@@ -1092,15 +1092,12 @@ export function StatePanel({
   action?: React.ReactNode;
   onRetry?: () => void;
 }) {
-  if (kind === "loading") return <LoadingState label={typeof title === "string" ? title : undefined} />;
+  if (kind === "loading")
+    return <LoadingState label={typeof title === "string" ? title : undefined} />;
   if (kind === "error")
     return <ErrorState title={title} description={description} onRetry={onRetry} />;
   return (
-    <EmptyState
-      title={title ?? "Nothing here yet"}
-      description={description}
-      action={action}
-    />
+    <EmptyState title={title ?? "Nothing here yet"} description={description} action={action} />
   );
 }
 

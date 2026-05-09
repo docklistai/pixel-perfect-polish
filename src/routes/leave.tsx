@@ -134,7 +134,11 @@ function LeavePage() {
             <ActionButton icon={Calendar} onClick={() => setReviewOpen("New request")}>
               Request Leave
             </ActionButton>
-            <ActionButton variant="secondary" icon={AlertTriangle} onClick={() => setRiskOpen(true)}>
+            <ActionButton
+              variant="secondary"
+              icon={AlertTriangle}
+              onClick={() => setRiskOpen(true)}
+            >
               Coverage risks
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />

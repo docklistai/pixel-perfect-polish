@@ -526,9 +526,7 @@ function RotaPage() {
         title="Rota conflicts"
         description="2 conflicts detected for w/c 19 May 2025."
         meta={<StatusBadge tone="warning">2 issues</StatusBadge>}
-        footer={
-          <ActionButton onClick={() => setConflictOpen(false)}>Close</ActionButton>
-        }
+        footer={<ActionButton onClick={() => setConflictOpen(false)}>Close</ActionButton>}
       >
         <FormSection title="Issues">
           <dl className="divide-y divide-border">

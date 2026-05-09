@@ -219,11 +219,7 @@ function StaffPage() {
         actions={
           <>
             <FilterButton icon={Filter} label="Filters" showCaret={false} />
-            <ActionButton
-              icon={Plus}
-              iconRight={ChevronDown}
-              onClick={() => setAddOpen(true)}
-            >
+            <ActionButton icon={Plus} iconRight={ChevronDown} onClick={() => setAddOpen(true)}>
               Add team member
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />

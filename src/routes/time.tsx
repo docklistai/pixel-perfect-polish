@@ -238,11 +238,7 @@ function TimePage() {
         actions={
           <>
             <ActionButton onClick={() => setReviewOpen(true)}>Review timesheet</ActionButton>
-            <ActionButton
-              variant="secondary"
-              icon={Download}
-              onClick={() => setExportOpen(true)}
-            >
+            <ActionButton variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
               Export Payroll-Ready CSV
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
