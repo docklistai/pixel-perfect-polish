@@ -90,6 +90,9 @@ const toneBg: Record<string, string> = {
 };
 
 function Home() {
+  const [alertOpen, setAlertOpen] = React.useState(false);
+  const [quickOpen, setQuickOpen] = React.useState<null | { t: string; s: string }>(null);
+
   return (
     <AppShell>
       <PageHeader
