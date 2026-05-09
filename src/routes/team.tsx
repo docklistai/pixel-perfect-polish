@@ -117,6 +117,9 @@ const announcements = [
 ];
 
 function TeamPage() {
+  const [composeOpen, setComposeOpen] = React.useState(false);
+  const [detail, setDetail] = React.useState<null | { t: string; s: string }>(null);
+
   return (
     <AppShell>
       <PageHeader
@@ -124,7 +127,9 @@ function TeamPage() {
         subtitle="Share updates, keep everyone informed and connected."
         actions={
           <>
-            <ActionButton icon={Megaphone}>Compose announcement</ActionButton>
+            <ActionButton icon={Megaphone} onClick={() => setComposeOpen(true)}>
+              Compose announcement
+            </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
