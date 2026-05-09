@@ -228,6 +228,10 @@ function ShiftCell({ s }: { s: Shift }) {
 }
 
 function RotaPage() {
+  const [addOpen, setAddOpen] = React.useState(false);
+  const [publishOpen, setPublishOpen] = React.useState(false);
+  const [conflictOpen, setConflictOpen] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -238,13 +242,13 @@ function RotaPage() {
             <FilterButton label="Week" />
             <FilterButton label="All departments" />
             <FilterButton label="View by: Employee" />
-            <ActionButton variant="outline" size="sm">
-              Draft
+            <ActionButton variant="outline" size="sm" icon={Plus} onClick={() => setAddOpen(true)}>
+              Add shift
             </ActionButton>
-            <ActionButton variant="outline" size="sm">
-              Review
+            <ActionButton variant="outline" size="sm" onClick={() => setConflictOpen(true)}>
+              View conflicts
             </ActionButton>
-            <ActionButton icon={Send} size="sm">
+            <ActionButton icon={Send} size="sm" onClick={() => setPublishOpen(true)}>
               Publish Rota
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
