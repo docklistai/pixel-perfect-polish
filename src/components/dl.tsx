@@ -1294,16 +1294,17 @@ export function SyncStatusBadge({
   lastChecked?: React.ReactNode;
   className?: string;
 }) {
-  const map: Record<SyncStatus, { tone: Tone; label: string }> = {
-    online: { tone: "success", label: "Online" },
-    offline: { tone: "danger", label: "Offline" },
-    syncing: { tone: "warning", label: "Syncing" },
+  const map: Record<SyncStatus, { dot: string; label: string; text: string }> = {
+    online: { dot: "bg-success", label: "Online", text: "text-success" },
+    offline: { dot: "bg-danger", label: "Offline", text: "text-danger" },
+    syncing: { dot: "bg-warning", label: "Syncing", text: "text-warning" },
   };
-  const { tone, label } = map[status];
+  const { dot, label, text } = map[status];
   return (
     <span
       className={cn(
         "inline-flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1 text-[11px] shadow-[var(--shadow-card)]",
+        text,
         className,
       )}
       title={typeof lastChecked === "string" ? `Last checked ${lastChecked}` : undefined}
