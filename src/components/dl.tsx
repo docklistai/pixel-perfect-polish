@@ -797,6 +797,397 @@ export function ErrorState({
 }
 
 /* ------------------------------------------------------------------ */
+/* Interaction shells: Drawer / Dialog / Confirm                        */
+/* ------------------------------------------------------------------ */
+
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Lock, CheckCircle2, Info, XCircle } from "lucide-react";
+
+export interface DrawerShellProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  /** Footer rendered as right-aligned action group. Use ActionButton elements. */
+  footer?: React.ReactNode;
+  /** Optional badge/status node rendered next to the title. */
+  meta?: React.ReactNode;
+  side?: "right" | "left";
+  width?: "sm" | "md" | "lg";
+  children: React.ReactNode;
+}
+
+const drawerWidths: Record<NonNullable<DrawerShellProps["width"]>, string> = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-xl",
+};
+
+/** Right-side drawer with the Docklist header / scrollable body / sticky footer. */
+export function DrawerShell({
+  open,
+  onOpenChange,
+  title,
+  description,
+  footer,
+  meta,
+  side = "right",
+  width = "md",
+  children,
+}: DrawerShellProps) {
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side={side}
+        className={cn(
+          "flex flex-col gap-0 p-0 w-full",
+          drawerWidths[width],
+          "bg-background text-foreground",
+        )}
+      >
+        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <SheetTitle className="text-base font-semibold leading-tight">{title}</SheetTitle>
+              {description && (
+                <SheetDescription className="text-xs text-muted-foreground mt-1">
+                  {description}
+                </SheetDescription>
+              )}
+            </div>
+            {meta && <div className="shrink-0">{meta}</div>}
+          </div>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">{children}</div>
+        {footer && (
+          <div className="px-5 py-3 border-t border-border flex items-center justify-end gap-2 bg-background">
+            {footer}
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+export interface DialogShellProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  footer?: React.ReactNode;
+  size?: "sm" | "md" | "lg";
+  children?: React.ReactNode;
+}
+
+const dialogSizes: Record<NonNullable<DialogShellProps["size"]>, string> = {
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+};
+
+/** Centred modal dialog with the Docklist header/body/footer rhythm. */
+export function DialogShell({
+  open,
+  onOpenChange,
+  title,
+  description,
+  footer,
+  size = "md",
+  children,
+}: DialogShellProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={cn("p-0 gap-0", dialogSizes[size])}>
+        <DialogHeader className="px-5 pt-5 pb-2">
+          <DialogTitle className="text-base font-semibold">{title}</DialogTitle>
+          {description && (
+            <DialogDescription className="text-xs text-muted-foreground">
+              {description}
+            </DialogDescription>
+          )}
+        </DialogHeader>
+        {children && <div className="px-5 py-3 space-y-4 text-sm">{children}</div>}
+        {footer && (
+          <DialogFooter className="px-5 py-3 border-t border-border gap-2 sm:gap-2">
+            {footer}
+          </DialogFooter>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export interface ConfirmDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  tone?: "brand" | "danger";
+  onConfirm?: () => void;
+}
+
+/** Yes/no confirmation built on AlertDialog. Defaults to brand tone. */
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  tone = "brand",
+  onConfirm,
+}: ConfirmDialogProps) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-base">{title}</AlertDialogTitle>
+          {description && (
+            <AlertDialogDescription className="text-xs">{description}</AlertDialogDescription>
+          )}
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel className="h-9 rounded-lg text-sm">{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className={cn(
+              "h-9 rounded-lg text-sm",
+              tone === "danger" && "bg-danger text-white hover:bg-danger/90",
+            )}
+          >
+            {confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Form layout primitives                                               */
+/* ------------------------------------------------------------------ */
+
+export function FormSection({
+  title,
+  description,
+  children,
+  className,
+}: {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn("space-y-3", className)}>
+      {(title || description) && (
+        <header className="space-y-0.5">
+          {title && (
+            <h3 className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
+              {title}
+            </h3>
+          )}
+          {description && <p className="text-xs text-muted-foreground">{description}</p>}
+        </header>
+      )}
+      <div className="space-y-3">{children}</div>
+    </section>
+  );
+}
+
+export function FormRow({
+  label,
+  hint,
+  htmlFor,
+  required,
+  children,
+  className,
+}: {
+  label: React.ReactNode;
+  hint?: React.ReactNode;
+  htmlFor?: string;
+  required?: boolean;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-1.5", className)}>
+      <label
+        htmlFor={htmlFor}
+        className="text-xs font-medium text-foreground flex items-center gap-1"
+      >
+        {label}
+        {required && (
+          <span className="text-danger" aria-hidden>
+            *
+          </span>
+        )}
+      </label>
+      {children}
+      {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+export function DetailRow({
+  label,
+  value,
+  className,
+}: {
+  label: React.ReactNode;
+  value: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex items-start justify-between gap-4 py-1.5", className)}>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="text-xs font-medium text-foreground text-right max-w-[60%]">{value}</dd>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* State + permission + feedback                                        */
+/* ------------------------------------------------------------------ */
+
+export type StatePanelKind = "empty" | "loading" | "error";
+
+/** Convenience switch over Empty/Loading/Error states with a single API. */
+export function StatePanel({
+  kind,
+  title,
+  description,
+  action,
+  onRetry,
+}: {
+  kind: StatePanelKind;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  onRetry?: () => void;
+}) {
+  if (kind === "loading") return <LoadingState label={typeof title === "string" ? title : undefined} />;
+  if (kind === "error")
+    return <ErrorState title={title} description={description} onRetry={onRetry} />;
+  return (
+    <EmptyState
+      title={title ?? "Nothing here yet"}
+      description={description}
+      action={action}
+    />
+  );
+}
+
+/** "You don't have permission" placeholder used to gate restricted UI areas. */
+export function PermissionState({
+  title = "You don't have access to this area",
+  description = "Ask a workspace admin to grant you the right permissions.",
+  action,
+}: {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div
+      role="status"
+      className="flex flex-col items-center justify-center text-center py-12 gap-3"
+    >
+      <div
+        className="h-12 w-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center"
+        aria-hidden
+      >
+        <Lock className="h-5 w-5" />
+      </div>
+      <div className="text-base font-semibold">{title}</div>
+      <div className="text-xs text-muted-foreground max-w-xs">{description}</div>
+      {action && <div className="mt-1">{action}</div>}
+    </div>
+  );
+}
+
+export type FeedbackTone = "success" | "info" | "warning" | "danger";
+
+const feedbackIcons: Record<FeedbackTone, LucideIcon> = {
+  success: CheckCircle2,
+  info: Info,
+  warning: AlertTriangle,
+  danger: XCircle,
+};
+
+const feedbackSurface: Record<FeedbackTone, string> = {
+  success: "bg-success-soft text-success border-success/20",
+  info: "bg-info-soft text-info border-info/20",
+  warning: "bg-warning-soft text-warning border-warning/20",
+  danger: "bg-danger-soft text-danger border-danger/20",
+};
+
+/** Inline banner for save/discard, mock confirmations and other feedback. */
+export function FeedbackBanner({
+  tone = "info",
+  title,
+  description,
+  action,
+  onDismiss,
+  className,
+}: {
+  tone?: FeedbackTone;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  onDismiss?: () => void;
+  className?: string;
+}) {
+  const Icon = feedbackIcons[tone];
+  return (
+    <div
+      role="status"
+      className={cn(
+        "flex items-start gap-3 rounded-xl border p-3",
+        feedbackSurface[tone],
+        className,
+      )}
+    >
+      <Icon className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
+      <div className="flex-1 min-w-0 text-foreground">
+        <div className="text-sm font-medium">{title}</div>
+        {description && <div className="text-xs text-muted-foreground">{description}</div>}
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
+      {onDismiss && (
+        <IconButton icon={X} label="Dismiss" variant="ghost" size="sm" onClick={onDismiss} />
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Misc helpers re-exported for convenience                             */
 /* ------------------------------------------------------------------ */
 export { Bell, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, HelpCircle, Building2 };
