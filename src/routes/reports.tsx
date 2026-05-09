@@ -91,6 +91,9 @@ const toneBg: Record<string, string> = {
 };
 
 function ReportsPage() {
+  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [exportOpen, setExportOpen] = React.useState(false);
+  const [insightOpen, setInsightOpen] = React.useState(false);
   return (
     <AppShell>
       <PageHeader
