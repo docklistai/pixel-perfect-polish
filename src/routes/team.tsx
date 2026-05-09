@@ -238,7 +238,7 @@ function TeamPage() {
                     <Pin className="h-4 w-4 text-muted-foreground" />
                     <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                   </div>
-                </div>
+                </button>
               ))}
               <div className="text-center py-4 text-xs text-brand font-semibold">
                 Load more announcements ↓
