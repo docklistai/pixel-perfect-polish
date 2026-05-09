@@ -30,15 +30,18 @@ const tabs = [
   { t: "Exports", s: "Payroll and data export settings", icon: Cloud },
 ];
 
-function Toggle({ on = true }: { on?: boolean }) {
+function Toggle({ on = true, onClick }: { on?: boolean; onClick?: () => void }) {
   return (
-    <span
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Toggle setting"
       className={`inline-flex h-5 w-9 rounded-full p-0.5 transition ${on ? "bg-brand" : "bg-muted"}`}
     >
       <span
         className={`h-4 w-4 rounded-full bg-white shadow transition ${on ? "translate-x-4" : ""}`}
       />
-    </span>
+    </button>
   );
 }
 
