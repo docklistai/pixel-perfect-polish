@@ -43,6 +43,9 @@ function Toggle({ on = true }: { on?: boolean }) {
 }
 
 function SettingsPage() {
+  const [dirty, setDirty] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -50,11 +53,50 @@ function SettingsPage() {
         subtitle="Manage your workspace settings, policies and preferences."
         actions={
           <>
-            <ActionButton variant="secondary">Discard changes</ActionButton>
-            <ActionButton>Save changes</ActionButton>
+            <ActionButton
+              variant="secondary"
+              disabled={!dirty}
+              onClick={() => {
+                setDirty(false);
+                setSaved(false);
+              }}
+            >
+              Discard changes
+            </ActionButton>
+            <ActionButton
+              disabled={!dirty}
+              onClick={() => {
+                setDirty(false);
+                setSaved(true);
+              }}
+            >
+              Save changes
+            </ActionButton>
           </>
         }
       />
+
+      {dirty && (
+        <FeedbackBanner
+          tone="warning"
+          title="You have unsaved changes"
+          description="Save or discard before leaving — frontend example only."
+          className="mb-4"
+        />
+      )}
+      {saved && (
+        <FeedbackBanner
+          tone="success"
+          title="Settings saved"
+          description="Mock confirmation — nothing has been written."
+          className="mb-4"
+          onDismiss={() => setSaved(false)}
+        />
+      )}
+
+      <div className="hidden">
+        <button onClick={() => setDirty(true)}>mark dirty</button>
+      </div>
 
       <div className="grid grid-cols-12 gap-5">
         <Card className="col-span-12 lg:col-span-3 p-3 self-start">
