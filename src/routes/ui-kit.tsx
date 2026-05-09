@@ -226,20 +226,21 @@ function UIKitPage() {
 
         <Block name="DataTable" description="Striped rows, sortable headings, pagination-ready.">
           <DataTable
-            data={sampleRows}
+            rows={sampleRows}
+            rowKey={(r) => r.name}
             columns={[
-              { key: "name", header: "Staff member", cell: (r) => r.name },
-              { key: "role", header: "Role", cell: (r) => r.role },
+              { key: "name", header: "STAFF MEMBER", render: (r) => r.name },
+              { key: "role", header: "ROLE", render: (r) => r.role },
               {
                 key: "status",
-                header: "Status",
-                cell: (r) => (
+                header: "STATUS",
+                render: (r) => (
                   <StatusBadge tone={r.status === "Active" ? "success" : "muted"}>
                     {r.status}
                   </StatusBadge>
                 ),
               },
-              { key: "hours", header: "Hours", cell: (r) => r.hours, align: "right" },
+              { key: "hours", header: "HOURS", render: (r) => r.hours, align: "right" },
             ]}
           />
         </Block>
