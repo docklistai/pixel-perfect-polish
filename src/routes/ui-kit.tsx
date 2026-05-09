@@ -83,9 +83,7 @@ function Block({
     <section className="space-y-3">
       <header className="space-y-0.5">
         <h2 className="text-sm font-semibold text-foreground">{name}</h2>
-        {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </header>
       <Card className="p-5">{children}</Card>
     </section>
@@ -311,14 +309,29 @@ function UIKitPage() {
 
         <Block name="FeedbackBanner" description="Inline save / discard / mock confirmation.">
           <div className="space-y-2">
-            <FeedbackBanner tone="success" title="Settings saved" description="Mock confirmation — nothing was written." />
-            <FeedbackBanner tone="warning" title="You have unsaved changes" description="Save or discard before leaving." />
+            <FeedbackBanner
+              tone="success"
+              title="Settings saved"
+              description="Mock confirmation — nothing was written."
+            />
+            <FeedbackBanner
+              tone="warning"
+              title="You have unsaved changes"
+              description="Save or discard before leaving."
+            />
             <FeedbackBanner tone="info" title="Rota auto-fill is in beta" />
-            <FeedbackBanner tone="danger" title="Couldn't reach the time clock" description="Mock error state." />
+            <FeedbackBanner
+              tone="danger"
+              title="Couldn't reach the time clock"
+              description="Mock error state."
+            />
           </div>
         </Block>
 
-        <Block name="DrawerShell" description="Right-side drawer with header, body and sticky footer.">
+        <Block
+          name="DrawerShell"
+          description="Right-side drawer with header, body and sticky footer."
+        >
           <ActionButton onClick={() => setDrawer(true)}>Open example drawer</ActionButton>
         </Block>
 
@@ -352,7 +365,10 @@ function UIKitPage() {
           )}
         </Block>
 
-        <Block name="FormSection / FormRow / DetailRow" description="Used inside drawers and dialogs.">
+        <Block
+          name="FormSection / FormRow / DetailRow"
+          description="Used inside drawers and dialogs."
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <FormSection title="Shift details" description="Mock-only example.">
               <FormRow label="Role" required>
