@@ -144,7 +144,11 @@ function Home() {
               { t: "3 Shifts are understaffed", s: "Today · View shifts" },
               { t: "2 Timesheets need approval", s: "Overdue · Review now" },
             ].map((a) => (
-              <div key={a.t} className="flex items-start gap-3 rounded-xl border border-border p-3">
+              <button
+                key={a.t}
+                onClick={() => setAlertOpen(true)}
+                className="w-full text-left flex items-start gap-3 rounded-xl border border-border p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+              >
                 <div className="h-8 w-8 rounded-lg bg-warning-soft text-warning flex items-center justify-center shrink-0">
                   <AlertTriangle className="h-4 w-4" />
                 </div>
@@ -153,7 +157,7 @@ function Home() {
                   <div className="text-xs text-muted-foreground">{a.s}</div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
+              </button>
             ))}
           </div>
           <a className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
