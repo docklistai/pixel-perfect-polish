@@ -35,8 +35,13 @@ import {
   FormSection,
   FormRow,
   DetailRow,
+  Kbd,
+  HelpHint,
+  RecoveryCard,
+  SyncStatusBadge,
   type Tone,
 } from "@/components/dl";
+import { useOverlays } from "@/components/AppShortcuts";
 import {
   Calendar,
   Users,
@@ -476,6 +481,85 @@ function UIKitPage() {
         tone="danger"
         onConfirm={() => setConfirm(false)}
       />
+
+      {/* ---------- Keyboard, status & recovery ---------- */}
+      <KeyboardAndStatusSection />
     </AppShell>
+  );
+}
+
+function KeyboardAndStatusSection() {
+  const { openPalette, openShortcuts, openNotifications } = useOverlays();
+  return (
+    <section className="mt-10 space-y-4">
+      <SectionHeader
+        eyebrow="KEYBOARD, STATUS & RECOVERY"
+        title="Productivity primitives"
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <DashboardCard className="p-5 space-y-3">
+          <div className="text-sm font-semibold">Keyboard chips</div>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <Kbd>Ctrl</Kbd>
+            <span className="text-muted-foreground">+</span>
+            <Kbd>K</Kbd>
+            <span className="ml-3 text-muted-foreground">or</span>
+            <Kbd>⌘</Kbd>
+            <Kbd>K</Kbd>
+            <span className="ml-3 text-muted-foreground">·</span>
+            <Kbd>?</Kbd>
+            <span className="ml-3 text-muted-foreground">·</span>
+            <Kbd>G</Kbd>
+            <Kbd>R</Kbd>
+          </div>
+          <HelpHint>Press ? anywhere to see the full shortcut list.</HelpHint>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <ActionButton size="sm" variant="secondary" onClick={openPalette}>
+              Open command palette
+            </ActionButton>
+            <ActionButton size="sm" variant="secondary" onClick={openShortcuts}>
+              Open shortcuts dialog
+            </ActionButton>
+            <ActionButton size="sm" variant="secondary" onClick={openNotifications}>
+              Open notifications
+            </ActionButton>
+          </div>
+        </DashboardCard>
+
+        <DashboardCard className="p-5 space-y-3">
+          <div className="text-sm font-semibold">Sync status</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <SyncStatusBadge status="online" lastChecked="just now" />
+            <SyncStatusBadge status="syncing" lastChecked="2s ago" />
+            <SyncStatusBadge status="offline" lastChecked="1 min ago" />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Visual chip only — does not perform real sync.
+          </p>
+        </DashboardCard>
+
+        <DashboardCard className="p-5 lg:col-span-2 space-y-3">
+          <div className="text-sm font-semibold">Recovery cards</div>
+          <RecoveryCard
+            tone="info"
+            title="Your draft shift is still here"
+            description="You started a new shift for Saturday but didn't save it. Resume where you left off?"
+            primaryLabel="Resume draft"
+            secondaryLabel="Discard"
+            onPrimary={() => {}}
+            onSecondary={() => {}}
+          />
+          <RecoveryCard
+            tone="warning"
+            title="Connection dropped during edit"
+            description="Mock — your last change wasn't sent. Retry when you're back online."
+            primaryLabel="Retry"
+            secondaryLabel="Keep offline"
+            onPrimary={() => {}}
+            onSecondary={() => {}}
+          />
+        </DashboardCard>
+      </div>
+    </section>
   );
 }
