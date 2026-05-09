@@ -9,11 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShortcuts } from "@/components/AppShortcuts";
-import {
-  SkipToContent,
-  RouteAnnouncer,
-  RouteFocusManager,
-} from "@/components/RouteAnnouncer";
+import { SkipToContent, RouteAnnouncer, RouteFocusManager } from "@/components/RouteAnnouncer";
 
 import appCss from "../styles.css?url";
 

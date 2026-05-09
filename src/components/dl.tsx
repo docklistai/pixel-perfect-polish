@@ -79,11 +79,7 @@ export function AppShell({
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar searchPlaceholder={searchPlaceholder} />
-        <main
-          id="main-content"
-          tabIndex={-1}
-          className="flex-1 px-8 py-7 focus:outline-none"
-        >
+        <main id="main-content" tabIndex={-1} className="flex-1 px-8 py-7 focus:outline-none">
           {children}
         </main>
         <footer className="px-8 py-5 text-center text-xs text-muted-foreground">
@@ -1195,13 +1191,7 @@ export function FeedbackBanner({
 /* ------------------------------------------------------------------ */
 
 /** Inline keyboard shortcut chip. Pass single key parts as children. */
-export function Kbd({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+export function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <kbd
       className={cn(
@@ -1224,10 +1214,7 @@ export function HelpHint({
 }) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center gap-1 text-[11px] text-muted-foreground",
-        className,
-      )}
+      className={cn("inline-flex items-center gap-1 text-[11px] text-muted-foreground", className)}
     >
       <HelpCircle className="h-3 w-3" aria-hidden />
       <span>{children}</span>
@@ -1318,9 +1305,7 @@ export function SyncStatusBadge({
       <span className={cn("h-1.5 w-1.5 rounded-full", dot)} aria-hidden />
 
       <span className="font-medium">{label}</span>
-      {lastChecked && (
-        <span className="text-muted-foreground">· {lastChecked}</span>
-      )}
+      {lastChecked && <span className="text-muted-foreground">· {lastChecked}</span>}
     </span>
   );
 }
@@ -1329,4 +1314,3 @@ export function SyncStatusBadge({
 /* Misc helpers re-exported for convenience                             */
 /* ------------------------------------------------------------------ */
 export { Bell, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, HelpCircle, Building2 };
-

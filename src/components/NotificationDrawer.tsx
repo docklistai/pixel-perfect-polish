@@ -154,10 +154,7 @@ export function NotificationDrawer({
                   <span className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate">{n.title}</span>
                     {n.unread && (
-                      <span
-                        className="h-1.5 w-1.5 rounded-full bg-brand"
-                        aria-label="unread"
-                      />
+                      <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-label="unread" />
                     )}
                   </span>
                   <span className="block text-xs text-muted-foreground mt-0.5">{n.body}</span>

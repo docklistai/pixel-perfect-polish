@@ -70,10 +70,30 @@ interface QuickAction {
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Add shift (mock)", hint: "Open the rota with the add-shift drawer", icon: Plus, to: "/rota" },
-  { label: "Add team member (mock)", hint: "Open the staff directory", icon: UserPlus, to: "/staff" },
-  { label: "Review leave requests (mock)", hint: "Jump to the leave queue", icon: Inbox, to: "/leave" },
-  { label: "Export reports (mock)", hint: "Open the reports workspace", icon: Download, to: "/reports" },
+  {
+    label: "Add shift (mock)",
+    hint: "Open the rota with the add-shift drawer",
+    icon: Plus,
+    to: "/rota",
+  },
+  {
+    label: "Add team member (mock)",
+    hint: "Open the staff directory",
+    icon: UserPlus,
+    to: "/staff",
+  },
+  {
+    label: "Review leave requests (mock)",
+    hint: "Jump to the leave queue",
+    icon: Inbox,
+    to: "/leave",
+  },
+  {
+    label: "Export reports (mock)",
+    hint: "Open the reports workspace",
+    icon: Download,
+    to: "/reports",
+  },
 ];
 
 export function CommandPalette({
@@ -131,11 +151,7 @@ export function CommandPalette({
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
-              <CommandItem
-                key={action.label}
-                value={action.label}
-                onSelect={() => runMock(action)}
-              >
+              <CommandItem key={action.label} value={action.label} onSelect={() => runMock(action)}>
                 <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
                 <span>{action.label}</span>
                 <span className="ml-auto text-[11px] text-muted-foreground">{action.hint}</span>

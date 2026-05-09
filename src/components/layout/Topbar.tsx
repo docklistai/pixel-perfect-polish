@@ -1,4 +1,12 @@
-import { Bell, Briefcase, ChevronDown, ChevronLeft, ChevronRight, Calendar, HelpCircle } from "lucide-react";
+import {
+  Bell,
+  Briefcase,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  HelpCircle,
+} from "lucide-react";
 import { SearchField } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
@@ -87,9 +95,7 @@ export function Topbar({
         type="button"
         onClick={openNotifications}
         className="relative rounded-xl border border-border bg-card p-2.5 shadow-[var(--shadow-card)] hover:bg-muted/40 transition"
-        aria-label={
-          unreadCount > 0 ? `Notifications (${unreadCount} unread)` : "Notifications"
-        }
+        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : "Notifications"}
       >
         <Bell className="h-4 w-4" aria-hidden />
         {unreadCount > 0 && (

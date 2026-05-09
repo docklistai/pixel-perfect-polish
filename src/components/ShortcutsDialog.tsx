@@ -10,16 +10,53 @@ interface Shortcut {
 }
 
 const GENERAL: Shortcut[] = [
-  { keys: <><Kbd>Ctrl</Kbd><span className="mx-1 text-muted-foreground">/</span><Kbd>⌘</Kbd> <Kbd>K</Kbd></>, label: "Open command palette" },
+  {
+    keys: (
+      <>
+        <Kbd>Ctrl</Kbd>
+        <span className="mx-1 text-muted-foreground">/</span>
+        <Kbd>⌘</Kbd> <Kbd>K</Kbd>
+      </>
+    ),
+    label: "Open command palette",
+  },
   { keys: <Kbd>?</Kbd>, label: "Open this shortcuts panel" },
   { keys: <Kbd>Esc</Kbd>, label: "Close any open drawer or dialog" },
 ];
 
 const NAV: Shortcut[] = [
-  { keys: <><Kbd>G</Kbd> <Kbd>H</Kbd></>, label: "Go to Home" },
-  { keys: <><Kbd>G</Kbd> <Kbd>R</Kbd></>, label: "Go to Rota" },
-  { keys: <><Kbd>G</Kbd> <Kbd>S</Kbd></>, label: "Go to Staff" },
-  { keys: <><Kbd>G</Kbd> <Kbd>T</Kbd></>, label: "Go to Time & Attendance" },
+  {
+    keys: (
+      <>
+        <Kbd>G</Kbd> <Kbd>H</Kbd>
+      </>
+    ),
+    label: "Go to Home",
+  },
+  {
+    keys: (
+      <>
+        <Kbd>G</Kbd> <Kbd>R</Kbd>
+      </>
+    ),
+    label: "Go to Rota",
+  },
+  {
+    keys: (
+      <>
+        <Kbd>G</Kbd> <Kbd>S</Kbd>
+      </>
+    ),
+    label: "Go to Staff",
+  },
+  {
+    keys: (
+      <>
+        <Kbd>G</Kbd> <Kbd>T</Kbd>
+      </>
+    ),
+    label: "Go to Time & Attendance",
+  },
 ];
 
 function Section({ title, items }: { title: string; items: Shortcut[] }) {

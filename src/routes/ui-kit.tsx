@@ -492,10 +492,7 @@ function KeyboardAndStatusSection() {
   const { openPalette, openShortcuts, openNotifications } = useOverlays();
   return (
     <section className="mt-10 space-y-4">
-      <SectionHeader
-        eyebrow="KEYBOARD, STATUS & RECOVERY"
-        title="Productivity primitives"
-      />
+      <SectionHeader eyebrow="KEYBOARD, STATUS & RECOVERY" title="Productivity primitives" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <DashboardCard className="p-5 space-y-3">
           <div className="text-sm font-semibold">Keyboard chips</div>
