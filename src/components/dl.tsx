@@ -1309,9 +1309,8 @@ export function SyncStatusBadge({
       )}
       title={typeof lastChecked === "string" ? `Last checked ${lastChecked}` : undefined}
     >
-      <span className={cn("h-1.5 w-1.5 rounded-full", toneText[tone])}>
-        <span className={cn("block h-full w-full rounded-full", `bg-${tone}`)} />
-      </span>
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} aria-hidden />
+
       <span className="font-medium">{label}</span>
       {lastChecked && (
         <span className="text-muted-foreground">· {lastChecked}</span>
