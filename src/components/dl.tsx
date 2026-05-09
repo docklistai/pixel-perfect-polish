@@ -79,7 +79,9 @@ export function AppShell({
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar searchPlaceholder={searchPlaceholder} />
-        <main className="flex-1 px-8 py-7">{children}</main>
+        <main id="main-content" tabIndex={-1} className="flex-1 px-8 py-7 focus:outline-none">
+          {children}
+        </main>
         <footer className="px-8 py-5 text-center text-xs text-muted-foreground">
           All times shown in Europe/London (GMT+1)
         </footer>
@@ -1181,6 +1183,130 @@ export function FeedbackBanner({
         <IconButton icon={X} label="Dismiss" variant="ghost" size="sm" onClick={onDismiss} />
       )}
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Keyboard, hints, recovery, sync                                      */
+/* ------------------------------------------------------------------ */
+
+/** Inline keyboard shortcut chip. Pass single key parts as children. */
+export function Kbd({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <kbd
+      className={cn(
+        "inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 rounded-md border border-border bg-muted text-[10px] font-semibold text-muted-foreground",
+        className,
+      )}
+    >
+      {children}
+    </kbd>
+  );
+}
+
+/** Small inline help hint with a question-mark icon and tooltip-like text. */
+export function HelpHint({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      className={cn("inline-flex items-center gap-1 text-[11px] text-muted-foreground", className)}
+    >
+      <HelpCircle className="h-3 w-3" aria-hidden />
+      <span>{children}</span>
+    </span>
+  );
+}
+
+/**
+ * Recovery card — used to surface a recoverable interruption
+ * (e.g. "Your draft is still here"). Frontend-only; no real persistence.
+ */
+export function RecoveryCard({
+  title,
+  description,
+  primaryLabel = "Resume",
+  secondaryLabel = "Discard",
+  onPrimary,
+  onSecondary,
+  tone = "info",
+  className,
+}: {
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  primaryLabel?: string;
+  secondaryLabel?: string;
+  onPrimary?: () => void;
+  onSecondary?: () => void;
+  tone?: FeedbackTone;
+  className?: string;
+}) {
+  const Icon = feedbackIcons[tone];
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 rounded-xl border p-3.5",
+        feedbackSurface[tone],
+        className,
+      )}
+    >
+      <Icon className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
+      <div className="flex-1 min-w-0 text-foreground">
+        <div className="text-sm font-medium">{title}</div>
+        {description && <div className="text-xs text-muted-foreground mt-0.5">{description}</div>}
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
+        {onSecondary && (
+          <ActionButton size="sm" variant="ghost" onClick={onSecondary}>
+            {secondaryLabel}
+          </ActionButton>
+        )}
+        {onPrimary && (
+          <ActionButton size="sm" variant="secondary" onClick={onPrimary}>
+            {primaryLabel}
+          </ActionButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export type SyncStatus = "online" | "offline" | "syncing";
+
+/** Compact connection / sync chip. Visual only — does not perform sync. */
+export function SyncStatusBadge({
+  status,
+  lastChecked,
+  className,
+}: {
+  status: SyncStatus;
+  lastChecked?: React.ReactNode;
+  className?: string;
+}) {
+  const map: Record<SyncStatus, { dot: string; label: string; text: string }> = {
+    online: { dot: "bg-success", label: "Online", text: "text-success" },
+    offline: { dot: "bg-danger", label: "Offline", text: "text-danger" },
+    syncing: { dot: "bg-warning", label: "Syncing", text: "text-warning" },
+  };
+  const { dot, label, text } = map[status];
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1 text-[11px] shadow-[var(--shadow-card)]",
+        text,
+        className,
+      )}
+      title={typeof lastChecked === "string" ? `Last checked ${lastChecked}` : undefined}
+    >
+      <span className={cn("h-1.5 w-1.5 rounded-full", dot)} aria-hidden />
+
+      <span className="font-medium">{label}</span>
+      {lastChecked && <span className="text-muted-foreground">· {lastChecked}</span>}
+    </span>
   );
 }
 
