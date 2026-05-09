@@ -304,7 +304,8 @@ function StaffPage() {
                 {rows.map((r) => (
                   <tr
                     key={r.n}
-                    className={`border-b border-border/60 last:border-0 ${r.active ? "bg-info-soft/30" : ""}`}
+                    onClick={() => setProfile({ n: r.n, e: r.e, role: r.role })}
+                    className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${r.active ? "bg-info-soft/30" : ""}`}
                   >
                     <td className="py-3 px-2">
                       <div className="flex items-center gap-2.5">
