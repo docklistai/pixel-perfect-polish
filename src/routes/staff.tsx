@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import * as React from "react";
 import {
   AppShell,
   Card,
@@ -6,6 +7,11 @@ import {
   ActionButton,
   IconButton,
   FilterButton,
+  DrawerShell,
+  FormSection,
+  FormRow,
+  DetailRow,
+  StatusBadge,
 } from "@/components/dl";
 import {
   Users,
@@ -202,6 +208,9 @@ const rows = [
 ];
 
 function StaffPage() {
+  const [addOpen, setAddOpen] = React.useState(false);
+  const [profile, setProfile] = React.useState<null | { n: string; e: string; role: string }>(null);
+
   return (
     <AppShell searchPlaceholder="Search staff, roles, skills...">
       <PageHeader
@@ -210,7 +219,7 @@ function StaffPage() {
         actions={
           <>
             <FilterButton icon={Filter} label="Filters" showCaret={false} />
-            <ActionButton icon={Plus} iconRight={ChevronDown}>
+            <ActionButton icon={Plus} iconRight={ChevronDown} onClick={() => setAddOpen(true)}>
               Add team member
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
@@ -291,7 +300,8 @@ function StaffPage() {
                 {rows.map((r) => (
                   <tr
                     key={r.n}
-                    className={`border-b border-border/60 last:border-0 ${r.active ? "bg-info-soft/30" : ""}`}
+                    onClick={() => setProfile({ n: r.n, e: r.e, role: r.role })}
+                    className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${r.active ? "bg-info-soft/30" : ""}`}
                   >
                     <td className="py-3 px-2">
                       <div className="flex items-center gap-2.5">
@@ -459,6 +469,100 @@ function StaffPage() {
           </div>
         </Card>
       </div>
+
+      {/* Add team member drawer */}
+      <DrawerShell
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        title="Add team member"
+        description="Invite a new colleague to Harbour View Hotel."
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setAddOpen(false)}>
+              Cancel
+            </ActionButton>
+            <ActionButton onClick={() => setAddOpen(false)}>Send invite</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Personal">
+          <div className="grid grid-cols-2 gap-3">
+            <FormRow label="First name" required>
+              <input className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm" />
+            </FormRow>
+            <FormRow label="Last name" required>
+              <input className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm" />
+            </FormRow>
+          </div>
+          <FormRow label="Work email" required>
+            <input
+              type="email"
+              placeholder="name@docklist.co.uk"
+              className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+            />
+          </FormRow>
+        </FormSection>
+        <FormSection title="Role">
+          <FormRow label="Department" required>
+            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+              <option>Front of House</option>
+              <option>Bar</option>
+              <option>Kitchen</option>
+              <option>Housekeeping</option>
+            </select>
+          </FormRow>
+          <FormRow label="Contract">
+            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+              <option>Full-time (40h/week)</option>
+              <option>Part-time</option>
+              <option>Zero-hours</option>
+            </select>
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
+
+      {/* Staff profile drawer (mirrors right-side profile style) */}
+      <DrawerShell
+        open={!!profile}
+        onOpenChange={(o) => !o && setProfile(null)}
+        width="lg"
+        title={profile?.n ?? ""}
+        description={profile?.role}
+        meta={<StatusBadge tone="success">Active</StatusBadge>}
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setProfile(null)}>
+              Close
+            </ActionButton>
+            <ActionButton onClick={() => setProfile(null)}>Open full profile</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Contact">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Email" value={profile?.e ?? "—"} />
+            <DetailRow label="Phone" value="+44 7700 900123" />
+            <DetailRow label="Location" value="Harbour View Hotel" />
+          </dl>
+        </FormSection>
+        <FormSection title="Employment">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Employee ID" value="DCL-1027" />
+            <DetailRow label="Start date" value="14 Mar 2023" />
+            <DetailRow label="Contract" value="Full-time (40h/week)" />
+            <DetailRow label="Pay rate" value="£13.50 per hour" />
+          </dl>
+        </FormSection>
+        <FormSection title="Skills">
+          <div className="flex flex-wrap gap-1.5">
+            {["Customer Service", "Supervisor", "Food Safety Level 2"].map((t) => (
+              <span key={t} className="rounded-md border border-border px-2 py-0.5 text-[11px]">
+                {t}
+              </span>
+            ))}
+          </div>
+        </FormSection>
+      </DrawerShell>
     </AppShell>
   );
 }

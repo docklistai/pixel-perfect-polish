@@ -1,5 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import * as React from "react";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  ActionButton,
+  IconButton,
+  DrawerShell,
+  FormSection,
+  FormRow,
+} from "@/components/dl";
 import {
   AlertTriangle,
   Plus,
@@ -139,6 +149,8 @@ const timeline = [
 ];
 
 function OpsPage() {
+  const [openDrawer, setOpenDrawer] = React.useState<null | "incident" | "task" | "handover">(null);
+
   return (
     <AppShell>
       <PageHeader
@@ -146,11 +158,17 @@ function OpsPage() {
         subtitle="Stay on top of today's activity and keep your team aligned."
         actions={
           <>
-            <ActionButton icon={AlertTriangle}>Log incident</ActionButton>
-            <ActionButton variant="secondary" icon={Plus}>
+            <ActionButton icon={AlertTriangle} onClick={() => setOpenDrawer("incident")}>
+              Log incident
+            </ActionButton>
+            <ActionButton variant="secondary" icon={Plus} onClick={() => setOpenDrawer("task")}>
               Add task
             </ActionButton>
-            <ActionButton variant="secondary" icon={FileText}>
+            <ActionButton
+              variant="secondary"
+              icon={FileText}
+              onClick={() => setOpenDrawer("handover")}
+            >
               Add handover note
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
@@ -358,6 +376,53 @@ function OpsPage() {
           </Card>
         </div>
       </div>
+
+      <DrawerShell
+        open={!!openDrawer}
+        onOpenChange={(o) => !o && setOpenDrawer(null)}
+        title={
+          openDrawer === "incident"
+            ? "Log incident"
+            : openDrawer === "task"
+              ? "Add task"
+              : "Add handover note"
+        }
+        description="Frontend example only — nothing is saved."
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setOpenDrawer(null)}>
+              Cancel
+            </ActionButton>
+            <ActionButton onClick={() => setOpenDrawer(null)}>Save</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Details">
+          <FormRow label="Title" required>
+            <input className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm" />
+          </FormRow>
+          {openDrawer === "incident" && (
+            <FormRow label="Severity">
+              <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </FormRow>
+          )}
+          {openDrawer === "task" && (
+            <FormRow label="Due">
+              <input
+                type="date"
+                className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+              />
+            </FormRow>
+          )}
+          <FormRow label="Notes">
+            <textarea className="w-full min-h-24 rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
     </AppShell>
   );
 }

@@ -1,5 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import * as React from "react";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  ActionButton,
+  IconButton,
+  DrawerShell,
+  ConfirmDialog,
+  FormSection,
+  FormRow,
+  DetailRow,
+  StatusBadge,
+} from "@/components/dl";
 import {
   Calendar,
   ChevronDown,
@@ -214,6 +227,9 @@ const stTones: Record<string, string> = {
 const noteTones: Record<string, string> = { warning: "text-warning", danger: "text-danger" };
 
 function TimePage() {
+  const [reviewOpen, setReviewOpen] = React.useState(false);
+  const [exportOpen, setExportOpen] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -221,8 +237,8 @@ function TimePage() {
         subtitle="Review, approve and export time data for payroll."
         actions={
           <>
-            <ActionButton>Approve Selected</ActionButton>
-            <ActionButton variant="secondary" icon={Download}>
+            <ActionButton onClick={() => setReviewOpen(true)}>Review timesheet</ActionButton>
+            <ActionButton variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
               Export Payroll-Ready CSV
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
@@ -557,6 +573,51 @@ function TimePage() {
           </Card>
         </div>
       </div>
+
+      {/* Timesheet approval drawer */}
+      <DrawerShell
+        open={reviewOpen}
+        onOpenChange={setReviewOpen}
+        title="Emma Johnson — Week of 12 May 2025"
+        description="Front of House · Harbour View Hotel"
+        meta={<StatusBadge tone="warning">Needs review</StatusBadge>}
+        width="lg"
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setReviewOpen(false)}>
+              Reject
+            </ActionButton>
+            <ActionButton onClick={() => setReviewOpen(false)}>Approve timesheet</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Summary">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Scheduled" value="38h 00m" />
+            <DetailRow label="Clocked" value="39h 12m" />
+            <DetailRow label="Variance" value="+1h 12m" />
+            <DetailRow label="Lateness flags" value="2" />
+          </dl>
+        </FormSection>
+        <FormSection title="Adjustments" description="Edits are mock-only.">
+          <FormRow label="Manager note">
+            <textarea
+              className="w-full min-h-20 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              placeholder="Add a note for payroll..."
+            />
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
+
+      {/* Export payroll-ready CSV confirmation */}
+      <ConfirmDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        title="Export payroll-ready CSV?"
+        description="Generates a CSV for the week of 12 – 18 May 2025 (Europe/London). Frontend example only — no file will be downloaded."
+        confirmLabel="Export CSV"
+        onConfirm={() => setExportOpen(false)}
+      />
     </AppShell>
   );
 }

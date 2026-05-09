@@ -1,5 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader, FilterButton } from "@/components/dl";
+import * as React from "react";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  FilterButton,
+  ActionButton,
+  DrawerShell,
+  ConfirmDialog,
+  FormSection,
+  FormRow,
+  DetailRow,
+} from "@/components/dl";
 import {
   Calendar,
   ChevronDown,
@@ -79,6 +91,9 @@ const toneBg: Record<string, string> = {
 };
 
 function ReportsPage() {
+  const [filterOpen, setFilterOpen] = React.useState(false);
+  const [exportOpen, setExportOpen] = React.useState(false);
+  const [insightOpen, setInsightOpen] = React.useState(false);
   return (
     <AppShell>
       <PageHeader
@@ -87,8 +102,21 @@ function ReportsPage() {
         actions={
           <>
             <FilterButton icon={Calendar} label="12 – 18 May 2025" />
-            <FilterButton icon={Filter} label="Filters" showCaret={false} />
-            <FilterButton icon={Download} label="Export" showCaret={false} />
+            <FilterButton
+              icon={Filter}
+              label="Filters"
+              showCaret={false}
+              onClick={() => setFilterOpen(true)}
+            />
+            <FilterButton
+              icon={Download}
+              label="Export"
+              showCaret={false}
+              onClick={() => setExportOpen(true)}
+            />
+            <ActionButton variant="secondary" onClick={() => setInsightOpen(true)}>
+              View top insight
+            </ActionButton>
           </>
         }
       />
@@ -454,6 +482,62 @@ function ReportsPage() {
           <a className="mt-2 block text-xs font-semibold text-brand">View department report →</a>
         </Card>
       </div>
+
+      <DrawerShell
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        title="Filter reports"
+        description="Frontend example only."
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setFilterOpen(false)}>
+              Reset
+            </ActionButton>
+            <ActionButton onClick={() => setFilterOpen(false)}>Apply</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Filters">
+          <FormRow label="Department">
+            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+              <option>All</option>
+              <option>Front of House</option>
+              <option>Kitchen</option>
+            </select>
+          </FormRow>
+          <FormRow label="Date range">
+            <input
+              type="date"
+              className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+            />
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
+
+      <DrawerShell
+        open={insightOpen}
+        onOpenChange={setInsightOpen}
+        title="Labour % above target"
+        description="Week of 12 May 2025 · Europe/London"
+        footer={<ActionButton onClick={() => setInsightOpen(false)}>Close</ActionButton>}
+      >
+        <FormSection title="Detail">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Actual" value="28.6%" />
+            <DetailRow label="Target" value="27.0%" />
+            <DetailRow label="Driver" value="Kitchen overtime, Sat" />
+          </dl>
+        </FormSection>
+      </DrawerShell>
+
+      <ConfirmDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        title="Export weekly report?"
+        description="Frontend example only — no file will be downloaded."
+        confirmLabel="Export"
+        onConfirm={() => setExportOpen(false)}
+      />
     </AppShell>
   );
 }

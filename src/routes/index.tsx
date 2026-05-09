@@ -1,5 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import * as React from "react";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  ActionButton,
+  IconButton,
+  DrawerShell,
+  DetailRow,
+  FormSection,
+  FormRow,
+  StatusBadge,
+} from "@/components/dl";
 import {
   Users,
   PoundSterling,
@@ -78,6 +90,9 @@ const toneBg: Record<string, string> = {
 };
 
 function Home() {
+  const [alertOpen, setAlertOpen] = React.useState(false);
+  const [quickOpen, setQuickOpen] = React.useState<null | { t: string; s: string }>(null);
+
   return (
     <AppShell>
       <PageHeader
@@ -129,7 +144,11 @@ function Home() {
               { t: "3 Shifts are understaffed", s: "Today · View shifts" },
               { t: "2 Timesheets need approval", s: "Overdue · Review now" },
             ].map((a) => (
-              <div key={a.t} className="flex items-start gap-3 rounded-xl border border-border p-3">
+              <button
+                key={a.t}
+                onClick={() => setAlertOpen(true)}
+                className="w-full text-left flex items-start gap-3 rounded-xl border border-border p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+              >
                 <div className="h-8 w-8 rounded-lg bg-warning-soft text-warning flex items-center justify-center shrink-0">
                   <AlertTriangle className="h-4 w-4" />
                 </div>
@@ -138,7 +157,7 @@ function Home() {
                   <div className="text-xs text-muted-foreground">{a.s}</div>
                 </div>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
+              </button>
             ))}
           </div>
           <a className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
@@ -376,7 +395,8 @@ function Home() {
             ].map((a) => (
               <button
                 key={a.t}
-                className="w-full flex items-center gap-3 rounded-xl border border-border p-2.5 text-left hover:bg-muted/40 transition"
+                onClick={() => setQuickOpen({ t: a.t, s: a.s })}
+                className="w-full flex items-center gap-3 rounded-xl border border-border p-2.5 text-left hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
               >
                 <div className="h-8 w-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center">
                   <a.icon className="h-4 w-4" />
@@ -391,6 +411,70 @@ function Home() {
           </div>
         </Card>
       </div>
+
+      {/* Alert detail drawer */}
+      <DrawerShell
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        title="3 shifts are understaffed"
+        description="Today · Harbour View Hotel"
+        meta={<StatusBadge tone="warning">Needs attention</StatusBadge>}
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setAlertOpen(false)}>
+              Dismiss
+            </ActionButton>
+            <ActionButton onClick={() => setAlertOpen(false)}>Open rota</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Affected shifts">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Bar — Evening" value="Sat 17 May · 17:00–23:00 · 2 of 3 filled" />
+            <DetailRow label="Front of House" value="Sat 17 May · 12:00–20:00 · 4 of 5 filled" />
+            <DetailRow label="Kitchen — Late" value="Sun 18 May · 18:00–00:00 · 3 of 4 filled" />
+          </dl>
+        </FormSection>
+        <FormSection title="Suggested next step" description="Mock recommendation only.">
+          <p className="text-xs text-muted-foreground">
+            Auto-fill from your standby pool, or post these shifts as open for staff to claim.
+          </p>
+        </FormSection>
+      </DrawerShell>
+
+      {/* Quick action example drawer */}
+      <DrawerShell
+        open={!!quickOpen}
+        onOpenChange={(o) => !o && setQuickOpen(null)}
+        title={quickOpen?.t ?? ""}
+        description={quickOpen?.s}
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setQuickOpen(null)}>
+              Cancel
+            </ActionButton>
+            <ActionButton onClick={() => setQuickOpen(null)}>Save</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Details">
+          <FormRow label="Title" required>
+            <input
+              className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              defaultValue={quickOpen?.t}
+            />
+          </FormRow>
+          <FormRow label="Notes" hint="Visible to managers only.">
+            <textarea
+              className="w-full min-h-20 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              placeholder="Add a note..."
+            />
+          </FormRow>
+        </FormSection>
+        <p className="text-[11px] text-muted-foreground">
+          This is a frontend example. No data is saved.
+        </p>
+      </DrawerShell>
     </AppShell>
   );
 }

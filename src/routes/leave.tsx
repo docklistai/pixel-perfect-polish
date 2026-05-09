@@ -1,5 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import * as React from "react";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  ActionButton,
+  IconButton,
+  DrawerShell,
+  FormSection,
+  FormRow,
+  DetailRow,
+  StatusBadge,
+} from "@/components/dl";
 import {
   Calendar,
   ArrowRight,
@@ -109,6 +121,9 @@ const days = ["M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T", "F", "S", "
 const dates = [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
 
 function LeavePage() {
+  const [reviewOpen, setReviewOpen] = React.useState<null | string>(null);
+  const [riskOpen, setRiskOpen] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -116,7 +131,16 @@ function LeavePage() {
         subtitle="Manage leave requests, availability and ensure we're covered."
         actions={
           <>
-            <ActionButton icon={Calendar}>Request Leave</ActionButton>
+            <ActionButton icon={Calendar} onClick={() => setReviewOpen("New request")}>
+              Request Leave
+            </ActionButton>
+            <ActionButton
+              variant="secondary"
+              icon={AlertTriangle}
+              onClick={() => setRiskOpen(true)}
+            >
+              Coverage risks
+            </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
@@ -422,6 +446,66 @@ function LeavePage() {
           <a className="mt-4 block text-xs font-semibold text-brand">View coverage report →</a>
         </Card>
       </div>
+
+      {/* Leave request review drawer */}
+      <DrawerShell
+        open={!!reviewOpen}
+        onOpenChange={(o) => !o && setReviewOpen(null)}
+        title={reviewOpen === "New request" ? "New leave request" : "Review leave request"}
+        description="Sophie Carter · Front of House"
+        meta={<StatusBadge tone="warning">Pending</StatusBadge>}
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setReviewOpen(null)}>
+              Decline
+            </ActionButton>
+            <ActionButton onClick={() => setReviewOpen(null)}>Approve</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Request">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Type" value="Annual leave" />
+            <DetailRow label="Dates" value="18 – 20 May 2025 (3 days)" />
+            <DetailRow label="Remaining balance" value="14 days" />
+            <DetailRow label="Submitted" value="08 May 2025, 09:14 (Europe/London)" />
+          </dl>
+        </FormSection>
+        <FormSection title="Coverage impact">
+          <p className="text-xs text-muted-foreground">
+            Front of House is fully covered for these dates by Liam and Olivia.
+          </p>
+        </FormSection>
+        <FormSection title="Manager note">
+          <FormRow label="Reply to staff member">
+            <textarea
+              className="w-full min-h-20 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              placeholder="Optional message..."
+            />
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
+
+      {/* Coverage risk drawer */}
+      <DrawerShell
+        open={riskOpen}
+        onOpenChange={setRiskOpen}
+        title="Coverage risk — Bar"
+        description="Sat 24 May 2025"
+        meta={<StatusBadge tone="danger">High risk</StatusBadge>}
+        footer={<ActionButton onClick={() => setRiskOpen(false)}>Close</ActionButton>}
+      >
+        <FormSection title="Why this is flagged">
+          <dl className="divide-y divide-border">
+            <DetailRow label="On leave" value="2 of 4 bar staff" />
+            <DetailRow label="Forecast covers" value="320 (busy Saturday)" />
+            <DetailRow label="Suggested cover" value="3 bar staff" />
+          </dl>
+        </FormSection>
+        <p className="text-[11px] text-muted-foreground">
+          Frontend example. No leave or rota change is made.
+        </p>
+      </DrawerShell>
     </AppShell>
   );
 }

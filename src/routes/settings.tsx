@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader, ActionButton } from "@/components/dl";
+import * as React from "react";
+import { AppShell, Card, PageHeader, ActionButton, FeedbackBanner } from "@/components/dl";
 import {
   LayoutGrid,
   Users,
@@ -29,19 +30,25 @@ const tabs = [
   { t: "Exports", s: "Payroll and data export settings", icon: Cloud },
 ];
 
-function Toggle({ on = true }: { on?: boolean }) {
+function Toggle({ on = true, onClick }: { on?: boolean; onClick?: () => void }) {
   return (
-    <span
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Toggle setting"
       className={`inline-flex h-5 w-9 rounded-full p-0.5 transition ${on ? "bg-brand" : "bg-muted"}`}
     >
       <span
         className={`h-4 w-4 rounded-full bg-white shadow transition ${on ? "translate-x-4" : ""}`}
       />
-    </span>
+    </button>
   );
 }
 
 function SettingsPage() {
+  const [dirty, setDirty] = React.useState(false);
+  const [saved, setSaved] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -49,11 +56,50 @@ function SettingsPage() {
         subtitle="Manage your workspace settings, policies and preferences."
         actions={
           <>
-            <ActionButton variant="secondary">Discard changes</ActionButton>
-            <ActionButton>Save changes</ActionButton>
+            <ActionButton
+              variant="secondary"
+              disabled={!dirty}
+              onClick={() => {
+                setDirty(false);
+                setSaved(false);
+              }}
+            >
+              Discard changes
+            </ActionButton>
+            <ActionButton
+              disabled={!dirty}
+              onClick={() => {
+                setDirty(false);
+                setSaved(true);
+              }}
+            >
+              Save changes
+            </ActionButton>
           </>
         }
       />
+
+      {dirty && (
+        <FeedbackBanner
+          tone="warning"
+          title="You have unsaved changes"
+          description="Save or discard before leaving — frontend example only."
+          className="mb-4"
+        />
+      )}
+      {saved && (
+        <FeedbackBanner
+          tone="success"
+          title="Settings saved"
+          description="Mock confirmation — nothing has been written."
+          className="mb-4"
+          onDismiss={() => setSaved(false)}
+        />
+      )}
+
+      <div className="hidden">
+        <button onClick={() => setDirty(true)}>mark dirty</button>
+      </div>
 
       <div className="grid grid-cols-12 gap-5">
         <Card className="col-span-12 lg:col-span-3 p-3 self-start">
@@ -137,7 +183,7 @@ function SettingsPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Toggle />
+              <Toggle onClick={() => setDirty(true)} />
               <div>
                 <div className="text-sm font-medium">Auto round shift times</div>
                 <div className="text-xs text-muted-foreground">
