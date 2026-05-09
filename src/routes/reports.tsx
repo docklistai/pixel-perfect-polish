@@ -472,7 +472,7 @@ function ReportsPage() {
           <a className="mt-2 block text-xs font-semibold text-brand">View department report →</a>
         </Card>
       </div>
-      </div>
+
 
       <DrawerShell
         open={filterOpen}
