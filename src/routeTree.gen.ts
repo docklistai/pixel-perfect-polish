@@ -9,8 +9,56 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TimeRouteImport } from './routes/time'
+import { Route as TeamRouteImport } from './routes/team'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RotaRouteImport } from './routes/rota'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as OpsRouteImport } from './routes/ops'
+import { Route as LeaveRouteImport } from './routes/leave'
 import { Route as IndexRouteImport } from './routes/index'
 
+const TimeRoute = TimeRouteImport.update({
+  id: '/time',
+  path: '/time',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RotaRoute = RotaRouteImport.update({
+  id: '/rota',
+  path: '/rota',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsRoute = OpsRouteImport.update({
+  id: '/ops',
+  path: '/ops',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaveRoute = LeaveRouteImport.update({
+  id: '/leave',
+  path: '/leave',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +67,144 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/leave': typeof LeaveRoute
+  '/ops': typeof OpsRoute
+  '/reports': typeof ReportsRoute
+  '/rota': typeof RotaRoute
+  '/settings': typeof SettingsRoute
+  '/staff': typeof StaffRoute
+  '/team': typeof TeamRoute
+  '/time': typeof TimeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/leave': typeof LeaveRoute
+  '/ops': typeof OpsRoute
+  '/reports': typeof ReportsRoute
+  '/rota': typeof RotaRoute
+  '/settings': typeof SettingsRoute
+  '/staff': typeof StaffRoute
+  '/team': typeof TeamRoute
+  '/time': typeof TimeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/leave': typeof LeaveRoute
+  '/ops': typeof OpsRoute
+  '/reports': typeof ReportsRoute
+  '/rota': typeof RotaRoute
+  '/settings': typeof SettingsRoute
+  '/staff': typeof StaffRoute
+  '/team': typeof TeamRoute
+  '/time': typeof TimeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/leave'
+    | '/ops'
+    | '/reports'
+    | '/rota'
+    | '/settings'
+    | '/staff'
+    | '/team'
+    | '/time'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/leave'
+    | '/ops'
+    | '/reports'
+    | '/rota'
+    | '/settings'
+    | '/staff'
+    | '/team'
+    | '/time'
+  id:
+    | '__root__'
+    | '/'
+    | '/leave'
+    | '/ops'
+    | '/reports'
+    | '/rota'
+    | '/settings'
+    | '/staff'
+    | '/team'
+    | '/time'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LeaveRoute: typeof LeaveRoute
+  OpsRoute: typeof OpsRoute
+  ReportsRoute: typeof ReportsRoute
+  RotaRoute: typeof RotaRoute
+  SettingsRoute: typeof SettingsRoute
+  StaffRoute: typeof StaffRoute
+  TeamRoute: typeof TeamRoute
+  TimeRoute: typeof TimeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/time': {
+      id: '/time'
+      path: '/time'
+      fullPath: '/time'
+      preLoaderRoute: typeof TimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rota': {
+      id: '/rota'
+      path: '/rota'
+      fullPath: '/rota'
+      preLoaderRoute: typeof RotaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops': {
+      id: '/ops'
+      path: '/ops'
+      fullPath: '/ops'
+      preLoaderRoute: typeof OpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leave': {
+      id: '/leave'
+      path: '/leave'
+      fullPath: '/leave'
+      preLoaderRoute: typeof LeaveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +217,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LeaveRoute: LeaveRoute,
+  OpsRoute: OpsRoute,
+  ReportsRoute: ReportsRoute,
+  RotaRoute: RotaRoute,
+  SettingsRoute: SettingsRoute,
+  StaffRoute: StaffRoute,
+  TeamRoute: TeamRoute,
+  TimeRoute: TimeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
