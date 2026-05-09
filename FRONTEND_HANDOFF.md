@@ -319,3 +319,100 @@ When moving this UI into the production Docklist repo:
 
 See the verification section at the end of the handoff turn for the
 latest `lint`, `build`, and `tsc` results.
+
+---
+
+## 10. Productivity layer (added in handoff polish pass)
+
+A small set of frontend-only conveniences sit on top of the existing UI
+system. They borrow ideas from the older Docklist repo (command palette,
+shortcuts help, notification centre, connection indicator, focus
+management) and adapt them to the new TanStack Router setup. None of them
+read or write any real data.
+
+### Command palette
+
+- File: `src/components/CommandPalette.tsx`.
+- Trigger: `Ctrl+K` / `⌘K` (also from the topbar search button).
+- Built on shadcn `command.tsx` (cmdk). Dialog-based.
+- **Navigate** group: links to all nine main routes.
+- **Quick actions (mock)** group: Add shift, Add team member, Review leave
+  requests, Export reports. Each navigates to the relevant route and
+  emits a Sonner toast labelled as a mock action — nothing is created.
+
+### Keyboard shortcuts help
+
+- File: `src/components/ShortcutsDialog.tsx`.
+- Trigger: `?` key (when not typing in an input) or the help icon in the
+  topbar.
+- Lists general shortcuts (`⌘K`, `?`, `Esc`) and the `G`-then-X
+  navigation sequence (`G H`, `G R`, `G S`, `G T`).
+
+### Navigation sequence (`G` then X)
+
+- Implemented in `src/components/AppShortcuts.tsx`.
+- Press `G`, then within ~1.2 s press `H` (Home), `R` (Rota), `S`
+  (Staff), or `T` (Time).
+- Disabled while focus is in an input, textarea, select, or
+  `contenteditable` element.
+
+### Notification drawer (mock)
+
+- File: `src/components/NotificationDrawer.tsx`.
+- Trigger: bell icon in the topbar.
+- Five hospitality-themed seed notifications: rota conflict, leave
+  request, missed clock-in, announcement acknowledgement, ops follow-up.
+- Read state lives in component state only — not persisted, no Supabase,
+  no push delivery. Topbar unread count is a fixed `3` matching the seed.
+
+### Connection status chip
+
+- File: `src/components/ConnectionStatus.tsx` (uses
+  `SyncStatusBadge` from `dl.tsx`).
+- Reads `navigator.onLine` and listens for `online` / `offline` events.
+- Shows "Online · Checked just now" style label. No queue, no real sync,
+  nothing persisted.
+
+### Accessibility helpers
+
+- File: `src/components/RouteAnnouncer.tsx`.
+- **SkipToContent** — visible-on-focus skip link rendered at the very
+  top of the document; jumps to `#main-content`.
+- **RouteFocusManager** — moves focus to `#main-content` on every route
+  change after the first render.
+- **RouteAnnouncer** — polite `aria-live` region announcing the current
+  page name (e.g. "Rota page loaded").
+- `AppShell`'s `<main>` element now carries `id="main-content"` and
+  `tabIndex={-1}`.
+- All icon-only buttons (topbar bell, help, search trigger) carry
+  explicit `aria-label`s.
+
+### New `dl.tsx` primitives
+
+- `Kbd` — inline keyboard chip.
+- `HelpHint` — small inline help text with question-mark icon.
+- `RecoveryCard` — banner-style "your draft is still here" card.
+- `SyncStatusBadge` — Online / Syncing / Offline chip.
+
+All four are demonstrated in `/ui-kit` under "Keyboard, status &
+recovery".
+
+### Provider wiring
+
+- `src/components/AppShortcuts.tsx` exposes an `OverlayContext`
+  (`openPalette`, `openShortcuts`, `openNotifications`, `unreadCount`)
+  that the topbar consumes via `useOverlays()`.
+- Mounted once at the root in `src/routes/__root.tsx`, alongside
+  `<SkipToContent />`, `<RouteFocusManager />`, `<RouteAnnouncer />`,
+  and the Sonner `<Toaster />`.
+- Main sidebar navigation is unchanged.
+
+### Reminders
+
+- Everything in this section is **frontend-only**.
+- The command palette does not search real data — it is a navigation
+  and mock-action launcher.
+- The notification drawer does not connect to any service.
+- The connection chip reflects the browser's online state only.
+- No new dependencies were added (uses existing `cmdk`, `sonner`,
+  shadcn primitives, lucide-react).
