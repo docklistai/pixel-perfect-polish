@@ -79,7 +79,13 @@ export function AppShell({
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar searchPlaceholder={searchPlaceholder} />
-        <main className="flex-1 px-8 py-7">{children}</main>
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 px-8 py-7 focus:outline-none"
+        >
+          {children}
+        </main>
         <footer className="px-8 py-5 text-center text-xs text-muted-foreground">
           All times shown in Europe/London (GMT+1)
         </footer>
