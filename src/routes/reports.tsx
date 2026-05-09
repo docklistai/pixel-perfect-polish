@@ -102,8 +102,11 @@ function ReportsPage() {
         actions={
           <>
             <FilterButton icon={Calendar} label="12 – 18 May 2025" />
-            <FilterButton icon={Filter} label="Filters" showCaret={false} />
-            <FilterButton icon={Download} label="Export" showCaret={false} />
+            <FilterButton icon={Filter} label="Filters" showCaret={false} onClick={() => setFilterOpen(true)} />
+            <FilterButton icon={Download} label="Export" showCaret={false} onClick={() => setExportOpen(true)} />
+            <ActionButton variant="secondary" onClick={() => setInsightOpen(true)}>
+              View top insight
+            </ActionButton>
           </>
         }
       />
