@@ -120,7 +120,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <SkipToContent />
+      <AppShortcuts>
+        <Outlet />
+      </AppShortcuts>
+      <RouteFocusManager />
+      <RouteAnnouncer />
+      <Toaster />
     </QueryClientProvider>
   );
 }
