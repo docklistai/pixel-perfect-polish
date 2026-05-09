@@ -469,6 +469,88 @@ function RotaPage() {
           </Card>
         </div>
       </div>
+
+      {/* Add shift drawer */}
+      <DrawerShell
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        title="Add shift"
+        description="Create a new shift on the rota."
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setAddOpen(false)}>
+              Cancel
+            </ActionButton>
+            <ActionButton onClick={() => setAddOpen(false)}>Add to rota</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Shift">
+          <FormRow label="Role" required>
+            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+              <option>Front of House</option>
+              <option>Bar</option>
+              <option>Kitchen</option>
+              <option>Housekeeping</option>
+            </select>
+          </FormRow>
+          <div className="grid grid-cols-2 gap-3">
+            <FormRow label="Start" required>
+              <input
+                type="time"
+                defaultValue="17:00"
+                className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+              />
+            </FormRow>
+            <FormRow label="End" required>
+              <input
+                type="time"
+                defaultValue="23:00"
+                className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+              />
+            </FormRow>
+          </div>
+          <FormRow label="Assign to" hint="Leave blank to post as an open shift.">
+            <input
+              placeholder="Search staff..."
+              className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+            />
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
+
+      {/* Conflict details drawer */}
+      <DrawerShell
+        open={conflictOpen}
+        onOpenChange={setConflictOpen}
+        title="Rota conflicts"
+        description="2 conflicts detected for w/c 19 May 2025."
+        meta={<StatusBadge tone="warning">2 issues</StatusBadge>}
+        footer={
+          <ActionButton onClick={() => setConflictOpen(false)}>Close</ActionButton>
+        }
+      >
+        <FormSection title="Issues">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Sophie Carter" value="Double-booked Sat 17 May · 12:00–18:00" />
+            <DetailRow label="Daniel Mitchell" value="Below 11h rest break (Fri → Sat)" />
+          </dl>
+        </FormSection>
+        <p className="text-[11px] text-muted-foreground">
+          Resolve conflicts before publishing. UK working-time rules applied.
+        </p>
+      </DrawerShell>
+
+      {/* Publish rota dialog */}
+      <ConfirmDialog
+        open={publishOpen}
+        onOpenChange={setPublishOpen}
+        title="Publish rota for w/c 19 May 2025?"
+        description="24 staff will be notified via the staff portal. This is a frontend example — nothing will be sent."
+        confirmLabel="Publish"
+        cancelLabel="Not yet"
+        onConfirm={() => setPublishOpen(false)}
+      />
     </AppShell>
   );
 }
