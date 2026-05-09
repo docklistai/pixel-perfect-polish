@@ -149,6 +149,8 @@ const timeline = [
 ];
 
 function OpsPage() {
+  const [openDrawer, setOpenDrawer] = React.useState<null | "incident" | "task" | "handover">(null);
+
   return (
     <AppShell>
       <PageHeader
@@ -156,11 +158,17 @@ function OpsPage() {
         subtitle="Stay on top of today's activity and keep your team aligned."
         actions={
           <>
-            <ActionButton icon={AlertTriangle}>Log incident</ActionButton>
-            <ActionButton variant="secondary" icon={Plus}>
+            <ActionButton icon={AlertTriangle} onClick={() => setOpenDrawer("incident")}>
+              Log incident
+            </ActionButton>
+            <ActionButton variant="secondary" icon={Plus} onClick={() => setOpenDrawer("task")}>
               Add task
             </ActionButton>
-            <ActionButton variant="secondary" icon={FileText}>
+            <ActionButton
+              variant="secondary"
+              icon={FileText}
+              onClick={() => setOpenDrawer("handover")}
+            >
               Add handover note
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
