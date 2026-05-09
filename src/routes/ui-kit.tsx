@@ -145,21 +145,27 @@ function UIKitPage() {
               icon={Users}
               label="Scheduled hours"
               value="1,248h"
-              delta={{ value: "6% vs last week", up: true }}
+              sub="vs last week"
+              delta="6%"
+              deltaTone="success"
               tone="info"
             />
             <MetricCard
               icon={PoundSterling}
               label="Labour cost"
               value="£18,420"
-              delta={{ value: "3% vs last week", up: false }}
+              sub="vs last week"
+              delta="3%"
+              deltaTone="danger"
               tone="brand"
             />
             <MetricCard
               icon={Calendar}
               label="Coverage"
               value="98%"
-              delta={{ value: "2pp vs last week", up: true }}
+              sub="vs last week"
+              delta="2pp"
+              deltaTone="success"
               tone="success"
             />
             <MetricCard icon={Bell} label="Open alerts" value="5" tone="warning" />
@@ -168,7 +174,7 @@ function UIKitPage() {
 
         <Block name="DashboardCard" description="Container surface for grouped content.">
           <DashboardCard className="p-5">
-            <SectionHeader eyebrow="Today" title="Front of House" caption="3 shifts" />
+            <SectionHeader eyebrow="TODAY" title="Front of House" count={3} />
             <p className="text-xs text-muted-foreground">
               Use DashboardCard as the standard surface for grouped content blocks.
             </p>
