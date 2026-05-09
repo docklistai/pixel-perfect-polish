@@ -28,7 +28,7 @@ function Home() {
   return (
     <AppShell>
       <PageHeader
-        title={<>Good morning, Alex <span>👋</span></> as unknown as string}
+        title={<>Good morning, Alex <span>👋</span></>}
         subtitle="Here's what's happening across Harbour View Hotel this week."
         actions={
           <>

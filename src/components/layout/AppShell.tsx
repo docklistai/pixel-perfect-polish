@@ -18,7 +18,7 @@ export function AppShell({ children, searchPlaceholder }: { children: React.Reac
 
 export function PageHeader({
   title, subtitle, actions,
-}: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+}: { title: React.ReactNode; subtitle?: React.ReactNode; actions?: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 mb-6">
       <div>
