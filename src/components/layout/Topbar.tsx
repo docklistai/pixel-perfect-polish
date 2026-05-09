@@ -1,11 +1,4 @@
-import {
-  Bell,
-  Briefcase,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-} from "lucide-react";
+import { Bell, Briefcase, ChevronDown, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { SearchField } from "@/components/dl";
 
 export function Topbar({

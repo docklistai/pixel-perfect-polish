@@ -1,7 +1,17 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Home, Calendar, Users, Clock, Plane, MessageSquare,
-  Briefcase, BarChart3, Settings, ChevronDown, HelpCircle, Building2,
+  Home,
+  Calendar,
+  Users,
+  Clock,
+  Plane,
+  MessageSquare,
+  Briefcase,
+  BarChart3,
+  Settings,
+  ChevronDown,
+  HelpCircle,
+  Building2,
 } from "lucide-react";
 
 const items = [
@@ -20,8 +30,10 @@ export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <aside className="hidden md:flex w-64 shrink-0 flex-col text-sidebar-foreground"
-      style={{ background: "var(--gradient-sidebar)" }}>
+    <aside
+      className="hidden md:flex w-64 shrink-0 flex-col text-sidebar-foreground"
+      style={{ background: "var(--gradient-sidebar)" }}
+    >
       <div className="px-7 pt-7 pb-8">
         <h1 className="text-2xl font-bold tracking-tight text-white">Docklist</h1>
       </div>
@@ -60,7 +72,10 @@ export function Sidebar() {
           <ChevronDown className="h-4 w-4 text-sidebar-muted" />
         </button>
 
-        <a className="flex items-center justify-between rounded-xl border border-sidebar-border/60 px-3 py-2.5 hover:bg-white/5 transition cursor-pointer" href="#">
+        <a
+          className="flex items-center justify-between rounded-xl border border-sidebar-border/60 px-3 py-2.5 hover:bg-white/5 transition cursor-pointer"
+          href="#"
+        >
           <div className="flex items-center gap-2.5">
             <HelpCircle className="h-4 w-4" />
             <div>

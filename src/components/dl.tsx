@@ -37,14 +37,7 @@ import { cn } from "@/lib/utils";
 /* Tokens                                                              */
 /* ------------------------------------------------------------------ */
 
-export type Tone =
-  | "brand"
-  | "info"
-  | "success"
-  | "warning"
-  | "danger"
-  | "purple"
-  | "muted";
+export type Tone = "brand" | "info" | "success" | "warning" | "danger" | "purple" | "muted";
 
 /** Background + foreground pair for soft tone surfaces (badges, icon chips). */
 export const toneSoft: Record<Tone, string> = {
@@ -112,15 +105,9 @@ export function PageHeader({
     <div className="flex items-start justify-between gap-4 mb-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        {subtitle && (
-          <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
-        )}
+        {subtitle && <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
-      {actions && (
-        <div className="flex items-center gap-2 flex-wrap justify-end">
-          {actions}
-        </div>
-      )}
+      {actions && <div className="flex items-center gap-2 flex-wrap justify-end">{actions}</div>}
     </div>
   );
 }
@@ -148,9 +135,7 @@ export function SectionHeader({
           </span>
         )}
         {title && <span className="text-sm font-semibold">{title}</span>}
-        {count !== undefined && (
-          <span className="text-xs text-muted-foreground">({count})</span>
-        )}
+        {count !== undefined && <span className="text-xs text-muted-foreground">({count})</span>}
       </div>
       {action && <div className="text-xs">{action}</div>}
     </div>
@@ -268,19 +253,14 @@ export function QuickActionCard({
   const inner = (
     <>
       <div
-        className={cn(
-          "h-8 w-8 rounded-lg flex items-center justify-center",
-          toneSoft[tone],
-        )}
+        className={cn("h-8 w-8 rounded-lg flex items-center justify-center", toneSoft[tone])}
         aria-hidden
       >
         <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 text-left">
         <div className="text-sm font-medium">{title}</div>
-        {description && (
-          <div className="text-[11px] text-muted-foreground">{description}</div>
-        )}
+        {description && <div className="text-[11px] text-muted-foreground">{description}</div>}
       </div>
       <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden />
     </>
@@ -324,8 +304,7 @@ const actionSizes: Record<ActionSize, string> = {
   md: "px-4 py-2.5 text-sm font-semibold",
 };
 
-export interface ActionButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ActionVariant;
   size?: ActionSize;
   icon?: LucideIcon;
@@ -333,41 +312,34 @@ export interface ActionButtonProps
 }
 
 /** Primary text-bearing button used in headers, modals and forms. */
-export const ActionButton = React.forwardRef<
-  HTMLButtonElement,
-  ActionButtonProps
->(function ActionButton(
-  {
-    variant = "primary",
-    size = "md",
-    icon: Icon,
-    iconRight: IconRight,
-    className,
-    children,
-    ...rest
+export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
+  function ActionButton(
+    {
+      variant = "primary",
+      size = "md",
+      icon: Icon,
+      iconRight: IconRight,
+      className,
+      children,
+      ...rest
+    },
+    ref,
+  ) {
+    return (
+      <button
+        ref={ref}
+        className={cn(actionBase, actionVariants[variant], actionSizes[size], className)}
+        {...rest}
+      >
+        {Icon && <Icon className="h-4 w-4" aria-hidden />}
+        {children}
+        {IconRight && <IconRight className="h-4 w-4" aria-hidden />}
+      </button>
+    );
   },
-  ref,
-) {
-  return (
-    <button
-      ref={ref}
-      className={cn(
-        actionBase,
-        actionVariants[variant],
-        actionSizes[size],
-        className,
-      )}
-      {...rest}
-    >
-      {Icon && <Icon className="h-4 w-4" aria-hidden />}
-      {children}
-      {IconRight && <IconRight className="h-4 w-4" aria-hidden />}
-    </button>
-  );
-});
+);
 
-export interface IconButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   icon: LucideIcon;
   /** Required — accessible name for screen readers. */
   label: string;
@@ -376,38 +348,36 @@ export interface IconButtonProps
 }
 
 /** Square icon-only button with mandatory aria-label. */
-export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
-  function IconButton(
-    { icon: Icon, label, variant = "card", size = "md", className, ...rest },
-    ref,
-  ) {
-    const sizeCls = size === "sm" ? "p-1.5" : "p-2.5";
-    const iconSize = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
-    const variantCls =
-      variant === "card"
-        ? "rounded-xl border border-border bg-card shadow-[var(--shadow-card)] hover:bg-muted/50"
-        : variant === "outline"
-          ? "rounded-lg border border-border hover:bg-muted/50"
-          : "rounded-lg hover:bg-muted/50 text-muted-foreground";
-    return (
-      <button
-        ref={ref}
-        type="button"
-        aria-label={label}
-        title={label}
-        className={cn(
-          "inline-flex items-center justify-center transition-colors",
-          sizeCls,
-          variantCls,
-          className,
-        )}
-        {...rest}
-      >
-        <Icon className={iconSize} aria-hidden />
-      </button>
-    );
-  },
-);
+export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
+  { icon: Icon, label, variant = "card", size = "md", className, ...rest },
+  ref,
+) {
+  const sizeCls = size === "sm" ? "p-1.5" : "p-2.5";
+  const iconSize = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
+  const variantCls =
+    variant === "card"
+      ? "rounded-xl border border-border bg-card shadow-[var(--shadow-card)] hover:bg-muted/50"
+      : variant === "outline"
+        ? "rounded-lg border border-border hover:bg-muted/50"
+        : "rounded-lg hover:bg-muted/50 text-muted-foreground";
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-label={label}
+      title={label}
+      className={cn(
+        "inline-flex items-center justify-center transition-colors",
+        sizeCls,
+        variantCls,
+        className,
+      )}
+      {...rest}
+    >
+      <Icon className={iconSize} aria-hidden />
+    </button>
+  );
+});
 
 /** Pill-style filter trigger ("All teams ▾"). */
 export function FilterButton({
@@ -478,8 +448,7 @@ export function StatusBadge({
 /* Inputs                                                              */
 /* ------------------------------------------------------------------ */
 
-export interface SearchFieldProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface SearchFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   containerClassName?: string;
   /** Visual size; matches the sidebar/topbar versions. */
   variant?: "card" | "inline";
@@ -488,13 +457,7 @@ export interface SearchFieldProps
 /** Text search input with leading magnifier icon. */
 export const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
   function SearchField(
-    {
-      containerClassName,
-      variant = "inline",
-      placeholder = "Search...",
-      className,
-      ...rest
-    },
+    { containerClassName, variant = "inline", placeholder = "Search...", className, ...rest },
     ref,
   ) {
     const wrapper =
@@ -563,9 +526,7 @@ export function DataTable<Row>({
     <div className={cn("w-full", className)}>
       <table className="w-full text-sm">
         {caption && (
-          <caption className="text-left text-xs text-muted-foreground pb-2">
-            {caption}
-          </caption>
+          <caption className="text-left text-xs text-muted-foreground pb-2">{caption}</caption>
         )}
         <thead>
           <tr className="text-[11px] font-semibold tracking-widest text-muted-foreground border-y border-border">
@@ -605,10 +566,7 @@ export function DataTable<Row>({
             rows.map((row, i) => (
               <tr
                 key={rowKey(row, i)}
-                className={cn(
-                  "border-b border-border/60 last:border-0",
-                  rowClassName?.(row, i),
-                )}
+                className={cn("border-b border-border/60 last:border-0", rowClassName?.(row, i))}
               >
                 {columns.map((c) => (
                   <td
@@ -662,9 +620,7 @@ export function TablePagination({
             onClick={() => onChange?.(p)}
             className={cn(
               "h-7 w-7 rounded-md text-xs",
-              p === page
-                ? "bg-primary text-primary-foreground"
-                : "border border-border",
+              p === page ? "bg-primary text-primary-foreground" : "border border-border",
             )}
           >
             {p}
@@ -706,13 +662,7 @@ export function RightPanel({
         <div className="flex items-center justify-between mb-3">
           <div className="text-sm font-semibold">{title}</div>
           {onClose && (
-            <IconButton
-              icon={X}
-              label="Close panel"
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-            />
+            <IconButton icon={X} label="Close panel" variant="ghost" size="sm" onClick={onClose} />
           )}
         </div>
       )}
@@ -741,12 +691,7 @@ export function AlertCard({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-start gap-3 rounded-xl border border-border p-3",
-        className,
-      )}
-    >
+    <div className={cn("flex items-start gap-3 rounded-xl border border-border p-3", className)}>
       <div
         className={cn(
           "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
@@ -758,13 +703,9 @@ export function AlertCard({
       </div>
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium">{title}</div>
-        {description && (
-          <div className="text-xs text-muted-foreground">{description}</div>
-        )}
+        {description && <div className="text-xs text-muted-foreground">{description}</div>}
       </div>
-      {action ?? (
-        <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden />
-      )}
+      {action ?? <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden />}
     </div>
   );
 }
@@ -798,12 +739,8 @@ export function EmptyState({
       >
         <Icon className={compact ? "h-5 w-5" : "h-6 w-6"} />
       </div>
-      <div className={compact ? "text-sm font-medium" : "text-base font-semibold"}>
-        {title}
-      </div>
-      {description && (
-        <div className="text-xs text-muted-foreground max-w-xs">{description}</div>
-      )}
+      <div className={compact ? "text-sm font-medium" : "text-base font-semibold"}>{title}</div>
+      {description && <div className="text-xs text-muted-foreground max-w-xs">{description}</div>}
       {action && <div className="mt-1">{action}</div>}
     </div>
   );
@@ -841,10 +778,7 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div
-      role="alert"
-      className="flex flex-col items-center justify-center text-center py-10 gap-3"
-    >
+    <div role="alert" className="flex flex-col items-center justify-center text-center py-10 gap-3">
       <div
         className="h-12 w-12 rounded-full bg-danger-soft text-danger flex items-center justify-center"
         aria-hidden
@@ -865,13 +799,4 @@ export function ErrorState({
 /* ------------------------------------------------------------------ */
 /* Misc helpers re-exported for convenience                             */
 /* ------------------------------------------------------------------ */
-export {
-  Bell,
-  Briefcase,
-  Calendar,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  HelpCircle,
-  Building2,
-};
+export { Bell, Briefcase, Calendar, ChevronDown, ChevronLeft, ChevronRight, HelpCircle, Building2 };
