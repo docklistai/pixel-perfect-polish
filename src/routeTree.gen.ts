@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UiKitRouteImport } from './routes/ui-kit'
 import { Route as TimeRouteImport } from './routes/time'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as StaffRouteImport } from './routes/staff'
@@ -19,6 +20,11 @@ import { Route as OpsRouteImport } from './routes/ops'
 import { Route as LeaveRouteImport } from './routes/leave'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UiKitRoute = UiKitRouteImport.update({
+  id: '/ui-kit',
+  path: '/ui-kit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TimeRoute = TimeRouteImport.update({
   id: '/time',
   path: '/time',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/staff': typeof StaffRoute
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
+  '/ui-kit': typeof UiKitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/staff': typeof StaffRoute
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
+  '/ui-kit': typeof UiKitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/staff': typeof StaffRoute
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
+  '/ui-kit': typeof UiKitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/staff'
     | '/team'
     | '/time'
+    | '/ui-kit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/staff'
     | '/team'
     | '/time'
+    | '/ui-kit'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/staff'
     | '/team'
     | '/time'
+    | '/ui-kit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,10 +157,18 @@ export interface RootRouteChildren {
   StaffRoute: typeof StaffRoute
   TeamRoute: typeof TeamRoute
   TimeRoute: typeof TimeRoute
+  UiKitRoute: typeof UiKitRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/ui-kit': {
+      id: '/ui-kit'
+      path: '/ui-kit'
+      fullPath: '/ui-kit'
+      preLoaderRoute: typeof UiKitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/time': {
       id: '/time'
       path: '/time'
@@ -225,17 +245,8 @@ const rootRouteChildren: RootRouteChildren = {
   StaffRoute: StaffRoute,
   TeamRoute: TeamRoute,
   TimeRoute: TimeRoute,
+  UiKitRoute: UiKitRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
