@@ -182,7 +182,12 @@ function TeamPage() {
             </div>
             <div className="border-t border-border">
               {announcements.map((a, i) => (
-                <div key={i} className="border-b border-border/60 last:border-0 px-5 py-4">
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setDetail({ t: a.t, s: a.body })}
+                  className="block w-full text-left border-b border-border/60 last:border-0 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+                >
                   {a.pinned && (
                     <div className="inline-flex items-center gap-1 rounded-md bg-accent-purple-soft text-accent-purple text-[11px] font-medium px-2 py-0.5 mb-2">
                       <Pin className="h-3 w-3" /> Pinned
