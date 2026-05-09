@@ -227,6 +227,9 @@ const stTones: Record<string, string> = {
 const noteTones: Record<string, string> = { warning: "text-warning", danger: "text-danger" };
 
 function TimePage() {
+  const [reviewOpen, setReviewOpen] = React.useState(false);
+  const [exportOpen, setExportOpen] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -234,8 +237,12 @@ function TimePage() {
         subtitle="Review, approve and export time data for payroll."
         actions={
           <>
-            <ActionButton>Approve Selected</ActionButton>
-            <ActionButton variant="secondary" icon={Download}>
+            <ActionButton onClick={() => setReviewOpen(true)}>Review timesheet</ActionButton>
+            <ActionButton
+              variant="secondary"
+              icon={Download}
+              onClick={() => setExportOpen(true)}
+            >
               Export Payroll-Ready CSV
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
