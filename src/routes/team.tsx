@@ -387,6 +387,71 @@ function TeamPage() {
           </Card>
         </div>
       </div>
+
+      {/* Compose announcement drawer */}
+      <DrawerShell
+        open={composeOpen}
+        onOpenChange={setComposeOpen}
+        title="Compose announcement"
+        description="Share an update with your team."
+        width="lg"
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setComposeOpen(false)}>
+              Save draft
+            </ActionButton>
+            <ActionButton onClick={() => setComposeOpen(false)}>Publish</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Message">
+          <FormRow label="Title" required>
+            <input
+              placeholder="e.g. Summer menu launch"
+              className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+            />
+          </FormRow>
+          <FormRow label="Body" required>
+            <textarea
+              className="w-full min-h-32 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+              placeholder="What would you like to share?"
+            />
+          </FormRow>
+        </FormSection>
+        <FormSection title="Audience">
+          <FormRow label="Send to">
+            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+              <option>All staff (48)</option>
+              <option>Front of House (12)</option>
+              <option>Kitchen (9)</option>
+            </select>
+          </FormRow>
+        </FormSection>
+      </DrawerShell>
+
+      {/* Announcement detail drawer */}
+      <DrawerShell
+        open={!!detail}
+        onOpenChange={(o) => !o && setDetail(null)}
+        title={detail?.t ?? ""}
+        description="Posted by Alex Thompson · Europe/London"
+        meta={<StatusBadge tone="info">Announcement</StatusBadge>}
+        footer={
+          <>
+            <ActionButton variant="secondary" onClick={() => setDetail(null)}>
+              Close
+            </ActionButton>
+            <ActionButton onClick={() => setDetail(null)}>Mark as read</ActionButton>
+          </>
+        }
+      >
+        <FormSection title="Message">
+          <p className="text-sm text-foreground">{detail?.s}</p>
+        </FormSection>
+        <FormSection title="Acknowledgements">
+          <p className="text-xs text-muted-foreground">38 of 48 staff have acknowledged.</p>
+        </FormSection>
+      </DrawerShell>
     </AppShell>
   );
 }
