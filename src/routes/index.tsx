@@ -1,5 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  ActionButton,
+  IconButton,
+} from "@/components/dl";
 import {
   Users, PoundSterling, Percent, TrendingUp, Star, AlertTriangle,
   Calendar, ArrowRight, Megaphone, Plus, ClockArrowUp, MoreHorizontal,
@@ -32,10 +38,8 @@ function Home() {
         subtitle="Here's what's happening across Harbour View Hotel this week."
         actions={
           <>
-            <button className="inline-flex items-center gap-2 rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold shadow-sm hover:opacity-95">
-              <Calendar className="h-4 w-4" /> Publish Rota
-            </button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <ActionButton icon={Calendar}>Publish Rota</ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />

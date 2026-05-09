@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton, IconButton, FilterButton } from "@/components/dl";
 import { Users, CheckCircle2, UserPlus, AlertTriangle, Filter, Plus, ChevronDown, Search, SlidersHorizontal, MoreHorizontal, X, MessageCircle, Phone, Mail, Calendar, ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
 
 export const Route = createFileRoute("/staff")({
@@ -40,9 +40,11 @@ function StaffPage() {
         subtitle="Manage your team, roles, and access in one place."
         actions={
           <>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2"><Filter className="h-4 w-4" /> Filters</button>
-            <button className="rounded-xl bg-brand text-brand-foreground px-3 py-2 text-sm font-semibold flex items-center gap-2"><Plus className="h-4 w-4" /> Add team member <ChevronDown className="h-4 w-4" /></button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <FilterButton icon={Filter} label="Filters" showCaret={false} />
+            <ActionButton icon={Plus} iconRight={ChevronDown}>
+              Add team member
+            </ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />

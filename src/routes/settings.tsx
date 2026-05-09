@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton } from "@/components/dl";
 import { LayoutGrid, Users, Shield, Clock, Calendar, Bell, Smile, Cloud, ChevronDown, Image as ImageIcon } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
@@ -30,8 +30,8 @@ function SettingsPage() {
         subtitle="Manage your workspace settings, policies and preferences."
         actions={
           <>
-            <button className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium">Discard changes</button>
-            <button className="rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold">Save changes</button>
+            <ActionButton variant="secondary">Discard changes</ActionButton>
+            <ActionButton>Save changes</ActionButton>
           </>
         }
       />

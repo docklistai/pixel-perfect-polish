@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { Calendar, ArrowRight, AlertTriangle, MoreHorizontal, Heart, UserCheck, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/leave")({
@@ -46,8 +46,8 @@ function LeavePage() {
         subtitle="Manage leave requests, availability and ensure we're covered."
         actions={
           <>
-            <button className="rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold flex items-center gap-2"><Calendar className="h-4 w-4" /> Request Leave</button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <ActionButton icon={Calendar}>Request Leave</ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />

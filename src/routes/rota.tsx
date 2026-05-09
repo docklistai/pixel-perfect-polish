@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton, IconButton, FilterButton } from "@/components/dl";
 import { ChevronDown, Filter, Sparkles, SlidersHorizontal, AlertTriangle, CircleAlert, Plane, Send, Share2, Plus, MoreHorizontal, Search } from "lucide-react";
 
 export const Route = createFileRoute("/rota")({
@@ -140,13 +140,13 @@ function RotaPage() {
         subtitle="Plan shifts, balance coverage and deliver great service."
         actions={
           <>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2"><span>Week</span><ChevronDown className="h-4 w-4" /></button>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2">All departments <ChevronDown className="h-4 w-4" /></button>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2">View by: Employee <ChevronDown className="h-4 w-4" /></button>
-            <button className="rounded-xl border border-brand text-brand px-3 py-2 text-sm font-semibold">Draft</button>
-            <button className="rounded-xl border border-brand text-brand px-3 py-2 text-sm font-semibold">Review</button>
-            <button className="rounded-xl bg-brand text-brand-foreground px-3 py-2 text-sm font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> Publish Rota</button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <FilterButton label="Week" />
+            <FilterButton label="All departments" />
+            <FilterButton label="View by: Employee" />
+            <ActionButton variant="outline" size="sm">Draft</ActionButton>
+            <ActionButton variant="outline" size="sm">Review</ActionButton>
+            <ActionButton icon={Send} size="sm">Publish Rota</ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />

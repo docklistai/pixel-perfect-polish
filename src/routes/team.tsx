@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { Megaphone, Pin, MoreHorizontal, Trophy, Shield, Clock, AlertCircle, Shirt, GraduationCap, Wine, Cake, ArrowRight, MapPin, Users, Filter, ChevronDown, SlidersHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/team")({
@@ -36,8 +36,8 @@ function TeamPage() {
         subtitle="Share updates, keep everyone informed and connected."
         actions={
           <>
-            <button className="rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold flex items-center gap-2"><Megaphone className="h-4 w-4" /> Compose announcement</button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <ActionButton icon={Megaphone}>Compose announcement</ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />
