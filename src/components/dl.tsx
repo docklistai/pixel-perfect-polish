@@ -26,6 +26,7 @@ import {
   AlertTriangle,
   Inbox,
   Loader2,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { Sidebar } from "./layout/Sidebar";
@@ -706,7 +707,7 @@ export function RightPanel({
           <div className="text-sm font-semibold">{title}</div>
           {onClose && (
             <IconButton
-              icon={require("lucide-react").X as LucideIcon}
+              icon={X}
               label="Close panel"
               variant="ghost"
               size="sm"
