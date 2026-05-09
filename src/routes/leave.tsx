@@ -121,6 +121,9 @@ const days = ["M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T", "F", "S", "
 const dates = [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
 
 function LeavePage() {
+  const [reviewOpen, setReviewOpen] = React.useState<null | string>(null);
+  const [riskOpen, setRiskOpen] = React.useState(false);
+
   return (
     <AppShell>
       <PageHeader
@@ -128,7 +131,12 @@ function LeavePage() {
         subtitle="Manage leave requests, availability and ensure we're covered."
         actions={
           <>
-            <ActionButton icon={Calendar}>Request Leave</ActionButton>
+            <ActionButton icon={Calendar} onClick={() => setReviewOpen("New request")}>
+              Request Leave
+            </ActionButton>
+            <ActionButton variant="secondary" icon={AlertTriangle} onClick={() => setRiskOpen(true)}>
+              Coverage risks
+            </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
