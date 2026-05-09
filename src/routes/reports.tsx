@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, FilterButton } from "@/components/dl";
 import { Calendar, ChevronDown, Filter, Download, PoundSterling, Percent, Users, Clock, Shield, Lightbulb, TrendingUp, AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/reports")({
@@ -29,9 +29,9 @@ function ReportsPage() {
         subtitle="Understand your labour performance and make better decisions."
         actions={
           <>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2"><Calendar className="h-4 w-4 text-brand" /> 12 – 18 May 2025 <ChevronDown className="h-4 w-4" /></button>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2"><Filter className="h-4 w-4" /> Filters</button>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2"><Download className="h-4 w-4" /> Export</button>
+            <FilterButton icon={Calendar} label="12 – 18 May 2025" />
+            <FilterButton icon={Filter} label="Filters" showCaret={false} />
+            <FilterButton icon={Download} label="Export" showCaret={false} />
           </>
         }
       />

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { Calendar, ChevronDown, Clock, Users, AlertTriangle, FileText, CheckCircle2, ArrowRight, Settings2, Download, MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/time")({
@@ -41,9 +41,11 @@ function TimePage() {
         subtitle="Review, approve and export time data for payroll."
         actions={
           <>
-            <button className="rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold">Approve Selected</button>
-            <button className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium flex items-center gap-2"><Download className="h-4 w-4" /> Export Payroll-Ready CSV</button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <ActionButton>Approve Selected</ActionButton>
+            <ActionButton variant="secondary" icon={Download}>
+              Export Payroll-Ready CSV
+            </ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, PageHeader } from "@/components/layout/AppShell";
+import { AppShell, Card, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { AlertTriangle, Plus, FileText, ChevronDown, ListChecks, AlertCircle, MessageCircle, Phone, Wrench, FileQuestion, MoreHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/ops")({
@@ -38,10 +38,10 @@ function OpsPage() {
         subtitle="Stay on top of today's activity and keep your team aligned."
         actions={
           <>
-            <button className="rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4" /> Log incident</button>
-            <button className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium flex items-center gap-2"><Plus className="h-4 w-4" /> Add task</button>
-            <button className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium flex items-center gap-2"><FileText className="h-4 w-4" /> Add handover note</button>
-            <button className="rounded-xl border border-border bg-card p-2.5"><MoreHorizontal className="h-4 w-4" /></button>
+            <ActionButton icon={AlertTriangle}>Log incident</ActionButton>
+            <ActionButton variant="secondary" icon={Plus}>Add task</ActionButton>
+            <ActionButton variant="secondary" icon={FileText}>Add handover note</ActionButton>
+            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />
