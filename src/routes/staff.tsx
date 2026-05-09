@@ -208,6 +208,9 @@ const rows = [
 ];
 
 function StaffPage() {
+  const [addOpen, setAddOpen] = React.useState(false);
+  const [profile, setProfile] = React.useState<null | { n: string; e: string; role: string }>(null);
+
   return (
     <AppShell searchPlaceholder="Search staff, roles, skills...">
       <PageHeader
@@ -216,7 +219,11 @@ function StaffPage() {
         actions={
           <>
             <FilterButton icon={Filter} label="Filters" showCaret={false} />
-            <ActionButton icon={Plus} iconRight={ChevronDown}>
+            <ActionButton
+              icon={Plus}
+              iconRight={ChevronDown}
+              onClick={() => setAddOpen(true)}
+            >
               Add team member
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
