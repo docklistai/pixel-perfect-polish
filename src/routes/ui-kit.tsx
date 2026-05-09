@@ -197,7 +197,7 @@ function UIKitPage() {
             <ActionButton variant="secondary">Secondary</ActionButton>
             <ActionButton variant="outline">Outline</ActionButton>
             <ActionButton variant="ghost">Ghost</ActionButton>
-            <ActionButton variant="destructive">Destructive</ActionButton>
+            <ActionButton variant="danger">Danger</ActionButton>
             <ActionButton icon={Plus}>With icon</ActionButton>
             <ActionButton size="sm">Small</ActionButton>
             <ActionButton disabled>Disabled</ActionButton>
