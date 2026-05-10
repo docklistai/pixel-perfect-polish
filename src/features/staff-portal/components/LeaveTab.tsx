@@ -229,7 +229,7 @@ export function LeaveTab() {
           <FormRow label="Note">
             <textarea
               rows={3}
-              placeholder="Add a short note for your manager"
+              placeholder="Add a short note about your request"
               className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
             />
           </FormRow>
@@ -256,7 +256,9 @@ export function LeaveTab() {
               }
             />
             <DetailRow label="Detail" value={detail.detail} />
-            {detail.managerNote && <DetailRow label="Manager note" value={detail.managerNote} />}
+            {detail.managerResponse && (
+              <DetailRow label="Manager response" value={detail.managerResponse} />
+            )}
           </FormSection>
         )}
       </DrawerShell>

@@ -91,12 +91,12 @@ export function ShiftDetailDrawer({
           )}
         </FormSection>
 
-        {shift.managerNote && (
+        {shift.shiftNote && (
           <DashboardCard className="p-4">
             <div className="text-[11px] font-semibold tracking-widest text-muted-foreground inline-flex items-center gap-1.5">
-              <MessageSquare className="h-3.5 w-3.5" /> MANAGER NOTE
+              <MessageSquare className="h-3.5 w-3.5" /> SHIFT NOTE
             </div>
-            <p className="mt-2 text-sm">{shift.managerNote}</p>
+            <p className="mt-2 text-sm">{shift.shiftNote}</p>
           </DashboardCard>
         )}
 

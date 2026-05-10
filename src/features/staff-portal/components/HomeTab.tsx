@@ -35,8 +35,8 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             <MapPin className="h-4 w-4 text-muted-foreground" /> {mockNextShift.station}
           </span>
         </div>
-        {mockNextShift.note && (
-          <div className="mt-3 text-xs text-muted-foreground">{mockNextShift.note}</div>
+        {mockNextShift.shiftNote && (
+          <div className="mt-3 text-xs text-muted-foreground">{mockNextShift.shiftNote}</div>
         )}
         <div className="mt-4">
           <ActionButton
@@ -97,7 +97,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
                     {s.role} · {s.station}
                   </div>
                 </div>
-                <StatusBadge tone="success">+£{Math.round(s.hours * 18)}</StatusBadge>
+                <StatusBadge tone="info">Open shift</StatusBadge>
               </div>
             ))}
           </div>

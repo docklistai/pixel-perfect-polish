@@ -85,8 +85,8 @@ function ShiftList({
       <DashboardCard className="p-6">
         <EmptyState
           icon={CalendarOff}
-          title="No shifts to show"
-          description="When new shifts are published they will appear here."
+          title="No shifts published yet"
+          description="Once your manager publishes shifts, they'll appear here."
         />
       </DashboardCard>
     );
@@ -154,8 +154,10 @@ function RequestsList() {
               <div className="min-w-0">
                 <div className="text-sm font-semibold truncate">{r.title}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{r.submitted}</div>
-                {r.managerNote && (
-                  <div className="text-xs text-foreground mt-1.5">{r.managerNote}</div>
+                {r.managerResponse && (
+                  <div className="text-xs text-foreground mt-1.5">
+                    <span className="font-medium">Manager response:</span> {r.managerResponse}
+                  </div>
                 )}
               </div>
               <StatusBadge

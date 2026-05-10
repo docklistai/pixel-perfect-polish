@@ -15,9 +15,8 @@ export interface PortalShift {
   station: string;
   breakMinutes: number;
   status: ShiftStatus;
-  note?: string;
+  shiftNote?: string;
   managerName?: string;
-  managerNote?: string;
   tasks?: { id: string; label: string; done?: boolean }[];
   teammates?: { id: string; name: string; initials: string; role: string }[];
   changeAcknowledged?: boolean;
@@ -43,7 +42,7 @@ export interface PortalRequest {
   detail: string;
   submitted: string;
   status: RequestStatus;
-  managerNote?: string;
+  managerResponse?: string;
 }
 
 export interface PortalNotice {

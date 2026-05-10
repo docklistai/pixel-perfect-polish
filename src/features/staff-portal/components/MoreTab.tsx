@@ -282,7 +282,7 @@ function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void
       open={open}
       onOpenChange={(o) => !o && onClose()}
       title="Documents"
-      description="Read-only mock — your documents are private to you and managers."
+      description="Read-only mock — documents shared with you."
     >
       <div className="space-y-4">
         <div className="rounded-xl bg-muted p-1 grid grid-cols-4 text-[11px] font-medium">

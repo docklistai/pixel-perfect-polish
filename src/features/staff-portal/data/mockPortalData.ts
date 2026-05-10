@@ -39,9 +39,8 @@ export const mockNextShift: PortalShift = {
   station: "The Harbor View",
   breakMinutes: 30,
   status: "confirmed",
-  note: "Pre-service brief at 08:15.",
+  shiftNote: "Please arrive 10 minutes early and check in with the duty manager.",
   managerName: "Sophie Martin",
-  managerNote: "Busy lunch service. Please help train new server at patio station.",
   tasks: [
     { id: "t1", label: "Review specials & menu updates", done: true },
     { id: "t2", label: "Check opening sidework list", done: true },
@@ -71,7 +70,7 @@ export const mockWeekShifts: PortalShift[] = [
     station: "The Harbor View",
     breakMinutes: 30,
     status: "changed",
-    note: "Start moved 30 min later.",
+    shiftNote: "Start moved 30 minutes later.",
   },
   {
     id: "sh-003",
@@ -215,7 +214,7 @@ export const mockRequests: PortalRequest[] = [
     detail: "Cannot work Monday evenings from June.",
     submitted: "Submitted 28 Apr",
     status: "approved",
-    managerNote: "Approved from 1 June.",
+    managerResponse: "Approved. Please check the rota when it is republished.",
   },
   {
     id: "rq-003",
@@ -224,7 +223,7 @@ export const mockRequests: PortalRequest[] = [
     detail: "Asked to confirm garden bar cover.",
     submitted: "Submitted 1 May",
     status: "declined",
-    managerNote: "Already covered, thanks for asking.",
+    managerResponse: "Thanks. Please check the published rota and follow up if needed.",
   },
 ];
 
@@ -317,7 +316,7 @@ export const mockNotifications: PortalNotification[] = [
     id: "nt-4",
     kind: "timesheet-reminder",
     title: "Timesheet reminder",
-    body: "You have 2 unpublished timesheets. Please submit by Sunday.",
+    body: "You have 2 unsubmitted timesheets. Please submit by Sunday.",
     postedAt: "Yesterday, 09:00",
     badge: { tone: "warning", label: "Reminder" },
   },
@@ -326,9 +325,9 @@ export const mockNotifications: PortalNotification[] = [
 export const mockDocuments: PortalDocument[] = [
   {
     id: "doc-1",
-    title: "Employment Contract",
+    title: "Staff Handbook",
     category: "Required",
-    meta: "PDF · 256 KB · Signed 2 Jan 2024",
+    meta: "PDF · 256 KB · Shared 2 Jan 2024",
     status: "Up to date",
   },
   {
