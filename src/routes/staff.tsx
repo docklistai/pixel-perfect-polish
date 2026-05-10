@@ -406,26 +406,29 @@ function StaffPage() {
         {/* Profile drawer */}
         <Card className="col-span-12 lg:col-span-3 p-5 self-start">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold">Sophie Carter</div>
+            <div className="text-sm font-semibold">{selected.n}</div>
             <X className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <img
-              src="https://i.pravatar.cc/96?img=5"
+              src={`https://i.pravatar.cc/96?img=${selected.img}`}
               className="h-16 w-16 rounded-full object-cover"
               alt=""
             />
             <div>
-              <div className="font-semibold">Sophie Carter</div>
-              <div className="text-xs text-muted-foreground">Front of House Supervisor</div>
+              <div className="font-semibold">{selected.n}</div>
+              <div className="text-xs text-muted-foreground">
+                {selected.role}
+                {selected.sub ? ` · ${selected.sub}` : ""}
+              </div>
               <span className="mt-1 inline-block rounded-md bg-success-soft text-success px-2 py-0.5 text-[11px] font-medium">
-                Active
+                {selected.status}
               </span>
             </div>
           </div>
           <div className="mt-3 text-xs space-y-1">
-            <div className="text-foreground">sophie.carter@docklist.co.uk</div>
-            <div className="text-muted-foreground">+44 7700 900123</div>
+            <div className="text-foreground">{selected.e}</div>
+            <div className="text-muted-foreground">Department: {selected.dept}</div>
           </div>
           <div className="mt-4 flex items-center gap-2">
             {[MessageCircle, Phone, Mail, Calendar, MoreHorizontal].map((I, i) => (
