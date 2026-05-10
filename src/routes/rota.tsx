@@ -236,6 +236,8 @@ function RotaPage() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [publishOpen, setPublishOpen] = React.useState(false);
   const [conflictOpen, setConflictOpen] = React.useState(false);
+  const [published, setPublished] = React.useState(false);
+  const [shiftDetail, setShiftDetail] = React.useState<ShiftDetail | null>(null);
 
   return (
     <AppShell>
