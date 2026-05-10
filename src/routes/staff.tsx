@@ -208,9 +208,23 @@ const rows = [
   },
 ];
 
+type Row = (typeof rows)[number];
+
 function StaffPage() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [profile, setProfile] = React.useState<null | { n: string; e: string; role: string }>(null);
+  const [query, setQuery] = React.useState("");
+  const [selected, setSelected] = React.useState<Row>(rows[0]);
+  const filteredRows = rows.filter((r) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      r.n.toLowerCase().includes(q) ||
+      r.e.toLowerCase().includes(q) ||
+      r.role.toLowerCase().includes(q) ||
+      r.dept.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <AppShell searchPlaceholder="Search staff, roles, skills...">
