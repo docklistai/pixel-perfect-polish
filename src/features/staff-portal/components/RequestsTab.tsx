@@ -91,11 +91,7 @@ export function RequestsTab() {
           <ul className="space-y-2">
             {mockRequests.map((r) => (
               <li key={r.id}>
-                <button
-                  type="button"
-                  onClick={() => setDetail(r)}
-                  className="w-full text-left"
-                >
+                <button type="button" onClick={() => setDetail(r)} className="w-full text-left">
                   <DashboardCard className="p-4 hover:bg-muted/40 transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -174,12 +170,14 @@ export function RequestsTab() {
             <DetailRow label="Type" value={kindLabel[detail.kind]} />
             <DetailRow
               label="Status"
-              value={<StatusBadge tone={statusTone[detail.status]}>{statusLabel[detail.status]}</StatusBadge>}
+              value={
+                <StatusBadge tone={statusTone[detail.status]}>
+                  {statusLabel[detail.status]}
+                </StatusBadge>
+              }
             />
             <DetailRow label="Detail" value={detail.detail} />
-            {detail.managerNote && (
-              <DetailRow label="Manager note" value={detail.managerNote} />
-            )}
+            {detail.managerNote && <DetailRow label="Manager note" value={detail.managerNote} />}
           </FormSection>
         )}
       </DrawerShell>

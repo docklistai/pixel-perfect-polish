@@ -1,12 +1,6 @@
 import { LogOut, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
-import {
-  ActionButton,
-  DashboardCard,
-  DetailRow,
-  FormSection,
-  StatusBadge,
-} from "@/components/dl";
+import { ActionButton, DashboardCard, DetailRow, FormSection, StatusBadge } from "@/components/dl";
 import { mockProfile } from "../data/mockPortalData";
 
 export function ProfileTab() {

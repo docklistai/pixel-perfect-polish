@@ -5,7 +5,11 @@ import { cn } from "@/lib/utils";
 import type { PortalTab } from "../types";
 import { mockProfile } from "../data/mockPortalData";
 
-const TABS: Array<{ id: PortalTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const TABS: Array<{
+  id: PortalTab;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
   { id: "home", label: "Home", icon: Home },
   { id: "schedule", label: "Schedule", icon: Calendar },
   { id: "clock", label: "Clock", icon: Clock },

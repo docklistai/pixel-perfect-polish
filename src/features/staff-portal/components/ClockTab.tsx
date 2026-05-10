@@ -40,7 +40,9 @@ export function ClockTab() {
               {clockedIn ? `Clocked in at ${since}` : "Not clocked in"}
             </div>
             <div className="text-xs text-muted-foreground">
-              {clockedIn ? "Tap to clock out at the end of your shift." : "Tap to start your shift."}
+              {clockedIn
+                ? "Tap to clock out at the end of your shift."
+                : "Tap to start your shift."}
             </div>
           </div>
           <StatusBadge tone={clockedIn ? "success" : "muted"} dot>

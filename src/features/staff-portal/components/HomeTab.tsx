@@ -1,16 +1,6 @@
 import { Calendar, Clock, MapPin, Phone, Mail, MessageSquare, ArrowRight } from "lucide-react";
-import {
-  ActionButton,
-  DashboardCard,
-  QuickActionCard,
-  StatusBadge,
-} from "@/components/dl";
-import {
-  mockNextShift,
-  mockNotices,
-  mockProfile,
-  mockWeeklySummary,
-} from "../data/mockPortalData";
+import { ActionButton, DashboardCard, QuickActionCard, StatusBadge } from "@/components/dl";
+import { mockNextShift, mockNotices, mockProfile, mockWeeklySummary } from "../data/mockPortalData";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
@@ -57,9 +47,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
               TIME CLOCK
             </div>
             <div className="mt-1 text-base font-semibold">Not clocked in</div>
-            <div className="text-xs text-muted-foreground">
-              Clock in when you arrive on shift.
-            </div>
+            <div className="text-xs text-muted-foreground">Clock in when you arrive on shift.</div>
           </div>
           <StatusBadge tone="muted" dot>
             Off shift

@@ -16,8 +16,7 @@ export const Route = createFileRoute("/portal")({
       { title: "Staff portal — Docklist" },
       {
         name: "description",
-        content:
-          "Your shifts, time clock, requests and notices in one mobile-first staff portal.",
+        content: "Your shifts, time clock, requests and notices in one mobile-first staff portal.",
       },
     ],
   }),
