@@ -144,10 +144,8 @@ function SettingsPage() {
             />
           </Card>
         ) : (
-        <Card
-          className="col-span-12 lg:col-span-6 p-6"
-          onChange={markDirty}
-        >
+        <Card className="col-span-12 lg:col-span-6 p-6">
+        <div onChange={markDirty}>
           <div className="text-lg font-semibold">Workspace</div>
           <p className="text-xs text-muted-foreground">
             Update your workspace details and default settings.
