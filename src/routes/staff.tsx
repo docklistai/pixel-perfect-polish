@@ -280,6 +280,8 @@ function StaffPage() {
               <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 flex-1 max-w-xs">
                 <Search className="h-3.5 w-3.5 text-muted-foreground" />
                 <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
                   className="bg-transparent text-xs outline-none w-full"
                   placeholder="Search by name, email or role..."
                 />
