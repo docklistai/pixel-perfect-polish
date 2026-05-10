@@ -20,7 +20,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 const tabs = [
-  { t: "Workspace", s: "General workspace settings", icon: LayoutGrid, active: true },
+  { t: "Workspace", s: "General workspace settings", icon: LayoutGrid },
   { t: "Teams", s: "Manage teams and departments", icon: Users },
   { t: "Roles & Permissions", s: "Set roles and access levels", icon: Shield },
   { t: "Time Rules", s: "Rules for time tracking", icon: Clock },
