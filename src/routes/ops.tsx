@@ -363,7 +363,8 @@ function OpsPage() {
                 { t: "Property information", icon: FileText, tone: "info" },
                 { t: "Lost & found", icon: FileQuestion, tone: "info" },
               ].map((q) => (
-                <a
+                <button
+                  type="button"
                   key={q.t}
                   className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 text-xs"
                 >
