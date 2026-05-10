@@ -347,7 +347,12 @@ function RotaPage() {
                     </td>
                     {s.shifts.map((sh, i) => (
                       <td key={i} className="px-1">
-                        <ShiftCell s={sh} />
+                        <ShiftCell
+                          s={sh}
+                          onOpen={() =>
+                            setShiftDetail({ ...sh, staff: s.name, day: days[i].d })
+                          }
+                        />
                       </td>
                     ))}
                   </tr>
