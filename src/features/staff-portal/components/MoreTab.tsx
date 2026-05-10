@@ -55,7 +55,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       </DashboardCard>
 
       {/* Quick links to main tabs */}
-      <DashboardCard className="p-2">
+      <DashboardCard className="p-2.5">
         <ul className="divide-y divide-border">
           <Row icon={Home} label="Home" onClick={() => onNavigate("home")} />
           <Row icon={CalendarDays} label="Shifts" onClick={() => onNavigate("shifts")} />
@@ -65,7 +65,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       </DashboardCard>
 
       {/* Secondary menu */}
-      <DashboardCard className="p-2">
+      <DashboardCard className="p-2.5">
         <ul className="divide-y divide-border">
           <Row icon={User} label="Profile" onClick={() => setSection("profile")} />
           <Row icon={Users} label="Team" onClick={() => setSection("team")} />
@@ -75,7 +75,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </ul>
       </DashboardCard>
 
-      <DashboardCard className="p-2">
+      <DashboardCard className="p-2.5">
         <ul className="divide-y divide-border">
           <Row
             icon={LogOut}
@@ -115,7 +115,7 @@ function Row({
         type="button"
         onClick={onClick}
         className={
-          "w-full flex items-center gap-3 px-3 py-3 text-sm font-medium text-left hover:bg-muted/40 rounded-lg transition-colors " +
+          "flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-sm font-medium transition-colors hover:bg-muted/40 " +
           (tone === "danger" ? "text-danger" : "text-foreground")
         }
       >

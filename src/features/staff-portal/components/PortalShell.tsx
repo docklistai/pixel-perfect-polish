@@ -102,8 +102,8 @@ export function PortalShell({
       {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Mobile + tablet header — dark navy */}
-        <header className="md:hidden sticky top-0 z-20 bg-[var(--sidebar)] text-white">
-          <div className="px-4 pt-3 pb-3 flex items-center justify-between gap-3">
+        <header className="md:hidden sticky top-0 z-20 bg-[var(--sidebar)] text-white shadow-[var(--shadow-elevated)]">
+          <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-3.5">
             <button
               type="button"
               onClick={() => onTabChange("more")}
@@ -112,15 +112,15 @@ export function PortalShell({
             >
               <MoreHorizontal className="h-5 w-5" />
             </button>
-            <div className="text-sm font-semibold tracking-tight">{TITLES[activeTab]}</div>
+            <div className="text-base font-semibold tracking-tight">{TITLES[activeTab]}</div>
             <NotificationBell count={unreadNotifications} onClick={onOpenNotifications} dark />
           </div>
           {isHome && (
             <div className="px-4 pb-4">
-              <div className="text-xl font-bold leading-tight">
+              <div className="text-[1.15rem] font-bold leading-tight text-balance">
                 {greeting}, {mockProfile.name.split(" ")[0]}
               </div>
-              <div className="mt-0.5 text-[12px] text-white/70">
+              <div className="mt-0.5 text-[11px] leading-5 text-white/70">
                 {mockProfile.role} · {mockProfile.department.split(" · ")[0]}
               </div>
             </div>
@@ -128,10 +128,10 @@ export function PortalShell({
         </header>
 
         {/* Desktop header strip */}
-        <header className="hidden md:flex items-center justify-between px-8 py-5 bg-card border-b border-border">
+        <header className="hidden md:flex items-center justify-between border-b border-border/80 bg-card px-8 py-5">
           <div>
             <div className="text-[11px] text-muted-foreground">{greeting}</div>
-            <h1 className="text-xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-semibold tracking-tight">
               {isHome ? mockProfile.name : TITLES[activeTab]}
             </h1>
           </div>
@@ -159,7 +159,7 @@ export function PortalShell({
         {/* Mobile bottom nav */}
         <nav
           aria-label="Portal sections"
-          className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_-8px_oklch(0.20_0.04_250/0.15)]"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border/80 bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_24px_-18px_oklch(0.20_0.04_250/0.2)]"
         >
           <ul className="grid grid-cols-5">
             {TABS.map((t) => {
@@ -171,7 +171,7 @@ export function PortalShell({
                     type="button"
                     onClick={() => onTabChange(t.id)}
                     className={cn(
-                      "w-full flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
+                      "w-full flex flex-col items-center justify-center gap-1.5 py-2.5 text-[11px] font-medium transition-colors",
                       active ? "text-brand" : "text-muted-foreground",
                     )}
                     aria-current={active ? "page" : undefined}
