@@ -371,6 +371,12 @@ function StaffPage() {
                 ))}
               </tbody>
             </table>
+            {filteredRows.length === 0 && (
+              <EmptyState
+                title="No staff found"
+                description="Try adjusting your search or filters."
+              />
+            )}
 
             <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
               <span>Showing 1 to 10 of 48 results</span>
