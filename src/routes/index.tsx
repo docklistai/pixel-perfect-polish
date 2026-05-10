@@ -160,7 +160,10 @@ function Home() {
               </button>
             ))}
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             View all alerts (5) <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
@@ -209,7 +212,10 @@ function Home() {
               </div>
             </div>
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             Go to Labour Watch <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
@@ -233,7 +239,10 @@ function Home() {
             <div className="h-full w-2/3 bg-brand" />
           </div>
           <div className="mt-2 text-xs text-muted-foreground">2 days remaining</div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             Go to Rota <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
@@ -268,7 +277,10 @@ function Home() {
               </div>
             ))}
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             Review leave requests <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
@@ -303,7 +315,10 @@ function Home() {
               </div>
             ))}
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             Review timesheets <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
@@ -333,7 +348,10 @@ function Home() {
               </div>
             ))}
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             View live board <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
@@ -377,7 +395,10 @@ function Home() {
               </div>
             ))}
           </div>
-          <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
             View all announcements <ArrowRight className="h-3 w-3" />
           </button>
         </Card>

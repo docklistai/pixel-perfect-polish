@@ -264,7 +264,9 @@ function TeamPage() {
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Upcoming training</div>
-              <button type="button" className="text-xs text-brand">View all</button>
+              <button type="button" className="text-xs text-brand">
+                View all
+              </button>
             </div>
             {[
               {
@@ -310,7 +312,9 @@ function TeamPage() {
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Birthdays this week</div>
-              <button type="button" className="text-xs text-brand">View all</button>
+              <button type="button" className="text-xs text-brand">
+                View all
+              </button>
             </div>
             {[
               { n: "Liam O'Connor", d: "11 May", img: 13 },
@@ -332,13 +336,17 @@ function TeamPage() {
                 <div className="text-[11px] text-muted-foreground">{p.d}</div>
               </div>
             ))}
-            <button type="button" className="mt-2 block text-xs font-semibold text-brand">Send a birthday wish →</button>
+            <button type="button" className="mt-2 block text-xs font-semibold text-brand">
+              Send a birthday wish →
+            </button>
           </Card>
 
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Staff events</div>
-              <button type="button" className="text-xs text-brand">View all</button>
+              <button type="button" className="text-xs text-brand">
+                View all
+              </button>
             </div>
             {[
               { t: "Team Social", d: "Fri, 23 May · 18:30", w: "5 days", icon: Cake, tone: "info" },
@@ -378,7 +386,9 @@ function TeamPage() {
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Quick groups</div>
-              <button type="button" className="text-xs text-brand">Manage</button>
+              <button type="button" className="text-xs text-brand">
+                Manage
+              </button>
             </div>
             {[
               ["All Staff", "24 members"],

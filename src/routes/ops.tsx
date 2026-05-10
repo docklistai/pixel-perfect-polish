@@ -271,10 +271,7 @@ function OpsPage() {
             </div>
           )}
           {timeline.length > 0 && (
-            <button
-              type="button"
-              className="block mx-auto mt-4 text-xs text-brand font-semibold"
-            >
+            <button type="button" className="block mx-auto mt-4 text-xs text-brand font-semibold">
               Load more activity →
             </button>
           )}
@@ -284,7 +281,9 @@ function OpsPage() {
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Shift handover</div>
-              <button type="button" className="text-xs text-brand">View all notes</button>
+              <button type="button" className="text-xs text-brand">
+                View all notes
+              </button>
             </div>
             {[
               {
@@ -327,7 +326,9 @@ function OpsPage() {
                   3
                 </span>
               </div>
-              <button type="button" className="text-xs text-brand">View all</button>
+              <button type="button" className="text-xs text-brand">
+                View all
+              </button>
             </div>
             {[
               {

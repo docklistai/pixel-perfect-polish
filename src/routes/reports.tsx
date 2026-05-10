@@ -255,7 +255,9 @@ function ReportsPage() {
             <span>
               Labour % averaged 28.6% this week, 1.8pp above target. Weekends were the main driver.
             </span>
-            <button type="button" className="ml-auto text-brand font-semibold">View full trend →</button>
+            <button type="button" className="ml-auto text-brand font-semibold">
+              View full trend →
+            </button>
           </div>
         </Card>
 
@@ -306,12 +308,16 @@ function ReportsPage() {
                 <div className="flex-1">
                   <div className="text-sm font-medium">{ins.t}</div>
                   <div className="text-xs text-muted-foreground">{ins.s}</div>
-                  <button type="button" className="text-xs font-semibold text-brand">{ins.a} →</button>
+                  <button type="button" className="text-xs font-semibold text-brand">
+                    {ins.a} →
+                  </button>
                 </div>
               </div>
             ))}
           </div>
-          <button type="button" className="mt-3 block text-xs font-semibold text-brand">View all insights →</button>
+          <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+            View all insights →
+          </button>
         </Card>
 
         {/* Bottom row */}
@@ -366,7 +372,9 @@ function ReportsPage() {
           <div className="text-xs text-muted-foreground mt-2">
             78% of timesheets were approved on time this week.
           </div>
-          <button type="button" className="mt-2 block text-xs font-semibold text-brand">View time approval report →</button>
+          <button type="button" className="mt-2 block text-xs font-semibold text-brand">
+            View time approval report →
+          </button>
         </Card>
 
         <Card className="col-span-12 lg:col-span-4 p-5">
@@ -442,7 +450,9 @@ function ReportsPage() {
           <div className="text-xs text-muted-foreground mt-3">
             Absence rate was 4.2%, down 0.6pp vs last week.
           </div>
-          <button type="button" className="mt-2 block text-xs font-semibold text-brand">View absence report →</button>
+          <button type="button" className="mt-2 block text-xs font-semibold text-brand">
+            View absence report →
+          </button>
         </Card>
 
         <Card className="col-span-12 lg:col-span-4 p-5">
@@ -479,7 +489,9 @@ function ReportsPage() {
           <div className="text-xs text-muted-foreground mt-2">
             Kitchen and Bar are driving labour % over target.
           </div>
-          <button type="button" className="mt-2 block text-xs font-semibold text-brand">View department report →</button>
+          <button type="button" className="mt-2 block text-xs font-semibold text-brand">
+            View department report →
+          </button>
         </Card>
       </div>
 

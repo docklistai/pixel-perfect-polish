@@ -349,9 +349,7 @@ function RotaPage() {
                       <td key={i} className="px-1">
                         <ShiftCell
                           s={sh}
-                          onOpen={() =>
-                            setShiftDetail({ ...sh, staff: s.name, day: days[i].d })
-                          }
+                          onOpen={() => setShiftDetail({ ...sh, staff: s.name, day: days[i].d })}
                         />
                       </td>
                     ))}
@@ -401,7 +399,9 @@ function RotaPage() {
               <div className="h-full w-[98%] bg-brand" />
             </div>
             <div className="mt-2 text-xs text-muted-foreground">Budget: 820h</div>
-            <button type="button" className="mt-4 block text-xs font-semibold text-brand">View full analysis →</button>
+            <button type="button" className="mt-4 block text-xs font-semibold text-brand">
+              View full analysis →
+            </button>
           </Card>
 
           <Card className="p-5">
@@ -430,7 +430,9 @@ function RotaPage() {
                 <span className="text-muted-foreground">›</span>
               </div>
             ))}
-            <button type="button" className="mt-3 block text-xs font-semibold text-brand">View all alerts →</button>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+              View all alerts →
+            </button>
           </Card>
 
           <Card className="p-5">

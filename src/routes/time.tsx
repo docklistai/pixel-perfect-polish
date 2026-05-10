@@ -523,7 +523,9 @@ function TimePage() {
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
             ))}
-            <button type="button" className="mt-3 block text-xs font-semibold text-brand">View all (3) →</button>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+              View all (3) →
+            </button>
           </Card>
 
           <Card className="p-5">
@@ -569,7 +571,9 @@ function TimePage() {
                 </span>
               </div>
             ))}
-            <button type="button" className="mt-3 block text-xs font-semibold text-brand">View all disputes →</button>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+              View all disputes →
+            </button>
           </Card>
         </div>
       </div>

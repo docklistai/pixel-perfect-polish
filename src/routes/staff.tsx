@@ -494,7 +494,9 @@ function StaffPage() {
               <span>Front of House</span>
               <span>Evening Shift</span>
             </div>
-            <button type="button" className="mt-2 block text-xs font-semibold text-brand">View full rota</button>
+            <button type="button" className="mt-2 block text-xs font-semibold text-brand">
+              View full rota
+            </button>
           </div>
         </Card>
       </div>
