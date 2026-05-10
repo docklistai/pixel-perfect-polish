@@ -434,7 +434,10 @@ function RotaPage() {
           </Card>
 
           <Card className="p-5">
-            <div className="text-sm font-semibold mb-3">Publish readiness</div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-semibold">Publish readiness</div>
+              {published && <StatusBadge tone="success">Published</StatusBadge>}
+            </div>
             {[
               ["Shifts assigned", "24 / 27"],
               ["Coverage target", "98%"],
@@ -449,10 +452,18 @@ function RotaPage() {
                 <span className="text-muted-foreground">{v}</span>
               </div>
             ))}
-            <button className="mt-4 w-full rounded-xl bg-brand text-brand-foreground py-2.5 text-sm font-semibold flex items-center justify-center gap-2">
-              <Plane className="h-4 w-4" /> Ready to publish
+            <button
+              type="button"
+              onClick={() => !published && setPublishOpen(true)}
+              disabled={published}
+              className="mt-4 w-full rounded-xl bg-brand text-brand-foreground py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Plane className="h-4 w-4" /> {published ? "Published" : "Ready to publish"}
             </button>
-            <button className="mt-2 w-full rounded-xl border border-border py-2.5 text-sm font-medium flex items-center justify-center gap-2">
+            <button
+              type="button"
+              className="mt-2 w-full rounded-xl border border-border py-2.5 text-sm font-medium flex items-center justify-center gap-2"
+            >
               <Share2 className="h-4 w-4" /> Share draft
             </button>
           </Card>
