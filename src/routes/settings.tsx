@@ -136,7 +136,18 @@ function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-6 p-6">
+        {activeTab !== "Workspace" ? (
+          <Card className="col-span-12 lg:col-span-6 p-6">
+            <EmptyState
+              title={`${activeTab} settings`}
+              description="This section is a placeholder in the desktop prototype. Workspace tab is fully wired."
+            />
+          </Card>
+        ) : (
+        <Card
+          className="col-span-12 lg:col-span-6 p-6"
+          onChange={markDirty}
+        >
           <div className="text-lg font-semibold">Workspace</div>
           <p className="text-xs text-muted-foreground">
             Update your workspace details and default settings.
