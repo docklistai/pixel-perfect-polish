@@ -16,6 +16,7 @@ import { Route as StaffRouteImport } from './routes/staff'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RotaRouteImport } from './routes/rota'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as LeaveRouteImport } from './routes/leave'
 import { Route as IndexRouteImport } from './routes/index'
@@ -55,6 +56,11 @@ const ReportsRoute = ReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortalRoute = PortalRouteImport.update({
+  id: '/portal',
+  path: '/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpsRoute = OpsRouteImport.update({
   id: '/ops',
   path: '/ops',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/leave': typeof LeaveRoute
   '/ops': typeof OpsRoute
+  '/portal': typeof PortalRoute
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/leave': typeof LeaveRoute
   '/ops': typeof OpsRoute
+  '/portal': typeof PortalRoute
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/leave': typeof LeaveRoute
   '/ops': typeof OpsRoute
+  '/portal': typeof PortalRoute
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/leave'
     | '/ops'
+    | '/portal'
     | '/reports'
     | '/rota'
     | '/settings'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/leave'
     | '/ops'
+    | '/portal'
     | '/reports'
     | '/rota'
     | '/settings'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/leave'
     | '/ops'
+    | '/portal'
     | '/reports'
     | '/rota'
     | '/settings'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LeaveRoute: typeof LeaveRoute
   OpsRoute: typeof OpsRoute
+  PortalRoute: typeof PortalRoute
   ReportsRoute: typeof ReportsRoute
   RotaRoute: typeof RotaRoute
   SettingsRoute: typeof SettingsRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal': {
+      id: '/portal'
+      path: '/portal'
+      fullPath: '/portal'
+      preLoaderRoute: typeof PortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ops': {
       id: '/ops'
       path: '/ops'
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LeaveRoute: LeaveRoute,
   OpsRoute: OpsRoute,
+  PortalRoute: PortalRoute,
   ReportsRoute: ReportsRoute,
   RotaRoute: RotaRoute,
   SettingsRoute: SettingsRoute,
