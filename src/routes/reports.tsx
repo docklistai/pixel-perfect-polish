@@ -328,35 +328,35 @@ function ReportsPage() {
             </span>
           </div>
           <svg viewBox="0 0 280 140" className="w-full h-40">
-            {["Mon 12", "Tue 13", "Wed 14", "Thu 15", "Fri 16", "Sat 17", "Sun 18"].map((d, i) => (
-              <g key={d} transform={`translate(${20 + i * 36}, 0)`}>
-                <rect
-                  x="0"
-                  y={30 + Math.random() * 10}
-                  width="20"
-                  height={70 - Math.random() * 10}
-                  fill="var(--brand)"
-                  rx="2"
-                />
-                <rect
-                  x="0"
-                  y={20 + Math.random() * 8}
-                  width="20"
-                  height="10"
-                  fill="var(--danger)"
-                  rx="2"
-                />
-                <text
-                  x="10"
-                  y="125"
-                  fontSize="8"
-                  textAnchor="middle"
-                  fill="var(--muted-foreground)"
-                >
-                  {d}
-                </text>
-              </g>
-            ))}
+            {[
+              { d: "Mon 12", on: 82 },
+              { d: "Tue 13", on: 78 },
+              { d: "Wed 14", on: 85 },
+              { d: "Thu 15", on: 71 },
+              { d: "Fri 16", on: 80 },
+              { d: "Sat 17", on: 68 },
+              { d: "Sun 18", on: 74 },
+            ].map(({ d, on }, i) => {
+              const onTimeH = (on / 100) * 70;
+              const lateH = 10;
+              const onTimeY = 100 - onTimeH;
+              const lateY = onTimeY - lateH;
+              return (
+                <g key={d} transform={`translate(${20 + i * 36}, 0)`}>
+                  <rect x="0" y={onTimeY} width="20" height={onTimeH} fill="var(--brand)" rx="2" />
+                  <rect x="0" y={lateY} width="20" height={lateH} fill="var(--danger)" rx="2" />
+                  <text
+                    x="10"
+                    y="125"
+                    fontSize="8"
+                    textAnchor="middle"
+                    fill="var(--muted-foreground)"
+                  >
+                    {d}
+                  </text>
+                </g>
+              );
+            })}
             {["100%", "75%", "50%", "25%", "0%"].map((t, i) => (
               <text key={t} x="0" y={20 + i * 25} fontSize="8" fill="var(--muted-foreground)">
                 {t}
