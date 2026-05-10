@@ -389,7 +389,7 @@ function RotaPage() {
               <div className="h-full w-[98%] bg-brand" />
             </div>
             <div className="mt-2 text-xs text-muted-foreground">Budget: 820h</div>
-            <a className="mt-4 block text-xs font-semibold text-brand">View full analysis →</a>
+            <button type="button" className="mt-4 block text-xs font-semibold text-brand">View full analysis →</button>
           </Card>
 
           <Card className="p-5">
@@ -418,7 +418,7 @@ function RotaPage() {
                 <span className="text-muted-foreground">›</span>
               </div>
             ))}
-            <a className="mt-3 block text-xs font-semibold text-brand">View all alerts →</a>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">View all alerts →</button>
           </Card>
 
           <Card className="p-5">

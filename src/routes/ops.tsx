@@ -271,7 +271,7 @@ function OpsPage() {
           <Card className="p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Shift handover</div>
-              <a className="text-xs text-brand">View all notes</a>
+              <button type="button" className="text-xs text-brand">View all notes</button>
             </div>
             {[
               {
@@ -314,7 +314,7 @@ function OpsPage() {
                   3
                 </span>
               </div>
-              <a className="text-xs text-brand">View all</a>
+              <button type="button" className="text-xs text-brand">View all</button>
             </div>
             {[
               {
@@ -370,7 +370,7 @@ function OpsPage() {
                     className={`h-3.5 w-3.5 ${q.tone === "danger" ? "text-danger" : "text-brand"}`}
                   />{" "}
                   {q.t}
-                </a>
+                </button>
               ))}
             </div>
           </Card>

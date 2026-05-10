@@ -163,9 +163,9 @@ function LeavePage() {
                 <div className="text-xs text-muted-foreground">{t.s}</div>
               </div>
             </div>
-            <a className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
+            <button type="button" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand">
               {t.a} <ArrowRight className="h-3 w-3" />
-            </a>
+            </button>
           </Card>
         ))}
       </div>
@@ -224,7 +224,7 @@ function LeavePage() {
               </div>
             ))}
           </div>
-          <a className="mt-3 block text-xs font-semibold text-brand">View all requests →</a>
+          <button type="button" className="mt-3 block text-xs font-semibold text-brand">View all requests →</button>
         </Card>
 
         <Card className="col-span-12 lg:col-span-6 p-5">
@@ -312,7 +312,7 @@ function LeavePage() {
             <div className="text-sm font-semibold mb-3">MY AVAILABILITY</div>
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold">Recurring availability</div>
-              <a className="text-xs text-brand">Edit</a>
+              <button type="button" className="text-xs text-brand">Edit</button>
             </div>
             {[
               ["Mon", "Unavailable"],
@@ -330,9 +330,9 @@ function LeavePage() {
             ))}
             <div className="mt-3 flex items-center justify-between">
               <div className="text-xs font-semibold">Unavailable dates</div>
-              <a className="text-xs text-brand flex items-center gap-1">
+              <button type="button" className="text-xs text-brand flex items-center gap-1">
                 <Plus className="h-3 w-3" /> Add
-              </a>
+              </button>
             </div>
             <div className="mt-1 text-xs">
               <div className="flex justify-between">
@@ -378,7 +378,7 @@ function LeavePage() {
                 <div className="flex-1">
                   <div className="text-sm font-medium">{a.t}</div>
                   <div className="text-[11px] text-muted-foreground">{a.s}</div>
-                  <a className="text-[11px] text-brand font-semibold">{a.link} →</a>
+                  <button type="button" className="text-[11px] text-brand font-semibold">{a.link} →</button>
                 </div>
               </div>
             ))}
@@ -409,7 +409,7 @@ function LeavePage() {
               </div>
             ))}
           </div>
-          <a className="mt-4 block text-xs font-semibold text-brand">View full leave report →</a>
+          <button type="button" className="mt-4 block text-xs font-semibold text-brand">View full leave report →</button>
         </Card>
 
         <Card className="col-span-12 lg:col-span-6 p-5">
@@ -443,7 +443,7 @@ function LeavePage() {
             <div style={{ width: "10%", background: "var(--warning)" }} />
             <div style={{ width: "5%", background: "var(--danger)" }} />
           </div>
-          <a className="mt-4 block text-xs font-semibold text-brand">View coverage report →</a>
+          <button type="button" className="mt-4 block text-xs font-semibold text-brand">View coverage report →</button>
         </Card>
       </div>
 

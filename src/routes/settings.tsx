@@ -347,7 +347,7 @@ function SettingsPage() {
                 <span className="text-muted-foreground">Logo</span>
                 <span className="flex items-center gap-2 text-xs">
                   <ImageIcon className="h-3.5 w-3.5" /> harbour-view-logo.png{" "}
-                  <a className="text-brand">Change</a>
+                  <button type="button" className="text-brand">Change</button>
                 </span>
               </div>
             </div>
