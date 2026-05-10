@@ -50,9 +50,20 @@ Skills skipped: <name — reason, or "none">
 - Lovable owns the new frontend design direction unless told otherwise.
 - Prefer clean V2 rebuilds over copying old bloat.
 
+## Repo-wide architecture limits
+
+Before any implementation, read `docs/ai/repo-architecture-guardrails.md`.
+
+1. Identify all files likely to be touched.
+2. Check current line counts.
+3. If any file is already over the hard max, stop and propose extraction — do not add more logic to it.
+4. Prefer extraction before growth across all file types (routes, components, hooks, services, edge functions).
+
+Before any worktree-sensitive task (branch switch, sync, Lovable merge), report: current branch, whether this is a worktree, `git status --short`, and which files must not be staged.
+
 ## Frontend architecture limits
 
-Before frontend work, apply `docs/ai/frontend-architecture-guardrails.md`.
+Before frontend work, also apply `docs/ai/frontend-architecture-guardrails.md`.
 
 Route/page files have a hard max of 350 lines unless explicitly approved. If a change would exceed the hard max, stop and propose extraction before continuing.
 

@@ -87,3 +87,9 @@ Before merging a PR that touches a route or component file:
 2. If at or above Target, flag for extraction in the PR description
 3. If at or above Hard max, extraction is required — do not merge without it
 4. For Lovable-generated output: apply the Lovable frontend review route in `skill-router.md` before merging
+
+---
+
+## Repo-wide limits
+
+Frontend file-size limits are a subset of the repo-wide guardrails. For all other file types (hooks, services, edge functions, types, utilities, tests, docs), see `docs/ai/repo-architecture-guardrails.md`.

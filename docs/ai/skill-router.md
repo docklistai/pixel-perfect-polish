@@ -51,6 +51,7 @@ Match every task to one or more skill routes before doing any work. Read the lis
 - `.claude/skills/docklist-baseline-ui/SKILL.md`
 - `.claude/skills/docklist-fixing-accessibility/SKILL.md`
 - `.claude/skills/docklist-code-review-checklist/SKILL.md`
+- `.claude/skills/docklist-vibe-code-auditor/SKILL.md`
 **Required output:** violation list with file/line + severity
 **Required checks:** layout anti-patterns; animation durations; typography scale; a11y
 
@@ -138,3 +139,48 @@ Match every task to one or more skill routes before doing any work. Read the lis
 - `.claude/skills/docklist-context-driven-development/SKILL.md`
 **Required output:** doc diff or new file + link audit
 **Required checks:** internal links valid; no procedures duplicated in code files
+
+---
+
+## Worktree / branch / sync work
+
+**When:** creating worktrees, switching branches, syncing with remote, checking repo state, or integrating Lovable/GitHub changes locally
+**Skills:**
+- `.claude/skills/docklist-using-git-worktrees/SKILL.md`
+**Required output:** current branch + worktree status + sync plan
+**Required checks:** confirm branch; confirm expected changes are present; list files that must not be staged
+
+---
+
+## Large implementation / decomposition / batch refactor
+
+**When:** planning or executing a large multi-file refactor, decomposing a complex feature, or coordinating work across many files
+**Skills:**
+- `.claude/skills/docklist-orchestrate-batch-refactor/SKILL.md`
+- `.claude/skills/docklist-architecture-patterns/SKILL.md`
+- `.claude/skills/docklist-clean-code/SKILL.md`
+**Required output:** work packet list + line-count check per target file + extraction plan for any file near or over hard max
+**Required checks:** line counts before and after; no file left over hard max; types still pass
+
+---
+
+## Planning that persists across turns or agents
+
+**When:** implementing multi-step work, handing off to another agent, or planning that must survive context resets
+**Skills:**
+- `.claude/skills/docklist-planning-with-files/SKILL.md`
+- `.claude/skills/docklist-filesystem-context/SKILL.md`
+**Required output:** task plan file written to `.claude/plans/` or `docs/ai/`
+**Required checks:** plan file exists and is readable; progress checkpoints updated
+
+---
+
+## Repo architecture + file-size guardrails
+
+**When:** evaluating whether a file is too large, planning extractions, or auditing repo structure
+**Skills:**
+- `.claude/skills/docklist-architecture-patterns/SKILL.md`
+- `.claude/skills/docklist-filesystem-context/SKILL.md`
+- `.claude/skills/docklist-orchestrate-batch-refactor/SKILL.md`
+**Required output:** line-count table + files over hard max + extraction plan
+**Required checks:** compare against `docs/ai/repo-architecture-guardrails.md`; no logic added to over-limit file without extraction approval
