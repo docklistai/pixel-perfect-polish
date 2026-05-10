@@ -278,6 +278,7 @@ function SettingsPage() {
             </div>
           </div>
         </Card>
+        )}
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
           <Card className="p-5">
