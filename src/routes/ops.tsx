@@ -213,59 +213,71 @@ function OpsPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            {timeline.map((e, i) => (
-              <div key={i} className="grid grid-cols-[60px_1fr] gap-3 items-center">
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 rounded-full`}
-                    style={{ background: `var(--${e.dot})` }}
-                  />
-                  {e.t}
-                </div>
-                <div
-                  className={`flex items-center gap-3 rounded-xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
-                >
-                  <div
-                    className={`h-9 w-9 rounded-lg flex items-center justify-center ${toneBg[e.dot === "danger" ? "warning" : e.dot]}`}
-                  >
-                    <e.icon className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{e.title}</div>
-                    <div className="text-[11px] text-muted-foreground">{e.area}</div>
-                    {e.by && <div className="text-[11px] text-muted-foreground">{e.by}</div>}
-                  </div>
-                  {e.who && (
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={`https://i.pravatar.cc/64?img=${e.who.img}`}
-                        className="h-7 w-7 rounded-full object-cover"
-                        alt=""
-                      />
-                      <span className="text-sm">{e.who.n}</span>
-                    </div>
-                  )}
-                  {e.prio && (
+          {timeline.length === 0 ? (
+            <EmptyState
+              title="No activity yet"
+              description="Today's operations timeline will appear here."
+            />
+          ) : (
+            <div className="space-y-2">
+              {timeline.map((e, i) => (
+                <div key={i} className="grid grid-cols-[60px_1fr] gap-3 items-center">
+                  <div className="text-xs text-muted-foreground flex items-center gap-2">
                     <span
-                      className={`text-xs flex items-center gap-1`}
-                      style={{ color: `var(--${e.prioTone})` }}
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" /> {e.prio}
-                    </span>
-                  )}
-                  <span
-                    className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${e.stTone === "success" ? "bg-success-soft text-success" : e.stTone === "info" ? "bg-info-soft text-info" : "bg-warning-soft text-warning"}`}
+                      className={`h-2 w-2 rounded-full`}
+                      style={{ background: `var(--${e.dot})` }}
+                    />
+                    {e.t}
+                  </div>
+                  <div
+                    className={`flex items-center gap-3 rounded-xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
                   >
-                    {e.st}
-                  </span>
+                    <div
+                      className={`h-9 w-9 rounded-lg flex items-center justify-center ${toneBg[e.dot === "danger" ? "warning" : e.dot]}`}
+                    >
+                      <e.icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium">{e.title}</div>
+                      <div className="text-[11px] text-muted-foreground">{e.area}</div>
+                      {e.by && <div className="text-[11px] text-muted-foreground">{e.by}</div>}
+                    </div>
+                    {e.who && (
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={`https://i.pravatar.cc/64?img=${e.who.img}`}
+                          className="h-7 w-7 rounded-full object-cover"
+                          alt=""
+                        />
+                        <span className="text-sm">{e.who.n}</span>
+                      </div>
+                    )}
+                    {e.prio && (
+                      <span
+                        className={`text-xs flex items-center gap-1`}
+                        style={{ color: `var(--${e.prioTone})` }}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-current" /> {e.prio}
+                      </span>
+                    )}
+                    <span
+                      className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${e.stTone === "success" ? "bg-success-soft text-success" : e.stTone === "info" ? "bg-info-soft text-info" : "bg-warning-soft text-warning"}`}
+                    >
+                      {e.st}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-4 text-xs text-brand font-semibold">
-            Load more activity →
-          </div>
+              ))}
+            </div>
+          )}
+          {timeline.length > 0 && (
+            <button
+              type="button"
+              className="block mx-auto mt-4 text-xs text-brand font-semibold"
+            >
+              Load more activity →
+            </button>
+          )}
         </Card>
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
