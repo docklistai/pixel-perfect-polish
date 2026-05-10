@@ -1,0 +1,190 @@
+import * as React from "react";
+import { CalendarOff, ChevronRight } from "lucide-react";
+import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
+import { mockPastShifts, mockRequests, mockWeekShifts } from "../data/mockPortalData";
+import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
+import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
+
+const statusTone: Record<ShiftStatus, "success" | "warning" | "info"> = {
+  confirmed: "success",
+  open: "info",
+  changed: "warning",
+};
+
+const statusLabel: Record<ShiftStatus, string> = {
+  confirmed: "Scheduled",
+  open: "Open shift",
+  changed: "Changed",
+};
+
+const SUB_TABS: { id: ShiftsSubTab; label: string }[] = [
+  { id: "upcoming", label: "Upcoming" },
+  { id: "requests", label: "My requests" },
+  { id: "history", label: "History" },
+];
+
+export function ShiftsTab() {
+  const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
+  const [selected, setSelected] = React.useState<PortalShift | null>(null);
+
+  return (
+    <div className="space-y-4">
+      <SegmentedTabs value={sub} onChange={setSub} />
+
+      {sub === "upcoming" && <ShiftList shifts={mockWeekShifts} onOpen={setSelected} />}
+      {sub === "requests" && <RequestsList />}
+      {sub === "history" && <ShiftList shifts={mockPastShifts} onOpen={setSelected} />}
+
+      <ShiftDetailDrawer shift={selected} onClose={() => setSelected(null)} />
+    </div>
+  );
+}
+
+function SegmentedTabs({
+  value,
+  onChange,
+}: {
+  value: ShiftsSubTab;
+  onChange: (v: ShiftsSubTab) => void;
+}) {
+  return (
+    <div className="rounded-xl bg-muted p-1 grid grid-cols-3 text-sm font-medium">
+      {SUB_TABS.map((t) => {
+        const active = t.id === value;
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => onChange(t.id)}
+            className={
+              active
+                ? "rounded-lg bg-card text-foreground py-2 shadow-[var(--shadow-card)]"
+                : "rounded-lg text-muted-foreground py-2"
+            }
+            aria-pressed={active}
+          >
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ShiftList({
+  shifts,
+  onOpen,
+}: {
+  shifts: PortalShift[];
+  onOpen: (s: PortalShift) => void;
+}) {
+  // Group by month label for visual section headers.
+  const groups = groupByMonth(shifts);
+  if (shifts.length === 0) {
+    return (
+      <DashboardCard className="p-6">
+        <EmptyState
+          icon={CalendarOff}
+          title="No shifts to show"
+          description="When new shifts are published they will appear here."
+        />
+      </DashboardCard>
+    );
+  }
+  return (
+    <div className="space-y-5">
+      {groups.map((g) => (
+        <div key={g.label}>
+          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+            {g.label}
+          </div>
+          <ul className="space-y-2">
+            {g.shifts.map((s) => (
+              <li key={s.id}>
+                <button type="button" onClick={() => onOpen(s)} className="w-full text-left">
+                  <DashboardCard className="p-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+                          {s.dayLabel.toUpperCase()}
+                        </div>
+                        <div className="mt-1 text-base font-semibold">
+                          {s.start} – {s.end}
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground truncate">
+                          {s.role} · {s.station}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <StatusBadge tone={statusTone[s.status]}>
+                          {statusLabel[s.status]}
+                        </StatusBadge>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </DashboardCard>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RequestsList() {
+  if (mockRequests.length === 0) {
+    return (
+      <DashboardCard className="p-6">
+        <EmptyState
+          icon={CalendarOff}
+          title="No requests yet"
+          description="Submitted requests will appear here."
+        />
+      </DashboardCard>
+    );
+  }
+  return (
+    <ul className="space-y-2">
+      {mockRequests.map((r) => (
+        <li key={r.id}>
+          <DashboardCard className="p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold truncate">{r.title}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{r.submitted}</div>
+                {r.managerNote && (
+                  <div className="text-xs text-foreground mt-1.5">{r.managerNote}</div>
+                )}
+              </div>
+              <StatusBadge
+                tone={
+                  r.status === "approved"
+                    ? "success"
+                    : r.status === "declined"
+                      ? "danger"
+                      : "warning"
+                }
+              >
+                {r.status[0].toUpperCase() + r.status.slice(1)}
+              </StatusBadge>
+            </div>
+          </DashboardCard>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function groupByMonth(shifts: PortalShift[]): { label: string; shifts: PortalShift[] }[] {
+  const map = new Map<string, PortalShift[]>();
+  for (const s of shifts) {
+    const d = new Date(s.date);
+    const label = d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    const existing = map.get(label) ?? [];
+    existing.push(s);
+    map.set(label, existing);
+  }
+  return Array.from(map.entries()).map(([label, shifts]) => ({ label, shifts }));
+}
