@@ -79,6 +79,13 @@ export function AppShell({
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Topbar searchPlaceholder={searchPlaceholder} />
+        <div className="md:hidden px-4 pt-4">
+          <FeedbackBanner
+            tone="warning"
+            title="Optimised for desktop"
+            description="Docklist manager is optimised for desktop. Please use a larger screen."
+          />
+        </div>
         <main id="main-content" tabIndex={-1} className="flex-1 px-8 py-7 focus:outline-none">
           {children}
         </main>
