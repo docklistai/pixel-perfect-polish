@@ -32,21 +32,25 @@ Skills skipped: <name — reason, or "none">
 ## DocklistAI Non-Negotiables
 
 **Access control:**
+
 - Staff must only see published/committed rota data (snapshots). Never live drafts.
 - Managers and owners manage live draft data.
 - Staff must never see: manager notes, payroll settings, internal review notes, performance data, private staff fields.
 
 **Billing / integrations:**
+
 - Billing remains disabled until the product is ready.
 - Payroll integrations remain disabled.
 - Payroll-ready exports are allowed.
 
 **Database:**
+
 - Never use `select('*')`. Always use explicit field selects.
 - Every workspace query must be workspace-scoped.
 - Do not blindly port complexity from the old repo.
 
 **Architecture:**
+
 - Lovable owns the new frontend design direction unless told otherwise.
 - Prefer clean V2 rebuilds over copying old bloat.
 

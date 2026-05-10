@@ -42,11 +42,12 @@ Skills skipped: <name — reason, or "none">
 
 **What:** Make the changes described and approved in Stage 1/2.
 **Rules:**
+
 - Follow all skills identified in the audit.
 - DocklistAI non-negotiables (see `AGENTS.md`) are enforced unconditionally.
 - If scope creep is discovered mid-implementation, stop and report. Do not expand scope silently.
-**Output:** Diff or list of files changed.
-**Gate:** Proceed to Stage 4 immediately after changes are made.
+  **Output:** Diff or list of files changed.
+  **Gate:** Proceed to Stage 4 immediately after changes are made.
 
 ---
 
@@ -54,11 +55,12 @@ Skills skipped: <name — reason, or "none">
 
 **What:** Run targeted checks to confirm the implementation is correct.
 **Rules:**
+
 - Use targeted typecheck and targeted tests. Do not run the full test suite unless necessary.
 - Report the exact commands run and their output.
 - Do not substitute narrative for evidence.
-**Output:** Commands run + output + pass/fail verdict.
-**Gate:** If all checks pass, proceed to Stage 6. If any checks fail, proceed to Stage 5.
+  **Output:** Commands run + output + pass/fail verdict.
+  **Gate:** If all checks pass, proceed to Stage 6. If any checks fail, proceed to Stage 5.
 
 ---
 
@@ -66,10 +68,11 @@ Skills skipped: <name — reason, or "none">
 
 **What:** Fix issues found in Stage 4.
 **Rules:**
+
 - Targeted fixes only. Do not refactor unrelated code.
 - Re-run the same checks from Stage 4 after each fix.
-**Output:** Correction diff + re-run results.
-**Gate:** All checks must pass before Stage 6.
+  **Output:** Correction diff + re-run results.
+  **Gate:** All checks must pass before Stage 6.
 
 ---
 
@@ -77,10 +80,11 @@ Skills skipped: <name — reason, or "none">
 
 **What:** Stage files and create a commit message.
 **Rules:**
+
 - Do not commit unless the user explicitly asks (`"commit this"`, `"commit and push"`, etc.).
 - Never use `git push` unless explicitly instructed.
 - Present staged files and draft message for user confirmation if not explicitly told otherwise.
-**Gate:** User confirms commit.
+  **Gate:** User confirms commit.
 
 ---
 

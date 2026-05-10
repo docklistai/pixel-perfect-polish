@@ -8,22 +8,23 @@ Route files should orchestrate screens, not contain everything. The goal is to p
 
 ## File size limits
 
-| File type | Target | Hard max | Required action if exceeded |
-|---|---:|---:|---|
-| Route/page files | 250 lines | 350 lines | Extract sections, mock data, hooks, drawers, or tables |
-| UI components | 150 lines | 250 lines | Split into subcomponents |
-| Forms and drawers | 180 lines | 280 lines | Extract form sections, field config, validation, or footer actions |
-| Hooks | 120 lines | 180 lines | Split responsibilities |
-| Services | 200 lines | 300 lines | Split by domain action |
-| Tests | 250 lines | 450 lines | Split by behavior |
-| Design system files | Exception | Review required | Do not add route-specific logic |
-| Migrations | Exception | Review required | One purpose per migration, include RLS where relevant |
+| File type           |    Target |        Hard max | Required action if exceeded                                        |
+| ------------------- | --------: | --------------: | ------------------------------------------------------------------ |
+| Route/page files    | 250 lines |       350 lines | Extract sections, mock data, hooks, drawers, or tables             |
+| UI components       | 150 lines |       250 lines | Split into subcomponents                                           |
+| Forms and drawers   | 180 lines |       280 lines | Extract form sections, field config, validation, or footer actions |
+| Hooks               | 120 lines |       180 lines | Split responsibilities                                             |
+| Services            | 200 lines |       300 lines | Split by domain action                                             |
+| Tests               | 250 lines |       450 lines | Split by behavior                                                  |
+| Design system files | Exception | Review required | Do not add route-specific logic                                    |
+| Migrations          | Exception | Review required | One purpose per migration, include RLS where relevant              |
 
 ---
 
 ## Route file rules
 
 Routes **should**:
+
 - import page sections
 - orchestrate layout
 - hold only small local demo state
@@ -31,6 +32,7 @@ Routes **should**:
 - pass data into components
 
 Routes **should not**:
+
 - contain large mock datasets
 - contain several complex tables
 - contain large forms inline
@@ -43,6 +45,7 @@ Routes **should not**:
 ## Component extraction rules
 
 Extract when:
+
 - a JSX block exceeds roughly 80 lines
 - a drawer or form has more than one section
 - table rows contain complex rendering
@@ -83,6 +86,7 @@ src/features/rota/hooks/
 ## Enforcement
 
 Before merging a PR that touches a route or component file:
+
 1. Check line count against the table above
 2. If at or above Target, flag for extraction in the PR description
 3. If at or above Hard max, extraction is required — do not merge without it
