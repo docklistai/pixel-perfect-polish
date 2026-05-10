@@ -4,7 +4,7 @@
 
 Skills live in `.claude/skills/`. Before any task, declare the skill route as required by the Skill Declaration rule in `AGENTS.md`. Do not begin work until the declaration is posted.
 
-**Frontend work:** read `docklist-frontend-dev-guidelines`, `docklist-react-ui-patterns`, `docklist-tailwind-design-system`, `docklist-baseline-ui`, `docklist-fixing-accessibility`.
+**Frontend work:** read `docklist-frontend-dev-guidelines`, `docklist-react-ui-patterns`, `docklist-tailwind-design-system`, `docklist-baseline-ui`, `docklist-fixing-accessibility`. Before frontend work, read `docs/ai/frontend-architecture-guardrails.md` and declare whether the change risks exceeding file-size limits.
 
 **Supabase / RLS / schema:** read `docklist-security-audit`, `docklist-database-design`, `docklist-postgresql`, `docklist-saas-multi-tenant`.
 

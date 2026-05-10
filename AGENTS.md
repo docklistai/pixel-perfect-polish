@@ -50,6 +50,14 @@ Skills skipped: <name — reason, or "none">
 - Lovable owns the new frontend design direction unless told otherwise.
 - Prefer clean V2 rebuilds over copying old bloat.
 
+## Frontend architecture limits
+
+Before frontend work, apply `docs/ai/frontend-architecture-guardrails.md`.
+
+Route/page files have a hard max of 350 lines unless explicitly approved. If a change would exceed the hard max, stop and propose extraction before continuing.
+
+Do not create bloated route files, duplicated UI primitives, or route-specific design system patterns.
+
 ## Execution Rules
 
 - Do not move from audit to implementation without user approval.

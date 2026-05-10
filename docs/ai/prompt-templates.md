@@ -53,9 +53,14 @@ Skill Declaration (post this before any work):
 
 Review the frontend changes in [files/PR/commit]. Follow Stage 1 of docs/ai/docklist-agent-workflow.md — audit only.
 Skills: docklist-frontend-dev-guidelines, docklist-baseline-ui, docklist-fixing-accessibility, docklist-code-review-checklist.
+Apply docs/ai/frontend-architecture-guardrails.md.
 No edits.
-Checks: animation durations, typography scale, hardcoded colors/sizes, aria labels, keyboard navigation, layout anti-patterns.
-Output: violation list with file, line, severity, and fix recommendation.
+Checks:
+- animation durations, typography scale, hardcoded colors/sizes, aria labels, keyboard navigation, layout anti-patterns
+- line count per file against guardrails table (target / hard max)
+- hard max exceeded? → flag as BLOCKER, recommend extraction targets
+- extraction needed? → list what to extract and where (components, data, hooks, drawers)
+Output: violation list with file, line, severity, fix recommendation, and line-count verdict per file.
 ```
 
 ---

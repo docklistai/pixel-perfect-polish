@@ -22,8 +22,9 @@ Match every task to one or more skill routes before doing any work. Read the lis
 **Skills:**
 - `.claude/skills/docklist-verification-before-completion/SKILL.md`
 - `.claude/skills/docklist-testing-patterns/SKILL.md`
+- `.claude/skills/docklist-lint-and-validate/SKILL.md`
 **Required output:** evidence list (commands run + output), not narrative
-**Required checks:** targeted typecheck + targeted test run; skipped checks reported
+**Required checks:** targeted typecheck + targeted test run; lint pass; skipped checks reported
 
 ---
 
@@ -36,6 +37,7 @@ Match every task to one or more skill routes before doing any work. Read the lis
 - `.claude/skills/docklist-tailwind-design-system/SKILL.md`
 - `.claude/skills/docklist-baseline-ui/SKILL.md`
 - `.claude/skills/docklist-fixing-accessibility/SKILL.md`
+**Also add** `.claude/skills/docklist-react-component-performance/SKILL.md` when render complexity, repeated components, heavy JSX, or interaction state is involved.
 **Required output:** component diff + accessibility check + design token audit
 **Required checks:** no hardcoded colors/sizes; keyboard nav; aria labels present
 
@@ -60,6 +62,8 @@ Match every task to one or more skill routes before doing any work. Read the lis
 **Skills:**
 - `.claude/skills/docklist-react-ui-patterns/SKILL.md`
 - `.claude/skills/docklist-code-refactoring/SKILL.md`
+- `.claude/skills/docklist-clean-code/SKILL.md`
+- `.claude/skills/docklist-react-component-performance/SKILL.md`
 - `.claude/skills/docklist-testing-patterns/SKILL.md`
 **Required output:** before/after diff + test results
 **Required checks:** no behaviour change; types still pass; targeted test run
@@ -101,6 +105,28 @@ Match every task to one or more skill routes before doing any work. Read the lis
 - `.claude/skills/docklist-verification-before-completion/SKILL.md`
 **Required output:** diff summary + finding list + pass/fail verdict
 **Required checks:** typecheck; targeted tests; no secrets or debug code committed
+
+---
+
+## TypeScript / data model work
+
+**When:** writing or refactoring TypeScript types, interfaces, generics, or data models
+**Skills:**
+- `.claude/skills/docklist-typescript-expert/SKILL.md`
+- `.claude/skills/docklist-lint-and-validate/SKILL.md`
+**Required output:** type diff + typecheck output
+**Required checks:** strict mode passes; no `any` introduced without justification
+
+---
+
+## Architecture decisions
+
+**When:** proposing significant structural changes, choosing patterns, or evaluating trade-offs
+**Skills:**
+- `.claude/skills/docklist-software-architecture/SKILL.md`
+- `.claude/skills/docklist-architecture-decision-records/SKILL.md`
+**Required output:** ADR document or updated ADR + decision summary
+**Required checks:** alternatives considered; consequences documented; stakeholder impact noted
 
 ---
 
