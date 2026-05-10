@@ -48,6 +48,11 @@ function Toggle({ on = true, onClick }: { on?: boolean; onClick?: () => void }) 
 function SettingsPage() {
   const [dirty, setDirty] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState("Workspace");
+  const markDirty = () => {
+    setDirty(true);
+    setSaved(false);
+  };
 
   return (
     <AppShell>
