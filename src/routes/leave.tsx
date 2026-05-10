@@ -309,7 +309,7 @@ function LeavePage() {
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
           <Card className="p-5">
-            <div className="text-sm font-semibold mb-3">MY AVAILABILITY</div>
+            <div className="text-sm font-semibold mb-3">MANAGER AVAILABILITY</div>
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold">Recurring availability</div>
               <button type="button" className="text-xs text-brand">Edit</button>
