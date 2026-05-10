@@ -45,6 +45,7 @@ const days = [
 ];
 
 type Shift = { time: string; role: string; tone: string; flag?: "conflict" | "open" | "off" };
+type ShiftDetail = Shift & { staff: string; day: string };
 const off: Shift = { time: "—", role: "Day off", tone: "off", flag: "off" };
 
 const staff: {
