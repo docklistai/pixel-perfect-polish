@@ -1,11 +1,7 @@
 import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
-import {
-  mockPastShifts,
-  mockRequests,
-  mockWeekShifts,
-} from "../data/mockPortalData";
+import { mockPastShifts, mockRequests, mockWeekShifts } from "../data/mockPortalData";
 import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
@@ -105,11 +101,7 @@ function ShiftList({
           <ul className="space-y-2">
             {g.shifts.map((s) => (
               <li key={s.id}>
-                <button
-                  type="button"
-                  onClick={() => onOpen(s)}
-                  className="w-full text-left"
-                >
+                <button type="button" onClick={() => onOpen(s)} className="w-full text-left">
                   <DashboardCard className="p-4 hover:bg-muted/30 transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">

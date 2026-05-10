@@ -113,11 +113,7 @@ export function PortalShell({
               <MoreHorizontal className="h-5 w-5" />
             </button>
             <div className="text-sm font-semibold tracking-tight">{TITLES[activeTab]}</div>
-            <NotificationBell
-              count={unreadNotifications}
-              onClick={onOpenNotifications}
-              dark
-            />
+            <NotificationBell count={unreadNotifications} onClick={onOpenNotifications} dark />
           </div>
           {isHome && (
             <div className="px-4 pb-4">

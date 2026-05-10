@@ -47,7 +47,9 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
           <div className="min-w-0">
             <div className="text-base font-semibold truncate">{mockProfile.name}</div>
             <div className="text-xs text-muted-foreground truncate">{mockProfile.role}</div>
-            <div className="text-[11px] text-muted-foreground truncate">{mockProfile.department}</div>
+            <div className="text-[11px] text-muted-foreground truncate">
+              {mockProfile.department}
+            </div>
           </div>
         </div>
       </DashboardCard>
@@ -310,9 +312,7 @@ function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-sm font-semibold truncate">{d.title}</div>
-                      <StatusBadge
-                        tone={d.status === "Expires soon" ? "warning" : "success"}
-                      >
+                      <StatusBadge tone={d.status === "Expires soon" ? "warning" : "success"}>
                         {d.status}
                       </StatusBadge>
                     </div>

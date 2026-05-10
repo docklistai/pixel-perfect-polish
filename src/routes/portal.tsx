@@ -43,10 +43,7 @@ function PortalPage() {
         {tab === "leave" && <LeaveTab />}
         {tab === "more" && <MoreTab onNavigate={setTab} />}
       </PortalShell>
-      <NotificationDrawer
-        open={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-      />
+      <NotificationDrawer open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </>
   );
 }

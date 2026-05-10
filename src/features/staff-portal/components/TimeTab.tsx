@@ -70,9 +70,7 @@ export function TimeTab() {
         <div className="flex flex-col items-center">
           <ClockRing active={clockedIn} elapsedMs={elapsed} />
           <div className="mt-3 text-xs text-muted-foreground">
-            {clockedIn && sinceLabel
-              ? `since ${sinceLabel}`
-              : "Tap clock in to start your shift"}
+            {clockedIn && sinceLabel ? `since ${sinceLabel}` : "Tap clock in to start your shift"}
           </div>
         </div>
 
@@ -105,9 +103,7 @@ export function TimeTab() {
             <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
               SCHEDULED
             </div>
-            <div className="mt-2 text-2xl font-bold tabular-nums">
-              {mockNextShift.hours}h 00m
-            </div>
+            <div className="mt-2 text-2xl font-bold tabular-nums">{mockNextShift.hours}h 00m</div>
           </div>
           <div>
             <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">

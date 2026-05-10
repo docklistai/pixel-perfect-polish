@@ -131,10 +131,4 @@ export interface TeamOnDuty {
   isManagerOnDuty?: boolean;
 }
 
-export type MoreSection =
-  | "profile"
-  | "team"
-  | "documents"
-  | "settings"
-  | "help"
-  | null;
+export type MoreSection = "profile" | "team" | "documents" | "settings" | "help" | null;

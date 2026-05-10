@@ -1,5 +1,13 @@
 import * as React from "react";
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock4, HelpCircle, Pencil } from "lucide-react";
+import {
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock4,
+  HelpCircle,
+  Pencil,
+} from "lucide-react";
 import {
   ActionButton,
   DashboardCard,
@@ -128,11 +136,7 @@ export function LeaveTab() {
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
           <div className="text-xs text-foreground font-medium">13 – 19 May 2024</div>
-          <button
-            type="button"
-            aria-label="Next week"
-            className="p-1 rounded-md hover:bg-muted/60"
-          >
+          <button type="button" aria-label="Next week" className="p-1 rounded-md hover:bg-muted/60">
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
@@ -165,11 +169,7 @@ export function LeaveTab() {
         <ul className="space-y-2">
           {mockRequests.map((r) => (
             <li key={r.id}>
-              <button
-                type="button"
-                onClick={() => setDetail(r)}
-                className="w-full text-left"
-              >
+              <button type="button" onClick={() => setDetail(r)} className="w-full text-left">
                 <DashboardCard className="p-4 hover:bg-muted/30 transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">

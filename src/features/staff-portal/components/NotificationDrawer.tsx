@@ -11,13 +11,7 @@ const TABS: { id: NotificationCategory; label: string }[] = [
   { id: "important", label: "Important" },
 ];
 
-export function NotificationDrawer({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [tab, setTab] = React.useState<NotificationCategory>("all");
   const [items, setItems] = React.useState<PortalNotification[]>(mockNotifications);
 
@@ -27,8 +21,7 @@ export function NotificationDrawer({
     return true;
   });
 
-  const markAllRead = () =>
-    setItems((prev) => prev.map((n) => ({ ...n, unread: false })));
+  const markAllRead = () => setItems((prev) => prev.map((n) => ({ ...n, unread: false })));
 
   return (
     <DrawerShell
@@ -50,7 +43,9 @@ export function NotificationDrawer({
                   onClick={() => setTab(t.id)}
                   className={cn(
                     "py-1.5 rounded-lg transition-colors inline-flex items-center justify-center gap-1.5",
-                    active ? "bg-card text-foreground shadow-[var(--shadow-card)]" : "text-muted-foreground",
+                    active
+                      ? "bg-card text-foreground shadow-[var(--shadow-card)]"
+                      : "text-muted-foreground",
                   )}
                   aria-pressed={active}
                 >
@@ -74,11 +69,7 @@ export function NotificationDrawer({
         </div>
 
         {filtered.length === 0 ? (
-          <EmptyState
-            icon={Bell}
-            title="Nothing here"
-            description="You're all caught up."
-          />
+          <EmptyState icon={Bell} title="Nothing here" description="You're all caught up." />
         ) : (
           <ul className="space-y-2">
             {filtered.map((n) => (

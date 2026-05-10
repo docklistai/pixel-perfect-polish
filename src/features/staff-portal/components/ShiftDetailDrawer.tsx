@@ -144,10 +144,7 @@ export function ShiftDetailDrawer({
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {shift.teammates.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex flex-col items-center gap-1 w-[64px] text-center"
-                >
+                <div key={m.id} className="flex flex-col items-center gap-1 w-[64px] text-center">
                   <div className="h-10 w-10 rounded-full bg-brand-soft text-brand flex items-center justify-center text-xs font-semibold">
                     {m.initials}
                   </div>
@@ -164,9 +161,7 @@ export function ShiftDetailDrawer({
         )}
 
         {isChanged && acknowledged && (
-          <div className="text-center text-xs text-success font-medium">
-            Changes acknowledged
-          </div>
+          <div className="text-center text-xs text-success font-medium">Changes acknowledged</div>
         )}
       </div>
     </DrawerShell>
