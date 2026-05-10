@@ -570,8 +570,51 @@ function RotaPage() {
         description="24 staff will be notified via the staff portal. This is a frontend example — nothing will be sent."
         confirmLabel="Publish"
         cancelLabel="Not yet"
-        onConfirm={() => setPublishOpen(false)}
+        onConfirm={() => {
+          setPublished(true);
+          setPublishOpen(false);
+        }}
       />
+
+      {/* Shift detail drawer (read-only) */}
+      <DrawerShell
+        open={!!shiftDetail}
+        onOpenChange={(o) => !o && setShiftDetail(null)}
+        title={shiftDetail?.staff ?? "Shift"}
+        description={shiftDetail ? `${shiftDetail.day} · ${shiftDetail.role}` : undefined}
+        meta={
+          shiftDetail?.flag === "conflict" ? (
+            <StatusBadge tone="warning">Conflict</StatusBadge>
+          ) : shiftDetail?.flag === "open" ? (
+            <StatusBadge tone="info">Open shift</StatusBadge>
+          ) : (
+            <StatusBadge tone="success">Scheduled</StatusBadge>
+          )
+        }
+        footer={<ActionButton onClick={() => setShiftDetail(null)}>Close</ActionButton>}
+      >
+        <FormSection title="Shift details">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Assigned to" value={shiftDetail?.staff ?? "—"} />
+            <DetailRow label="Role" value={shiftDetail?.role ?? "—"} />
+            <DetailRow label="Day" value={shiftDetail?.day ?? "—"} />
+            <DetailRow label="Time" value={shiftDetail?.time ?? "—"} />
+            <DetailRow
+              label="Status"
+              value={
+                shiftDetail?.flag === "conflict"
+                  ? "Conflict — needs review"
+                  : shiftDetail?.flag === "open"
+                    ? "Open — unassigned"
+                    : "Scheduled"
+              }
+            />
+          </dl>
+        </FormSection>
+        <p className="text-[11px] text-muted-foreground">
+          Read-only preview — editing is not enabled in this prototype.
+        </p>
+      </DrawerShell>
     </AppShell>
   );
 }
