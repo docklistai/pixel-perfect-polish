@@ -112,20 +112,27 @@ function SettingsPage() {
             SETTINGS
           </div>
           <div className="space-y-1">
-            {tabs.map((t) => (
-              <button
-                key={t.t}
-                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${t.active ? "bg-brand-soft" : "hover:bg-muted/50"}`}
-              >
-                <t.icon
-                  className={`h-4 w-4 ${t.active ? "text-brand" : "text-muted-foreground"}`}
-                />
-                <div>
-                  <div className={`text-sm font-medium ${t.active ? "text-brand" : ""}`}>{t.t}</div>
-                  <div className="text-[11px] text-muted-foreground">{t.s}</div>
-                </div>
-              </button>
-            ))}
+            {tabs.map((t) => {
+              const active = activeTab === t.t;
+              return (
+                <button
+                  key={t.t}
+                  type="button"
+                  onClick={() => setActiveTab(t.t)}
+                  className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${active ? "bg-brand-soft" : "hover:bg-muted/50"}`}
+                >
+                  <t.icon
+                    className={`h-4 w-4 ${active ? "text-brand" : "text-muted-foreground"}`}
+                  />
+                  <div>
+                    <div className={`text-sm font-medium ${active ? "text-brand" : ""}`}>
+                      {t.t}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">{t.s}</div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </Card>
 
