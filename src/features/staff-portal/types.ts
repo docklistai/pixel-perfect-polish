@@ -1,4 +1,6 @@
-export type PortalTab = "home" | "schedule" | "clock" | "requests" | "notices" | "profile";
+export type PortalTab = "home" | "shifts" | "time" | "leave" | "more";
+
+export type ShiftsSubTab = "upcoming" | "requests" | "history";
 
 export type ShiftStatus = "confirmed" | "open" | "changed";
 
@@ -14,6 +16,11 @@ export interface PortalShift {
   breakMinutes: number;
   status: ShiftStatus;
   note?: string;
+  managerName?: string;
+  managerNote?: string;
+  tasks?: { id: string; label: string; done?: boolean }[];
+  teammates?: { id: string; name: string; initials: string; role: string }[];
+  changeAcknowledged?: boolean;
 }
 
 export interface ClockEntry {
@@ -34,7 +41,7 @@ export interface PortalRequest {
   kind: RequestKind;
   title: string;
   detail: string;
-  submitted: string; // human label
+  submitted: string;
   status: RequestStatus;
   managerNote?: string;
 }
@@ -44,7 +51,7 @@ export interface PortalNotice {
   title: string;
   body: string;
   postedBy: string;
-  postedAt: string; // human label
+  postedAt: string;
   pinned?: boolean;
   unread?: boolean;
   needsAck?: boolean;
@@ -65,4 +72,69 @@ export interface PortalProfile {
 export interface WeeklySummary {
   shifts: number;
   hours: number;
+  openShifts: number;
 }
+
+export interface LeaveBalance {
+  label: string;
+  days: number;
+  unit: "days";
+  tone: "brand" | "info" | "purple" | "success" | "warning";
+}
+
+export interface ApprovedLeave {
+  id: string;
+  rangeLabel: string;
+  type: string;
+  days: number;
+}
+
+export interface AvailabilityDay {
+  shortLabel: string;
+  date: string;
+  status: "available" | "limited" | "off";
+}
+
+export type NotificationKind =
+  | "shift-changed"
+  | "leave-approved"
+  | "announcement"
+  | "timesheet-reminder";
+
+export type NotificationCategory = "all" | "unread" | "important";
+
+export interface PortalNotification {
+  id: string;
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  postedAt: string;
+  badge?: { tone: "warning" | "success" | "info" | "danger"; label: string };
+  unread?: boolean;
+  important?: boolean;
+}
+
+export interface PortalDocument {
+  id: string;
+  title: string;
+  category: "Required" | "Certificates" | "Training";
+  meta: string;
+  status: "Up to date" | "Expires soon" | "Valid";
+}
+
+export interface TeamOnDuty {
+  id: string;
+  name: string;
+  initials: string;
+  role: string;
+  shiftLabel: string;
+  isManagerOnDuty?: boolean;
+}
+
+export type MoreSection =
+  | "profile"
+  | "team"
+  | "documents"
+  | "settings"
+  | "help"
+  | null;
