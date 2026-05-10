@@ -275,6 +275,7 @@ function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
         </Card>
         )}
 
