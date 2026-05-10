@@ -487,9 +487,9 @@ function TimePage() {
                 <span key={d}>{d}</span>
               ))}
             </div>
-            <a className="mt-3 block text-xs font-semibold text-brand">
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
               View full attendance report →
-            </a>
+            </button>
           </Card>
 
           <Card className="p-5">
@@ -523,7 +523,9 @@ function TimePage() {
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
             ))}
-            <a className="mt-3 block text-xs font-semibold text-brand">View all (3) →</a>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+              View all (3) →
+            </button>
           </Card>
 
           <Card className="p-5">
@@ -569,7 +571,9 @@ function TimePage() {
                 </span>
               </div>
             ))}
-            <a className="mt-3 block text-xs font-semibold text-brand">View all disputes →</a>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+              View all disputes →
+            </button>
           </Card>
         </div>
       </div>

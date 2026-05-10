@@ -1,6 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, Card, PageHeader, ActionButton, FeedbackBanner } from "@/components/dl";
+import {
+  AppShell,
+  Card,
+  PageHeader,
+  ActionButton,
+  FeedbackBanner,
+  EmptyState,
+} from "@/components/dl";
 import {
   LayoutGrid,
   Users,
@@ -20,7 +27,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 const tabs = [
-  { t: "Workspace", s: "General workspace settings", icon: LayoutGrid, active: true },
+  { t: "Workspace", s: "General workspace settings", icon: LayoutGrid },
   { t: "Teams", s: "Manage teams and departments", icon: Users },
   { t: "Roles & Permissions", s: "Set roles and access levels", icon: Shield },
   { t: "Time Rules", s: "Rules for time tracking", icon: Clock },
@@ -48,6 +55,11 @@ function Toggle({ on = true, onClick }: { on?: boolean; onClick?: () => void }) 
 function SettingsPage() {
   const [dirty, setDirty] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState("Workspace");
+  const markDirty = () => {
+    setDirty(true);
+    setSaved(false);
+  };
 
   return (
     <AppShell>
@@ -107,154 +119,174 @@ function SettingsPage() {
             SETTINGS
           </div>
           <div className="space-y-1">
-            {tabs.map((t) => (
-              <button
-                key={t.t}
-                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${t.active ? "bg-brand-soft" : "hover:bg-muted/50"}`}
-              >
-                <t.icon
-                  className={`h-4 w-4 ${t.active ? "text-brand" : "text-muted-foreground"}`}
-                />
+            {tabs.map((t) => {
+              const active = activeTab === t.t;
+              return (
+                <button
+                  key={t.t}
+                  type="button"
+                  onClick={() => setActiveTab(t.t)}
+                  className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${active ? "bg-brand-soft" : "hover:bg-muted/50"}`}
+                >
+                  <t.icon
+                    className={`h-4 w-4 ${active ? "text-brand" : "text-muted-foreground"}`}
+                  />
+                  <div>
+                    <div className={`text-sm font-medium ${active ? "text-brand" : ""}`}>{t.t}</div>
+                    <div className="text-[11px] text-muted-foreground">{t.s}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        {activeTab !== "Workspace" ? (
+          <Card className="col-span-12 lg:col-span-6 p-6">
+            <EmptyState
+              title={`${activeTab} settings`}
+              description="This section is a placeholder in the desktop prototype. Workspace tab is fully wired."
+            />
+          </Card>
+        ) : (
+          <Card className="col-span-12 lg:col-span-6 p-6">
+            <div onChange={markDirty}>
+              <div className="text-lg font-semibold">Workspace</div>
+              <p className="text-xs text-muted-foreground">
+                Update your workspace details and default settings.
+              </p>
+
+              <div className="mt-5 space-y-4">
+                <div className="text-sm font-semibold">Workspace details</div>
+                {[
+                  ["Workspace name", "Harbour View Hotel"],
+                  ["Address", "1 Harbour Street, Brighton BN1 1AA, United Kingdom"],
+                ].map(([l, v]) => (
+                  <div key={l}>
+                    <label className="text-xs font-medium text-muted-foreground">{l}</label>
+                    <input
+                      defaultValue={v}
+                      className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
+                    />
+                  </div>
+                ))}
                 <div>
-                  <div className={`text-sm font-medium ${t.active ? "text-brand" : ""}`}>{t.t}</div>
-                  <div className="text-[11px] text-muted-foreground">{t.s}</div>
+                  <label className="text-xs font-medium text-muted-foreground">Timezone</label>
+                  <button className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm flex items-center justify-between">
+                    Europe/London (GMT+1) <ChevronDown className="h-4 w-4" />
+                  </button>
+                  <div className="text-[11px] text-muted-foreground mt-1">
+                    All times in Docklist are shown in this timezone.
+                  </div>
                 </div>
-              </button>
-            ))}
-          </div>
-        </Card>
+              </div>
 
-        <Card className="col-span-12 lg:col-span-6 p-6">
-          <div className="text-lg font-semibold">Workspace</div>
-          <p className="text-xs text-muted-foreground">
-            Update your workspace details and default settings.
-          </p>
+              <div className="mt-6 space-y-4">
+                <div className="text-sm font-semibold">Shift defaults</div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Default shift start</label>
+                    <input
+                      defaultValue="09:00"
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Default shift end</label>
+                    <input
+                      defaultValue="17:00"
+                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Default unpaid break</label>
+                    <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
+                      <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
+                      <span className="bg-muted px-3 py-2 text-xs text-muted-foreground flex items-center">
+                        mins ▾
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Toggle onClick={() => setDirty(true)} />
+                  <div>
+                    <div className="text-sm font-medium">Auto round shift times</div>
+                    <div className="text-xs text-muted-foreground">
+                      Round clock in/out times to the nearest 5 minutes.
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Overtime threshold</label>
+                  <button className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm flex items-center justify-between">
+                    <span>
+                      8 <span className="text-muted-foreground ml-2">hours per day</span>
+                    </span>{" "}
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
-          <div className="mt-5 space-y-4">
-            <div className="text-sm font-semibold">Workspace details</div>
-            {[
-              ["Workspace name", "Harbour View Hotel"],
-              ["Address", "1 Harbour Street, Brighton BN1 1AA, United Kingdom"],
-            ].map(([l, v]) => (
-              <div key={l}>
-                <label className="text-xs font-medium text-muted-foreground">{l}</label>
-                <input
-                  defaultValue={v}
-                  className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
-                />
+              <div className="mt-6 space-y-4">
+                <div className="text-sm font-semibold">Break rules</div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-muted-foreground">
+                      Minimum break for shifts over
+                    </label>
+                    <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
+                      <input defaultValue="6" className="w-full px-3 py-2 text-sm outline-none" />
+                      <span className="bg-muted px-3 py-2 text-xs text-muted-foreground">
+                        hours
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">Break duration</label>
+                    <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
+                      <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
+                      <span className="bg-muted px-3 py-2 text-xs text-muted-foreground">
+                        mins ▾
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Toggle />
+                  <div>
+                    <div className="text-sm font-medium">Break required</div>
+                    <div className="text-xs text-muted-foreground">
+                      Enforce breaks for eligible shifts.
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Timezone</label>
-              <button className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm flex items-center justify-between">
-                Europe/London (GMT+1) <ChevronDown className="h-4 w-4" />
-              </button>
-              <div className="text-[11px] text-muted-foreground mt-1">
-                All times in Docklist are shown in this timezone.
-              </div>
-            </div>
-          </div>
 
-          <div className="mt-6 space-y-4">
-            <div className="text-sm font-semibold">Shift defaults</div>
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs text-muted-foreground">Default shift start</label>
-                <input
-                  defaultValue="09:00"
-                  className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Default shift end</label>
-                <input
-                  defaultValue="17:00"
-                  className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Default unpaid break</label>
-                <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
-                  <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
-                  <span className="bg-muted px-3 py-2 text-xs text-muted-foreground flex items-center">
-                    mins ▾
-                  </span>
+              <div className="mt-6 space-y-4">
+                <div className="text-sm font-semibold">Approval settings</div>
+                <div className="flex items-center gap-3">
+                  <Toggle />
+                  <div>
+                    <div className="text-sm font-medium">Require approval for timesheets</div>
+                    <div className="text-xs text-muted-foreground">
+                      Managers must approve timesheets before they are finalised.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Toggle />
+                  <div>
+                    <div className="text-sm font-medium">Require approval for leave requests</div>
+                    <div className="text-xs text-muted-foreground">
+                      Leave requests must be approved before they are marked as approved.
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Toggle onClick={() => setDirty(true)} />
-              <div>
-                <div className="text-sm font-medium">Auto round shift times</div>
-                <div className="text-xs text-muted-foreground">
-                  Round clock in/out times to the nearest 5 minutes.
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground">Overtime threshold</label>
-              <button className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm flex items-center justify-between">
-                <span>
-                  8 <span className="text-muted-foreground ml-2">hours per day</span>
-                </span>{" "}
-                <ChevronDown className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <div className="text-sm font-semibold">Break rules</div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-muted-foreground">
-                  Minimum break for shifts over
-                </label>
-                <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
-                  <input defaultValue="6" className="w-full px-3 py-2 text-sm outline-none" />
-                  <span className="bg-muted px-3 py-2 text-xs text-muted-foreground">hours</span>
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground">Break duration</label>
-                <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
-                  <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
-                  <span className="bg-muted px-3 py-2 text-xs text-muted-foreground">mins ▾</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Toggle />
-              <div>
-                <div className="text-sm font-medium">Break required</div>
-                <div className="text-xs text-muted-foreground">
-                  Enforce breaks for eligible shifts.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            <div className="text-sm font-semibold">Approval settings</div>
-            <div className="flex items-center gap-3">
-              <Toggle />
-              <div>
-                <div className="text-sm font-medium">Require approval for timesheets</div>
-                <div className="text-xs text-muted-foreground">
-                  Managers must approve timesheets before they are finalised.
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Toggle />
-              <div>
-                <div className="text-sm font-medium">Require approval for leave requests</div>
-                <div className="text-xs text-muted-foreground">
-                  Leave requests must be approved before they are marked as approved.
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
           <Card className="p-5">
@@ -347,7 +379,9 @@ function SettingsPage() {
                 <span className="text-muted-foreground">Logo</span>
                 <span className="flex items-center gap-2 text-xs">
                   <ImageIcon className="h-3.5 w-3.5" /> harbour-view-logo.png{" "}
-                  <a className="text-brand">Change</a>
+                  <button type="button" className="text-brand">
+                    Change
+                  </button>
                 </span>
               </div>
             </div>

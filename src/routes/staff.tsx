@@ -12,6 +12,7 @@ import {
   FormRow,
   DetailRow,
   StatusBadge,
+  EmptyState,
 } from "@/components/dl";
 import {
   Users,
@@ -207,9 +208,23 @@ const rows = [
   },
 ];
 
+type Row = (typeof rows)[number];
+
 function StaffPage() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [profile, setProfile] = React.useState<null | { n: string; e: string; role: string }>(null);
+  const [query, setQuery] = React.useState("");
+  const [selected, setSelected] = React.useState<Row>(rows[0]);
+  const filteredRows = rows.filter((r) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      r.n.toLowerCase().includes(q) ||
+      r.e.toLowerCase().includes(q) ||
+      r.role.toLowerCase().includes(q) ||
+      r.dept.toLowerCase().includes(q)
+    );
+  });
 
   return (
     <AppShell searchPlaceholder="Search staff, roles, skills...">
@@ -265,6 +280,8 @@ function StaffPage() {
               <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 flex-1 max-w-xs">
                 <Search className="h-3.5 w-3.5 text-muted-foreground" />
                 <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
                   className="bg-transparent text-xs outline-none w-full"
                   placeholder="Search by name, email or role..."
                 />
@@ -297,11 +314,14 @@ function StaffPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {filteredRows.map((r) => (
                   <tr
                     key={r.n}
-                    onClick={() => setProfile({ n: r.n, e: r.e, role: r.role })}
-                    className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${r.active ? "bg-info-soft/30" : ""}`}
+                    onClick={() => {
+                      setSelected(r);
+                      setProfile({ n: r.n, e: r.e, role: r.role });
+                    }}
+                    className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.n === r.n ? "bg-info-soft/30" : ""}`}
                   >
                     <td className="py-3 px-2">
                       <div className="flex items-center gap-2.5">
@@ -351,6 +371,12 @@ function StaffPage() {
                 ))}
               </tbody>
             </table>
+            {filteredRows.length === 0 && (
+              <EmptyState
+                title="No staff found"
+                description="Try adjusting your search or filters."
+              />
+            )}
 
             <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
               <span>Showing 1 to 10 of 48 results</span>
@@ -380,26 +406,29 @@ function StaffPage() {
         {/* Profile drawer */}
         <Card className="col-span-12 lg:col-span-3 p-5 self-start">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold">Sophie Carter</div>
+            <div className="text-sm font-semibold">{selected.n}</div>
             <X className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <img
-              src="https://i.pravatar.cc/96?img=5"
+              src={`https://i.pravatar.cc/96?img=${selected.img}`}
               className="h-16 w-16 rounded-full object-cover"
               alt=""
             />
             <div>
-              <div className="font-semibold">Sophie Carter</div>
-              <div className="text-xs text-muted-foreground">Front of House Supervisor</div>
+              <div className="font-semibold">{selected.n}</div>
+              <div className="text-xs text-muted-foreground">
+                {selected.role}
+                {selected.sub ? ` · ${selected.sub}` : ""}
+              </div>
               <span className="mt-1 inline-block rounded-md bg-success-soft text-success px-2 py-0.5 text-[11px] font-medium">
-                Active
+                {selected.status}
               </span>
             </div>
           </div>
           <div className="mt-3 text-xs space-y-1">
-            <div className="text-foreground">sophie.carter@docklist.co.uk</div>
-            <div className="text-muted-foreground">+44 7700 900123</div>
+            <div className="text-foreground">{selected.e}</div>
+            <div className="text-muted-foreground">Department: {selected.dept}</div>
           </div>
           <div className="mt-4 flex items-center gap-2">
             {[MessageCircle, Phone, Mail, Calendar, MoreHorizontal].map((I, i) => (
@@ -465,7 +494,9 @@ function StaffPage() {
               <span>Front of House</span>
               <span>Evening Shift</span>
             </div>
-            <a className="mt-2 block text-xs font-semibold text-brand">View full rota</a>
+            <button type="button" className="mt-2 block text-xs font-semibold text-brand">
+              View full rota
+            </button>
           </div>
         </Card>
       </div>

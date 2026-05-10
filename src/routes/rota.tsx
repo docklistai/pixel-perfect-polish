@@ -45,6 +45,7 @@ const days = [
 ];
 
 type Shift = { time: string; role: string; tone: string; flag?: "conflict" | "open" | "off" };
+type ShiftDetail = Shift & { staff: string; day: string };
 const off: Shift = { time: "—", role: "Day off", tone: "off", flag: "off" };
 
 const staff: {
@@ -195,7 +196,7 @@ const toneStyles: Record<string, string> = {
   off: "bg-transparent text-muted-foreground border-transparent",
 };
 
-function ShiftCell({ s }: { s: Shift }) {
+function ShiftCell({ s, onOpen }: { s: Shift; onOpen?: () => void }) {
   if (s.flag === "off")
     return (
       <div className="h-16 flex items-center justify-center text-sm text-muted-foreground">
@@ -204,26 +205,30 @@ function ShiftCell({ s }: { s: Shift }) {
     );
   if (s.flag === "open") {
     return (
-      <div
-        className={`h-16 rounded-lg border-2 ${toneStyles.open} flex flex-col items-center justify-center text-xs`}
+      <button
+        type="button"
+        onClick={onOpen}
+        className={`w-full h-16 rounded-lg border-2 ${toneStyles.open} flex flex-col items-center justify-center text-xs hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition`}
       >
         <div className="font-medium">Open shift</div>
         <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
           {s.role} <Plus className="h-3 w-3" />
         </div>
-      </div>
+      </button>
     );
   }
   return (
-    <div
-      className={`h-16 rounded-lg border ${toneStyles[s.tone]} px-2.5 py-1.5 flex flex-col justify-between relative`}
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`w-full h-16 rounded-lg border ${toneStyles[s.tone]} px-2.5 py-1.5 flex flex-col justify-between text-left relative hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition`}
     >
       <div className="text-xs font-semibold">{s.time}</div>
       <div className="text-[11px] text-muted-foreground">{s.role}</div>
       {s.flag === "conflict" && (
         <AlertTriangle className="h-3.5 w-3.5 text-warning absolute top-1.5 right-1.5" />
       )}
-    </div>
+    </button>
   );
 }
 
@@ -231,6 +236,8 @@ function RotaPage() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [publishOpen, setPublishOpen] = React.useState(false);
   const [conflictOpen, setConflictOpen] = React.useState(false);
+  const [published, setPublished] = React.useState(false);
+  const [shiftDetail, setShiftDetail] = React.useState<ShiftDetail | null>(null);
 
   return (
     <AppShell>
@@ -340,7 +347,10 @@ function RotaPage() {
                     </td>
                     {s.shifts.map((sh, i) => (
                       <td key={i} className="px-1">
-                        <ShiftCell s={sh} />
+                        <ShiftCell
+                          s={sh}
+                          onOpen={() => setShiftDetail({ ...sh, staff: s.name, day: days[i].d })}
+                        />
                       </td>
                     ))}
                   </tr>
@@ -389,7 +399,9 @@ function RotaPage() {
               <div className="h-full w-[98%] bg-brand" />
             </div>
             <div className="mt-2 text-xs text-muted-foreground">Budget: 820h</div>
-            <a className="mt-4 block text-xs font-semibold text-brand">View full analysis →</a>
+            <button type="button" className="mt-4 block text-xs font-semibold text-brand">
+              View full analysis →
+            </button>
           </Card>
 
           <Card className="p-5">
@@ -418,11 +430,16 @@ function RotaPage() {
                 <span className="text-muted-foreground">›</span>
               </div>
             ))}
-            <a className="mt-3 block text-xs font-semibold text-brand">View all alerts →</a>
+            <button type="button" className="mt-3 block text-xs font-semibold text-brand">
+              View all alerts →
+            </button>
           </Card>
 
           <Card className="p-5">
-            <div className="text-sm font-semibold mb-3">Publish readiness</div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-semibold">Publish readiness</div>
+              {published && <StatusBadge tone="success">Published</StatusBadge>}
+            </div>
             {[
               ["Shifts assigned", "24 / 27"],
               ["Coverage target", "98%"],
@@ -437,10 +454,18 @@ function RotaPage() {
                 <span className="text-muted-foreground">{v}</span>
               </div>
             ))}
-            <button className="mt-4 w-full rounded-xl bg-brand text-brand-foreground py-2.5 text-sm font-semibold flex items-center justify-center gap-2">
-              <Plane className="h-4 w-4" /> Ready to publish
+            <button
+              type="button"
+              onClick={() => !published && setPublishOpen(true)}
+              disabled={published}
+              className="mt-4 w-full rounded-xl bg-brand text-brand-foreground py-2.5 text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Plane className="h-4 w-4" /> {published ? "Published" : "Ready to publish"}
             </button>
-            <button className="mt-2 w-full rounded-xl border border-border py-2.5 text-sm font-medium flex items-center justify-center gap-2">
+            <button
+              type="button"
+              className="mt-2 w-full rounded-xl border border-border py-2.5 text-sm font-medium flex items-center justify-center gap-2"
+            >
               <Share2 className="h-4 w-4" /> Share draft
             </button>
           </Card>
@@ -547,8 +572,51 @@ function RotaPage() {
         description="24 staff will be notified via the staff portal. This is a frontend example — nothing will be sent."
         confirmLabel="Publish"
         cancelLabel="Not yet"
-        onConfirm={() => setPublishOpen(false)}
+        onConfirm={() => {
+          setPublished(true);
+          setPublishOpen(false);
+        }}
       />
+
+      {/* Shift detail drawer (read-only) */}
+      <DrawerShell
+        open={!!shiftDetail}
+        onOpenChange={(o) => !o && setShiftDetail(null)}
+        title={shiftDetail?.staff ?? "Shift"}
+        description={shiftDetail ? `${shiftDetail.day} · ${shiftDetail.role}` : undefined}
+        meta={
+          shiftDetail?.flag === "conflict" ? (
+            <StatusBadge tone="warning">Conflict</StatusBadge>
+          ) : shiftDetail?.flag === "open" ? (
+            <StatusBadge tone="info">Open shift</StatusBadge>
+          ) : (
+            <StatusBadge tone="success">Scheduled</StatusBadge>
+          )
+        }
+        footer={<ActionButton onClick={() => setShiftDetail(null)}>Close</ActionButton>}
+      >
+        <FormSection title="Shift details">
+          <dl className="divide-y divide-border">
+            <DetailRow label="Assigned to" value={shiftDetail?.staff ?? "—"} />
+            <DetailRow label="Role" value={shiftDetail?.role ?? "—"} />
+            <DetailRow label="Day" value={shiftDetail?.day ?? "—"} />
+            <DetailRow label="Time" value={shiftDetail?.time ?? "—"} />
+            <DetailRow
+              label="Status"
+              value={
+                shiftDetail?.flag === "conflict"
+                  ? "Conflict — needs review"
+                  : shiftDetail?.flag === "open"
+                    ? "Open — unassigned"
+                    : "Scheduled"
+              }
+            />
+          </dl>
+        </FormSection>
+        <p className="text-[11px] text-muted-foreground">
+          Read-only preview — editing is not enabled in this prototype.
+        </p>
+      </DrawerShell>
     </AppShell>
   );
 }
