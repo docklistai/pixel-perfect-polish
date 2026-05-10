@@ -109,10 +109,6 @@ function SettingsPage() {
         />
       )}
 
-      <div className="hidden">
-        <button onClick={() => setDirty(true)}>mark dirty</button>
-      </div>
-
       <div className="grid grid-cols-12 gap-5">
         <Card className="col-span-12 lg:col-span-3 p-3 self-start">
           <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-3 py-2">
