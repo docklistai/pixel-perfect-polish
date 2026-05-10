@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Bell, Calendar, Clock, FileText, Home, Megaphone, User } from "lucide-react";
-import { FeedbackBanner, IconButton } from "@/components/dl";
+import { Bell, Calendar, Clock, Home, MoreHorizontal, Plane } from "lucide-react";
+import { FeedbackBanner } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import type { PortalTab } from "../types";
 import { mockProfile } from "../data/mockPortalData";
@@ -11,44 +11,63 @@ const TABS: Array<{
   icon: React.ComponentType<{ className?: string }>;
 }> = [
   { id: "home", label: "Home", icon: Home },
-  { id: "schedule", label: "Schedule", icon: Calendar },
-  { id: "clock", label: "Clock", icon: Clock },
-  { id: "requests", label: "Requests", icon: FileText },
-  { id: "notices", label: "Notices", icon: Megaphone },
-  { id: "profile", label: "Profile", icon: User },
+  { id: "shifts", label: "Shifts", icon: Calendar },
+  { id: "time", label: "Time", icon: Clock },
+  { id: "leave", label: "Leave", icon: Plane },
+  { id: "more", label: "More", icon: MoreHorizontal },
 ];
+
+const TITLES: Record<PortalTab, string> = {
+  home: "Docklist",
+  shifts: "Shifts",
+  time: "Time",
+  leave: "Leave & Requests",
+  more: "More",
+};
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export function PortalShell({
   activeTab,
   onTabChange,
-  unreadNotices,
+  unreadNotifications,
   showStaleBanner,
+  onOpenNotifications,
   children,
 }: {
   activeTab: PortalTab;
   onTabChange: (tab: PortalTab) => void;
-  unreadNotices: number;
+  unreadNotifications: number;
   showStaleBanner?: boolean;
+  onOpenNotifications: () => void;
   children: React.ReactNode;
 }) {
   const greeting = getGreeting();
+  const isHome = activeTab === "home";
 
   return (
-    <div className="min-h-[100dvh] bg-muted/30 text-foreground flex">
-      {/* Desktop side nav */}
-      <aside className="hidden md:flex w-[240px] shrink-0 flex-col border-r border-border bg-card">
-        <div className="px-5 py-5 border-b border-border">
-          <div className="text-lg font-semibold tracking-tight">Docklist</div>
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mt-1">
+    <div className="min-h-[100dvh] bg-[oklch(0.96_0.008_240)] text-foreground flex">
+      {/* Desktop side rail (kept light, mirrors mobile structure) */}
+      <aside className="hidden md:flex w-[260px] shrink-0 flex-col bg-[var(--sidebar)] text-[var(--sidebar-foreground)]">
+        <div className="px-6 py-6">
+          <div className="text-base font-semibold tracking-tight text-white">Docklist</div>
+          <div className="text-[11px] font-semibold tracking-[0.2em] text-[var(--sidebar-muted)] mt-1">
             STAFF PORTAL
           </div>
         </div>
-        <div className="px-5 py-4 border-b border-border">
+        <div className="px-6 pb-5">
           <div className="flex items-center gap-3">
-            <Avatar initials={mockProfile.initials} />
+            <Avatar initials={mockProfile.initials} dark />
             <div className="min-w-0">
-              <div className="text-sm font-semibold truncate">{mockProfile.name}</div>
-              <div className="text-[11px] text-muted-foreground truncate">{mockProfile.role}</div>
+              <div className="text-sm font-semibold truncate text-white">{mockProfile.name}</div>
+              <div className="text-[11px] text-[var(--sidebar-muted)] truncate">
+                {mockProfile.role}
+              </div>
             </div>
           </div>
         </div>
@@ -64,77 +83,63 @@ export function PortalShell({
                 className={cn(
                   "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-brand-soft text-brand"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                    ? "bg-[var(--sidebar-active)] text-[var(--sidebar-active-foreground)]"
+                    : "text-[var(--sidebar-muted)] hover:bg-white/5 hover:text-white",
                 )}
                 aria-current={active ? "page" : undefined}
               >
                 <Icon className="h-4 w-4" />
                 <span className="flex-1 text-left">{t.label}</span>
-                {t.id === "notices" && unreadNotices > 0 && (
-                  <span className="rounded-full bg-brand text-brand-foreground text-[10px] font-bold px-1.5 py-0.5">
-                    {unreadNotices}
-                  </span>
-                )}
               </button>
             );
           })}
         </nav>
-        <div className="px-5 py-4 border-t border-border text-[11px] text-muted-foreground">
+        <div className="px-6 py-4 text-[11px] text-[var(--sidebar-muted)]">
           All times Europe/London
         </div>
       </aside>
 
       {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile + tablet header */}
-        <header className="md:hidden sticky top-0 z-20 bg-card border-b border-border">
-          <div className="px-4 py-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="text-[11px] text-muted-foreground">{greeting}</div>
-              <div className="text-base font-semibold truncate">{mockProfile.name}</div>
-            </div>
-            <div className="relative">
-              <IconButton
-                icon={Bell}
-                label="Notices"
-                variant="ghost"
-                onClick={() => onTabChange("notices")}
-              />
-              {unreadNotices > 0 && (
-                <span
-                  aria-hidden
-                  className="absolute -top-0.5 -right-0.5 rounded-full bg-brand text-brand-foreground text-[10px] font-bold px-1.5 py-0.5"
-                >
-                  {unreadNotices}
-                </span>
-              )}
-            </div>
+        {/* Mobile + tablet header — dark navy */}
+        <header className="md:hidden sticky top-0 z-20 bg-[var(--sidebar)] text-white">
+          <div className="px-4 pt-3 pb-3 flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={() => onTabChange("more")}
+              aria-label="Open menu"
+              className="p-2 -ml-2 rounded-lg hover:bg-white/10"
+            >
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+            <div className="text-sm font-semibold tracking-tight">{TITLES[activeTab]}</div>
+            <NotificationBell
+              count={unreadNotifications}
+              onClick={onOpenNotifications}
+              dark
+            />
           </div>
+          {isHome && (
+            <div className="px-4 pb-4">
+              <div className="text-xl font-bold leading-tight">
+                {greeting}, {mockProfile.name.split(" ")[0]}
+              </div>
+              <div className="mt-0.5 text-[12px] text-white/70">
+                {mockProfile.role} · {mockProfile.department.split(" · ")[0]}
+              </div>
+            </div>
+          )}
         </header>
 
         {/* Desktop header strip */}
-        <header className="hidden md:flex items-center justify-between px-8 py-5 border-b border-border bg-card">
+        <header className="hidden md:flex items-center justify-between px-8 py-5 bg-card border-b border-border">
           <div>
             <div className="text-[11px] text-muted-foreground">{greeting}</div>
-            <h1 className="text-xl font-semibold tracking-tight">{mockProfile.name}</h1>
+            <h1 className="text-xl font-semibold tracking-tight">
+              {isHome ? mockProfile.name : TITLES[activeTab]}
+            </h1>
           </div>
-          <div className="relative">
-            <IconButton
-              icon={Bell}
-              label="Notices"
-              variant="ghost"
-              onClick={() => onTabChange("notices")}
-            />
-            {unreadNotices > 0 && (
-              <span
-                aria-hidden
-                className="absolute -top-0.5 -right-0.5 rounded-full bg-brand text-brand-foreground text-[10px] font-bold px-1.5 py-0.5"
-              >
-                {unreadNotices}
-              </span>
-            )}
-          </div>
+          <NotificationBell count={unreadNotifications} onClick={onOpenNotifications} />
         </header>
 
         {showStaleBanner && (
@@ -150,7 +155,7 @@ export function PortalShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 px-4 md:px-8 py-4 md:py-6 pb-[calc(env(safe-area-inset-bottom)+88px)] md:pb-10 focus:outline-none"
+          className="flex-1 px-4 md:px-8 py-4 md:py-6 pb-[calc(env(safe-area-inset-bottom)+96px)] md:pb-10 focus:outline-none"
         >
           <div className="mx-auto w-full max-w-[720px]">{children}</div>
         </main>
@@ -158,9 +163,9 @@ export function PortalShell({
         {/* Mobile bottom nav */}
         <nav
           aria-label="Portal sections"
-          className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card pb-[env(safe-area-inset-bottom)]"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_-8px_oklch(0.20_0.04_250/0.15)]"
         >
-          <ul className="grid grid-cols-6">
+          <ul className="grid grid-cols-5">
             {TABS.map((t) => {
               const active = activeTab === t.id;
               const Icon = t.icon;
@@ -170,21 +175,13 @@ export function PortalShell({
                     type="button"
                     onClick={() => onTabChange(t.id)}
                     className={cn(
-                      "w-full flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium relative",
+                      "w-full flex flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-medium transition-colors",
                       active ? "text-brand" : "text-muted-foreground",
                     )}
                     aria-current={active ? "page" : undefined}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className={cn("h-5 w-5", active && "stroke-[2.4]")} />
                     <span>{t.label}</span>
-                    {t.id === "notices" && unreadNotices > 0 && (
-                      <span
-                        aria-hidden
-                        className="absolute top-1 right-[18%] rounded-full bg-brand text-brand-foreground text-[9px] font-bold px-1 py-0"
-                      >
-                        {unreadNotices}
-                      </span>
-                    )}
                   </button>
                 </li>
               );
@@ -196,20 +193,48 @@ export function PortalShell({
   );
 }
 
-function Avatar({ initials }: { initials: string }) {
+function NotificationBell({
+  count,
+  onClick,
+  dark,
+}: {
+  count: number;
+  onClick: () => void;
+  dark?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Notifications (${count} unread)`}
+      className={cn(
+        "relative p-2 -mr-2 rounded-lg transition-colors",
+        dark ? "hover:bg-white/10" : "hover:bg-muted/60",
+      )}
+    >
+      <Bell className="h-5 w-5" />
+      {count > 0 && (
+        <span
+          aria-hidden
+          className="absolute top-1 right-1 min-w-[16px] h-[16px] rounded-full bg-brand text-brand-foreground text-[10px] font-bold px-1 flex items-center justify-center"
+        >
+          {count}
+        </span>
+      )}
+    </button>
+  );
+}
+
+function Avatar({ initials, dark }: { initials: string; dark?: boolean }) {
   return (
     <div
       aria-hidden
-      className="h-10 w-10 rounded-full bg-brand-soft text-brand flex items-center justify-center text-sm font-semibold"
+      className={cn(
+        "h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold",
+        dark ? "bg-white/10 text-white" : "bg-brand-soft text-brand",
+      )}
     >
       {initials}
     </div>
   );
-}
-
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
 }
