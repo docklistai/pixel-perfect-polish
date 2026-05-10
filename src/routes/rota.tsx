@@ -196,7 +196,7 @@ const toneStyles: Record<string, string> = {
   off: "bg-transparent text-muted-foreground border-transparent",
 };
 
-function ShiftCell({ s }: { s: Shift }) {
+function ShiftCell({ s, onOpen }: { s: Shift; onOpen?: () => void }) {
   if (s.flag === "off")
     return (
       <div className="h-16 flex items-center justify-center text-sm text-muted-foreground">
@@ -205,26 +205,30 @@ function ShiftCell({ s }: { s: Shift }) {
     );
   if (s.flag === "open") {
     return (
-      <div
-        className={`h-16 rounded-lg border-2 ${toneStyles.open} flex flex-col items-center justify-center text-xs`}
+      <button
+        type="button"
+        onClick={onOpen}
+        className={`w-full h-16 rounded-lg border-2 ${toneStyles.open} flex flex-col items-center justify-center text-xs hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition`}
       >
         <div className="font-medium">Open shift</div>
         <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
           {s.role} <Plus className="h-3 w-3" />
         </div>
-      </div>
+      </button>
     );
   }
   return (
-    <div
-      className={`h-16 rounded-lg border ${toneStyles[s.tone]} px-2.5 py-1.5 flex flex-col justify-between relative`}
+    <button
+      type="button"
+      onClick={onOpen}
+      className={`w-full h-16 rounded-lg border ${toneStyles[s.tone]} px-2.5 py-1.5 flex flex-col justify-between text-left relative hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition`}
     >
       <div className="text-xs font-semibold">{s.time}</div>
       <div className="text-[11px] text-muted-foreground">{s.role}</div>
       {s.flag === "conflict" && (
         <AlertTriangle className="h-3.5 w-3.5 text-warning absolute top-1.5 right-1.5" />
       )}
-    </div>
+    </button>
   );
 }
 
