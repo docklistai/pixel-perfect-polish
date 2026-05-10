@@ -314,11 +314,14 @@ function StaffPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {filteredRows.map((r) => (
                   <tr
                     key={r.n}
-                    onClick={() => setProfile({ n: r.n, e: r.e, role: r.role })}
-                    className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${r.active ? "bg-info-soft/30" : ""}`}
+                    onClick={() => {
+                      setSelected(r);
+                      setProfile({ n: r.n, e: r.e, role: r.role });
+                    }}
+                    className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.n === r.n ? "bg-info-soft/30" : ""}`}
                   >
                     <td className="py-3 px-2">
                       <div className="flex items-center gap-2.5">
