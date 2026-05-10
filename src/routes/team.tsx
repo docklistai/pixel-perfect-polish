@@ -182,68 +182,80 @@ function TeamPage() {
               </div>
             </div>
             <div className="border-t border-border">
-              {announcements.map((a, i) => (
+              {announcements.length === 0 ? (
+                <EmptyState
+                  title="No announcements"
+                  description="Posts shared with the team will appear here."
+                />
+              ) : (
+                announcements.map((a, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setDetail({ t: a.t, s: a.body })}
+                    className="block w-full text-left border-b border-border/60 last:border-0 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+                  >
+                    {a.pinned && (
+                      <div className="inline-flex items-center gap-1 rounded-md bg-accent-purple-soft text-accent-purple text-[11px] font-medium px-2 py-0.5 mb-2">
+                        <Pin className="h-3 w-3" /> Pinned
+                      </div>
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${toneBg[a.tone]}`}
+                      >
+                        <a.icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 font-semibold">
+                          {a.t} <span>{a.emoji}</span>{" "}
+                          {a.t === "Food Safety Refresher" && (
+                            <Shield className="h-4 w-4 text-success" />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">{a.body}</p>
+                        <div className="flex gap-2 mt-2">
+                          {a.tags.map((tg) => (
+                            <span
+                              key={tg}
+                              className="rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
+                            >
+                              {tg}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="text-right text-xs shrink-0">
+                        <div className="font-semibold">{a.ack}</div>
+                        <div className="text-muted-foreground">Acknowledged</div>
+                        <div className="mt-1 h-1 w-24 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full bg-brand"
+                            style={{
+                              width: `${(parseInt(a.ack) / parseInt(a.ack.split("/")[1])) * 100}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="mt-2 text-muted-foreground">
+                          Published
+                          <br />
+                          <span className="text-foreground font-medium">{a.date}</span>
+                        </div>
+                      </div>
+                      <Pin className="h-4 w-4 text-muted-foreground" />
+                      <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </button>
+                ))
+              )}
+              {announcements.length > 0 && (
                 <button
-                  key={i}
                   type="button"
-                  onClick={() => setDetail({ t: a.t, s: a.body })}
-                  className="block w-full text-left border-b border-border/60 last:border-0 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+                  className="block mx-auto py-4 text-xs text-brand font-semibold"
                 >
-                  {a.pinned && (
-                    <div className="inline-flex items-center gap-1 rounded-md bg-accent-purple-soft text-accent-purple text-[11px] font-medium px-2 py-0.5 mb-2">
-                      <Pin className="h-3 w-3" /> Pinned
-                    </div>
-                  )}
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${toneBg[a.tone]}`}
-                    >
-                      <a.icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 font-semibold">
-                        {a.t} <span>{a.emoji}</span>{" "}
-                        {a.t === "Food Safety Refresher" && (
-                          <Shield className="h-4 w-4 text-success" />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">{a.body}</p>
-                      <div className="flex gap-2 mt-2">
-                        {a.tags.map((tg) => (
-                          <span
-                            key={tg}
-                            className="rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
-                          >
-                            {tg}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="text-right text-xs shrink-0">
-                      <div className="font-semibold">{a.ack}</div>
-                      <div className="text-muted-foreground">Acknowledged</div>
-                      <div className="mt-1 h-1 w-24 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full bg-brand"
-                          style={{
-                            width: `${(parseInt(a.ack) / parseInt(a.ack.split("/")[1])) * 100}%`,
-                          }}
-                        />
-                      </div>
-                      <div className="mt-2 text-muted-foreground">
-                        Published
-                        <br />
-                        <span className="text-foreground font-medium">{a.date}</span>
-                      </div>
-                    </div>
-                    <Pin className="h-4 w-4 text-muted-foreground" />
-                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                  </div>
+                  Load more announcements ↓
                 </button>
-              ))}
-              <div className="text-center py-4 text-xs text-brand font-semibold">
-                Load more announcements ↓
-              </div>
+              )}
             </div>
           </Card>
         </div>
