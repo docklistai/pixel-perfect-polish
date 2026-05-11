@@ -1,5 +1,12 @@
 @AGENTS.md
 
+## Shared Skill Selection
+
+- Before each task, inspect the available repo skills.
+- Select only the skills relevant to the task.
+- Do not apply unrelated skills just because they exist.
+- `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md` is mandatory only for frontend/UI/UX/visual/accessibility/design-system work.
+
 ## Claude Code — Additional Rules
 
 Skills live in `.claude/skills/`. Before any task, declare the skill route as required by the Skill Declaration rule in `AGENTS.md`. Do not begin work until the declaration is posted.
