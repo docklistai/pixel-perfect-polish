@@ -33,6 +33,7 @@ Match every task to one or more skill routes before doing any work. Read the lis
 ## Frontend page or component work
 
 **When:** building, editing, or reviewing React components, pages, or styles
+**Also check:** `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md` for frontend/UI/UX/visual/accessibility/design-system work
 **Skills:**
 
 - `.claude/skills/docklist-frontend-dev-guidelines/SKILL.md`
@@ -85,6 +86,7 @@ Match every task to one or more skill routes before doing any work. Read the lis
 - `.claude/skills/docklist-database-design/SKILL.md`
 - `.claude/skills/docklist-postgresql/SKILL.md`
 - `.claude/skills/docklist-saas-multi-tenant/SKILL.md`
+- `.claude/skills/docklist-supabase/SKILL.md`
   **Required output:** policy diff + workspace-scope proof + RLS coverage table
   **Required checks:** no `select('*')`; every query workspace-scoped; RLS enabled on new tables
 
