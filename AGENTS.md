@@ -68,6 +68,7 @@ Before any worktree-sensitive task (branch switch, sync, Lovable merge), report:
 ## Frontend architecture limits
 
 Before frontend work, also apply `docs/ai/frontend-architecture-guardrails.md`.
+Also read `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md` for the required anti-slop stack and visual rules.
 
 Route/page files have a hard max of 350 lines unless explicitly approved. If a change would exceed the hard max, stop and propose extraction before continuing.
 

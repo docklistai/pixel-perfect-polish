@@ -7,6 +7,7 @@ Skills live in `.claude/skills/`. Before any task, declare the skill route as re
 **All implementation work:** before editing, read `docs/ai/repo-architecture-guardrails.md`. Check line counts for all files likely to be touched. Declare whether any touched file is at or over the hard max. If over, propose extraction before adding code.
 
 **Frontend work:** read `docklist-frontend-dev-guidelines`, `docklist-react-ui-patterns`, `docklist-tailwind-design-system`, `docklist-baseline-ui`, `docklist-fixing-accessibility`. Before frontend work, also read `docs/ai/frontend-architecture-guardrails.md` and declare whether the change risks exceeding file-size limits.
+Also read `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md` before UI or visual-polish work.
 
 **Branch / sync / worktree tasks:** use `docklist-using-git-worktrees`. Confirm branch, worktree status, and which files must not be staged before acting.
 
