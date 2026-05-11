@@ -40,6 +40,7 @@ Match every task to one or more skill routes before doing any work. Read the lis
 - `.claude/skills/docklist-react-ui-patterns/SKILL.md`
 - `.claude/skills/docklist-tailwind-design-system/SKILL.md`
 - `.claude/skills/docklist-baseline-ui/SKILL.md`
+- `.claude/skills/docklist-ui-visual-validator/SKILL.md`
 - `.claude/skills/docklist-fixing-accessibility/SKILL.md`
   **Also add** `.claude/skills/docklist-react-component-performance/SKILL.md` when render complexity, repeated components, heavy JSX, or interaction state is involved.
   **Required output:** component diff + accessibility check + design token audit
