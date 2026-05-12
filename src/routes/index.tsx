@@ -3,7 +3,6 @@ import * as React from "react";
 import {
   AppShell,
   Card,
-  PageHeader,
   ActionButton,
   IconButton,
   DrawerShell,
@@ -21,9 +20,11 @@ import {
   AlertTriangle,
   Calendar,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
   Megaphone,
   Plus,
-  ClockArrowUp,
+  Clock3,
   MoreHorizontal,
 } from "lucide-react";
 
@@ -95,51 +96,59 @@ function Home() {
 
   return (
     <AppShell>
-      <PageHeader
-        title={
-          <>
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="dock-section-eyebrow">Dashboard</div>
+          <h1 className="mt-2 text-balance text-[2rem] font-semibold tracking-tight md:text-[2.125rem]">
             Good morning, Alex <span>👋</span>
-          </>
-        }
-        subtitle="Here's what's happening across Harbour View Hotel this week."
-        actions={
-          <>
-            <ActionButton icon={Calendar}>Publish Rota</ActionButton>
-            <IconButton icon={MoreHorizontal} label="More actions" />
-          </>
-        }
-      />
+          </h1>
+          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
+            Here's what's happening across Harbour View Hotel this week.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
+          <ActionButton icon={Calendar}>Publish Rota</ActionButton>
+          <IconButton icon={MoreHorizontal} label="More actions" />
+        </div>
+      </div>
 
-      <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-9 p-6">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-4">
-            WEEKLY OVERVIEW
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
+        <Card className="p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="dock-section-eyebrow">Weekly overview</div>
+            <div className="text-xs text-muted-foreground">Live rota health</div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
             {overview.map((m) => (
-              <div key={m.label} className="flex flex-col items-start">
+              <div key={m.label} className="flex min-w-0 flex-col gap-2">
                 <div
-                  className={`h-12 w-12 rounded-full flex items-center justify-center ${toneBg[m.tone]}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-[14px] ${toneBg[m.tone]}`}
                 >
-                  <m.icon className="h-5 w-5" />
+                  <m.icon className="h-[18px] w-[18px]" />
                 </div>
-                <div className="mt-3 text-xs text-muted-foreground">{m.label}</div>
-                <div className="mt-1 text-2xl font-bold tracking-tight">{m.value}</div>
+                <div className="text-[11px] font-medium tracking-wide text-muted-foreground">
+                  {m.label}
+                </div>
+                <div className="text-[24px] font-semibold tracking-tight">{m.value}</div>
                 <div
-                  className={`mt-1 text-xs flex items-center gap-1 ${m.up ? "text-success" : "text-danger"}`}
+                  className={`flex items-center gap-1.5 text-xs font-medium ${
+                    m.up ? "text-success" : "text-danger"
+                  }`}
                 >
-                  <ClockArrowUp className={`h-3 w-3 ${m.up ? "" : "rotate-180"}`} /> {m.delta}
+                  {m.up ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                  <span>{m.delta}</span>
                 </div>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-3 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
-            ATTENTION
+        <Card className="p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="dock-section-eyebrow">Attention</div>
+            <StatusBadge tone="warning">5</StatusBadge>
           </div>
-          <div className="space-y-2.5">
+          <div className="mt-3 space-y-2.5">
             {[
               { t: "3 Shifts are understaffed", s: "Today · View shifts" },
               { t: "2 Timesheets need approval", s: "Overdue · Review now" },
@@ -147,12 +156,12 @@ function Home() {
               <button
                 key={a.t}
                 onClick={() => setAlertOpen(true)}
-                className="w-full text-left flex items-start gap-3 rounded-xl border border-border p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+                className="flex w-full items-start gap-3 rounded-[10px] border border-border px-3 py-3 text-left transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               >
-                <div className="h-8 w-8 rounded-lg bg-warning-soft text-warning flex items-center justify-center shrink-0">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-warning/10 bg-warning-soft text-warning">
                   <AlertTriangle className="h-4 w-4" />
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">{a.t}</div>
                   <div className="text-xs text-muted-foreground">{a.s}</div>
                 </div>
@@ -162,205 +171,216 @@ function Home() {
           </div>
           <button
             type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand"
           >
             View all alerts (5) <ArrowRight className="h-3 w-3" />
           </button>
         </Card>
+      </div>
 
-        {/* Row 2 */}
-        <Card className="col-span-12 lg:col-span-4 p-5">
-          <div className="flex items-center justify-between text-[11px] font-semibold tracking-widest text-muted-foreground mb-2">
-            <span>LABOUR WATCH</span>
-            <span className="text-muted-foreground/70">vs target</span>
-          </div>
-          <div className="grid grid-cols-5 gap-3 items-center">
-            <div className="col-span-2 relative h-32 flex items-end justify-center">
-              <svg viewBox="0 0 120 70" className="w-full">
-                <path
-                  d="M10,60 A50,50 0 0 1 110,60"
-                  fill="none"
-                  stroke="oklch(0.92 0.01 240)"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M10,60 A50,50 0 0 1 95,28"
-                  fill="none"
-                  stroke="var(--brand)"
-                  strokeWidth="10"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute bottom-0 text-center">
-                <div className="text-2xl font-bold">28.6%</div>
-                <div className="text-[10px] text-muted-foreground">Target: 30.0%</div>
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-4">
+            <div className="flex items-center gap-2">
+              <div className="dock-section-eyebrow">Labour watch</div>
+              <div className="grow" />
+              <div className="text-xs text-muted-foreground">vs target</div>
+            </div>
+            <div className="mt-4 flex items-center gap-4">
+              <div className="relative flex h-[100px] w-[160px] items-end justify-center">
+                <svg viewBox="0 0 120 70" className="w-full">
+                  <path
+                    d="M10,60 A50,50 0 0 1 110,60"
+                    fill="none"
+                    stroke="oklch(0.92 0.01 240)"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M10,60 A50,50 0 0 1 95,28"
+                    fill="none"
+                    stroke="var(--brand)"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute bottom-0 text-center">
+                  <div className="text-[24px] font-semibold tracking-tight">28.6%</div>
+                  <div className="text-[10px] text-muted-foreground">Target: 30.0%</div>
+                </div>
+              </div>
+              <div className="min-w-0 flex-1 space-y-3 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground">Total Labour Cost</div>
+                  <div className="text-[18px] font-semibold">£18,420</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Sales</div>
+                  <div className="text-[18px] font-semibold">£64,520</div>
+                </div>
+                <div>
+                  <div className="text-xs text-muted-foreground">Projected Labour %</div>
+                  <div className="text-[18px] font-semibold text-brand">28.6%</div>
+                </div>
               </div>
             </div>
-            <div className="col-span-3 text-sm space-y-2">
-              <div>
-                <div className="text-xs text-muted-foreground">Total Labour Cost</div>
-                <div className="font-semibold">£18,420</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Sales</div>
-                <div className="font-semibold">£64,520</div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground">Projected Labour %</div>
-                <div className="font-semibold text-brand">28.6%</div>
-              </div>
-            </div>
           </div>
-          <button
-            type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-          >
-            Go to Labour Watch <ArrowRight className="h-3 w-3" />
-          </button>
+          <div className="border-t border-border px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            >
+              Go to Labour Watch <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-4 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
-            UPCOMING ROTA PUBLISH
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-brand-soft text-brand flex items-center justify-center">
-              <Calendar className="h-5 w-5" />
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-4">
+            <div className="dock-section-eyebrow">Upcoming rota publish</div>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-brand-soft text-brand">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-xs text-muted-foreground">Week commencing</div>
+                <div className="text-[22px] font-semibold tracking-tight">19 May 2025</div>
+              </div>
             </div>
-            <div>
-              <div className="text-xs text-muted-foreground">Week commencing</div>
-              <div className="text-lg font-bold">19 May 2025</div>
+            <div className="mt-4">
+              <div className="text-xs text-muted-foreground">Rota due by</div>
+              <div className="text-[15px] font-semibold">Fri, 16 May 12:00</div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                <div className="h-full w-2/3 bg-brand" />
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">2 days remaining</div>
             </div>
           </div>
-          <div className="mt-4 text-xs text-muted-foreground">Rota due by</div>
-          <div className="text-sm font-semibold">Fri, 16 May 12:00</div>
-          <div className="mt-3 h-2 rounded-full bg-muted overflow-hidden">
-            <div className="h-full w-2/3 bg-brand" />
+          <div className="border-t border-border px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            >
+              Go to Rota <ArrowRight className="h-3 w-3" />
+            </button>
           </div>
-          <div className="mt-2 text-xs text-muted-foreground">2 days remaining</div>
-          <button
-            type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-          >
-            Go to Rota <ArrowRight className="h-3 w-3" />
-          </button>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-4 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-semibold tracking-widest text-muted-foreground">
-              PENDING LEAVE APPROVALS
-            </span>
-            <span className="rounded-md bg-warning-soft text-warning text-[11px] font-bold px-2 py-0.5">
-              3
-            </span>
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="dock-section-eyebrow">Pending leave approvals</div>
+              <StatusBadge tone="warning">3</StatusBadge>
+            </div>
           </div>
-          <div className="space-y-3">
+          <div className="divide-y divide-border">
             {[
               { n: "Sophie Carter", d: "18 – 20 May 2025  (3 days)", img: 5 },
               { n: "Daniel Mitchell", d: "26 – 27 May 2025  (2 days)", img: 12 },
               { n: "Priya Patel", d: "31 May – 02 Jun 2025  (3 days)", img: 47 },
             ].map((p) => (
-              <div key={p.n} className="flex items-center gap-3">
+              <div key={p.n} className="flex items-center gap-3 px-5 py-3.5">
                 <img
                   src={`https://i.pravatar.cc/64?img=${p.img}`}
                   className="h-8 w-8 rounded-full object-cover"
                   alt=""
                 />
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium truncate">{p.n}</div>
                   <div className="text-xs text-muted-foreground truncate">{p.d}</div>
                 </div>
-                <span className="text-xs text-brand font-medium">Annual Leave</span>
+                <span className="text-xs font-medium text-brand">Annual Leave</span>
                 <ArrowRight className="h-4 w-4 text-muted-foreground" />
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-          >
-            Review leave requests <ArrowRight className="h-3 w-3" />
-          </button>
-        </Card>
-
-        {/* Row 3 */}
-        <Card className="col-span-12 md:col-span-6 lg:col-span-3 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-semibold tracking-widest text-muted-foreground">
-              UNAPPROVED TIMESHEETS
-            </span>
-            <span className="rounded-md bg-warning-soft text-warning text-[11px] font-bold px-2 py-0.5">
-              5
-            </span>
+          <div className="border-t border-border px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            >
+              Review leave requests <ArrowRight className="h-3 w-3" />
+            </button>
           </div>
-          <div className="space-y-3">
+        </Card>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="dock-section-eyebrow">Unapproved timesheets</div>
+              <StatusBadge tone="warning">5</StatusBadge>
+            </div>
+          </div>
+          <div className="divide-y divide-border">
             {[
               { n: "Emma Johnson", d: "5 – 11 May 2025", t: "2 days late", img: 9 },
               { n: "Liam O'Connor", d: "5 – 11 May 2025", t: "1 day late", img: 13 },
               { n: "Olivia Bennett", d: "5 – 11 May 2025", t: "1 day late", img: 16 },
             ].map((p) => (
-              <div key={p.n} className="flex items-center gap-3">
+              <div key={p.n} className="flex items-center gap-3 px-5 py-3.5">
                 <img
                   src={`https://i.pravatar.cc/64?img=${p.img}`}
                   className="h-8 w-8 rounded-full object-cover"
                   alt=""
                 />
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium truncate">{p.n}</div>
                   <div className="text-xs text-muted-foreground">{p.d}</div>
                 </div>
-                <span className="text-[11px] text-warning font-medium">{p.t}</span>
+                <span className="text-[11px] font-medium text-warning">{p.t}</span>
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-          >
-            Review timesheets <ArrowRight className="h-3 w-3" />
-          </button>
+          <div className="border-t border-border px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            >
+              Review timesheets <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </Card>
 
-        <Card className="col-span-12 md:col-span-6 lg:col-span-3 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-semibold tracking-widest text-muted-foreground">
-              STAFF ON SHIFT TODAY
-            </span>
-            <span className="rounded-md bg-muted text-foreground text-[11px] font-bold px-2 py-0.5">
-              28
-            </span>
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="dock-section-eyebrow">Staff on shift today</div>
+              <StatusBadge tone="muted">28</StatusBadge>
+            </div>
           </div>
-          <div className="space-y-3">
+          <div className="divide-y divide-border">
             {[
               ["Front of House", 12],
               ["Kitchen", 9],
               ["Housekeeping", 4],
               ["Bar", 3],
             ].map(([t, n]) => (
-              <div key={t as string} className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
+              <div key={t as string} className="flex items-center gap-3 px-5 py-3.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-muted text-muted-foreground">
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <div className="text-sm flex-1">{t}</div>
+                <div className="flex-1 text-sm">{t}</div>
                 <div className="text-sm font-semibold">{n}</div>
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-          >
-            View live board <ArrowRight className="h-3 w-3" />
-          </button>
+          <div className="border-t border-border px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            >
+              View live board <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </Card>
 
-        <Card className="col-span-12 md:col-span-6 lg:col-span-3 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
-            RECENT ANNOUNCEMENTS
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-3">
+            <div className="dock-section-eyebrow">Recent announcements</div>
           </div>
-          <div className="space-y-3">
+          <div className="divide-y divide-border">
             {[
               {
                 t: "New Summer Menu Launch",
@@ -381,48 +401,50 @@ function Home() {
                 tone: "purple",
               },
             ].map((a) => (
-              <div key={a.t} className="flex gap-3">
+              <div key={a.t} className="flex gap-3 px-5 py-3.5">
                 <div
-                  className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${toneBg[a.tone]}`}
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[12px] ${toneBg[a.tone]}`}
                 >
                   <Megaphone className="h-4 w-4" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">{a.t}</div>
                   <div className="text-xs text-muted-foreground">{a.s}</div>
                 </div>
-                <div className="text-[11px] text-muted-foreground whitespace-nowrap">{a.a}</div>
+                <div className="text-[11px] whitespace-nowrap text-muted-foreground">{a.a}</div>
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-          >
-            View all announcements <ArrowRight className="h-3 w-3" />
-          </button>
+          <div className="border-t border-border px-5 py-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+            >
+              View all announcements <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
         </Card>
 
-        <Card className="col-span-12 md:col-span-6 lg:col-span-3 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
-            QUICK ACTIONS
+        <Card className="p-0 overflow-hidden">
+          <div className="px-5 pt-5 pb-3">
+            <div className="dock-section-eyebrow">Quick actions</div>
           </div>
-          <div className="space-y-2">
+          <div className="divide-y divide-border">
             {[
               { t: "Add Shift", s: "Create an open shift", icon: Calendar },
               { t: "Add Leave Request", s: "Add a new leave request", icon: Plus },
-              { t: "Clock In / Out", s: "Record time for a team member", icon: ClockArrowUp },
+              { t: "Clock In / Out", s: "Record time for a team member", icon: Clock3 },
               { t: "Add Announcement", s: "Share news with your team", icon: Megaphone },
             ].map((a) => (
               <button
                 key={a.t}
                 onClick={() => setQuickOpen({ t: a.t, s: a.s })}
-                className="w-full flex items-center gap-3 rounded-xl border border-border p-2.5 text-left hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+                className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               >
-                <div className="h-8 w-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center">
+                <div className="flex h-8 w-8 items-center justify-center rounded-[12px] bg-brand-soft text-brand">
                   <a.icon className="h-4 w-4" />
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <div className="text-sm font-medium">{a.t}</div>
                   <div className="text-[11px] text-muted-foreground">{a.s}</div>
                 </div>
@@ -431,6 +453,10 @@ function Home() {
             ))}
           </div>
         </Card>
+      </div>
+
+      <div className="mt-7 text-center text-xs text-muted-foreground">
+        All times shown in Europe/London (GMT+1)
       </div>
 
       {/* Alert detail drawer */}
