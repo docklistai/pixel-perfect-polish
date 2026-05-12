@@ -30,26 +30,18 @@ export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <aside
-      className="hidden md:flex w-64 shrink-0 flex-col text-sidebar-foreground"
-      style={{ background: "var(--gradient-sidebar)" }}
-    >
-      <div className="px-7 pt-7 pb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Docklist</h1>
-      </div>
+    <aside className="hidden md:flex dock-sidebar shrink-0">
+      <div className="dock-sidebar-brand">Docklist</div>
 
-      <nav className="flex-1 px-4 space-y-1">
+      <nav className="dock-sidebar-nav" aria-label="Primary">
         {items.map(({ to, label, icon: Icon }) => {
           const active = to === "/" ? path === "/" : path.startsWith(to);
           return (
             <Link
               key={to}
               to={to}
-              className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-sidebar-active text-sidebar-active-foreground shadow-sm"
-                  : "text-sidebar-foreground/85 hover:bg-white/5"
-              }`}
+              aria-current={active ? "page" : undefined}
+              className="dock-sidebar-item"
             >
               <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.2 : 1.8} />
               <span>{label}</span>
@@ -58,29 +50,30 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-4 pb-4 space-y-3">
-        <button className="w-full flex items-center justify-between gap-3 rounded-xl bg-white/5 px-3 py-2.5 text-left hover:bg-white/10 transition">
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center">
-              <Building2 className="h-4 w-4" />
+      <div className="dock-sidebar-footer">
+        <button
+          type="button"
+          className="dock-sidebar-workspace"
+          aria-label="Switch workspace"
+        >
+          <div className="dock-sidebar-workspace-meta">
+            <div className="dock-sidebar-workspace-icon">
+              <Building2 className="h-4 w-4" aria-hidden />
             </div>
-            <div>
-              <div className="text-sm font-medium text-white">Harbour View Hotel</div>
-              <div className="text-[11px] text-sidebar-muted">Main Workspace</div>
+            <div className="min-w-0">
+              <div className="dock-sidebar-workspace-name">Harbour View Hotel</div>
+              <div className="dock-sidebar-workspace-sub">Main Workspace</div>
             </div>
           </div>
-          <ChevronDown className="h-4 w-4 text-sidebar-muted" />
+          <ChevronDown className="h-4 w-4 text-sidebar-muted" aria-hidden />
         </button>
 
-        <a
-          className="flex items-center justify-between rounded-xl border border-sidebar-border/60 px-3 py-2.5 hover:bg-white/5 transition cursor-pointer"
-          href="#"
-        >
-          <div className="flex items-center gap-2.5">
-            <HelpCircle className="h-4 w-4" />
-            <div>
-              <div className="text-xs font-semibold text-white">Need help?</div>
-              <div className="text-[11px] text-sidebar-muted">Visit our Help Centre</div>
+        <a className="dock-sidebar-help" href="#">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <HelpCircle className="h-4 w-4 shrink-0" aria-hidden />
+            <div className="min-w-0">
+              <div className="dock-sidebar-help-title">Need help?</div>
+              <div className="dock-sidebar-help-sub">Visit our Help Centre</div>
             </div>
           </div>
         </a>

@@ -60,7 +60,7 @@
   --radius: 0.75rem;
 
   /* page surfaces */
-  --background: oklch(0.99 0.004 230);
+  --background: #f6f8fb;
   --foreground: oklch(0.19 0.035 250);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.19 0.035 250);
@@ -131,7 +131,7 @@
     font-family: var(--font-sans);
   }
   body {
-    background: var(--gradient-page);
+    background: var(--background);
     color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
   }
@@ -163,6 +163,305 @@
 }
 
 @layer components {
+  #main-content {
+    padding: 28px 32px 60px;
+  }
+
+  #main-content + footer {
+    padding: 0 32px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+
+  .dock-sidebar {
+    width: 240px;
+    background: linear-gradient(180deg, #0b1a2e 0%, #091525 100%);
+    color: #dce5f1;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 16px 16px;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .dock-sidebar-brand {
+    padding: 0 12px 22px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .dock-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .dock-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: #b7c4d9;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    transition:
+      background-color 120ms ease,
+      color 120ms ease,
+      box-shadow 120ms ease,
+      transform 120ms ease;
+  }
+
+  .dock-sidebar-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: #eef3f9;
+  }
+
+  .dock-sidebar-item[aria-current="page"] {
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--brand) 28%, transparent),
+      color-mix(in oklch, var(--brand) 8%, transparent)
+    );
+    color: #fff;
+    box-shadow: inset 2px 0 0 var(--brand);
+  }
+
+  .dock-sidebar-item svg {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+  }
+
+  .dock-sidebar-footer {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 10px;
+  }
+
+  .dock-sidebar-workspace,
+  .dock-sidebar-help {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.04);
+    color: #dce5f1;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease;
+  }
+
+  .dock-sidebar-workspace:hover,
+  .dock-sidebar-help:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .dock-sidebar-workspace-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .dock-sidebar-workspace-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    color: #c3cee0;
+    flex: 0 0 auto;
+  }
+
+  .dock-sidebar-workspace-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .dock-sidebar-workspace-sub {
+    font-size: 11px;
+    color: #91a0b7;
+    line-height: 1.2;
+  }
+
+  .dock-sidebar-help-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .dock-sidebar-help-sub {
+    font-size: 11px;
+    color: #91a0b7;
+  }
+
+  .dock-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 72px;
+    padding: 0 32px;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dock-topbar-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--foreground);
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-topbar-pill svg {
+    flex: 0 0 auto;
+  }
+
+  .dock-topbar-workspace {
+    min-width: 210px;
+  }
+
+  .dock-topbar-date {
+    min-width: 230px;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .dock-topbar-date-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.15;
+  }
+
+  .dock-topbar-date-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
+
+  .dock-topbar-arrow {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    color: var(--muted-foreground);
+  }
+
+  .dock-topbar-arrow:hover {
+    background: var(--muted);
+    color: var(--foreground);
+  }
+
+  .dock-topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 380px;
+    max-width: 380px;
+    min-width: 220px;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--muted-foreground);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-topbar-search input {
+    border: 0;
+    outline: 0;
+    background: transparent;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .dock-topbar-search input::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  .dock-topbar-shortcuts {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+  }
+
+  .dock-topbar-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--foreground);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-topbar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .dock-topbar-user-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.2;
+  }
+
+  .dock-topbar-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .dock-topbar-user-sub {
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+
   .dock-card {
     border-radius: 18px;
     border: 1px solid color-mix(in oklch, var(--border) 88%, white);
@@ -229,5 +528,34 @@
 
   .dock-table tbody td {
     border-bottom: 1px solid color-mix(in oklch, var(--border) 72%, white);
+  }
+
+  @media (max-width: 767px) {
+    #main-content {
+      padding: 20px 16px 48px;
+    }
+
+    #main-content + footer {
+      padding: 0 16px 16px;
+    }
+
+    .dock-topbar {
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: auto;
+      padding: 12px 16px;
+    }
+
+    .dock-topbar-workspace,
+    .dock-topbar-date {
+      min-width: 0;
+    }
+
+    .dock-topbar-search {
+      order: 10;
+      width: 100%;
+      max-width: none;
+      flex-basis: 100%;
+    }
   }
 }
