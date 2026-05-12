@@ -177,7 +177,7 @@ function OpsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-5">
         {stats.map((s) => (
           <Card key={s.l} className="rounded-2xl p-4">
             <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ function OpsPage() {
             <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
               Today <ChevronDown className="h-3 w-3" />
             </button>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex flex-wrap items-center gap-2">
               <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 All categories <ChevronDown className="h-3 w-3" />
               </button>

@@ -261,7 +261,7 @@ function TimePage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((s) => (
               <Card key={s.label} className="rounded-2xl p-4">
                 <div className="flex items-center gap-3">
@@ -317,7 +317,8 @@ function TimePage() {
               </div>
             </div>
 
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-[1100px] w-full text-sm">
               <thead>
                 <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
                   <th className="py-2 px-2 text-left w-8">
@@ -414,7 +415,8 @@ function TimePage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
 
             <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
               <span>Showing 1 to 8 of 20 staff</span>

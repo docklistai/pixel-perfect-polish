@@ -7,6 +7,7 @@ import {
   ActionButton,
   FeedbackBanner,
   EmptyState,
+  StatusBadge,
 } from "@/components/dl";
 import {
   LayoutGrid,
@@ -109,12 +110,12 @@ function SettingsPage() {
         />
       )}
 
-      <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-3 rounded-2xl p-3 self-start">
-          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground px-3 py-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)_300px]">
+        <Card className="rounded-3xl p-2.5 self-start lg:sticky lg:top-6">
+          <div className="px-3 py-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-muted-foreground">
             SETTINGS
           </div>
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             {tabs.map((t) => {
               const active = activeTab === t.t;
               return (
@@ -122,7 +123,11 @@ function SettingsPage() {
                   key={t.t}
                   type="button"
                   onClick={() => setActiveTab(t.t)}
-                  className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition ${active ? "bg-brand-soft" : "hover:bg-muted/50"}`}
+                  className={`w-full flex items-center gap-3 rounded-2xl border px-3 py-2.5 text-left transition ${
+                    active
+                      ? "border-brand/15 bg-brand-soft/70 text-brand shadow-[var(--shadow-card)]"
+                      : "border-transparent hover:bg-muted/60"
+                  }`}
                 >
                   <t.icon
                     className={`h-4 w-4 ${active ? "text-brand" : "text-muted-foreground"}`}
@@ -138,67 +143,77 @@ function SettingsPage() {
         </Card>
 
         {activeTab !== "Workspace" ? (
-          <Card className="col-span-12 lg:col-span-6 rounded-2xl p-6">
+          <Card className="rounded-3xl p-6">
             <EmptyState
               title={`${activeTab} settings`}
               description="This section is a placeholder in the desktop prototype. Workspace tab is fully wired."
             />
           </Card>
         ) : (
-          <Card className="col-span-12 lg:col-span-6 rounded-2xl p-6">
-            <div onChange={markDirty}>
-              <div className="text-lg font-semibold">Workspace</div>
-              <p className="text-xs text-muted-foreground">
-                Update your workspace details and default settings.
-              </p>
+          <Card className="rounded-3xl p-5 lg:p-6">
+            <div onChange={markDirty} className="space-y-5">
+              <div>
+                <div className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">
+                  Workspace
+                </div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Update your workspace details and default settings.
+                </p>
+              </div>
 
-              <div className="mt-5 space-y-4">
-                <div className="text-sm font-semibold">Workspace details</div>
-                {[
-                  ["Workspace name", "Harbour View Hotel"],
-                  ["Address", "1 Harbour Street, Brighton BN1 1AA, United Kingdom"],
-                ].map(([l, v]) => (
-                  <div key={l}>
-                    <label className="text-xs font-medium text-muted-foreground">{l}</label>
-                    <input
-                      defaultValue={v}
-                      className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
-                    />
-                  </div>
-                ))}
+              <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
+                <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+                  Workspace details
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  {[
+                    ["Workspace name", "Harbour View Hotel"],
+                    ["Address", "1 Harbour Street, Brighton BN1 1AA, United Kingdom"],
+                  ].map(([l, v], index) => (
+                    <div key={l} className={index === 1 ? "md:col-span-2" : ""}>
+                      <label className="text-xs font-medium text-muted-foreground">{l}</label>
+                      <input
+                        defaultValue={v}
+                        className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
+                      />
+                    </div>
+                  ))}
+                </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Timezone</label>
-                  <button className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm flex items-center justify-between">
+                  <button className="mt-1 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm">
                     Europe/London (GMT+1) <ChevronDown className="h-4 w-4" />
                   </button>
-                  <div className="text-[11px] text-muted-foreground mt-1">
+                  <div className="mt-1 text-[11px] text-muted-foreground">
                     All times in Docklist are shown in this timezone.
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 space-y-4">
-                <div className="text-sm font-semibold">Shift defaults</div>
-                <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
+                <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+                  Shift defaults
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div>
                     <label className="text-xs text-muted-foreground">Default shift start</label>
                     <input
                       defaultValue="09:00"
-                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground">Default shift end</label>
                     <input
                       defaultValue="17:00"
-                      className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground">Default unpaid break</label>
-                    <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
+                    <div className="mt-1 flex overflow-hidden rounded-xl border border-border">
                       <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
-                      <span className="bg-muted px-3 py-2 text-xs text-muted-foreground flex items-center">
+                      <span className="flex items-center bg-muted px-3 py-2 text-xs text-muted-foreground">
                         mins ▾
                       </span>
                     </div>
@@ -215,34 +230,36 @@ function SettingsPage() {
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Overtime threshold</label>
-                  <button className="mt-1 w-full rounded-lg border border-border bg-card px-3 py-2 text-sm flex items-center justify-between">
+                  <button className="mt-1 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm">
                     <span>
-                      8 <span className="text-muted-foreground ml-2">hours per day</span>
+                      8 <span className="ml-2 text-muted-foreground">hours per day</span>
                     </span>{" "}
                     <ChevronDown className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              <div className="mt-6 space-y-4">
-                <div className="text-sm font-semibold">Break rules</div>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
+                <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+                  Break rules
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div>
                     <label className="text-xs text-muted-foreground">
                       Minimum break for shifts over
                     </label>
-                    <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
+                    <div className="mt-1 flex overflow-hidden rounded-xl border border-border">
                       <input defaultValue="6" className="w-full px-3 py-2 text-sm outline-none" />
-                      <span className="bg-muted px-3 py-2 text-xs text-muted-foreground">
+                      <span className="flex items-center bg-muted px-3 py-2 text-xs text-muted-foreground">
                         hours
                       </span>
                     </div>
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground">Break duration</label>
-                    <div className="mt-1 flex rounded-lg border border-border overflow-hidden">
+                    <div className="mt-1 flex overflow-hidden rounded-xl border border-border">
                       <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
-                      <span className="bg-muted px-3 py-2 text-xs text-muted-foreground">
+                      <span className="flex items-center bg-muted px-3 py-2 text-xs text-muted-foreground">
                         mins ▾
                       </span>
                     </div>
@@ -259,8 +276,10 @@ function SettingsPage() {
                 </div>
               </div>
 
-              <div className="mt-6 space-y-4">
-                <div className="text-sm font-semibold">Approval settings</div>
+              <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
+                <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+                  Approval settings
+                </div>
                 <div className="flex items-center gap-3">
                   <Toggle />
                   <div>
@@ -284,21 +303,29 @@ function SettingsPage() {
           </Card>
         )}
 
-        <div className="col-span-12 lg:col-span-3 space-y-4">
-          <Card className="rounded-2xl p-5">
-            <div className="text-sm font-semibold">Payroll-ready export</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Configure how data is prepared for payroll.
-            </p>
+        <div className="space-y-4">
+          <Card className="rounded-3xl p-4 lg:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-semibold">Payroll-ready export</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Export only. No live sync. Preview payroll-ready data before exporting.
+                </p>
+              </div>
+              <StatusBadge tone="info">Preview</StatusBadge>
+            </div>
+            <div className="mt-3 rounded-2xl border border-border bg-card/70 px-3 py-2 text-[11px] text-muted-foreground">
+              Configured export · Payroll-ready only
+            </div>
             <div className="mt-3">
               <label className="text-xs text-muted-foreground">Week starts on</label>
-              <button className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm flex items-center justify-between">
+              <button className="mt-1 flex w-full items-center justify-between rounded-xl border border-border px-3 py-2 text-sm">
                 Monday <ChevronDown className="h-4 w-4" />
               </button>
             </div>
             <div className="mt-3">
               <label className="text-xs text-muted-foreground">Export pay period</label>
-              <button className="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm flex items-center justify-between">
+              <button className="mt-1 flex w-full items-center justify-between rounded-xl border border-border px-3 py-2 text-sm">
                 Weekly <ChevronDown className="h-4 w-4" />
               </button>
             </div>
@@ -318,9 +345,9 @@ function SettingsPage() {
             </div>
           </Card>
 
-          <Card className="rounded-2xl p-5">
+          <Card className="rounded-3xl p-4 lg:p-5">
             <div className="text-sm font-semibold">Brand preview</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
               See how your brand appears in the staff app.
             </p>
             <div className="mt-3 rounded-2xl border border-border overflow-hidden">
@@ -382,7 +409,7 @@ function SettingsPage() {
               </div>
             </div>
             <button className="mt-3 w-full rounded-xl border border-border py-2 text-xs font-medium">
-              ✎ Customize branding
+              Preview branding
             </button>
           </Card>
         </div>

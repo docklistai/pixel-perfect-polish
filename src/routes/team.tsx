@@ -138,7 +138,7 @@ function TeamPage() {
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {top.map((t) => (
               <Card key={t.l} className="rounded-2xl p-4 flex items-center gap-3">
                 <div
@@ -160,14 +160,14 @@ function TeamPage() {
 
           <Card className="rounded-2xl">
             <div className="flex items-center justify-between px-5 pt-4">
-              <div className="flex gap-5 text-sm">
+              <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
                 <button className="pb-3 border-b-2 border-brand text-brand font-semibold">
                   All announcements
                 </button>
                 <button className="pb-3 text-muted-foreground">Pinned</button>
                 <button className="pb-3 text-muted-foreground">My acknowledgements</button>
               </div>
-              <div className="flex items-center gap-2 pb-3">
+              <div className="flex flex-wrap items-center gap-2 pb-3">
                 <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                   <Users className="h-3.5 w-3.5" /> Filter by audience{" "}
                   <ChevronDown className="h-3 w-3" />

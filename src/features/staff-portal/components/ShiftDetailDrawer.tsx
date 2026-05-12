@@ -40,6 +40,7 @@ export function ShiftDetailDrawer({
       onOpenChange={(open) => !open && onClose()}
       title="Shift detail"
       description={shift.dayLabel}
+      width="lg"
       footer={
         isChanged && !acknowledged ? (
           <ActionButton onClick={() => setAcknowledged(true)} className="w-full justify-center">

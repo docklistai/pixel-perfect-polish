@@ -153,7 +153,9 @@ export function PortalShell({
           tabIndex={-1}
           className="flex-1 px-4 md:px-8 py-4 md:py-6 pb-[calc(env(safe-area-inset-bottom)+96px)] md:pb-10 focus:outline-none"
         >
-          <div className="mx-auto w-full max-w-[430px] md:max-w-[460px]">{children}</div>
+          <div className="mx-auto w-full max-w-[430px] md:max-w-[620px] lg:max-w-[760px] xl:max-w-[880px]">
+            {children}
+          </div>
         </main>
 
         {/* Mobile bottom nav */}

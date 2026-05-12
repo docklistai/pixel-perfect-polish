@@ -58,7 +58,7 @@ export function LeaveTab() {
           </div>
           <span className="text-[11px] text-muted-foreground">As of today</span>
         </div>
-        <dl className="mt-3 grid grid-cols-3 gap-2.5 text-center">
+        <dl className="mt-3 grid grid-cols-1 gap-2.5 text-center sm:grid-cols-3">
           {mockLeaveBalances.map((b) => (
             <div key={b.label} className="rounded-2xl border border-border bg-muted/40 py-3 px-2">
               <dt className="text-[11px] text-muted-foreground">{b.label}</dt>
@@ -193,6 +193,7 @@ export function LeaveTab() {
         onOpenChange={setOpen}
         title={`New request · ${kindLabel[kind]}`}
         description="Mock form — nothing is submitted."
+        width="lg"
         footer={
           <>
             <ActionButton variant="secondary" onClick={() => setOpen(false)}>
@@ -242,6 +243,7 @@ export function LeaveTab() {
         onOpenChange={(o) => !o && setDetail(null)}
         title={detail?.title ?? ""}
         description={detail?.submitted}
+        width="lg"
         footer={<ActionButton onClick={() => setDetail(null)}>Close</ActionButton>}
       >
         {detail && (

@@ -29,6 +29,7 @@ export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: 
       onOpenChange={(o) => !o && onClose()}
       title="Notifications"
       description="Updates about your shifts, leave and team."
+      width="lg"
     >
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-2">

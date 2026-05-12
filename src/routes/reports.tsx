@@ -121,7 +121,7 @@ function ReportsPage() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5 mb-5">
         {kpis.map((k) => (
           <Card key={k.l} className="rounded-2xl p-4">
             <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-8 rounded-2xl p-5">
+        <Card className="col-span-12 lg:col-span-8 rounded-2xl p-4 lg:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               LABOUR % VS SALES ⓘ
@@ -261,7 +261,7 @@ function ReportsPage() {
           </div>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-5">
+        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-4 lg:p-5">
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="h-4 w-4 text-warning" />
             <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
@@ -321,7 +321,7 @@ function ReportsPage() {
         </Card>
 
         {/* Bottom row */}
-        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-5">
+        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-4 lg:p-5">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
             TIME APPROVAL TREND
           </div>
@@ -377,7 +377,7 @@ function ReportsPage() {
           </button>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-5">
+        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-4 lg:p-5">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
             ABSENCE BREAKDOWN ⓘ
           </div>

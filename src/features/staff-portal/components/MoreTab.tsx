@@ -138,6 +138,7 @@ function ProfileDrawer({ open, onClose }: { open: boolean; onClose: () => void }
       onOpenChange={(o) => !o && onClose()}
       title="Profile"
       description="Your details and manager contact"
+      width="lg"
     >
       <div className="space-y-4">
         <DashboardCard className="p-4">
@@ -204,6 +205,7 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
       onOpenChange={(o) => !o && onClose()}
       title="Team"
       description="Who's on today and team noticeboard"
+      width="lg"
       footer={
         <ActionButton
           className="w-full justify-center"
@@ -283,6 +285,7 @@ function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void
       onOpenChange={(o) => !o && onClose()}
       title="Documents"
       description="Read-only mock — documents shared with you."
+      width="lg"
     >
       <div className="space-y-4">
         <div className="rounded-xl bg-muted p-1 grid grid-cols-4 text-[11px] font-medium">
@@ -336,6 +339,7 @@ function SettingsDrawer({ open, onClose }: { open: boolean; onClose: () => void 
       onOpenChange={(o) => !o && onClose()}
       title="Settings"
       description="Personal app preferences (mock)"
+      width="lg"
     >
       <div className="space-y-4">
         <Group title="Preferences">
@@ -408,6 +412,7 @@ function HelpDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
       onOpenChange={(o) => !o && onClose()}
       title="Help & support"
       description="Find answers or contact your manager"
+      width="lg"
     >
       <div className="space-y-3">
         <DashboardCard className="p-4">

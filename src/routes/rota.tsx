@@ -480,8 +480,8 @@ function RotaPage() {
           </div>
         </Card>
 
-        <div className="space-y-4">
-          <Card className="p-5">
+        <div className="space-y-3.5">
+          <Card className="p-4">
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm font-semibold">Labour summary</div>
               <StatusBadge tone="muted">Live</StatusBadge>
@@ -537,7 +537,7 @@ function RotaPage() {
             </button>
           </Card>
 
-          <Card className="p-5">
+          <Card className="p-4">
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm font-semibold">Alerts</div>
               <span className="text-xs text-muted-foreground">(6)</span>
@@ -574,7 +574,7 @@ function RotaPage() {
             </button>
           </Card>
 
-          <Card className="p-5">
+          <Card className="p-4">
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm font-semibold">Publish readiness</div>
               <StatusBadge tone={published ? "success" : "warning"}>{published ? "Published" : "Draft"}</StatusBadge>
@@ -606,7 +606,7 @@ function RotaPage() {
             </ActionButton>
           </Card>
 
-          <Card className="p-5">
+          <Card className="p-4">
             <div className="mb-4 flex items-center justify-between">
               <div className="text-sm font-semibold">Role coverage</div>
               <span className="text-xs text-muted-foreground">This week</span>
@@ -635,7 +635,7 @@ function RotaPage() {
             </div>
           </Card>
 
-          <Card className="p-5">
+          <Card className="p-4">
             <div className="mb-4 text-sm font-semibold">Legend</div>
             <div className="grid grid-cols-2 gap-2 text-xs">
               {roleLegend.map((item) => (

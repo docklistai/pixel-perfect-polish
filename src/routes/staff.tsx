@@ -244,9 +244,9 @@ function StaffPage() {
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((s) => (
-            <Card key={s.label} className="rounded-2xl p-4">
+              <Card key={s.label} className="rounded-2xl p-4">
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[s.tone]}`}
@@ -300,7 +300,8 @@ function StaffPage() {
               </button>
             </div>
 
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-[980px] w-full text-sm">
               <thead>
                 <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
                   <th className="text-left py-2.5 px-2">STAFF MEMBER</th>
@@ -370,7 +371,8 @@ function StaffPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
             {filteredRows.length === 0 && (
               <EmptyState
                 title="No staff found"
