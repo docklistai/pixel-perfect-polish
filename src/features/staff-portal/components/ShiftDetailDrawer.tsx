@@ -93,7 +93,7 @@ export function ShiftDetailDrawer({
 
         {shift.shiftNote && (
           <DashboardCard className="p-4">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground inline-flex items-center gap-1.5">
+            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground inline-flex items-center gap-1.5">
               <MessageSquare className="h-3.5 w-3.5" /> SHIFT NOTE
             </div>
             <p className="mt-2 text-sm">{shift.shiftNote}</p>
@@ -103,7 +103,7 @@ export function ShiftDetailDrawer({
         {shift.tasks && shift.tasks.length > 0 && (
           <div>
             <div className="flex items-center justify-between px-1 mb-2">
-              <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground">
                 TASKS
               </div>
               <div className="text-[11px] text-muted-foreground">
@@ -138,7 +138,7 @@ export function ShiftDetailDrawer({
         {shift.teammates && shift.teammates.length > 0 && (
           <DashboardCard className="p-4">
             <div className="flex items-center justify-between">
-              <div className="text-[11px] font-semibold tracking-widest text-muted-foreground inline-flex items-center gap-1.5">
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground inline-flex items-center gap-1.5">
                 <Users className="h-3.5 w-3.5" /> TEAMMATES ON SHIFT ({shift.teammates.length})
               </div>
             </div>

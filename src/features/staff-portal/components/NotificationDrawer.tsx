@@ -82,7 +82,7 @@ export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: 
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+                    <div className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
                       {kindLabel(n.kind)}
                     </div>
                     <div className="mt-0.5 text-sm font-semibold">{n.title}</div>
