@@ -28,7 +28,7 @@ export function AuthValuePanel() {
       </span>
 
       <div className="max-w-2xl space-y-4">
-        <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
+        <h2 className="text-balance text-3xl font-extralight tracking-tight text-foreground md:text-5xl">
           Bring your rota, team, and time back under control.
         </h2>
         <p className="max-w-xl text-pretty text-base leading-7 text-muted-foreground md:text-lg">
@@ -36,7 +36,7 @@ export function AuthValuePanel() {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {valuePillars.map((item) => (
           <div
             key={item.title}

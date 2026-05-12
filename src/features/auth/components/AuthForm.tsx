@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordChecklist } from "./PasswordChecklist";
+import { AuthModeToggle } from "./AuthModeToggle";
+import { AuthNextStepNotice } from "./AuthNextStepNotice";
 import { StaffPortalClaimFields } from "./StaffPortalClaimFields";
 
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -42,7 +44,11 @@ export function AuthForm({ onBackToHome }: AuthFormProps) {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      setAuthError("Sign in is not available yet. Please check back soon.");
+      setAuthError(
+        isSignUp
+          ? "Sign up is not available yet. Please check back soon."
+          : "Sign in is not available yet. Please check back soon.",
+      );
     }, 600);
   };
 
@@ -64,7 +70,6 @@ export function AuthForm({ onBackToHome }: AuthFormProps) {
 
   return (
     <div className="space-y-4 lg:space-y-6">
-      {/* Header */}
       <div className="text-center">
         <Button
           variant="ghost"
@@ -84,7 +89,7 @@ export function AuthForm({ onBackToHome }: AuthFormProps) {
 
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
-            {isSignUp ? "Create your workspace access" : "Sign in to your account"}
+            Secure workspace access
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             {isSignUp ? "Start your team setup" : "Welcome back"}
@@ -96,11 +101,11 @@ export function AuthForm({ onBackToHome }: AuthFormProps) {
           </p>
         </div>
       </div>
-
-      {/* Form card */}
       <Card className="overflow-hidden rounded-2xl border-border/70 shadow-[0_20px_60px_color-mix(in_oklch,var(--foreground)_10%,transparent)]">
-        <CardHeader className="space-y-2 border-b border-border/60 bg-background/70 pb-5 text-center">
-          <CardTitle className="text-2xl">{isSignUp ? "Create account" : "Sign In"}</CardTitle>
+        <CardHeader className="space-y-4 border-b border-border/60 bg-background/70 pb-5 text-center">
+          <div className="flex justify-center">
+            <AuthModeToggle isSignUp={isSignUp} onSwitchMode={switchMode} />
+          </div>
           <p className="text-sm leading-6 text-muted-foreground">
             {isSignUp
               ? "Set up your access once, then finish onboarding from the live product."
@@ -215,20 +220,11 @@ export function AuthForm({ onBackToHome }: AuthFormProps) {
                 "Sign In"
               )}
             </Button>
+
+            {!isSignUp && <AuthNextStepNotice />}
           </form>
 
           <div className="space-y-3 border-t border-border/60 pt-5 text-center">
-            {!isSignUp && (
-              <div className="rounded-xl border border-border/60 bg-muted/20 px-4 py-3 text-left">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
-                  What happens next
-                </p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  You&apos;ll land in your workspace and pick up right where you left off — rota,
-                  team, and operations ready to go.
-                </p>
-              </div>
-            )}
             <Button variant="ghost" onClick={switchMode} className="text-sm">
               {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
             </Button>
