@@ -780,7 +780,7 @@ export function LoadingState({
       )}
     >
       <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shadow-[var(--shadow-card)]">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+        <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
       </div>
       <span>{label}</span>
     </div>

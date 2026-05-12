@@ -146,7 +146,10 @@ function ReportsPage() {
       <div className="grid grid-cols-12 gap-5">
         <Card className="col-span-12 lg:col-span-8 rounded-2xl p-4 lg:p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+            <div
+              id="reports-chart-title"
+              className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground"
+            >
               LABOUR % VS SALES ⓘ
             </div>
             <div className="flex items-center gap-1 rounded-xl border border-border p-0.5 text-xs">
@@ -175,7 +178,18 @@ function ReportsPage() {
             </span>
           </div>
 
-          <svg viewBox="0 0 600 240" className="w-full h-72">
+          <div id="reports-chart-summary" className="sr-only">
+            Labour averaged 28.6 percent this week, which is 1.8 percentage points above target.
+            Weekends were the main driver, while sales peaked on Friday and Saturday.
+          </div>
+
+          <svg
+            viewBox="0 0 600 240"
+            className="w-full h-72"
+            role="img"
+            aria-labelledby="reports-chart-title"
+            aria-describedby="reports-chart-summary"
+          >
             {/* grid */}
             {[0, 1, 2, 3, 4, 5].map((i) => (
               <line
@@ -250,7 +264,7 @@ function ReportsPage() {
             ))}
           </div>
 
-            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted/50 px-3 py-2.5 text-xs">
+          <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted/50 px-3 py-2.5 text-xs">
             <TrendingUp className="h-4 w-4 text-brand" />
             <span>
               Labour % averaged 28.6% this week, 1.8pp above target. Weekends were the main driver.

@@ -152,6 +152,10 @@ function SettingsPage() {
         ) : (
           <Card className="rounded-3xl p-5 lg:p-6">
             <div onChange={markDirty} className="space-y-5">
+              {/*
+               * Stable IDs keep the workspace form controls programmatically
+               * associated with their labels and helper text.
+               */}
               <div>
                 <div className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">
                   Workspace
@@ -166,25 +170,51 @@ function SettingsPage() {
                   Workspace details
                 </div>
                 <div className="grid gap-3 md:grid-cols-2">
-                  {[
-                    ["Workspace name", "Harbour View Hotel"],
-                    ["Address", "1 Harbour Street, Brighton BN1 1AA, United Kingdom"],
-                  ].map(([l, v], index) => (
-                    <div key={l} className={index === 1 ? "md:col-span-2" : ""}>
-                      <label className="text-xs font-medium text-muted-foreground">{l}</label>
-                      <input
-                        defaultValue={v}
-                        className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
-                      />
-                    </div>
-                  ))}
+                  <div>
+                    <label
+                      htmlFor="workspace-name"
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      Workspace name
+                    </label>
+                    <input
+                      id="workspace-name"
+                      defaultValue="Harbour View Hotel"
+                      className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label
+                      htmlFor="workspace-address"
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      Address
+                    </label>
+                    <input
+                      id="workspace-address"
+                      defaultValue="1 Harbour Street, Brighton BN1 1AA, United Kingdom"
+                      className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-brand"
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Timezone</label>
-                  <button className="mt-1 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm">
+                  <label
+                    id="timezone-label"
+                    htmlFor="workspace-timezone"
+                    className="text-xs font-medium text-muted-foreground"
+                  >
+                    Timezone
+                  </label>
+                  <button
+                    id="workspace-timezone"
+                    type="button"
+                    aria-labelledby="timezone-label"
+                    aria-describedby="timezone-help"
+                    className="mt-1 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                  >
                     Europe/London (GMT+1) <ChevronDown className="h-4 w-4" />
                   </button>
-                  <div className="mt-1 text-[11px] text-muted-foreground">
+                  <div id="timezone-help" className="mt-1 text-[11px] text-muted-foreground">
                     All times in Docklist are shown in this timezone.
                   </div>
                 </div>
@@ -196,23 +226,35 @@ function SettingsPage() {
                 </div>
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                   <div>
-                    <label className="text-xs text-muted-foreground">Default shift start</label>
+                    <label htmlFor="shift-start" className="text-xs text-muted-foreground">
+                      Default shift start
+                    </label>
                     <input
+                      id="shift-start"
                       defaultValue="09:00"
                       className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-muted-foreground">Default shift end</label>
+                    <label htmlFor="shift-end" className="text-xs text-muted-foreground">
+                      Default shift end
+                    </label>
                     <input
+                      id="shift-end"
                       defaultValue="17:00"
                       className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-muted-foreground">Default unpaid break</label>
+                    <label htmlFor="unpaid-break" className="text-xs text-muted-foreground">
+                      Default unpaid break
+                    </label>
                     <div className="mt-1 flex overflow-hidden rounded-xl border border-border">
-                      <input defaultValue="30" className="w-full px-3 py-2 text-sm outline-none" />
+                      <input
+                        id="unpaid-break"
+                        defaultValue="30"
+                        className="w-full px-3 py-2 text-sm outline-none"
+                      />
                       <span className="flex items-center bg-muted px-3 py-2 text-xs text-muted-foreground">
                         mins ▾
                       </span>
@@ -229,8 +271,19 @@ function SettingsPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Overtime threshold</label>
-                  <button className="mt-1 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm">
+                  <label
+                    id="overtime-label"
+                    htmlFor="overtime-threshold"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Overtime threshold
+                  </label>
+                  <button
+                    id="overtime-threshold"
+                    type="button"
+                    aria-labelledby="overtime-label"
+                    className="mt-1 flex w-full items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm"
+                  >
                     <span>
                       8 <span className="ml-2 text-muted-foreground">hours per day</span>
                     </span>{" "}

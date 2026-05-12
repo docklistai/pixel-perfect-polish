@@ -197,18 +197,28 @@ const toneStyles: Record<string, string> = {
   off: "bg-transparent text-muted-foreground border-transparent",
 };
 
-function ShiftCell({ s, onOpen }: { s: Shift; onOpen?: () => void }) {
+function ShiftCell({
+  s,
+  onOpen,
+  ariaLabel,
+}: {
+  s: Shift;
+  onOpen?: () => void;
+  ariaLabel: string;
+}) {
   if (s.flag === "off")
     return (
       <div className="flex h-16 items-center justify-center text-sm text-muted-foreground">
-        — Day off
+        <span aria-hidden>— Day off</span>
+        <span className="sr-only">{ariaLabel}</span>
       </div>
     );
   if (s.flag === "open") {
     return (
       <button
         type="button"
-        onClick={onOpen}
+      onClick={onOpen}
+      aria-label={ariaLabel}
         className={`flex h-16 w-full flex-col justify-center rounded-[10px] border-2 px-2.5 text-xs transition hover:bg-warning-soft/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${toneStyles.open}`}
       >
         <div className="font-semibold text-warning-700">Open shift</div>
@@ -222,6 +232,7 @@ function ShiftCell({ s, onOpen }: { s: Shift; onOpen?: () => void }) {
     <button
       type="button"
       onClick={onOpen}
+      aria-label={ariaLabel}
       className={`relative flex h-16 w-full flex-col justify-between rounded-[10px] border px-2.5 py-1.5 text-left transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${toneStyles[s.tone]}`}
     >
       <div className="text-xs font-semibold tracking-tight">{s.time}</div>
@@ -239,6 +250,8 @@ function RotaPage() {
   const [conflictOpen, setConflictOpen] = React.useState(false);
   const [published, setPublished] = React.useState(false);
   const [shiftDetail, setShiftDetail] = React.useState<ShiftDetail | null>(null);
+  const scheduleTitleId = "rota-schedule-title";
+  const scheduleDescId = "rota-schedule-desc";
   const openShiftCount = staff.reduce(
     (count, row) => count + row.shifts.filter((shift) => shift.flag === "open").length,
     0,
@@ -374,13 +387,24 @@ function RotaPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <div
+            <section
+              role="region"
+              aria-labelledby={scheduleTitleId}
+              aria-describedby={scheduleDescId}
               className="min-w-[1100px]"
               style={{
                 display: "grid",
                 gridTemplateColumns: "240px repeat(7, minmax(120px, 1fr))",
               }}
             >
+              <h2 id={scheduleTitleId} className="sr-only">
+                Weekly rota matrix
+              </h2>
+              <p id={scheduleDescId} className="sr-only">
+                Interactive schedule grid for the week of 12 to 18 May. Each shift tile includes
+                the staff member, day, role, and status so screen readers can understand open
+                shifts, conflicts, and days off.
+              </p>
               <div className="border-b border-border px-4 py-4">
                 <div className="text-sm font-semibold">
                   Staff <span className="font-normal text-muted-foreground">(8)</span>
@@ -391,6 +415,7 @@ function RotaPage() {
                     <input
                       className="w-full bg-transparent text-xs outline-none placeholder:text-muted-foreground"
                       placeholder="Search staff..."
+                      aria-label="Search staff in rota"
                     />
                   </div>
                 </div>
@@ -438,6 +463,7 @@ function RotaPage() {
                       <ShiftCell
                         s={sh}
                         onOpen={() => setShiftDetail({ ...sh, staff: s.name, day: days[i].d })}
+                        ariaLabel={`${s.name}, ${days[i].d}: ${sh.time === "—" ? "Day off" : `${sh.time}, ${sh.role}`}${sh.flag === "open" ? ", open shift" : sh.flag === "conflict" ? ", conflict" : ""}`}
                       />
                     </div>
                   ))}
@@ -457,7 +483,7 @@ function RotaPage() {
                   {d.h}
                 </div>
               ))}
-            </div>
+            </section>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 border-t border-border px-5 py-3 text-[11px] text-muted-foreground">
