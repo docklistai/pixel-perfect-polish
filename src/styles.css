@@ -109,8 +109,8 @@
   --gradient-page: linear-gradient(180deg, oklch(0.992 0.004 220) 0%, oklch(0.975 0.008 200) 100%);
   --gradient-sidebar: linear-gradient(180deg, oklch(0.2 0.045 255) 0%, oklch(0.17 0.045 250) 100%);
   --gradient-brand: linear-gradient(135deg, oklch(0.6 0.11 195), oklch(0.54 0.12 200));
-  --shadow-card: 0 1px 2px 0 oklch(0.19 0.035 250 / 0.04), 0 10px 26px -18px oklch(0.19 0.035 250 / 0.16);
-  --shadow-elevated: 0 10px 30px -18px oklch(0.19 0.035 250 / 0.2);
+  --shadow-card: 0 1px 2px 0 oklch(0.19 0.035 250 / 0.04), 0 10px 24px -18px oklch(0.19 0.035 250 / 0.14);
+  --shadow-elevated: 0 12px 32px -18px oklch(0.19 0.035 250 / 0.18);
 }
 
 .dark {
@@ -134,5 +134,100 @@
     background: var(--gradient-page);
     color: var(--color-foreground);
     -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--brand) 20%, white);
+    color: var(--foreground);
+  }
+  button,
+  input,
+  select,
+  textarea,
+  a {
+    transition:
+      color 120ms ease,
+      background-color 120ms ease,
+      border-color 120ms ease,
+      box-shadow 120ms ease,
+      opacity 120ms ease,
+      transform 120ms ease;
+  }
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid color-mix(in oklch, var(--ring) 75%, white);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .dock-card {
+    border-radius: 18px;
+    border: 1px solid color-mix(in oklch, var(--border) 88%, white);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-card-tight {
+    border-radius: 16px;
+    border: 1px solid color-mix(in oklch, var(--border) 88%, white);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-input {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--foreground);
+  }
+
+  .dock-banner {
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .dock-section-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .dock-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .dock-table thead tr {
+    background: color-mix(in oklch, var(--muted) 72%, white);
+  }
+
+  .dock-table thead th {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .dock-table tbody tr {
+    transition: background-color 120ms ease;
+  }
+
+  .dock-table tbody tr:hover {
+    background: color-mix(in oklch, var(--muted) 55%, white);
+  }
+
+  .dock-table tbody td {
+    border-bottom: 1px solid color-mix(in oklch, var(--border) 72%, white);
   }
 }

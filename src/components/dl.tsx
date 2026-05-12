@@ -111,13 +111,13 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-7 flex items-start justify-between gap-4">
+    <div className="mb-6 flex items-start justify-between gap-4">
       <div className="min-w-0">
-        <h1 className="text-balance text-[2rem] font-semibold tracking-tight md:text-[2.25rem]">
+        <h1 className="text-balance text-[1.875rem] font-semibold tracking-tight md:text-[2rem]">
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-2 max-w-3xl text-pretty text-sm leading-6 text-muted-foreground">
+          <p className="mt-1.5 max-w-3xl text-pretty text-sm leading-6 text-muted-foreground">
             {subtitle}
           </p>
         )}
@@ -145,11 +145,11 @@ export function SectionHeader({
     <div className={cn("mb-3.5 flex items-center justify-between", className)}>
       <div className="flex items-center gap-2">
         {eyebrow && (
-          <span className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+          <span className="dock-section-eyebrow">
             {eyebrow}
           </span>
         )}
-        {title && <span className="text-sm font-semibold">{title}</span>}
+        {title && <span className="text-sm font-semibold tracking-tight">{title}</span>}
         {count !== undefined && <span className="text-xs text-muted-foreground">({count})</span>}
       </div>
       {action && <div className="text-xs">{action}</div>}
@@ -174,7 +174,7 @@ export function DashboardCard({
   return (
     <Tag
       className={cn(
-        "rounded-[1.25rem] border border-border/70 bg-card shadow-[var(--shadow-card)]",
+        "dock-card",
         className,
       )}
     >
@@ -281,7 +281,7 @@ export function QuickActionCard({
     </>
   );
   const cls =
-    "w-full flex items-center gap-3.5 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-muted/40";
+    "w-full flex items-center gap-3.5 rounded-[16px] border border-border bg-card p-3 text-left shadow-[var(--shadow-card)] hover:bg-muted/40";
   if (href) {
     return (
       <a href={href} className={cls}>
@@ -304,14 +304,14 @@ type ActionVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
 type ActionSize = "sm" | "md";
 
 const actionBase =
-  "inline-flex min-h-10 items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+  "inline-flex min-h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
 
 const actionVariants: Record<ActionVariant, string> = {
-  primary: "bg-brand text-brand-foreground hover:opacity-95 shadow-sm",
-  secondary: "bg-card border border-border text-foreground hover:bg-muted/50",
-  outline: "border border-brand text-brand hover:bg-brand-soft",
+  primary: "bg-brand text-brand-foreground hover:opacity-95 shadow-[var(--shadow-card)]",
+  secondary: "bg-card border border-border text-foreground hover:bg-muted/50 shadow-[var(--shadow-card)]",
+  outline: "border border-brand text-brand hover:bg-brand-soft shadow-[var(--shadow-card)]",
   ghost: "text-foreground hover:bg-muted/50",
-  danger: "bg-danger text-white hover:opacity-95",
+  danger: "bg-danger text-white hover:opacity-95 shadow-[var(--shadow-card)]",
 };
 
 const actionSizes: Record<ActionSize, string> = {
@@ -373,8 +373,8 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(f
     variant === "card"
       ? "rounded-xl border border-border bg-card shadow-[var(--shadow-card)] hover:bg-muted/50"
       : variant === "outline"
-        ? "rounded-lg border border-border hover:bg-muted/50"
-        : "rounded-lg hover:bg-muted/50 text-muted-foreground";
+        ? "rounded-xl border border-border bg-card shadow-[var(--shadow-card)] hover:bg-muted/50"
+        : "rounded-xl bg-transparent hover:bg-muted/50 text-muted-foreground";
   return (
     <button
       ref={ref}
@@ -415,7 +415,7 @@ export function FilterButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "min-h-10 rounded-xl border px-3.5 py-2 text-xs flex items-center gap-2 transition-colors",
+        "min-h-10 rounded-xl border px-3.5 py-2 text-xs font-medium flex items-center gap-2 transition-colors",
         active
           ? "border-brand text-brand bg-brand-soft"
           : "border-border bg-card hover:bg-muted/50",
@@ -448,7 +448,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium leading-none",
+        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none",
         toneSoft[tone],
         className,
       )}
@@ -478,7 +478,7 @@ export const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
     const wrapper =
       variant === "card"
         ? "flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 shadow-[var(--shadow-card)]"
-        : "flex items-center gap-2 rounded-lg border border-border px-3 py-1.5";
+        : "flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5";
     return (
       <div className={cn(wrapper, containerClassName)}>
         <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
@@ -539,18 +539,18 @@ export function DataTable<Row>({
 }: DataTableProps<Row>) {
   return (
     <div className={cn("w-full", className)}>
-      <table className="w-full text-sm">
+      <table className="dock-table text-sm">
         {caption && (
           <caption className="text-left text-xs text-muted-foreground pb-2">{caption}</caption>
         )}
         <thead>
-          <tr className="text-[11px] font-semibold tracking-widest text-muted-foreground border-y border-border">
+          <tr>
             {columns.map((c) => (
               <th
                 key={c.key}
                 style={c.width ? { width: c.width } : undefined}
                 className={cn(
-                  "py-2.5 px-2",
+                  "py-3 px-3",
                   c.align === "right" && "text-right",
                   c.align === "center" && "text-center",
                   c.align !== "right" && c.align !== "center" && "text-left",
@@ -581,13 +581,13 @@ export function DataTable<Row>({
             rows.map((row, i) => (
               <tr
                 key={rowKey(row, i)}
-                className={cn("border-b border-border/60 last:border-0", rowClassName?.(row, i))}
+                className={cn(rowClassName?.(row, i))}
               >
                 {columns.map((c) => (
                   <td
                     key={c.key}
                     className={cn(
-                      "py-3 px-2",
+                      "py-3.5 px-3",
                       c.align === "right" && "text-right",
                       c.align === "center" && "text-center",
                     )}
@@ -634,8 +634,8 @@ export function TablePagination({
             key={p}
             onClick={() => onChange?.(p)}
             className={cn(
-              "h-7 w-7 rounded-md text-xs",
-              p === page ? "bg-primary text-primary-foreground" : "border border-border",
+              "h-7 w-7 rounded-xl text-xs",
+              p === page ? "bg-primary text-primary-foreground shadow-[var(--shadow-card)]" : "border border-border bg-card hover:bg-muted/50",
             )}
           >
             {p}
@@ -649,7 +649,7 @@ export function TablePagination({
           onClick={() => onChange?.(Math.min(pages, page + 1))}
         />
       </div>
-      <button className="rounded-md border border-border px-2 py-1 flex items-center gap-1">
+      <button className="rounded-xl border border-border bg-card px-2 py-1 flex items-center gap-1 shadow-[var(--shadow-card)] hover:bg-muted/50">
         {pageSizeLabel} <ChevronDown className="h-3 w-3" aria-hidden />
       </button>
     </div>
@@ -707,11 +707,11 @@ export function AlertCard({
 }) {
   return (
     <div
-      className={cn("flex items-start gap-3 rounded-2xl border border-border/70 p-3.5", className)}
+      className={cn("dock-card-tight flex items-start gap-3 p-3.5", className)}
     >
       <div
         className={cn(
-          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0",
+          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-[var(--shadow-card)]",
           toneSoft[tone],
         )}
         aria-hidden
@@ -749,7 +749,7 @@ export function EmptyState({
     >
       <div
         className={cn(
-          "rounded-full bg-muted text-muted-foreground flex items-center justify-center",
+          "rounded-full bg-muted text-muted-foreground flex items-center justify-center shadow-[var(--shadow-card)]",
           compact ? "h-10 w-10" : "h-14 w-14",
         )}
         aria-hidden
@@ -775,11 +775,13 @@ export function LoadingState({
       role="status"
       aria-live="polite"
       className={cn(
-        "flex items-center justify-center gap-2 text-muted-foreground",
-        compact ? "py-4 text-xs" : "py-12 text-sm",
+        "flex flex-col items-center justify-center text-center text-muted-foreground",
+        compact ? "py-4 gap-2 text-xs" : "py-12 gap-3 text-sm",
       )}
     >
-      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shadow-[var(--shadow-card)]">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+      </div>
       <span>{label}</span>
     </div>
   );
@@ -795,9 +797,9 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div role="alert" className="flex flex-col items-center justify-center text-center py-10 gap-3">
+    <div role="alert" className="dock-card-tight flex flex-col items-center justify-center text-center py-10 gap-3 p-6">
       <div
-        className="h-12 w-12 rounded-full bg-danger-soft text-danger flex items-center justify-center"
+        className="h-12 w-12 rounded-full bg-danger-soft text-danger flex items-center justify-center shadow-[var(--shadow-card)]"
         aria-hidden
       >
         <AlertTriangle className="h-5 w-5" />
@@ -881,9 +883,8 @@ export function DrawerShell({
       <SheetContent
         side={side}
         className={cn(
-          "flex flex-col gap-0 p-0 w-full",
+          "flex flex-col gap-0 p-0 w-full bg-background text-foreground",
           drawerWidths[width],
-          "bg-background text-foreground",
         )}
       >
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
@@ -1026,7 +1027,7 @@ export function FormSection({
       {(title || description) && (
         <header className="space-y-0.5">
           {title && (
-            <h3 className="text-[11px] font-semibold tracking-widest text-muted-foreground uppercase">
+            <h3 className="dock-section-eyebrow">
               {title}
             </h3>
           )}
@@ -1055,10 +1056,7 @@ export function FormRow({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label
-        htmlFor={htmlFor}
-        className="text-xs font-medium text-foreground flex items-center gap-1"
-      >
+      <label htmlFor={htmlFor} className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
         {label}
         {required && (
           <span className="text-danger" aria-hidden>
@@ -1131,10 +1129,10 @@ export function PermissionState({
   return (
     <div
       role="status"
-      className="flex flex-col items-center justify-center text-center py-12 gap-3"
+      className="dock-card-tight flex flex-col items-center justify-center text-center py-12 gap-3 p-6"
     >
       <div
-        className="h-12 w-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center"
+        className="h-12 w-12 rounded-full bg-muted text-muted-foreground flex items-center justify-center shadow-[var(--shadow-card)]"
         aria-hidden
       >
         <Lock className="h-5 w-5" />
@@ -1183,7 +1181,7 @@ export function FeedbackBanner({
     <div
       role="status"
       className={cn(
-        "flex items-start gap-3 rounded-xl border p-3",
+        "dock-banner flex items-start gap-3 p-3",
         feedbackSurface[tone],
         className,
       )}
@@ -1264,7 +1262,7 @@ export function RecoveryCard({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-xl border p-3.5",
+        "dock-banner flex items-start gap-3 p-3.5",
         feedbackSurface[tone],
         className,
       )}
@@ -1311,7 +1309,7 @@ export function SyncStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-lg border border-border bg-card px-2.5 py-1 text-[11px] shadow-[var(--shadow-card)]",
+        "inline-flex items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-1 text-[11px] shadow-[var(--shadow-card)]",
         text,
         className,
       )}
