@@ -148,8 +148,8 @@ function LeavePage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         {top.map((t) => (
-          <Card key={t.l} className="p-5">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
+          <Card key={t.l} className="rounded-2xl p-5">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
               {t.l}
             </div>
             <div className="flex items-center gap-3">
@@ -174,8 +174,8 @@ function LeavePage() {
       </div>
 
       <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-3 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-2">
+        <Card className="col-span-12 lg:col-span-3 rounded-2xl p-5">
+          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-2">
             LEAVE REQUEST INBOX
           </div>
           <div className="border-b border-border flex gap-4 text-xs mb-3">
@@ -232,9 +232,9 @@ function LeavePage() {
           </button>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-6 p-5">
+        <Card className="col-span-12 lg:col-span-6 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               MAY – JUNE 2025
             </div>
             <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 text-xs">
@@ -243,7 +243,7 @@ function LeavePage() {
             </div>
           </div>
           <div className="grid grid-cols-[140px_repeat(14,1fr)] text-[10px] text-muted-foreground border-b border-border pb-1">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               STAFF MEMBER
             </div>
             {days.map((d, i) => (
@@ -313,7 +313,7 @@ function LeavePage() {
         </Card>
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="text-sm font-semibold mb-3">MANAGER AVAILABILITY</div>
             <div className="flex items-center justify-between mb-2">
               <div className="text-xs font-semibold">Recurring availability</div>
@@ -353,7 +353,7 @@ function LeavePage() {
             </div>
           </Card>
 
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-semibold">LEAVE ALERTS</span>
               <span className="rounded-md bg-warning-soft text-warning text-[11px] font-bold px-2 py-0.5">
@@ -395,9 +395,9 @@ function LeavePage() {
         </div>
 
         {/* Bottom row */}
-        <Card className="col-span-12 lg:col-span-6 p-5">
+        <Card className="col-span-12 lg:col-span-6 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               LEAVE INSIGHTS
             </div>
             <button className="rounded-md border border-border px-2 py-1 text-xs">
@@ -423,9 +423,9 @@ function LeavePage() {
           </button>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-6 p-5">
+        <Card className="col-span-12 lg:col-span-6 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               TEAM COVERAGE OVERVIEW
             </div>
             <button className="rounded-md border border-border px-2 py-1 text-xs">

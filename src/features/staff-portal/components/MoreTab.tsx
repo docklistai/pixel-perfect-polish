@@ -40,7 +40,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         <div className="flex items-center gap-3">
           <div
             aria-hidden
-            className="h-12 w-12 rounded-full bg-brand-soft text-brand flex items-center justify-center text-base font-semibold"
+            className="h-12 w-12 rounded-full bg-brand-soft text-brand flex items-center justify-center text-base font-semibold shadow-[var(--shadow-card)]"
           >
             {mockProfile.initials}
           </div>
@@ -55,7 +55,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       </DashboardCard>
 
       {/* Quick links to main tabs */}
-      <DashboardCard className="p-2.5">
+      <DashboardCard className="rounded-2xl p-2.5">
         <ul className="divide-y divide-border">
           <Row icon={Home} label="Home" onClick={() => onNavigate("home")} />
           <Row icon={CalendarDays} label="Shifts" onClick={() => onNavigate("shifts")} />
@@ -65,7 +65,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       </DashboardCard>
 
       {/* Secondary menu */}
-      <DashboardCard className="p-2.5">
+      <DashboardCard className="rounded-2xl p-2.5">
         <ul className="divide-y divide-border">
           <Row icon={User} label="Profile" onClick={() => setSection("profile")} />
           <Row icon={Users} label="Team" onClick={() => setSection("team")} />
@@ -75,7 +75,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </ul>
       </DashboardCard>
 
-      <DashboardCard className="p-2.5">
+      <DashboardCard className="rounded-2xl p-2.5">
         <ul className="divide-y divide-border">
           <Row
             icon={LogOut}
@@ -216,14 +216,14 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
       <div className="space-y-4">
         {manager && (
           <div>
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
               MANAGER ON DUTY
             </div>
             <TeamRow member={manager} />
           </div>
         )}
         <div>
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
             TEAM ON SHIFT
           </div>
           <ul className="space-y-2">
@@ -236,7 +236,7 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
         {noticeboard && (
           <div>
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
               NOTICEBOARD
             </div>
             <DashboardCard className="p-4">
@@ -365,10 +365,10 @@ function SettingsDrawer({ open, onClose }: { open: boolean; onClose: () => void 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+      <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground px-1 mb-2">
         {title.toUpperCase()}
       </div>
-      <DashboardCard className="p-2">
+      <DashboardCard className="rounded-2xl p-2">
         <ul className="divide-y divide-border">{children}</ul>
       </DashboardCard>
     </div>

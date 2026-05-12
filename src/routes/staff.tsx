@@ -246,14 +246,14 @@ function StaffPage() {
         <div className="col-span-12 lg:col-span-9 space-y-5">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((s) => (
-              <Card key={s.label} className="p-4">
+            <Card key={s.label} className="rounded-2xl p-4">
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[s.tone]}`}
                   >
                     <s.icon className="h-5 w-5" />
                   </div>
-                  <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+                  <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
                     {s.label}
                   </div>
                 </div>
@@ -275,8 +275,8 @@ function StaffPage() {
             ))}
           </div>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-3 pb-3">
+          <Card className="rounded-2xl p-4">
+            <div className="flex flex-wrap items-center gap-3 pb-3">
               <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 flex-1 max-w-xs">
                 <Search className="h-3.5 w-3.5 text-muted-foreground" />
                 <input
@@ -286,23 +286,23 @@ function StaffPage() {
                   placeholder="Search by name, email or role..."
                 />
               </div>
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+              <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 All departments <ChevronDown className="h-3.5 w-3.5" />
               </button>
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+              <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 All roles <ChevronDown className="h-3.5 w-3.5" />
               </button>
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+              <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 Employment status <ChevronDown className="h-3.5 w-3.5" />
               </button>
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+              <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 <SlidersHorizontal className="h-3.5 w-3.5" /> More filters
               </button>
             </div>
 
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-[11px] font-semibold tracking-widest text-muted-foreground border-y border-border">
+                <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
                   <th className="text-left py-2.5 px-2">STAFF MEMBER</th>
                   <th className="text-left py-2.5">ROLE</th>
                   <th className="text-left py-2.5">DEPARTMENT</th>
@@ -404,7 +404,7 @@ function StaffPage() {
         </div>
 
         {/* Profile drawer */}
-        <Card className="col-span-12 lg:col-span-3 p-5 self-start">
+        <Card className="col-span-12 lg:col-span-3 rounded-2xl p-5 self-start">
           <div className="flex items-center justify-between mb-3">
             <div className="text-sm font-semibold">{selected.n}</div>
             <X className="h-4 w-4 text-muted-foreground" />

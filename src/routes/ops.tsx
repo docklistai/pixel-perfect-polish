@@ -179,7 +179,7 @@ function OpsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         {stats.map((s) => (
-          <Card key={s.l} className="p-4">
+          <Card key={s.l} className="rounded-2xl p-4">
             <div className="flex items-center gap-3">
               <div
                 className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[s.tone]}`}
@@ -197,17 +197,17 @@ function OpsPage() {
       </div>
 
       <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-9 p-5">
+        <Card className="col-span-12 lg:col-span-9 rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="text-sm font-semibold">Operations timeline</div>
-            <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+            <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
               Today <ChevronDown className="h-3 w-3" />
             </button>
             <div className="ml-auto flex items-center gap-2">
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+              <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 All categories <ChevronDown className="h-3 w-3" />
               </button>
-              <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+              <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                 All locations <ChevronDown className="h-3 w-3" />
               </button>
             </div>
@@ -230,7 +230,7 @@ function OpsPage() {
                     {e.t}
                   </div>
                   <div
-                    className={`flex items-center gap-3 rounded-xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
+                    className={`flex items-center gap-3 rounded-2xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
                   >
                     <div
                       className={`h-9 w-9 rounded-lg flex items-center justify-center ${toneBg[e.dot === "danger" ? "warning" : e.dot]}`}
@@ -261,7 +261,7 @@ function OpsPage() {
                       </span>
                     )}
                     <span
-                      className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${e.stTone === "success" ? "bg-success-soft text-success" : e.stTone === "info" ? "bg-info-soft text-info" : "bg-warning-soft text-warning"}`}
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${e.stTone === "success" ? "bg-success-soft text-success" : e.stTone === "info" ? "bg-info-soft text-info" : "bg-warning-soft text-warning"}`}
                     >
                       {e.st}
                     </span>
@@ -278,7 +278,7 @@ function OpsPage() {
         </Card>
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">Shift handover</div>
               <button type="button" className="text-xs text-brand">
@@ -318,7 +318,7 @@ function OpsPage() {
             ))}
           </Card>
 
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="text-sm font-semibold">
                 Urgent follow-ups{" "}
@@ -367,7 +367,7 @@ function OpsPage() {
             ))}
           </Card>
 
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="text-sm font-semibold mb-3">Quick reference</div>
             <div className="grid grid-cols-2 gap-2">
               {[
@@ -379,7 +379,7 @@ function OpsPage() {
                 <button
                   type="button"
                   key={q.t}
-                  className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 text-xs"
+                  className="flex items-center gap-2 rounded-xl border border-border px-2 py-1.5 text-xs"
                 >
                   <q.icon
                     className={`h-3.5 w-3.5 ${q.tone === "danger" ? "text-danger" : "text-brand"}`}

@@ -48,7 +48,7 @@ function SegmentedTabs({
   onChange: (v: ShiftsSubTab) => void;
 }) {
   return (
-    <div className="rounded-xl bg-muted p-1 grid grid-cols-3 text-sm font-medium">
+    <div className="grid grid-cols-3 rounded-2xl bg-muted/80 p-1.5 text-sm font-medium shadow-[var(--shadow-card)]">
       {SUB_TABS.map((t) => {
         const active = t.id === value;
         return (
@@ -58,8 +58,8 @@ function SegmentedTabs({
             onClick={() => onChange(t.id)}
             className={
               active
-                ? "rounded-lg bg-card text-foreground py-2 shadow-[var(--shadow-card)]"
-                : "rounded-lg text-muted-foreground py-2"
+                ? "rounded-xl bg-card text-foreground py-2.5 shadow-[var(--shadow-card)]"
+                : "rounded-xl text-muted-foreground py-2.5 hover:text-foreground"
             }
             aria-pressed={active}
           >
@@ -95,17 +95,17 @@ function ShiftList({
     <div className="space-y-5">
       {groups.map((g) => (
         <div key={g.label}>
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
             {g.label}
           </div>
           <ul className="space-y-2">
             {g.shifts.map((s) => (
               <li key={s.id}>
                 <button type="button" onClick={() => onOpen(s)} className="w-full text-left">
-                  <DashboardCard className="p-4 hover:bg-muted/30 transition-colors">
+                  <DashboardCard className="p-4 hover:bg-muted/30 transition-colors rounded-2xl">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+                        <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
                           {s.dayLabel.toUpperCase()}
                         </div>
                         <div className="mt-1 text-base font-semibold">
@@ -149,7 +149,7 @@ function RequestsList() {
     <ul className="space-y-2">
       {mockRequests.map((r) => (
         <li key={r.id}>
-          <DashboardCard className="p-4">
+          <DashboardCard className="p-4 rounded-2xl">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="text-sm font-semibold truncate">{r.title}</div>

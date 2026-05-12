@@ -37,19 +37,19 @@ export const Route = createFileRoute("/reports")({
 const kpis = [
   {
     l: "Labour Cost",
-    v: "£18,420",
-    d: "4.3%",
+    v: "£42,180",
+    d: "3.2%",
     up: false,
-    vs: "vs last week",
+    vs: "vs last period",
     icon: PoundSterling,
     tone: "info",
   },
   {
     l: "Labour %",
-    v: "28.6%",
-    d: "1.8pp",
-    up: true,
-    vs: "vs target",
+    v: "28.4%",
+    d: "0.8pp",
+    up: false,
+    vs: "vs last period",
     icon: Percent,
     tone: "warning",
   },
@@ -58,7 +58,7 @@ const kpis = [
     v: "4.2%",
     d: "0.6pp",
     up: false,
-    vs: "vs last week",
+    vs: "vs last period",
     icon: Users,
     tone: "purple",
   },
@@ -67,7 +67,7 @@ const kpis = [
     v: "18.7 hrs",
     d: "2.1 hrs",
     up: true,
-    vs: "vs last week",
+    vs: "vs last period",
     icon: Clock,
     tone: "danger",
   },
@@ -76,7 +76,7 @@ const kpis = [
     v: "92%",
     d: "3pp",
     up: true,
-    vs: "vs last week",
+    vs: "vs last period",
     icon: Shield,
     tone: "success",
   },
@@ -123,7 +123,7 @@ function ReportsPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-5">
         {kpis.map((k) => (
-          <Card key={k.l} className="p-4">
+          <Card key={k.l} className="rounded-2xl p-4">
             <div className="flex items-center gap-3">
               <div
                 className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[k.tone]}`}
@@ -144,15 +144,15 @@ function ReportsPage() {
       </div>
 
       <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-8 p-5">
+        <Card className="col-span-12 lg:col-span-8 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               LABOUR % VS SALES ⓘ
             </div>
-            <div className="flex items-center gap-1 rounded-lg border border-border p-0.5 text-xs">
-              <button className="px-3 py-1 rounded-md bg-muted">Day</button>
-              <button className="px-3 py-1 rounded-md">Week</button>
-              <button className="px-3 py-1 rounded-md">Month</button>
+            <div className="flex items-center gap-1 rounded-xl border border-border p-0.5 text-xs">
+              <button className="px-3 py-1 rounded-lg bg-muted">Day</button>
+              <button className="px-3 py-1 rounded-lg">Week</button>
+              <button className="px-3 py-1 rounded-lg">Month</button>
             </div>
           </div>
 
@@ -250,7 +250,7 @@ function ReportsPage() {
             ))}
           </div>
 
-          <div className="mt-4 flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2.5 text-xs">
+            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted/50 px-3 py-2.5 text-xs">
             <TrendingUp className="h-4 w-4 text-brand" />
             <span>
               Labour % averaged 28.6% this week, 1.8pp above target. Weekends were the main driver.
@@ -261,10 +261,10 @@ function ReportsPage() {
           </div>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-4 p-5">
+        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="h-4 w-4 text-warning" />
-            <span className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               INSIGHTS
             </span>
           </div>
@@ -321,8 +321,8 @@ function ReportsPage() {
         </Card>
 
         {/* Bottom row */}
-        <Card className="col-span-12 lg:col-span-4 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
+        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-5">
+          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
             TIME APPROVAL TREND
           </div>
           <div className="flex items-center gap-3 text-xs mb-2">
@@ -377,8 +377,8 @@ function ReportsPage() {
           </button>
         </Card>
 
-        <Card className="col-span-12 lg:col-span-4 p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground mb-3">
+        <Card className="col-span-12 lg:col-span-4 rounded-2xl p-5">
+          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
             ABSENCE BREAKDOWN ⓘ
           </div>
           <div className="flex items-center gap-4">
@@ -457,7 +457,7 @@ function ReportsPage() {
 
         <Card className="col-span-12 lg:col-span-4 p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+            <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
               LABOUR % BY DEPARTMENT ⓘ
             </div>
             <span className="text-[11px] text-muted-foreground">vs target (pp)</span>

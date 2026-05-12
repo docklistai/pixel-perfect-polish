@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AlertTriangle, Clock, Coffee, PlayCircle, StopCircle } from "lucide-react";
+import { AlertTriangle, Clock, Coffee, MapPin, PlayCircle, StopCircle } from "lucide-react";
 import {
   ActionButton,
   DashboardCard,
@@ -49,28 +49,70 @@ export function TimeTab() {
 
   return (
     <div className="space-y-4">
-      {/* Current shift summary */}
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
             CURRENT SHIFT
           </div>
           <StatusBadge tone={clockedIn ? "success" : "muted"}>
             {clockedIn ? "Scheduled" : "Off shift"}
           </StatusBadge>
         </div>
-        <div className="mt-2 text-xl font-bold tracking-tight">
+        <div className="mt-2 text-[13px] text-muted-foreground">{mockNextShift.dayLabel}</div>
+        <div className="mt-1 text-[28px] font-bold tracking-tight leading-none">
           {mockNextShift.start} – {mockNextShift.end}
         </div>
-        <div className="text-xs text-muted-foreground">{mockNextShift.station}</div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+          <span className="inline-flex items-center gap-1.5 text-foreground">
+            <Clock className="h-4 w-4 text-muted-foreground" /> {mockNextShift.role}
+          </span>
+          <span className="inline-flex items-center gap-1.5 text-foreground">
+            <MapPin className="h-4 w-4 text-muted-foreground" /> {mockNextShift.station}
+          </span>
+        </div>
+        {mockNextShift.shiftNote && (
+          <div className="mt-3 text-xs text-muted-foreground">{mockNextShift.shiftNote}</div>
+        )}
       </DashboardCard>
 
-      {/* Big timer ring */}
-      <DashboardCard className="p-6">
+      <DashboardCard className="p-5">
         <div className="flex flex-col items-center">
-          <ClockRing active={clockedIn} elapsedMs={elapsed} />
-          <div className="mt-3 text-xs text-muted-foreground">
-            {clockedIn && sinceLabel ? `since ${sinceLabel}` : "Tap clock in to start your shift"}
+          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+            {clockedIn ? "YOU ARE CLOCKED IN" : "NOT ON SHIFT"}
+          </div>
+          <div className="mt-3 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={onToggle}
+              className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
+                clockedIn
+                  ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
+                  : "bg-[linear-gradient(135deg,#0B7A78_0%,#0EA5A2_100%)]"
+              }`}
+            >
+              <span className="absolute inset-[-12px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,162,.18),_transparent_70%)]" />
+              <span className="relative flex flex-col items-center gap-2">
+                {clockedIn ? <StopCircle className="h-9 w-9" /> : <PlayCircle className="h-9 w-9" />}
+                <span className="text-[22px] font-bold leading-none">
+                  {clockedIn ? "Clock out" : "Clock in"}
+                </span>
+                <span className="text-[11px] font-medium text-white/85">
+                  {clockedIn ? (sinceLabel ? `since ${sinceLabel}` : "End your shift") : "Tap to start your shift"}
+                </span>
+              </span>
+            </button>
+          </div>
+          <div className="mt-4 w-full rounded-2xl border border-border bg-muted/40 px-4 py-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>Worked</span>
+              <span>{clockedIn ? formatElapsed(elapsed) : "00:00:00"}</span>
+            </div>
+            <div className="mt-2 h-1.5 rounded-full bg-border/70">
+              <div
+                className="h-full rounded-full bg-brand"
+                style={{ width: clockedIn ? `${Math.min((elapsed / (8 * 60 * 60 * 1000)) * 100, 100)}%` : "0%" }}
+              />
+            </div>
           </div>
         </div>
 
@@ -85,33 +127,28 @@ export function TimeTab() {
               {onBreak ? "End break" : "Start break"}
             </ActionButton>
           )}
-          <ActionButton
-            onClick={onToggle}
-            icon={clockedIn ? StopCircle : PlayCircle}
-            variant={clockedIn ? "danger" : "primary"}
-            className="w-full justify-center"
-          >
-            {clockedIn ? "Clock out" : "Clock in"}
-          </ActionButton>
         </div>
       </DashboardCard>
 
-      {/* Scheduled vs worked summary */}
       <DashboardCard className="p-5">
-        <div className="grid grid-cols-2 gap-4 text-center">
-          <div>
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
-              SCHEDULED
+        <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+              Scheduled
             </div>
-            <div className="mt-2 text-2xl font-bold tabular-nums">{mockNextShift.hours}h 00m</div>
+            <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
+              {mockNextShift.hours}h
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">Shift length</div>
           </div>
-          <div>
-            <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
-              WORKED
+          <div className="rounded-2xl border border-border bg-card p-3">
+            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+              Worked
             </div>
-            <div className="mt-2 text-2xl font-bold tabular-nums">
+            <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
               {clockedIn ? formatElapsed(elapsed).slice(0, 5) : "0h 00m"}
             </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">This session</div>
           </div>
         </div>
       </DashboardCard>
@@ -125,7 +162,7 @@ export function TimeTab() {
       )}
 
       <div>
-        <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+        <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
           RECENT ENTRIES
         </div>
         {entries.length === 0 ? (
@@ -162,66 +199,6 @@ export function TimeTab() {
               </li>
             ))}
           </ul>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ClockRing({ active, elapsedMs }: { active: boolean; elapsedMs: number }) {
-  // Visual ring — fills proportionally to a notional 8-hour shift, capped at 1.
-  const target = 8 * 60 * 60 * 1000;
-  const pct = active ? Math.min(elapsedMs / target, 1) : 0;
-  const size = 200;
-  const stroke = 12;
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const offset = c * (1 - pct);
-
-  return (
-    <div
-      className="relative flex items-center justify-center"
-      style={{ width: size, height: size }}
-    >
-      <svg width={size} height={size} className="-rotate-90">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="var(--muted)"
-          strokeWidth={stroke}
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r}
-          fill="none"
-          stroke="var(--brand)"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.6s linear" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        {active ? (
-          <>
-            <div className="text-[10px] tracking-widest text-muted-foreground">
-              YOU ARE CLOCKED IN
-            </div>
-            <div className="mt-1 text-3xl font-bold tabular-nums tracking-tight">
-              {formatElapsed(elapsedMs)}
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="text-[10px] tracking-widest text-muted-foreground">NOT ON SHIFT</div>
-            <div className="mt-1 text-3xl font-bold tabular-nums tracking-tight text-muted-foreground">
-              00:00:00
-            </div>
-          </>
         )}
       </div>
     </div>

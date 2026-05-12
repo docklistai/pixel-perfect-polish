@@ -110,8 +110,8 @@ function SettingsPage() {
       )}
 
       <div className="grid grid-cols-12 gap-5">
-        <Card className="col-span-12 lg:col-span-3 p-3 self-start">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-3 py-2">
+        <Card className="col-span-12 lg:col-span-3 rounded-2xl p-3 self-start">
+          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground px-3 py-2">
             SETTINGS
           </div>
           <div className="space-y-1">
@@ -138,14 +138,14 @@ function SettingsPage() {
         </Card>
 
         {activeTab !== "Workspace" ? (
-          <Card className="col-span-12 lg:col-span-6 p-6">
+          <Card className="col-span-12 lg:col-span-6 rounded-2xl p-6">
             <EmptyState
               title={`${activeTab} settings`}
               description="This section is a placeholder in the desktop prototype. Workspace tab is fully wired."
             />
           </Card>
         ) : (
-          <Card className="col-span-12 lg:col-span-6 p-6">
+          <Card className="col-span-12 lg:col-span-6 rounded-2xl p-6">
             <div onChange={markDirty}>
               <div className="text-lg font-semibold">Workspace</div>
               <p className="text-xs text-muted-foreground">
@@ -285,7 +285,7 @@ function SettingsPage() {
         )}
 
         <div className="col-span-12 lg:col-span-3 space-y-4">
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="text-sm font-semibold">Payroll-ready export</div>
             <p className="text-xs text-muted-foreground mt-1">
               Configure how data is prepared for payroll.
@@ -318,7 +318,7 @@ function SettingsPage() {
             </div>
           </Card>
 
-          <Card className="p-5">
+          <Card className="rounded-2xl p-5">
             <div className="text-sm font-semibold">Brand preview</div>
             <p className="text-xs text-muted-foreground mt-1">
               See how your brand appears in the staff app.

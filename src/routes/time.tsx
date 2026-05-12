@@ -248,22 +248,22 @@ function TimePage() {
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">
-          <div className="flex items-center gap-3">
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2 shadow-[var(--shadow-card)]">
               <Calendar className="h-4 w-4 text-brand" /> 12 – 18 May 2025{" "}
               <ChevronDown className="h-4 w-4" />
             </button>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2">
+            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2 shadow-[var(--shadow-card)]">
               <Users className="h-4 w-4" /> All Teams <ChevronDown className="h-4 w-4" />
             </button>
-            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2">
+            <button className="rounded-xl border border-border bg-card px-3 py-2 text-sm flex items-center gap-2 shadow-[var(--shadow-card)]">
               <Settings2 className="h-4 w-4" /> More Filters
             </button>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((s) => (
-              <Card key={s.label} className="p-4">
+              <Card key={s.label} className="rounded-2xl p-4">
                 <div className="flex items-center gap-3">
                   <div
                     className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[s.tone]}`}
@@ -301,17 +301,17 @@ function TimePage() {
             ))}
           </div>
 
-          <Card className="p-4">
+          <Card className="rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <div>
                 <span className="font-semibold">Weekly Timesheet</span>{" "}
                 <span className="text-xs text-muted-foreground ml-1">20 staff</span>
               </div>
               <div className="flex items-center gap-2">
-                <button className="rounded-lg border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+                <button className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
                   <Settings2 className="h-3.5 w-3.5" /> Column Settings
                 </button>
-                <button className="rounded-lg border border-border p-1.5">
+                <button className="rounded-xl border border-border p-1.5">
                   <Download className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -319,7 +319,7 @@ function TimePage() {
 
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-[11px] font-semibold tracking-widest text-muted-foreground border-y border-border">
+                <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
                   <th className="py-2 px-2 text-left w-8">
                     <input type="checkbox" />
                   </th>

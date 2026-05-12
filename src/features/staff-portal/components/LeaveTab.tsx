@@ -53,14 +53,14 @@ export function LeaveTab() {
       {/* Balance cards */}
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             LEAVE BALANCE
           </div>
           <span className="text-[11px] text-muted-foreground">As of today</span>
         </div>
-        <dl className="mt-3 grid grid-cols-3 gap-3 text-center">
+        <dl className="mt-3 grid grid-cols-3 gap-2.5 text-center">
           {mockLeaveBalances.map((b) => (
-            <div key={b.label} className="rounded-xl bg-muted/40 py-3 px-2">
+            <div key={b.label} className="rounded-2xl border border-border bg-muted/40 py-3 px-2">
               <dt className="text-[11px] text-muted-foreground">{b.label}</dt>
               <dd className="mt-1 text-xl font-bold tabular-nums">{b.days.toFixed(1)}</dd>
               <div className="text-[10px] text-muted-foreground">{b.unit}</div>
@@ -89,14 +89,14 @@ export function LeaveTab() {
       {/* Upcoming approved leave */}
       {mockApprovedLeave.length > 0 && (
         <DashboardCard className="p-5">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             UPCOMING APPROVED LEAVE
           </div>
           <ul className="mt-3 space-y-2">
             {mockApprovedLeave.map((l) => (
               <li
                 key={l.id}
-                className="flex items-center justify-between rounded-lg border border-border px-3 py-2.5"
+                className="flex items-center justify-between rounded-2xl border border-border px-3 py-2.5"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <CalendarDays className="h-4 w-4 text-brand shrink-0" />
@@ -117,7 +117,7 @@ export function LeaveTab() {
       {/* Availability strip */}
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
+          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             AVAILABILITY
           </div>
           <button
@@ -163,7 +163,7 @@ export function LeaveTab() {
 
       {/* Request history */}
       <div>
-        <div className="text-[11px] font-semibold tracking-widest text-muted-foreground px-1 mb-2">
+        <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
           REQUEST HISTORY
         </div>
         <ul className="space-y-2">

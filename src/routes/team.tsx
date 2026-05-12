@@ -140,7 +140,7 @@ function TeamPage() {
         <div className="col-span-12 lg:col-span-9 space-y-5">
           <div className="grid grid-cols-3 gap-4">
             {top.map((t) => (
-              <Card key={t.l} className="p-4 flex items-center gap-3">
+              <Card key={t.l} className="rounded-2xl p-4 flex items-center gap-3">
                 <div
                   className={`h-12 w-12 rounded-full flex items-center justify-center ${toneBg[t.tone]}`}
                 >
@@ -158,7 +158,7 @@ function TeamPage() {
             ))}
           </div>
 
-          <Card>
+          <Card className="rounded-2xl">
             <div className="flex items-center justify-between px-5 pt-4">
               <div className="flex gap-5 text-sm">
                 <button className="pb-3 border-b-2 border-brand text-brand font-semibold">
@@ -196,7 +196,7 @@ function TeamPage() {
                     className="block w-full text-left border-b border-border/60 last:border-0 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
                   >
                     {a.pinned && (
-                      <div className="inline-flex items-center gap-1 rounded-md bg-accent-purple-soft text-accent-purple text-[11px] font-medium px-2 py-0.5 mb-2">
+                      <div className="inline-flex items-center gap-1 rounded-full bg-accent-purple-soft text-accent-purple text-[11px] font-medium px-2 py-0.5 mb-2">
                         <Pin className="h-3 w-3" /> Pinned
                       </div>
                     )}
