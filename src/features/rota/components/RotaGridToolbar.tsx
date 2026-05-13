@@ -4,6 +4,7 @@ import { ActionButton, StatusBadge } from "@/components/dl";
 export function RotaGridToolbar({
   conflictCount,
   openShiftCount,
+  coveragePct,
   onFilter,
   onGenerateRota,
   onAddShift,
@@ -11,11 +12,13 @@ export function RotaGridToolbar({
 }: {
   conflictCount: number;
   openShiftCount: number;
+  coveragePct: number;
   onFilter: () => void;
   onGenerateRota: () => void;
   onAddShift: () => void;
   onViewConflicts: () => void;
 }) {
+  const coverageTone = coveragePct >= 95 ? "success" : coveragePct >= 80 ? "warning" : "danger";
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-3.5">
       <ActionButton variant="secondary" size="sm" icon={Filter} onClick={onFilter}>
@@ -27,8 +30,8 @@ export function RotaGridToolbar({
       <StatusBadge tone="warning" dot>
         {openShiftCount} Open shifts
       </StatusBadge>
-      <StatusBadge tone="success" dot>
-        98% Coverage
+      <StatusBadge tone={coverageTone} dot>
+        {coveragePct}% Coverage
       </StatusBadge>
       <div className="ml-auto flex flex-wrap items-center gap-2">
         <ActionButton variant="outline" size="sm" icon={CalendarPlus} onClick={onGenerateRota}>

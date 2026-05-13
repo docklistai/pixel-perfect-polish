@@ -1,14 +1,17 @@
 import * as React from "react";
-import { Clock, Target, Plus } from "lucide-react";
+import { Clock, Target, Plus, AlertTriangle } from "lucide-react";
 import { SearchField, ActionButton } from "@/components/dl";
 import { ShiftCell } from "./ShiftCell";
-import type { ShiftDetail, StaffMember } from "../types";
+import type { RotaGridOpenRow, RotaGridStaffRow, ShiftId } from "../types";
 
 type DayEntry = { d: string; h: string; c: string; tone: string };
 
 export function RotaGrid({
   days,
-  staff,
+  staffRows,
+  openRow,
+  staffCount,
+  visibleStaffCount,
   weekLabel,
   staffSearch,
   scheduleTitleId,
@@ -18,15 +21,20 @@ export function RotaGrid({
   onAddStaff,
 }: {
   days: DayEntry[];
-  staff: StaffMember[];
+  staffRows: RotaGridStaffRow[];
+  openRow: RotaGridOpenRow;
+  staffCount: number;
+  visibleStaffCount: number;
   weekLabel: string;
   staffSearch: string;
   scheduleTitleId: string;
   scheduleDescId: string;
   onStaffSearchChange: (value: string) => void;
-  onShiftOpen: (detail: ShiftDetail) => void;
+  onShiftOpen: (shiftId: ShiftId) => void;
   onAddStaff: () => void;
 }) {
+  const totalOpenShifts = openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0);
+
   return (
     <div className="overflow-x-auto">
       <section
@@ -51,7 +59,11 @@ export function RotaGrid({
         {/* Column header — staff */}
         <div className="border-b border-border px-4 py-4">
           <div className="text-sm font-semibold">
-            Staff <span className="font-normal text-muted-foreground">({staff.length})</span>
+            Staff{" "}
+            <span className="font-normal text-muted-foreground">
+              ({visibleStaffCount}
+              {visibleStaffCount !== staffCount ? ` of ${staffCount}` : ""})
+            </span>
           </div>
           <div className="mt-2">
             <SearchField
@@ -86,29 +98,33 @@ export function RotaGrid({
           </div>
         ))}
 
-        {staff.length > 0 ? (
-          staff.map((s) => (
-            <React.Fragment key={s.name}>
+        {staffRows.length > 0 ? (
+          staffRows.map((row) => (
+            <React.Fragment key={row.staff.id}>
               <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
                 <img
-                  src={`https://i.pravatar.cc/64?img=${s.img}`}
+                  src={`https://i.pravatar.cc/64?img=${row.staff.img}`}
                   alt=""
                   className="h-9 w-9 rounded-full object-cover"
                 />
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-medium">{s.name}</div>
+                  <div className="truncate text-sm font-medium">{row.staff.name}</div>
                   <div className="text-[11px] text-muted-foreground">
-                    {s.role} · {s.hrs}
+                    {row.staff.role} · {row.staff.hrs}
                   </div>
                   <div className="text-[10px] text-muted-foreground">Contracted</div>
                 </div>
               </div>
-              {s.shifts.map((sh, i) => (
-                <div key={i} className="border-b border-l border-border px-2 py-2">
+              {row.cells.map((cell, dayIndex) => (
+                <div
+                  key={`${row.staff.id}-${dayIndex}`}
+                  className="border-b border-l border-border px-2 py-2"
+                >
                   <ShiftCell
-                    s={sh}
-                    onOpen={() => onShiftOpen({ ...sh, staff: s.name, day: days[i].d })}
-                    ariaLabel={`${s.name}, ${days[i].d}: ${sh.time === "—" ? "Day off" : `${sh.time}, ${sh.role}`}${sh.flag === "open" ? ", open shift" : sh.flag === "conflict" ? ", conflict" : ""}`}
+                    shifts={cell.shifts}
+                    context="staff"
+                    onOpenShift={onShiftOpen}
+                    emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: day off`}
                   />
                 </div>
               ))}
@@ -135,6 +151,35 @@ export function RotaGrid({
             )}
           </div>
         )}
+
+        {/* Open shifts row */}
+        <div className="flex items-center gap-3 border-b border-border bg-warning-soft/20 px-4 py-3.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning">
+            <AlertTriangle className="h-4 w-4" aria-hidden />
+          </div>
+          <div className="min-w-0">
+            <div className="text-sm font-medium">Open shifts</div>
+            <div className="text-[11px] text-muted-foreground">
+              {totalOpenShifts === 0
+                ? "All shifts assigned"
+                : `${totalOpenShifts} unassigned this week`}
+            </div>
+            <div className="text-[10px] text-muted-foreground">Unassigned</div>
+          </div>
+        </div>
+        {openRow.cells.map((cell, dayIndex) => (
+          <div
+            key={`open-${dayIndex}`}
+            className="border-b border-l border-border bg-warning-soft/10 px-2 py-2"
+          >
+            <ShiftCell
+              shifts={cell.shifts}
+              context="open"
+              onOpenShift={onShiftOpen}
+              emptyAriaLabel={`Open shifts, ${days[dayIndex]?.d ?? ""}: none`}
+            />
+          </div>
+        ))}
 
         {/* Footer — add staff */}
         <div className="border-b border-border px-4 py-3.5">

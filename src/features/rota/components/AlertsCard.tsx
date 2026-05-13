@@ -4,12 +4,14 @@ import { Card, ActionButton } from "@/components/dl";
 export function AlertsCard({
   openShiftCount,
   conflictCount,
+  workingTimeAlertCount,
   onAddShift,
   onViewConflicts,
   onWorkingTimeAlert,
 }: {
   openShiftCount: number;
   conflictCount: number;
+  workingTimeAlertCount: number;
   onAddShift: () => void;
   onViewConflicts: () => void;
   onWorkingTimeAlert: () => void;
@@ -17,21 +19,21 @@ export function AlertsCard({
   const alerts = [
     {
       t: `${openShiftCount} Open shifts`,
-      s: "Require staff",
+      s: openShiftCount === 0 ? "All shifts assigned" : "Require staff",
       icon: AlertTriangle,
       tone: "warning",
       action: onAddShift,
     },
     {
       t: `${conflictCount} Conflicts`,
-      s: "Need attention",
+      s: conflictCount === 0 ? "None this week" : "Need attention",
       icon: CircleAlert,
       tone: "danger",
       action: onViewConflicts,
     },
     {
-      t: "1 Working time alert",
-      s: "Exceeds 40h",
+      t: `${workingTimeAlertCount} Working time alert${workingTimeAlertCount === 1 ? "" : "s"}`,
+      s: workingTimeAlertCount === 0 ? "Within planned hours" : "Exceeds planned hours",
       icon: AlertTriangle,
       tone: "warning",
       action: onWorkingTimeAlert,

@@ -3,39 +3,53 @@ import { Card, StatusBadge, ActionButton } from "@/components/dl";
 
 export function PublishReadinessCard({
   published,
+  hasUnpublishedChanges,
   conflictCount,
   assignedShiftCount,
   plannedShiftCount,
+  coveragePct,
   onPublish,
 }: {
   published: boolean;
+  hasUnpublishedChanges: boolean;
   conflictCount: number;
   assignedShiftCount: number;
   plannedShiftCount: number;
+  coveragePct: number;
   onPublish: () => void;
 }) {
   const checks = [
     {
       k: "Shifts assigned",
       v: `${assignedShiftCount} / ${plannedShiftCount}`,
-      ok: assignedShiftCount === plannedShiftCount,
+      ok: plannedShiftCount > 0 && assignedShiftCount === plannedShiftCount,
     },
-    { k: "Coverage target", v: "98%", ok: true },
+    {
+      k: "Coverage target",
+      v: `${coveragePct}%`,
+      ok: coveragePct >= 95,
+    },
     {
       k: "Conflicts resolved",
       v: conflictCount === 0 ? "All" : `0 / ${conflictCount}`,
       ok: conflictCount === 0,
     },
-    { k: "Hours target", v: "802 / 820h", ok: true },
   ];
+
+  const isClean = published && !hasUnpublishedChanges;
+  const badgeTone = isClean ? "success" : "warning";
+  const badgeLabel = !published ? "Draft" : hasUnpublishedChanges ? "Draft changes" : "Published";
+  const buttonLabel = !published
+    ? "Publish to staff"
+    : hasUnpublishedChanges
+      ? "Republish to staff"
+      : "Published";
 
   return (
     <Card className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <div className="text-sm font-semibold">Publish readiness</div>
-        <StatusBadge tone={published ? "success" : "warning"}>
-          {published ? "Published" : "Draft"}
-        </StatusBadge>
+        <StatusBadge tone={badgeTone}>{badgeLabel}</StatusBadge>
       </div>
       <div className="space-y-2">
         {checks.map(({ k, v, ok }) => (
@@ -51,10 +65,10 @@ export function PublishReadinessCard({
       <ActionButton
         className="mt-4 w-full"
         icon={Send}
-        onClick={() => !published && onPublish()}
-        disabled={published}
+        onClick={() => (!published || hasUnpublishedChanges) && onPublish()}
+        disabled={isClean}
       >
-        {published ? "Published" : "Publish to staff"}
+        {buttonLabel}
       </ActionButton>
     </Card>
   );

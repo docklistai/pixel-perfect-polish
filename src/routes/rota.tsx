@@ -1,19 +1,37 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import {
-  AppShell,
-  Card,
-  IconButton,
-  FilterButton,
-  ConfirmDialog,
-  StatusBadge,
-} from "@/components/dl";
-import { ChevronLeft, ChevronRight, Calendar, MoreHorizontal } from "lucide-react";
+import { AppShell, Card, ConfirmDialog } from "@/components/dl";
 
 import { getWeekLabel, getWeekDayLabels } from "@/features/rota/lib/weekHelpers";
-import { staff, baseDayStats } from "@/features/rota/data/mockData";
-import type { RotaFilters, RotaViewMode, ShiftDetail, StaffMember } from "@/features/rota/types";
+import { staff, baseDayStats, initialDraftShifts } from "@/features/rota/data/mockData";
+import {
+  applyShiftPatch,
+  buildOpenRow,
+  buildStaffRows,
+  createInitialDraftShifts,
+  makeDraftShift,
+} from "@/features/rota/lib/draftRota";
+import {
+  buildConflictSummaries,
+  buildRoleCoverage,
+  countAssignedShifts,
+  countConflicts,
+  countOpenShifts,
+  countPlannedShifts,
+  coveragePercent,
+  filterStaff,
+  totalScheduledHours,
+  workingTimeAlerts,
+} from "@/features/rota/lib/rotaSummaries";
+import type {
+  DraftShift,
+  DraftShiftInput,
+  RotaFilters,
+  RotaViewMode,
+  ShiftId,
+} from "@/features/rota/types";
 
+import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 import { RotaStatusBanner } from "@/features/rota/components/RotaStatusBanner";
 import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
@@ -55,38 +73,6 @@ const DEFAULT_ROTA_FILTERS: RotaFilters = {
   warningType: "all",
 };
 
-function hasScheduledShift(row: StaffMember) {
-  return row.shifts.some((shift) => !shift.flag);
-}
-
-function hasWorkingTimeAlert(row: StaffMember) {
-  const scheduledDays = row.shifts.filter(
-    (shift) => shift.flag !== "off" && shift.flag !== "open",
-  ).length;
-
-  return row.hrs === "40h" && scheduledDays > 5;
-}
-
-function rowMatchesFilters(row: StaffMember, filters: RotaFilters, staffSearch: string) {
-  const normalizedSearch = staffSearch.trim().toLowerCase();
-  const matchesSearch =
-    !normalizedSearch ||
-    row.name.toLowerCase().includes(normalizedSearch) ||
-    row.role.toLowerCase().includes(normalizedSearch);
-  const matchesDepartment = filters.department === "all" || row.role === filters.department;
-  const matchesShiftStatus =
-    filters.shiftStatus === "all" ||
-    (filters.shiftStatus === "scheduled" && hasScheduledShift(row)) ||
-    row.shifts.some((shift) => shift.flag === filters.shiftStatus);
-  const matchesWarning =
-    filters.warningType === "all" ||
-    (filters.warningType === "conflicts" &&
-      row.shifts.some((shift) => shift.flag === "conflict")) ||
-    (filters.warningType === "working-time" && hasWorkingTimeAlert(row));
-
-  return matchesSearch && matchesDepartment && matchesShiftStatus && matchesWarning;
-}
-
 function RotaPage() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [addStaffOpen, setAddStaffOpen] = React.useState(false);
@@ -102,91 +88,91 @@ function RotaPage() {
   const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
   const [workingTimeOpen, setWorkingTimeOpen] = React.useState(false);
   const [published, setPublished] = React.useState(false);
-  const [shiftDetail, setShiftDetail] = React.useState<ShiftDetail | null>(null);
+  const [hasUnpublishedChanges, setHasUnpublishedChanges] = React.useState(false);
+  const [selectedShiftId, setSelectedShiftId] = React.useState<ShiftId | null>(null);
   const [weekOffset, setWeekOffset] = React.useState(0);
   const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
   const [staffSearch, setStaffSearch] = React.useState("");
   const [viewMode, setViewMode] = React.useState<RotaViewMode>("employee");
+  const [draftShifts, setDraftShifts] = React.useState<DraftShift[]>(() =>
+    createInitialDraftShifts(initialDraftShifts),
+  );
 
   const weekLabel = getWeekLabel(weekOffset);
   const days = getWeekDayLabels(weekOffset).map((d, i) => ({ d, ...baseDayStats[i] }));
+  const dayLabels = days.map((d) => d.d);
   const roleOptions = Array.from(new Set(staff.map((row) => row.role)));
-  const visibleStaff = staff.filter((row) => rowMatchesFilters(row, filters, staffSearch));
+  const visibleStaff = filterStaff(staff, draftShifts, filters, staffSearch);
+  const staffRows = buildStaffRows(visibleStaff, draftShifts);
+  const openRow = buildOpenRow(draftShifts);
 
-  const openShiftCount = staff.reduce(
-    (count, row) => count + row.shifts.filter((sh) => sh.flag === "open").length,
-    0,
-  );
-  const assignedShiftCount = staff.reduce(
-    (count, row) =>
-      count + row.shifts.filter((sh) => sh.flag !== "off" && sh.flag !== "open").length,
-    0,
-  );
-  const plannedShiftCount = staff.reduce(
-    (count, row) => count + row.shifts.filter((sh) => sh.flag !== "off").length,
-    0,
-  );
-  const conflictSummaries = staff.flatMap((row) =>
-    row.shifts.flatMap((sh, i) =>
-      sh.flag === "conflict"
-        ? [{ staff: row.name, day: days[i].d, detail: `${sh.role} · ${sh.time}` }]
-        : [],
-    ),
-  );
-  const conflictCount = conflictSummaries.length;
-  const roleCoverage = staff
-    .map((row) => {
-      const filled = row.shifts.filter((sh) => sh.flag !== "off" && sh.flag !== "open").length;
-      const total = row.shifts.length;
-      const pct = Math.round((filled / total) * 100);
-      return { label: row.role, value: `${filled} / ${total}`, pct, tone: row.tone };
-    })
-    .sort((a, b) => a.pct - b.pct);
+  const openShiftCount = countOpenShifts(draftShifts);
+  const conflictCount = countConflicts(draftShifts);
+  const assignedShiftCount = countAssignedShifts(draftShifts);
+  const plannedShiftCount = countPlannedShifts(draftShifts);
+  const conflictSummaries = buildConflictSummaries(draftShifts, staff, dayLabels);
+  const roleCoverage = buildRoleCoverage(staff, draftShifts);
+  const coveragePct = coveragePercent(staff, draftShifts);
+  const scheduledHours = totalScheduledHours(draftShifts);
+  const workingTimeAlertList = workingTimeAlerts(staff, draftShifts);
+  const workingTimeAlertCount = workingTimeAlertList.length;
+
+  const selectedShift = selectedShiftId
+    ? (draftShifts.find((s) => s.id === selectedShiftId) ?? null)
+    : null;
+
+  const markDirty = () => setHasUnpublishedChanges(true);
+  const closeShiftDetail = () => setSelectedShiftId(null);
+
+  const addShift = (input: DraftShiftInput) => {
+    setDraftShifts((current) => [...current, makeDraftShift(input)]);
+    markDirty();
+  };
+  const updateShift = (id: ShiftId, patch: Partial<DraftShift>) => {
+    setDraftShifts((current) => current.map((s) => (s.id === id ? applyShiftPatch(s, patch) : s)));
+    markDirty();
+  };
+  const removeShift = (id: ShiftId) => {
+    setDraftShifts((current) => current.filter((s) => s.id !== id));
+    if (selectedShiftId === id) closeShiftDetail();
+    markDirty();
+  };
+  const markShiftOpen = (id: ShiftId) =>
+    updateShift(id, { staffId: null, status: "open", tone: "open" });
+
+  const handlePublish = () => {
+    setPublished(true);
+    setHasUnpublishedChanges(false);
+    setPublishOpen(false);
+  };
+
+  const headerStatusTone = !published || hasUnpublishedChanges ? "warning" : "success";
+  const headerStatusLabel = !published
+    ? "Draft · not yet shared"
+    : hasUnpublishedChanges
+      ? "Published · draft changes since last publish"
+      : "Published · staff can see this snapshot";
 
   return (
     <AppShell>
-      {/* Page header */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-[2rem] font-semibold tracking-tight md:text-[2.125rem]">Rota</h1>
-            <StatusBadge tone={published ? "success" : "warning"} dot>
-              {published ? "Published" : "Draft"} ·{" "}
-              {published ? "staff can see this snapshot" : "edited 12 min ago"}
-            </StatusBadge>
-          </div>
-          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Week of {weekLabel} · Harbour View Hotel
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
-          <IconButton
-            icon={ChevronLeft}
-            label="Previous week"
-            onClick={() => setWeekOffset((w) => w - 1)}
-          />
-          <FilterButton icon={Calendar} label={weekLabel} onClick={() => setWeekPickerOpen(true)} />
-          <IconButton
-            icon={ChevronRight}
-            label="Next week"
-            onClick={() => setWeekOffset((w) => w + 1)}
-          />
-          <FilterButton
-            label={`View by: ${VIEW_MODE_LABELS[viewMode]}`}
-            onClick={() => setViewModeOpen(true)}
-          />
-          <IconButton
-            icon={MoreHorizontal}
-            label="More actions"
-            onClick={() => setMoreActionsOpen(true)}
-          />
-        </div>
-      </div>
+      <RotaPageHeader
+        weekLabel={weekLabel}
+        viewModeLabel={VIEW_MODE_LABELS[viewMode]}
+        statusTone={headerStatusTone}
+        statusLabel={headerStatusLabel}
+        onPrevWeek={() => setWeekOffset((w) => w - 1)}
+        onPickWeek={() => setWeekPickerOpen(true)}
+        onNextWeek={() => setWeekOffset((w) => w + 1)}
+        onChangeViewMode={() => setViewModeOpen(true)}
+        onMoreActions={() => setMoreActionsOpen(true)}
+      />
 
       <RotaStatusBanner
         published={published}
+        hasUnpublishedChanges={hasUnpublishedChanges}
         openShiftCount={openShiftCount}
         conflictCount={conflictCount}
+        coveragePct={coveragePct}
         onPublish={() => setPublishOpen(true)}
       />
 
@@ -195,6 +181,7 @@ function RotaPage() {
           <RotaGridToolbar
             conflictCount={conflictCount}
             openShiftCount={openShiftCount}
+            coveragePct={coveragePct}
             onFilter={() => setFiltersOpen(true)}
             onGenerateRota={() => setGenerateOpen(true)}
             onAddShift={() => setAddOpen(true)}
@@ -202,32 +189,42 @@ function RotaPage() {
           />
           <RotaGrid
             days={days}
-            staff={visibleStaff}
+            staffRows={staffRows}
+            openRow={openRow}
+            staffCount={staff.length}
+            visibleStaffCount={visibleStaff.length}
             weekLabel={weekLabel}
             staffSearch={staffSearch}
             scheduleTitleId={SCHEDULE_TITLE_ID}
             scheduleDescId={SCHEDULE_DESC_ID}
             onStaffSearchChange={setStaffSearch}
-            onShiftOpen={setShiftDetail}
+            onShiftOpen={setSelectedShiftId}
             onAddStaff={() => setAddStaffOpen(true)}
           />
           <RotaGridLegendBar staffCount={visibleStaff.length} />
         </Card>
 
         <div className="space-y-3.5">
-          <LabourSummaryCard onViewCoverageDetails={() => setCoverageDetailsOpen(true)} />
+          <LabourSummaryCard
+            scheduledHours={scheduledHours}
+            coveragePct={coveragePct}
+            onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
+          />
           <AlertsCard
             openShiftCount={openShiftCount}
             conflictCount={conflictCount}
+            workingTimeAlertCount={workingTimeAlertCount}
             onAddShift={() => setAddOpen(true)}
             onViewConflicts={() => setConflictOpen(true)}
             onWorkingTimeAlert={() => setWorkingTimeOpen(true)}
           />
           <PublishReadinessCard
             published={published}
+            hasUnpublishedChanges={hasUnpublishedChanges}
             conflictCount={conflictCount}
             assignedShiftCount={assignedShiftCount}
             plannedShiftCount={plannedShiftCount}
+            coveragePct={coveragePct}
             onPublish={() => setPublishOpen(true)}
           />
           <RoleCoverageCard roleCoverage={roleCoverage} />
@@ -235,7 +232,14 @@ function RotaPage() {
         </div>
       </div>
 
-      <AddShiftDrawer open={addOpen} onOpenChange={setAddOpen} days={days} staff={staff} />
+      <AddShiftDrawer
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        days={days}
+        staff={staff}
+        roles={roleOptions}
+        onSubmit={addShift}
+      />
       <AddStaffDialog open={addStaffOpen} onOpenChange={setAddStaffOpen} />
       <ConflictDrawer
         open={conflictOpen}
@@ -249,10 +253,7 @@ function RotaPage() {
         description={`${staff.length} staff will see this published snapshot in the staff portal.`}
         confirmLabel={published ? "Republish" : "Publish"}
         cancelLabel="Not yet"
-        onConfirm={() => {
-          setPublished(true);
-          setPublishOpen(false);
-        }}
+        onConfirm={handlePublish}
       />
       <GenerateRotaDialog
         open={generateOpen}
@@ -296,10 +297,24 @@ function RotaPage() {
         staffCount={staff.length}
         openShiftCount={openShiftCount}
         conflictCount={conflictCount}
+        coveragePct={coveragePct}
         roleCoverage={roleCoverage}
       />
-      <WorkingTimeDetailsDrawer open={workingTimeOpen} onOpenChange={setWorkingTimeOpen} />
-      <ShiftDetailDrawer shiftDetail={shiftDetail} onClose={() => setShiftDetail(null)} />
+      <WorkingTimeDetailsDrawer
+        open={workingTimeOpen}
+        onOpenChange={setWorkingTimeOpen}
+        alerts={workingTimeAlertList}
+      />
+      <ShiftDetailDrawer
+        key={selectedShiftId ?? "none"}
+        shift={selectedShift}
+        staff={staff}
+        days={days}
+        onClose={closeShiftDetail}
+        onUpdate={updateShift}
+        onRemove={removeShift}
+        onMarkOpen={markShiftOpen}
+      />
     </AppShell>
   );
 }

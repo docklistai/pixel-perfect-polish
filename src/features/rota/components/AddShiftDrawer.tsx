@@ -1,19 +1,79 @@
+import * as React from "react";
 import { DrawerShell, FormSection, FormRow, ActionButton } from "@/components/dl";
-import type { StaffMember } from "../types";
+import { isStartBeforeEnd } from "../lib/draftRota";
+import type { DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
 
-type Day = { d: string };
+type DayEntry = { d: string };
+
+type FormState = {
+  dayIndex: RotaDayIndex;
+  role: string;
+  start: string;
+  end: string;
+  assignTo: string; // "" means open shift; otherwise StaffId
+};
+
+const DEFAULT_FORM: FormState = {
+  dayIndex: 0,
+  role: "",
+  start: "17:00",
+  end: "23:00",
+  assignTo: "",
+};
 
 export function AddShiftDrawer({
   open,
   onOpenChange,
   days,
   staff,
+  roles,
+  onSubmit,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  days: Day[];
+  days: DayEntry[];
   staff: StaffMember[];
+  roles: string[];
+  onSubmit: (input: DraftShiftInput) => void;
 }) {
+  const initialForm = React.useMemo<FormState>(
+    () => ({ ...DEFAULT_FORM, role: roles[0] ?? "" }),
+    [roles],
+  );
+  const [form, setForm] = React.useState<FormState>(initialForm);
+  const [submitted, setSubmitted] = React.useState(false);
+
+  React.useEffect(() => {
+    if (open) {
+      setForm(initialForm);
+      setSubmitted(false);
+    }
+  }, [open, initialForm]);
+
+  const errors = {
+    role: !form.role ? "Choose a role" : "",
+    start: !form.start ? "Required" : "",
+    end: !form.end ? "Required" : "",
+    timeOrder:
+      form.start && form.end && !isStartBeforeEnd(form.start, form.end)
+        ? "Enter a valid start and end time."
+        : "",
+  };
+  const hasError = Boolean(errors.role || errors.start || errors.end || errors.timeOrder);
+
+  const handleSave = () => {
+    setSubmitted(true);
+    if (hasError) return;
+    onSubmit({
+      dayIndex: form.dayIndex,
+      staffId: form.assignTo === "" ? null : form.assignTo,
+      role: form.role,
+      start: form.start,
+      end: form.end,
+    });
+    onOpenChange(false);
+  };
+
   return (
     <DrawerShell
       open={open}
@@ -25,55 +85,88 @@ export function AddShiftDrawer({
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton
-            disabled
-            title="Draft editing is the next step before shifts can be added to the visible rota."
-          >
-            Draft editing next
-          </ActionButton>
+          <ActionButton onClick={handleSave}>Add to draft</ActionButton>
         </>
       }
     >
-      <FormSection
-        title="Shift"
-        description="The next pass will connect this form to the visible draft rota."
-      >
-        <FormRow label="Day" required>
-          <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
-            {days.map((d) => (
-              <option key={d.d}>{d.d}</option>
+      <FormSection title="Shift">
+        <FormRow label="Day" required htmlFor="add-shift-day">
+          <select
+            id="add-shift-day"
+            value={form.dayIndex}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                dayIndex: Number(e.target.value) as RotaDayIndex,
+              }))
+            }
+            className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+          >
+            {days.map((d, i) => (
+              <option key={d.d} value={i}>
+                {d.d}
+              </option>
             ))}
           </select>
         </FormRow>
-        <FormRow label="Role" required>
-          <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
-            <option>Front of House</option>
-            <option>Bar</option>
-            <option>Kitchen</option>
-            <option>Housekeeping</option>
+
+        <FormRow label="Role" required htmlFor="add-shift-role">
+          <select
+            id="add-shift-role"
+            value={form.role}
+            onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
+            className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+          >
+            <option value="">Select a role…</option>
+            {roles.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
           </select>
+          {submitted && errors.role && (
+            <p className="mt-1 text-[11px] text-danger">{errors.role}</p>
+          )}
         </FormRow>
+
         <div className="grid grid-cols-2 gap-3">
-          <FormRow label="Start" required>
+          <FormRow label="Start" required htmlFor="add-shift-start">
             <input
+              id="add-shift-start"
               type="time"
-              defaultValue="17:00"
+              value={form.start}
+              onChange={(e) => setForm((prev) => ({ ...prev, start: e.target.value }))}
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
-          <FormRow label="End" required>
+          <FormRow label="End" required htmlFor="add-shift-end">
             <input
+              id="add-shift-end"
               type="time"
-              defaultValue="23:00"
+              value={form.end}
+              onChange={(e) => setForm((prev) => ({ ...prev, end: e.target.value }))}
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
         </div>
-        <FormRow label="Assign to" hint="Leave blank to post as an open shift.">
-          <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
+        {submitted && errors.timeOrder && (
+          <p className="text-[11px] text-danger">{errors.timeOrder}</p>
+        )}
+
+        <FormRow
+          label="Assign to"
+          hint="Leave blank to post as an open shift."
+          htmlFor="add-shift-assign"
+        >
+          <select
+            id="add-shift-assign"
+            value={form.assignTo}
+            onChange={(e) => setForm((prev) => ({ ...prev, assignTo: e.target.value }))}
+            className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+          >
             <option value="">Post as open shift</option>
             {staff.map((s) => (
-              <option key={s.name} value={s.name}>
+              <option key={s.id} value={s.id}>
                 {s.name} · {s.role}
               </option>
             ))}

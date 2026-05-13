@@ -26,7 +26,7 @@ export function ConflictDrawer({
           <dl className="divide-y divide-border">
             {conflicts.map((conflict) => (
               <DetailRow
-                key={`${conflict.staff}-${conflict.day}-${conflict.detail}`}
+                key={conflict.id}
                 label={conflict.staff}
                 value={`${conflict.day} · ${conflict.detail}`}
               />

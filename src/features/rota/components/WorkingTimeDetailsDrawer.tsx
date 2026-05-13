@@ -1,38 +1,59 @@
 import { AlertTriangle } from "lucide-react";
 import { ActionButton, DetailRow, DrawerShell, FormSection, StatusBadge } from "@/components/dl";
+import type { WorkingTimeAlert } from "../types";
 
 export function WorkingTimeDetailsDrawer({
   open,
   onOpenChange,
+  alerts,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  alerts: WorkingTimeAlert[];
 }) {
+  const meta =
+    alerts.length > 0 ? (
+      <StatusBadge tone="warning">Needs review</StatusBadge>
+    ) : (
+      <StatusBadge tone="success">All within plan</StatusBadge>
+    );
+
   return (
     <DrawerShell
       open={open}
       onOpenChange={onOpenChange}
       title="Working time details"
       description="Hours risk for this rota before publishing."
-      meta={<StatusBadge tone="warning">Needs review</StatusBadge>}
+      meta={meta}
       footer={<ActionButton onClick={() => onOpenChange(false)}>Close</ActionButton>}
     >
-      <FormSection title="Issue">
-        <div className="rounded-xl border border-warning/30 bg-warning-soft px-3 py-3">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <AlertTriangle className="h-4 w-4 text-warning" aria-hidden />1 working time alert
+      <FormSection title={alerts.length === 1 ? "Issue" : "Issues"}>
+        {alerts.length > 0 ? (
+          <div className="rounded-xl border border-warning/30 bg-warning-soft px-3 py-3">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <AlertTriangle className="h-4 w-4 text-warning" aria-hidden />
+              {alerts.length} working time alert{alerts.length === 1 ? "" : "s"}
+            </div>
+            <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+              {alerts.map((alert) => (
+                <li key={alert.staffId}>
+                  {alert.staffName} · scheduled {alert.scheduledDays} of 7 days
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            One staff member is scheduled above the planned weekly hours threshold.
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            No staff are scheduled above their planned weekly days.
           </p>
-        </div>
+        )}
       </FormSection>
 
       <FormSection title="Why it matters">
         <dl className="divide-y divide-border">
           <DetailRow label="Risk" value="Hours risk before publish" />
           <DetailRow label="Likely action" value="Move or shorten a shift" />
-          <DetailRow label="Draft editing" value="Connected in the next frontend pass" />
+          <DetailRow label="Resolves with" value="Reassigning or removing extra days" />
         </dl>
       </FormSection>
     </DrawerShell>

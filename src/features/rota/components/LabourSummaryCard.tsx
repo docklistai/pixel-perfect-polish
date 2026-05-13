@@ -1,10 +1,21 @@
 import { Card, StatusBadge, ActionButton } from "@/components/dl";
 
+const RING_RADIUS = 36;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ≈ 226
+
 export function LabourSummaryCard({
+  scheduledHours,
+  coveragePct,
   onViewCoverageDetails,
 }: {
+  scheduledHours: number;
+  coveragePct: number;
   onViewCoverageDetails: () => void;
 }) {
+  const clampedPct = Math.min(100, Math.max(0, coveragePct));
+  const dashOffset = RING_CIRCUMFERENCE * (1 - clampedPct / 100);
+  const scheduledLabel = `${Math.round(scheduledHours)}h`;
+
   return (
     <Card className="p-4">
       <div className="mb-4 flex items-center justify-between">
@@ -17,7 +28,7 @@ export function LabourSummaryCard({
             <circle
               cx="50"
               cy="50"
-              r="36"
+              r={RING_RADIUS}
               fill="none"
               stroke="oklch(0.92 0.01 240)"
               strokeWidth="10"
@@ -25,37 +36,33 @@ export function LabourSummaryCard({
             <circle
               cx="50"
               cy="50"
-              r="36"
+              r={RING_RADIUS}
               fill="none"
               stroke="var(--brand)"
               strokeWidth="10"
               strokeLinecap="round"
-              strokeDasharray="226"
-              strokeDashoffset="5"
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
             />
           </svg>
           <div className="absolute text-center">
-            <div className="text-[24px] font-semibold tracking-tight">802h</div>
-            <div className="text-[10px] text-muted-foreground">Coverage 98%</div>
+            <div className="text-[24px] font-semibold tracking-tight">{scheduledLabel}</div>
+            <div className="text-[10px] text-muted-foreground">Coverage {coveragePct}%</div>
           </div>
         </div>
         <div className="min-w-0 flex-1 space-y-3 text-sm">
           <div>
             <div className="text-xs text-muted-foreground">Total scheduled</div>
-            <div className="text-[18px] font-semibold">802h</div>
+            <div className="text-[18px] font-semibold">{scheduledLabel}</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Target</div>
-            <div className="text-[18px] font-semibold">820h</div>
-          </div>
-          <div>
-            <div className="text-xs text-muted-foreground">Hours target</div>
-            <div className="text-[18px] font-semibold text-brand">802 / 820h</div>
+            <div className="text-xs text-muted-foreground">Coverage</div>
+            <div className="text-[18px] font-semibold text-brand">{coveragePct}%</div>
           </div>
         </div>
       </div>
       <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
-        <div className="h-full w-[98%] bg-brand" />
+        <div className="h-full bg-brand" style={{ width: `${clampedPct}%` }} />
       </div>
       <ActionButton
         variant="ghost"
