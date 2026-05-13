@@ -1,0 +1,76 @@
+import { AlertTriangle, CircleAlert } from "lucide-react";
+import { Card, ActionButton } from "@/components/dl";
+
+export function AlertsCard({
+  onAddShift,
+  onViewConflicts,
+  onWorkingTimeAlert,
+}: {
+  onAddShift: () => void;
+  onViewConflicts: () => void;
+  onWorkingTimeAlert: () => void;
+}) {
+  const alerts = [
+    {
+      t: "3 Open shifts",
+      s: "Require staff",
+      icon: AlertTriangle,
+      tone: "warning",
+      action: onAddShift,
+    },
+    {
+      t: "2 Conflicts",
+      s: "Need attention",
+      icon: CircleAlert,
+      tone: "danger",
+      action: onViewConflicts,
+    },
+    {
+      t: "1 Working time alert",
+      s: "Exceeds 40h",
+      icon: AlertTriangle,
+      tone: "warning",
+      action: onWorkingTimeAlert,
+    },
+  ] as const;
+
+  return (
+    <Card className="p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm font-semibold">Alerts</div>
+        <span className="text-xs text-muted-foreground">(3)</span>
+      </div>
+      <div className="space-y-3">
+        {alerts.map((a) => (
+          <button
+            key={a.t}
+            type="button"
+            onClick={a.action}
+            className="flex w-full items-center gap-3 rounded-[12px] border border-border px-3 py-3 text-left transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            <div
+              className={`flex h-9 w-9 items-center justify-center rounded-[12px] ${
+                a.tone === "danger" ? "bg-danger-soft text-danger" : "bg-warning-soft text-warning"
+              }`}
+            >
+              <a.icon className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-medium">{a.t}</div>
+              <div className="text-xs text-muted-foreground">{a.s}</div>
+            </div>
+            <span className="text-muted-foreground">›</span>
+          </button>
+        ))}
+      </div>
+      <ActionButton
+        variant="ghost"
+        size="sm"
+        className="mt-3 px-0 text-xs font-semibold text-brand"
+        onClick={onViewConflicts}
+      >
+        View all alerts
+      </ActionButton>
+    </Card>
+  );
+}
