@@ -1,24 +1,32 @@
-import { Send, Share2, Download } from "lucide-react";
+import { Send } from "lucide-react";
 import { Card, StatusBadge, ActionButton } from "@/components/dl";
 
 export function PublishReadinessCard({
   published,
   conflictCount,
+  assignedShiftCount,
+  plannedShiftCount,
   onPublish,
 }: {
   published: boolean;
   conflictCount: number;
+  assignedShiftCount: number;
+  plannedShiftCount: number;
   onPublish: () => void;
 }) {
   const checks = [
-    { k: "Shifts assigned", v: "24 / 27", ok: true },
+    {
+      k: "Shifts assigned",
+      v: `${assignedShiftCount} / ${plannedShiftCount}`,
+      ok: assignedShiftCount === plannedShiftCount,
+    },
     { k: "Coverage target", v: "98%", ok: true },
     {
       k: "Conflicts resolved",
       v: conflictCount === 0 ? "All" : `0 / ${conflictCount}`,
       ok: conflictCount === 0,
     },
-    { k: "Budget check", v: "On track", ok: true },
+    { k: "Hours target", v: "802 / 820h", ok: true },
   ];
 
   return (
@@ -47,12 +55,6 @@ export function PublishReadinessCard({
         disabled={published}
       >
         {published ? "Published" : "Publish to staff"}
-      </ActionButton>
-      <ActionButton className="mt-2 w-full" variant="secondary" icon={Share2} disabled>
-        Share draft
-      </ActionButton>
-      <ActionButton className="mt-2 w-full" variant="ghost" icon={Download} disabled>
-        Export PDF
       </ActionButton>
     </Card>
   );

@@ -19,17 +19,25 @@ export function AddShiftDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Add shift"
-      description="Create a new shift on the rota."
+      description="Create a one-off assigned or open shift for this week."
       footer={
         <>
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton onClick={() => onOpenChange(false)}>Add to rota</ActionButton>
+          <ActionButton
+            disabled
+            title="Draft editing is the next step before shifts can be added to the visible rota."
+          >
+            Draft editing next
+          </ActionButton>
         </>
       }
     >
-      <FormSection title="Shift">
+      <FormSection
+        title="Shift"
+        description="The next pass will connect this form to the visible draft rota."
+      >
         <FormRow label="Day" required>
           <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
             {days.map((d) => (

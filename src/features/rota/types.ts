@@ -17,3 +17,28 @@ export type StaffMember = {
 };
 
 export const off: Shift = { time: "—", role: "Day off", tone: "off", flag: "off" };
+
+export type RotaShiftStatusFilter = "all" | "scheduled" | "open" | "conflict";
+
+export type RotaWarningFilter = "all" | "conflicts" | "working-time";
+
+export type RotaViewMode = "employee" | "role" | "day";
+
+export type RotaFilters = {
+  department: string;
+  shiftStatus: RotaShiftStatusFilter;
+  warningType: RotaWarningFilter;
+};
+
+export type ConflictSummary = {
+  staff: string;
+  day: string;
+  detail: string;
+};
+
+export type RoleCoverageSummary = {
+  label: string;
+  value: string;
+  pct: number;
+  tone: string;
+};

@@ -1,13 +1,7 @@
 import { Card } from "@/components/dl";
+import type { RoleCoverageSummary } from "../types";
 
-type RoleCoverageRow = {
-  label: string;
-  value: string;
-  pct: number;
-  tone: string;
-};
-
-export function RoleCoverageCard({ roleCoverage }: { roleCoverage: RoleCoverageRow[] }) {
+export function RoleCoverageCard({ roleCoverage }: { roleCoverage: RoleCoverageSummary[] }) {
   return (
     <Card className="p-4">
       <div className="mb-4 flex items-center justify-between">

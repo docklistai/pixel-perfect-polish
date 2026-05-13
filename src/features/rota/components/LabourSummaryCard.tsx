@@ -1,10 +1,14 @@
 import { Card, StatusBadge, ActionButton } from "@/components/dl";
 
-export function LabourSummaryCard({ onViewAnalysis }: { onViewAnalysis: () => void }) {
+export function LabourSummaryCard({
+  onViewCoverageDetails,
+}: {
+  onViewCoverageDetails: () => void;
+}) {
   return (
     <Card className="p-4">
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm font-semibold">Labour summary</div>
+        <div className="text-sm font-semibold">Coverage summary</div>
         <StatusBadge tone="muted">This week</StatusBadge>
       </div>
       <div className="flex items-center gap-4">
@@ -45,8 +49,8 @@ export function LabourSummaryCard({ onViewAnalysis }: { onViewAnalysis: () => vo
             <div className="text-[18px] font-semibold">820h</div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">Budget</div>
-            <div className="text-[18px] font-semibold text-brand">On track</div>
+            <div className="text-xs text-muted-foreground">Hours target</div>
+            <div className="text-[18px] font-semibold text-brand">802 / 820h</div>
           </div>
         </div>
       </div>
@@ -57,9 +61,9 @@ export function LabourSummaryCard({ onViewAnalysis }: { onViewAnalysis: () => vo
         variant="ghost"
         size="sm"
         className="mt-3 px-0 text-xs font-semibold text-brand"
-        onClick={onViewAnalysis}
+        onClick={onViewCoverageDetails}
       >
-        View full analysis
+        View coverage details
       </ActionButton>
     </Card>
   );

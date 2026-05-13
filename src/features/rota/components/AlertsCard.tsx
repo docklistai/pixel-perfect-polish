@@ -2,24 +2,28 @@ import { AlertTriangle, CircleAlert } from "lucide-react";
 import { Card, ActionButton } from "@/components/dl";
 
 export function AlertsCard({
+  openShiftCount,
+  conflictCount,
   onAddShift,
   onViewConflicts,
   onWorkingTimeAlert,
 }: {
+  openShiftCount: number;
+  conflictCount: number;
   onAddShift: () => void;
   onViewConflicts: () => void;
   onWorkingTimeAlert: () => void;
 }) {
   const alerts = [
     {
-      t: "3 Open shifts",
+      t: `${openShiftCount} Open shifts`,
       s: "Require staff",
       icon: AlertTriangle,
       tone: "warning",
       action: onAddShift,
     },
     {
-      t: "2 Conflicts",
+      t: `${conflictCount} Conflicts`,
       s: "Need attention",
       icon: CircleAlert,
       tone: "danger",
@@ -38,7 +42,7 @@ export function AlertsCard({
     <Card className="p-4">
       <div className="mb-4 flex items-center justify-between">
         <div className="text-sm font-semibold">Alerts</div>
-        <span className="text-xs text-muted-foreground">(3)</span>
+        <span className="text-xs text-muted-foreground">({alerts.length})</span>
       </div>
       <div className="space-y-3">
         {alerts.map((a) => (
@@ -69,7 +73,7 @@ export function AlertsCard({
         className="mt-3 px-0 text-xs font-semibold text-brand"
         onClick={onViewConflicts}
       >
-        View all alerts
+        View conflicts
       </ActionButton>
     </Card>
   );

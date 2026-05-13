@@ -10,16 +10,20 @@ export function RotaGrid({
   days,
   staff,
   weekLabel,
+  staffSearch,
   scheduleTitleId,
   scheduleDescId,
+  onStaffSearchChange,
   onShiftOpen,
   onAddStaff,
 }: {
   days: DayEntry[];
   staff: StaffMember[];
   weekLabel: string;
+  staffSearch: string;
   scheduleTitleId: string;
   scheduleDescId: string;
+  onStaffSearchChange: (value: string) => void;
   onShiftOpen: (detail: ShiftDetail) => void;
   onAddStaff: () => void;
 }) {
@@ -50,7 +54,12 @@ export function RotaGrid({
             Staff <span className="font-normal text-muted-foreground">({staff.length})</span>
           </div>
           <div className="mt-2">
-            <SearchField placeholder="Search staff..." aria-label="Search staff in rota" />
+            <SearchField
+              placeholder="Search staff or role..."
+              aria-label="Search staff in rota"
+              value={staffSearch}
+              onChange={(event) => onStaffSearchChange(event.target.value)}
+            />
           </div>
         </div>
 
@@ -77,34 +86,55 @@ export function RotaGrid({
           </div>
         ))}
 
-        {/* Staff rows */}
-        {staff.map((s) => (
-          <React.Fragment key={s.name}>
-            <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
-              <img
-                src={`https://i.pravatar.cc/64?img=${s.img}`}
-                alt=""
-                className="h-9 w-9 rounded-full object-cover"
-              />
-              <div className="min-w-0">
-                <div className="truncate text-sm font-medium">{s.name}</div>
-                <div className="text-[11px] text-muted-foreground">
-                  {s.role} · {s.hrs}
-                </div>
-                <div className="text-[10px] text-muted-foreground">Contracted</div>
-              </div>
-            </div>
-            {s.shifts.map((sh, i) => (
-              <div key={i} className="border-b border-l border-border px-2 py-2">
-                <ShiftCell
-                  s={sh}
-                  onOpen={() => onShiftOpen({ ...sh, staff: s.name, day: days[i].d })}
-                  ariaLabel={`${s.name}, ${days[i].d}: ${sh.time === "—" ? "Day off" : `${sh.time}, ${sh.role}`}${sh.flag === "open" ? ", open shift" : sh.flag === "conflict" ? ", conflict" : ""}`}
+        {staff.length > 0 ? (
+          staff.map((s) => (
+            <React.Fragment key={s.name}>
+              <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
+                <img
+                  src={`https://i.pravatar.cc/64?img=${s.img}`}
+                  alt=""
+                  className="h-9 w-9 rounded-full object-cover"
                 />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{s.name}</div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {s.role} · {s.hrs}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">Contracted</div>
+                </div>
               </div>
-            ))}
-          </React.Fragment>
-        ))}
+              {s.shifts.map((sh, i) => (
+                <div key={i} className="border-b border-l border-border px-2 py-2">
+                  <ShiftCell
+                    s={sh}
+                    onOpen={() => onShiftOpen({ ...sh, staff: s.name, day: days[i].d })}
+                    ariaLabel={`${s.name}, ${days[i].d}: ${sh.time === "—" ? "Day off" : `${sh.time}, ${sh.role}`}${sh.flag === "open" ? ", open shift" : sh.flag === "conflict" ? ", conflict" : ""}`}
+                  />
+                </div>
+              ))}
+            </React.Fragment>
+          ))
+        ) : (
+          <div
+            className="border-b border-border px-4 py-10 text-center"
+            style={{ gridColumn: "1 / -1" }}
+          >
+            <div className="text-sm font-semibold">No staff match this view</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Adjust the staff search or rota filters to show schedule rows.
+            </p>
+            {staffSearch && (
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                className="mt-3"
+                onClick={() => onStaffSearchChange("")}
+              >
+                Clear search
+              </ActionButton>
+            )}
+          </div>
+        )}
 
         {/* Footer — add staff */}
         <div className="border-b border-border px-4 py-3.5">

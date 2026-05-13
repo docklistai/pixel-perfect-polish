@@ -1,4 +1,4 @@
-import { CircleAlert, Share2, Download, Send } from "lucide-react";
+import { CircleAlert, Send } from "lucide-react";
 import { ActionButton } from "@/components/dl";
 
 export function RotaStatusBanner({
@@ -41,12 +41,6 @@ export function RotaStatusBanner({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-          <ActionButton variant="secondary" size="sm" icon={Share2} disabled>
-            {published ? "Share published link" : "Share draft link"}
-          </ActionButton>
-          <ActionButton variant="secondary" size="sm" icon={Download} disabled>
-            Export PDF
-          </ActionButton>
           <ActionButton size="sm" icon={Send} onClick={onPublish}>
             {published ? "Republish to staff" : "Publish to staff"}
           </ActionButton>

@@ -14,23 +14,27 @@ export function GenerateRotaDialog({
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Generate rota"
-      description={`Auto-fill the week of ${weekLabel} based on staff availability and role requirements.`}
+      title="Generate rota draft"
+      description={`Prepare a suggested rota for the week of ${weekLabel} without publishing changes.`}
       size="sm"
       footer={
         <>
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton icon={CalendarPlus} onClick={() => onOpenChange(false)}>
-            Generate
+          <ActionButton
+            icon={CalendarPlus}
+            disabled
+            title="Draft generation needs editable rota state before it can prepare suggestions."
+          >
+            Prepare draft later
           </ActionButton>
         </>
       }
     >
       <p className="text-sm text-muted-foreground">
-        AI-assisted rota generation is coming soon. It will use contracted hours, availability, and
-        role requirements to suggest a full week.
+        Draft generation will use open shifts, role coverage, staff availability, and week
+        requirements to prepare a manager-reviewed rota. It will not publish anything to staff.
       </p>
     </DialogShell>
   );

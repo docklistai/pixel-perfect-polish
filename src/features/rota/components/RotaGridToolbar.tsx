@@ -1,12 +1,10 @@
-import { Filter, SlidersHorizontal, Copy, CalendarPlus, Plus } from "lucide-react";
+import { Filter, CalendarPlus, Plus } from "lucide-react";
 import { ActionButton, StatusBadge } from "@/components/dl";
 
 export function RotaGridToolbar({
   conflictCount,
   openShiftCount,
   onFilter,
-  onTemplates,
-  onCopyLastWeek,
   onGenerateRota,
   onAddShift,
   onViewConflicts,
@@ -14,8 +12,6 @@ export function RotaGridToolbar({
   conflictCount: number;
   openShiftCount: number;
   onFilter: () => void;
-  onTemplates: () => void;
-  onCopyLastWeek: () => void;
   onGenerateRota: () => void;
   onAddShift: () => void;
   onViewConflicts: () => void;
@@ -35,12 +31,6 @@ export function RotaGridToolbar({
         98% Coverage
       </StatusBadge>
       <div className="ml-auto flex flex-wrap items-center gap-2">
-        <ActionButton variant="secondary" size="sm" icon={SlidersHorizontal} onClick={onTemplates}>
-          Templates
-        </ActionButton>
-        <ActionButton variant="secondary" size="sm" icon={Copy} onClick={onCopyLastWeek}>
-          Copy last week
-        </ActionButton>
         <ActionButton variant="outline" size="sm" icon={CalendarPlus} onClick={onGenerateRota}>
           Generate rota
         </ActionButton>
