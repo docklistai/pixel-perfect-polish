@@ -13,6 +13,7 @@ export interface StaffRow {
   img: number;
   active?: boolean;
   statusTone?: "info" | "purple";
+  portalStatus?: "Claimed" | "Pending" | "Not invited";
 }
 
 // Extended manager-only profile data — never exposed to staff portal
@@ -69,7 +70,12 @@ export interface StaffProfile {
   recentActivity: StaffProfileActivity[];
   documentsSummary: { total: number; expiringSoon: number; missing: number };
   documents: StaffProfileDocument[];
-  availability: { updated: string; conflicts: number; lateChanges: number; usuallyAvailable: string };
+  availability: {
+    updated: string;
+    conflicts: number;
+    lateChanges: number;
+    usuallyAvailable: string;
+  };
   scheduleStats: { preferredDays: string[]; preferredShifts: string[]; avoidIfPossible: string[] };
   workloadBalance: {
     hoursThisWeek: number;
@@ -82,16 +88,25 @@ export interface StaffProfile {
   leaveAbsence: {
     annualLeaveRemaining: number;
     sickDaysThisYear: number;
+    sickDaysThisMonth: number;
+    sickDaysLast90: number;
     sicknessEpisodes: number;
     shortNoticeAbsences: number;
     returnToWorkRequired: boolean;
     fitNoteRequired: boolean;
   };
-  timeStats: { hoursThisWeek: number; avgWeeklyHours: number; hoursThisMonth: number; overtimeThisMonth: number };
+  timeStats: {
+    hoursThisWeek: number;
+    avgWeeklyHours: number;
+    hoursThisMonth: number;
+    overtimeThisMonth: number;
+  };
   portalAccess: { status: string; lastLogin: string };
   notes: StaffProfileNote[];
   upcomingShifts: StaffProfileShift[];
   recentShifts: StaffProfileShift[];
+  roleCoverage?: Array<{ label: string; value: number }>;
+  breakSummary?: { averageBreak: string; missedBreaks: number; complianceStatus: string };
   insights: {
     attendanceRate: number;
     onTimeStarts: number;

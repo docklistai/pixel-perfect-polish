@@ -62,6 +62,8 @@ const MAX_HOURS = 10;
 
 export function ProfileTimeTab({ profile }: Props) {
   const ts = profile.timeStats;
+  const ins = profile.insights;
+  const bs = profile.breakSummary;
 
   return (
     <div className="space-y-4">
@@ -153,18 +155,38 @@ export function ProfileTimeTab({ profile }: Props) {
         {/* Right: attendance + breaks */}
         <div className="space-y-4">
           <ProfileCard title="Attendance summary">
-            <Pair label="On-time starts" value="97%" />
-            <Pair label="Late starts" value="2" />
-            <Pair label="No-shows" value="0" />
-            <Pair label="Missed shifts" value="0" />
+            <Pair
+              label="Attendance rate"
+              value={ins.attendanceRate > 0 ? `${ins.attendanceRate}%` : "—"}
+            />
+            <Pair
+              label="On-time starts"
+              value={ins.onTimeStarts > 0 ? `${ins.onTimeStarts}%` : "—"}
+            />
+            <Pair label="Late clock-ins" value={ins.lateClockIns} />
+            <Pair label="No-shows" value={ins.noShows} />
           </ProfileCard>
 
           <ProfileCard title="Breaks summary">
-            <Pair label="Average break time" value="38 min" />
-            <Pair label="Missed breaks" value="0" />
+            <Pair label="Average break time" value={bs?.averageBreak ?? "—"} />
+            <Pair label="Missed breaks" value={bs?.missedBreaks ?? "—"} />
             <Pair
               label="Break compliance"
-              value={<span className="text-success font-semibold">Compliant</span>}
+              value={
+                bs ? (
+                  <span
+                    className={
+                      bs.complianceStatus === "Compliant"
+                        ? "text-success font-semibold"
+                        : "text-warning font-semibold"
+                    }
+                  >
+                    {bs.complianceStatus}
+                  </span>
+                ) : (
+                  "—"
+                )
+              }
             />
           </ProfileCard>
         </div>

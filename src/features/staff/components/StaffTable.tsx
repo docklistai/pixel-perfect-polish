@@ -4,7 +4,6 @@ import {
   ChevronDown,
   SlidersHorizontal,
   MoreHorizontal,
-  CheckCircle,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -132,10 +131,12 @@ export function StaffTable({
                   </span>
                 </td>
                 <td className="py-3">
-                  {r.availTone === "off" ? (
-                    <span className="text-muted-foreground">—</span>
+                  {r.portalStatus === "Claimed" ? (
+                    <span className="text-[11px] font-medium text-success">Claimed</span>
+                  ) : r.portalStatus === "Pending" ? (
+                    <span className="text-[11px] font-medium text-warning">Pending</span>
                   ) : (
-                    <CheckCircle className="h-5 w-5 text-brand" />
+                    <span className="text-[11px] text-muted-foreground">Not invited</span>
                   )}
                 </td>
                 <td className="py-3">

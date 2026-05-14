@@ -66,6 +66,8 @@ function stub(
     leaveAbsence: {
       annualLeaveRemaining: 28,
       sickDaysThisYear: 0,
+      sickDaysThisMonth: 0,
+      sickDaysLast90: 0,
       sicknessEpisodes: 0,
       shortNoticeAbsences: 0,
       returnToWorkRequired: false,
@@ -159,6 +161,8 @@ const sophie: StaffProfile = {
   leaveAbsence: {
     annualLeaveRemaining: 14,
     sickDaysThisYear: 4,
+    sickDaysThisMonth: 2,
+    sickDaysLast90: 3,
     sicknessEpisodes: 2,
     shortNoticeAbsences: 1,
     returnToWorkRequired: false,
@@ -171,6 +175,13 @@ const sophie: StaffProfile = {
     overtimeThisMonth: 4.5,
   },
   portalAccess: { status: "Active", lastLogin: "12 Jan 2026, 08:15" },
+  roleCoverage: [
+    { label: "Front of House", value: 95 },
+    { label: "Barista", value: 88 },
+    { label: "Opening shift", value: 72 },
+    { label: "Customer service", value: 100 },
+  ],
+  breakSummary: { averageBreak: "38 min", missedBreaks: 0, complianceStatus: "Compliant" },
   notes: [
     {
       date: "10 Jan 2026",

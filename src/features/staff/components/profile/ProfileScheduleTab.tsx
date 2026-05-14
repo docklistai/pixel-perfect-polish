@@ -48,11 +48,9 @@ function ShiftTable({ shifts, caption }: { shifts: StaffProfileShift[]; caption:
   );
 }
 
-const ROLE_COVERAGE = [
-  { role: "Barista", pct: 88 },
-  { role: "Front of House", pct: 95 },
-  { role: "Opening shift", pct: 72 },
-  { role: "Customer service", pct: 100 },
+const DEFAULT_ROLE_COVERAGE = [
+  { label: "Role fit", value: 80 },
+  { label: "Schedule match", value: 75 },
 ];
 
 export function ProfileScheduleTab({ profile }: Props) {
@@ -133,14 +131,14 @@ export function ProfileScheduleTab({ profile }: Props) {
 
         <ProfileCard title="Role coverage">
           <div className="space-y-3">
-            {ROLE_COVERAGE.map(({ role, pct }) => (
-              <div key={role}>
+            {(profile.roleCoverage ?? DEFAULT_ROLE_COVERAGE).map(({ label, value }) => (
+              <div key={label}>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-muted-foreground">{role}</span>
-                  <span className="font-medium">{pct}%</span>
+                  <span className="text-muted-foreground">{label}</span>
+                  <span className="font-medium">{value}%</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-brand" style={{ width: `${value}%` }} />
                 </div>
               </div>
             ))}

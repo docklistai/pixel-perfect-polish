@@ -130,16 +130,45 @@ export function ProfileInsightsTab({ profile }: Props) {
           <InsightMetric label="Short-notice absence count" value={ins.shortNoticeAbsenceCount} />
         </ProfileCard>
 
-        <ProfileCard title="Skills & training fit" className="sm:col-span-2 xl:col-span-2">
+        <ProfileCard title="Training & document readiness" className="sm:col-span-2 xl:col-span-2">
           <p className="text-xs text-muted-foreground mb-3">
-            Based on certified skills and scheduled role history.
+            Certifications, skills, and document status at a glance.
           </p>
           <div className="grid grid-cols-2 gap-x-6">
-            <Pair label="Role fit" value={ins.roleFit} />
-            <Pair label="Department fit" value={ins.departmentFit} />
-            <Pair label="Availability match" value={ins.availabilityMatch} />
-            <Pair label="Preferred shifts" value={ins.preferredShifts} />
-            <Pair label="Certifications status" value={ins.certificationsStatus} />
+            <Pair
+              label="Skills on record"
+              value={profile.skills.length > 0 ? profile.skills.length : "None"}
+            />
+            <Pair label="Certifications" value={ins.certificationsStatus} />
+            <Pair
+              label="Documents total"
+              value={profile.documentsSummary.total > 0 ? profile.documentsSummary.total : "—"}
+            />
+            <Pair
+              label="Expiring soon"
+              value={
+                profile.documentsSummary.expiringSoon > 0 ? (
+                  <span className="text-warning font-semibold">
+                    {profile.documentsSummary.expiringSoon}
+                  </span>
+                ) : (
+                  "None"
+                )
+              }
+            />
+            <Pair
+              label="Missing documents"
+              value={
+                profile.documentsSummary.missing > 0 ? (
+                  <span className="text-danger font-semibold">
+                    {profile.documentsSummary.missing}
+                  </span>
+                ) : (
+                  "None"
+                )
+              }
+            />
+            {profile.flags.length > 0 && <Pair label="Active flags" value={profile.flags.length} />}
           </div>
         </ProfileCard>
       </div>

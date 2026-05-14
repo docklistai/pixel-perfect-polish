@@ -32,40 +32,45 @@ export const Route = createFileRoute("/staff")({
   component: StaffPage,
 });
 
-const stats = [
-  {
-    icon: Users,
-    label: "TOTAL STAFF",
-    value: "48",
-    sub: "↑ 4 vs last month",
-    action: "View all staff",
-    tone: "info",
-  },
-  {
-    icon: CheckCircle2,
-    label: "ACTIVE THIS WEEK",
-    value: "42",
-    sub: "87% of total staff",
-    action: "View rota",
-    tone: "brand",
-  },
-  {
-    icon: UserPlus,
-    label: "ONBOARDING",
-    value: "3",
-    sub: "2 start this week",
-    action: "View onboarding",
-    tone: "warning",
-  },
-  {
-    icon: AlertTriangle,
-    label: "MISSING DOCUMENTS",
-    value: "6",
-    sub: "Requires attention",
-    action: "View alerts",
-    tone: "danger",
-  },
-];
+function buildStats(staffRows: typeof rows) {
+  const total = staffRows.length;
+  const active = staffRows.filter((r) => r.status === "Active").length;
+  const onboarding = staffRows.filter((r) => r.status === "Probation").length;
+  return [
+    {
+      icon: Users,
+      label: "TOTAL STAFF",
+      value: String(total),
+      sub: "Across all departments",
+      action: "View all staff",
+      tone: "info",
+    },
+    {
+      icon: CheckCircle2,
+      label: "ACTIVE THIS WEEK",
+      value: String(active),
+      sub: `${Math.round((active / total) * 100)}% of total staff`,
+      action: "View rota",
+      tone: "brand",
+    },
+    {
+      icon: UserPlus,
+      label: "ONBOARDING",
+      value: String(onboarding),
+      sub: "Currently on probation",
+      action: "View onboarding",
+      tone: "warning",
+    },
+    {
+      icon: AlertTriangle,
+      label: "MISSING DOCUMENTS",
+      value: "2",
+      sub: "Requires attention",
+      action: "View alerts",
+      tone: "danger",
+    },
+  ];
+}
 
 const toneBg: Record<string, string> = {
   info: "bg-info-soft text-info",
@@ -83,6 +88,7 @@ function StaffPage() {
 }
 
 function StaffListPage() {
+  const stats = buildStats(rows);
   const [addOpen, setAddOpen] = React.useState(false);
   const [inviteSent, setInviteSent] = React.useState(false);
   const [selected, setSelected] = React.useState<StaffRow>(rows[0]);

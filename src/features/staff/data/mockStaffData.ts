@@ -15,6 +15,7 @@ export const rows: StaffRow[] = [
     availTone: "high",
     img: 5,
     active: true,
+    portalStatus: "Claimed",
   },
   {
     id: "daniel-mitchell",
@@ -29,6 +30,7 @@ export const rows: StaffRow[] = [
     avail: "90%",
     availTone: "high",
     img: 12,
+    portalStatus: "Claimed",
   },
   {
     id: "priya-patel",
@@ -43,6 +45,7 @@ export const rows: StaffRow[] = [
     avail: "60%",
     availTone: "med",
     img: 47,
+    portalStatus: "Claimed",
   },
   {
     id: "liam-oconnor",
@@ -57,6 +60,7 @@ export const rows: StaffRow[] = [
     avail: "75%",
     availTone: "high",
     img: 13,
+    portalStatus: "Pending",
   },
   {
     id: "olivia-bennett",
@@ -71,6 +75,7 @@ export const rows: StaffRow[] = [
     avail: "80%",
     availTone: "high",
     img: 16,
+    portalStatus: "Claimed",
   },
   {
     id: "emma-johnson",
@@ -85,6 +90,7 @@ export const rows: StaffRow[] = [
     avail: "65%",
     availTone: "med",
     img: 9,
+    portalStatus: "Pending",
   },
   {
     id: "noah-williams",
@@ -100,6 +106,7 @@ export const rows: StaffRow[] = [
     availTone: "high",
     img: 33,
     statusTone: "info",
+    portalStatus: "Pending",
   },
   {
     id: "ava-thompson",
@@ -114,6 +121,7 @@ export const rows: StaffRow[] = [
     avail: "95%",
     availTone: "high",
     img: 23,
+    portalStatus: "Claimed",
   },
   {
     id: "james-lewis",
@@ -128,6 +136,7 @@ export const rows: StaffRow[] = [
     avail: "50%",
     availTone: "med",
     img: 14,
+    portalStatus: "Not invited",
   },
   {
     id: "isabella-martin",
@@ -143,5 +152,6 @@ export const rows: StaffRow[] = [
     availTone: "off",
     img: 25,
     statusTone: "purple",
+    portalStatus: "Claimed",
   },
 ];

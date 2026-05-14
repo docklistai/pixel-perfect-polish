@@ -87,8 +87,8 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
 
         {/* Sickness summary */}
         <ProfileCard title="Sickness summary">
-          <Pair label="Sick days this month" value={la.sickDaysThisYear > 0 ? "2" : "0"} />
-          <Pair label="Sick days last 90 days" value="3" />
+          <Pair label="Sick days this month" value={la.sickDaysThisMonth} />
+          <Pair label="Sick days last 90 days" value={la.sickDaysLast90} />
           <Pair label="Sick days this year" value={la.sickDaysThisYear} />
           <Pair label="Sickness episodes" value={la.sicknessEpisodes} />
           <Pair label="Return to work required" value={la.returnToWorkRequired ? "Yes" : "No"} />

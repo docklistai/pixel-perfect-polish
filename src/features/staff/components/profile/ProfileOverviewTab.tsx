@@ -9,15 +9,20 @@ interface Props {
   profile: StaffProfile;
 }
 
-const NEXT_7: { day: string; date: string; shift: string }[] = [
-  { day: "Thu", date: "16", shift: "08–16" },
-  { day: "Fri", date: "17", shift: "08–16" },
-  { day: "Sat", date: "18", shift: "10–18" },
-  { day: "Sun", date: "19", shift: "OFF" },
-  { day: "Mon", date: "20", shift: "08–16" },
-  { day: "Tue", date: "21", shift: "08–16" },
-  { day: "Wed", date: "22", shift: "OFF" },
-];
+const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function buildNext7(upcomingShifts: { date: string; time: string }[]) {
+  const today = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const abbr = DAY_ABBR[d.getDay()];
+    const dayLabel = i === 0 ? "Today" : i === 1 ? "Tmrw" : abbr;
+    const match = upcomingShifts.find((s) => s.date.startsWith(abbr));
+    const shift = match ? match.time.replace(/:00/g, "").replace(" – ", "–") : "OFF";
+    return { day: dayLabel, shift };
+  });
+}
 
 const ACTIVITY_CHIP: Record<string, string> = {
   Absence: "bg-warning-soft text-warning",
@@ -35,6 +40,7 @@ export function ProfileOverviewTab({ profile }: Props) {
     availability: av,
     portalAccess: pa,
   } = profile;
+  const next7 = buildNext7(profile.upcomingShifts);
 
   const snapshotSummary = profile.managerSnapshot.filter(
     (l) => !l.startsWith("Watch:") && !l.startsWith("Next action:"),
@@ -290,18 +296,17 @@ export function ProfileOverviewTab({ profile }: Props) {
 
           <ProfileCard title="Next 7 days" className="col-span-12 lg:col-span-4 p-5">
             <div className="grid grid-cols-7 gap-1 text-center">
-              {NEXT_7.map((d) => (
+              {next7.map((d) => (
                 <div key={d.day} className="flex flex-col items-center gap-1">
                   <span className="text-[9px] font-semibold text-muted-foreground uppercase">
                     {d.day}
                   </span>
                   <div
                     className={cn(
-                      "w-full rounded-md flex flex-col items-center py-2 gap-0.5",
+                      "w-full rounded-md flex items-center justify-center py-2.5",
                       d.shift === "OFF" ? "bg-muted/40" : "bg-brand-soft",
                     )}
                   >
-                    <span className="text-xs font-bold">{d.date}</span>
                     <span
                       className={cn(
                         "text-[9px] font-medium leading-none",
@@ -343,7 +348,8 @@ export function ProfileOverviewTab({ profile }: Props) {
               </button>
               <button
                 type="button"
-                className="block w-full text-left text-sm text-danger font-medium hover:underline"
+                disabled
+                className="block w-full text-left text-sm text-muted-foreground cursor-not-allowed opacity-50"
               >
                 Deactivate access
               </button>
