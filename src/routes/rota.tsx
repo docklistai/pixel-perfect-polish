@@ -103,6 +103,11 @@ function RotaPage() {
   const dayLabels = days.map((d) => d.d);
   const roleOptions = Array.from(new Set(staff.map((row) => row.role)));
   const visibleStaff = filterStaff(staff, draftShifts, filters, staffSearch);
+  const hasActiveFilters =
+    staffSearch.trim().length > 0 ||
+    filters.department !== "all" ||
+    filters.shiftStatus !== "all" ||
+    filters.warningType !== "all";
   const staffRows = buildStaffRows(visibleStaff, draftShifts);
   const openRow = buildOpenRow(draftShifts);
 
@@ -148,10 +153,10 @@ function RotaPage() {
 
   const headerStatusTone = !published || hasUnpublishedChanges ? "warning" : "success";
   const headerStatusLabel = !published
-    ? "Draft · not yet shared"
+    ? "Draft · local changes only"
     : hasUnpublishedChanges
-      ? "Published · draft changes since last publish"
-      : "Published · staff can see this snapshot";
+      ? "Published · draft changes waiting to republish"
+      : "Published · staff see the last snapshot";
 
   return (
     <AppShell>
@@ -195,9 +200,14 @@ function RotaPage() {
             visibleStaffCount={visibleStaff.length}
             weekLabel={weekLabel}
             staffSearch={staffSearch}
+            hasActiveFilters={hasActiveFilters}
             scheduleTitleId={SCHEDULE_TITLE_ID}
             scheduleDescId={SCHEDULE_DESC_ID}
             onStaffSearchChange={setStaffSearch}
+            onClearFilters={() => {
+              setStaffSearch("");
+              setFilters(DEFAULT_ROTA_FILTERS);
+            }}
             onShiftOpen={setSelectedShiftId}
             onAddStaff={() => setAddStaffOpen(true)}
           />
@@ -250,7 +260,7 @@ function RotaPage() {
         open={publishOpen}
         onOpenChange={setPublishOpen}
         title={`${published ? "Republish" : "Publish"} rota for w/c ${weekLabel}?`}
-        description={`${staff.length} staff will see this published snapshot in the staff portal.`}
+        description={`Draft changes stay local until you ${published ? "republish" : "publish"}. Staff see the last published snapshot in the staff portal.`}
         confirmLabel={published ? "Republish" : "Publish"}
         cancelLabel="Not yet"
         onConfirm={handlePublish}

@@ -14,9 +14,11 @@ export function RotaGrid({
   visibleStaffCount,
   weekLabel,
   staffSearch,
+  hasActiveFilters,
   scheduleTitleId,
   scheduleDescId,
   onStaffSearchChange,
+  onClearFilters,
   onShiftOpen,
   onAddStaff,
 }: {
@@ -27,9 +29,11 @@ export function RotaGrid({
   visibleStaffCount: number;
   weekLabel: string;
   staffSearch: string;
+  hasActiveFilters: boolean;
   scheduleTitleId: string;
   scheduleDescId: string;
   onStaffSearchChange: (value: string) => void;
+  onClearFilters: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;
   onAddStaff: () => void;
 }) {
@@ -135,18 +139,15 @@ export function RotaGrid({
             className="border-b border-border px-4 py-10 text-center"
             style={{ gridColumn: "1 / -1" }}
           >
-            <div className="text-sm font-semibold">No staff match this view</div>
+            <div className="text-sm font-semibold">
+              No staff match the current search or filters
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Adjust the staff search or rota filters to show schedule rows.
+              Open shifts still appear below. Clear the search or filters to bring staff rows back.
             </p>
-            {staffSearch && (
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                className="mt-3"
-                onClick={() => onStaffSearchChange("")}
-              >
-                Clear search
+            {(staffSearch || hasActiveFilters) && (
+              <ActionButton className="mt-3" size="sm" variant="secondary" onClick={onClearFilters}>
+                Clear search and filters
               </ActionButton>
             )}
           </div>

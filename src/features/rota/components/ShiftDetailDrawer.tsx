@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Trash2, UserMinus, Save } from "lucide-react";
 import { ActionButton, DrawerShell, FormRow, FormSection, StatusBadge } from "@/components/dl";
-import { isStartBeforeEnd } from "../lib/draftRota";
+import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
 
 type DayEntry = { d: string };
@@ -69,13 +69,14 @@ export function ShiftDetailDrawer({
     <StatusBadge tone="success">Scheduled</StatusBadge>
   );
 
-  const timesValid = isStartBeforeEnd(form.start, form.end);
+  const timesValid = isValidShiftTimeRange(form.start, form.end);
   const isDirty =
     form.role !== shift.role ||
     form.start !== shift.start ||
     form.end !== shift.end ||
     form.assignTo !== (shift.staffId ?? "");
   const canSave = isDirty && form.role.trim() !== "" && timesValid;
+  const timeErrorId = "shift-edit-time-error";
 
   const handleSave = () => {
     if (!canSave) return;
@@ -131,6 +132,8 @@ export function ShiftDetailDrawer({
               type="time"
               value={form.start}
               onChange={(e) => setForm((prev) => ({ ...prev, start: e.target.value }))}
+              aria-invalid={!timesValid}
+              aria-describedby={!timesValid ? timeErrorId : undefined}
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
@@ -140,12 +143,16 @@ export function ShiftDetailDrawer({
               type="time"
               value={form.end}
               onChange={(e) => setForm((prev) => ({ ...prev, end: e.target.value }))}
+              aria-invalid={!timesValid}
+              aria-describedby={!timesValid ? timeErrorId : undefined}
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
         </div>
         {!timesValid && (
-          <p className="text-[11px] text-danger">Enter a valid start and end time.</p>
+          <p id={timeErrorId} className="text-[11px] text-danger">
+            Enter a valid shift time. Overnight shifts are allowed.
+          </p>
         )}
         <FormRow
           label="Assigned to"

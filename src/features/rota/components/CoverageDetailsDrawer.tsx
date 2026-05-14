@@ -57,6 +57,9 @@ export function CoverageDetailsDrawer({
             </div>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Availability and leave cues will be connected here in a later backend pass.
+        </p>
       </FormSection>
     </DrawerShell>
   );

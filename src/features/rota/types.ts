@@ -70,6 +70,7 @@ export type ConflictSummary = {
   staff: string;
   day: string;
   detail: string;
+  guidance: string;
 };
 
 export type RoleCoverageSummary = {

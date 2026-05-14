@@ -119,6 +119,8 @@ export function buildConflictSummaries(
         staff: staffName,
         day: dayLabels[s.dayIndex] ?? "",
         detail: `${s.role} · ${formatShiftTime(s.start, s.end)}`,
+        guidance:
+          "Needs manager review. Check overlap, leave, or role cover before publishing. Edit the shift, mark it open, or reassign it if cover is uncertain.",
       };
     });
 }

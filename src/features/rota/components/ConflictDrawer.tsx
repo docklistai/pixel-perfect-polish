@@ -1,4 +1,4 @@
-import { DrawerShell, FormSection, DetailRow, StatusBadge, ActionButton } from "@/components/dl";
+import { DrawerShell, FormSection, StatusBadge, ActionButton } from "@/components/dl";
 import type { ConflictSummary } from "../types";
 
 export function ConflictDrawer({
@@ -23,15 +23,23 @@ export function ConflictDrawer({
     >
       <FormSection title="Issues">
         {conflicts.length > 0 ? (
-          <dl className="divide-y divide-border">
+          <div className="space-y-3">
             {conflicts.map((conflict) => (
-              <DetailRow
+              <div
                 key={conflict.id}
-                label={conflict.staff}
-                value={`${conflict.day} · ${conflict.detail}`}
-              />
+                className="rounded-xl border border-border bg-muted/20 px-3 py-3"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-medium text-foreground">{conflict.staff}</div>
+                  <StatusBadge tone="warning">Needs review</StatusBadge>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  {conflict.day} · {conflict.detail}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{conflict.guidance}</p>
+              </div>
             ))}
-          </dl>
+          </div>
         ) : (
           <p className="text-xs text-muted-foreground">No visible conflicts in this rota.</p>
         )}

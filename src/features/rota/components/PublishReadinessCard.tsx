@@ -62,6 +62,10 @@ export function PublishReadinessCard({
           </div>
         ))}
       </div>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Draft changes stay local until publish or republish. Staff only see the last published
+        snapshot.
+      </p>
       <ActionButton
         className="mt-4 w-full"
         icon={Send}

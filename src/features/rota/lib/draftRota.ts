@@ -14,6 +14,7 @@ import type {
 import type { SeedShift } from "../data/mockData";
 
 export const DAY_COUNT = 7;
+const MAX_SHIFT_DURATION_MINUTES = 16 * 60;
 
 let shiftCounter = 0;
 export function makeShiftId(): ShiftId {
@@ -109,12 +110,27 @@ export function parseHHMMToMinutes(value: string): number | null {
   return hour * 60 + minute;
 }
 
-export function shiftHours(start: string, end: string): number {
+export function getShiftDurationMinutes(start: string, end: string): number | null {
   const startMin = parseHHMMToMinutes(start);
   const endMin = parseHHMMToMinutes(end);
-  if (startMin === null || endMin === null) return 0;
-  const wrapped = endMin <= startMin ? endMin + 24 * 60 : endMin;
-  return (wrapped - startMin) / 60;
+  if (startMin === null || endMin === null) return null;
+
+  let duration = endMin - startMin;
+  if (duration < 0) duration += 24 * 60;
+  if (duration === 0) return null;
+
+  return duration;
+}
+
+export function isValidShiftTimeRange(start: string, end: string): boolean {
+  const duration = getShiftDurationMinutes(start, end);
+  return duration !== null && duration <= MAX_SHIFT_DURATION_MINUTES;
+}
+
+export function shiftHours(start: string, end: string): number {
+  const duration = getShiftDurationMinutes(start, end);
+  if (duration === null || duration > MAX_SHIFT_DURATION_MINUTES) return 0;
+  return duration / 60;
 }
 
 export function formatShiftTime(start: string, end: string): string {
@@ -134,10 +150,5 @@ function formatTime(hhmm: string): string {
 }
 
 export function isStartBeforeEnd(start: string, end: string): boolean {
-  const s = parseHHMMToMinutes(start);
-  const e = parseHHMMToMinutes(end);
-  if (s === null || e === null) return false;
-  // end <= start is treated as an overnight shift (e.g. 23:00 → 01:00, 16:00 → 00:00).
-  // shiftHours already wraps such cases by adding 24h to end.
-  return true;
+  return isValidShiftTimeRange(start, end);
 }

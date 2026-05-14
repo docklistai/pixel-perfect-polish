@@ -1,6 +1,6 @@
 import * as React from "react";
 import { DrawerShell, FormSection, FormRow, ActionButton } from "@/components/dl";
-import { isStartBeforeEnd } from "../lib/draftRota";
+import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
 
 type DayEntry = { d: string };
@@ -55,11 +55,12 @@ export function AddShiftDrawer({
     start: !form.start ? "Required" : "",
     end: !form.end ? "Required" : "",
     timeOrder:
-      form.start && form.end && !isStartBeforeEnd(form.start, form.end)
-        ? "Enter a valid start and end time."
+      form.start && form.end && !isValidShiftTimeRange(form.start, form.end)
+        ? "Enter a valid shift time. Overnight shifts are allowed."
         : "",
   };
   const hasError = Boolean(errors.role || errors.start || errors.end || errors.timeOrder);
+  const timeErrorId = "add-shift-time-error";
 
   const handleSave = () => {
     setSubmitted(true);
@@ -136,6 +137,8 @@ export function AddShiftDrawer({
               type="time"
               value={form.start}
               onChange={(e) => setForm((prev) => ({ ...prev, start: e.target.value }))}
+              aria-invalid={submitted && Boolean(errors.timeOrder)}
+              aria-describedby={submitted && errors.timeOrder ? timeErrorId : undefined}
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
@@ -145,12 +148,16 @@ export function AddShiftDrawer({
               type="time"
               value={form.end}
               onChange={(e) => setForm((prev) => ({ ...prev, end: e.target.value }))}
+              aria-invalid={submitted && Boolean(errors.timeOrder)}
+              aria-describedby={submitted && errors.timeOrder ? timeErrorId : undefined}
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
         </div>
         {submitted && errors.timeOrder && (
-          <p className="text-[11px] text-danger">{errors.timeOrder}</p>
+          <p id={timeErrorId} className="text-[11px] text-danger">
+            {errors.timeOrder}
+          </p>
         )}
 
         <FormRow
