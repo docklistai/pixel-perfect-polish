@@ -5,10 +5,12 @@ export function ConflictDrawer({
   open,
   onOpenChange,
   conflicts,
+  onReviewShift,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   conflicts: ConflictSummary[];
+  onReviewShift: (shiftId: ConflictSummary["id"]) => void;
 }) {
   const issueLabel = conflicts.length === 1 ? "1 issue" : `${conflicts.length} issues`;
 
@@ -37,6 +39,14 @@ export function ConflictDrawer({
                   {conflict.day} · {conflict.detail}
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">{conflict.guidance}</p>
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  className="mt-3"
+                  onClick={() => onReviewShift(conflict.id)}
+                >
+                  Review shift
+                </ActionButton>
               </div>
             ))}
           </div>

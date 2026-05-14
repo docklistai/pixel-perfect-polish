@@ -8,8 +8,7 @@ export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
       </span>
       <span>Coverage target: 100%</span>
       <span>
-        Breaks: 30 mins unpaid break for shifts over 6 hours{" "}
-        <CircleAlert className="inline-block h-3 w-3 align-[-1px]" />
+        Break guidance is advisory <CircleAlert className="inline-block h-3 w-3 align-[-1px]" />
       </span>
       <div className="ml-auto flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-1">— Break</span>
@@ -20,7 +19,7 @@ export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
           <span className="inline-block h-3 w-3 rounded-sm border-2 border-dashed border-warning" />
           Open shift
         </span>
-        <span>— Day off</span>
+        <span>Break guidance is advisory until rules are connected</span>
       </div>
     </div>
   );

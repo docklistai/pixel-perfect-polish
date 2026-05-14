@@ -1,4 +1,3 @@
-import { Copy } from "lucide-react";
 import { ActionButton, DialogShell, FormSection, StatusBadge } from "@/components/dl";
 
 export function CopyLastWeekDialog({
@@ -15,17 +14,12 @@ export function CopyLastWeekDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Copy last week"
-      description={`Prepare to copy the previous rota into the week of ${weekLabel}.`}
+      description={`Real copy last week needs saved rota history for the week of ${weekLabel}.`}
       size="sm"
       footer={
-        <>
-          <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
-            Close
-          </ActionButton>
-          <ActionButton icon={Copy} disabled title="Draft editing needs to be connected first.">
-            Copy after draft editing
-          </ActionButton>
-        </>
+        <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
+          Close
+        </ActionButton>
       }
     >
       <FormSection title="What this will do">
@@ -35,7 +29,8 @@ export function CopyLastWeekDialog({
             <StatusBadge tone="muted">Backend later</StatusBadge>
           </div>
           <p className="text-xs text-muted-foreground">
-            This will copy the previous week into the current draft once draft editing is connected.
+            Real copy last week needs saved rota history. This screen stays as a planning note until
+            that data exists.
           </p>
           <p className="text-xs text-muted-foreground">
             It will not publish anything or notify staff without a manager review step.

@@ -50,7 +50,7 @@ export function WeekPickerDialog({
             onClick={() => selectWeek(0)}
             className="justify-start"
           >
-            This week
+            Today
           </ActionButton>
           <ActionButton
             variant="secondary"

@@ -184,8 +184,14 @@ export function RotaGrid({
 
         {/* Footer — add staff */}
         <div className="border-b border-border px-4 py-3.5">
-          <ActionButton variant="secondary" size="sm" icon={Plus} onClick={onAddStaff}>
-            Add staff
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            icon={Plus}
+            onClick={onAddStaff}
+            title="Staff creation is handled later."
+          >
+            Add staff later
           </ActionButton>
         </div>
 

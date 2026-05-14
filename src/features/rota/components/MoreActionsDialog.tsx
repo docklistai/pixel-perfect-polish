@@ -46,7 +46,7 @@ export function MoreActionsDialog({
             onClick={() => openNestedSurface(onCopyLastWeek)}
             className="justify-start"
           >
-            Copy last week
+            Copy last week (later)
           </ActionButton>
           <ActionButton
             variant="secondary"

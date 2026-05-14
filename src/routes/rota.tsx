@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, Card, ConfirmDialog } from "@/components/dl";
-
 import { getWeekLabel, getWeekDayLabels } from "@/features/rota/lib/weekHelpers";
 import { staff, baseDayStats, initialDraftShifts } from "@/features/rota/data/mockData";
 import {
@@ -9,6 +8,7 @@ import {
   buildOpenRow,
   buildStaffRows,
   createInitialDraftShifts,
+  fillOpenShiftsWithSuggestions,
   makeDraftShift,
 } from "@/features/rota/lib/draftRota";
 import {
@@ -144,6 +144,18 @@ function RotaPage() {
   };
   const markShiftOpen = (id: ShiftId) =>
     updateShift(id, { staffId: null, status: "open", tone: "open" });
+  const applyStandardTemplate = () => {
+    setDraftShifts(createInitialDraftShifts(initialDraftShifts));
+    markDirty();
+  };
+  const applyOpenShiftSuggestions = () => {
+    setDraftShifts((current) => fillOpenShiftsWithSuggestions(current, staff).shifts);
+    markDirty();
+  };
+  const reviewConflictShift = (shiftId: ShiftId) => {
+    setSelectedShiftId(shiftId);
+    setConflictOpen(false);
+  };
 
   const handlePublish = () => {
     setPublished(true);
@@ -255,6 +267,7 @@ function RotaPage() {
         open={conflictOpen}
         onOpenChange={setConflictOpen}
         conflicts={conflictSummaries}
+        onReviewShift={reviewConflictShift}
       />
       <ConfirmDialog
         open={publishOpen}
@@ -269,6 +282,9 @@ function RotaPage() {
         open={generateOpen}
         onOpenChange={setGenerateOpen}
         weekLabel={weekLabel}
+        shifts={draftShifts}
+        staff={staff}
+        onApplySuggestions={applyOpenShiftSuggestions}
       />
       <WeekPickerDialog
         open={weekPickerOpen}
@@ -295,7 +311,11 @@ function RotaPage() {
         onCopyLastWeek={() => setCopyLastWeekOpen(true)}
         onTemplates={() => setTemplatesOpen(true)}
       />
-      <TemplatesDialog open={templatesOpen} onOpenChange={setTemplatesOpen} />
+      <TemplatesDialog
+        open={templatesOpen}
+        onOpenChange={setTemplatesOpen}
+        onApplyStandardTemplate={applyStandardTemplate}
+      />
       <CopyLastWeekDialog
         open={copyLastWeekOpen}
         onOpenChange={setCopyLastWeekOpen}
