@@ -29,8 +29,8 @@ export function GenerateRotaDialog({
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Suggest cover for open shifts"
-      description={`Review simple local cover suggestions for the week of ${weekLabel}.`}
+      title="Fill open shifts"
+      description={`Review suggested staff for open shifts in the week of ${weekLabel}.`}
       size="sm"
       footer={
         <>
@@ -45,10 +45,10 @@ export function GenerateRotaDialog({
               onOpenChange(false);
             }}
             title={
-              canApply ? "Apply suggestions to the current draft." : "No suggestions are available."
+              canApply ? "Fill open shifts in the current draft." : "No open shifts can be filled."
             }
           >
-            Apply cover suggestions
+            Fill open shifts
           </ActionButton>
         </>
       }
@@ -56,12 +56,11 @@ export function GenerateRotaDialog({
       <FormSection title="How it works">
         <div className="rounded-xl border border-border bg-muted/30 px-3 py-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-semibold">Local cover suggestions</span>
-            <StatusBadge tone="muted">Draft only</StatusBadge>
+            <span className="text-sm font-semibold">Suggested assignments</span>
+            <StatusBadge tone="muted">Preview</StatusBadge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            This fills open shifts using role matches and a simple balance check. It only changes
-            this local draft.
+            This uses role matches and a simple balance check before updating this draft.
           </p>
         </div>
       </FormSection>

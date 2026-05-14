@@ -4,7 +4,7 @@ import { SearchField, ActionButton } from "@/components/dl";
 import { ShiftCell } from "./ShiftCell";
 import type { RotaGridOpenRow, RotaGridStaffRow, ShiftId } from "../types";
 
-type DayEntry = { d: string; h: string; c: string; tone: string };
+type DayEntry = { d: string; h: string; c: string; tone: string; isToday: boolean };
 
 export function RotaGrid({
   days,
@@ -20,6 +20,9 @@ export function RotaGrid({
   onStaffSearchChange,
   onClearFilters,
   onShiftOpen,
+  onShiftDuplicate,
+  onShiftRemove,
+  onShiftMarkOpen,
 }: {
   days: DayEntry[];
   staffRows: RotaGridStaffRow[];
@@ -34,6 +37,9 @@ export function RotaGrid({
   onStaffSearchChange: (value: string) => void;
   onClearFilters: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;
+  onShiftDuplicate: (shiftId: ShiftId) => void;
+  onShiftRemove: (shiftId: ShiftId) => void;
+  onShiftMarkOpen: (shiftId: ShiftId) => void;
 }) {
   const totalOpenShifts = openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0);
 
@@ -79,8 +85,20 @@ export function RotaGrid({
 
         {/* Column headers — days */}
         {days.map((d) => (
-          <div key={d.d} className="border-b border-l border-border px-3 py-4">
-            <div className="text-sm font-semibold tracking-tight">{d.d}</div>
+          <div
+            key={d.d}
+            className={`border-b border-l px-3 py-4 ${
+              d.isToday ? "border-brand/30 bg-brand-soft/25" : "border-border"
+            }`}
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+              <span>{d.d}</span>
+              {d.isToday && (
+                <span className="rounded-full bg-brand-soft px-1.5 py-0.5 text-[10px] font-semibold text-brand">
+                  Today
+                </span>
+              )}
+            </div>
             <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" aria-hidden />
               <span>{d.h}</span>
@@ -120,12 +138,17 @@ export function RotaGrid({
               {row.cells.map((cell, dayIndex) => (
                 <div
                   key={`${row.staff.id}-${dayIndex}`}
-                  className="border-b border-l border-border px-2 py-2"
+                  className={`border-b border-l px-2 py-2 ${
+                    days[dayIndex]?.isToday ? "border-brand/20 bg-brand-soft/10" : "border-border"
+                  }`}
                 >
                   <ShiftCell
                     shifts={cell.shifts}
                     context="staff"
                     onOpenShift={onShiftOpen}
+                    onDuplicateShift={onShiftDuplicate}
+                    onRemoveShift={onShiftRemove}
+                    onMarkOpenShift={onShiftMarkOpen}
                     emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: day off`}
                   />
                 </div>
@@ -169,12 +192,19 @@ export function RotaGrid({
         {openRow.cells.map((cell, dayIndex) => (
           <div
             key={`open-${dayIndex}`}
-            className="border-b border-l border-border bg-warning-soft/10 px-2 py-2"
+            className={`border-b border-l px-2 py-2 ${
+              days[dayIndex]?.isToday
+                ? "border-brand/20 bg-warning-soft/20"
+                : "border-border bg-warning-soft/10"
+            }`}
           >
             <ShiftCell
               shifts={cell.shifts}
               context="open"
               onOpenShift={onShiftOpen}
+              onDuplicateShift={onShiftDuplicate}
+              onRemoveShift={onShiftRemove}
+              onMarkOpenShift={onShiftMarkOpen}
               emptyAriaLabel={`Open shifts, ${days[dayIndex]?.d ?? ""}: none`}
             />
           </div>
@@ -189,7 +219,9 @@ export function RotaGrid({
         {days.map((d) => (
           <div
             key={`footer-${d.d}`}
-            className="border-b border-l border-border px-3 py-4 text-xs text-muted-foreground"
+            className={`border-b border-l px-3 py-4 text-xs text-muted-foreground ${
+              d.isToday ? "border-brand/20 bg-brand-soft/10" : "border-border"
+            }`}
           >
             {d.h}
           </div>

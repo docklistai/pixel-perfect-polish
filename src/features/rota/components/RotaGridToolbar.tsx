@@ -37,7 +37,7 @@ export function RotaGridToolbar({
       </div>
       <div className="ml-auto flex flex-wrap items-center gap-2">
         <ActionButton variant="outline" size="sm" icon={CalendarPlus} onClick={onGenerateRota}>
-          Suggest cover
+          Fill open shifts
         </ActionButton>
         <ActionButton variant="secondary" size="sm" icon={Plus} onClick={onAddShift}>
           Add shift

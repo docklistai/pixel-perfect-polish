@@ -2,7 +2,7 @@ import * as React from "react";
 import { staff } from "../data/mockData";
 import type { RotaFilters, RotaViewMode } from "../types";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
-import { getWeekDayLabels } from "../lib/weekHelpers";
+import { getCurrentWeekDayIndex, getWeekDayLabels } from "../lib/weekHelpers";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
   buildDayStats,
@@ -39,8 +39,13 @@ export function useRotaDraftController() {
   );
   const days = React.useMemo(() => {
     const stats = buildDayStats(displayShifts);
-    return dayLabels.map((d, index) => ({ d, ...stats[index]! }));
-  }, [dayLabels, displayShifts]);
+    const currentDayIndex = getCurrentWeekDayIndex(weekDraft.weekOffset);
+    return dayLabels.map((d, index) => ({
+      d,
+      isToday: index === currentDayIndex,
+      ...stats[index]!,
+    }));
+  }, [dayLabels, displayShifts, weekDraft.weekOffset]);
   const visibleStaff = filterStaff(staff, displayShifts, filters, staffSearch);
   const conflictSummaries = buildLocalConflictSummaries(displayShifts, staff, dayLabels);
   const selectedShift = weekDraft.selectedShiftId

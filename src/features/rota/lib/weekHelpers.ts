@@ -39,6 +39,12 @@ export function getWeekDayLabels(offset: number): string[] {
   });
 }
 
+export function getCurrentWeekDayIndex(offset: number): number | null {
+  if (offset !== 0) return null;
+  const day = new Date().getDay();
+  return day === 0 ? 6 : day - 1;
+}
+
 export function getWeekLabel(offset: number): string {
   const start = weekStart(offset);
   const end = new Date(start);

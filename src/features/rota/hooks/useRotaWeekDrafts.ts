@@ -7,26 +7,15 @@ import {
   fillOpenShiftsWithSuggestions,
   makeDraftShift,
 } from "../lib/draftRota";
+import { duplicateDraftShiftAsOpen } from "../lib/draftActions";
+import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
 import { getWeekLabel } from "../lib/weekHelpers";
-
-type WeekDraftState = {
-  shifts: DraftShift[];
-  published: boolean;
-  hasUnpublishedChanges: boolean;
-};
 
 type Confirmation =
   | { kind: "template"; title: string; description: string; confirmLabel: string }
   | { kind: "fill"; title: string; description: string; confirmLabel: string }
+  | { kind: "clear"; title: string; description: string; confirmLabel: string }
   | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string };
-
-function createWeekDraft(): WeekDraftState {
-  return {
-    shifts: createInitialDraftShifts(initialDraftShifts),
-    published: false,
-    hasUnpublishedChanges: false,
-  };
-}
 
 export function useRotaWeekDrafts() {
   const [weekOffset, setWeekOffsetState] = React.useState(0);
@@ -72,6 +61,10 @@ export function useRotaWeekDrafts() {
     mutateShifts((current) => [...current, makeDraftShift(input)]);
   };
 
+  const duplicateShiftAsOpen = (id: ShiftId) => {
+    mutateShifts((current) => duplicateDraftShiftAsOpen(current, id));
+  };
+
   const updateShift = (id: ShiftId, patch: Partial<DraftShift>) => {
     mutateShifts((current) =>
       current.map((shift) => (shift.id === id ? applyShiftPatch(shift, patch) : shift)),
@@ -104,7 +97,7 @@ export function useRotaWeekDrafts() {
       kind: "remove",
       shiftId: id,
       title: "Remove this shift?",
-      description: "This removes the shift from the local draft for this week.",
+      description: "This removes the shift from this week's draft.",
       confirmLabel: "Remove shift",
     });
   };
@@ -117,7 +110,7 @@ export function useRotaWeekDrafts() {
     setConfirmation({
       kind: "template",
       title: "Apply standard cover?",
-      description: "This replaces the current local draft for this week with the standard pattern.",
+      description: "This replaces this week's draft with the standard pattern.",
       confirmLabel: "Apply template",
     });
   };
@@ -125,15 +118,32 @@ export function useRotaWeekDrafts() {
   const requestApplyOpenShiftSuggestions = () => {
     setConfirmation({
       kind: "fill",
-      title: "Apply suggested cover?",
-      description: "This assigns suggested staff to open shifts in the local draft.",
-      confirmLabel: "Apply suggestions",
+      title: "Fill open shifts?",
+      description: "This assigns suggested staff to open shifts in this draft.",
+      confirmLabel: "Fill open shifts",
+    });
+  };
+
+  const requestClearWeek = () => {
+    setConfirmation({
+      kind: "clear",
+      title: "Clear this week?",
+      description: "This removes every shift from the current week only.",
+      confirmLabel: "Clear week",
     });
   };
 
   const confirmPendingAction = () => {
     if (confirmation?.kind === "template") applyStandardTemplate();
     if (confirmation?.kind === "fill") applyOpenShiftSuggestions();
+    if (confirmation?.kind === "clear") {
+      setCurrentDraft((draft) => ({
+        ...draft,
+        shifts: [],
+        hasUnpublishedChanges: true,
+      }));
+      setSelectedShiftId(null);
+    }
     if (confirmation?.kind === "remove") removeShiftNow(confirmation.shiftId);
     setConfirmation(null);
   };
@@ -153,12 +163,14 @@ export function useRotaWeekDrafts() {
     setSelectedShiftId,
     closeShiftDetail: () => setSelectedShiftId(null),
     addShift,
+    duplicateShiftAsOpen,
     updateShift,
     markShiftOpen: (id: ShiftId) =>
       updateShift(id, { staffId: null, status: "open", tone: "open" }),
     requestRemoveShift,
     requestApplyStandardTemplate,
     requestApplyOpenShiftSuggestions,
+    requestClearWeek,
     handlePublish,
     confirmation,
     confirmPendingAction,

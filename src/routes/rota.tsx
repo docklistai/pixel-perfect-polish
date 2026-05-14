@@ -61,6 +61,10 @@ function RotaPage() {
     rota.handlePublish();
     setPublishOpen(false);
   };
+  const confirmationTone =
+    rota.confirmation?.kind === "remove" || rota.confirmation?.kind === "clear"
+      ? "danger"
+      : "brand";
   const headerStatusTone = !rota.published || rota.hasUnpublishedChanges ? "warning" : "success";
   const headerStatusLabel = !rota.published
     ? "Draft · local only"
@@ -116,6 +120,9 @@ function RotaPage() {
             onStaffSearchChange={rota.setStaffSearch}
             onClearFilters={rota.clearFilters}
             onShiftOpen={rota.setSelectedShiftId}
+            onShiftDuplicate={rota.duplicateShiftAsOpen}
+            onShiftRemove={rota.requestRemoveShift}
+            onShiftMarkOpen={rota.markShiftOpen}
           />
           <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
         </Card>
@@ -202,6 +209,7 @@ function RotaPage() {
         open={moreActionsOpen}
         onOpenChange={setMoreActionsOpen}
         onTemplates={() => setTemplatesOpen(true)}
+        onClearWeek={rota.requestClearWeek}
       />
       <TemplatesDialog
         open={templatesOpen}
@@ -239,6 +247,7 @@ function RotaPage() {
         description={rota.confirmation?.description ?? ""}
         confirmLabel={rota.confirmation?.confirmLabel ?? "Confirm"}
         cancelLabel="Cancel"
+        tone={confirmationTone}
         onConfirm={rota.confirmPendingAction}
       />
     </AppShell>
