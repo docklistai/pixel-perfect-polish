@@ -38,6 +38,7 @@ export function ConflictDrawer({
                 <div className="mt-1 text-xs text-muted-foreground">
                   {conflict.day} · {conflict.detail}
                 </div>
+                <p className="mt-2 text-xs font-medium text-foreground">{conflict.cause}</p>
                 <p className="mt-2 text-xs text-muted-foreground">{conflict.guidance}</p>
                 <ActionButton
                   variant="secondary"

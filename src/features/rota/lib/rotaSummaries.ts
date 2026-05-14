@@ -1,5 +1,4 @@
 import type {
-  ConflictSummary,
   DraftShift,
   RoleCoverageSummary,
   RotaFilters,
@@ -12,10 +11,6 @@ import { DAY_COUNT, formatShiftTime, shiftHours } from "./draftRota";
 
 export function countOpenShifts(shifts: DraftShift[]): number {
   return shifts.reduce((acc, s) => (s.staffId === null ? acc + 1 : acc), 0);
-}
-
-export function countConflicts(shifts: DraftShift[]): number {
-  return shifts.reduce((acc, s) => (s.status === "conflict" ? acc + 1 : acc), 0);
 }
 
 export function countAssignedShifts(shifts: DraftShift[]): number {
@@ -102,44 +97,30 @@ export function filterStaff(
   });
 }
 
-export function buildConflictSummaries(
-  shifts: DraftShift[],
-  staff: StaffMember[],
-  dayLabels: string[],
-): ConflictSummary[] {
-  return shifts
-    .filter((s) => s.status === "conflict")
-    .map((s) => {
-      const staffName =
-        s.staffId === null
-          ? "Open shift"
-          : (staff.find((m) => m.id === s.staffId)?.name ?? "Unknown");
-      return {
-        id: s.id,
-        staff: staffName,
-        day: dayLabels[s.dayIndex] ?? "",
-        detail: `${s.role} · ${formatShiftTime(s.start, s.end)}`,
-        guidance:
-          "Needs manager review. Check overlap, leave, or role cover before publishing. Edit the shift, mark it open, or reassign it if cover is uncertain.",
-      };
-    });
-}
-
 export function buildRoleCoverage(
   staff: StaffMember[],
   shifts: DraftShift[],
 ): RoleCoverageSummary[] {
-  return staff
-    .map((member) => {
-      const days = new Set<number>();
-      for (const s of shifts) {
-        if (s.staffId === member.id && s.status !== "open") {
-          days.add(s.dayIndex);
-        }
-      }
+  const roles = new Map<string, { days: Set<number>; tone: string }>();
+  for (const member of staff) {
+    roles.set(
+      member.role,
+      roles.get(member.role) ?? { days: new Set<number>(), tone: member.tone },
+    );
+  }
+
+  for (const shift of shifts) {
+    if (shift.staffId === null) continue;
+    const current = roles.get(shift.role) ?? { days: new Set<number>(), tone: shift.tone };
+    current.days.add(shift.dayIndex);
+    roles.set(shift.role, current);
+  }
+
+  return Array.from(roles.entries())
+    .map(([role, { days, tone }]) => {
       const filled = days.size;
       const pct = Math.round((filled / DAY_COUNT) * 100);
-      return { label: member.role, value: `${filled} / ${DAY_COUNT}`, pct, tone: member.tone };
+      return { label: role, value: `${filled} / ${DAY_COUNT} days`, pct, tone };
     })
     .sort((a, b) => a.pct - b.pct);
 }
@@ -162,4 +143,31 @@ export function coveragePercent(staff: StaffMember[], shifts: DraftShift[]): num
   const target = staffWeeklyHourTarget(staff);
   if (!target) return 0;
   return Math.max(0, Math.round((totalScheduledHours(shifts) / target) * 100));
+}
+
+export type RotaDayStat = {
+  h: string;
+  c: string;
+  tone: "muted" | "warning" | "danger";
+};
+
+export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
+  return Array.from({ length: DAY_COUNT }, (_, dayIndex) => {
+    const dayShifts = shifts.filter((shift) => shift.dayIndex === dayIndex);
+    const assigned = dayShifts.filter((shift) => shift.staffId !== null);
+    const open = dayShifts.length - assigned.length;
+    const hours = assigned.reduce((sum, shift) => sum + shiftHours(shift.start, shift.end), 0);
+    const tone =
+      open > 0
+        ? "warning"
+        : dayShifts.some((shift) => shift.status === "conflict")
+          ? "danger"
+          : "muted";
+
+    return {
+      h: `${Math.round(hours)}h planned`,
+      c: `${assigned.length}/${dayShifts.length} assigned`,
+      tone,
+    };
+  });
 }

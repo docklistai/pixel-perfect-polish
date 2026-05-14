@@ -19,16 +19,16 @@ export function RotaStatusBanner({
   const isClean = published && !hasUnpublishedChanges;
   const tone = isClean ? "success" : "warning";
   const title = !published
-    ? "Draft rota · changes stay local until you publish"
+    ? "Draft rota · local planning state"
     : hasUnpublishedChanges
-      ? "Published rota · local draft changes waiting to republish"
-      : "Published rota · staff see the last published snapshot";
+      ? "Local publish · draft changes waiting"
+      : "Local publish · no draft changes";
   const body = !published
-    ? `${openShiftCount} open shifts · ${conflictCount} conflicts · ${coveragePct}% coverage. Staff do not see these draft changes yet.`
+    ? `${openShiftCount} open shifts · ${conflictCount} conflicts · ${coveragePct}% coverage. Mark it published locally when this draft is ready to review.`
     : hasUnpublishedChanges
-      ? `${openShiftCount} open shifts · ${conflictCount} conflicts · ${coveragePct}% coverage. Republish to update the staff snapshot they will see later.`
-      : "Staff see the last published snapshot. Draft changes remain local until you republish.";
-  const cta = !published ? "Publish to staff" : "Republish to staff";
+      ? `${openShiftCount} open shifts · ${conflictCount} conflicts · ${coveragePct}% coverage. Update the local publish state when the edits are ready.`
+      : "This week has no local draft changes since it was marked published.";
+  const cta = !published ? "Mark published locally" : "Update local publish";
 
   return (
     <div

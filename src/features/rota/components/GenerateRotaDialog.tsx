@@ -29,8 +29,8 @@ export function GenerateRotaDialog({
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Generate rota draft"
-      description={`Prepare simple local cover suggestions for the week of ${weekLabel}.`}
+      title="Suggest cover for open shifts"
+      description={`Review simple local cover suggestions for the week of ${weekLabel}.`}
       size="sm"
       footer={
         <>
@@ -45,9 +45,7 @@ export function GenerateRotaDialog({
               onOpenChange(false);
             }}
             title={
-              canApply
-                ? "Apply local cover suggestions to the current draft."
-                : "No simple local suggestions are available right now."
+              canApply ? "Apply suggestions to the current draft." : "No suggestions are available."
             }
           >
             Apply cover suggestions
@@ -62,8 +60,8 @@ export function GenerateRotaDialog({
             <StatusBadge tone="muted">Draft only</StatusBadge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            This fills open shifts using role matches and a simple local balance check. It will not
-            publish anything or call backend services.
+            This fills open shifts using role matches and a simple balance check. It only changes
+            this local draft.
           </p>
         </div>
       </FormSection>
@@ -88,7 +86,7 @@ export function GenerateRotaDialog({
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">
-            No simple local suggestions are available for the current open shifts.
+            No suggestions are available for the current open shifts.
           </p>
         )}
       </FormSection>

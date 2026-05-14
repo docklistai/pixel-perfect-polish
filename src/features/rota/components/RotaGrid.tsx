@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Clock, Target, Plus, AlertTriangle } from "lucide-react";
+import { Clock, Target, AlertTriangle } from "lucide-react";
 import { SearchField, ActionButton } from "@/components/dl";
 import { ShiftCell } from "./ShiftCell";
 import type { RotaGridOpenRow, RotaGridStaffRow, ShiftId } from "../types";
@@ -20,7 +20,6 @@ export function RotaGrid({
   onStaffSearchChange,
   onClearFilters,
   onShiftOpen,
-  onAddStaff,
 }: {
   days: DayEntry[];
   staffRows: RotaGridStaffRow[];
@@ -35,7 +34,6 @@ export function RotaGrid({
   onStaffSearchChange: (value: string) => void;
   onClearFilters: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;
-  onAddStaff: () => void;
 }) {
   const totalOpenShifts = openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0);
 
@@ -182,17 +180,9 @@ export function RotaGrid({
           </div>
         ))}
 
-        {/* Footer — add staff */}
+        {/* Footer — staff note */}
         <div className="border-b border-border px-4 py-3.5">
-          <ActionButton
-            variant="secondary"
-            size="sm"
-            icon={Plus}
-            onClick={onAddStaff}
-            title="Staff creation is handled later."
-          >
-            Add staff later
-          </ActionButton>
+          <div className="text-xs text-muted-foreground">Staff list managed outside this rota.</div>
         </div>
 
         {/* Footer — day hours */}

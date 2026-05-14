@@ -61,6 +61,7 @@ export function AddShiftDrawer({
   };
   const hasError = Boolean(errors.role || errors.start || errors.end || errors.timeOrder);
   const timeErrorId = "add-shift-time-error";
+  const roleErrorId = "add-shift-role-error";
 
   const handleSave = () => {
     setSubmitted(true);
@@ -116,6 +117,8 @@ export function AddShiftDrawer({
             id="add-shift-role"
             value={form.role}
             onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
+            aria-invalid={submitted && Boolean(errors.role)}
+            aria-describedby={submitted && errors.role ? roleErrorId : undefined}
             className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
           >
             <option value="">Select a role…</option>
@@ -126,12 +129,14 @@ export function AddShiftDrawer({
             ))}
           </select>
           {submitted && errors.role && (
-            <p className="mt-1 text-[11px] text-danger">{errors.role}</p>
+            <p id={roleErrorId} className="mt-1 text-[11px] text-danger">
+              {errors.role}
+            </p>
           )}
         </FormRow>
 
         <div className="grid grid-cols-2 gap-3">
-          <FormRow label="Start" required htmlFor="add-shift-start">
+          <FormRow label="Start time" required htmlFor="add-shift-start">
             <input
               id="add-shift-start"
               type="time"
@@ -142,7 +147,7 @@ export function AddShiftDrawer({
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
-          <FormRow label="End" required htmlFor="add-shift-end">
+          <FormRow label="End time" required htmlFor="add-shift-end">
             <input
               id="add-shift-end"
               type="time"

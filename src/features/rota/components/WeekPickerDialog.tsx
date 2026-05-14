@@ -37,7 +37,7 @@ export function WeekPickerDialog({
             <StatusBadge tone="warning">Draft</StatusBadge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Week changes are local to this planning view until backend snapshots are connected.
+            Each week keeps its own local draft in this planning view.
           </p>
         </div>
       </FormSection>

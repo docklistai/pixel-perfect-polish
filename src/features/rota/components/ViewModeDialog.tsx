@@ -17,7 +17,7 @@ export function ViewModeDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="View rota by"
-      description="Choose how managers scan the rota while planning."
+      description="Employee view is the active planning view for this rota."
       size="sm"
       footer={
         <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
@@ -47,15 +47,15 @@ export function ViewModeDialog({
 
         <div className="rounded-xl border border-border bg-muted/30 px-3 py-3">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-semibold">Coming later</span>
-            <StatusBadge tone="muted">Later</StatusBadge>
+            <span className="text-sm font-semibold">Other views</span>
+            <StatusBadge tone="muted">Hidden</StatusBadge>
           </div>
           <div className="mt-2 space-y-2 text-xs text-muted-foreground">
             <p>
-              <span className="font-medium text-foreground">Role</span> - view comes later.
+              <span className="font-medium text-foreground">Role</span> - not shown in this view.
             </p>
             <p>
-              <span className="font-medium text-foreground">Day</span> - board comes later.
+              <span className="font-medium text-foreground">Day</span> - not shown in this view.
             </p>
           </div>
         </div>

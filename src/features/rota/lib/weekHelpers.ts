@@ -14,11 +14,19 @@ const MONTH_NAMES = [
   "Dec",
 ];
 
-const BASE_DATE = new Date(2025, 4, 12);
+function currentWeekStart(): Date {
+  const today = new Date();
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const day = start.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  start.setDate(start.getDate() + mondayOffset);
+  return start;
+}
 
 function weekStart(offset: number): Date {
-  const d = new Date(BASE_DATE);
-  d.setDate(BASE_DATE.getDate() + offset * 7);
+  const base = currentWeekStart();
+  const d = new Date(base);
+  d.setDate(base.getDate() + offset * 7);
   return d;
 }
 

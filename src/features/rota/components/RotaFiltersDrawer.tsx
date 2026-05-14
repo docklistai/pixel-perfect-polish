@@ -45,7 +45,7 @@ export function RotaFiltersDrawer({
     >
       <FormSection
         title="Filter view"
-        description="Selections update the visible rota rows only. Backend saved views come later."
+        description="Selections update the visible staff rows for this local planning view."
       >
         <FormRow label="Department or role" htmlFor="rota-filter-department">
           <select

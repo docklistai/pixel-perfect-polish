@@ -38,12 +38,16 @@ export function PublishReadinessCard({
 
   const isClean = published && !hasUnpublishedChanges;
   const badgeTone = isClean ? "success" : "warning";
-  const badgeLabel = !published ? "Draft" : hasUnpublishedChanges ? "Draft changes" : "Published";
-  const buttonLabel = !published
-    ? "Publish to staff"
+  const badgeLabel = !published
+    ? "Draft"
     : hasUnpublishedChanges
-      ? "Republish to staff"
-      : "Published";
+      ? "Draft changes"
+      : "Local publish";
+  const buttonLabel = !published
+    ? "Mark published locally"
+    : hasUnpublishedChanges
+      ? "Update local publish"
+      : "Published locally";
 
   return (
     <Card className="p-4">
@@ -63,8 +67,8 @@ export function PublishReadinessCard({
         ))}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Draft changes stay local until publish or republish. Staff only see the last published
-        snapshot.
+        This marks the draft as published in the local planning view. Staff visibility needs
+        connected snapshots.
       </p>
       <ActionButton
         className="mt-4 w-full"

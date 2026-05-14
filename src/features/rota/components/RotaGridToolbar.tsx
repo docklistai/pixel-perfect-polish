@@ -24,18 +24,20 @@ export function RotaGridToolbar({
       <ActionButton variant="secondary" size="sm" icon={Filter} onClick={onFilter}>
         Filters
       </ActionButton>
-      <StatusBadge tone="danger" dot>
-        {conflictCount} Conflicts
-      </StatusBadge>
-      <StatusBadge tone="warning" dot>
-        {openShiftCount} Open shifts
-      </StatusBadge>
-      <StatusBadge tone={coverageTone} dot>
-        {coveragePct}% Coverage
-      </StatusBadge>
+      <div className="hidden flex-wrap items-center gap-2 sm:flex">
+        <StatusBadge tone="danger" dot>
+          {conflictCount} Conflicts
+        </StatusBadge>
+        <StatusBadge tone="warning" dot>
+          {openShiftCount} Open shifts
+        </StatusBadge>
+        <StatusBadge tone={coverageTone} dot>
+          {coveragePct}% Coverage
+        </StatusBadge>
+      </div>
       <div className="ml-auto flex flex-wrap items-center gap-2">
         <ActionButton variant="outline" size="sm" icon={CalendarPlus} onClick={onGenerateRota}>
-          Generate rota
+          Suggest cover
         </ActionButton>
         <ActionButton variant="secondary" size="sm" icon={Plus} onClick={onAddShift}>
           Add shift

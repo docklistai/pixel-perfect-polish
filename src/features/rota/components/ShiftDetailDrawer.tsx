@@ -77,6 +77,14 @@ export function ShiftDetailDrawer({
     form.assignTo !== (shift.staffId ?? "");
   const canSave = isDirty && form.role.trim() !== "" && timesValid;
   const timeErrorId = "shift-edit-time-error";
+  const roleErrorId = "shift-edit-role-error";
+  const saveHint = !isDirty
+    ? "Make a change to enable Save."
+    : !form.role.trim()
+      ? "Enter a role to save."
+      : !timesValid
+        ? "Enter a valid time range to save."
+        : "";
 
   const handleSave = () => {
     if (!canSave) return;
@@ -122,11 +130,18 @@ export function ShiftDetailDrawer({
             type="text"
             value={form.role}
             onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
+            aria-invalid={!form.role.trim()}
+            aria-describedby={!form.role.trim() ? roleErrorId : undefined}
             className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
           />
+          {!form.role.trim() && (
+            <p id={roleErrorId} className="mt-1 text-[11px] text-danger">
+              Enter a role.
+            </p>
+          )}
         </FormRow>
         <div className="grid grid-cols-2 gap-3">
-          <FormRow label="Start" required htmlFor="shift-edit-start">
+          <FormRow label="Start time" required htmlFor="shift-edit-start">
             <input
               id="shift-edit-start"
               type="time"
@@ -137,7 +152,7 @@ export function ShiftDetailDrawer({
               className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
             />
           </FormRow>
-          <FormRow label="End" required htmlFor="shift-edit-end">
+          <FormRow label="End time" required htmlFor="shift-edit-end">
             <input
               id="shift-edit-end"
               type="time"
@@ -173,6 +188,7 @@ export function ShiftDetailDrawer({
             ))}
           </select>
         </FormRow>
+        {saveHint && <p className="text-[11px] text-muted-foreground">{saveHint}</p>}
       </FormSection>
 
       {!isOpen && (
@@ -188,8 +204,8 @@ export function ShiftDetailDrawer({
             </ActionButton>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            To reassign or open up, pick the staff member above and save. Changes apply locally and
-            stay until you republish.
+            To reassign or open up, pick the staff member above and save. Changes stay in this local
+            week draft.
           </p>
         </FormSection>
       )}

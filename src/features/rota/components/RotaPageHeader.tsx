@@ -41,7 +41,7 @@ export function RotaPageHeader({
         <IconButton icon={ChevronLeft} label="Previous week" onClick={onPrevWeek} />
         <FilterButton icon={Calendar} label={weekLabel} onClick={onPickWeek} />
         <IconButton icon={ChevronRight} label="Next week" onClick={onNextWeek} />
-        <FilterButton label={`View by: ${viewModeLabel}`} onClick={onChangeViewMode} />
+        <FilterButton label={`${viewModeLabel} view`} onClick={onChangeViewMode} />
         <IconButton icon={MoreHorizontal} label="More actions" onClick={onMoreActions} />
       </div>
     </div>

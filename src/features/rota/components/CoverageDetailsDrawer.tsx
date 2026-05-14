@@ -58,7 +58,7 @@ export function CoverageDetailsDrawer({
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          Availability and leave cues will be connected here in a later backend pass.
+          Role bars show how many days have at least one assigned shift for that role.
         </p>
       </FormSection>
     </DrawerShell>

@@ -1,35 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, Card, ConfirmDialog } from "@/components/dl";
-import { getWeekLabel, getWeekDayLabels } from "@/features/rota/lib/weekHelpers";
-import { staff, baseDayStats, initialDraftShifts } from "@/features/rota/data/mockData";
-import {
-  applyShiftPatch,
-  buildOpenRow,
-  buildStaffRows,
-  createInitialDraftShifts,
-  fillOpenShiftsWithSuggestions,
-  makeDraftShift,
-} from "@/features/rota/lib/draftRota";
-import {
-  buildConflictSummaries,
-  buildRoleCoverage,
-  countAssignedShifts,
-  countConflicts,
-  countOpenShifts,
-  countPlannedShifts,
-  coveragePercent,
-  filterStaff,
-  totalScheduledHours,
-  workingTimeAlerts,
-} from "@/features/rota/lib/rotaSummaries";
-import type {
-  DraftShift,
-  DraftShiftInput,
-  RotaFilters,
-  RotaViewMode,
-  ShiftId,
-} from "@/features/rota/types";
+import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
+import type { RotaViewMode } from "@/features/rota/types";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 import { RotaStatusBanner } from "@/features/rota/components/RotaStatusBanner";
@@ -50,10 +23,8 @@ import { RotaFiltersDrawer } from "@/features/rota/components/RotaFiltersDrawer"
 import { ViewModeDialog } from "@/features/rota/components/ViewModeDialog";
 import { MoreActionsDialog } from "@/features/rota/components/MoreActionsDialog";
 import { TemplatesDialog } from "@/features/rota/components/TemplatesDialog";
-import { CopyLastWeekDialog } from "@/features/rota/components/CopyLastWeekDialog";
 import { CoverageDetailsDrawer } from "@/features/rota/components/CoverageDetailsDrawer";
 import { WorkingTimeDetailsDrawer } from "@/features/rota/components/WorkingTimeDetailsDrawer";
-import { AddStaffDialog } from "@/features/rota/components/AddStaffDialog";
 
 export const Route = createFileRoute("/rota")({
   head: () => ({ meta: [{ title: "Rota — Docklist" }] }),
@@ -67,15 +38,9 @@ const VIEW_MODE_LABELS: Record<RotaViewMode, string> = {
   role: "Role",
   day: "Day",
 };
-const DEFAULT_ROTA_FILTERS: RotaFilters = {
-  department: "all",
-  shiftStatus: "all",
-  warningType: "all",
-};
-
 function RotaPage() {
+  const rota = useRotaDraftController();
   const [addOpen, setAddOpen] = React.useState(false);
-  const [addStaffOpen, setAddStaffOpen] = React.useState(false);
   const [publishOpen, setPublishOpen] = React.useState(false);
   const [conflictOpen, setConflictOpen] = React.useState(false);
   const [generateOpen, setGenerateOpen] = React.useState(false);
@@ -84,172 +49,101 @@ function RotaPage() {
   const [viewModeOpen, setViewModeOpen] = React.useState(false);
   const [moreActionsOpen, setMoreActionsOpen] = React.useState(false);
   const [templatesOpen, setTemplatesOpen] = React.useState(false);
-  const [copyLastWeekOpen, setCopyLastWeekOpen] = React.useState(false);
   const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
   const [workingTimeOpen, setWorkingTimeOpen] = React.useState(false);
-  const [published, setPublished] = React.useState(false);
-  const [hasUnpublishedChanges, setHasUnpublishedChanges] = React.useState(false);
-  const [selectedShiftId, setSelectedShiftId] = React.useState<ShiftId | null>(null);
-  const [weekOffset, setWeekOffset] = React.useState(0);
-  const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
-  const [staffSearch, setStaffSearch] = React.useState("");
-  const [viewMode, setViewMode] = React.useState<RotaViewMode>("employee");
-  const [draftShifts, setDraftShifts] = React.useState<DraftShift[]>(() =>
-    createInitialDraftShifts(initialDraftShifts),
-  );
 
-  const weekLabel = getWeekLabel(weekOffset);
-  const days = getWeekDayLabels(weekOffset).map((d, i) => ({ d, ...baseDayStats[i] }));
-  const dayLabels = days.map((d) => d.d);
-  const roleOptions = Array.from(new Set(staff.map((row) => row.role)));
-  const visibleStaff = filterStaff(staff, draftShifts, filters, staffSearch);
-  const hasActiveFilters =
-    staffSearch.trim().length > 0 ||
-    filters.department !== "all" ||
-    filters.shiftStatus !== "all" ||
-    filters.warningType !== "all";
-  const staffRows = buildStaffRows(visibleStaff, draftShifts);
-  const openRow = buildOpenRow(draftShifts);
-
-  const openShiftCount = countOpenShifts(draftShifts);
-  const conflictCount = countConflicts(draftShifts);
-  const assignedShiftCount = countAssignedShifts(draftShifts);
-  const plannedShiftCount = countPlannedShifts(draftShifts);
-  const conflictSummaries = buildConflictSummaries(draftShifts, staff, dayLabels);
-  const roleCoverage = buildRoleCoverage(staff, draftShifts);
-  const coveragePct = coveragePercent(staff, draftShifts);
-  const scheduledHours = totalScheduledHours(draftShifts);
-  const workingTimeAlertList = workingTimeAlerts(staff, draftShifts);
-  const workingTimeAlertCount = workingTimeAlertList.length;
-
-  const selectedShift = selectedShiftId
-    ? (draftShifts.find((s) => s.id === selectedShiftId) ?? null)
-    : null;
-
-  const markDirty = () => setHasUnpublishedChanges(true);
-  const closeShiftDetail = () => setSelectedShiftId(null);
-
-  const addShift = (input: DraftShiftInput) => {
-    setDraftShifts((current) => [...current, makeDraftShift(input)]);
-    markDirty();
-  };
-  const updateShift = (id: ShiftId, patch: Partial<DraftShift>) => {
-    setDraftShifts((current) => current.map((s) => (s.id === id ? applyShiftPatch(s, patch) : s)));
-    markDirty();
-  };
-  const removeShift = (id: ShiftId) => {
-    setDraftShifts((current) => current.filter((s) => s.id !== id));
-    if (selectedShiftId === id) closeShiftDetail();
-    markDirty();
-  };
-  const markShiftOpen = (id: ShiftId) =>
-    updateShift(id, { staffId: null, status: "open", tone: "open" });
-  const applyStandardTemplate = () => {
-    setDraftShifts(createInitialDraftShifts(initialDraftShifts));
-    markDirty();
-  };
-  const applyOpenShiftSuggestions = () => {
-    setDraftShifts((current) => fillOpenShiftsWithSuggestions(current, staff).shifts);
-    markDirty();
-  };
-  const reviewConflictShift = (shiftId: ShiftId) => {
-    setSelectedShiftId(shiftId);
+  const workingTimeAlertCount = rota.workingTimeAlertList.length;
+  const reviewConflictShift = (shiftId: string) => {
+    rota.setSelectedShiftId(shiftId);
     setConflictOpen(false);
   };
-
   const handlePublish = () => {
-    setPublished(true);
-    setHasUnpublishedChanges(false);
+    rota.handlePublish();
     setPublishOpen(false);
   };
-
-  const headerStatusTone = !published || hasUnpublishedChanges ? "warning" : "success";
-  const headerStatusLabel = !published
-    ? "Draft · local changes only"
-    : hasUnpublishedChanges
-      ? "Published · draft changes waiting to republish"
-      : "Published · staff see the last snapshot";
+  const headerStatusTone = !rota.published || rota.hasUnpublishedChanges ? "warning" : "success";
+  const headerStatusLabel = !rota.published
+    ? "Draft · local only"
+    : rota.hasUnpublishedChanges
+      ? "Local publish · draft changes waiting"
+      : "Local publish · no draft changes";
 
   return (
     <AppShell>
       <RotaPageHeader
-        weekLabel={weekLabel}
-        viewModeLabel={VIEW_MODE_LABELS[viewMode]}
+        weekLabel={rota.weekLabel}
+        viewModeLabel={VIEW_MODE_LABELS[rota.viewMode]}
         statusTone={headerStatusTone}
         statusLabel={headerStatusLabel}
-        onPrevWeek={() => setWeekOffset((w) => w - 1)}
+        onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
         onPickWeek={() => setWeekPickerOpen(true)}
-        onNextWeek={() => setWeekOffset((w) => w + 1)}
+        onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
         onChangeViewMode={() => setViewModeOpen(true)}
         onMoreActions={() => setMoreActionsOpen(true)}
       />
 
       <RotaStatusBanner
-        published={published}
-        hasUnpublishedChanges={hasUnpublishedChanges}
-        openShiftCount={openShiftCount}
-        conflictCount={conflictCount}
-        coveragePct={coveragePct}
+        published={rota.published}
+        hasUnpublishedChanges={rota.hasUnpublishedChanges}
+        openShiftCount={rota.openShiftCount}
+        conflictCount={rota.conflictCount}
+        coveragePct={rota.coveragePct}
         onPublish={() => setPublishOpen(true)}
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
         <Card className="overflow-hidden p-0">
           <RotaGridToolbar
-            conflictCount={conflictCount}
-            openShiftCount={openShiftCount}
-            coveragePct={coveragePct}
+            conflictCount={rota.conflictCount}
+            openShiftCount={rota.openShiftCount}
+            coveragePct={rota.coveragePct}
             onFilter={() => setFiltersOpen(true)}
             onGenerateRota={() => setGenerateOpen(true)}
             onAddShift={() => setAddOpen(true)}
             onViewConflicts={() => setConflictOpen(true)}
           />
           <RotaGrid
-            days={days}
-            staffRows={staffRows}
-            openRow={openRow}
-            staffCount={staff.length}
-            visibleStaffCount={visibleStaff.length}
-            weekLabel={weekLabel}
-            staffSearch={staffSearch}
-            hasActiveFilters={hasActiveFilters}
+            days={rota.days}
+            staffRows={rota.staffRows}
+            openRow={rota.openRow}
+            staffCount={rota.staff.length}
+            visibleStaffCount={rota.visibleStaff.length}
+            weekLabel={rota.weekLabel}
+            staffSearch={rota.staffSearch}
+            hasActiveFilters={rota.hasActiveFilters}
             scheduleTitleId={SCHEDULE_TITLE_ID}
             scheduleDescId={SCHEDULE_DESC_ID}
-            onStaffSearchChange={setStaffSearch}
-            onClearFilters={() => {
-              setStaffSearch("");
-              setFilters(DEFAULT_ROTA_FILTERS);
-            }}
-            onShiftOpen={setSelectedShiftId}
-            onAddStaff={() => setAddStaffOpen(true)}
+            onStaffSearchChange={rota.setStaffSearch}
+            onClearFilters={rota.clearFilters}
+            onShiftOpen={rota.setSelectedShiftId}
           />
-          <RotaGridLegendBar staffCount={visibleStaff.length} />
+          <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
         </Card>
 
         <div className="space-y-3.5">
           <LabourSummaryCard
-            scheduledHours={scheduledHours}
-            coveragePct={coveragePct}
+            scheduledHours={rota.scheduledHours}
+            coveragePct={rota.coveragePct}
             onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
           />
           <AlertsCard
-            openShiftCount={openShiftCount}
-            conflictCount={conflictCount}
+            openShiftCount={rota.openShiftCount}
+            conflictCount={rota.conflictCount}
             workingTimeAlertCount={workingTimeAlertCount}
             onAddShift={() => setAddOpen(true)}
             onViewConflicts={() => setConflictOpen(true)}
             onWorkingTimeAlert={() => setWorkingTimeOpen(true)}
           />
           <PublishReadinessCard
-            published={published}
-            hasUnpublishedChanges={hasUnpublishedChanges}
-            conflictCount={conflictCount}
-            assignedShiftCount={assignedShiftCount}
-            plannedShiftCount={plannedShiftCount}
-            coveragePct={coveragePct}
+            published={rota.published}
+            hasUnpublishedChanges={rota.hasUnpublishedChanges}
+            conflictCount={rota.conflictCount}
+            assignedShiftCount={rota.assignedShiftCount}
+            plannedShiftCount={rota.plannedShiftCount}
+            coveragePct={rota.coveragePct}
             onPublish={() => setPublishOpen(true)}
           />
-          <RoleCoverageCard roleCoverage={roleCoverage} />
+          <RoleCoverageCard roleCoverage={rota.roleCoverage} />
           <LegendCard />
         </div>
       </div>
@@ -257,93 +151,95 @@ function RotaPage() {
       <AddShiftDrawer
         open={addOpen}
         onOpenChange={setAddOpen}
-        days={days}
-        staff={staff}
-        roles={roleOptions}
-        onSubmit={addShift}
+        days={rota.days}
+        staff={rota.staff}
+        roles={rota.roleOptions}
+        onSubmit={rota.addShift}
       />
-      <AddStaffDialog open={addStaffOpen} onOpenChange={setAddStaffOpen} />
       <ConflictDrawer
         open={conflictOpen}
         onOpenChange={setConflictOpen}
-        conflicts={conflictSummaries}
+        conflicts={rota.conflictSummaries}
         onReviewShift={reviewConflictShift}
       />
       <ConfirmDialog
         open={publishOpen}
         onOpenChange={setPublishOpen}
-        title={`${published ? "Republish" : "Publish"} rota for w/c ${weekLabel}?`}
-        description={`Draft changes stay local until you ${published ? "republish" : "publish"}. Staff see the last published snapshot in the staff portal.`}
-        confirmLabel={published ? "Republish" : "Publish"}
+        title={`${rota.published ? "Update" : "Mark"} local publish for w/c ${rota.weekLabel}?`}
+        description="This records a local published state for this planning screen. Real staff visibility will come when snapshots are connected."
+        confirmLabel={rota.published ? "Update local publish" : "Mark published locally"}
         cancelLabel="Not yet"
         onConfirm={handlePublish}
       />
       <GenerateRotaDialog
         open={generateOpen}
         onOpenChange={setGenerateOpen}
-        weekLabel={weekLabel}
-        shifts={draftShifts}
-        staff={staff}
-        onApplySuggestions={applyOpenShiftSuggestions}
+        weekLabel={rota.weekLabel}
+        shifts={rota.draftShifts}
+        staff={rota.staff}
+        onApplySuggestions={rota.requestApplyOpenShiftSuggestions}
       />
       <WeekPickerDialog
         open={weekPickerOpen}
         onOpenChange={setWeekPickerOpen}
-        weekLabel={weekLabel}
-        onSelectOffset={setWeekOffset}
+        weekLabel={rota.weekLabel}
+        onSelectOffset={rota.setWeekOffset}
       />
       <RotaFiltersDrawer
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
-        filters={filters}
-        roleOptions={roleOptions}
-        onFiltersChange={setFilters}
+        filters={rota.filters}
+        roleOptions={rota.roleOptions}
+        onFiltersChange={rota.setFilters}
       />
       <ViewModeDialog
         open={viewModeOpen}
         onOpenChange={setViewModeOpen}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
+        viewMode={rota.viewMode}
+        onViewModeChange={rota.setViewMode}
       />
       <MoreActionsDialog
         open={moreActionsOpen}
         onOpenChange={setMoreActionsOpen}
-        onCopyLastWeek={() => setCopyLastWeekOpen(true)}
         onTemplates={() => setTemplatesOpen(true)}
       />
       <TemplatesDialog
         open={templatesOpen}
         onOpenChange={setTemplatesOpen}
-        onApplyStandardTemplate={applyStandardTemplate}
-      />
-      <CopyLastWeekDialog
-        open={copyLastWeekOpen}
-        onOpenChange={setCopyLastWeekOpen}
-        weekLabel={weekLabel}
+        onApplyStandardTemplate={rota.requestApplyStandardTemplate}
       />
       <CoverageDetailsDrawer
         open={coverageDetailsOpen}
         onOpenChange={setCoverageDetailsOpen}
-        staffCount={staff.length}
-        openShiftCount={openShiftCount}
-        conflictCount={conflictCount}
-        coveragePct={coveragePct}
-        roleCoverage={roleCoverage}
+        staffCount={rota.staff.length}
+        openShiftCount={rota.openShiftCount}
+        conflictCount={rota.conflictCount}
+        coveragePct={rota.coveragePct}
+        roleCoverage={rota.roleCoverage}
       />
       <WorkingTimeDetailsDrawer
         open={workingTimeOpen}
         onOpenChange={setWorkingTimeOpen}
-        alerts={workingTimeAlertList}
+        alerts={rota.workingTimeAlertList}
       />
       <ShiftDetailDrawer
-        key={selectedShiftId ?? "none"}
-        shift={selectedShift}
-        staff={staff}
-        days={days}
-        onClose={closeShiftDetail}
-        onUpdate={updateShift}
-        onRemove={removeShift}
-        onMarkOpen={markShiftOpen}
+        key={rota.selectedShiftId ?? "none"}
+        shift={rota.selectedShift}
+        staff={rota.staff}
+        days={rota.days}
+        onClose={rota.closeShiftDetail}
+        onUpdate={rota.updateShift}
+        onRemove={rota.requestRemoveShift}
+        onMarkOpen={rota.markShiftOpen}
+      />
+      <ConfirmDialog
+        open={Boolean(rota.confirmation)}
+        onOpenChange={(open) => !open && rota.clearConfirmation()}
+        title={rota.confirmation?.title ?? ""}
+        description={rota.confirmation?.description ?? ""}
+        confirmLabel={rota.confirmation?.confirmLabel ?? "Confirm"}
+        cancelLabel="Cancel"
+        onConfirm={rota.confirmPendingAction}
       />
     </AppShell>
   );

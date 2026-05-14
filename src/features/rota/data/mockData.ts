@@ -1,15 +1,5 @@
 import type { DraftShift, ShiftTone, StaffMember } from "../types";
 
-export const baseDayStats = [
-  { h: "112h", c: "94%", tone: "muted" },
-  { h: "128h", c: "100%", tone: "muted" },
-  { h: "120h", c: "92%", tone: "muted" },
-  { h: "134h", c: "103%", tone: "warning" },
-  { h: "142h", c: "109%", tone: "warning" },
-  { h: "156h", c: "118%", tone: "danger" },
-  { h: "110h", c: "89%", tone: "warning" },
-];
-
 export const staff: StaffMember[] = [
   { id: "sophie-carter", name: "Sophie Carter", role: "Manager", hrs: "32h", img: 5, tone: "info" },
   {
@@ -92,11 +82,12 @@ export const initialDraftShifts: SeedShift[] = [
   sched("sophie-carter", 4, "Manager", "08:00", "16:00", "info"),
   sched("sophie-carter", 5, "Manager", "10:00", "18:00", "info"),
 
-  // Daniel Mitchell — Supervisor (Fri marked as a conflict)
+  // Daniel Mitchell — Supervisor (Fri has a local overlap for conflict review)
   sched("daniel-mitchell", 0, "Supervisor", "09:00", "17:00", "info"),
   sched("daniel-mitchell", 1, "Supervisor", "09:00", "17:00", "info"),
   sched("daniel-mitchell", 3, "Supervisor", "13:00", "21:00", "info"),
-  sched("daniel-mitchell", 4, "Supervisor", "13:00", "21:00", "info", "conflict"),
+  sched("daniel-mitchell", 4, "Supervisor", "13:00", "21:00", "info"),
+  sched("daniel-mitchell", 4, "Supervisor", "18:00", "22:00", "info"),
   sched("daniel-mitchell", 5, "Supervisor", "13:00", "21:00", "info"),
   sched("daniel-mitchell", 6, "Supervisor", "09:00", "17:00", "info"),
 
@@ -108,10 +99,10 @@ export const initialDraftShifts: SeedShift[] = [
   sched("priya-patel", 5, "Head Chef", "06:00", "14:00", "warning"),
   sched("priya-patel", 6, "Head Chef", "06:00", "14:00", "warning"),
 
-  // Liam O'Connor — Bartender (Wed conflict, Fri now uncovered → open shift)
+  // Liam O'Connor — Bartender (Fri now uncovered → open shift)
   sched("liam-oconnor", 0, "Bartender", "16:00", "00:00", "warning"),
   sched("liam-oconnor", 1, "Bartender", "16:00", "00:00", "warning"),
-  sched("liam-oconnor", 2, "Bartender", "16:00", "00:00", "warning", "conflict"),
+  sched("liam-oconnor", 2, "Bartender", "16:00", "00:00", "warning"),
   sched("liam-oconnor", 5, "Bartender", "16:00", "00:00", "warning"),
   sched("liam-oconnor", 6, "Bartender", "16:00", "00:00", "warning"),
 
