@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useChildMatches } from "@tanstack/react-router";
 import * as React from "react";
 import {
   AppShell,
@@ -75,6 +75,14 @@ const toneBg: Record<string, string> = {
 };
 
 function StaffPage() {
+  const childMatches = useChildMatches();
+  if (childMatches.length > 0) {
+    return <Outlet />;
+  }
+  return <StaffListPage />;
+}
+
+function StaffListPage() {
   const [addOpen, setAddOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<StaffRow>(rows[0]);
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();

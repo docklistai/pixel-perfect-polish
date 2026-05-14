@@ -1,5 +1,14 @@
 import * as React from "react";
-import { X, MessageCircle, Phone, Mail, Calendar, MoreHorizontal } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import {
+  X,
+  MessageCircle,
+  Phone,
+  Mail,
+  Calendar,
+  MoreHorizontal,
+  ArrowUpRight,
+} from "lucide-react";
 import { Card } from "@/components/dl";
 import type { StaffRow } from "../types";
 
@@ -71,6 +80,14 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
           </button>
         ))}
       </div>
+
+      <Link
+        to="/staff/$staffId"
+        params={{ staffId: member.id }}
+        className="mt-3 flex items-center justify-center gap-1.5 w-full rounded-xl border border-brand/30 bg-brand-soft text-brand text-xs font-semibold py-2 hover:bg-brand/10 transition-colors"
+      >
+        View full profile <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+      </Link>
 
       <div className="mt-5 border-b border-border flex gap-4 text-xs">
         {TABS.map((t, i) => (

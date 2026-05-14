@@ -21,6 +21,7 @@ import { Route as OpsRouteImport } from './routes/ops'
 import { Route as LeaveRouteImport } from './routes/leave'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StaffStaffIdRouteImport } from './routes/staff.$staffId'
 
 const UiKitRoute = UiKitRouteImport.update({
   id: '/ui-kit',
@@ -82,6 +83,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StaffStaffIdRoute = StaffStaffIdRouteImport.update({
+  id: '/$staffId',
+  path: '/$staffId',
+  getParentRoute: () => StaffRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -92,10 +98,11 @@ export interface FileRoutesByFullPath {
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
+  '/staff': typeof StaffRouteWithChildren
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/staff/$staffId': typeof StaffStaffIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -106,10 +113,11 @@ export interface FileRoutesByTo {
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
+  '/staff': typeof StaffRouteWithChildren
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/staff/$staffId': typeof StaffStaffIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -121,10 +129,11 @@ export interface FileRoutesById {
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
+  '/staff': typeof StaffRouteWithChildren
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/staff/$staffId': typeof StaffStaffIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/time'
     | '/ui-kit'
+    | '/staff/$staffId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/time'
     | '/ui-kit'
+    | '/staff/$staffId'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/time'
     | '/ui-kit'
+    | '/staff/$staffId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -180,7 +192,7 @@ export interface RootRouteChildren {
   ReportsRoute: typeof ReportsRoute
   RotaRoute: typeof RotaRoute
   SettingsRoute: typeof SettingsRoute
-  StaffRoute: typeof StaffRoute
+  StaffRoute: typeof StaffRouteWithChildren
   TeamRoute: typeof TeamRoute
   TimeRoute: typeof TimeRoute
   UiKitRoute: typeof UiKitRoute
@@ -272,8 +284,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/staff/$staffId': {
+      id: '/staff/$staffId'
+      path: '/$staffId'
+      fullPath: '/staff/$staffId'
+      preLoaderRoute: typeof StaffStaffIdRouteImport
+      parentRoute: typeof StaffRoute
+    }
   }
 }
+
+interface StaffRouteChildren {
+  StaffStaffIdRoute: typeof StaffStaffIdRoute
+}
+
+const StaffRouteChildren: StaffRouteChildren = {
+  StaffStaffIdRoute: StaffStaffIdRoute,
+}
+
+const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -284,7 +313,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportsRoute: ReportsRoute,
   RotaRoute: RotaRoute,
   SettingsRoute: SettingsRoute,
-  StaffRoute: StaffRoute,
+  StaffRoute: StaffRouteWithChildren,
   TeamRoute: TeamRoute,
   TimeRoute: TimeRoute,
   UiKitRoute: UiKitRoute,

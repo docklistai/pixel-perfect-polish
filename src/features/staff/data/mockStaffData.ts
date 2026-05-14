@@ -2,6 +2,8 @@ import type { StaffRow } from "../types";
 
 export const rows: StaffRow[] = [
   {
+    id: "sophie-carter",
+    name: "Sophie Carter",
     n: "Sophie Carter",
     e: "sophie.carter@docklist.co.uk",
     role: "Front of House",
@@ -15,6 +17,8 @@ export const rows: StaffRow[] = [
     active: true,
   },
   {
+    id: "daniel-mitchell",
+    name: "Daniel Mitchell",
     n: "Daniel Mitchell",
     e: "daniel.mitchell@docklist.co.uk",
     role: "Chef",
@@ -27,6 +31,8 @@ export const rows: StaffRow[] = [
     img: 12,
   },
   {
+    id: "priya-patel",
+    name: "Priya Patel",
     n: "Priya Patel",
     e: "priya.patel@docklist.co.uk",
     role: "Housekeeping",
@@ -39,6 +45,8 @@ export const rows: StaffRow[] = [
     img: 47,
   },
   {
+    id: "liam-oconnor",
+    name: "Liam O'Connor",
     n: "Liam O'Connor",
     e: "liam.oconnor@docklist.co.uk",
     role: "Bartender",
@@ -51,6 +59,8 @@ export const rows: StaffRow[] = [
     img: 13,
   },
   {
+    id: "olivia-bennett",
+    name: "Olivia Bennett",
     n: "Olivia Bennett",
     e: "olivia.bennett@docklist.co.uk",
     role: "Events Coordinator",
@@ -63,6 +73,8 @@ export const rows: StaffRow[] = [
     img: 16,
   },
   {
+    id: "emma-johnson",
+    name: "Emma Johnson",
     n: "Emma Johnson",
     e: "emma.johnson@docklist.co.uk",
     role: "Front of House",
@@ -75,6 +87,8 @@ export const rows: StaffRow[] = [
     img: 9,
   },
   {
+    id: "noah-williams",
+    name: "Noah Williams",
     n: "Noah Williams",
     e: "noah.williams@docklist.co.uk",
     role: "Chef",
@@ -88,6 +102,8 @@ export const rows: StaffRow[] = [
     statusTone: "info",
   },
   {
+    id: "ava-thompson",
+    name: "Ava Thompson",
     n: "Ava Thompson",
     e: "ava.thompson@docklist.co.uk",
     role: "Housekeeping",
@@ -100,6 +116,8 @@ export const rows: StaffRow[] = [
     img: 23,
   },
   {
+    id: "james-lewis",
+    name: "James Lewis",
     n: "James Lewis",
     e: "james.lewis@docklist.co.uk",
     role: "Maintenance",
@@ -112,6 +130,8 @@ export const rows: StaffRow[] = [
     img: 14,
   },
   {
+    id: "isabella-martin",
+    name: "Isabella Martin",
     n: "Isabella Martin",
     e: "isabella.martin@docklist.co.uk",
     role: "Front of House",
