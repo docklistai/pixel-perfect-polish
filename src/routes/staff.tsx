@@ -84,9 +84,18 @@ function StaffPage() {
 
 function StaffListPage() {
   const [addOpen, setAddOpen] = React.useState(false);
+  const [inviteSent, setInviteSent] = React.useState(false);
   const [selected, setSelected] = React.useState<StaffRow>(rows[0]);
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();
   const [query, setQuery] = React.useState("");
+
+  function handleSendInvite() {
+    setInviteSent(true);
+    setTimeout(() => {
+      setAddOpen(false);
+      setInviteSent(false);
+    }, 1400);
+  }
 
   function handleSelectMember(row: StaffRow) {
     setSelected(row);
@@ -167,44 +176,70 @@ function StaffListPage() {
             <ActionButton variant="secondary" onClick={() => setAddOpen(false)}>
               Cancel
             </ActionButton>
-            <ActionButton onClick={() => setAddOpen(false)}>Send invite</ActionButton>
+            <ActionButton onClick={handleSendInvite}>Send invite</ActionButton>
           </>
         }
       >
-        <FormSection title="Personal">
-          <div className="grid grid-cols-2 gap-3">
-            <FormRow label="First name" required>
-              <input className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm" />
-            </FormRow>
-            <FormRow label="Last name" required>
-              <input className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm" />
-            </FormRow>
+        {inviteSent ? (
+          <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
+            <div className="text-2xl font-bold text-success">Invite ready to send</div>
+            <p className="text-sm text-muted-foreground">
+              The invite will be sent once wired to the backend.
+            </p>
           </div>
-          <FormRow label="Work email" required>
-            <input
-              type="email"
-              placeholder="name@docklist.co.uk"
-              className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
-            />
-          </FormRow>
-        </FormSection>
-        <FormSection title="Role">
-          <FormRow label="Department" required>
-            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
-              <option>Front of House</option>
-              <option>Bar</option>
-              <option>Kitchen</option>
-              <option>Housekeeping</option>
-            </select>
-          </FormRow>
-          <FormRow label="Contract">
-            <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm">
-              <option>Full-time (40h/week)</option>
-              <option>Part-time</option>
-              <option>Zero-hours</option>
-            </select>
-          </FormRow>
-        </FormSection>
+        ) : (
+          <>
+            <FormSection title="Personal">
+              <div className="grid grid-cols-2 gap-3">
+                <FormRow label="First name" required>
+                  <input
+                    aria-label="First name"
+                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+                  />
+                </FormRow>
+                <FormRow label="Last name" required>
+                  <input
+                    aria-label="Last name"
+                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+                  />
+                </FormRow>
+              </div>
+              <FormRow label="Work email" required>
+                <input
+                  type="email"
+                  aria-label="Work email"
+                  placeholder="name@docklist.co.uk"
+                  className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+                />
+              </FormRow>
+            </FormSection>
+            <FormSection title="Role">
+              <FormRow label="Department" required>
+                <select
+                  aria-label="Department"
+                  className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+                >
+                  <option>Front of House</option>
+                  <option>Bar</option>
+                  <option>Kitchen</option>
+                  <option>Housekeeping</option>
+                  <option>Events</option>
+                  <option>Maintenance</option>
+                </select>
+              </FormRow>
+              <FormRow label="Contract">
+                <select
+                  aria-label="Contract type"
+                  className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+                >
+                  <option>Full-time (40h/week)</option>
+                  <option>Part-time</option>
+                  <option>Zero-hours</option>
+                </select>
+              </FormRow>
+            </FormSection>
+          </>
+        )}
       </DrawerShell>
     </AppShell>
   );

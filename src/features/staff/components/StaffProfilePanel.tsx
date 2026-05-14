@@ -11,27 +11,50 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/dl";
 import type { StaffRow } from "../types";
+import { mockStaffProfiles } from "../data/mockStaffProfiles";
 
 interface StaffProfilePanelProps {
   member: StaffRow;
   onClose: () => void;
 }
 
-const ACTION_ICONS = [MessageCircle, Phone, Mail, Calendar, MoreHorizontal] as const;
-const TABS = ["Overview", "Documents", "Availability", "Notes"] as const;
-const OVERVIEW_FIELDS: [string, string][] = [
-  ["Employee ID", "DCL-1027"],
-  ["Start date", "14 Mar 2023 (2y 2m)"],
-  ["Department", "Front of House"],
-  ["Reports to", "Alex Thompson"],
-  ["Contract", "Full-time (40h/week)"],
-  ["Pay rate", "£13.50 per hour"],
-  ["Location", "Harbour View Hotel"],
-  ["Address", "12 Harbour Rd, Brighton, BN1 1AA"],
+const PANEL_ACTIONS = [
+  { key: "message", Icon: MessageCircle, getLabel: (name: string) => `Message ${name}` },
+  { key: "call", Icon: Phone, getLabel: (name: string) => `Call ${name}` },
+  { key: "email", Icon: Mail, getLabel: (name: string) => `Email ${name}` },
+  { key: "schedule", Icon: Calendar, getLabel: (name: string) => `View schedule for ${name}` },
+  { key: "more", Icon: MoreHorizontal, getLabel: (name: string) => `More actions for ${name}` },
 ];
-const SKILLS = ["Customer Service", "Supervisor", "Food Safety Level 2", "Beverage Knowledge"];
+
+const PANEL_TABS = ["Overview", "Documents", "Availability", "Notes"] as const;
+
+const STATUS_CLS: Record<string, string> = {
+  Active: "bg-success-soft text-success",
+  "On Leave": "bg-accent-purple/10 text-accent-purple",
+  Probation: "bg-info-soft text-info",
+};
 
 export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
+  const profile = mockStaffProfiles[member.id] ?? null;
+
+  const overviewFields: [string, string][] = [
+    ["Start date", profile?.startDate ?? "—"],
+    ["Department", member.dept],
+    ["Employment", profile?.employmentType ?? member.contract],
+    ["Contracted hours", profile?.contractedHours ?? "—"],
+  ];
+
+  const skills = profile?.skills.length
+    ? profile.skills
+    : [member.role, member.sub].filter(Boolean);
+  const visibleSkills = skills.slice(0, 4);
+  const extraSkills = skills.length > 4 ? skills.length - 4 : 0;
+
+  const nextShift = profile?.nextShift;
+  const hasShift = Boolean(nextShift?.time);
+
+  const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
+
   return (
     <Card className="col-span-12 lg:col-span-3 rounded-2xl p-5 self-start">
       <div className="flex items-center justify-between mb-3">
@@ -58,7 +81,9 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
             {member.role}
             {member.sub ? ` · ${member.sub}` : ""}
           </div>
-          <span className="mt-1 inline-block rounded-md bg-success-soft text-success px-2 py-0.5 text-[11px] font-medium">
+          <span
+            className={`mt-1 inline-block rounded-md px-2 py-0.5 text-[11px] font-medium ${statusCls}`}
+          >
             {member.status}
           </span>
         </div>
@@ -70,13 +95,14 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
       </div>
 
       <div className="mt-4 flex items-center gap-2">
-        {ACTION_ICONS.map((Icon, i) => (
+        {PANEL_ACTIONS.map(({ key, Icon, getLabel }) => (
           <button
-            key={i}
+            key={key}
             type="button"
+            aria-label={getLabel(member.n)}
             className="h-8 w-8 rounded-lg border border-border flex items-center justify-center"
           >
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
           </button>
         ))}
       </div>
@@ -90,7 +116,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
       </Link>
 
       <div className="mt-5 border-b border-border flex gap-4 text-xs">
-        {TABS.map((t, i) => (
+        {PANEL_TABS.map((t, i) => (
           <button
             key={t}
             type="button"
@@ -102,7 +128,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
       </div>
 
       <dl className="mt-4 text-xs space-y-2">
-        {OVERVIEW_FIELDS.map(([k, v]) => (
+        {overviewFields.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-2">
             <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
             <dd className="font-medium text-right">{v}</dd>
@@ -111,30 +137,39 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
       </dl>
 
       <div className="mt-5">
-        <div className="text-xs font-semibold mb-2">Skills & Certifications</div>
-        <div className="flex flex-wrap gap-1.5">
-          {SKILLS.map((t) => (
-            <span key={t} className="rounded-md border border-border px-2 py-0.5 text-[11px]">
-              {t}
-            </span>
-          ))}
-          <span className="text-[11px] text-brand font-medium">+ 3 more</span>
-        </div>
+        <div className="text-xs font-semibold mb-2">Skills &amp; Certifications</div>
+        {visibleSkills.length === 0 ? (
+          <span className="text-[11px] text-muted-foreground">No skills recorded</span>
+        ) : (
+          <div className="flex flex-wrap gap-1.5">
+            {visibleSkills.map((t) => (
+              <span key={t} className="rounded-md border border-border px-2 py-0.5 text-[11px]">
+                {t}
+              </span>
+            ))}
+            {extraSkills > 0 && (
+              <span className="text-[11px] text-brand font-medium">+ {extraSkills} more</span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="mt-5 rounded-xl border border-border p-3">
         <div className="text-xs font-semibold mb-2">NEXT SCHEDULED SHIFT</div>
-        <div className="flex items-center gap-2 text-sm">
-          <Calendar className="h-4 w-4 text-brand" /> Today, 12 May{" "}
-          <span className="ml-auto font-semibold">14:00 – 22:00</span>
-        </div>
-        <div className="flex justify-between text-xs text-muted-foreground mt-1">
-          <span>Front of House</span>
-          <span>Evening Shift</span>
-        </div>
-        <button type="button" className="mt-2 block text-xs font-semibold text-brand">
-          View full rota
-        </button>
+        {hasShift ? (
+          <>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="h-4 w-4 text-brand" aria-hidden />
+              {nextShift!.date} <span className="ml-auto font-semibold">{nextShift!.time}</span>
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>{nextShift!.dept}</span>
+              <span>{nextShift!.role}</span>
+            </div>
+          </>
+        ) : (
+          <div className="text-xs text-muted-foreground">No upcoming shift recorded</div>
+        )}
       </div>
     </Card>
   );

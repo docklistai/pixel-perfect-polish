@@ -2,7 +2,7 @@ import * as React from "react";
 import { Lock } from "lucide-react";
 import { AlertCard } from "@/components/dl";
 import { ProfileCard } from "./ProfileCard";
-import type { StaffProfile } from "../../types";
+import type { StaffProfile, StaffProfileNote } from "../../types";
 
 interface Props {
   profile: StaffProfile;
@@ -18,9 +18,23 @@ const NOTE_TYPE_OPTIONS = [
 ];
 
 export function ProfileNotesTab({ profile }: Props) {
+  const [notes, setNotes] = React.useState<StaffProfileNote[]>(profile.notes);
   const [noteType, setNoteType] = React.useState("General");
   const [noteText, setNoteText] = React.useState("");
   const [visibleToStaff, setVisibleToStaff] = React.useState(false);
+
+  function handleSave() {
+    if (!noteText.trim()) return;
+    const newNote: StaffProfileNote = {
+      date: "Just now",
+      author: "You",
+      type: noteType,
+      text: noteText.trim(),
+      visibleToStaff,
+    };
+    setNotes([newNote, ...notes]);
+    setNoteText("");
+  }
 
   return (
     <div className="space-y-4">
@@ -35,11 +49,11 @@ export function ProfileNotesTab({ profile }: Props) {
         {/* Notes timeline */}
         <div className="xl:col-span-2">
           <ProfileCard title="Notes">
-            {profile.notes.length === 0 ? (
+            {notes.length === 0 ? (
               <p className="text-xs text-muted-foreground py-2">No notes recorded yet.</p>
             ) : (
               <ul className="space-y-4">
-                {profile.notes.map((note, i) => (
+                {notes.map((note, i) => (
                   <li
                     key={i}
                     className="relative pl-5 pb-4 border-b border-border/40 last:border-0 last:pb-0"
@@ -74,10 +88,14 @@ export function ProfileNotesTab({ profile }: Props) {
           <ProfileCard title="Add note">
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-1.5">
+                <label
+                  htmlFor="note-type"
+                  className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-1.5"
+                >
                   Note type
                 </label>
                 <select
+                  id="note-type"
                   value={noteType}
                   onChange={(e) => setNoteType(e.target.value)}
                   className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
@@ -90,10 +108,14 @@ export function ProfileNotesTab({ profile }: Props) {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-1.5">
+                <label
+                  htmlFor="note-text"
+                  className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-1.5"
+                >
                   Note
                 </label>
                 <textarea
+                  id="note-text"
                   value={noteText}
                   onChange={(e) => setNoteText(e.target.value)}
                   rows={4}
@@ -101,8 +123,9 @@ export function ProfileNotesTab({ profile }: Props) {
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none"
                 />
               </div>
-              <label className="flex items-start gap-2 cursor-pointer">
+              <label htmlFor="note-visible" className="flex items-start gap-2 cursor-pointer">
                 <input
+                  id="note-visible"
                   type="checkbox"
                   checked={visibleToStaff}
                   onChange={(e) => setVisibleToStaff(e.target.checked)}
@@ -112,6 +135,7 @@ export function ProfileNotesTab({ profile }: Props) {
               </label>
               <button
                 type="button"
+                onClick={handleSave}
                 className="w-full rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-95"
               >
                 Save note

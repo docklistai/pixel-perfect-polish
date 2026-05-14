@@ -19,7 +19,13 @@ interface StaffTableProps {
   onSelectMember: (row: StaffRow) => void;
 }
 
-export function StaffTable({ rows, selected, query, onQueryChange, onSelectMember }: StaffTableProps) {
+export function StaffTable({
+  rows,
+  selected,
+  query,
+  onQueryChange,
+  onSelectMember,
+}: StaffTableProps) {
   const filteredRows = rows.filter((r) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -39,20 +45,33 @@ export function StaffTable({ rows, selected, query, onQueryChange, onSelectMembe
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
+            aria-label="Search staff"
             className="bg-transparent text-xs outline-none w-full"
             placeholder="Search by name, email or role..."
           />
         </div>
-        <button type="button" className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+        <button
+          type="button"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+        >
           All departments <ChevronDown className="h-3.5 w-3.5" />
         </button>
-        <button type="button" className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+        <button
+          type="button"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+        >
           All roles <ChevronDown className="h-3.5 w-3.5" />
         </button>
-        <button type="button" className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+        <button
+          type="button"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+        >
           Employment status <ChevronDown className="h-3.5 w-3.5" />
         </button>
-        <button type="button" className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2">
+        <button
+          type="button"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+        >
           <SlidersHorizontal className="h-3.5 w-3.5" /> More filters
         </button>
       </div>
@@ -74,9 +93,9 @@ export function StaffTable({ rows, selected, query, onQueryChange, onSelectMembe
           <tbody>
             {filteredRows.map((r) => (
               <tr
-                key={r.n}
+                key={r.id}
                 onClick={() => onSelectMember(r)}
-                className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.n === r.n ? "bg-info-soft/30" : ""}`}
+                className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.id === r.id ? "bg-info-soft/30" : ""}`}
               >
                 <td className="py-3 px-2">
                   <div className="flex items-center gap-2.5">
@@ -120,7 +139,14 @@ export function StaffTable({ rows, selected, query, onQueryChange, onSelectMembe
                   )}
                 </td>
                 <td className="py-3">
-                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                  <button
+                    type="button"
+                    aria-label={`More actions for ${r.n}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="rounded p-1 hover:bg-muted/60 transition-colors"
+                  >
+                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -133,9 +159,16 @@ export function StaffTable({ rows, selected, query, onQueryChange, onSelectMembe
       )}
 
       <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
-        <span>Showing 1 to 10 of 48 results</span>
+        <span>
+          {query.trim()
+            ? `Showing ${filteredRows.length} of ${rows.length} staff`
+            : `Showing ${rows.length} staff`}
+        </span>
         <div className="flex items-center gap-1">
-          <button type="button" className="h-7 w-7 rounded-md border border-border flex items-center justify-center">
+          <button
+            type="button"
+            className="h-7 w-7 rounded-md border border-border flex items-center justify-center"
+          >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
           {["1", "2", "3", "…", "5"].map((p) => (
@@ -147,11 +180,17 @@ export function StaffTable({ rows, selected, query, onQueryChange, onSelectMembe
               {p}
             </button>
           ))}
-          <button type="button" className="h-7 w-7 rounded-md border border-border flex items-center justify-center">
+          <button
+            type="button"
+            className="h-7 w-7 rounded-md border border-border flex items-center justify-center"
+          >
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
-        <button type="button" className="rounded-md border border-border px-2 py-1 flex items-center gap-1">
+        <button
+          type="button"
+          className="rounded-md border border-border px-2 py-1 flex items-center gap-1"
+        >
           10 per page <ChevronDown className="h-3 w-3" />
         </button>
       </div>
