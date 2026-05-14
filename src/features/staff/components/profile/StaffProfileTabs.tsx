@@ -35,6 +35,7 @@ export function StaffProfileTabs({ activeTab, onChange }: StaffProfileTabsProps)
       {TABS.map((tab) => (
         <button
           key={tab.id}
+          id={`staff-profile-tab-${tab.id}`}
           role="tab"
           type="button"
           aria-selected={activeTab === tab.id}

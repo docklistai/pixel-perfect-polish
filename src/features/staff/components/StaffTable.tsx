@@ -93,7 +93,14 @@ export function StaffTable({
             {filteredRows.map((r) => (
               <tr
                 key={r.id}
+                tabIndex={0}
                 onClick={() => onSelectMember(r)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onSelectMember(r);
+                  }
+                }}
                 className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.id === r.id ? "bg-info-soft/30" : ""}`}
               >
                 <td className="py-3 px-2">

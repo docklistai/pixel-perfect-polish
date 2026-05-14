@@ -2,10 +2,11 @@ import * as React from "react";
 import { Lock } from "lucide-react";
 import { AlertCard } from "@/components/dl";
 import { ProfileCard } from "./ProfileCard";
-import type { StaffProfile, StaffProfileNote } from "../../types";
+import type { StaffProfileNote } from "../../types";
 
 interface Props {
-  profile: StaffProfile;
+  notes: StaffProfileNote[];
+  onSaveNote: (note: StaffProfileNote) => void;
 }
 
 const NOTE_TYPE_OPTIONS = [
@@ -17,8 +18,7 @@ const NOTE_TYPE_OPTIONS = [
   "Concern",
 ];
 
-export function ProfileNotesTab({ profile }: Props) {
-  const [notes, setNotes] = React.useState<StaffProfileNote[]>(profile.notes);
+export function ProfileNotesTab({ notes, onSaveNote }: Props) {
   const [noteType, setNoteType] = React.useState("General");
   const [noteText, setNoteText] = React.useState("");
   const [visibleToStaff, setVisibleToStaff] = React.useState(false);
@@ -32,7 +32,7 @@ export function ProfileNotesTab({ profile }: Props) {
       text: noteText.trim(),
       visibleToStaff,
     };
-    setNotes([newNote, ...notes]);
+    onSaveNote(newNote);
     setNoteText("");
   }
 

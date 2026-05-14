@@ -36,6 +36,7 @@ const STATUS_CLS: Record<string, string> = {
 
 export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
   const profile = mockStaffProfiles[member.id] ?? null;
+  const [activePanelTab, setActivePanelTab] = React.useState(0);
 
   const overviewFields: [string, string][] = [
     ["Start date", profile?.startDate ?? "—"],
@@ -115,62 +116,122 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         View full profile <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
       </Link>
 
-      <div className="mt-5 border-b border-border flex gap-4 text-xs">
+      <div
+        role="tablist"
+        aria-label="Staff panel sections"
+        className="mt-5 border-b border-border flex gap-4 text-xs"
+      >
         {PANEL_TABS.map((t, i) => (
           <button
             key={t}
+            role="tab"
             type="button"
-            className={`pb-2 ${i === 0 ? "border-b-2 border-brand text-brand font-semibold" : "text-muted-foreground"}`}
+            aria-selected={activePanelTab === i}
+            onClick={() => setActivePanelTab(i)}
+            className={`pb-2 ${activePanelTab === i ? "border-b-2 border-brand text-brand font-semibold" : "text-muted-foreground"}`}
           >
             {t}
           </button>
         ))}
       </div>
 
-      <dl className="mt-4 text-xs space-y-2">
-        {overviewFields.map(([k, v]) => (
-          <div key={k} className="flex justify-between gap-2">
-            <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
-            <dd className="font-medium text-right">{v}</dd>
-          </div>
-        ))}
-      </dl>
-
-      <div className="mt-5">
-        <div className="text-xs font-semibold mb-2">Skills &amp; Certifications</div>
-        {visibleSkills.length === 0 ? (
-          <span className="text-[11px] text-muted-foreground">No skills recorded</span>
-        ) : (
-          <div className="flex flex-wrap gap-1.5">
-            {visibleSkills.map((t) => (
-              <span key={t} className="rounded-md border border-border px-2 py-0.5 text-[11px]">
-                {t}
-              </span>
+      {activePanelTab === 0 && (
+        <>
+          <dl className="mt-4 text-xs space-y-2">
+            {overviewFields.map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-2">
+                <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
+                <dd className="font-medium text-right">{v}</dd>
+              </div>
             ))}
-            {extraSkills > 0 && (
-              <span className="text-[11px] text-brand font-medium">+ {extraSkills} more</span>
+          </dl>
+          <div className="mt-5">
+            <div className="text-xs font-semibold mb-2">Skills &amp; Certifications</div>
+            {visibleSkills.length === 0 ? (
+              <span className="text-[11px] text-muted-foreground">No skills recorded</span>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {visibleSkills.map((t) => (
+                  <span key={t} className="rounded-md border border-border px-2 py-0.5 text-[11px]">
+                    {t}
+                  </span>
+                ))}
+                {extraSkills > 0 && (
+                  <span className="text-[11px] text-brand font-medium">+ {extraSkills} more</span>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
+          <div className="mt-5 rounded-xl border border-border p-3">
+            <div className="text-xs font-semibold mb-2">NEXT SCHEDULED SHIFT</div>
+            {hasShift ? (
+              <>
+                <div className="flex items-center gap-2 text-sm">
+                  <Calendar className="h-4 w-4 text-brand" aria-hidden />
+                  {nextShift!.date} <span className="ml-auto font-semibold">{nextShift!.time}</span>
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>{nextShift!.dept}</span>
+                  <span>{nextShift!.role}</span>
+                </div>
+              </>
+            ) : (
+              <div className="text-xs text-muted-foreground">No upcoming shift recorded</div>
+            )}
+          </div>
+        </>
+      )}
 
-      <div className="mt-5 rounded-xl border border-border p-3">
-        <div className="text-xs font-semibold mb-2">NEXT SCHEDULED SHIFT</div>
-        {hasShift ? (
-          <>
-            <div className="flex items-center gap-2 text-sm">
-              <Calendar className="h-4 w-4 text-brand" aria-hidden />
-              {nextShift!.date} <span className="ml-auto font-semibold">{nextShift!.time}</span>
+      {activePanelTab === 1 && (
+        <dl className="mt-4 text-xs space-y-2">
+          {[
+            ["Total", String(profile?.documentsSummary.total ?? "—")],
+            ["Expiring soon", String(profile?.documentsSummary.expiringSoon ?? "—")],
+            ["Missing", String(profile?.documentsSummary.missing ?? "—")],
+          ].map(([k, v]) => (
+            <div key={k} className="flex justify-between gap-2">
+              <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
+              <dd className="font-medium text-right">{v}</dd>
             </div>
-            <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>{nextShift!.dept}</span>
-              <span>{nextShift!.role}</span>
+          ))}
+        </dl>
+      )}
+
+      {activePanelTab === 2 && (
+        <dl className="mt-4 text-xs space-y-2">
+          {[
+            ["Usually available", profile?.availability.usuallyAvailable ?? "—"],
+            ["Last updated", profile?.availability.updated ?? "—"],
+            ["Conflicts", String(profile?.availability.conflicts ?? "—")],
+            ["Late changes", String(profile?.availability.lateChanges ?? "—")],
+          ].map(([k, v]) => (
+            <div key={k} className="flex justify-between gap-2">
+              <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
+              <dd className="font-medium text-right">{v}</dd>
             </div>
-          </>
-        ) : (
-          <div className="text-xs text-muted-foreground">No upcoming shift recorded</div>
-        )}
-      </div>
+          ))}
+        </dl>
+      )}
+
+      {activePanelTab === 3 && (
+        <div className="mt-4 text-xs">
+          {profile?.notes.length ? (
+            <ul className="space-y-2">
+              {profile.notes.slice(0, 2).map((n, i) => (
+                <li key={i} className="border-b border-border/40 pb-2 last:border-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-semibold">{n.author}</span>
+                    <span className="text-muted-foreground ml-auto">{n.date}</span>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed line-clamp-2">{n.text}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted-foreground">No manager notes recorded.</p>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
