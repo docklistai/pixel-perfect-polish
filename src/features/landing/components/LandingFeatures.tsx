@@ -37,10 +37,14 @@ export function LandingFeatures() {
         </div>
 
         <div className="mt-12 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
-          <article className="min-w-0 rounded-lg border border-white/10 bg-[#0b2027] p-6 shadow-2xl shadow-black/20">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <article className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/12 bg-gradient-to-br from-[#0d242c] via-[#0b2027] to-[#081a20] p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7),0_0_0_1px_rgba(86,184,163,0.06)_inset] sm:p-7">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#56b8a3]/40 to-transparent"
+            />
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-center gap-4">
-                <span className="flex size-12 items-center justify-center rounded-lg border border-[#56b8a3]/25 bg-[#56b8a3]/12 text-[#56b8a3]">
+                <span className="flex size-12 items-center justify-center rounded-xl border border-[#56b8a3]/30 bg-[#56b8a3]/12 text-[#56b8a3] shadow-inner shadow-[#56b8a3]/10">
                   {primaryFeature ? (
                     <primaryFeature.icon className="size-6" aria-hidden="true" />
                   ) : (
@@ -48,15 +52,17 @@ export function LandingFeatures() {
                   )}
                 </span>
                 <div>
-                  <p className="text-sm text-[#9fb2b4]">01 &middot; The centrepiece</p>
-                  <h3 className="mt-1 font-serif text-3xl">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#56b8a3]/80">
+                    01 &middot; The centrepiece
+                  </p>
+                  <h3 className="mt-1.5 font-serif text-3xl">
                     {primaryFeature?.title ?? "Rota Builder"}
                   </h3>
                 </div>
               </div>
             </div>
 
-            <p className="mt-5 max-w-2xl text-sm leading-6 text-[#b8c4c5]">
+            <p className="relative mt-5 max-w-2xl text-sm leading-6 text-[#b8c4c5]">
               {primaryFeature?.body ??
                 "Flexible planning, easy editing, and complete control for the weekly rota."}
             </p>
