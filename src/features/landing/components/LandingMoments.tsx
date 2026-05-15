@@ -22,7 +22,7 @@ export function LandingMoments() {
           {moments.map((moment) => (
             <article
               key={moment.title}
-              className="overflow-hidden rounded-lg border border-white/10 bg-[#0b2027] shadow-xl shadow-black/15"
+              className="group overflow-hidden rounded-xl border border-white/10 bg-gradient-to-b from-[#0d242c] to-[#0a1c22] shadow-[0_24px_50px_-25px_rgba(0,0,0,0.7)] transition duration-300 hover:-translate-y-1 hover:border-[#56b8a3]/25 hover:shadow-[0_30px_60px_-25px_rgba(86,184,163,0.18)]"
             >
               <div className="relative aspect-[5/4] overflow-hidden">
                 <img
