@@ -44,9 +44,13 @@ export function LandingPricing() {
 
             <Link
               to="/auth"
-              className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-[#2f8c7b] px-6 py-3 text-sm font-semibold text-white hover:bg-[#277768]"
+              className="group mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-[#2f8c7b] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-10px_rgba(47,140,123,0.55)] transition hover:-translate-y-0.5 hover:bg-[#277768]"
             >
-              Get started <ArrowRight className="size-4" aria-hidden="true" />
+              Get started
+              <ArrowRight
+                className="size-4 transition group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
             </Link>
           </div>
 
