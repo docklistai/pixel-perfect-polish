@@ -4,7 +4,7 @@ import { navLinks } from "../data/landingContent";
 
 export function LandingNavbar() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#07171d]/90 pt-[env(safe-area-inset-top)] text-[#f5efe2] shadow-lg backdrop-blur-md">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.08] bg-[#07171d]/85 pt-[env(safe-area-inset-top)] text-[#f5efe2] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.4)] backdrop-blur-xl supports-[backdrop-filter]:bg-[#07171d]/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <a
           href="#top"
