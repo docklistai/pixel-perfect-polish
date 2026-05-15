@@ -31,7 +31,7 @@ export function LandingFinalCTA() {
           />
         </Link>
       </div>
-      <div className="mx-auto mt-8 flex max-w-7xl flex-wrap gap-4 px-4 text-sm text-white/80 sm:px-6 lg:px-8">
+      <div className="relative mx-auto mt-8 flex max-w-7xl flex-wrap gap-x-6 gap-y-3 px-4 text-sm text-white/80 sm:px-6 lg:px-8">
         {finalCtaBullets.map((bullet) => (
           <span key={bullet}>{bullet}</span>
         ))}
