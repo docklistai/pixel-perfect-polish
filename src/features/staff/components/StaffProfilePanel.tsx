@@ -1,14 +1,6 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  X,
-  MessageCircle,
-  Phone,
-  Mail,
-  Calendar,
-  MoreHorizontal,
-  ArrowUpRight,
-} from "lucide-react";
+import { X, Calendar, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/dl";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
@@ -17,14 +9,6 @@ interface StaffProfilePanelProps {
   member: StaffRow;
   onClose: () => void;
 }
-
-const PANEL_ACTIONS = [
-  { key: "message", Icon: MessageCircle, getLabel: (name: string) => `Message ${name}` },
-  { key: "call", Icon: Phone, getLabel: (name: string) => `Call ${name}` },
-  { key: "email", Icon: Mail, getLabel: (name: string) => `Email ${name}` },
-  { key: "schedule", Icon: Calendar, getLabel: (name: string) => `View schedule for ${name}` },
-  { key: "more", Icon: MoreHorizontal, getLabel: (name: string) => `More actions for ${name}` },
-];
 
 const PANEL_TABS = ["Overview", "Documents", "Availability", "Notes"] as const;
 
@@ -66,7 +50,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
           aria-label="Close staff profile"
           className="rounded p-0.5 hover:bg-muted/60 transition-colors"
         >
-          <X className="h-4 w-4 text-muted-foreground" />
+          <X className="h-4 w-4 text-muted-foreground" aria-hidden />
         </button>
       </div>
 
@@ -90,28 +74,19 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         </div>
       </div>
 
-      <div className="mt-3 text-xs space-y-1">
-        <div className="text-foreground">{member.e}</div>
-        <div className="text-muted-foreground">Department: {member.dept}</div>
-      </div>
-
-      <div className="mt-4 flex items-center gap-2">
-        {PANEL_ACTIONS.map(({ key, Icon, getLabel }) => (
-          <button
-            key={key}
-            type="button"
-            aria-label={getLabel(member.n)}
-            className="h-8 w-8 rounded-lg border border-border flex items-center justify-center"
-          >
-            <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
-          </button>
-        ))}
+      <div className="mt-3 text-xs">
+        <a
+          href={`mailto:${member.e}`}
+          className="text-foreground hover:text-brand transition-colors"
+        >
+          {member.e}
+        </a>
       </div>
 
       <Link
         to="/staff/$staffId"
         params={{ staffId: member.id }}
-        className="mt-3 flex items-center justify-center gap-1.5 w-full rounded-xl border border-brand/30 bg-brand-soft text-brand text-xs font-semibold py-2 hover:bg-brand/10 transition-colors"
+        className="mt-4 flex items-center justify-center gap-1.5 w-full rounded-xl border border-brand/30 bg-brand-soft text-brand text-xs font-semibold py-2 hover:bg-brand/10 transition-colors"
       >
         View full profile <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
       </Link>

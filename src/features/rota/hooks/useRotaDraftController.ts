@@ -1,6 +1,6 @@
 import * as React from "react";
 import { staff } from "../data/mockData";
-import type { RotaFilters, RotaViewMode } from "../types";
+import type { RotaFilters } from "../types";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
 import { getCurrentWeekDayIndex, getWeekDayLabels } from "../lib/weekHelpers";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
@@ -27,7 +27,6 @@ export function useRotaDraftController() {
   const weekDraft = useRotaWeekDrafts();
   const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
   const [staffSearch, setStaffSearch] = React.useState("");
-  const [viewMode, setViewMode] = React.useState<RotaViewMode>("employee");
 
   const displayShifts = React.useMemo(
     () => withLocalConflictStatus(weekDraft.draftShifts),
@@ -61,8 +60,6 @@ export function useRotaDraftController() {
     setFilters,
     staffSearch,
     setStaffSearch,
-    viewMode,
-    setViewMode,
     draftShifts: displayShifts,
     staffRows: buildStaffRows(visibleStaff, displayShifts),
     openRow: buildOpenRow(displayShifts),

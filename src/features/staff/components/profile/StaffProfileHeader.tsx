@@ -1,18 +1,13 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  MessageCircle,
-  FileText,
-  Upload,
-  CalendarOff,
-  MoreHorizontal,
-  ChevronLeft,
-} from "lucide-react";
-import { ActionButton, Card, IconButton, StatusBadge, type Tone } from "@/components/dl";
+import { FileText, Upload, ChevronLeft } from "lucide-react";
+import { ActionButton, Card, StatusBadge, type Tone } from "@/components/dl";
 import type { StaffProfile } from "../../types";
+import type { ProfileTab } from "./StaffProfileTabs";
 
 interface StaffProfileHeaderProps {
   profile: StaffProfile;
+  onTabChange: (tab: ProfileTab) => void;
 }
 
 function statusTone(status: string): Tone {
@@ -22,7 +17,7 @@ function statusTone(status: string): Tone {
   return "muted";
 }
 
-export function StaffProfileHeader({ profile }: StaffProfileHeaderProps) {
+export function StaffProfileHeader({ profile, onTabChange }: StaffProfileHeaderProps) {
   return (
     <div className="mb-6">
       <Link
@@ -56,19 +51,22 @@ export function StaffProfileHeader({ profile }: StaffProfileHeaderProps) {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <ActionButton size="sm" variant="secondary" icon={MessageCircle}>
-              Message
-            </ActionButton>
-            <ActionButton size="sm" variant="secondary" icon={FileText}>
+            <ActionButton
+              size="sm"
+              variant="secondary"
+              icon={FileText}
+              onClick={() => onTabChange("notes")}
+            >
               Add note
             </ActionButton>
-            <ActionButton size="sm" variant="secondary" icon={Upload}>
-              Upload document
+            <ActionButton
+              size="sm"
+              variant="secondary"
+              icon={Upload}
+              onClick={() => onTabChange("documents")}
+            >
+              Documents
             </ActionButton>
-            <ActionButton size="sm" icon={CalendarOff}>
-              Record absence
-            </ActionButton>
-            <IconButton icon={MoreHorizontal} label="More actions" variant="outline" />
           </div>
         </div>
       </Card>

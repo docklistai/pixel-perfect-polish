@@ -136,7 +136,8 @@ export function ProfileNotesTab({ notes, onSaveNote }: Props) {
               <button
                 type="button"
                 onClick={handleSave}
-                className="w-full rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-95"
+                disabled={!noteText.trim()}
+                className="w-full rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save note
               </button>

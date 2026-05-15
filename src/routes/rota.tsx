@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, Card, ConfirmDialog } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
-import type { RotaViewMode } from "@/features/rota/types";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 import { RotaStatusBanner } from "@/features/rota/components/RotaStatusBanner";
@@ -20,7 +19,6 @@ import { GenerateRotaDialog } from "@/features/rota/components/GenerateRotaDialo
 import { ShiftDetailDrawer } from "@/features/rota/components/ShiftDetailDrawer";
 import { WeekPickerDialog } from "@/features/rota/components/WeekPickerDialog";
 import { RotaFiltersDrawer } from "@/features/rota/components/RotaFiltersDrawer";
-import { ViewModeDialog } from "@/features/rota/components/ViewModeDialog";
 import { MoreActionsDialog } from "@/features/rota/components/MoreActionsDialog";
 import { TemplatesDialog } from "@/features/rota/components/TemplatesDialog";
 import { CoverageDetailsDrawer } from "@/features/rota/components/CoverageDetailsDrawer";
@@ -33,11 +31,7 @@ export const Route = createFileRoute("/rota")({
 
 const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
-const VIEW_MODE_LABELS: Record<RotaViewMode, string> = {
-  employee: "Employee",
-  role: "Role",
-  day: "Day",
-};
+
 function RotaPage() {
   const rota = useRotaDraftController();
   const [addOpen, setAddOpen] = React.useState(false);
@@ -46,7 +40,6 @@ function RotaPage() {
   const [generateOpen, setGenerateOpen] = React.useState(false);
   const [weekPickerOpen, setWeekPickerOpen] = React.useState(false);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
-  const [viewModeOpen, setViewModeOpen] = React.useState(false);
   const [moreActionsOpen, setMoreActionsOpen] = React.useState(false);
   const [templatesOpen, setTemplatesOpen] = React.useState(false);
   const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
@@ -76,13 +69,11 @@ function RotaPage() {
     <AppShell>
       <RotaPageHeader
         weekLabel={rota.weekLabel}
-        viewModeLabel={VIEW_MODE_LABELS[rota.viewMode]}
         statusTone={headerStatusTone}
         statusLabel={headerStatusLabel}
         onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
         onPickWeek={() => setWeekPickerOpen(true)}
         onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
-        onChangeViewMode={() => setViewModeOpen(true)}
         onMoreActions={() => setMoreActionsOpen(true)}
       />
 
@@ -184,7 +175,7 @@ function RotaPage() {
         weekLabel={rota.weekLabel}
         shifts={rota.draftShifts}
         staff={rota.staff}
-        onApplySuggestions={rota.requestApplyOpenShiftSuggestions}
+        onApplySuggestions={rota.applyOpenShiftSuggestions}
       />
       <WeekPickerDialog
         open={weekPickerOpen}
@@ -198,12 +189,6 @@ function RotaPage() {
         filters={rota.filters}
         roleOptions={rota.roleOptions}
         onFiltersChange={rota.setFilters}
-      />
-      <ViewModeDialog
-        open={viewModeOpen}
-        onOpenChange={setViewModeOpen}
-        viewMode={rota.viewMode}
-        onViewModeChange={rota.setViewMode}
       />
       <MoreActionsDialog
         open={moreActionsOpen}

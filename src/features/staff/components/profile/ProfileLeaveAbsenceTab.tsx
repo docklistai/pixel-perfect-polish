@@ -6,43 +6,13 @@ interface Props {
   profile: StaffProfile;
 }
 
-const MOCK_UPCOMING_LEAVE = [
-  { range: "3 Feb – 7 Feb 2026", type: "Annual leave", duration: "5 days", status: "Approved" },
-];
-
-const MOCK_ABSENCE_HISTORY = [
-  {
-    date: "14 Jan 2026",
-    type: "Sick",
-    duration: "1 day",
-    reason: "Illness",
-    status: "Recorded",
-    rtw: "Yes",
-  },
-  {
-    date: "9–10 Dec 2025",
-    type: "Sick",
-    duration: "2 days",
-    reason: "Illness",
-    status: "Recorded",
-    rtw: "Yes",
-  },
-  {
-    date: "15–19 Sep 2025",
-    type: "Annual leave",
-    duration: "5 days",
-    reason: "Holiday",
-    status: "Approved",
-    rtw: "N/A",
-  },
-];
-
 export function ProfileLeaveAbsenceTab({ profile }: Props) {
   const la = profile.leaveAbsence;
+  const upcoming = profile.upcomingLeave ?? [];
+  const history = profile.absenceHistory ?? [];
 
   return (
     <div className="space-y-4">
-      {/* Top metrics */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
         {[
           { label: "Annual leave remaining", value: `${la.annualLeaveRemaining} days` },
@@ -57,10 +27,9 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {/* Upcoming leave */}
         <ProfileCard title="Upcoming leave">
-          {MOCK_UPCOMING_LEAVE.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No upcoming leave approved.</p>
+          {upcoming.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-2">No upcoming leave approved.</p>
           ) : (
             <table className="w-full text-xs">
               <thead>
@@ -72,7 +41,7 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_UPCOMING_LEAVE.map((l, i) => (
+                {upcoming.map((l, i) => (
                   <tr key={i} className="border-b border-border/40 last:border-0">
                     <td className="py-2.5 pr-3 font-medium">{l.range}</td>
                     <td className="py-2.5 pr-3 text-muted-foreground">{l.type}</td>
@@ -85,7 +54,6 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
           )}
         </ProfileCard>
 
-        {/* Sickness summary */}
         <ProfileCard title="Sickness summary">
           <Pair label="Sick days this month" value={la.sickDaysThisMonth} />
           <Pair label="Sick days last 90 days" value={la.sickDaysLast90} />
@@ -96,10 +64,9 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
         </ProfileCard>
       </div>
 
-      {/* Absence history */}
       <ProfileCard title="Absence history">
-        {MOCK_ABSENCE_HISTORY.length === 0 ? (
-          <p className="text-xs text-muted-foreground">No absence history recorded.</p>
+        {history.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-2">No absence history recorded.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -115,7 +82,7 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_ABSENCE_HISTORY.map((a, i) => (
+                {history.map((a, i) => (
                   <tr key={i} className="border-b border-border/40 last:border-0">
                     <td className="py-2.5 pr-4 font-medium">{a.date}</td>
                     <td className="py-2.5 pr-4">{a.type}</td>

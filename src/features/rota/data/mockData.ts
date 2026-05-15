@@ -37,7 +37,7 @@ export const staff: StaffMember[] = [
   {
     id: "james-walker",
     name: "James Walker",
-    role: "Waiting Staff",
+    role: "Waiter",
     hrs: "20h",
     img: 14,
     tone: "purple",

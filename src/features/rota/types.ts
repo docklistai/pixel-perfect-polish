@@ -57,8 +57,6 @@ export type RotaShiftStatusFilter = "all" | "scheduled" | "open" | "conflict";
 
 export type RotaWarningFilter = "all" | "conflicts" | "working-time";
 
-export type RotaViewMode = "employee" | "role" | "day";
-
 export type RotaFilters = {
   department: string;
   shiftStatus: RotaShiftStatusFilter;

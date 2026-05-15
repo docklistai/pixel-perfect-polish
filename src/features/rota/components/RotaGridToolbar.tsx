@@ -19,16 +19,18 @@ export function RotaGridToolbar({
   onViewConflicts: () => void;
 }) {
   const coverageTone = coveragePct >= 95 ? "success" : coveragePct >= 80 ? "warning" : "danger";
+  const conflictTone = conflictCount > 0 ? "danger" : "muted";
+  const openShiftTone = openShiftCount > 0 ? "warning" : "muted";
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-3.5">
       <ActionButton variant="secondary" size="sm" icon={Filter} onClick={onFilter}>
         Filters
       </ActionButton>
       <div className="hidden flex-wrap items-center gap-2 sm:flex">
-        <StatusBadge tone="danger" dot>
+        <StatusBadge tone={conflictTone} dot>
           {conflictCount} Conflicts
         </StatusBadge>
-        <StatusBadge tone="warning" dot>
+        <StatusBadge tone={openShiftTone} dot>
           {openShiftCount} Open shifts
         </StatusBadge>
         <StatusBadge tone={coverageTone} dot>

@@ -1,5 +1,5 @@
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import { ActionButton, DialogShell, FormSection, StatusBadge } from "@/components/dl";
+import { ActionButton, DialogShell, FormSection } from "@/components/dl";
 
 export function WeekPickerDialog({
   open,
@@ -32,10 +32,7 @@ export function WeekPickerDialog({
     >
       <FormSection title="Current week">
         <div className="rounded-xl border border-border bg-muted/30 px-3 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-semibold">Week of {weekLabel}</span>
-            <StatusBadge tone="warning">Draft</StatusBadge>
-          </div>
+          <span className="text-sm font-semibold">Week of {weekLabel}</span>
           <p className="mt-1 text-xs text-muted-foreground">
             Each week keeps its own local draft in this planning view.
           </p>

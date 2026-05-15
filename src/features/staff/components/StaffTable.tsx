@@ -1,12 +1,5 @@
 import * as React from "react";
-import {
-  Search,
-  ChevronDown,
-  SlidersHorizontal,
-  MoreHorizontal,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { Search } from "lucide-react";
 import { Card, EmptyState } from "@/components/dl";
 import type { StaffRow } from "../types";
 
@@ -40,7 +33,7 @@ export function StaffTable({
     <Card className="rounded-2xl p-4">
       <div className="flex flex-wrap items-center gap-3 pb-3">
         <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 flex-1 max-w-xs">
-          <Search className="h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
           <input
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
@@ -49,42 +42,10 @@ export function StaffTable({
             placeholder="Search by name, email or role..."
           />
         </div>
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
-        >
-          All departments <ChevronDown className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
-        >
-          All roles <ChevronDown className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
-        >
-          Employment status <ChevronDown className="h-3.5 w-3.5" />
-        </button>
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
-        >
-          <SlidersHorizontal className="h-3.5 w-3.5" /> More filters
-        </button>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-[980px] w-full text-sm">
+        <table className="min-w-[880px] w-full text-sm">
           <thead>
             <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
               <th className="text-left py-2.5 px-2">STAFF MEMBER</th>
@@ -94,7 +55,6 @@ export function StaffTable({
               <th className="text-left py-2.5">CONTRACT</th>
               <th className="text-left py-2.5">AVAILABILITY</th>
               <th className="text-left py-2.5">PORTAL</th>
-              <th className="text-left py-2.5">ACTIONS</th>
             </tr>
           </thead>
           <tbody>
@@ -109,6 +69,7 @@ export function StaffTable({
                     onSelectMember(r);
                   }
                 }}
+                aria-selected={selected.id === r.id}
                 className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.id === r.id ? "bg-info-soft/30" : ""}`}
               >
                 <td className="py-3 px-2">
@@ -133,7 +94,8 @@ export function StaffTable({
                   <span
                     className={`inline-flex items-center gap-1.5 ${r.statusTone === "info" ? "text-info" : r.statusTone === "purple" ? "text-accent-purple" : "text-success"}`}
                   >
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" /> {r.status}
+                    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+                    {r.status}
                   </span>
                 </td>
                 <td className="py-3 text-muted-foreground">{r.contract}</td>
@@ -154,16 +116,6 @@ export function StaffTable({
                     <span className="text-[11px] text-muted-foreground">Not invited</span>
                   )}
                 </td>
-                <td className="py-3">
-                  <button
-                    type="button"
-                    aria-label={`More actions for ${r.n}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="rounded p-1 hover:bg-muted/60 transition-colors"
-                  >
-                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" aria-hidden />
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>
@@ -171,54 +123,13 @@ export function StaffTable({
       </div>
 
       {filteredRows.length === 0 && (
-        <EmptyState title="No staff found" description="Try adjusting your search or filters." />
+        <EmptyState title="No staff found" description="Try adjusting your search." />
       )}
 
-      <div className="flex items-center justify-between pt-4 text-xs text-muted-foreground">
-        <span>
-          {query.trim()
-            ? `Showing ${filteredRows.length} of ${rows.length} staff`
-            : `Showing ${rows.length} staff`}
-        </span>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            aria-label="Previous page"
-            className="h-7 w-7 rounded-md border border-border flex items-center justify-center opacity-50 cursor-not-allowed"
-          >
-            <ChevronLeft className="h-3.5 w-3.5" />
-          </button>
-          {["1", "2", "3", "…", "5"].map((p) => (
-            <button
-              key={p}
-              type="button"
-              disabled
-              aria-disabled="true"
-              className={`h-7 w-7 rounded-md text-xs opacity-50 cursor-not-allowed ${p === "1" ? "bg-primary text-primary-foreground" : "border border-border"}`}
-            >
-              {p}
-            </button>
-          ))}
-          <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            aria-label="Next page"
-            className="h-7 w-7 rounded-md border border-border flex items-center justify-center opacity-50 cursor-not-allowed"
-          >
-            <ChevronRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
-        <button
-          type="button"
-          disabled
-          aria-disabled="true"
-          className="rounded-md border border-border px-2 py-1 flex items-center gap-1 opacity-50 cursor-not-allowed"
-        >
-          10 per page <ChevronDown className="h-3 w-3" />
-        </button>
+      <div className="pt-4 text-xs text-muted-foreground">
+        {query.trim()
+          ? `Showing ${filteredRows.length} of ${rows.length} staff`
+          : `Showing ${rows.length} of ${rows.length} staff`}
       </div>
     </Card>
   );

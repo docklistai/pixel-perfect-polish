@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Upload } from "lucide-react";
-import { ActionButton } from "@/components/dl";
 import { ProfileCard } from "./ProfileCard";
 import type { StaffProfile } from "../../types";
 
@@ -60,14 +59,13 @@ export function ProfileDocumentsTab({ profile }: Props) {
 
       <div className="space-y-4">
         <ProfileCard title="Upload document">
-          <div className="rounded-xl border-2 border-dashed border-border p-6 text-center mb-3">
+          <div className="rounded-xl border-2 border-dashed border-border p-6 text-center">
             <Upload className="mx-auto h-6 w-6 text-muted-foreground mb-2" aria-hidden />
-            <p className="text-xs text-muted-foreground">Drop a file here or click to browse</p>
-            <p className="text-[11px] text-muted-foreground mt-1">PDF, JPG, PNG — max 10 MB</p>
+            <p className="text-xs text-muted-foreground">Document upload coming soon</p>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Connected once document storage is wired
+            </p>
           </div>
-          <ActionButton variant="secondary" className="w-full justify-center" icon={Upload}>
-            Upload document
-          </ActionButton>
         </ProfileCard>
 
         <ProfileCard title="Expiring soon">

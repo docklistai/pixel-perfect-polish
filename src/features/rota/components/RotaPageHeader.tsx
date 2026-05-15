@@ -5,23 +5,19 @@ type StatusTone = "success" | "warning";
 
 export function RotaPageHeader({
   weekLabel,
-  viewModeLabel,
   statusTone,
   statusLabel,
   onPrevWeek,
   onPickWeek,
   onNextWeek,
-  onChangeViewMode,
   onMoreActions,
 }: {
   weekLabel: string;
-  viewModeLabel: string;
   statusTone: StatusTone;
   statusLabel: string;
   onPrevWeek: () => void;
   onPickWeek: () => void;
   onNextWeek: () => void;
-  onChangeViewMode: () => void;
   onMoreActions: () => void;
 }) {
   return (
@@ -41,7 +37,6 @@ export function RotaPageHeader({
         <IconButton icon={ChevronLeft} label="Previous week" onClick={onPrevWeek} />
         <FilterButton icon={Calendar} label={weekLabel} onClick={onPickWeek} />
         <IconButton icon={ChevronRight} label="Next week" onClick={onNextWeek} />
-        <FilterButton label={`${viewModeLabel} view`} onClick={onChangeViewMode} />
         <IconButton icon={MoreHorizontal} label="More actions" onClick={onMoreActions} />
       </div>
     </div>

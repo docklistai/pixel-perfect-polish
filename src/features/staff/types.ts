@@ -48,6 +48,33 @@ export interface StaffProfileActivity {
   note: string;
 }
 
+export interface StaffProfileTimeEntry {
+  date: string;
+  shift: string;
+  role: string;
+  location: string;
+  clockIn: string;
+  clockOut: string;
+  breaks: string;
+  total: string;
+}
+
+export interface StaffProfileLeaveEntry {
+  range: string;
+  type: string;
+  duration: string;
+  status: string;
+}
+
+export interface StaffProfileAbsenceEntry {
+  date: string;
+  type: string;
+  duration: string;
+  reason: string;
+  status: string;
+  rtw: string;
+}
+
 export interface StaffProfile {
   id: string;
   name: string;
@@ -107,6 +134,10 @@ export interface StaffProfile {
   recentShifts: StaffProfileShift[];
   roleCoverage?: Array<{ label: string; value: number }>;
   breakSummary?: { averageBreak: string; missedBreaks: number; complianceStatus: string };
+  weeklyHours?: number[];
+  timeEntries?: StaffProfileTimeEntry[];
+  upcomingLeave?: StaffProfileLeaveEntry[];
+  absenceHistory?: StaffProfileAbsenceEntry[];
   insights: {
     attendanceRate: number;
     onTimeStarts: number;

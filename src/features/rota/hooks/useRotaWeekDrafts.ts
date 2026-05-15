@@ -13,7 +13,6 @@ import { getWeekLabel } from "../lib/weekHelpers";
 
 type Confirmation =
   | { kind: "template"; title: string; description: string; confirmLabel: string }
-  | { kind: "fill"; title: string; description: string; confirmLabel: string }
   | { kind: "clear"; title: string; description: string; confirmLabel: string }
   | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string };
 
@@ -115,14 +114,8 @@ export function useRotaWeekDrafts() {
     });
   };
 
-  const requestApplyOpenShiftSuggestions = () => {
-    setConfirmation({
-      kind: "fill",
-      title: "Fill open shifts?",
-      description: "This assigns suggested staff to open shifts in this draft.",
-      confirmLabel: "Fill open shifts",
-    });
-  };
+  // Generate dialog already shows a preview-and-confirm step,
+  // so it can apply directly without a second ConfirmDialog.
 
   const requestClearWeek = () => {
     setConfirmation({
@@ -135,7 +128,6 @@ export function useRotaWeekDrafts() {
 
   const confirmPendingAction = () => {
     if (confirmation?.kind === "template") applyStandardTemplate();
-    if (confirmation?.kind === "fill") applyOpenShiftSuggestions();
     if (confirmation?.kind === "clear") {
       setCurrentDraft((draft) => ({
         ...draft,
@@ -169,7 +161,7 @@ export function useRotaWeekDrafts() {
       updateShift(id, { staffId: null, status: "open", tone: "open" }),
     requestRemoveShift,
     requestApplyStandardTemplate,
-    requestApplyOpenShiftSuggestions,
+    applyOpenShiftSuggestions,
     requestClearWeek,
     handlePublish,
     confirmation,

@@ -21,21 +21,21 @@ export function AlertsCard({
       t: `${openShiftCount} Open shifts`,
       s: openShiftCount === 0 ? "All shifts assigned" : "Require staff",
       icon: AlertTriangle,
-      tone: "warning",
+      tone: openShiftCount > 0 ? "warning" : "muted",
       action: onAddShift,
     },
     {
       t: `${conflictCount} Conflicts`,
       s: conflictCount === 0 ? "None this week" : "Need attention",
       icon: CircleAlert,
-      tone: "danger",
+      tone: conflictCount > 0 ? "danger" : "muted",
       action: onViewConflicts,
     },
     {
       t: `${workingTimeAlertCount} Working time alert${workingTimeAlertCount === 1 ? "" : "s"}`,
       s: workingTimeAlertCount === 0 ? "Within planned hours" : "Exceeds planned hours",
       icon: AlertTriangle,
-      tone: "warning",
+      tone: workingTimeAlertCount > 0 ? "warning" : "muted",
       action: onWorkingTimeAlert,
     },
   ] as const;
@@ -56,10 +56,14 @@ export function AlertsCard({
           >
             <div
               className={`flex h-9 w-9 items-center justify-center rounded-[12px] ${
-                a.tone === "danger" ? "bg-danger-soft text-danger" : "bg-warning-soft text-warning"
+                a.tone === "danger"
+                  ? "bg-danger-soft text-danger"
+                  : a.tone === "warning"
+                    ? "bg-warning-soft text-warning"
+                    : "bg-muted text-muted-foreground"
               }`}
             >
-              <a.icon className="h-4 w-4" />
+              <a.icon className="h-4 w-4" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-medium">{a.t}</div>

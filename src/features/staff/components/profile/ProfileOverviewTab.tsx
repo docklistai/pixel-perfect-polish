@@ -1,8 +1,9 @@
 import * as React from "react";
 import { AlertTriangle, Calendar, ChevronRight } from "lucide-react";
-import { StatusBadge } from "@/components/dl";
+import { StatusBadge, type Tone } from "@/components/dl";
 import { ProfileCard, Pair, SectionLabel, CardTile } from "./ProfileCard";
 import type { StaffProfile } from "../../types";
+import type { ProfileTab } from "./StaffProfileTabs";
 import { ProfileLeaveCard } from "./ProfileLeaveCard";
 import { ProfileWorkloadCard } from "./ProfileWorkloadCard";
 import { ProfileNext7Days } from "./ProfileNext7Days";
@@ -10,9 +11,16 @@ import { ProfileActivityFeed } from "./ProfileActivityFeed";
 
 interface Props {
   profile: StaffProfile;
+  onTabChange: (tab: ProfileTab) => void;
 }
 
-export function ProfileOverviewTab({ profile }: Props) {
+function portalTone(status: string): Tone {
+  if (status === "Active") return "success";
+  if (status === "Pending") return "warning";
+  return "muted";
+}
+
+export function ProfileOverviewTab({ profile, onTabChange }: Props) {
   const {
     workloadBalance: wb,
     leaveAbsence: la,
@@ -73,7 +81,11 @@ export function ProfileOverviewTab({ profile }: Props) {
           title="Next scheduled shift"
           className="col-span-12 lg:col-span-3 p-5"
           action={
-            <button type="button" className="text-[11px] text-brand font-semibold hover:underline">
+            <button
+              type="button"
+              onClick={() => onTabChange("schedule")}
+              className="text-[11px] text-brand font-semibold hover:underline"
+            >
               View schedule
             </button>
           }
@@ -157,6 +169,7 @@ export function ProfileOverviewTab({ profile }: Props) {
             action={
               <button
                 type="button"
+                onClick={() => onTabChange("documents")}
                 className="text-[11px] text-brand font-semibold hover:underline"
               >
                 View docs
@@ -210,29 +223,14 @@ export function ProfileOverviewTab({ profile }: Props) {
           </ProfileCard>
 
           <ProfileCard title="Staff portal access" className="col-span-12 lg:col-span-6 p-5">
-            <Pair label="Status" value={<StatusBadge tone="success">{pa.status}</StatusBadge>} />
+            <Pair
+              label="Status"
+              value={<StatusBadge tone={portalTone(pa.status)}>{pa.status}</StatusBadge>}
+            />
             <Pair label="Last login" value={pa.lastLogin} />
-            <div className="mt-3 pt-3 border-t border-border/40 space-y-2">
-              <button
-                type="button"
-                className="block w-full text-left text-sm text-brand font-medium hover:underline"
-              >
-                Send portal instructions
-              </button>
-              <button
-                type="button"
-                className="block w-full text-left text-sm text-muted-foreground hover:text-foreground"
-              >
-                Reset access
-              </button>
-              <button
-                type="button"
-                disabled
-                className="block w-full text-left text-sm text-muted-foreground cursor-not-allowed opacity-50"
-              >
-                Deactivate access
-              </button>
-            </div>
+            <p className="mt-3 pt-3 border-t border-border/40 text-[11px] text-muted-foreground leading-snug">
+              Portal access changes will be available once the portal is connected.
+            </p>
           </ProfileCard>
         </div>
       </div>

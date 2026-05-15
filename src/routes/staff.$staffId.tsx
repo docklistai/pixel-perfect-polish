@@ -54,7 +54,7 @@ function StaffProfilePage() {
 
   return (
     <AppShell searchPlaceholder="Search staff...">
-      <StaffProfileHeader profile={profile} />
+      <StaffProfileHeader profile={profile} onTabChange={setActiveTab} />
       <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} />
       {activeTab === "overview" && (
         <div
@@ -62,7 +62,7 @@ function StaffProfilePage() {
           id="staff-profile-panel-overview"
           aria-labelledby="staff-profile-tab-overview"
         >
-          <ProfileOverviewTab profile={profile} />
+          <ProfileOverviewTab profile={profile} onTabChange={setActiveTab} />
         </div>
       )}
       {activeTab === "schedule" && (

@@ -39,7 +39,7 @@ export function RotaFiltersDrawer({
           <ActionButton variant="secondary" onClick={resetFilters}>
             Clear
           </ActionButton>
-          <ActionButton onClick={() => onOpenChange(false)}>Apply filters</ActionButton>
+          <ActionButton onClick={() => onOpenChange(false)}>Done</ActionButton>
         </>
       }
     >

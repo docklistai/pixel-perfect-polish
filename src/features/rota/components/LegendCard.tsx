@@ -20,11 +20,11 @@ export function LegendCard() {
                         ? "bg-success"
                         : "bg-info"
               }`}
+              aria-hidden
             />
             {item.label}
           </div>
         ))}
-        <span className="text-xs text-muted-foreground">+2 more</span>
       </div>
     </Card>
   );

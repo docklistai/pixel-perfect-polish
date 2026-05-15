@@ -5,22 +5,11 @@ import {
   Card,
   PageHeader,
   ActionButton,
-  IconButton,
-  FilterButton,
   DrawerShell,
   FormSection,
   FormRow,
 } from "@/components/dl";
-import {
-  Users,
-  CheckCircle2,
-  UserPlus,
-  AlertTriangle,
-  Filter,
-  Plus,
-  ChevronDown,
-  MoreHorizontal,
-} from "lucide-react";
+import { Users, CheckCircle2, UserPlus, AlertTriangle, Plus, ChevronDown } from "lucide-react";
 import { rows } from "@/features/staff/data/mockStaffData";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { StaffTable } from "@/features/staff/components/StaffTable";
@@ -32,25 +21,34 @@ export const Route = createFileRoute("/staff")({
   component: StaffPage,
 });
 
-function buildStats(staffRows: typeof rows) {
+type StatTone = "info" | "brand" | "warning" | "muted";
+
+type StatCard = {
+  icon: typeof Users;
+  label: string;
+  value: string;
+  sub: string;
+  tone: StatTone;
+};
+
+function buildStats(staffRows: typeof rows): StatCard[] {
   const total = staffRows.length;
   const active = staffRows.filter((r) => r.status === "Active").length;
   const onboarding = staffRows.filter((r) => r.status === "Probation").length;
+  const activePct = total > 0 ? Math.round((active / total) * 100) : 0;
   return [
     {
       icon: Users,
       label: "TOTAL STAFF",
       value: String(total),
       sub: "Across all departments",
-      action: "View all staff",
       tone: "info",
     },
     {
       icon: CheckCircle2,
       label: "ACTIVE THIS WEEK",
       value: String(active),
-      sub: `${Math.round((active / total) * 100)}% of total staff`,
-      action: "View rota",
+      sub: `${activePct}% of total staff`,
       tone: "brand",
     },
     {
@@ -58,25 +56,23 @@ function buildStats(staffRows: typeof rows) {
       label: "ONBOARDING",
       value: String(onboarding),
       sub: "Currently on probation",
-      action: "View onboarding",
       tone: "warning",
     },
     {
       icon: AlertTriangle,
       label: "MISSING DOCUMENTS",
       value: "—",
-      sub: "Not yet wired",
-      action: "View alerts",
-      tone: "info",
+      sub: "Tracked once documents are wired",
+      tone: "muted",
     },
   ];
 }
 
-const toneBg: Record<string, string> = {
+const toneBg: Record<StatTone, string> = {
   info: "bg-info-soft text-info",
   brand: "bg-brand-soft text-brand",
   warning: "bg-warning-soft text-warning",
-  danger: "bg-danger-soft text-danger",
+  muted: "bg-muted text-muted-foreground",
 };
 
 function StaffPage() {
@@ -114,23 +110,9 @@ function StaffListPage() {
         title="Staff"
         subtitle="Manage your team, roles, and access in one place."
         actions={
-          <>
-            <FilterButton
-              icon={Filter}
-              label="Filters"
-              showCaret={false}
-              className="opacity-50 pointer-events-none"
-            />
-            <ActionButton icon={Plus} iconRight={ChevronDown} onClick={() => setAddOpen(true)}>
-              Add team member
-            </ActionButton>
-            <IconButton
-              icon={MoreHorizontal}
-              label="More actions"
-              disabled
-              className="opacity-50 cursor-not-allowed"
-            />
-          </>
+          <ActionButton icon={Plus} iconRight={ChevronDown} onClick={() => setAddOpen(true)}>
+            Add team member
+          </ActionButton>
         }
       />
 
@@ -143,7 +125,7 @@ function StaffListPage() {
                   <div
                     className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[s.tone]}`}
                   >
-                    <s.icon className="h-5 w-5" />
+                    <s.icon className="h-5 w-5" aria-hidden />
                   </div>
                   <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
                     {s.label}
@@ -151,19 +133,6 @@ function StaffListPage() {
                 </div>
                 <div className="mt-3 text-3xl font-bold">{s.value}</div>
                 <div className="text-xs text-muted-foreground mt-1">{s.sub}</div>
-                <button
-                  type="button"
-                  className={`mt-3 w-full rounded-lg border py-1.5 text-xs font-medium ${s.tone === "danger" || s.tone === "warning" ? `border-${s.tone} text-${s.tone}` : "border-border text-foreground"}`}
-                  style={
-                    s.tone === "danger"
-                      ? { borderColor: "var(--danger)", color: "var(--danger)" }
-                      : s.tone === "warning"
-                        ? { borderColor: "var(--warning)", color: "var(--warning)" }
-                        : undefined
-                  }
-                >
-                  {s.action}
-                </button>
               </Card>
             ))}
           </div>
@@ -224,7 +193,7 @@ function StaffListPage() {
                 <input
                   type="email"
                   aria-label="Work email"
-                  placeholder="name@docklist.co.uk"
+                  placeholder="name@harbourview.co.uk"
                   className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                 />
               </FormRow>
