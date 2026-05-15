@@ -3,7 +3,11 @@ import { footerColumns } from "../data/landingContent";
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-white/10 bg-[#07171d] py-14 text-[#f5efe2]">
+    <footer className="relative border-t border-white/10 bg-[#07171d] py-14 text-[#f5efe2]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#56b8a3]/40 to-transparent"
+      />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>

@@ -17,7 +17,7 @@ export function LandingPricing() {
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-5xl overflow-hidden rounded-lg border border-[#07171d]/10 bg-white shadow-2xl shadow-[#07171d]/10 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="mx-auto mt-12 grid max-w-5xl overflow-hidden rounded-2xl border border-[#07171d]/10 bg-white shadow-[0_40px_80px_-30px_rgba(7,23,29,0.25)] ring-1 ring-black/[0.03] lg:grid-cols-[0.95fr_1.05fr]">
           <div className="border-b border-[#07171d]/10 bg-[#fbf7ee] p-6 sm:p-8 lg:border-b-0 lg:border-r">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold text-[#2f8c7b]">DocklistAI</span>
@@ -44,9 +44,13 @@ export function LandingPricing() {
 
             <Link
               to="/auth"
-              className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-[#2f8c7b] px-6 py-3 text-sm font-semibold text-white hover:bg-[#277768]"
+              className="group mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-[#2f8c7b] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_-10px_rgba(47,140,123,0.55)] transition hover:-translate-y-0.5 hover:bg-[#277768]"
             >
-              Get started <ArrowRight className="size-4" aria-hidden="true" />
+              Get started
+              <ArrowRight
+                className="size-4 transition group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
             </Link>
           </div>
 

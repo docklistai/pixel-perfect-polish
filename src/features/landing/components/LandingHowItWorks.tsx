@@ -20,7 +20,7 @@ export function LandingHowItWorks() {
             {howItWorks.map((step, index) => (
               <article
                 key={step.title}
-                className="rounded-lg border border-[#07171d]/10 bg-white p-6 shadow-sm"
+                className="group rounded-xl border border-[#07171d]/10 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-[#2f8c7b]/25 hover:shadow-[0_20px_40px_-20px_rgba(7,23,29,0.25)]"
               >
                 <div className="flex items-center justify-between gap-4">
                   <span className="flex size-11 items-center justify-center rounded-full bg-[#07171d] font-serif text-xl italic text-[#56b8a3]">

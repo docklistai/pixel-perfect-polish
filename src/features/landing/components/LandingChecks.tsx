@@ -23,7 +23,7 @@ export function LandingChecks() {
               return (
                 <article
                   key={check.title}
-                  className="rounded-lg border border-[#07171d]/10 bg-white p-4 shadow-sm"
+                  className="rounded-xl border border-[#07171d]/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#2f8c7b]/30 hover:shadow-md"
                 >
                   <Icon className="size-5 text-[#2f8c7b]" aria-hidden="true" />
                   <h3 className="mt-3 font-semibold">{check.title}</h3>
@@ -34,7 +34,7 @@ export function LandingChecks() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#07171d]/10 bg-white p-6 shadow-xl shadow-[#07171d]/10">
+        <div className="rounded-2xl border border-[#07171d]/10 bg-white p-6 shadow-[0_30px_60px_-25px_rgba(7,23,29,0.25)] ring-1 ring-black/[0.03]">
           <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#07171d]/10 pb-5">
             <div>
               <p className="text-sm font-semibold text-[#667275]">Review before publish</p>
