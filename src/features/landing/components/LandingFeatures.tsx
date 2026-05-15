@@ -5,8 +5,24 @@ export function LandingFeatures() {
   const [primaryFeature, ...secondaryFeatures] = features;
 
   return (
-    <section id="features" className="bg-[#07171d] py-20 text-[#f5efe2] sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section
+      id="features"
+      className="relative overflow-hidden bg-[#07171d] py-20 text-[#f5efe2] sm:py-24"
+    >
+      {/* ambient depth — keeps the section from feeling like a flat slab */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#56b8a3]/30 to-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-32 top-24 size-[28rem] rounded-full bg-[#56b8a3]/8 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-40 bottom-10 size-[32rem] rounded-full bg-[#1a4a55]/35 blur-3xl"
+      />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
           <div className="max-w-3xl">
             <p className="text-sm font-semibold text-[#56b8a3]">Everything you need</p>
