@@ -67,82 +67,84 @@ function RotaPage() {
 
   return (
     <AppShell>
-      <RotaPageHeader
-        weekLabel={rota.weekLabel}
-        statusTone={headerStatusTone}
-        statusLabel={headerStatusLabel}
-        onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
-        onPickWeek={() => setWeekPickerOpen(true)}
-        onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
-        onMoreActions={() => setMoreActionsOpen(true)}
-      />
+      <div className="w-full max-w-full overflow-x-hidden">
+        <RotaPageHeader
+          weekLabel={rota.weekLabel}
+          statusTone={headerStatusTone}
+          statusLabel={headerStatusLabel}
+          onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
+          onPickWeek={() => setWeekPickerOpen(true)}
+          onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
+          onMoreActions={() => setMoreActionsOpen(true)}
+        />
 
-      <RotaStatusBanner
-        published={rota.published}
-        hasUnpublishedChanges={rota.hasUnpublishedChanges}
-        openShiftCount={rota.openShiftCount}
-        conflictCount={rota.conflictCount}
-        coveragePct={rota.coveragePct}
-        onPublish={() => setPublishOpen(true)}
-      />
+        <RotaStatusBanner
+          published={rota.published}
+          hasUnpublishedChanges={rota.hasUnpublishedChanges}
+          openShiftCount={rota.openShiftCount}
+          conflictCount={rota.conflictCount}
+          coveragePct={rota.coveragePct}
+          onPublish={() => setPublishOpen(true)}
+        />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <Card className="overflow-hidden p-0">
-          <RotaGridToolbar
-            conflictCount={rota.conflictCount}
-            openShiftCount={rota.openShiftCount}
-            coveragePct={rota.coveragePct}
-            onFilter={() => setFiltersOpen(true)}
-            onGenerateRota={() => setGenerateOpen(true)}
-            onAddShift={() => setAddOpen(true)}
-            onViewConflicts={() => setConflictOpen(true)}
-          />
-          <RotaGrid
-            days={rota.days}
-            staffRows={rota.staffRows}
-            openRow={rota.openRow}
-            staffCount={rota.staff.length}
-            visibleStaffCount={rota.visibleStaff.length}
-            weekLabel={rota.weekLabel}
-            staffSearch={rota.staffSearch}
-            hasActiveFilters={rota.hasActiveFilters}
-            scheduleTitleId={SCHEDULE_TITLE_ID}
-            scheduleDescId={SCHEDULE_DESC_ID}
-            onStaffSearchChange={rota.setStaffSearch}
-            onClearFilters={rota.clearFilters}
-            onShiftOpen={rota.setSelectedShiftId}
-            onShiftDuplicate={rota.duplicateShiftAsOpen}
-            onShiftRemove={rota.requestRemoveShift}
-            onShiftMarkOpen={rota.markShiftOpen}
-          />
-          <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
-        </Card>
+        <div className="grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_280px]">
+          <Card className="min-w-0 overflow-hidden p-0">
+            <RotaGridToolbar
+              conflictCount={rota.conflictCount}
+              openShiftCount={rota.openShiftCount}
+              coveragePct={rota.coveragePct}
+              onFilter={() => setFiltersOpen(true)}
+              onGenerateRota={() => setGenerateOpen(true)}
+              onAddShift={() => setAddOpen(true)}
+              onViewConflicts={() => setConflictOpen(true)}
+            />
+            <RotaGrid
+              days={rota.days}
+              staffRows={rota.staffRows}
+              openRow={rota.openRow}
+              staffCount={rota.staff.length}
+              visibleStaffCount={rota.visibleStaff.length}
+              weekLabel={rota.weekLabel}
+              staffSearch={rota.staffSearch}
+              hasActiveFilters={rota.hasActiveFilters}
+              scheduleTitleId={SCHEDULE_TITLE_ID}
+              scheduleDescId={SCHEDULE_DESC_ID}
+              onStaffSearchChange={rota.setStaffSearch}
+              onClearFilters={rota.clearFilters}
+              onShiftOpen={rota.setSelectedShiftId}
+              onShiftDuplicate={rota.duplicateShiftAsOpen}
+              onShiftRemove={rota.requestRemoveShift}
+              onShiftMarkOpen={rota.markShiftOpen}
+            />
+            <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
+          </Card>
 
-        <div className="space-y-3.5">
-          <LabourSummaryCard
-            scheduledHours={rota.scheduledHours}
-            coveragePct={rota.coveragePct}
-            onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
-          />
-          <AlertsCard
-            openShiftCount={rota.openShiftCount}
-            conflictCount={rota.conflictCount}
-            workingTimeAlertCount={workingTimeAlertCount}
-            onAddShift={() => setAddOpen(true)}
-            onViewConflicts={() => setConflictOpen(true)}
-            onWorkingTimeAlert={() => setWorkingTimeOpen(true)}
-          />
-          <PublishReadinessCard
-            published={rota.published}
-            hasUnpublishedChanges={rota.hasUnpublishedChanges}
-            conflictCount={rota.conflictCount}
-            assignedShiftCount={rota.assignedShiftCount}
-            plannedShiftCount={rota.plannedShiftCount}
-            coveragePct={rota.coveragePct}
-            onPublish={() => setPublishOpen(true)}
-          />
-          <RoleCoverageCard roleCoverage={rota.roleCoverage} />
-          <LegendCard />
+          <div className="space-y-3.5">
+            <LabourSummaryCard
+              scheduledHours={rota.scheduledHours}
+              coveragePct={rota.coveragePct}
+              onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
+            />
+            <AlertsCard
+              openShiftCount={rota.openShiftCount}
+              conflictCount={rota.conflictCount}
+              workingTimeAlertCount={workingTimeAlertCount}
+              onAddShift={() => setAddOpen(true)}
+              onViewConflicts={() => setConflictOpen(true)}
+              onWorkingTimeAlert={() => setWorkingTimeOpen(true)}
+            />
+            <PublishReadinessCard
+              published={rota.published}
+              hasUnpublishedChanges={rota.hasUnpublishedChanges}
+              conflictCount={rota.conflictCount}
+              assignedShiftCount={rota.assignedShiftCount}
+              plannedShiftCount={rota.plannedShiftCount}
+              coveragePct={rota.coveragePct}
+              onPublish={() => setPublishOpen(true)}
+            />
+            <RoleCoverageCard roleCoverage={rota.roleCoverage} />
+            <LegendCard />
+          </div>
         </div>
       </div>
 

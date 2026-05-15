@@ -37,7 +37,7 @@ export function RouteAnnouncer() {
   const label = ROUTE_LABELS[pathname] ?? "Page";
   return (
     <div role="status" aria-live="polite" className="sr-only">
-      {`${label} page loaded`}
+      {label}
     </div>
   );
 }
