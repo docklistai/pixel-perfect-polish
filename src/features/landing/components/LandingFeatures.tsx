@@ -97,12 +97,14 @@ function FeatureCard({
   compact?: boolean;
 }) {
   return (
-    <article className="rounded-lg border border-white/10 bg-[#0b2027] p-5 shadow-lg shadow-black/10">
+    <article className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-[#0c2229] to-[#0a1c22] p-5 shadow-[0_18px_45px_-25px_rgba(0,0,0,0.7)] transition duration-300 hover:-translate-y-0.5 hover:border-[#56b8a3]/25 hover:shadow-[0_28px_60px_-25px_rgba(86,184,163,0.18)]">
       <div className="flex items-start justify-between gap-4">
-        <span className="flex size-10 items-center justify-center rounded-lg border border-[#56b8a3]/20 bg-[#56b8a3]/10 text-[#56b8a3]">
+        <span className="flex size-10 items-center justify-center rounded-lg border border-[#56b8a3]/25 bg-[#56b8a3]/10 text-[#56b8a3] transition group-hover:border-[#56b8a3]/45 group-hover:bg-[#56b8a3]/15">
           <feature.icon className="size-5" aria-hidden="true" />
         </span>
-        <span className="text-xs text-[#7e9295]">{String(index).padStart(2, "0")}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7e9295]">
+          {String(index).padStart(2, "0")}
+        </span>
       </div>
       <h3 className="mt-5 font-serif text-2xl">{feature.title}</h3>
       <p className={`mt-3 text-sm leading-6 text-[#b8c4c5] ${compact ? "max-w-md" : ""}`}>
@@ -114,12 +116,50 @@ function FeatureCard({
 
 function RotaBuilderPreview() {
   return (
-    <div className="mt-7 overflow-hidden rounded-lg border border-white/10 bg-[#07171d]/70 shadow-2xl">
-      <img
-        src={landingImages.rotaBuilder}
-        alt="Real DocklistAI Rota Builder interface"
-        className="w-full object-cover"
+    <div className="relative mt-7">
+      {/* soft teal glow behind the frame — anchors the screenshot to the brand */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-6 -bottom-6 -top-3 rounded-[28px] bg-gradient-to-br from-[#56b8a3]/14 via-[#0b2027]/0 to-[#1a4a55]/25 blur-2xl"
       />
+      <figure className="relative overflow-hidden rounded-xl border border-white/12 bg-[#05121a] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
+        {/* faux browser chrome — makes it read as a deliberate product preview */}
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#081a20]/95 px-4 py-2.5">
+          <div className="flex items-center gap-1.5" aria-hidden="true">
+            <span className="size-2.5 rounded-full bg-[#ff5f57]/70" />
+            <span className="size-2.5 rounded-full bg-[#febc2e]/70" />
+            <span className="size-2.5 rounded-full bg-[#28c840]/70" />
+          </div>
+          <span className="truncate rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-[#9fb2b4]">
+            docklist.ai / rota
+          </span>
+          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-[#56b8a3]/80 sm:inline">
+            Live preview
+          </span>
+        </div>
+        <div className="relative">
+          <img
+            src={landingImages.rotaBuilder}
+            alt="Real DocklistAI Rota Builder interface — weekly schedule with staff, shifts, and coverage."
+            className="block w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+          {/* edge gradients to bleed the screenshot into the surrounding navy card */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#07171d] via-[#07171d]/40 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#07171d]/60 to-transparent"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5"
+          />
+        </div>
+      </figure>
     </div>
   );
 }
