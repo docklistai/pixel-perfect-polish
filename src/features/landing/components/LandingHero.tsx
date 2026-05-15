@@ -20,6 +20,10 @@ export function LandingHero() {
         className="absolute inset-y-0 left-0 w-full bg-[linear-gradient(90deg,#07171d_0%,rgba(7,23,29,0.92)_38%,rgba(7,23,29,0.42)_100%)]"
         aria-hidden="true"
       />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f5efe2]/15"
+        aria-hidden="true"
+      />
 
       <div className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
         <div className="max-w-3xl">
