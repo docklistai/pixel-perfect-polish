@@ -43,7 +43,7 @@ export function LandingNavbar() {
           </Link>
           <Link
             to="/auth"
-            className="inline-flex items-center justify-center rounded-full bg-[#56b8a3] px-4 py-2 text-sm font-semibold text-[#07171d] shadow-sm hover:bg-[#6cc7b4] sm:px-5"
+            className="inline-flex items-center justify-center rounded-full bg-[#56b8a3] px-4 py-2 text-sm font-semibold text-[#07171d] shadow-[0_10px_25px_-10px_rgba(86,184,163,0.6)] ring-1 ring-inset ring-white/20 transition hover:-translate-y-0.5 hover:bg-[#6cc7b4] sm:px-5"
           >
             Get started
           </Link>
