@@ -23,7 +23,7 @@ export function LandingChecks() {
               return (
                 <article
                   key={check.title}
-                  className="rounded-lg border border-[#07171d]/10 bg-white p-4 shadow-sm"
+                  className="rounded-xl border border-[#07171d]/10 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[#2f8c7b]/30 hover:shadow-md"
                 >
                   <Icon className="size-5 text-[#2f8c7b]" aria-hidden="true" />
                   <h3 className="mt-3 font-semibold">{check.title}</h3>
