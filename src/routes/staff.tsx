@@ -64,10 +64,10 @@ function buildStats(staffRows: typeof rows) {
     {
       icon: AlertTriangle,
       label: "MISSING DOCUMENTS",
-      value: "2",
-      sub: "Requires attention",
+      value: "—",
+      sub: "Not yet wired",
       action: "View alerts",
-      tone: "danger",
+      tone: "info",
     },
   ];
 }
@@ -115,11 +115,21 @@ function StaffListPage() {
         subtitle="Manage your team, roles, and access in one place."
         actions={
           <>
-            <FilterButton icon={Filter} label="Filters" showCaret={false} />
+            <FilterButton
+              icon={Filter}
+              label="Filters"
+              showCaret={false}
+              className="opacity-50 pointer-events-none"
+            />
             <ActionButton icon={Plus} iconRight={ChevronDown} onClick={() => setAddOpen(true)}>
               Add team member
             </ActionButton>
-            <IconButton icon={MoreHorizontal} label="More actions" />
+            <IconButton
+              icon={MoreHorizontal}
+              label="More actions"
+              disabled
+              className="opacity-50 cursor-not-allowed"
+            />
           </>
         }
       />

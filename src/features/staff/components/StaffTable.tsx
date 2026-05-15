@@ -51,25 +51,33 @@ export function StaffTable({
         </div>
         <button
           type="button"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+          disabled
+          aria-disabled="true"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
         >
           All departments <ChevronDown className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+          disabled
+          aria-disabled="true"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
         >
           All roles <ChevronDown className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+          disabled
+          aria-disabled="true"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
         >
           Employment status <ChevronDown className="h-3.5 w-3.5" />
         </button>
         <button
           type="button"
-          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2"
+          disabled
+          aria-disabled="true"
+          className="rounded-xl border border-border px-3 py-1.5 text-xs flex items-center gap-2 opacity-50 cursor-not-allowed"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" /> More filters
         </button>
@@ -175,7 +183,10 @@ export function StaffTable({
         <div className="flex items-center gap-1">
           <button
             type="button"
-            className="h-7 w-7 rounded-md border border-border flex items-center justify-center"
+            disabled
+            aria-disabled="true"
+            aria-label="Previous page"
+            className="h-7 w-7 rounded-md border border-border flex items-center justify-center opacity-50 cursor-not-allowed"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
@@ -183,21 +194,28 @@ export function StaffTable({
             <button
               key={p}
               type="button"
-              className={`h-7 w-7 rounded-md text-xs ${p === "1" ? "bg-primary text-primary-foreground" : "border border-border"}`}
+              disabled
+              aria-disabled="true"
+              className={`h-7 w-7 rounded-md text-xs opacity-50 cursor-not-allowed ${p === "1" ? "bg-primary text-primary-foreground" : "border border-border"}`}
             >
               {p}
             </button>
           ))}
           <button
             type="button"
-            className="h-7 w-7 rounded-md border border-border flex items-center justify-center"
+            disabled
+            aria-disabled="true"
+            aria-label="Next page"
+            className="h-7 w-7 rounded-md border border-border flex items-center justify-center opacity-50 cursor-not-allowed"
           >
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
         <button
           type="button"
-          className="rounded-md border border-border px-2 py-1 flex items-center gap-1"
+          disabled
+          aria-disabled="true"
+          className="rounded-md border border-border px-2 py-1 flex items-center gap-1 opacity-50 cursor-not-allowed"
         >
           10 per page <ChevronDown className="h-3 w-3" />
         </button>

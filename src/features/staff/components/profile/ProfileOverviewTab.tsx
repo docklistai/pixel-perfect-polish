@@ -1,35 +1,16 @@
 import * as React from "react";
 import { AlertTriangle, Calendar, ChevronRight } from "lucide-react";
 import { StatusBadge } from "@/components/dl";
-import { ProfileCard, Pair, SectionLabel, MetricBlock, CardTile } from "./ProfileCard";
-import { cn } from "@/lib/utils";
+import { ProfileCard, Pair, SectionLabel, CardTile } from "./ProfileCard";
 import type { StaffProfile } from "../../types";
+import { ProfileLeaveCard } from "./ProfileLeaveCard";
+import { ProfileWorkloadCard } from "./ProfileWorkloadCard";
+import { ProfileNext7Days } from "./ProfileNext7Days";
+import { ProfileActivityFeed } from "./ProfileActivityFeed";
 
 interface Props {
   profile: StaffProfile;
 }
-
-const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-function buildNext7(upcomingShifts: { date: string; time: string }[]) {
-  const today = new Date();
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const abbr = DAY_ABBR[d.getDay()];
-    const dayLabel = i === 0 ? "Today" : i === 1 ? "Tmrw" : abbr;
-    const match = upcomingShifts.find((s) => s.date.startsWith(abbr));
-    const shift = match ? match.time.replace(/:00/g, "").replace(" – ", "–") : "OFF";
-    return { day: dayLabel, shift };
-  });
-}
-
-const ACTIVITY_CHIP: Record<string, string> = {
-  Absence: "bg-warning-soft text-warning",
-  Document: "bg-brand-soft text-brand",
-  Leave: "bg-success-soft text-success",
-  Availability: "bg-muted text-muted-foreground",
-};
 
 export function ProfileOverviewTab({ profile }: Props) {
   const {
@@ -40,7 +21,6 @@ export function ProfileOverviewTab({ profile }: Props) {
     availability: av,
     portalAccess: pa,
   } = profile;
-  const next7 = buildNext7(profile.upcomingShifts);
 
   const snapshotSummary = profile.managerSnapshot.filter(
     (l) => !l.startsWith("Watch:") && !l.startsWith("Next action:"),
@@ -112,58 +92,14 @@ export function ProfileOverviewTab({ profile }: Props) {
           </div>
         </ProfileCard>
 
-        <ProfileCard
-          title="Leave & absence"
-          className="col-span-12 lg:col-span-3 p-5"
-          action={
-            <button type="button" className="text-[11px] text-brand font-semibold hover:underline">
-              View full
-            </button>
-          }
-        >
-          <div className="rounded-lg bg-muted/30 flex items-center justify-between px-3 py-2.5 mb-3">
-            <span className="text-xs text-muted-foreground">Annual leave remaining</span>
-            <span className="text-2xl font-bold tabular-nums">
-              {la.annualLeaveRemaining}
-              <span className="text-xs font-normal text-muted-foreground ml-1">days</span>
-            </span>
-          </div>
-          <Pair label="Sick days this year" value={la.sickDaysThisYear} />
-          <Pair label="Sickness episodes" value={la.sicknessEpisodes} />
-          <Pair
-            label="Short-notice absences"
-            value={
-              <span className={la.shortNoticeAbsences > 0 ? "text-warning font-semibold" : ""}>
-                {la.shortNoticeAbsences}
-              </span>
-            }
-          />
-          <Pair label="Return to work req." value={la.returnToWorkRequired ? "Yes" : "No"} />
-        </ProfileCard>
+        <ProfileLeaveCard la={la} />
       </div>
 
       {/* Section 2: Scheduling context */}
       <div className="space-y-4">
         <SectionLabel>Scheduling context</SectionLabel>
         <div className="grid grid-cols-12 gap-5">
-          <ProfileCard title="Workload balance" className="col-span-12 lg:col-span-8 p-5">
-            <div className="flex flex-wrap gap-3">
-              <MetricBlock
-                label="This week"
-                value={wb.hoursThisWeek > 0 ? `${wb.hoursThisWeek}h` : "—"}
-              />
-              <MetricBlock
-                label="Avg 4 weeks"
-                value={wb.avgLast4Weeks > 0 ? `${wb.avgLast4Weeks}h` : "—"}
-              />
-              <MetricBlock
-                label="Consecutive"
-                value={wb.consecutiveShifts > 0 ? String(wb.consecutiveShifts) : "—"}
-              />
-              <MetricBlock label="Rest gap" value={wb.restGap} />
-              <MetricBlock label="Overtime" value={wb.overtimeTrend || "—"} />
-            </div>
-          </ProfileCard>
+          <ProfileWorkloadCard wb={wb} />
 
           <ProfileCard title="Flags" className="col-span-12 lg:col-span-4 p-5">
             {profile.flags.length === 0 ? (
@@ -261,65 +197,8 @@ export function ProfileOverviewTab({ profile }: Props) {
       <div className="space-y-4">
         <SectionLabel>Activity &amp; access</SectionLabel>
         <div className="grid grid-cols-12 gap-5">
-          <ProfileCard title="Recent activity" className="col-span-12 lg:col-span-8 p-5">
-            {profile.recentActivity.length === 0 ? (
-              <span className="text-xs text-muted-foreground">No recent activity</span>
-            ) : (
-              <ul className="space-y-3">
-                {profile.recentActivity.map((a, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span
-                      className="mt-1.5 h-1.5 w-1.5 rounded-full bg-brand shrink-0"
-                      aria-hidden
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm">{a.note}</span>
-                        {a.type && ACTIVITY_CHIP[a.type] && (
-                          <span
-                            className={cn(
-                              "rounded-md px-1.5 py-0.5 text-[10px] font-medium shrink-0",
-                              ACTIVITY_CHIP[a.type],
-                            )}
-                          >
-                            {a.type}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">{a.date}</div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </ProfileCard>
-
-          <ProfileCard title="Next 7 days" className="col-span-12 lg:col-span-4 p-5">
-            <div className="grid grid-cols-7 gap-1 text-center">
-              {next7.map((d) => (
-                <div key={d.day} className="flex flex-col items-center gap-1">
-                  <span className="text-[9px] font-semibold text-muted-foreground uppercase">
-                    {d.day}
-                  </span>
-                  <div
-                    className={cn(
-                      "w-full rounded-md flex items-center justify-center py-2.5",
-                      d.shift === "OFF" ? "bg-muted/40" : "bg-brand-soft",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "text-[9px] font-medium leading-none",
-                        d.shift === "OFF" ? "text-muted-foreground" : "text-brand",
-                      )}
-                    >
-                      {d.shift}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ProfileCard>
+          <ProfileActivityFeed recentActivity={profile.recentActivity} />
+          <ProfileNext7Days upcomingShifts={profile.upcomingShifts} />
         </div>
 
         <div className="grid grid-cols-12 gap-5">
