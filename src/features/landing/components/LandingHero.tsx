@@ -39,13 +39,17 @@ export function LandingHero() {
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
               to="/auth"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#56b8a3] px-6 py-3.5 text-sm font-semibold text-[#07171d] shadow-lg shadow-black/20 hover:bg-[#6cc7b4]"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#56b8a3] px-6 py-3.5 text-sm font-semibold text-[#07171d] shadow-[0_18px_40px_-12px_rgba(86,184,163,0.55)] ring-1 ring-inset ring-white/15 transition hover:-translate-y-0.5 hover:bg-[#6cc7b4] hover:shadow-[0_22px_50px_-12px_rgba(86,184,163,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56b8a3] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07171d]"
             >
-              Get started <ArrowRight className="size-4" aria-hidden="true" />
+              Get started
+              <ArrowRight
+                className="size-4 transition group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
             </Link>
             <a
               href="#how-it-works"
-              className="inline-flex items-center justify-center rounded-full border border-[#f5efe2]/25 px-6 py-3.5 text-sm font-semibold text-[#f5efe2] hover:bg-white/10"
+              className="inline-flex items-center justify-center rounded-full border border-[#f5efe2]/25 bg-white/5 px-6 py-3.5 text-sm font-semibold text-[#f5efe2] backdrop-blur-sm transition hover:border-[#f5efe2]/40 hover:bg-white/10"
             >
               See how it works
             </a>
