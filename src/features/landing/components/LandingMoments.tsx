@@ -28,7 +28,7 @@ export function LandingMoments() {
                 <img
                   src={moment.image}
                   alt=""
-                  className="size-full object-cover"
+                  className="size-full object-cover transition duration-500 group-hover:scale-[1.03]"
                   loading="eager"
                   decoding="async"
                 />
