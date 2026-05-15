@@ -19,6 +19,7 @@ import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as LeaveRouteImport } from './routes/leave'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffStaffIdRouteImport } from './routes/staff.$staffId'
@@ -73,6 +74,11 @@ const LeaveRoute = LeaveRouteImport.update({
   path: '/leave',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -92,6 +98,7 @@ const StaffStaffIdRoute = StaffStaffIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/landing': typeof LandingRoute
   '/leave': typeof LeaveRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/landing': typeof LandingRoute
   '/leave': typeof LeaveRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/landing': typeof LandingRoute
   '/leave': typeof LeaveRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/landing'
     | '/leave'
     | '/ops'
     | '/portal'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/landing'
     | '/leave'
     | '/ops'
     | '/portal'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/landing'
     | '/leave'
     | '/ops'
     | '/portal'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  LandingRoute: typeof LandingRoute
   LeaveRoute: typeof LeaveRoute
   OpsRoute: typeof OpsRoute
   PortalRoute: typeof PortalRoute
@@ -270,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LeaveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -307,6 +327,7 @@ const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  LandingRoute: LandingRoute,
   LeaveRoute: LeaveRoute,
   OpsRoute: OpsRoute,
   PortalRoute: PortalRoute,
