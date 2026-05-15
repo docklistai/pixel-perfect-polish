@@ -116,50 +116,87 @@ function FeatureCard({
 
 function RotaBuilderPreview() {
   return (
-    <div className="relative mt-7">
-      {/* soft teal glow behind the frame — anchors the screenshot to the brand */}
+    <div className="relative mt-8">
+      {/* blueprint canvas — faint grid behind the frame so it reads as a product surface, not a floating screenshot */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-6 -bottom-6 -top-3 rounded-[28px] bg-gradient-to-br from-[#56b8a3]/14 via-[#0b2027]/0 to-[#1a4a55]/25 blur-2xl"
+        className="pointer-events-none absolute -inset-x-4 -bottom-8 -top-4 rounded-[28px] opacity-[0.35] [background-image:linear-gradient(to_right,rgba(86,184,163,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(86,184,163,0.05)_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_75%)]"
       />
-      <figure className="relative overflow-hidden rounded-xl border border-white/12 bg-[#05121a] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
-        {/* faux browser chrome — makes it read as a deliberate product preview */}
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#081a20]/95 px-4 py-2.5">
-          <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="size-2.5 rounded-full bg-[#ff5f57]/70" />
-            <span className="size-2.5 rounded-full bg-[#febc2e]/70" />
-            <span className="size-2.5 rounded-full bg-[#28c840]/70" />
+      {/* soft teal radial — anchors to brand */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-10 top-6 size-72 rounded-full bg-[#56b8a3]/14 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-12 bottom-0 size-80 rounded-full bg-[#1a4a55]/40 blur-3xl"
+      />
+
+      <figure className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#05121a] shadow-[0_50px_100px_-35px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-white/[0.04]">
+        {/* app-native top bar — mirrors the real DocklistAI Topbar / publish chip language */}
+        <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-[#06151b] px-4 py-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex size-6 items-center justify-center rounded-md border border-[#56b8a3]/25 bg-[#56b8a3]/10 text-[10px] font-semibold text-[#56b8a3]">
+              D
+            </span>
+            <span className="truncate text-[11px] font-medium text-[#9fb2b4]">
+              Rota &middot; w/c 28 Apr
+            </span>
           </div>
-          <span className="truncate rounded-md border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-medium text-[#9fb2b4]">
-            docklist.ai / rota
-          </span>
-          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.18em] text-[#56b8a3]/80 sm:inline">
-            Live preview
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#56b8a3]/25 bg-[#56b8a3]/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#56b8a3]">
+            <span className="size-1.5 rounded-full bg-[#56b8a3]" aria-hidden="true" />
+            Published
           </span>
         </div>
+
         <div className="relative">
           <img
             src={landingImages.rotaBuilder}
-            alt="Real DocklistAI Rota Builder interface — weekly schedule with staff, shifts, and coverage."
-            className="block w-full object-cover"
+            alt="DocklistAI Rota Builder — weekly schedule grid with staff, shifts, coverage, and conflicts."
+            className="block w-full object-cover object-top brightness-[0.92] saturate-[0.95] contrast-[1.02]"
             loading="lazy"
             decoding="async"
           />
-          {/* edge gradients to bleed the screenshot into the surrounding navy card */}
+          {/* navy multiply tint so the screenshot belongs in the section */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#07171d] via-[#07171d]/40 to-transparent"
+            className="pointer-events-none absolute inset-0 bg-[#07171d]/15 mix-blend-multiply"
+          />
+          {/* gradient mask, fades bottom into section */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#06151b] via-[#06151b]/60 to-transparent"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#07171d]/60 to-transparent"
+            className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#06151b]/55 to-transparent"
           />
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5"
+            className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/[0.04]"
           />
         </div>
       </figure>
+
+      {/* decorative status chips — borrowed from the real app's surface language */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-3 left-6 hidden rounded-xl border border-white/10 bg-[#081a20]/95 px-3 py-2 shadow-[0_18px_40px_-15px_rgba(0,0,0,0.7)] backdrop-blur sm:block"
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7e9295]">
+          Coverage
+        </p>
+        <p className="mt-0.5 font-serif text-lg leading-none text-[#56b8a3]">92%</p>
+      </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-2 right-4 hidden rounded-xl border border-white/10 bg-[#081a20]/95 px-3 py-2 shadow-[0_18px_40px_-15px_rgba(0,0,0,0.7)] backdrop-blur md:block"
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7e9295]">
+          Conflicts
+        </p>
+        <p className="mt-0.5 font-serif text-lg leading-none text-[#f5efe2]">3 to review</p>
+      </div>
     </div>
   );
 }

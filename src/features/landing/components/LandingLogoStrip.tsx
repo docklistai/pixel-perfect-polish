@@ -9,9 +9,12 @@ export function LandingLogoStrip() {
         </p>
 
         {/* PLACEHOLDER LOGOS, replace before public launch */}
-        <div className="mt-8 grid grid-cols-2 gap-6 text-center sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {trustLogos.map((logo) => (
-            <div key={logo} className="font-serif text-lg text-[#07171d]/45">
+            <div
+              key={logo}
+              className="flex h-12 items-center justify-center rounded-lg border border-[#07171d]/8 bg-white/40 px-4 font-serif text-base text-[#07171d]/55 transition hover:border-[#07171d]/15 hover:text-[#07171d]/75"
+            >
               {logo}
             </div>
           ))}
