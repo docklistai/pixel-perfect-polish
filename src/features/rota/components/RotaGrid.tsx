@@ -71,7 +71,7 @@ export function RotaGrid({
         days off.
       </p>
 
-      <div className="w-full min-w-0 overflow-x-auto" style={{ contain: "size layout paint" }}>
+      <div className="w-full min-w-0 overflow-x-auto">
         <div className="grid w-full min-w-0 grid-cols-[160px_repeat(7,minmax(80px,1fr))] md:grid-cols-[240px_repeat(7,minmax(120px,1fr))]">
           {/* Column header — staff */}
           <div className="border-b border-border px-4 py-4">
