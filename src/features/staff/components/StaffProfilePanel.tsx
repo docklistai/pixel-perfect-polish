@@ -41,7 +41,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
   const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
 
   return (
-    <Card className="col-span-12 lg:col-span-3 rounded-2xl p-5 self-start">
+    <Card className="rounded-2xl p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="text-sm font-semibold">{member.n}</div>
         <button
