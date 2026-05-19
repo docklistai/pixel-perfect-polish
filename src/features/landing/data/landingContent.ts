@@ -12,21 +12,20 @@ import {
 } from "lucide-react";
 import heroHospitalityService from "@/assets/landing/hero-hospitality-service.jpg";
 import rotaBuilderPreview from "@/assets/landing/rota-builder-real-preview.png";
-import momentCoverShift from "@/assets/landing/moment-cover-shift.jpg";
-import momentHandover from "@/assets/landing/moment-handover.jpg";
-import momentLeaveClash from "@/assets/landing/moment-leave-clash.jpg";
 import momentRotaChange from "@/assets/landing/moment-rota-change.jpg";
 import type {
   LandingFeature,
   LandingFooterColumn,
   LandingMoment,
   LandingNavLink,
+  LandingPricingTier,
   LandingStep,
 } from "../types";
 
 export const landingImages = {
   hero: heroHospitalityService,
   rotaBuilder: rotaBuilderPreview,
+  momentAtmosphere: momentRotaChange,
 };
 
 // Image attribution/licensing should be reviewed before public launch.
@@ -127,46 +126,103 @@ export const checksBeforePublish = [
 
 export const moments: LandingMoment[] = [
   {
-    title: "Someone calls in sick",
-    tag: "Saturday night",
+    title: "Sick call",
+    tag: "Open shift",
     body: "See the gap, adjust cover, and keep service moving.",
-    quote: "We used to lose half an hour finding cover. Now the gap is obvious.",
-    who: "Floor lead, The Lockside",
-    image: momentCoverShift,
+    signal: "Cover needed",
+    detail: "2 open shifts",
   },
   {
-    title: "The rota changes",
-    tag: "Mid-service",
+    title: "Rota changed after publish",
+    tag: "Published rota",
     body: "Keep everyone working from the same published version.",
-    quote: "Nobody argues over which screenshot is the real one anymore.",
-    who: "Ops manager, Hideout Coffee",
-    image: momentRotaChange,
+    signal: "Version check",
+    detail: "3 edits logged",
   },
   {
-    title: "Leave clashes",
-    tag: "Two weeks ahead",
+    title: "Leave clash",
+    tag: "Leave pressure",
     body: "Catch pressure before it lands on your busiest day.",
-    quote: "I can see the squeeze early enough to plan around it.",
-    who: "GM, The Glasshouse",
-    image: momentLeaveClash,
+    signal: "Review before publish",
+    detail: "1 clash",
   },
   {
-    title: "Clean handover",
+    title: "Handover note",
     tag: "Sunday close",
     body: "Keep notes, updates, and actions in one place.",
-    quote: "The opener walks in already knowing what closed late.",
-    who: "Head of bar, Porter & Rye",
-    image: momentHandover,
+    signal: "Ops note",
+    detail: "Ready for opening",
   },
 ];
 
-export const pricingFeatures = [
-  "Rota builder",
-  "Availability & Leave",
-  "Role-based access",
-  "Published rota visibility",
-  "Staff access codes",
-  "Change history",
+export const pricingTiers: LandingPricingTier[] = [
+  {
+    id: "free",
+    name: "Free",
+    price: "£0",
+    staffCap: "Up to 5 staff",
+    description: "For small teams getting started with rota planning.",
+    features: ["Basic rota builder", "Basic staff list", "Basic print/export", "Trial fallback"],
+    cta: "Get started free",
+    ctaHref: "/auth",
+  },
+  {
+    id: "core",
+    name: "Core",
+    price: "£39",
+    period: "/month",
+    staffCap: "Up to 25 staff",
+    description: "Full rota operations for growing hospitality teams.",
+    features: [
+      "Full rota operations",
+      "Build, edit, and publish rotas",
+      "Staff portal",
+      "Staff records",
+      "Leave and availability",
+      "Print/export",
+      "Basic labour view",
+      "Basic rota checks",
+    ],
+    cta: "Start 14-day trial",
+    ctaHref: "/auth",
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: "£79",
+    period: "/month",
+    staffCap: "Up to 50 staff",
+    description: "Smarter scheduling and advanced tools for busy managers.",
+    badge: "Best for busy teams",
+    recommended: true,
+    features: [
+      "Everything in Core",
+      "Generate rota",
+      "Advanced labour warnings",
+      "Coverage and conflict warnings",
+      "Rota quality score",
+      "Stronger scheduling rules",
+      "Priority support",
+      "Docklist Operator (coming soon)",
+    ],
+    cta: "Start 14-day trial",
+    ctaHref: "/auth",
+  },
+  {
+    id: "custom",
+    name: "Custom",
+    price: "Contact us",
+    staffCap: "50+ staff / multi-site",
+    description: "For larger operations, multiple venues, or specialist setup.",
+    features: [
+      "Multi-site support",
+      "White-glove setup",
+      "Higher-volume support",
+      "Custom integrations (coming soon)",
+    ],
+    cta: "Contact us",
+    ctaHref: "mailto:hello@docklist.ai",
+  },
 ];
 
 export const footerColumns: LandingFooterColumn[] = [

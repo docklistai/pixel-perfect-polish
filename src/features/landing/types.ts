@@ -21,13 +21,26 @@ export interface LandingMoment {
   title: string;
   tag: string;
   body: string;
-  quote: string;
-  who: string;
-  image: string;
+  signal: string;
+  detail: string;
 }
 
 export interface LandingFooterColumn {
   title: string;
   links: LandingNavLink[];
   comingSoon?: boolean;
+}
+
+export interface LandingPricingTier {
+  id: string;
+  name: string;
+  price: string;
+  period?: string;
+  staffCap: string;
+  description: string;
+  features: string[];
+  cta: string;
+  ctaHref: string;
+  recommended?: boolean;
+  badge?: string;
 }
