@@ -14,18 +14,14 @@ import {
 } from "@/components/dl";
 import {
   Calendar,
-  ChevronDown,
   Filter,
   Download,
-  PoundSterling,
   Percent,
   Users,
   Clock,
   Shield,
   Lightbulb,
   TrendingUp,
-  AlertTriangle,
-  ArrowRight,
   CheckCircle2,
 } from "lucide-react";
 
@@ -36,12 +32,12 @@ export const Route = createFileRoute("/reports")({
 
 const kpis = [
   {
-    l: "Labour Cost",
-    v: "£42,180",
-    d: "3.2%",
+    l: "Scheduled Hours",
+    v: "312 hrs",
+    d: "4 hrs",
     up: false,
     vs: "vs last period",
-    icon: PoundSterling,
+    icon: Calendar,
     tone: "info",
   },
   {
@@ -101,7 +97,7 @@ function ReportsPage() {
         subtitle="Understand your labour performance and make better decisions."
         actions={
           <>
-            <FilterButton icon={Calendar} label="12 – 18 May 2025" />
+            <FilterButton icon={Calendar} label="18 – 24 May 2026" />
             <FilterButton
               icon={Filter}
               label="Filters"
@@ -150,13 +146,11 @@ function ReportsPage() {
               id="reports-chart-title"
               className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground"
             >
-              LABOUR % VS SALES ⓘ
+              LABOUR % VS TARGET
             </div>
-            <div className="flex items-center gap-1 rounded-xl border border-border p-0.5 text-xs">
-              <button className="px-3 py-1 rounded-lg bg-muted">Day</button>
-              <button className="px-3 py-1 rounded-lg">Week</button>
-              <button className="px-3 py-1 rounded-lg">Month</button>
-            </div>
+            <span className="rounded-xl border border-border px-3 py-1 text-xs text-muted-foreground">
+              Weekly view
+            </span>
           </div>
 
           <div className="flex items-center gap-4 text-xs mb-3">
@@ -173,14 +167,11 @@ function ReportsPage() {
               />{" "}
               Target
             </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-0.5 w-4 bg-accent-purple inline-block rounded" /> Sales (£)
-            </span>
           </div>
 
           <div id="reports-chart-summary" className="sr-only">
-            Labour averaged 28.6 percent this week, which is 1.8 percentage points above target.
-            Weekends were the main driver, while sales peaked on Friday and Saturday.
+            Labour averaged 28.6 percent this week, which is 1.8 percentage points above the 27
+            percent planning target. Weekends were the main driver of overage.
           </div>
 
           <svg
@@ -216,13 +207,6 @@ function ReportsPage() {
               strokeDasharray="4 4"
               points="80,135 160,135 240,135 320,135 400,135 480,135 560,135"
             />
-            {/* sales line purple */}
-            <polyline
-              fill="none"
-              stroke="var(--accent-purple)"
-              strokeWidth="2.5"
-              points="80,170 160,165 240,140 320,110 400,60 480,75 560,85"
-            />
             {/* dots */}
             {[
               [80, 150],
@@ -235,31 +219,15 @@ function ReportsPage() {
             ].map(([x, y], i) => (
               <circle key={i} cx={x} cy={y} r="3.5" fill="var(--brand)" />
             ))}
-            {[
-              [80, 170],
-              [160, 165],
-              [240, 140],
-              [320, 110],
-              [400, 60],
-              [480, 75],
-              [560, 85],
-            ].map(([x, y], i) => (
-              <circle key={i} cx={x} cy={y} r="3.5" fill="var(--accent-purple)" />
-            ))}
             {/* y-axis labels */}
             {["40%", "35%", "30%", "25%", "20%", "15%"].map((t, i) => (
               <text key={t} x="10" y={25 + i * 40} fontSize="10" fill="var(--muted-foreground)">
                 {t}
               </text>
             ))}
-            {["£25K", "£20K", "£15K", "£10K", "£5K", "£0"].map((t, i) => (
-              <text key={t} x="585" y={25 + i * 40} fontSize="10" fill="var(--muted-foreground)">
-                {t}
-              </text>
-            ))}
           </svg>
           <div className="flex justify-between text-[11px] text-muted-foreground px-10">
-            {["Mon 12", "Tue 13", "Wed 14", "Thu 15", "Fri 16", "Sat 17", "Sun 18"].map((d) => (
+            {["Mon 18", "Tue 19", "Wed 20", "Thu 21", "Fri 22", "Sat 23", "Sun 24"].map((d) => (
               <span key={d}>{d}</span>
             ))}
           </div>
@@ -267,11 +235,9 @@ function ReportsPage() {
           <div className="mt-4 flex items-center gap-2 rounded-2xl bg-muted/50 px-3 py-2.5 text-xs">
             <TrendingUp className="h-4 w-4 text-brand" />
             <span>
-              Labour % averaged 28.6% this week, 1.8pp above target. Weekends were the main driver.
+              Labour % averaged 28.6% this week, 1.8pp above the planning target. Weekends were the
+              main driver — review Saturday and Sunday shifts before publishing next rota.
             </span>
-            <button type="button" className="ml-auto text-brand font-semibold">
-              View full trend →
-            </button>
           </div>
         </Card>
 
@@ -286,29 +252,25 @@ function ReportsPage() {
             {[
               {
                 t: "Labour ran 1.8pp above target on weekends",
-                s: "Weekend labour % was 31.2% vs a target of 29.4%.",
-                a: "See weekend breakdown",
+                s: "Weekend labour % was 31.2% vs a planning target of 29.4%.",
                 icon: TrendingUp,
                 tone: "warning",
               },
               {
                 t: "2 teams have repeated late clock-ins",
-                s: "Kitchen and Bar teams had the most late starts.",
-                a: "View time approval report",
+                s: "Kitchen and Bar teams had the most late starts this week.",
                 icon: Users,
                 tone: "danger",
               },
               {
                 t: "Overtime increased by 2.1 hrs vs last week",
                 s: "Mostly driven by Friday and Saturday shifts.",
-                a: "Review overtime",
                 icon: Calendar,
                 tone: "info",
               },
               {
                 t: "Rota compliance improved to 92%",
-                s: "Great work! Keep an eye on next week's gaps.",
-                a: "Review rota compliance",
+                s: "Keep an eye on next week's gaps before publishing.",
                 icon: CheckCircle2,
                 tone: "success",
               },
@@ -322,22 +284,23 @@ function ReportsPage() {
                 <div className="flex-1">
                   <div className="text-sm font-medium">{ins.t}</div>
                   <div className="text-xs text-muted-foreground">{ins.s}</div>
-                  <button type="button" className="text-xs font-semibold text-brand">
-                    {ins.a} →
-                  </button>
                 </div>
               </div>
             ))}
           </div>
-          <button type="button" className="mt-3 block text-xs font-semibold text-brand">
-            View all insights →
-          </button>
         </Card>
 
         {/* Bottom row */}
         <Card className="col-span-12 lg:col-span-4 rounded-2xl p-4 lg:p-5">
-          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
+          <div
+            id="time-approval-chart-title"
+            className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3"
+          >
             TIME APPROVAL TREND
+          </div>
+          <div id="time-approval-chart-summary" className="sr-only">
+            Time approval trend for the week of 18 May 2026. Most days had over 70 percent of
+            timesheets approved on time. Saturday had the lowest rate at 68 percent.
           </div>
           <div className="flex items-center gap-3 text-xs mb-2">
             <span className="flex items-center gap-1">
@@ -347,15 +310,21 @@ function ReportsPage() {
               <span className="h-2 w-2 rounded bg-danger" /> Approved late
             </span>
           </div>
-          <svg viewBox="0 0 280 140" className="w-full h-40">
+          <svg
+            viewBox="0 0 280 140"
+            className="w-full h-40"
+            role="img"
+            aria-labelledby="time-approval-chart-title"
+            aria-describedby="time-approval-chart-summary"
+          >
             {[
-              { d: "Mon 12", on: 82 },
-              { d: "Tue 13", on: 78 },
-              { d: "Wed 14", on: 85 },
-              { d: "Thu 15", on: 71 },
-              { d: "Fri 16", on: 80 },
-              { d: "Sat 17", on: 68 },
-              { d: "Sun 18", on: 74 },
+              { d: "Mon 18", on: 82 },
+              { d: "Tue 19", on: 78 },
+              { d: "Wed 20", on: 85 },
+              { d: "Thu 21", on: 71 },
+              { d: "Fri 22", on: 80 },
+              { d: "Sat 23", on: 68 },
+              { d: "Sun 24", on: 74 },
             ].map(({ d, on }, i) => {
               const onTimeH = (on / 100) * 70;
               const lateH = 10;
@@ -386,18 +355,29 @@ function ReportsPage() {
           <div className="text-xs text-muted-foreground mt-2">
             78% of timesheets were approved on time this week.
           </div>
-          <button type="button" className="mt-2 block text-xs font-semibold text-brand">
-            View time approval report →
-          </button>
         </Card>
 
         <Card className="col-span-12 lg:col-span-4 rounded-2xl p-4 lg:p-5">
-          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
-            ABSENCE BREAKDOWN ⓘ
+          <div
+            id="absence-chart-title"
+            className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3"
+          >
+            ABSENCE BREAKDOWN
+          </div>
+          <div id="absence-chart-summary" className="sr-only">
+            Absence breakdown for the week of 18 May 2026. Total 36 hours: sickness 22 hours (61
+            percent), annual leave 8 hours (22 percent), unpaid leave 3 hours (8 percent), other 3
+            hours (8 percent). Absence rate was 4.2 percent.
           </div>
           <div className="flex items-center gap-4">
             <div className="relative h-32 w-32">
-              <svg viewBox="0 0 36 36" className="h-32 w-32 -rotate-90">
+              <svg
+                viewBox="0 0 36 36"
+                className="h-32 w-32 -rotate-90"
+                role="img"
+                aria-labelledby="absence-chart-title"
+                aria-describedby="absence-chart-summary"
+              >
                 <circle
                   cx="18"
                   cy="18"
@@ -464,24 +444,21 @@ function ReportsPage() {
           <div className="text-xs text-muted-foreground mt-3">
             Absence rate was 4.2%, down 0.6pp vs last week.
           </div>
-          <button type="button" className="mt-2 block text-xs font-semibold text-brand">
-            View absence report →
-          </button>
         </Card>
 
         <Card className="col-span-12 lg:col-span-4 p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-              LABOUR % BY DEPARTMENT ⓘ
+              LABOUR % BY DEPARTMENT
             </div>
             <span className="text-[11px] text-muted-foreground">vs target (pp)</span>
           </div>
           {[
-            ["Front of House", 80, "+0.9pp", "success"],
-            ["Kitchen", 92, "+2.6pp", "danger"],
-            ["Housekeeping", 65, "-1.4pp", "success"],
-            ["Bar", 88, "+1.2pp", "danger"],
-          ].map(([n, w, d, tone]) => (
+            ["Front of House", 80, "+0.9pp", "success", "On target"],
+            ["Kitchen", 92, "+2.6pp", "danger", "Above target"],
+            ["Housekeeping", 65, "-1.4pp", "success", "On target"],
+            ["Bar", 88, "+1.2pp", "danger", "Above target"],
+          ].map(([n, w, d, tone, label]) => (
             <div key={n as string} className="py-2.5">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span>{n}</span>
@@ -494,18 +471,16 @@ function ReportsPage() {
                 <div style={{ width: "10%", background: "var(--brand)", opacity: 0.4 }} />
               </div>
               <div
-                className={`text-[11px] mt-1 text-right ${tone === "danger" ? "text-danger" : "text-success"}`}
+                className={`text-[11px] mt-1 flex items-center justify-between ${tone === "danger" ? "text-danger" : "text-success"}`}
               >
-                {d}
+                <span>{label as string}</span>
+                <span>{d}</span>
               </div>
             </div>
           ))}
           <div className="text-xs text-muted-foreground mt-2">
             Kitchen and Bar are driving labour % over target.
           </div>
-          <button type="button" className="mt-2 block text-xs font-semibold text-brand">
-            View department report →
-          </button>
         </Card>
       </div>
 
@@ -519,7 +494,7 @@ function ReportsPage() {
             <ActionButton variant="secondary" onClick={() => setFilterOpen(false)}>
               Reset
             </ActionButton>
-            <ActionButton onClick={() => setFilterOpen(false)}>Apply</ActionButton>
+            <ActionButton onClick={() => setFilterOpen(false)}>Close preview</ActionButton>
           </>
         }
       >
@@ -544,7 +519,7 @@ function ReportsPage() {
         open={insightOpen}
         onOpenChange={setInsightOpen}
         title="Labour % above target"
-        description="Week of 12 May 2025 · Europe/London"
+        description="Week of 18 May 2026 · Europe/London"
         footer={<ActionButton onClick={() => setInsightOpen(false)}>Close</ActionButton>}
       >
         <FormSection title="Detail">
