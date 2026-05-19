@@ -12,14 +12,12 @@ import {
 import landingBecauseHospitality from "@/assets/landing/landing-because-hospitality.jpg";
 import landingHeroHospitality from "@/assets/landing/landing-hero-hospitality.jpg";
 import landingMomentsHospitality from "@/assets/landing/landing-moments-hospitality.jpg";
-import rotaBuilderPreview from "@/assets/landing/rota-builder-real-preview.png";
 import type { LandingFeature, LandingNavLink } from "../types";
 
 export const landingImages = {
   hero: landingHeroHospitality,
   because: landingBecauseHospitality,
   moments: landingMomentsHospitality,
-  rotaBuilder: rotaBuilderPreview,
 };
 
 export const navLinks: LandingNavLink[] = [

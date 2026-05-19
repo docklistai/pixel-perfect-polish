@@ -4,7 +4,6 @@ export { LandingLogoStrip } from "./components/LandingLogoStrip";
 export { LandingThreeSteps } from "./components/LandingThreeSteps";
 export { LandingBecause } from "./components/LandingBecause";
 export { LandingHowItWorks } from "./components/LandingHowItWorks";
-export { LandingFeatures } from "./components/LandingFeatures";
 export { LandingChecks } from "./components/LandingChecks";
 export { LandingProductProof } from "./components/LandingProductProof";
 export { LandingMoments } from "./components/LandingMoments";
