@@ -1,138 +1,81 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import type { LandingPricingTier } from "../types";
-import { pricingTiers } from "../data/landingContent";
+const coreFeatures = [
+  "Drag-and-drop week planning, splits and doubles",
+  "Pre-publish checks — clashes, coverage, hours, leave",
+  "Open shift management and cover requests",
+  "Handover notes and shift context",
+  "Roles, sections, contracted hours and availability",
+] as const;
 
 export function LandingPricing() {
   return (
-    <section id="pricing" className="bg-[#f5efe2] py-16 text-[#07171d] sm:py-24">
+    <section
+      id="pricing"
+      className="border-t border-[#0c1412]/10 bg-[var(--landing-cream)] py-24 text-[var(--landing-ink)] sm:py-32"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-semibold text-[#2f8c7b]">Pricing</p>
-          <h2 className="mt-4 text-balance font-serif text-4xl leading-tight sm:text-5xl">
-            Simple, flat workspace pricing.
-          </h2>
-          <p className="mt-5 text-pretty text-base leading-7 text-[#526064]">
-            All plans include the core Docklist workspace. Higher plans unlock more team capacity
-            and smarter scheduling tools.
+        <div className="mb-12">
+          <p className="landing-section-eyebrow">Pricing</p>
+          <h2 className="landing-section-title">Pricing in beta.</h2>
+          <p className="max-w-md text-pretty text-[17px] leading-7 text-[#526064]">
+            Early access pricing will be confirmed before launch.
           </p>
         </div>
 
-        <div className="mx-auto mt-8 max-w-xl rounded-xl border border-[#2f8c7b]/25 bg-[#dff3ec] px-6 py-4 text-center">
-          <p className="font-semibold text-[#1f6f61]">
-            Start with a 14-day full Pro trial. No credit card required.
-          </p>
-          <p className="mt-1 text-sm leading-6 text-[#2d6258]">
-            After your trial, continue on Pro, upgrade, or fall back to Free.
-          </p>
-        </div>
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr]">
+          <article className="flex min-h-[360px] flex-col rounded-lg border border-[#0c1412]/10 bg-[var(--landing-paper)] p-8">
+            <div className="landing-mono flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[var(--landing-teal-deep)]">
+              <span className="size-1.5 rounded-full bg-[var(--landing-teal)]" />
+              Core product
+            </div>
+            <h3 className="mt-4 font-serif text-4xl font-normal tracking-[-0.02em]">
+              DocklistAI Core
+            </h3>
+            <p className="mt-2 max-w-sm text-[15px] leading-6 text-[#5c645f]">
+              The rota and scheduling workspace for hospitality teams.
+            </p>
+            <ul className="mt-6 space-y-3 border-t border-dashed border-[#0c1412]/15 pt-6">
+              {coreFeatures.map((feature) => (
+                <li key={feature} className="flex gap-3 text-sm leading-6 text-[#3f4744]">
+                  <span className="mt-2 size-1.5 rounded-full bg-[var(--landing-teal-deep)]" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <div className="landing-mono mt-auto flex flex-wrap justify-between gap-3 pt-8 text-[11px] uppercase tracking-[0.12em] text-[#8c8273]">
+              <span>Early access pricing</span>
+              <span>Confirmed before launch</span>
+            </div>
+          </article>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {pricingTiers.map((tier) => (
-            <PricingTierCard key={tier.id} tier={tier} />
-          ))}
+          <article className="flex min-h-[360px] flex-col overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#0f1816] to-[#0a100e] text-[var(--landing-cream)]">
+            <div className="p-8 pb-0">
+              <div className="landing-mono flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[var(--landing-teal)]">
+                <span className="size-1.5 rounded-full bg-[var(--landing-teal)]" />
+                Workspace session
+              </div>
+              <h3 className="mt-4 font-serif text-4xl font-light tracking-[-0.02em]">
+                See the <span className="italic text-[var(--landing-teal)]">workspace.</span>
+              </h3>
+              <p className="mt-2 max-w-sm text-[14.5px] leading-6 text-[var(--landing-cream)]/60">
+                A short session with the rota builder, pre-publish checks and shift management — in
+                your context, when you request access.
+              </p>
+            </div>
+            <div className="mx-8 my-8 grid min-h-[170px] place-items-center rounded-md border border-dashed border-[var(--landing-teal)]/30 bg-[radial-gradient(80%_60%_at_50%_50%,rgba(91,162,156,0.08),transparent_70%)]">
+              <a
+                href="#top"
+                className="landing-mono inline-flex items-center gap-2 rounded-md border border-[var(--landing-teal)]/35 bg-[var(--landing-teal)]/10 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[var(--landing-teal)] transition hover:bg-[var(--landing-teal)]/15"
+              >
+                Request access
+              </a>
+            </div>
+            <div className="landing-mono mt-auto flex justify-between gap-3 px-8 pb-8 text-[10px] uppercase tracking-[0.14em] text-white/45">
+              <span>Early access</span>
+              <span>On request</span>
+            </div>
+          </article>
         </div>
       </div>
     </section>
-  );
-}
-
-function PricingTierCard({ tier }: { tier: LandingPricingTier }) {
-  const isRecommended = !!tier.recommended;
-
-  return (
-    <article
-      className={`flex flex-col overflow-hidden rounded-2xl border shadow-sm transition ${
-        isRecommended
-          ? "border-[#07171d] bg-[#07171d] text-[#f5efe2] shadow-[0_30px_60px_-20px_rgba(7,23,29,0.4)]"
-          : "border-[#07171d]/10 bg-white hover:border-[#2f8c7b]/30 hover:shadow-md"
-      }`}
-    >
-      {isRecommended && tier.badge && (
-        <div className="bg-[#2f8c7b] px-6 py-2.5 text-center text-xs font-semibold text-white">
-          {tier.badge}
-        </div>
-      )}
-
-      <div className="flex flex-1 flex-col p-6">
-        <div>
-          <p
-            className={`text-sm font-semibold ${
-              isRecommended ? "text-[#56b8a3]" : "text-[#2f8c7b]"
-            }`}
-          >
-            {tier.name}
-          </p>
-          <div className="mt-3 flex items-end gap-1">
-            <span className="font-serif text-4xl leading-none">{tier.price}</span>
-            {tier.period && (
-              <span
-                className={`mb-0.5 text-sm ${isRecommended ? "text-[#9fb2b4]" : "text-[#667275]"}`}
-              >
-                {tier.period}
-              </span>
-            )}
-          </div>
-          <p
-            className={`mt-1.5 text-xs font-semibold ${
-              isRecommended ? "text-[#9fb2b4]" : "text-[#667275]"
-            }`}
-          >
-            {tier.staffCap}
-          </p>
-          <p
-            className={`mt-3 text-sm leading-6 ${
-              isRecommended ? "text-[#b8c4c5]" : "text-[#526064]"
-            }`}
-          >
-            {tier.description}
-          </p>
-        </div>
-
-        <ul
-          className={`mt-5 flex-1 space-y-2.5 border-t pt-5 text-sm ${
-            isRecommended ? "border-white/10" : "border-[#07171d]/10"
-          }`}
-        >
-          {tier.features.map((feature) => (
-            <li key={feature} className="flex items-start gap-2.5">
-              <CheckCircle2
-                className={`mt-0.5 size-4 shrink-0 ${
-                  isRecommended ? "text-[#56b8a3]" : "text-[#2f8c7b]"
-                }`}
-                aria-hidden="true"
-              />
-              <span className={isRecommended ? "text-[#d8d0bd]" : "text-[#07171d]"}>{feature}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-7">
-          {tier.id === "custom" ? (
-            <a
-              href={tier.ctaHref}
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-[#07171d]/20 px-5 py-3 text-sm font-semibold text-[#07171d] transition hover:-translate-y-0.5 hover:border-[#07171d]/40 hover:shadow-sm"
-            >
-              {tier.cta}
-            </a>
-          ) : (
-            <Link
-              to="/auth"
-              className={`group flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition hover:-translate-y-0.5 ${
-                isRecommended
-                  ? "bg-[#2f8c7b] text-white shadow-[0_14px_30px_-10px_rgba(47,140,123,0.5)] hover:bg-[#277768]"
-                  : "bg-[#07171d] text-[#f5efe2] hover:bg-[#0d2832]"
-              }`}
-            >
-              {tier.cta}
-              <ArrowRight
-                className="size-4 transition group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Link>
-          )}
-        </div>
-      </div>
-    </article>
   );
 }

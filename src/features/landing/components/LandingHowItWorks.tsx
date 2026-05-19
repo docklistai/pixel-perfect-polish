@@ -1,38 +1,66 @@
-import { howItWorks } from "../data/landingContent";
+const steps = [
+  {
+    number: "01",
+    title: "Import your team",
+    body: "Get your staff, roles and availability in.",
+  },
+  {
+    number: "02",
+    title: "Build your rota",
+    body: "Shape the week around your team, your sections, and the trade you're walking into.",
+  },
+  {
+    number: "03",
+    title: "Check before publish",
+    body: "Spot clashes, gaps and coverage pressure early.",
+  },
+  {
+    number: "04",
+    title: "Share and update",
+    body: "Keep your team informed as things change.",
+  },
+] as const;
 
 export function LandingHowItWorks() {
   return (
-    <section id="how-it-works" className="bg-[#fbf7ee] py-20 text-[#07171d] sm:py-24">
+    <section
+      id="how-it-works"
+      className="border-t border-[#0c1412]/10 bg-[var(--landing-paper)] py-24 text-[var(--landing-ink)] sm:py-36"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+        <div className="mb-16 grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:items-end">
           <div>
-            <p className="text-sm font-semibold text-[#2f8c7b]">How it works</p>
-            <h2 className="mt-4 max-w-xl text-balance font-serif text-4xl leading-tight sm:text-5xl">
-              Three steps to a better rota week.
+            <p className="landing-section-eyebrow">How it works</p>
+            <h2 className="landing-section-title">
+              Simple steps.
+              <br />
+              Powerful impact.
             </h2>
-            <p className="mt-5 max-w-lg text-pretty text-base leading-7 text-[#526064]">
-              The same rhythm every week: build, check, publish. No payroll-first detours, just the
-              loop hospitality managers already run.
-            </p>
           </div>
+          <p className="max-w-xl text-pretty text-[17px] leading-7 text-[#3f4744]">
+            A small, deliberate workflow. The same four steps every week — calmer, clearer and
+            faster every time you run them.
+          </p>
+        </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {howItWorks.map((step, index) => (
-              <article
-                key={step.title}
-                className="group rounded-xl border border-[#07171d]/10 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:border-[#2f8c7b]/25 hover:shadow-[0_20px_40px_-20px_rgba(7,23,29,0.25)]"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <span className="flex size-11 items-center justify-center rounded-full bg-[#07171d] font-serif text-xl italic text-[#56b8a3]">
-                    {index + 1}
-                  </span>
-                  <step.icon className="size-7 text-[#2f8c7b]" aria-hidden="true" />
-                </div>
-                <h3 className="mt-6 text-xl font-semibold">{step.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-[#526064]">{step.body}</p>
-              </article>
-            ))}
-          </div>
+        <div className="flex flex-col border-t border-[#0c1412]/15">
+          {steps.map((step) => (
+            <article
+              key={step.number}
+              className="grid gap-4 border-b border-[#0c1412]/10 py-8 md:grid-cols-[180px_1fr_1.4fr] md:gap-16 md:py-11"
+            >
+              <div className="font-serif text-7xl font-light leading-none tracking-[-0.045em] text-[var(--landing-ink)] md:text-8xl">
+                {step.number}
+                <span className="text-[var(--landing-teal-deep)]">.</span>
+              </div>
+              <h3 className="font-serif text-3xl font-normal leading-tight tracking-[-0.02em] md:text-4xl">
+                {step.title}
+              </h3>
+              <p className="max-w-md pt-2 text-pretty text-[15.5px] leading-7 text-[#4f564f]">
+                {step.body}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
     </section>

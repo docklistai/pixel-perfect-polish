@@ -1,49 +1,51 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CirclePlay } from "lucide-react";
 import { landingImages } from "../data/landingContent";
 
 export function LandingHero() {
   return (
     <section
       id="top"
-      className="relative min-h-dvh overflow-hidden bg-[#07171d] pt-16 text-[#f5efe2]"
+      className="relative flex min-h-[600px] items-end overflow-hidden bg-[var(--landing-ink)] pb-16 pt-24 text-[var(--landing-cream)] sm:min-h-[760px] sm:pb-24 lg:min-h-[900px]"
     >
       <img
         src={landingImages.hero}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 size-full object-cover object-center"
+        className="absolute inset-0 size-full object-cover object-[64%_44%] contrast-110 saturate-105"
         fetchPriority="high"
       />
-      <div className="absolute inset-0 bg-[#07171d]/10" aria-hidden="true" />
       <div
-        className="absolute inset-y-0 left-0 w-full bg-[linear-gradient(90deg,#07171d_0%,rgba(7,23,29,0.92)_38%,rgba(7,23,29,0.42)_100%)]"
+        className="absolute inset-0 bg-[radial-gradient(55%_75%_at_22%_58%,rgba(12,20,18,0.72),transparent_65%),radial-gradient(110%_70%_at_82%_32%,rgba(91,162,156,0.12),transparent_55%),linear-gradient(98deg,rgba(12,20,18,0.97)_0%,rgba(12,20,18,0.82)_22%,rgba(12,20,18,0.34)_50%,rgba(12,20,18,0.14)_72%,rgba(12,20,18,0.5)_100%),linear-gradient(180deg,rgba(12,20,18,0.45)_0%,rgba(12,20,18,0.2)_28%,rgba(12,20,18,0.55)_70%,rgba(12,20,18,0.96)_100%)]"
         aria-hidden="true"
       />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#f5efe2]/15"
-        aria-hidden="true"
-      />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--landing-teal)]/35 to-transparent" />
 
-      <div className="relative mx-auto flex min-h-[calc(100dvh-4rem)] max-w-7xl items-center px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-        <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#56b8a3]/30 bg-[#56b8a3]/12 px-4 py-2 text-xs font-semibold text-[#c9eee4]">
-            <span className="size-2 rounded-full bg-[#56b8a3]" aria-hidden="true" />
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[780px]">
+          <span className="landing-mono inline-flex items-center gap-2 rounded-full border border-[var(--landing-teal)]/35 bg-[var(--landing-teal)]/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--landing-teal)]">
+            <span className="size-1.5 rounded-full bg-[var(--landing-teal)] shadow-[0_0_0_3px_rgba(91,162,156,0.18)]" />
             Built for hospitality rota teams
           </span>
 
-          <h1 className="mt-8 max-w-4xl text-balance font-serif text-6xl leading-none text-[#f5efe2] sm:text-7xl lg:text-8xl">
-            The rota, <span className="italic text-[#56b8a3]">rebuilt.</span>
+          <h1
+            aria-label="The rota, rebuilt."
+            className="mt-9 text-balance font-serif text-[clamp(4rem,9.4vw,9.5rem)] font-light leading-[0.92] tracking-[-0.045em] text-[var(--landing-cream)] [text-shadow:0_1px_40px_rgba(0,0,0,0.4)] before:mb-6 before:block before:h-px before:w-12 before:bg-gradient-to-r before:from-[var(--landing-teal)]/70 before:to-transparent"
+          >
+            The rota,
+            <br />
+            <span className="italic text-[var(--landing-teal)]">rebuilt.</span>
           </h1>
 
-          <p className="mt-7 max-w-2xl text-pretty text-lg leading-8 text-[#d8d0bd] sm:text-xl">
-            Build the week, check the pressure, and publish a rota your team can trust.
+          <p className="mt-10 max-w-[480px] text-pretty text-[17.5px] leading-7 text-[var(--landing-cream)]/82">
+            Build the week, check coverage, handle staff changes, and publish a rota your team can
+            trust.
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-3">
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
             <Link
               to="/auth"
-              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#56b8a3] px-6 py-3.5 text-sm font-semibold text-[#07171d] shadow-[0_18px_40px_-12px_rgba(86,184,163,0.55)] ring-1 ring-inset ring-white/15 transition hover:-translate-y-0.5 hover:bg-[#6cc7b4] hover:shadow-[0_22px_50px_-12px_rgba(86,184,163,0.7)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#56b8a3] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07171d]"
+              className="group inline-flex items-center justify-center gap-3 rounded-lg bg-[var(--landing-teal)] px-6 py-3.5 text-sm font-semibold text-[var(--landing-ink)] transition hover:bg-[#6ab3ad]"
             >
               Get started
               <ArrowRight
@@ -53,25 +55,17 @@ export function LandingHero() {
             </Link>
             <a
               href="#how-it-works"
-              className="inline-flex items-center justify-center rounded-full border border-[#f5efe2]/25 bg-white/5 px-6 py-3.5 text-sm font-semibold text-[#f5efe2] backdrop-blur-sm transition hover:border-[#f5efe2]/40 hover:bg-white/10"
+              className="inline-flex items-center justify-center gap-3 rounded-lg border border-[var(--landing-cream)]/20 bg-black/10 px-6 py-3.5 text-sm font-semibold text-[var(--landing-cream)] backdrop-blur-sm transition hover:border-[var(--landing-cream)]/35 hover:bg-white/10"
             >
+              <CirclePlay className="size-4" aria-hidden="true" />
               See how it works
             </a>
           </div>
 
-          <div className="mt-12 flex flex-wrap gap-x-8 gap-y-4 text-sm text-[#d8d0bd]/80">
-            <span className="inline-flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-[#56b8a3]" aria-hidden="true" />
-              No credit card required
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-[#56b8a3]" aria-hidden="true" />
-              Built for hospitality teams
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-[#56b8a3]" aria-hidden="true" />
-              Scheduling first
-            </span>
+          <div className="landing-mono mt-12 flex max-w-[680px] flex-wrap gap-x-8 gap-y-3 border-t border-white/10 pt-6 text-[10px] uppercase tracking-[0.18em] text-[var(--landing-cream)]/50">
+            <span>Built for hospitality teams</span>
+            <span>Scheduling first</span>
+            <span>Made in Scotland</span>
           </div>
         </div>
       </div>

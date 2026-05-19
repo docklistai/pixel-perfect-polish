@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  LandingBecause,
   LandingChecks,
-  LandingFeatures,
   LandingFinalCTA,
   LandingFooter,
   LandingHero,
@@ -10,6 +10,8 @@ import {
   LandingMoments,
   LandingNavbar,
   LandingPricing,
+  LandingProductProof,
+  LandingThreeSteps,
 } from "@/features/landing";
 
 export const Route = createFileRoute("/landing")({
@@ -19,7 +21,7 @@ export const Route = createFileRoute("/landing")({
       {
         name: "description",
         content:
-          "DocklistAI is the rota-first workspace for hospitality teams. Build the week, check the pressure, and publish a rota your team can trust.",
+          "DocklistAI is the rota-first workspace for hospitality teams. Build the week, check coverage, handle staff changes, and publish a rota your team can trust.",
       },
     ],
   }),
@@ -28,14 +30,16 @@ export const Route = createFileRoute("/landing")({
 
 function LandingPage() {
   return (
-    <div className="min-h-dvh bg-[#07171d] text-[#07171d]">
+    <div className="landing-page min-h-dvh bg-[var(--landing-ink)] text-[var(--landing-ink)]">
       <LandingNavbar />
       <main id="main-content" className="!p-0">
         <LandingHero />
         <LandingLogoStrip />
+        <LandingThreeSteps />
+        <LandingBecause />
         <LandingHowItWorks />
-        <LandingFeatures />
         <LandingChecks />
+        <LandingProductProof />
         <LandingMoments />
         <LandingPricing />
         <LandingFinalCTA />
