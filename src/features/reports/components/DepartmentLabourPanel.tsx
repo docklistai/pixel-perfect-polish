@@ -18,9 +18,7 @@ export function DepartmentLabourPanel() {
         <div key={n as string} className="py-2.5">
           <div className="flex items-center justify-between text-sm mb-1">
             <span>{n}</span>
-            <span className="font-semibold">
-              {(w as number) / 3 + 5}.{(w as number) % 10}%
-            </span>
+            <span className="font-semibold">{((w as number) / 3 + 5).toFixed(1)}%</span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden flex">
             <div style={{ width: `${(w as number) - 10}%`, background: "var(--brand)" }} />

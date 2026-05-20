@@ -18,10 +18,7 @@ export function Topbar({
 }) {
   const { openPalette, openShortcuts, openNotifications, unreadCount } = useOverlays();
   return (
-    <header
-      className="dock-topbar"
-      aria-label="Workspace toolbar"
-    >
+    <header className="dock-topbar" aria-label="Workspace toolbar">
       <button
         type="button"
         className="dock-topbar-pill dock-topbar-workspace hidden md:flex"
@@ -34,23 +31,15 @@ export function Topbar({
 
       <div className="hidden flex-1 justify-center md:flex">
         <div className="dock-topbar-pill dock-topbar-date">
-          <button
-            type="button"
-            className="dock-topbar-arrow"
-            aria-label="Previous week"
-          >
+          <button type="button" className="dock-topbar-arrow" aria-label="Previous week">
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </button>
           <Calendar className="h-4 w-4 text-brand" aria-hidden />
           <div className="dock-topbar-date-stack">
-            <div className="text-sm font-semibold">12 – 18 May 2025</div>
+            <div className="text-sm font-semibold">18 – 24 May 2026</div>
             <div className="dock-topbar-date-sub">This week</div>
           </div>
-          <button
-            type="button"
-            className="dock-topbar-arrow"
-            aria-label="Next week"
-          >
+          <button type="button" className="dock-topbar-arrow" aria-label="Next week">
             <ChevronRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
@@ -108,16 +97,8 @@ export function Topbar({
         )}
       </button>
 
-      <button
-        type="button"
-        className="dock-topbar-user"
-        aria-label="Open account menu"
-      >
-        <img
-          src="https://i.pravatar.cc/64?img=12"
-          className="dock-topbar-avatar"
-          alt=""
-        />
+      <button type="button" className="dock-topbar-user" aria-label="Open account menu">
+        <img src="https://i.pravatar.cc/64?img=12" className="dock-topbar-avatar" alt="" />
         <div className="dock-topbar-user-copy text-left">
           <div className="dock-topbar-user-name">Alex Thompson</div>
           <div className="dock-topbar-user-sub">General Manager</div>
