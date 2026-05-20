@@ -351,6 +351,12 @@ For every extra issue found, classify it as:
 - Risk Log Only
 - Forbidden Unless Explicitly Approved
 
+Do not list verified-correct guidance, healthy files, or successful checks as proactive findings. A proactive finding must be an actual issue, risk, inconsistency, defect, or concern. If the approved scope has no issues, write: “No proactive findings in approved scope.”
+
+During audit-only tasks, all findings are report-only. Do not fix, stage, format, restore, or commit anything, even when a finding would normally fit the Fix Now bucket.
+
+"Fix Now" is a classification of fix eligibility during implementation tasks only. It is not an instruction to fix during audit-only tasks. Positive confirmations belong in the Verification or Scope Protection Check sections of your report, not Proactive Findings.
+
 ### 4. Do Not Expand Scope Silently
 
 If the issue affects more than 3 files, crosses domains, changes shared architecture, or touches high-risk areas, stop and report it.
