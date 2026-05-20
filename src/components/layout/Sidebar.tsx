@@ -51,11 +51,7 @@ export function Sidebar() {
       </nav>
 
       <div className="dock-sidebar-footer">
-        <button
-          type="button"
-          className="dock-sidebar-workspace"
-          aria-label="Switch workspace"
-        >
+        <button type="button" className="dock-sidebar-workspace" aria-label="Switch workspace">
           <div className="dock-sidebar-workspace-meta">
             <div className="dock-sidebar-workspace-icon">
               <Building2 className="h-4 w-4" aria-hidden />

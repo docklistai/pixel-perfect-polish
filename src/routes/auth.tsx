@@ -4,12 +4,7 @@ import { AuthValuePanel, AuthForm } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import heroBg from "@/assets/hero-cafe-minimal.jpg";
 import { Shield, Users, Coffee } from "lucide-react";
 
@@ -17,7 +12,10 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign In — Docklist" },
-      { name: "description", content: "Sign in to Docklist — Rota management for hospitality teams." },
+      {
+        name: "description",
+        content: "Sign in to Docklist — Rota management for hospitality teams.",
+      },
     ],
   }),
   component: AuthPage,
@@ -160,7 +158,9 @@ function StaffAuthForm({ onBack }: { onBack: () => void }) {
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [loginMode, setLoginMode] = React.useState<"role-select" | "manager" | "staff">("role-select");
+  const [loginMode, setLoginMode] = React.useState<"role-select" | "manager" | "staff">(
+    "role-select",
+  );
   const [selectedRole, setSelectedRole] = React.useState<"manager" | "staff">("manager");
 
   const handleRoleSelect = (role: "manager" | "staff") => {
@@ -181,8 +181,14 @@ function AuthPage() {
         className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
         fetchPriority="high"
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-background/80 via-background/50 to-background/90" aria-hidden="true" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" aria-hidden="true" />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-background/80 via-background/50 to-background/90"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30"
+        aria-hidden="true"
+      />
 
       <div className="relative flex min-h-dvh items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
         <div className="w-full max-w-6xl">
@@ -255,22 +261,14 @@ function AuthPage() {
                 )}
 
                 {loginMode === "manager" && (
-                  <AuthForm
-                    onBackToHome={handleBackToRoleSelect}
-                    variant="embedded"
-                    hideHeader
-                  />
+                  <AuthForm onBackToHome={handleBackToRoleSelect} variant="embedded" hideHeader />
                 )}
 
-                {loginMode === "staff" && (
-                  <StaffAuthForm onBack={handleBackToRoleSelect} />
-                )}
+                {loginMode === "staff" && <StaffAuthForm onBack={handleBackToRoleSelect} />}
               </div>
 
               <div className="mt-4 text-center">
-                <p className="text-xs text-muted-foreground">
-                  Secure login • GDPR compliant
-                </p>
+                <p className="text-xs text-muted-foreground">Secure login • GDPR compliant</p>
               </div>
             </div>
           </div>

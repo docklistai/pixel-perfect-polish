@@ -92,12 +92,20 @@ export function TimeTab() {
             >
               <span className="absolute inset-[-12px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,162,.18),_transparent_70%)]" />
               <span className="relative flex flex-col items-center gap-2">
-                {clockedIn ? <StopCircle className="h-9 w-9" /> : <PlayCircle className="h-9 w-9" />}
+                {clockedIn ? (
+                  <StopCircle className="h-9 w-9" />
+                ) : (
+                  <PlayCircle className="h-9 w-9" />
+                )}
                 <span className="text-[22px] font-bold leading-none">
                   {clockedIn ? "Clock out" : "Clock in"}
                 </span>
                 <span className="text-[11px] font-medium text-white/85">
-                  {clockedIn ? (sinceLabel ? `since ${sinceLabel}` : "End your shift") : "Tap to start your shift"}
+                  {clockedIn
+                    ? sinceLabel
+                      ? `since ${sinceLabel}`
+                      : "End your shift"
+                    : "Tap to start your shift"}
                 </span>
               </span>
             </button>
@@ -110,7 +118,11 @@ export function TimeTab() {
             <div className="mt-2 h-1.5 rounded-full bg-border/70">
               <div
                 className="h-full rounded-full bg-brand"
-                style={{ width: clockedIn ? `${Math.min((elapsed / (8 * 60 * 60 * 1000)) * 100, 100)}%` : "0%" }}
+                style={{
+                  width: clockedIn
+                    ? `${Math.min((elapsed / (8 * 60 * 60 * 1000)) * 100, 100)}%`
+                    : "0%",
+                }}
               />
             </div>
           </div>

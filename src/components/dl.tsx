@@ -144,11 +144,7 @@ export function SectionHeader({
   return (
     <div className={cn("mb-3.5 flex items-center justify-between", className)}>
       <div className="flex items-center gap-2">
-        {eyebrow && (
-          <span className="dock-section-eyebrow">
-            {eyebrow}
-          </span>
-        )}
+        {eyebrow && <span className="dock-section-eyebrow">{eyebrow}</span>}
         {title && <span className="text-sm font-semibold tracking-tight">{title}</span>}
         {count !== undefined && <span className="text-xs text-muted-foreground">({count})</span>}
       </div>
@@ -171,16 +167,7 @@ export function DashboardCard({
   children: React.ReactNode;
   as?: "div" | "section" | "article";
 }) {
-  return (
-    <Tag
-      className={cn(
-        "dock-card",
-        className,
-      )}
-    >
-      {children}
-    </Tag>
-  );
+  return <Tag className={cn("dock-card", className)}>{children}</Tag>;
 }
 
 // Backwards-compat alias for routes that still import { Card }.
@@ -308,7 +295,8 @@ const actionBase =
 
 const actionVariants: Record<ActionVariant, string> = {
   primary: "bg-brand text-brand-foreground hover:opacity-95 shadow-[var(--shadow-card)]",
-  secondary: "bg-card border border-border text-foreground hover:bg-muted/50 shadow-[var(--shadow-card)]",
+  secondary:
+    "bg-card border border-border text-foreground hover:bg-muted/50 shadow-[var(--shadow-card)]",
   outline: "border border-brand text-brand hover:bg-brand-soft shadow-[var(--shadow-card)]",
   ghost: "text-foreground hover:bg-muted/50",
   danger: "bg-danger text-white hover:opacity-95 shadow-[var(--shadow-card)]",
@@ -579,10 +567,7 @@ export function DataTable<Row>({
           )}
           {!loading &&
             rows.map((row, i) => (
-              <tr
-                key={rowKey(row, i)}
-                className={cn(rowClassName?.(row, i))}
-              >
+              <tr key={rowKey(row, i)} className={cn(rowClassName?.(row, i))}>
                 {columns.map((c) => (
                   <td
                     key={c.key}
@@ -635,7 +620,9 @@ export function TablePagination({
             onClick={() => onChange?.(p)}
             className={cn(
               "h-7 w-7 rounded-xl text-xs",
-              p === page ? "bg-primary text-primary-foreground shadow-[var(--shadow-card)]" : "border border-border bg-card hover:bg-muted/50",
+              p === page
+                ? "bg-primary text-primary-foreground shadow-[var(--shadow-card)]"
+                : "border border-border bg-card hover:bg-muted/50",
             )}
           >
             {p}
@@ -706,9 +693,7 @@ export function AlertCard({
   className?: string;
 }) {
   return (
-    <div
-      className={cn("dock-card-tight flex items-start gap-3 p-3.5", className)}
-    >
+    <div className={cn("dock-card-tight flex items-start gap-3 p-3.5", className)}>
       <div
         className={cn(
           "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-[var(--shadow-card)]",
@@ -797,7 +782,10 @@ export function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div role="alert" className="dock-card-tight flex flex-col items-center justify-center text-center py-10 gap-3 p-6">
+    <div
+      role="alert"
+      className="dock-card-tight flex flex-col items-center justify-center text-center py-10 gap-3 p-6"
+    >
       <div
         className="h-12 w-12 rounded-full bg-danger-soft text-danger flex items-center justify-center shadow-[var(--shadow-card)]"
         aria-hidden
@@ -1026,11 +1014,7 @@ export function FormSection({
     <section className={cn("space-y-3", className)}>
       {(title || description) && (
         <header className="space-y-0.5">
-          {title && (
-            <h3 className="dock-section-eyebrow">
-              {title}
-            </h3>
-          )}
+          {title && <h3 className="dock-section-eyebrow">{title}</h3>}
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
         </header>
       )}
@@ -1056,7 +1040,10 @@ export function FormRow({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label htmlFor={htmlFor} className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
+      <label
+        htmlFor={htmlFor}
+        className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1"
+      >
         {label}
         {required && (
           <span className="text-danger" aria-hidden>
@@ -1180,11 +1167,7 @@ export function FeedbackBanner({
   return (
     <div
       role="status"
-      className={cn(
-        "dock-banner flex items-start gap-3 p-3",
-        feedbackSurface[tone],
-        className,
-      )}
+      className={cn("dock-banner flex items-start gap-3 p-3", feedbackSurface[tone], className)}
     >
       <Icon className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
       <div className="flex-1 min-w-0 text-foreground">
@@ -1261,11 +1244,7 @@ export function RecoveryCard({
   const Icon = feedbackIcons[tone];
   return (
     <div
-      className={cn(
-        "dock-banner flex items-start gap-3 p-3.5",
-        feedbackSurface[tone],
-        className,
-      )}
+      className={cn("dock-banner flex items-start gap-3 p-3.5", feedbackSurface[tone], className)}
     >
       <Icon className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
       <div className="flex-1 min-w-0 text-foreground">

@@ -21,7 +21,11 @@ interface AuthFormProps {
   hideHeader?: boolean;
 }
 
-export function AuthForm({ onBackToHome, variant = "standalone", hideHeader = false }: AuthFormProps) {
+export function AuthForm({
+  onBackToHome,
+  variant = "standalone",
+  hideHeader = false,
+}: AuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -262,9 +266,7 @@ export function AuthForm({ onBackToHome, variant = "standalone", hideHeader = fa
           </p>
         </CardHeader>
 
-        <CardContent className="space-y-5 p-6 pt-6 sm:p-7 sm:pt-7">
-          {formContent}
-        </CardContent>
+        <CardContent className="space-y-5 p-6 pt-6 sm:p-7 sm:pt-7">{formContent}</CardContent>
       </Card>
 
       <div className="space-y-2 text-center text-sm text-muted-foreground">

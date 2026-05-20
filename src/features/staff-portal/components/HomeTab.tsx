@@ -82,7 +82,9 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   {d}
                 </div>
-                <div className={`mt-1 text-sm font-semibold ${active ? "text-brand" : ""}`}>{day}</div>
+                <div className={`mt-1 text-sm font-semibold ${active ? "text-brand" : ""}`}>
+                  {day}
+                </div>
                 {active && <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-brand" />}
               </div>
             );
@@ -175,7 +177,9 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
                 <action.icon className="h-4 w-4" />
               </div>
               <div className="text-sm font-semibold leading-tight">{action.title}</div>
-              <div className="text-[11px] text-muted-foreground leading-snug">{action.description}</div>
+              <div className="text-[11px] text-muted-foreground leading-snug">
+                {action.description}
+              </div>
             </button>
           ))}
         </div>
