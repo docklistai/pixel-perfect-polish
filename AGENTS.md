@@ -6,7 +6,7 @@ Read this file before any task. Consult `docs/ai/skill-router.md` before choosin
 
 Work advances in stages. Never skip a gate without explicit user approval.
 
-1. **Audit** — read only, no edits. Identify scope, risks, and which skills apply.
+1. **Audit** — read only, no edits. Identify scope, risks, and which skills apply. Use `.claude/skills/docklist-proactive-maintenance-guard/SKILL.md` to classify any nearby findings.
 2. **User review** — present findings. Wait for approval before proceeding.
 3. **Implementation** — only after explicit prompt. Follow skill constraints.
 4. **Verification** — run targeted checks. Report evidence, not assumptions.

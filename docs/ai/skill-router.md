@@ -4,6 +4,17 @@ Match every task to one or more skill routes before doing any work. Read the lis
 
 ---
 
+## Proactive maintenance / Scoped auditing
+
+**When:** noticing nearby issues, risks, or broken behaviour during any task; implementation review; pre-commit or pre-push review
+**Skills:**
+
+- `.claude/skills/docklist-proactive-maintenance-guard/SKILL.md`
+  **Required output:** Proactive Findings table (Brief issue, Domain, Bucket, Action)
+  **Required checks:** findings classified into buckets (Fix Now / Scope Allows / Report / Risk Log / Forbidden) before action; fix only if small, local, low-risk, and inside approved scope
+
+---
+
 ## Agent guidance or workflow changes
 
 **When:** editing AGENTS.md, CLAUDE.md, or changing how agents operate

@@ -12,6 +12,7 @@
 - Testing/QA work: use the relevant testing, verification, and bug-investigation skills.
 - Documentation/copy/product messaging: use the relevant writing, copy, product, and clarity skills.
 - Agent workflow/refactor work: use the relevant code-organisation, repo hygiene, and workflow skills.
+- Proactive maintenance / Scoped auditing: use `.claude/skills/docklist-proactive-maintenance-guard/SKILL.md` when noticing nearby issues during scoped work. Classify all findings (Fix Now / Scope Allows / Report / Risk Log / Forbidden) before action. Do not silently expand scope.
 
 ## Product Direction
 

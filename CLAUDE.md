@@ -11,7 +11,9 @@
 
 Skills live in `.claude/skills/`. Before any task, declare the skill route as required by the Skill Declaration rule in `AGENTS.md`. Do not begin work until the declaration is posted.
 
-**All implementation work:** before editing, read `docs/ai/repo-architecture-guardrails.md`. Check line counts for all files likely to be touched. Declare whether any touched file is at or over the hard max. If over, propose extraction before adding code.
+**All implementation work:** before editing, read `docs/ai/repo-architecture-guardrails.md` and `.claude/skills/docklist-proactive-maintenance-guard/SKILL.md`. Check line counts for all files likely to be touched. Declare whether any touched file is at or over the hard max. Use the proactive maintenance skill to classify any nearby issues found during the audit phase. Fix only when inside approved scope, small, local, and low-risk.
+
+**Proactive maintenance limits:** do not use proactive findings to justify broad refactors, backend work during frontend-only scope, or touching Supabase/RLS, auth, billing, payroll, AI/operator logic, integrations, dependencies, CI, or generated files without explicit approval. Always classify before action.
 
 **Frontend work:** read `docklist-frontend-dev-guidelines`, `docklist-react-ui-patterns`, `docklist-tailwind-design-system`, `docklist-baseline-ui`, `docklist-fixing-accessibility`. Before frontend work, also read `docs/ai/frontend-architecture-guardrails.md` and declare whether the change risks exceeding file-size limits.
 Also read `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md` before UI or visual-polish work.
