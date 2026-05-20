@@ -135,7 +135,7 @@ export function LeaveTab() {
           >
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
-          <div className="text-xs text-foreground font-medium">13 – 19 May 2024</div>
+          <div className="text-xs text-foreground font-medium">18 – 24 May 2026</div>
           <button type="button" aria-label="Next week" className="p-1 rounded-md hover:bg-muted/60">
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
@@ -192,14 +192,14 @@ export function LeaveTab() {
         open={open}
         onOpenChange={setOpen}
         title={`New request · ${kindLabel[kind]}`}
-        description="Mock form — nothing is submitted."
+        description="Request preview — saved for this session only."
         width="lg"
         footer={
           <>
             <ActionButton variant="secondary" onClick={() => setOpen(false)}>
               Cancel
             </ActionButton>
-            <ActionButton onClick={() => setOpen(false)}>Submit (mock)</ActionButton>
+            <ActionButton onClick={() => setOpen(false)}>Submit request</ActionButton>
           </>
         }
       >

@@ -1,6 +1,6 @@
 /**
- * Mock notification drawer. Hospitality-themed sample feed only —
- * no real read/unread persistence or backend.
+ * Notification drawer with a sample feed of recent rota, time, leave and
+ * operations updates. Frontend-only — read/unread state is per session.
  */
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -105,7 +105,7 @@ export function NotificationDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Notifications"
-      description="Mock feed — not connected to a real notification service."
+      description="Notification preview for recent rota and team updates."
       meta={
         unread > 0 ? (
           <StatusBadge tone="warning">{unread} unread</StatusBadge>

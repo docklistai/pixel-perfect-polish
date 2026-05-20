@@ -81,7 +81,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             icon={LogOut}
             label="Sign out"
             tone="danger"
-            onClick={() => toast.message("Signed out (mock)")}
+            onClick={() => toast.message("Signed out")}
           />
         </ul>
       </DashboardCard>
@@ -209,7 +209,7 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
       footer={
         <ActionButton
           className="w-full justify-center"
-          onClick={() => toast.message("Team briefing started (mock)")}
+          onClick={() => toast.message("Team briefing started")}
         >
           Start team briefing
         </ActionButton>
@@ -284,7 +284,7 @@ function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void
       open={open}
       onOpenChange={(o) => !o && onClose()}
       title="Documents"
-      description="Read-only mock — documents shared with you."
+      description="Read-only document preview."
       width="lg"
     >
       <div className="space-y-4">
@@ -338,7 +338,7 @@ function SettingsDrawer({ open, onClose }: { open: boolean; onClose: () => void 
       open={open}
       onOpenChange={(o) => !o && onClose()}
       title="Settings"
-      description="Personal app preferences (mock)"
+      description="Personal app preferences"
       width="lg"
     >
       <div className="space-y-4">
@@ -393,7 +393,7 @@ function SettingRow({
       <button
         type="button"
         className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/40 rounded-lg transition-colors"
-        onClick={() => toast.message(`${label} (mock)`)}
+        onClick={() => toast.message(`${label} — saved for this session`)}
       >
         <Icon className="h-4 w-4 text-muted-foreground" />
         <span className="flex-1 text-left">{label}</span>

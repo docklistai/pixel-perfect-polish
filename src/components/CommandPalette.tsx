@@ -1,10 +1,9 @@
 /**
- * Global command palette (Ctrl/Cmd+K). Frontend-only — no backend actions.
+ * Global command palette (Ctrl/Cmd+K). Navigation-only.
  * Wraps the shadcn cmdk-based <Command/> primitives in a Dialog.
  */
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import {
   Home,
   CalendarDays,
@@ -19,7 +18,6 @@ import {
   UserPlus,
   Inbox,
   Download,
-  ArrowRight,
 } from "lucide-react";
 import {
   CommandDialog,
@@ -71,25 +69,25 @@ interface QuickAction {
 
 const QUICK_ACTIONS: QuickAction[] = [
   {
-    label: "Add shift (mock)",
+    label: "Add shift",
     hint: "Open the rota with the add-shift drawer",
     icon: Plus,
     to: "/rota",
   },
   {
-    label: "Add team member (mock)",
+    label: "Add team member",
     hint: "Open the staff directory",
     icon: UserPlus,
     to: "/staff",
   },
   {
-    label: "Review leave requests (mock)",
+    label: "Review leave requests",
     hint: "Jump to the leave queue",
     icon: Inbox,
     to: "/leave",
   },
   {
-    label: "Export reports (mock)",
+    label: "Export reports",
     hint: "Open the reports workspace",
     icon: Download,
     to: "/reports",
@@ -113,14 +111,10 @@ export function CommandPalette({
     [navigate, onOpenChange],
   );
 
-  const runMock = React.useCallback(
+  const runAction = React.useCallback(
     (action: QuickAction) => {
       onOpenChange(false);
       navigate({ to: action.to });
-      toast(action.label, {
-        description: "Mock action — wire to backend in production.",
-        icon: <ArrowRight className="h-3.5 w-3.5" aria-hidden />,
-      });
     },
     [navigate, onOpenChange],
   );
@@ -147,11 +141,15 @@ export function CommandPalette({
           })}
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Quick actions (mock)">
+        <CommandGroup heading="Quick actions">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
-              <CommandItem key={action.label} value={action.label} onSelect={() => runMock(action)}>
+              <CommandItem
+                key={action.label}
+                value={action.label}
+                onSelect={() => runAction(action)}
+              >
                 <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
                 <span>{action.label}</span>
                 <span className="ml-auto text-[11px] text-muted-foreground">{action.hint}</span>
