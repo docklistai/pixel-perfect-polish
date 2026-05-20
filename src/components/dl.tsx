@@ -844,14 +844,15 @@ export interface DrawerShellProps {
   /** Optional badge/status node rendered next to the title. */
   meta?: React.ReactNode;
   side?: "right" | "left";
-  width?: "sm" | "md" | "lg";
+  width?: "sm" | "md" | "lg" | "xl";
   children: React.ReactNode;
 }
 
 const drawerWidths: Record<NonNullable<DrawerShellProps["width"]>, string> = {
   sm: "sm:max-w-sm",
-  md: "sm:max-w-md",
-  lg: "sm:max-w-xl",
+  md: "sm:max-w-lg",
+  lg: "sm:max-w-2xl",
+  xl: "sm:max-w-3xl",
 };
 
 /** Right-side drawer with the Docklist header / scrollable body / sticky footer. */
@@ -871,16 +872,18 @@ export function DrawerShell({
       <SheetContent
         side={side}
         className={cn(
-          "flex flex-col gap-0 p-0 w-full bg-background text-foreground",
+          "flex w-full flex-col gap-0 overflow-hidden border-border bg-card p-0 text-card-foreground shadow-[var(--shadow-elevated)]",
           drawerWidths[width],
         )}
       >
-        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
+        <SheetHeader className="border-b border-border bg-card px-6 pb-4 pt-5 pr-12">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <SheetTitle className="text-base font-semibold leading-tight">{title}</SheetTitle>
+            <div className="min-w-0 space-y-1">
+              <SheetTitle className="text-lg font-semibold leading-tight text-balance">
+                {title}
+              </SheetTitle>
               {description && (
-                <SheetDescription className="text-xs text-muted-foreground mt-1">
+                <SheetDescription className="text-sm leading-5 text-muted-foreground text-pretty">
                   {description}
                 </SheetDescription>
               )}
@@ -888,9 +891,9 @@ export function DrawerShell({
             {meta && <div className="shrink-0">{meta}</div>}
           </div>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">{children}</div>
+        <div className="flex-1 space-y-5 overflow-y-auto bg-muted/35 px-6 py-5">{children}</div>
         {footer && (
-          <div className="px-5 py-3 border-t border-border flex items-center justify-end gap-2 bg-background">
+          <div className="shrink-0 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-10px_24px_-20px_oklch(0.19_0.035_250_/_0.35)] flex items-center justify-end gap-2">
             {footer}
           </div>
         )}
@@ -927,18 +930,25 @@ export function DialogShell({
 }: DialogShellProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("p-0 gap-0", dialogSizes[size])}>
-        <DialogHeader className="px-5 pt-5 pb-2">
-          <DialogTitle className="text-base font-semibold">{title}</DialogTitle>
+      <DialogContent
+        className={cn(
+          "overflow-hidden gap-0 border-border bg-card p-0 text-card-foreground shadow-[var(--shadow-elevated)] sm:rounded-2xl",
+          dialogSizes[size],
+        )}
+      >
+        <DialogHeader className="border-b border-border bg-card px-6 pb-4 pt-5 pr-12">
+          <DialogTitle className="text-lg font-semibold leading-tight text-balance">
+            {title}
+          </DialogTitle>
           {description && (
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="text-sm leading-5 text-muted-foreground text-pretty">
               {description}
             </DialogDescription>
           )}
         </DialogHeader>
-        {children && <div className="px-5 py-3 space-y-4 text-sm">{children}</div>}
+        {children && <div className="space-y-4 bg-muted/35 px-6 py-5 text-sm">{children}</div>}
         {footer && (
-          <DialogFooter className="px-5 py-3 border-t border-border gap-2 sm:gap-2">
+          <DialogFooter className="border-t border-border bg-card px-6 py-4 gap-2 sm:gap-2">
             {footer}
           </DialogFooter>
         )}
@@ -971,20 +981,29 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-base">{title}</AlertDialogTitle>
+      <AlertDialogContent className="overflow-hidden gap-0 border-border bg-card p-0 text-card-foreground shadow-[var(--shadow-elevated)] sm:rounded-2xl">
+        <AlertDialogHeader className="border-b border-border bg-card px-6 pb-4 pt-5">
+          <AlertDialogTitle className="text-lg font-semibold leading-tight text-balance">
+            {title}
+          </AlertDialogTitle>
           {description && (
-            <AlertDialogDescription className="text-xs">{description}</AlertDialogDescription>
+            <AlertDialogDescription className="text-sm leading-5 text-muted-foreground text-pretty">
+              {description}
+            </AlertDialogDescription>
           )}
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="h-9 rounded-lg text-sm">{cancelLabel}</AlertDialogCancel>
+        <AlertDialogFooter className="border-t border-border bg-card px-6 py-4 gap-2 sm:gap-2">
+          <AlertDialogCancel
+            className={cn(actionBase, actionVariants.secondary, actionSizes.sm, "mt-0")}
+          >
+            {cancelLabel}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className={cn(
-              "h-9 rounded-lg text-sm",
-              tone === "danger" && "bg-danger text-white hover:bg-danger/90",
+              actionBase,
+              tone === "danger" ? actionVariants.danger : actionVariants.primary,
+              actionSizes.sm,
             )}
           >
             {confirmLabel}
