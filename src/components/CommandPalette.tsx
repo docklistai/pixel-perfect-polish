@@ -19,6 +19,7 @@ import {
   Inbox,
   Download,
 } from "lucide-react";
+import { DialogTitle } from "@/components/ui/dialog";
 import {
   CommandDialog,
   CommandEmpty,
@@ -121,6 +122,7 @@ export function CommandPalette({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <DialogTitle className="sr-only">Command palette</DialogTitle>
       <CommandInput placeholder="Search Docklist or jump to…" />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
