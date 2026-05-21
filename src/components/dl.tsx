@@ -111,7 +111,7 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
       <div className="min-w-0">
         <h1 className="text-balance text-[1.875rem] font-semibold tracking-tight md:text-[2rem]">
           {title}
@@ -122,7 +122,9 @@ export function PageHeader({
           </p>
         )}
       </div>
-      {actions && <div className="flex flex-wrap items-center justify-end gap-2.5">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2.5 md:justify-end">{actions}</div>
+      )}
     </div>
   );
 }
