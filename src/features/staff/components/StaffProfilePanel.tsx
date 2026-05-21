@@ -94,7 +94,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
       <div
         role="tablist"
         aria-label="Staff panel sections"
-        className="mt-5 border-b border-border flex gap-4 text-xs"
+        className="mt-5 border-b border-border flex flex-wrap gap-x-4 text-xs"
       >
         {PANEL_TABS.map((t, i) => (
           <button

@@ -44,7 +44,12 @@ export function StaffTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="Staff list, scroll horizontally to see all columns"
+      >
         <table className="min-w-[880px] w-full text-sm">
           <thead>
             <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">

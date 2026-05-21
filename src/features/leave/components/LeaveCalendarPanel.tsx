@@ -16,7 +16,12 @@ export function LeaveCalendarPanel() {
           <span className="px-3 py-1 rounded-md bg-muted">2 Weeks</span>
         </div>
       </div>
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="Leave calendar, scroll horizontally to see full 14-day view"
+      >
         <div className="min-w-[1040px]">
           <div className="grid grid-cols-[140px_repeat(14,1fr)] text-[10px] text-muted-foreground border-b border-border pb-1">
             <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
@@ -74,7 +79,7 @@ export function LeaveCalendarPanel() {
           ))}
         </div>
       </div>
-      <div className="mt-3 flex items-center gap-4 text-[11px] text-muted-foreground">
+      <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="h-3 w-6 rounded bg-success-soft border border-success/30" /> Approved
           leave

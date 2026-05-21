@@ -37,7 +37,7 @@ export function OpsTimeline() {
                 {e.t}
               </div>
               <div
-                className={`flex items-center gap-3 rounded-2xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
+                className={`min-w-0 overflow-hidden flex items-center gap-3 rounded-2xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
               >
                 <div
                   className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${toneBg[e.dot === "danger" ? "warning" : e.dot]}`}
@@ -50,16 +50,16 @@ export function OpsTimeline() {
                   {e.by && <div className="text-[11px] text-muted-foreground">{e.by}</div>}
                 </div>
                 {e.who && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <img
                       src={`https://i.pravatar.cc/64?img=${e.who.img}`}
-                      className="h-7 w-7 rounded-full object-cover"
+                      className="h-7 w-7 rounded-full object-cover shrink-0"
                       alt=""
                       loading="lazy"
                       width={28}
                       height={28}
                     />
-                    <span className="text-sm">{e.who.n}</span>
+                    <span className="text-sm min-w-0 truncate">{e.who.n}</span>
                   </div>
                 )}
                 {e.prio && (
