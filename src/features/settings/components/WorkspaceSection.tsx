@@ -50,14 +50,8 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
             </div>
           </div>
           <div>
-            <label
-              htmlFor="workspace-timezone"
-              className="text-xs font-medium text-muted-foreground"
-            >
-              Timezone
-            </label>
+            <p className="text-xs font-medium text-muted-foreground">Timezone</p>
             <div
-              id="workspace-timezone"
               aria-describedby="timezone-help"
               className="mt-1 w-full rounded-xl border border-border bg-card/70 px-3 py-2 text-sm text-muted-foreground"
             >
@@ -120,13 +114,8 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
             </div>
           </div>
           <div>
-            <label htmlFor="overtime-threshold" className="text-xs text-muted-foreground">
-              Overtime threshold
-            </label>
-            <div
-              id="overtime-threshold"
-              className="mt-1 w-full rounded-xl border border-border bg-card/70 px-3 py-2 text-sm text-muted-foreground"
-            >
+            <p className="text-xs text-muted-foreground">Overtime threshold</p>
+            <div className="mt-1 w-full rounded-xl border border-border bg-card/70 px-3 py-2 text-sm text-muted-foreground">
               8 hours per day
             </div>
           </div>

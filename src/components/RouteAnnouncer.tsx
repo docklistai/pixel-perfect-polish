@@ -34,7 +34,10 @@ export function SkipToContent() {
 
 export function RouteAnnouncer() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const label = ROUTE_LABELS[pathname] ?? "Page";
+  const matchedKey = Object.keys(ROUTE_LABELS)
+    .filter((k) => pathname === k || pathname.startsWith(k + "/"))
+    .sort((a, b) => b.length - a.length)[0];
+  const label = matchedKey ? ROUTE_LABELS[matchedKey] : "Page";
   return (
     <div role="status" aria-live="polite" className="sr-only">
       {label}

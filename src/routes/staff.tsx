@@ -180,32 +180,40 @@ function StaffListPage() {
           <>
             <FormSection title="Personal">
               <div className="grid grid-cols-2 gap-3">
-                <FormRow label="First name" required>
+                <FormRow label="First name" htmlFor="add-first-name" required>
                   <input
+                    id="add-first-name"
                     aria-label="First name"
+                    required
                     className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                   />
                 </FormRow>
-                <FormRow label="Last name" required>
+                <FormRow label="Last name" htmlFor="add-last-name" required>
                   <input
+                    id="add-last-name"
                     aria-label="Last name"
+                    required
                     className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                   />
                 </FormRow>
               </div>
-              <FormRow label="Work email" required>
+              <FormRow label="Work email" htmlFor="add-work-email" required>
                 <input
+                  id="add-work-email"
                   type="email"
                   aria-label="Work email"
+                  required
                   placeholder="name@harbourview.co.uk"
                   className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                 />
               </FormRow>
             </FormSection>
             <FormSection title="Role">
-              <FormRow label="Department" required>
+              <FormRow label="Department" htmlFor="add-department" required>
                 <select
+                  id="add-department"
                   aria-label="Department"
+                  required
                   className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
                 >
                   <option>Front of House</option>
