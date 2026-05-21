@@ -24,27 +24,13 @@ export function SettingsRightRail({ activeTab }: SettingsRightRailProps) {
         <div className="mt-3 rounded-2xl border border-border bg-card/70 px-3 py-2 text-[11px] text-muted-foreground">
           Configured export · Rota and timesheets
         </div>
-        <div className="mt-3">
-          <label htmlFor="week-start" className="text-xs text-muted-foreground">
-            Week starts on
-          </label>
-          <div
-            id="week-start"
-            className="mt-1 w-full rounded-xl border border-border bg-card/70 px-3 py-2 text-sm text-muted-foreground"
-          >
-            Monday
-          </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Week starts on</span>
+          <span className="text-sm font-medium">Monday</span>
         </div>
-        <div className="mt-3">
-          <label htmlFor="export-period" className="text-xs text-muted-foreground">
-            Export period
-          </label>
-          <div
-            id="export-period"
-            className="mt-1 w-full rounded-xl border border-border bg-card/70 px-3 py-2 text-sm text-muted-foreground"
-          >
-            Weekly
-          </div>
+        <div className="mt-2 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Export period</span>
+          <span className="text-sm font-medium">Weekly</span>
         </div>
         <div className="mt-4">
           <div className="text-xs font-medium mb-2">Include in export</div>

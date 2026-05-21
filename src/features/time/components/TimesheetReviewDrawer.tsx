@@ -81,7 +81,7 @@ export function TimesheetReviewDrawer({
           <DetailRow label="Lateness flags" value={latenessFlags} />
         </dl>
       </FormSection>
-      <FormSection title="Manager note" description="Preview only.">
+      <FormSection title="Manager note" description="Notes are not saved yet in this preview.">
         <FormRow label="Add a note" htmlFor="time-manager-note">
           <textarea
             id="time-manager-note"

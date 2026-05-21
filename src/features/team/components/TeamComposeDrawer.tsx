@@ -47,6 +47,9 @@ export function TeamComposeDrawer({ open, onOpenChange }: Props) {
           </select>
         </FormRow>
       </FormSection>
+      <p className="text-xs text-muted-foreground">
+        Announcements are not sent yet in this preview.
+      </p>
     </DrawerShell>
   );
 }

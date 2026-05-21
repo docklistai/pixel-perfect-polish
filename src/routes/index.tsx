@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, ActionButton, IconButton } from "@/components/dl";
 import { Calendar, MoreHorizontal } from "lucide-react";
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const navigate = useNavigate();
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [quickOpen, setQuickOpen] = React.useState<null | { t: string; s: string }>(null);
 
@@ -51,7 +52,9 @@ function Home() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
-          <ActionButton icon={Calendar}>Publish Rota</ActionButton>
+          <ActionButton icon={Calendar} onClick={() => navigate({ to: "/rota" })}>
+            Publish Rota
+          </ActionButton>
           <IconButton icon={MoreHorizontal} label="More actions" />
         </div>
       </div>

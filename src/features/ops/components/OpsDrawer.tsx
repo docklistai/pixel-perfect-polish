@@ -69,6 +69,7 @@ export function OpsDrawer({ mode, onClose }: OpsDrawerProps) {
           />
         </FormRow>
       </FormSection>
+      <p className="text-xs text-muted-foreground">Entries are not saved yet in this preview.</p>
     </DrawerShell>
   );
 }

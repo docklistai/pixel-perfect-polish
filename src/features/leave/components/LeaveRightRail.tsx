@@ -5,7 +5,10 @@ export function LeaveRightRail() {
   return (
     <div className="col-span-12 lg:col-span-3 space-y-4">
       <Card className="rounded-2xl p-5">
-        <div className="text-sm font-semibold mb-3">MANAGER AVAILABILITY</div>
+        <div className="text-sm font-semibold mb-1">MANAGER AVAILABILITY</div>
+        <p className="mb-3 text-xs text-muted-foreground">
+          Availability editing is not available in this preview yet.
+        </p>
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs font-semibold">Recurring availability</div>
           <button
