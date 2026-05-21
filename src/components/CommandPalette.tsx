@@ -53,10 +53,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Home", to: "/", icon: Home, shortcut: "G H" },
   { label: "Rota", to: "/rota", icon: CalendarDays, shortcut: "G R" },
   { label: "Staff", to: "/staff", icon: Users, shortcut: "G S" },
-  { label: "Time & Attendance", to: "/time", icon: Clock, shortcut: "G T" },
+  { label: "Time", to: "/time", icon: Clock, shortcut: "G T" },
   { label: "Leave", to: "/leave", icon: CalendarOff },
   { label: "Team", to: "/team", icon: MessageSquare },
-  { label: "Operations", to: "/ops", icon: Wrench },
+  { label: "Ops", to: "/ops", icon: Wrench },
   { label: "Reports", to: "/reports", icon: BarChart3 },
   { label: "Settings", to: "/settings", icon: SettingsIcon },
 ];
@@ -71,7 +71,7 @@ interface QuickAction {
 const QUICK_ACTIONS: QuickAction[] = [
   {
     label: "Add shift",
-    hint: "Open the rota with the add-shift drawer",
+    hint: "Open the rota",
     icon: Plus,
     to: "/rota",
   },
@@ -83,7 +83,7 @@ const QUICK_ACTIONS: QuickAction[] = [
   },
   {
     label: "Review leave requests",
-    hint: "Jump to the leave queue",
+    hint: "Open the leave queue",
     icon: Inbox,
     to: "/leave",
   },

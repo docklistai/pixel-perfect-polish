@@ -9,7 +9,6 @@ import {
   Briefcase,
   BarChart3,
   Settings,
-  ChevronDown,
   HelpCircle,
   Building2,
 } from "lucide-react";
@@ -51,7 +50,8 @@ export function Sidebar() {
       </nav>
 
       <div className="dock-sidebar-footer">
-        <button type="button" className="dock-sidebar-workspace" aria-label="Switch workspace">
+        {/* Workspace display — non-interactive until workspace switching is built */}
+        <div className="dock-sidebar-workspace pointer-events-none select-none">
           <div className="dock-sidebar-workspace-meta">
             <div className="dock-sidebar-workspace-icon">
               <Building2 className="h-4 w-4" aria-hidden />
@@ -61,18 +61,18 @@ export function Sidebar() {
               <div className="dock-sidebar-workspace-sub">Main Workspace</div>
             </div>
           </div>
-          <ChevronDown className="h-4 w-4 text-sidebar-muted" aria-hidden />
-        </button>
+        </div>
 
-        <a className="dock-sidebar-help" href="#">
+        {/* Help display — non-interactive until support link is available */}
+        <div className="dock-sidebar-help pointer-events-none select-none">
           <div className="flex items-center gap-2.5 min-w-0">
             <HelpCircle className="h-4 w-4 shrink-0" aria-hidden />
             <div className="min-w-0">
               <div className="dock-sidebar-help-title">Need help?</div>
-              <div className="dock-sidebar-help-sub">Visit our Help Centre</div>
+              <div className="dock-sidebar-help-sub">Support coming soon</div>
             </div>
           </div>
-        </a>
+        </div>
       </div>
     </aside>
   );
