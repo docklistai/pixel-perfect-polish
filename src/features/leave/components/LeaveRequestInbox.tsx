@@ -74,6 +74,7 @@ export function LeaveRequestInbox({
                 <div className="mt-2 flex gap-2">
                   <button
                     type="button"
+                    aria-label={`Decline leave request for ${r.n}`}
                     className="flex-1 rounded-lg border border-border py-1.5 text-xs"
                     onClick={() => onDecline(r.id)}
                   >
@@ -81,6 +82,7 @@ export function LeaveRequestInbox({
                   </button>
                   <button
                     type="button"
+                    aria-label={`Approve leave request for ${r.n}`}
                     className="flex-1 rounded-lg bg-brand-soft text-brand py-1.5 text-xs font-semibold"
                     onClick={() => onApprove(r.id)}
                   >

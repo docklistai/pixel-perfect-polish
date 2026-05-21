@@ -28,7 +28,12 @@ export function TimesheetTable({ rows, approved, declined, onReview }: Props) {
         <div className="text-xs text-muted-foreground">18 – 24 May 2026</div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div
+        className="overflow-x-auto"
+        tabIndex={0}
+        role="region"
+        aria-label="Weekly timesheet, scroll horizontally to see all columns"
+      >
         <table className="min-w-[1100px] w-full text-sm">
           <thead>
             <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
@@ -121,6 +126,7 @@ export function TimesheetTable({ rows, approved, declined, onReview }: Props) {
                     {!isApproved && !isDeclined && (
                       <button
                         type="button"
+                        aria-label={`Review timesheet for ${r.n}`}
                         className="text-[11px] text-brand font-semibold"
                         onClick={() => onReview(r)}
                       >

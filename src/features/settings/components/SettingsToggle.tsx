@@ -16,6 +16,7 @@ export function SettingsToggle({
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
+      aria-pressed={on}
       className={`inline-flex h-5 w-9 rounded-full p-0.5 transition ${on ? "bg-brand" : "bg-muted"}`}
     >
       <span
