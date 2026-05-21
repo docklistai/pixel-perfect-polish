@@ -33,9 +33,7 @@ export function WeekPickerDialog({
       <FormSection title="Current week">
         <div className="rounded-xl border border-border bg-muted/30 px-3 py-3">
           <span className="text-sm font-semibold">Week of {weekLabel}</span>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Each week keeps its own local draft in this planning view.
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Each week has a separate draft.</p>
         </div>
       </FormSection>
 

@@ -125,7 +125,7 @@ export function buildRoleCoverage(
     .sort((a, b) => a.pct - b.pct);
 }
 
-function staffWeeklyHourTarget(staff: StaffMember[]): number {
+export function staffWeeklyHourTarget(staff: StaffMember[]): number {
   return staff.reduce((sum, m) => {
     const parsed = parseInt(m.hrs, 10);
     return sum + (Number.isNaN(parsed) ? 0 : parsed);

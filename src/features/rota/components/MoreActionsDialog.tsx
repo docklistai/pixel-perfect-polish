@@ -22,7 +22,7 @@ export function MoreActionsDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Rota actions"
-      description="Working planning tools for this local rota."
+      description="Planning tools for this rota."
       size="md"
       footer={
         <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>

@@ -8,6 +8,7 @@ export function GenerateRotaDialog({
   open,
   onOpenChange,
   weekLabel,
+  days,
   shifts,
   staff,
   onApplySuggestions,
@@ -15,6 +16,7 @@ export function GenerateRotaDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
   weekLabel: string;
+  days: { d: string }[];
   shifts: DraftShift[];
   staff: StaffMember[];
   onApplySuggestions: () => void;
@@ -60,7 +62,8 @@ export function GenerateRotaDialog({
             <StatusBadge tone="muted">Preview</StatusBadge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            This uses role matches and a simple balance check before updating this draft.
+            Suggestions match the role first, then prefer staff with fewer assigned shifts this
+            week.
           </p>
         </div>
       </FormSection>
@@ -78,7 +81,9 @@ export function GenerateRotaDialog({
                   <StatusBadge tone="success">Suggested</StatusBadge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {suggestion.role} on day {suggestion.dayIndex + 1} · {suggestion.reason}
+                  {suggestion.role} on{" "}
+                  {days[suggestion.dayIndex]?.d ?? `day ${suggestion.dayIndex + 1}`} ·{" "}
+                  {suggestion.reason}
                 </p>
               </div>
             ))}

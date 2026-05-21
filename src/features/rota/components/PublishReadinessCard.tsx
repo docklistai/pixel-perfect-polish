@@ -4,7 +4,10 @@ import { Card, StatusBadge, ActionButton } from "@/components/dl";
 export function PublishReadinessCard({
   published,
   hasUnpublishedChanges,
+  publishState,
   conflictCount,
+  openShiftCount,
+  workingTimeAlertCount,
   assignedShiftCount,
   plannedShiftCount,
   coveragePct,
@@ -12,7 +15,10 @@ export function PublishReadinessCard({
 }: {
   published: boolean;
   hasUnpublishedChanges: boolean;
+  publishState: "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
   conflictCount: number;
+  openShiftCount: number;
+  workingTimeAlertCount: number;
   assignedShiftCount: number;
   plannedShiftCount: number;
   coveragePct: number;
@@ -34,20 +40,38 @@ export function PublishReadinessCard({
       v: conflictCount === 0 ? "All" : `0 / ${conflictCount}`,
       ok: conflictCount === 0,
     },
+    {
+      k: "Working time checked",
+      v:
+        workingTimeAlertCount === 0
+          ? "Clear"
+          : `${workingTimeAlertCount} alert${workingTimeAlertCount === 1 ? "" : "s"}`,
+      ok: workingTimeAlertCount === 0,
+    },
   ];
 
-  const isClean = published && !hasUnpublishedChanges;
-  const badgeTone = isClean ? "success" : "warning";
-  const badgeLabel = !published
-    ? "Draft"
-    : hasUnpublishedChanges
-      ? "Draft changes"
-      : "Local publish";
-  const buttonLabel = !published
-    ? "Mark published locally"
-    : hasUnpublishedChanges
-      ? "Update local publish"
-      : "Published locally";
+  const isClean = publishState === "published";
+  const badgeTone =
+    publishState === "published" || publishState === "ready" ? "success" : "warning";
+  const badgeLabel =
+    publishState === "published"
+      ? "Published"
+      : publishState === "published-issues"
+        ? "Published with issues"
+        : publishState === "unpublished-changes"
+          ? "Unpublished changes"
+          : publishState === "ready"
+            ? "Ready"
+            : "Draft";
+  const buttonLabel =
+    published && !hasUnpublishedChanges
+      ? publishState === "published-issues"
+        ? "Published with issues"
+        : "Published"
+      : openShiftCount > 0 || conflictCount > 0 || workingTimeAlertCount > 0
+        ? "Publish with issues"
+        : "Publish rota";
+  const canPublish = !published || hasUnpublishedChanges;
 
   return (
     <Card className="p-4">
@@ -67,14 +91,14 @@ export function PublishReadinessCard({
         ))}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        This marks the draft as published in the local planning view. Staff visibility needs
-        connected snapshots.
+        Staff should only see the published rota. Publish with issues only when the team is ready
+        for this version.
       </p>
       <ActionButton
         className="mt-4 w-full"
         icon={Send}
-        onClick={() => (!published || hasUnpublishedChanges) && onPublish()}
-        disabled={isClean}
+        onClick={() => canPublish && onPublish()}
+        disabled={!canPublish || isClean}
       >
         {buttonLabel}
       </ActionButton>

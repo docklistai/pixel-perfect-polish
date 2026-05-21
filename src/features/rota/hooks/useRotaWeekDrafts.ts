@@ -1,6 +1,7 @@
 import * as React from "react";
 import { initialDraftShifts, staff } from "../data/mockData";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
+import type { OpenShiftSuggestion } from "../lib/rotaSuggestions";
 import {
   applyShiftPatch,
   createInitialDraftShifts,
@@ -78,12 +79,14 @@ export function useRotaWeekDrafts() {
     }));
   };
 
-  const applyOpenShiftSuggestions = () => {
+  const applyOpenShiftSuggestions = (): OpenShiftSuggestion[] => {
+    const result = fillOpenShiftsWithSuggestions(currentDraft.shifts, staff);
     setCurrentDraft((draft) => ({
       ...draft,
       shifts: fillOpenShiftsWithSuggestions(draft.shifts, staff).shifts,
       hasUnpublishedChanges: true,
     }));
+    return result.suggestions;
   };
 
   const removeShiftNow = (id: ShiftId) => {

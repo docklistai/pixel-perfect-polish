@@ -12,6 +12,7 @@ import {
   countPlannedShifts,
   coveragePercent,
   filterStaff,
+  staffWeeklyHourTarget,
   totalScheduledHours,
   workingTimeAlerts,
 } from "../lib/rotaSummaries";
@@ -77,6 +78,7 @@ export function useRotaDraftController() {
     roleCoverage: buildRoleCoverage(staff, displayShifts),
     coveragePct: coveragePercent(staff, displayShifts),
     scheduledHours: totalScheduledHours(displayShifts),
+    targetHours: staffWeeklyHourTarget(staff),
     workingTimeAlertList: workingTimeAlerts(staff, displayShifts),
     selectedShift,
     clearFilters: () => {

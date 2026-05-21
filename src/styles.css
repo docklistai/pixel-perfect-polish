@@ -647,6 +647,30 @@
     border-bottom: 1px solid color-mix(in oklch, var(--border) 72%, white);
   }
 
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .dock-topbar {
+      flex-wrap: wrap;
+      gap: 10px;
+      min-height: auto;
+      padding: 12px 20px;
+      overflow: hidden;
+    }
+
+    .dock-topbar-workspace,
+    .dock-topbar-date {
+      min-width: 0;
+      flex: 1 1 220px;
+    }
+
+    .dock-topbar-search {
+      order: 10;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      flex-basis: 100%;
+    }
+  }
+
   @media (max-width: 767px) {
     #main-content {
       padding: 20px 16px 48px;

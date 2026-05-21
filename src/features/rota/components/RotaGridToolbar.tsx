@@ -18,7 +18,16 @@ export function RotaGridToolbar({
   onAddShift: () => void;
   onViewConflicts: () => void;
 }) {
-  const coverageTone = coveragePct >= 95 ? "success" : coveragePct >= 80 ? "warning" : "danger";
+  const coverageTone =
+    coveragePct > 110
+      ? "warning"
+      : coveragePct >= 95
+        ? "success"
+        : coveragePct >= 80
+          ? "warning"
+          : "danger";
+  const coverageLabel =
+    coveragePct > 110 ? `${coveragePct}% Over target` : `${coveragePct}% Schedule load`;
   const conflictTone = conflictCount > 0 ? "danger" : "muted";
   const openShiftTone = openShiftCount > 0 ? "warning" : "muted";
   return (
@@ -34,7 +43,7 @@ export function RotaGridToolbar({
           {openShiftCount} Open shifts
         </StatusBadge>
         <StatusBadge tone={coverageTone} dot>
-          {coveragePct}% Coverage
+          {coverageLabel}
         </StatusBadge>
       </div>
       <div className="ml-auto flex flex-wrap items-center gap-2">

@@ -49,10 +49,10 @@ export function TemplatesDialog({
         <div className="rounded-xl border border-dashed border-border px-3 py-3">
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-semibold text-muted-foreground">Custom templates</span>
-            <StatusBadge tone="muted">Pilot follow-up</StatusBadge>
+            <StatusBadge tone="muted">Unavailable</StatusBadge>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Save and apply your own weekly patterns — available in pilot follow-up.
+            Save and apply your own weekly patterns when custom templates are enabled.
           </p>
         </div>
       </FormSection>

@@ -33,7 +33,7 @@ export function RotaFiltersDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Rota filters"
-      description="Set the local planning filters for this rota view."
+      description="Filter this rota view."
       footer={
         <>
           <ActionButton variant="secondary" onClick={resetFilters}>
@@ -45,7 +45,7 @@ export function RotaFiltersDrawer({
     >
       <FormSection
         title="Filter view"
-        description="Selections update the visible staff rows for this local planning view."
+        description="Selections update the visible staff rows for this rota."
       >
         <FormRow label="Department or role" htmlFor="rota-filter-department">
           <select

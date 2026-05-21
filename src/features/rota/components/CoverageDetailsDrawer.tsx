@@ -18,7 +18,16 @@ export function CoverageDetailsDrawer({
   coveragePct: number;
   roleCoverage: RoleCoverageSummary[];
 }) {
-  const coverageTone = coveragePct >= 95 ? "success" : coveragePct >= 80 ? "warning" : "danger";
+  const coverageTone =
+    coveragePct > 110
+      ? "warning"
+      : coveragePct >= 95
+        ? "success"
+        : coveragePct >= 80
+          ? "warning"
+          : "danger";
+  const coverageLabel =
+    coveragePct > 110 ? `${coveragePct}% over target` : `${coveragePct}% schedule load`;
 
   return (
     <DrawerShell
@@ -26,13 +35,13 @@ export function CoverageDetailsDrawer({
       onOpenChange={onOpenChange}
       title="Coverage details"
       description="Scheduling health for the current visible rota."
-      meta={<StatusBadge tone={coverageTone}>{coveragePct}% coverage</StatusBadge>}
+      meta={<StatusBadge tone={coverageTone}>{coverageLabel}</StatusBadge>}
       footer={<ActionButton onClick={() => onOpenChange(false)}>Close</ActionButton>}
     >
       <FormSection title="Week summary">
         <dl className="divide-y divide-border">
           <DetailRow label="Visible staff" value={`${staffCount}`} />
-          <DetailRow label="Coverage" value={`${coveragePct}%`} />
+          <DetailRow label="Schedule load" value={`${coveragePct}%`} />
           <DetailRow label="Open shifts" value={`${openShiftCount}`} />
           <DetailRow label="Conflicts" value={`${conflictCount}`} />
         </dl>

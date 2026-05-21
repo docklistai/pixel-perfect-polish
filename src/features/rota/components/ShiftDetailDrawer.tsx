@@ -204,8 +204,8 @@ export function ShiftDetailDrawer({
             </ActionButton>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            To reassign or open up, pick the staff member above and save. Changes stay in this local
-            week draft.
+            To reassign or open up, pick the staff member above and save. Changes stay in the draft
+            until published.
           </p>
         </FormSection>
       )}

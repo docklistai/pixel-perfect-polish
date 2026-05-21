@@ -6,9 +6,9 @@ export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
       <span>
         <span className="font-semibold text-foreground">{staffCount} staff members</span>
       </span>
-      <span>Day figures update with local edits</span>
+      <span>Day figures update as you edit</span>
       <span>
-        Local overlap checks only <CircleAlert className="inline-block h-3 w-3 align-[-1px]" />
+        Overlap checks shown <CircleAlert className="inline-block h-3 w-3 align-[-1px]" />
       </span>
       <div className="ml-auto flex flex-wrap items-center gap-3">
         <span className="flex items-center gap-1">

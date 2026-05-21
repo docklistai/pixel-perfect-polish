@@ -4,31 +4,53 @@ import { ActionButton } from "@/components/dl";
 export function RotaStatusBanner({
   published,
   hasUnpublishedChanges,
+  publishState,
   openShiftCount,
   conflictCount,
+  workingTimeAlertCount,
   coveragePct,
   onPublish,
 }: {
   published: boolean;
   hasUnpublishedChanges: boolean;
+  publishState: "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
   openShiftCount: number;
   conflictCount: number;
+  workingTimeAlertCount: number;
   coveragePct: number;
   onPublish: () => void;
 }) {
-  const isClean = published && !hasUnpublishedChanges;
+  const isClean = publishState === "published" || publishState === "ready";
   const tone = isClean ? "success" : "warning";
-  const title = !published
-    ? "Draft rota · local planning state"
-    : hasUnpublishedChanges
-      ? "Local publish · draft changes waiting"
-      : "Local publish · no draft changes";
-  const body = !published
-    ? `${openShiftCount} open shifts · ${conflictCount} conflicts · ${coveragePct}% coverage. Mark it published locally when this draft is ready to review.`
-    : hasUnpublishedChanges
-      ? `${openShiftCount} open shifts · ${conflictCount} conflicts · ${coveragePct}% coverage. Update the local publish state when the edits are ready.`
-      : "This week has no local draft changes since it was marked published.";
-  const cta = !published ? "Mark published locally" : "Update local publish";
+  const issueSummary = `${openShiftCount} open shift${openShiftCount === 1 ? "" : "s"} · ${conflictCount} conflict${conflictCount === 1 ? "" : "s"} · ${workingTimeAlertCount} working time alert${workingTimeAlertCount === 1 ? "" : "s"}`;
+  const title =
+    publishState === "published"
+      ? "Published rota"
+      : publishState === "published-issues"
+        ? "Published with issues"
+        : publishState === "unpublished-changes"
+          ? "Unpublished changes"
+          : publishState === "ready"
+            ? "Ready to publish"
+            : "Draft rota";
+  const body =
+    publishState === "published"
+      ? "Staff should only see this published version."
+      : publishState === "published-issues"
+        ? `${issueSummary}. Staff should only see this published version; keep reviewing the remaining issues.`
+        : publishState === "unpublished-changes"
+          ? `${issueSummary}. Publish updates when the changed draft is ready for staff.`
+          : publishState === "ready"
+            ? "No open shifts or conflicts remain. Publish when this rota is ready for staff."
+            : `${issueSummary}. Review issues before publishing, or publish with acknowledgement if the rota is ready for staff.`;
+  const canPublish = !published || hasUnpublishedChanges;
+  const cta = canPublish
+    ? published && hasUnpublishedChanges
+      ? "Publish updates"
+      : "Publish rota"
+    : publishState === "published-issues"
+      ? "Published with issues"
+      : "Published";
 
   return (
     <div
@@ -48,10 +70,13 @@ export function RotaStatusBanner({
           <div className="min-w-0">
             <div className="text-sm font-semibold text-foreground">{title}</div>
             <div className="mt-1 text-sm text-muted-foreground">{body}</div>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Scheduled hours are {coveragePct}% of weekly target.
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
-          <ActionButton size="sm" icon={Send} onClick={onPublish}>
+          <ActionButton size="sm" icon={Send} onClick={onPublish} disabled={!canPublish}>
             {cta}
           </ActionButton>
         </div>

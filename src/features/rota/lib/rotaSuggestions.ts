@@ -54,7 +54,7 @@ export function fillOpenShiftsWithSuggestions(
       staffName: candidate.name,
       role: shift.role,
       dayIndex: shift.dayIndex,
-      reason: "Role match with a lighter local schedule",
+      reason: "Role match with fewer assigned shifts this week",
     });
 
     return applyShiftPatch(shift, {

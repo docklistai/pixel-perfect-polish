@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, Card, ConfirmDialog } from "@/components/dl";
+import { AppShell, Card, ConfirmDialog, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
@@ -32,6 +32,23 @@ export const Route = createFileRoute("/rota")({
 const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
+type PublishState = "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
+
+function publishStateLabel(state: PublishState): string {
+  switch (state) {
+    case "draft":
+      return "Draft";
+    case "unpublished-changes":
+      return "Unpublished changes";
+    case "ready":
+      return "Ready to publish";
+    case "published":
+      return "Published";
+    case "published-issues":
+      return "Published with issues";
+  }
+}
+
 function RotaPage() {
   const rota = useRotaDraftController();
   const [addOpen, setAddOpen] = React.useState(false);
@@ -44,8 +61,20 @@ function RotaPage() {
   const [templatesOpen, setTemplatesOpen] = React.useState(false);
   const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
   const [workingTimeOpen, setWorkingTimeOpen] = React.useState(false);
+  const [fillSummary, setFillSummary] = React.useState<string | null>(null);
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
+  const readinessIssueCount = rota.openShiftCount + rota.conflictCount + workingTimeAlertCount;
+  const hasReadinessIssues = readinessIssueCount > 0;
+  const publishState: PublishState = rota.published
+    ? rota.hasUnpublishedChanges
+      ? "unpublished-changes"
+      : hasReadinessIssues
+        ? "published-issues"
+        : "published"
+    : hasReadinessIssues
+      ? "draft"
+      : "ready";
   const reviewConflictShift = (shiftId: string) => {
     rota.setSelectedShiftId(shiftId);
     setConflictOpen(false);
@@ -58,12 +87,26 @@ function RotaPage() {
     rota.confirmation?.kind === "remove" || rota.confirmation?.kind === "clear"
       ? "danger"
       : "brand";
-  const headerStatusTone = !rota.published || rota.hasUnpublishedChanges ? "warning" : "success";
-  const headerStatusLabel = !rota.published
-    ? "Draft · local only"
-    : rota.hasUnpublishedChanges
-      ? "Local publish · draft changes waiting"
-      : "Local publish · no draft changes";
+  const headerStatusTone =
+    publishState === "published" || publishState === "ready" ? "success" : "warning";
+  const headerStatusLabel = publishStateLabel(publishState);
+
+  const handleApplySuggestions = () => {
+    const suggestions = rota.applyOpenShiftSuggestions();
+    setFillSummary(
+      suggestions.length > 0
+        ? `${suggestions.length} open shift${suggestions.length === 1 ? "" : "s"} filled. Review the assignments before publishing.`
+        : "No open shifts could be filled from the current staff list.",
+    );
+  };
+
+  const publishTitle = hasReadinessIssues
+    ? `Publish rota with ${readinessIssueCount} unresolved issue${readinessIssueCount === 1 ? "" : "s"}?`
+    : `Publish rota for w/c ${rota.weekLabel}?`;
+  const publishDescription = hasReadinessIssues
+    ? `${rota.openShiftCount} open shift${rota.openShiftCount === 1 ? "" : "s"}, ${rota.conflictCount} conflict${rota.conflictCount === 1 ? "" : "s"}, and ${workingTimeAlertCount} working time alert${workingTimeAlertCount === 1 ? "" : "s"} remain. Staff should only see the published rota, so publish with issues only if the team is ready for this version.`
+    : "Staff should only see the published rota. Publish when this week is ready for the team.";
+  const publishConfirmLabel = hasReadinessIssues ? "Publish with issues" : "Publish rota";
 
   return (
     <AppShell>
@@ -81,11 +124,23 @@ function RotaPage() {
         <RotaStatusBanner
           published={rota.published}
           hasUnpublishedChanges={rota.hasUnpublishedChanges}
+          publishState={publishState}
           openShiftCount={rota.openShiftCount}
           conflictCount={rota.conflictCount}
+          workingTimeAlertCount={workingTimeAlertCount}
           coveragePct={rota.coveragePct}
           onPublish={() => setPublishOpen(true)}
         />
+
+        {fillSummary && (
+          <FeedbackBanner
+            tone="info"
+            title="Open shifts updated"
+            description={fillSummary}
+            className="mb-4"
+            onDismiss={() => setFillSummary(null)}
+          />
+        )}
 
         <div className="grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_280px]">
           <Card className="min-w-0 overflow-hidden p-0">
@@ -122,6 +177,7 @@ function RotaPage() {
           <div className="space-y-3.5">
             <LabourSummaryCard
               scheduledHours={rota.scheduledHours}
+              targetHours={rota.targetHours}
               coveragePct={rota.coveragePct}
               onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
             />
@@ -136,7 +192,10 @@ function RotaPage() {
             <PublishReadinessCard
               published={rota.published}
               hasUnpublishedChanges={rota.hasUnpublishedChanges}
+              publishState={publishState}
               conflictCount={rota.conflictCount}
+              openShiftCount={rota.openShiftCount}
+              workingTimeAlertCount={workingTimeAlertCount}
               assignedShiftCount={rota.assignedShiftCount}
               plannedShiftCount={rota.plannedShiftCount}
               coveragePct={rota.coveragePct}
@@ -165,19 +224,21 @@ function RotaPage() {
       <ConfirmDialog
         open={publishOpen}
         onOpenChange={setPublishOpen}
-        title={`${rota.published ? "Update" : "Mark"} local publish for w/c ${rota.weekLabel}?`}
-        description="This records a local published state for this planning screen. Real staff visibility will come when snapshots are connected."
-        confirmLabel={rota.published ? "Update local publish" : "Mark published locally"}
-        cancelLabel="Not yet"
+        title={publishTitle}
+        description={publishDescription}
+        confirmLabel={publishConfirmLabel}
+        cancelLabel="Keep reviewing"
+        tone={hasReadinessIssues ? "danger" : "brand"}
         onConfirm={handlePublish}
       />
       <GenerateRotaDialog
         open={generateOpen}
         onOpenChange={setGenerateOpen}
         weekLabel={rota.weekLabel}
+        days={rota.days}
         shifts={rota.draftShifts}
         staff={rota.staff}
-        onApplySuggestions={rota.applyOpenShiftSuggestions}
+        onApplySuggestions={handleApplySuggestions}
       />
       <WeekPickerDialog
         open={weekPickerOpen}
