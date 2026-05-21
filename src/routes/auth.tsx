@@ -138,6 +138,9 @@ function StaffAuthForm({ onBack }: { onBack: () => void }) {
             <TooltipContent>Staff sign in is coming soon</TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        <p className="text-center text-xs text-muted-foreground">
+          Staff sign-in is coming soon. Contact your manager if you need access to your rota.
+        </p>
 
         <Button
           type="button"

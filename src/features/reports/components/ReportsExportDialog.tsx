@@ -11,7 +11,7 @@ export function ReportsExportDialog({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       title="Export weekly report?"
-      description="Preview export only. File download can be added after pilot."
+      description="Preview export only. File download will be available once export is live."
       confirmLabel="Export"
       onConfirm={() => onOpenChange(false)}
     />

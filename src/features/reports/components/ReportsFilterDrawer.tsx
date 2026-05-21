@@ -11,13 +11,13 @@ export function ReportsFilterDrawer({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       title="Filter reports"
-      description="Filter preview for the current report view."
+      description="Refine the data shown in this report."
       footer={
         <>
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Reset
           </ActionButton>
-          <ActionButton onClick={() => onOpenChange(false)}>Close preview</ActionButton>
+          <ActionButton onClick={() => onOpenChange(false)}>Done</ActionButton>
         </>
       }
     >

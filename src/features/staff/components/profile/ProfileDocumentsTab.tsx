@@ -63,7 +63,7 @@ export function ProfileDocumentsTab({ profile }: Props) {
             <Upload className="mx-auto h-6 w-6 text-muted-foreground mb-2" aria-hidden />
             <p className="text-xs text-muted-foreground">Document upload coming soon</p>
             <p className="text-[11px] text-muted-foreground mt-1">
-              Connected once document storage is wired
+              Available once document storage is live.
             </p>
           </div>
         </ProfileCard>

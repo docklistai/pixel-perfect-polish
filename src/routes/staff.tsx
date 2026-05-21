@@ -63,7 +63,7 @@ function buildStats(staffRows: typeof rows): StatCard[] {
       icon: AlertTriangle,
       label: "MISSING DOCUMENTS",
       value: "—",
-      sub: "Tracked once documents are wired",
+      sub: "Document tracking coming soon",
       tone: "muted",
     },
   ];
@@ -173,7 +173,7 @@ function StaffListPage() {
           <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
             <div className="text-2xl font-bold text-success">Invite ready to send</div>
             <p className="text-sm text-muted-foreground">
-              The invite will be sent once wired to the backend.
+              The invite will be sent once staff onboarding is live.
             </p>
           </div>
         ) : (
