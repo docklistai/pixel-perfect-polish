@@ -9,7 +9,7 @@ export function ReportsInsightsPanel() {
       <div className="flex items-center gap-2 mb-3">
         <Lightbulb className="h-4 w-4 text-warning" />
         <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-          INSIGHTS
+          REVIEW POINTS
         </span>
       </div>
       <div className="space-y-3">

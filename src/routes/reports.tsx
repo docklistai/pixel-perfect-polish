@@ -25,7 +25,7 @@ function ReportsPage() {
     <AppShell>
       <PageHeader
         title="Reports"
-        subtitle="Understand your labour performance and make better decisions."
+        subtitle="Review labour and coverage, then return to Rota, Time, or Leave to act."
         actions={
           <>
             <FilterButton icon={Calendar} label="18 – 24 May 2026" />
@@ -42,7 +42,7 @@ function ReportsPage() {
               onClick={() => setExportOpen(true)}
             />
             <ActionButton variant="secondary" onClick={() => setInsightOpen(true)}>
-              View top insight
+              View top review point
             </ActionButton>
           </>
         }
