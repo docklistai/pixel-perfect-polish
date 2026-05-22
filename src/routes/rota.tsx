@@ -11,6 +11,7 @@ import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar"
 import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
 import { AlertsCard } from "@/features/rota/components/AlertsCard";
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
+import { PrePublishReviewBlock } from "@/features/rota/components/PrePublishReviewBlock";
 import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
 import { LegendCard } from "@/features/rota/components/LegendCard";
 import { AddShiftDrawer } from "@/features/rota/components/AddShiftDrawer";
@@ -188,6 +189,15 @@ function RotaPage() {
               onAddShift={() => setAddOpen(true)}
               onViewConflicts={() => setConflictOpen(true)}
               onWorkingTimeAlert={() => setWorkingTimeOpen(true)}
+            />
+            <PrePublishReviewBlock
+              openShiftCount={rota.openShiftCount}
+              conflictCount={rota.conflictCount}
+              workingTimeAlertCount={workingTimeAlertCount}
+              plannedShiftCount={rota.plannedShiftCount}
+              onReviewOpenShifts={() => setAddOpen(true)}
+              onReviewConflicts={() => setConflictOpen(true)}
+              onReviewWorkingTime={() => setWorkingTimeOpen(true)}
             />
             <PublishReadinessCard
               published={rota.published}
