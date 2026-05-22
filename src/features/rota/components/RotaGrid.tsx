@@ -161,7 +161,7 @@ export function RotaGrid({
                         onDuplicateShift={onShiftDuplicate}
                         onRemoveShift={onShiftRemove}
                         onMarkOpenShift={onShiftMarkOpen}
-                        emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: day off`}
+                        emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: no shift`}
                       />
                     </div>
                   ))}

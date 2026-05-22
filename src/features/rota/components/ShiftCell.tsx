@@ -41,7 +41,7 @@ export function ShiftCell({
     }
     return (
       <div className="flex h-16 items-center justify-center text-sm text-muted-foreground">
-        <span aria-hidden>— Day off</span>
+        <span aria-hidden>— No shift</span>
         <span className="sr-only">{emptyAriaLabel}</span>
       </div>
     );
