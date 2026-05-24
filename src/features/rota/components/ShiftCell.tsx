@@ -1,12 +1,6 @@
 import * as React from "react";
-import { AlertTriangle, Copy, Edit3, MoreHorizontal, Plus, Trash2, UserMinus } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { AlertTriangle, Plus } from "lucide-react";
+import { ShiftActionMenu } from "./grid/ShiftActionMenu";
 import { toneStyles } from "../data/mockData";
 import { formatShiftTime } from "../lib/draftRota";
 import type { DraftShift } from "../types";
@@ -150,60 +144,5 @@ function ShiftPill({
         onMarkOpen={onMarkOpen}
       />
     </div>
-  );
-}
-
-function ShiftActionMenu({
-  shift,
-  onEdit,
-  onDuplicate,
-  onRemove,
-  onMarkOpen,
-}: {
-  shift: DraftShift;
-  onEdit: (shiftId: DraftShift["id"]) => void;
-  onDuplicate: (shiftId: DraftShift["id"]) => void;
-  onRemove: (shiftId: DraftShift["id"]) => void;
-  onMarkOpen: (shiftId: DraftShift["id"]) => void;
-}) {
-  const isOpen = shift.staffId === null;
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          aria-label={`Actions for ${shift.role} shift`}
-          className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground opacity-80 transition hover:bg-background/80 hover:text-foreground focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem onSelect={() => onEdit(shift.id)}>
-          <Edit3 className="h-4 w-4" aria-hidden />
-          Edit details
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onDuplicate(shift.id)}>
-          <Copy className="h-4 w-4" aria-hidden />
-          Duplicate as open
-        </DropdownMenuItem>
-        {!isOpen && (
-          <DropdownMenuItem onSelect={() => onMarkOpen(shift.id)}>
-            <UserMinus className="h-4 w-4" aria-hidden />
-            Mark as open
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="text-danger focus:text-danger"
-          onSelect={() => onRemove(shift.id)}
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-          Remove shift
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
