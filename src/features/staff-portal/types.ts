@@ -20,6 +20,8 @@ export interface PortalShift {
   tasks?: { id: string; label: string; done?: boolean }[];
   teammates?: { id: string; name: string; initials: string; role: string }[];
   changeAcknowledged?: boolean;
+  sourceSnapshotVersion?: number;
+  publishedAt?: string;
 }
 
 export interface ClockEntry {
@@ -58,6 +60,7 @@ export interface PortalNotice {
 }
 
 export interface PortalProfile {
+  staffId: string;
   name: string;
   initials: string;
   role: string;

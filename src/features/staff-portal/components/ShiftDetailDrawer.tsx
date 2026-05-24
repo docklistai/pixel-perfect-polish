@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Check, MapPin, MessageSquare, User, Users } from "lucide-react";
 import {
   ActionButton,
@@ -12,16 +11,15 @@ import type { PortalShift } from "../types";
 
 export function ShiftDetailDrawer({
   shift,
+  acknowledged,
+  onAcknowledge,
   onClose,
 }: {
   shift: PortalShift | null;
+  acknowledged?: boolean;
+  onAcknowledge?: (shiftId: string) => void;
   onClose: () => void;
 }) {
-  const [acknowledged, setAcknowledged] = React.useState(false);
-  React.useEffect(() => {
-    setAcknowledged(false);
-  }, [shift?.id]);
-
   if (!shift) {
     return (
       <DrawerShell open={false} onOpenChange={() => onClose()} title="">
@@ -43,7 +41,7 @@ export function ShiftDetailDrawer({
       width="lg"
       footer={
         isChanged && !acknowledged ? (
-          <ActionButton onClick={() => setAcknowledged(true)} className="w-full justify-center">
+          <ActionButton onClick={() => onAcknowledge?.(shift.id)} className="w-full justify-center">
             Acknowledge shift change
           </ActionButton>
         ) : (

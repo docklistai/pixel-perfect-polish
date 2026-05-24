@@ -14,11 +14,12 @@ import type {
 } from "../types";
 
 export const mockProfile: PortalProfile = {
-  name: "Alex Turner",
-  initials: "AT",
-  role: "Server",
+  staffId: "olivia-bennett",
+  name: "Olivia Bennett",
+  initials: "OB",
+  role: "Barista",
   department: "The Harbor View · Front of house",
-  email: "alex.turner@docklist.example",
+  email: "olivia.bennett@docklist.example",
   phone: "+44 7700 900123",
   accessStatus: "active",
   manager: {

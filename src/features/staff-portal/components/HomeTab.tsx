@@ -1,61 +1,68 @@
 import { Calendar, Clock, MapPin, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
 import { DashboardCard, StatusBadge } from "@/components/dl";
-import { mockNextShift, mockNotices, mockProfile } from "../data/mockPortalData";
+import { mockNotices, mockProfile } from "../data/mockPortalData";
+import { portalPublishedNextShift } from "../data/publishedRotaPortalData";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
-  const todayNotice = mockNotices.find((n) => n.unread) ?? mockNotices[0];
+  const nextShift = portalPublishedNextShift;
 
   return (
     <div className="space-y-4">
-      <DashboardCard className="overflow-hidden border-0 bg-[linear-gradient(135deg,#0B7A78_0%,#0EA5A2_100%)] text-white shadow-[0_20px_48px_-24px_rgba(14,165,162,.75)]">
-        <div className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="text-[11px] font-semibold tracking-[0.18em] text-white/75 uppercase">
-              Your next shift
+      {nextShift ? (
+        <DashboardCard className="overflow-hidden border-0 bg-[linear-gradient(135deg,#0B7A78_0%,#0EA5A2_100%)] text-white shadow-[0_20px_48px_-24px_rgba(14,165,162,.75)]">
+          <div className="p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-white/75 uppercase">
+                Your next shift
+              </div>
+              <span className="rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold text-white">
+                {nextShift.status === "changed" ? "Changed" : "Confirmed"}
+              </span>
             </div>
-            <span className="rounded-full bg-white/20 px-2.5 py-1 text-[11px] font-semibold text-white">
-              Confirmed
-            </span>
-          </div>
-          <div className="mt-2 text-[13px] text-white/80">{mockNextShift.dayLabel}</div>
-          <div className="mt-1 text-[30px] font-bold tracking-tight leading-none">
-            {mockNextShift.start} – {mockNextShift.end}
-          </div>
-          <div className="mt-3 space-y-1 text-sm text-white/90">
-            <div className="inline-flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 text-white/75" /> {mockNextShift.role}
+            <div className="mt-2 text-[13px] text-white/80">{nextShift.dayLabel}</div>
+            <div className="mt-1 text-[30px] font-bold tracking-tight leading-none">
+              {nextShift.start} – {nextShift.end}
             </div>
-            <div className="inline-flex items-center gap-1.5">
-              <MapPin className="h-4 w-4 text-white/75" /> {mockNextShift.station}
+            <div className="mt-3 space-y-1 text-sm text-white/90">
+              <div className="inline-flex items-center gap-1.5">
+                <Calendar className="h-4 w-4 text-white/75" /> {nextShift.role}
+              </div>
+              <div className="inline-flex items-center gap-1.5">
+                <MapPin className="h-4 w-4 text-white/75" /> {nextShift.station}
+              </div>
             </div>
-          </div>
-          {mockNextShift.shiftNote && (
-            <div className="mt-3 text-xs text-white/75">{mockNextShift.shiftNote}</div>
-          )}
-          <div className="mt-4 flex items-end gap-3">
-            <div className="h-1.5 flex-1 rounded-full bg-white/20">
-              <div className="h-full w-[32%] rounded-full bg-white" />
+            <div className="mt-4 flex items-end gap-3">
+              <div className="h-1.5 flex-1 rounded-full bg-white/20">
+                <div className="h-full w-[32%] rounded-full bg-white" />
+              </div>
+              <span className="text-[11px] font-medium text-white/80">Published rota</span>
             </div>
-            <span className="text-[11px] font-medium text-white/80">Starts in 3h 14m</span>
+            <button
+              type="button"
+              onClick={() => onNavigate("time")}
+              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-brand font-semibold shadow-[var(--shadow-card)] hover:bg-white/95"
+            >
+              <Clock className="h-4 w-4" />
+              Clock in
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigate("shifts")}
+              className="mt-2 inline-flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-white/85 hover:text-white"
+            >
+              View published rota <ArrowRight className="h-3 w-3" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => onNavigate("time")}
-            className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-brand font-semibold shadow-[var(--shadow-card)] hover:bg-white/95"
-          >
-            <Clock className="h-4 w-4" />
-            Clock in
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigate("shifts")}
-            className="mt-2 inline-flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-white/85 hover:text-white"
-          >
-            Shift notes ({mockNextShift.tasks?.length ?? 0}) <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-      </DashboardCard>
+        </DashboardCard>
+      ) : (
+        <DashboardCard className="p-5">
+          <div className="text-sm font-semibold">No published rota yet.</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Once your manager publishes the rota, your next shift will appear here.
+          </p>
+        </DashboardCard>
+      )}
 
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">

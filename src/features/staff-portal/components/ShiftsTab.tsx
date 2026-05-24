@@ -1,7 +1,11 @@
 import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
-import { mockPastShifts, mockRequests, mockWeekShifts } from "../data/mockPortalData";
+import { mockPastShifts, mockRequests } from "../data/mockPortalData";
+import {
+  portalPublishedRotaSnapshot,
+  portalPublishedWeekShifts,
+} from "../data/publishedRotaPortalData";
 import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
@@ -26,16 +30,32 @@ const SUB_TABS: { id: ShiftsSubTab; label: string }[] = [
 export function ShiftsTab() {
   const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
   const [selected, setSelected] = React.useState<PortalShift | null>(null);
+  const [acknowledgedShiftIds, setAcknowledgedShiftIds] = React.useState<Set<string>>(new Set());
+
+  const acknowledgeShift = (shiftId: string) => {
+    setAcknowledgedShiftIds((current) => new Set([...current, shiftId]));
+  };
 
   return (
     <div className="space-y-4">
       <SegmentedTabs value={sub} onChange={setSub} />
 
-      {sub === "upcoming" && <ShiftList shifts={mockWeekShifts} onOpen={setSelected} />}
+      {sub === "upcoming" && (
+        <ShiftList
+          shifts={portalPublishedWeekShifts}
+          hasPublishedSnapshot={Boolean(portalPublishedRotaSnapshot)}
+          onOpen={setSelected}
+        />
+      )}
       {sub === "requests" && <RequestsList />}
       {sub === "history" && <ShiftList shifts={mockPastShifts} onOpen={setSelected} />}
 
-      <ShiftDetailDrawer shift={selected} onClose={() => setSelected(null)} />
+      <ShiftDetailDrawer
+        shift={selected}
+        acknowledged={selected ? acknowledgedShiftIds.has(selected.id) : false}
+        onAcknowledge={acknowledgeShift}
+        onClose={() => setSelected(null)}
+      />
     </div>
   );
 }
@@ -73,9 +93,11 @@ function SegmentedTabs({
 
 function ShiftList({
   shifts,
+  hasPublishedSnapshot = true,
   onOpen,
 }: {
   shifts: PortalShift[];
+  hasPublishedSnapshot?: boolean;
   onOpen: (s: PortalShift) => void;
 }) {
   // Group by month label for visual section headers.
@@ -85,8 +107,12 @@ function ShiftList({
       <DashboardCard className="p-6">
         <EmptyState
           icon={CalendarOff}
-          title="No shifts published yet"
-          description="Once your manager publishes shifts, they'll appear here."
+          title={hasPublishedSnapshot ? "No shifts on the published rota" : "No published rota yet"}
+          description={
+            hasPublishedSnapshot
+              ? "You do not have any shifts in the current published rota."
+              : "Once your manager publishes the rota, your shifts will appear here."
+          }
         />
       </DashboardCard>
     );

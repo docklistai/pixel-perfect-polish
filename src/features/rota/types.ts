@@ -26,6 +26,38 @@ export type DraftShift = {
   status: DraftShiftStatus;
 };
 
+export type PublishedShiftStatus = "scheduled" | "open" | "changed";
+
+export type PublishedShiftSnapshot = {
+  id: ShiftId;
+  dayIndex: RotaDayIndex;
+  date: string;
+  dayLabel: string;
+  staffId: StaffId | null;
+  staffName: string | null;
+  staffInitials: string | null;
+  role: string;
+  start: string;
+  end: string;
+  location: string;
+  breakMinutes: number;
+  status: PublishedShiftStatus;
+};
+
+export type PublishedRotaSnapshot = {
+  workspaceId: string;
+  weekKey: string;
+  weekStart: string;
+  weekLabel: string;
+  version: number;
+  publishedAt: string;
+  publishedBy: {
+    id: StaffId;
+    name: string;
+  };
+  shifts: PublishedShiftSnapshot[];
+};
+
 export type DraftShiftInput = {
   dayIndex: RotaDayIndex;
   staffId: StaffId | null;

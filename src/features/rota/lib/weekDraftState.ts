@@ -1,11 +1,12 @@
 import { initialDraftShifts } from "../data/mockData";
-import type { DraftShift } from "../types";
+import type { DraftShift, PublishedRotaSnapshot } from "../types";
 import { createInitialDraftShifts } from "./draftRota";
 
 export type WeekDraftState = {
   shifts: DraftShift[];
   published: boolean;
   hasUnpublishedChanges: boolean;
+  publishedSnapshot: PublishedRotaSnapshot | null;
 };
 
 export function createWeekDraft(): WeekDraftState {
@@ -13,5 +14,6 @@ export function createWeekDraft(): WeekDraftState {
     shifts: createInitialDraftShifts(initialDraftShifts),
     published: false,
     hasUnpublishedChanges: false,
+    publishedSnapshot: null,
   };
 }

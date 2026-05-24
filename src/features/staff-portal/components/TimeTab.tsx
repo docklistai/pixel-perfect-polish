@@ -7,7 +7,8 @@ import {
   FeedbackBanner,
   StatusBadge,
 } from "@/components/dl";
-import { mockClockEntries, mockNextShift } from "../data/mockPortalData";
+import { mockClockEntries } from "../data/mockPortalData";
+import { portalPublishedNextShift } from "../data/publishedRotaPortalData";
 
 function formatElapsed(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -30,6 +31,7 @@ export function TimeTab() {
   }, [clockedIn]);
 
   const elapsed = clockedIn && startedAt ? now - startedAt : 0;
+  const currentShift = portalPublishedNextShift;
   const sinceLabel = startedAt
     ? new Date(startedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
     : null;
@@ -37,6 +39,7 @@ export function TimeTab() {
   const hasMissing = entries.some((e) => e.flag === "missing-clock-out");
 
   const onToggle = () => {
+    if (!currentShift) return;
     if (clockedIn) {
       setClockedIn(false);
       setOnBreak(false);
@@ -58,20 +61,23 @@ export function TimeTab() {
             {clockedIn ? "Scheduled" : "Off shift"}
           </StatusBadge>
         </div>
-        <div className="mt-2 text-[13px] text-muted-foreground">{mockNextShift.dayLabel}</div>
-        <div className="mt-1 text-[28px] font-bold tracking-tight leading-none">
-          {mockNextShift.start} – {mockNextShift.end}
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          <span className="inline-flex items-center gap-1.5 text-foreground">
-            <Clock className="h-4 w-4 text-muted-foreground" /> {mockNextShift.role}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-foreground">
-            <MapPin className="h-4 w-4 text-muted-foreground" /> {mockNextShift.station}
-          </span>
-        </div>
-        {mockNextShift.shiftNote && (
-          <div className="mt-3 text-xs text-muted-foreground">{mockNextShift.shiftNote}</div>
+        {currentShift ? (
+          <>
+            <div className="mt-2 text-[13px] text-muted-foreground">{currentShift.dayLabel}</div>
+            <div className="mt-1 text-[28px] font-bold tracking-tight leading-none">
+              {currentShift.start} – {currentShift.end}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <span className="inline-flex items-center gap-1.5 text-foreground">
+                <Clock className="h-4 w-4 text-muted-foreground" /> {currentShift.role}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-foreground">
+                <MapPin className="h-4 w-4 text-muted-foreground" /> {currentShift.station}
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="mt-2 text-sm text-muted-foreground">No published rota yet.</div>
         )}
       </DashboardCard>
 
@@ -84,6 +90,7 @@ export function TimeTab() {
             <button
               type="button"
               onClick={onToggle}
+              disabled={!currentShift}
               className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
                 clockedIn
                   ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
@@ -98,7 +105,7 @@ export function TimeTab() {
                   <PlayCircle className="h-9 w-9" />
                 )}
                 <span className="text-[22px] font-bold leading-none">
-                  {clockedIn ? "Clock out" : "Clock in"}
+                  {!currentShift ? "No shift" : clockedIn ? "Clock out" : "Clock in"}
                 </span>
                 <span className="text-[11px] font-medium text-white/85">
                   {clockedIn
@@ -149,7 +156,7 @@ export function TimeTab() {
               Scheduled
             </div>
             <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
-              {mockNextShift.hours}h
+              {currentShift ? `${currentShift.hours}h` : "0h"}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">Shift length</div>
           </div>

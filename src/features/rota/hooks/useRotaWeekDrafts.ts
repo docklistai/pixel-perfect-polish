@@ -9,6 +9,7 @@ import {
   makeDraftShift,
 } from "../lib/draftRota";
 import { duplicateDraftShiftAsOpen } from "../lib/draftActions";
+import { buildPublishedRotaSnapshot } from "../lib/publishedSnapshot";
 import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
 import { getWeekLabel } from "../lib/weekHelpers";
 
@@ -144,7 +145,18 @@ export function useRotaWeekDrafts() {
   };
 
   const handlePublish = () => {
-    setCurrentDraft((draft) => ({ ...draft, published: true, hasUnpublishedChanges: false }));
+    setCurrentDraft((draft) => ({
+      ...draft,
+      published: true,
+      hasUnpublishedChanges: false,
+      publishedSnapshot: buildPublishedRotaSnapshot({
+        shifts: draft.shifts,
+        staff,
+        weekOffset,
+        weekLabel: getWeekLabel(weekOffset),
+        previousSnapshot: draft.publishedSnapshot,
+      }),
+    }));
   };
 
   return {
@@ -154,6 +166,7 @@ export function useRotaWeekDrafts() {
     draftShifts: currentDraft.shifts,
     published: currentDraft.published,
     hasUnpublishedChanges: currentDraft.hasUnpublishedChanges,
+    publishedSnapshot: currentDraft.publishedSnapshot,
     selectedShiftId,
     setSelectedShiftId,
     closeShiftDetail: () => setSelectedShiftId(null),
