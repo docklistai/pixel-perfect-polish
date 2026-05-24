@@ -115,12 +115,41 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.04 250);
-  --foreground: oklch(0.98 0.005 230);
-  --card: oklch(0.22 0.04 250);
-  --card-foreground: oklch(0.98 0.005 230);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
+  --background: #0e1726;
+  --foreground: #ece7dc;
+  --card: #182338;
+  --card-foreground: #ece7dc;
+  --popover: #25334c;
+  --popover-foreground: #ece7dc;
+
+  --primary: #ece7dc;
+  --primary-foreground: #0e1726;
+  --secondary: #1e2b43;
+  --secondary-foreground: #ece7dc;
+  --muted: rgba(255, 255, 255, 0.05);
+  --muted-foreground: #7e8799;
+  --accent: rgba(255, 255, 255, 0.08);
+  --accent-foreground: #ece7dc;
+  --destructive: #f2647a;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: #1e2b43;
+  --ring: #3dcfcb;
+
+  /* Brand and status colors soft variables override for dark mode */
+  --brand-soft: rgba(61, 207, 203, 0.14);
+  --accent-purple-soft: rgba(161, 139, 255, 0.13);
+  --warning-soft: rgba(240, 182, 91, 0.13);
+  --success-soft: rgba(78, 202, 155, 0.13);
+  --danger-soft: rgba(242, 100, 122, 0.13);
+  --info-soft: rgba(116, 168, 255, 0.12);
+}
+
+.dark .dock-card,
+.dark .dock-card-tight,
+.dark .dock-table tbody td,
+.dark .dock-table thead th {
+  border-color: rgba(255, 255, 255, 0.09);
 }
 
 @layer base {
