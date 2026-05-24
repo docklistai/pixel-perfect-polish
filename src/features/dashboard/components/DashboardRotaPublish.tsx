@@ -1,16 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Calendar, ArrowRight } from "lucide-react";
-import { Card } from "@/components/dl";
+import { Calendar, Send } from "lucide-react";
+import { Card, StatusBadge } from "@/components/dl";
+import { toast } from "sonner";
 
 // Next rota: week of Mon 25 May 2026. Due by Fri 22 May 12:00 (2 days from Wed 20 May).
+// Counts consistent with /rota mock data: 1 conflict, 2 open shifts, 98% coverage.
 export function DashboardRotaPublish() {
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 pb-4 pt-5">
-        <div className="dock-section-eyebrow">Upcoming rota publish</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="dock-section-eyebrow">Next publish</div>
+          <StatusBadge tone="warning">Draft</StatusBadge>
+        </div>
         <div className="mt-4 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-brand-soft text-brand">
-            <Calendar className="h-5 w-5" />
+            <Calendar className="h-5 w-5" aria-hidden />
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Week commencing</div>
@@ -18,21 +23,39 @@ export function DashboardRotaPublish() {
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-xs text-muted-foreground">Rota due by</div>
-          <div className="text-[15px] font-semibold">Fri, 22 May 12:00</div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-2/3 bg-brand" />
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Due by Fri, 22 May 12:00</span>
+            <span className="font-semibold text-warning">2d remaining</span>
           </div>
-          <div className="mt-2 text-xs text-muted-foreground">2 days remaining</div>
+          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
+            <div className="h-full w-2/3 rounded-full bg-warning" />
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <StatusBadge tone="danger">1 conflict</StatusBadge>
+          <StatusBadge tone="warning">2 open</StatusBadge>
+          <StatusBadge tone="success">98% cov</StatusBadge>
         </div>
       </div>
-      <div className="border-t border-border px-5 py-3">
+      <div className="flex items-center gap-2 border-t border-border px-5 py-3">
         <Link
           to="/rota"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          className="flex-1 rounded-lg border border-border px-3 py-1.5 text-center text-xs font-semibold transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
-          Go to Rota <ArrowRight className="h-3 w-3" />
+          Open rota
         </Link>
+        <button
+          type="button"
+          onClick={() =>
+            toast.info("Rota publish", {
+              description: "Go to the Rota page to review and publish.",
+            })
+          }
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+        >
+          <Send className="h-3 w-3" aria-hidden />
+          Publish
+        </button>
       </div>
     </Card>
   );

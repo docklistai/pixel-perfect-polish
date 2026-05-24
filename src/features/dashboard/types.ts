@@ -7,11 +7,14 @@ export interface KpiItem {
   delta: string;
   up: boolean;
   tone: string;
+  tip?: string;
 }
 
 export interface AttentionItem {
   t: string;
   s: string;
+  icon?: LucideIcon;
+  tone?: string;
 }
 
 export interface OpenShiftItem {
@@ -24,6 +27,8 @@ export interface LeaveItem {
   n: string;
   d: string;
   img: number;
+  impact?: string;
+  impactTone?: string;
 }
 
 export interface TimesheetItem {
@@ -31,11 +36,13 @@ export interface TimesheetItem {
   d: string;
   late: string;
   img: number;
+  lateTone?: "warning" | "danger";
 }
 
 export interface StaffDeptItem {
   dept: string;
   count: number;
+  tone?: string;
 }
 
 export interface AnnouncementItem {
@@ -45,10 +52,22 @@ export interface AnnouncementItem {
   tone: string;
 }
 
+export type AppRoute =
+  | "/"
+  | "/rota"
+  | "/leave"
+  | "/time"
+  | "/team"
+  | "/ops"
+  | "/staff"
+  | "/reports"
+  | "/settings";
+
 export interface QuickActionItem {
   t: string;
   s: string;
   icon: LucideIcon;
+  route?: AppRoute;
 }
 
 export const toneBg: Record<string, string> = {
