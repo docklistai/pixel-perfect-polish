@@ -1,4 +1,4 @@
-import { Send } from "lucide-react";
+import { Send, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Card, StatusBadge, ActionButton } from "@/components/dl";
 
 export function PublishReadinessCard({
@@ -37,7 +37,7 @@ export function PublishReadinessCard({
     },
     {
       k: "Conflicts resolved",
-      v: conflictCount === 0 ? "All" : `0 / ${conflictCount}`,
+      v: conflictCount === 0 ? "All clear" : `${conflictCount} remain`,
       ok: conflictCount === 0,
     },
     {
@@ -50,7 +50,6 @@ export function PublishReadinessCard({
     },
   ];
 
-  const isClean = publishState === "published";
   const badgeTone =
     publishState === "published" || publishState === "ready" ? "success" : "warning";
   const badgeLabel =
@@ -75,30 +74,32 @@ export function PublishReadinessCard({
 
   return (
     <Card className="p-4">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <div className="text-sm font-semibold">Publish readiness</div>
         <StatusBadge tone={badgeTone}>{badgeLabel}</StatusBadge>
       </div>
       <div className="space-y-2">
         {checks.map(({ k, v, ok }) => (
-          <div key={k} className="flex items-center justify-between gap-4 text-sm">
-            <span className="flex items-center gap-2 text-foreground">
-              <span className={ok ? "text-success" : "text-danger"}>{ok ? "✓" : "✗"}</span>
-              {k}
-            </span>
-            <span className="text-muted-foreground">{v}</span>
+          <div key={k} className="flex items-center gap-2 text-sm">
+            {ok ? (
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-success" aria-hidden />
+            ) : (
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
+            )}
+            <span className="flex-1 text-foreground">{k}</span>
+            <span className={ok ? "text-success font-medium" : "text-muted-foreground"}>{v}</span>
           </div>
         ))}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Staff should only see the published rota. Publish with issues only when the team is ready
-        for this version.
+        Staff see only the published rota. Publish with issues only when the team is ready for this
+        version.
       </p>
       <ActionButton
         className="mt-4 w-full"
         icon={Send}
         onClick={() => canPublish && onPublish()}
-        disabled={!canPublish || isClean}
+        disabled={!canPublish}
       >
         {buttonLabel}
       </ActionButton>

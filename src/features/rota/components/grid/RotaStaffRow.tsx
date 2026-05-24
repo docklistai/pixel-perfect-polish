@@ -14,18 +14,21 @@ export function RotaStaffRow({
 }) {
   return (
     <React.Fragment>
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
+      <div className="flex items-center gap-2.5 border-b border-border px-3 py-3">
         <img
           src={`https://i.pravatar.cc/64?img=${row.staff.img}`}
           alt=""
-          className="h-9 w-9 rounded-full object-cover"
+          className="h-8 w-8 shrink-0 rounded-full object-cover"
         />
-        <div className="min-w-0">
-          <div className="truncate text-sm font-medium">{row.staff.name}</div>
-          <div className="text-[11px] text-muted-foreground">
-            {row.staff.role} · {row.staff.hrs}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium leading-tight">{row.staff.name}</div>
+          <div className="truncate text-[11px] text-muted-foreground">{row.staff.role}</div>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className="font-mono text-sm font-semibold tabular-nums leading-tight">
+            {row.staff.hrs}
           </div>
-          <div className="text-[10px] text-muted-foreground">Contracted</div>
+          <div className="text-[10px] text-muted-foreground">/ week</div>
         </div>
       </div>
       {row.cells.map((cell, dayIndex) => (

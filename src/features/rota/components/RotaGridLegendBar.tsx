@@ -1,22 +1,33 @@
-import { AlertTriangle, CircleAlert } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 border-t border-border px-5 py-3 text-[11px] text-muted-foreground">
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-4 py-2.5 text-[11px] text-muted-foreground">
       <span>
-        <span className="font-semibold text-foreground">{staffCount} staff members</span>
+        Target 100% · Breaks: 30 min unpaid for shifts ≥ 6h · {staffCount}{" "}
+        {staffCount === 1 ? "staff member" : "staff members"}
       </span>
-      <span>Day figures update as you edit</span>
-      <span>
-        Overlap checks shown <CircleAlert className="inline-block h-3 w-3 align-[-1px]" />
-      </span>
-      <div className="ml-auto flex flex-wrap items-center gap-3">
-        <span className="flex items-center gap-1">
-          <AlertTriangle className="h-3 w-3 text-warning" /> Conflict
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="flex items-center gap-1.5">
+          <span
+            className="inline-block h-3 w-3 rounded-[3px] border border-dashed border-border bg-muted/40"
+            aria-hidden
+          />
+          Day off
         </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded-sm border-2 border-dashed border-warning" />
+        <span className="flex items-center gap-1.5 text-warning-700">
+          <span
+            className="inline-block h-3 w-3 rounded-[3px] border-[1.5px] border-dashed border-warning/70 bg-warning-soft/40"
+            aria-hidden
+          />
           Open shift
+        </span>
+        <span className="flex items-center gap-1.5 text-warning">
+          <AlertTriangle className="h-3 w-3" aria-hidden />
+          Conflict
+        </span>
+        <span className="hidden text-muted-foreground/70 sm:inline">
+          Click a shift to edit · ⋯ for actions
         </span>
       </div>
     </div>

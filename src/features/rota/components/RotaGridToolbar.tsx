@@ -1,5 +1,5 @@
-import { Filter, CalendarPlus, Plus } from "lucide-react";
-import { ActionButton, StatusBadge } from "@/components/dl";
+import { Filter, Sparkles, Plus } from "lucide-react";
+import { ActionButton } from "@/components/dl";
 
 export function RotaGridToolbar({
   conflictCount,
@@ -18,43 +18,68 @@ export function RotaGridToolbar({
   onAddShift: () => void;
   onViewConflicts: () => void;
 }) {
-  const coverageTone =
-    coveragePct > 110
-      ? "warning"
-      : coveragePct >= 95
-        ? "success"
-        : coveragePct >= 80
-          ? "warning"
-          : "danger";
-  const coverageLabel =
-    coveragePct > 110 ? `${coveragePct}% Over target` : `${coveragePct}% Schedule load`;
-  const conflictTone = conflictCount > 0 ? "danger" : "muted";
-  const openShiftTone = openShiftCount > 0 ? "warning" : "muted";
+  const coverageTone = coveragePct > 110 ? "warning" : coveragePct >= 95 ? "success" : "warning";
+
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 py-3.5">
+    <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
       <ActionButton variant="secondary" size="sm" icon={Filter} onClick={onFilter}>
-        Filters
+        Filter
       </ActionButton>
-      <div className="hidden flex-wrap items-center gap-2 sm:flex">
-        <StatusBadge tone={conflictTone} dot>
-          {conflictCount} Conflicts
-        </StatusBadge>
-        <StatusBadge tone={openShiftTone} dot>
-          {openShiftCount} Open shifts
-        </StatusBadge>
-        <StatusBadge tone={coverageTone} dot>
-          {coverageLabel}
-        </StatusBadge>
+
+      <div className="hidden flex-wrap items-center gap-1.5 sm:flex">
+        <button
+          type="button"
+          onClick={conflictCount > 0 ? onViewConflicts : undefined}
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${
+            conflictCount > 0
+              ? "bg-danger-soft text-danger hover:bg-danger-soft/80 cursor-pointer"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${conflictCount > 0 ? "bg-danger" : "bg-muted-foreground"}`}
+            aria-hidden
+          />
+          {conflictCount} {conflictCount === 1 ? "conflict" : "conflicts"}
+        </button>
+
+        <button
+          type="button"
+          onClick={openShiftCount > 0 ? onViewConflicts : undefined}
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${
+            openShiftCount > 0
+              ? "bg-warning-soft text-warning-700 hover:bg-warning-soft/80 cursor-pointer"
+              : "bg-muted text-muted-foreground"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${openShiftCount > 0 ? "bg-warning" : "bg-muted-foreground"}`}
+            aria-hidden
+          />
+          {openShiftCount} open
+        </button>
+
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none ${
+            coverageTone === "success"
+              ? "bg-success-soft text-success"
+              : "bg-warning-soft text-warning-700"
+          }`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${coverageTone === "success" ? "bg-success" : "bg-warning"}`}
+            aria-hidden
+          />
+          {coveragePct}% coverage
+        </span>
       </div>
+
       <div className="ml-auto flex flex-wrap items-center gap-2">
-        <ActionButton variant="outline" size="sm" icon={CalendarPlus} onClick={onGenerateRota}>
-          Fill open shifts
+        <ActionButton variant="outline" size="sm" icon={Sparkles} onClick={onGenerateRota}>
+          Generate
         </ActionButton>
-        <ActionButton variant="secondary" size="sm" icon={Plus} onClick={onAddShift}>
+        <ActionButton size="sm" icon={Plus} onClick={onAddShift}>
           Add shift
-        </ActionButton>
-        <ActionButton variant="secondary" size="sm" onClick={onViewConflicts}>
-          View conflicts
         </ActionButton>
       </div>
     </div>

@@ -9,7 +9,6 @@ import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
 import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
-import { AlertsCard } from "@/features/rota/components/AlertsCard";
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
 import { PrePublishReviewBlock } from "@/features/rota/components/PrePublishReviewBlock";
 import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
@@ -116,10 +115,13 @@ function RotaPage() {
           weekLabel={rota.weekLabel}
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
+          canPublish={!rota.published || rota.hasUnpublishedChanges}
           onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
           onPickWeek={() => setWeekPickerOpen(true)}
           onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
           onMoreActions={() => setMoreActionsOpen(true)}
+          onGenerateRota={() => setGenerateOpen(true)}
+          onPublish={() => setPublishOpen(true)}
         />
 
         <RotaStatusBanner
@@ -175,29 +177,12 @@ function RotaPage() {
             <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
           </Card>
 
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             <LabourSummaryCard
               scheduledHours={rota.scheduledHours}
               targetHours={rota.targetHours}
               coveragePct={rota.coveragePct}
               onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
-            />
-            <AlertsCard
-              openShiftCount={rota.openShiftCount}
-              conflictCount={rota.conflictCount}
-              workingTimeAlertCount={workingTimeAlertCount}
-              onAddShift={() => setAddOpen(true)}
-              onViewConflicts={() => setConflictOpen(true)}
-              onWorkingTimeAlert={() => setWorkingTimeOpen(true)}
-            />
-            <PrePublishReviewBlock
-              openShiftCount={rota.openShiftCount}
-              conflictCount={rota.conflictCount}
-              workingTimeAlertCount={workingTimeAlertCount}
-              plannedShiftCount={rota.plannedShiftCount}
-              onReviewOpenShifts={() => setAddOpen(true)}
-              onReviewConflicts={() => setConflictOpen(true)}
-              onReviewWorkingTime={() => setWorkingTimeOpen(true)}
             />
             <PublishReadinessCard
               published={rota.published}
@@ -210,6 +195,15 @@ function RotaPage() {
               plannedShiftCount={rota.plannedShiftCount}
               coveragePct={rota.coveragePct}
               onPublish={() => setPublishOpen(true)}
+            />
+            <PrePublishReviewBlock
+              openShiftCount={rota.openShiftCount}
+              conflictCount={rota.conflictCount}
+              workingTimeAlertCount={workingTimeAlertCount}
+              plannedShiftCount={rota.plannedShiftCount}
+              onReviewOpenShifts={() => setAddOpen(true)}
+              onReviewConflicts={() => setConflictOpen(true)}
+              onReviewWorkingTime={() => setWorkingTimeOpen(true)}
             />
             <RoleCoverageCard roleCoverage={rota.roleCoverage} />
             <LegendCard />
