@@ -1,7 +1,7 @@
 import * as React from "react";
 import { AlertTriangle, Plus } from "lucide-react";
 import { ShiftActionMenu } from "./grid/ShiftActionMenu";
-import { toneStyles } from "../data/mockData";
+import { resolveShiftChipClasses } from "../lib/deptColours";
 import { formatShiftTime } from "../lib/draftRota";
 import type { DraftShift } from "../types";
 
@@ -93,7 +93,7 @@ function ShiftPill({
     ? "border-warning/70 bg-warning-soft/80 text-foreground shadow-[inset_3px_0_0_hsl(var(--warning))]"
     : isOpen
       ? "border-2 border-dashed border-warning/80 bg-warning-soft/80 text-warning-700"
-      : toneStyles[shift.tone];
+      : resolveShiftChipClasses(shift.role);
 
   if (isOpen) {
     return (

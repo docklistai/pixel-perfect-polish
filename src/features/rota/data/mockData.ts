@@ -150,10 +150,11 @@ export const toneStyles: Record<string, string> = {
 };
 
 export const roleLegend = [
-  { label: "Management", tone: "info" },
-  { label: "Kitchen", tone: "warning" },
-  { label: "Bar", tone: "warning" },
-  { label: "Service", tone: "purple" },
-  { label: "Housekeeping", tone: "danger" },
-  { label: "Porter", tone: "success" },
+  { label: "Management / FOH", preset: "blue" },
+  { label: "Kitchen", preset: "amber" },
+  { label: "Bar", preset: "purple" },
+  { label: "Housekeeping", preset: "green" },
+  { label: "Porter", preset: "teal" },
+  { label: "Events", preset: "rose" },
+  { label: "Maintenance", preset: "slate" },
 ];
