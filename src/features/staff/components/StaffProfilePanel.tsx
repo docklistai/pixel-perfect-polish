@@ -1,7 +1,17 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Calendar, ArrowUpRight } from "lucide-react";
+import {
+  X,
+  MessageSquare,
+  Phone,
+  Mail,
+  Calendar,
+  ArrowUpRight,
+  MoreHorizontal,
+} from "lucide-react";
 import { Card } from "@/components/dl";
+import { StaffMonogram } from "./StaffMonogram";
+import { StaffPanelOverview } from "./StaffPanelOverview";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
 
@@ -10,40 +20,60 @@ interface StaffProfilePanelProps {
   onClose: () => void;
 }
 
-const PANEL_TABS = ["Overview", "Documents", "Availability", "Notes"] as const;
-
 const STATUS_CLS: Record<string, string> = {
   Active: "bg-success-soft text-success",
-  "On Leave": "bg-accent-purple/10 text-accent-purple",
+  "On Leave": "bg-accent-purple-soft text-accent-purple",
   Probation: "bg-info-soft text-info",
 };
 
+const PANEL_TABS = ["Overview", "Documents", "Notes"] as const;
+type PanelTab = (typeof PANEL_TABS)[number];
+
+function docStatusLabel(status: string): { label: string; cls: string } {
+  if (status === "valid") return { label: "Verified", cls: "text-success" };
+  if (status === "expiring") return { label: "Expiring", cls: "text-warning" };
+  return { label: "Missing", cls: "text-danger" };
+}
+
+function demoPayRate(role: string): string {
+  const r = role.toLowerCase();
+  if (r.includes("manager") || r.includes("head")) return "£14.50 / hour";
+  if (r.includes("supervisor") || r.includes("chef")) return "£13.50 / hour";
+  return "£12.50 / hour";
+}
+
+function demoEmployeeId(id: string): string {
+  return `DKL-${id.toUpperCase().replace(/-/g, "").slice(0, 6)}-2024`;
+}
+
+function useToast() {
+  const [msg, setMsg] = React.useState<string | null>(null);
+  function show(text: string) {
+    setMsg(text);
+    setTimeout(() => setMsg(null), 2000);
+  }
+  return { msg, show };
+}
+
 export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
   const profile = mockStaffProfiles[member.id] ?? null;
-  const [activePanelTab, setActivePanelTab] = React.useState(0);
-
-  const overviewFields: [string, string][] = [
-    ["Start date", profile?.startDate ?? "—"],
-    ["Department", member.dept],
-    ["Employment", profile?.employmentType ?? member.contract],
-    ["Contracted hours", profile?.contractedHours ?? "—"],
-  ];
-
-  const skills = profile?.skills.length
-    ? profile.skills
-    : [member.role, member.sub].filter(Boolean);
-  const visibleSkills = skills.slice(0, 4);
-  const extraSkills = skills.length > 4 ? skills.length - 4 : 0;
-
-  const nextShift = profile?.nextShift;
-  const hasShift = Boolean(nextShift?.time);
+  const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
+  const { msg: toastMsg, show: showToast } = useToast();
 
   const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
+  const docs = profile?.documents ?? [];
+  const notes = profile?.notes ?? [];
 
   return (
-    <Card className="rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-sm font-semibold">{member.n}</div>
+    <Card className="rounded-2xl overflow-hidden p-0">
+      {toastMsg && (
+        <div className="mx-4 mt-4 rounded-xl bg-info-soft text-info text-xs font-medium px-3 py-2">
+          {toastMsg}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-border/60">
+        <span className="text-sm font-semibold">{member.n}</span>
         <button
           type="button"
           onClick={onClose}
@@ -54,159 +84,153 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
-        <img
-          src={`https://i.pravatar.cc/96?img=${member.img}`}
-          className="h-16 w-16 rounded-full object-cover"
-          alt=""
-        />
-        <div>
-          <div className="font-semibold">{member.n}</div>
-          <div className="text-xs text-muted-foreground">
-            {member.role}
-            {member.sub ? ` · ${member.sub}` : ""}
+      <div className="px-4 pt-4 pb-3 border-b border-border/60">
+        <div className="flex items-center gap-3 mb-3">
+          <StaffMonogram name={member.n} size="lg" />
+          <div>
+            <div className="font-semibold text-base">{member.n}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {member.role}
+              {member.sub ? ` · ${member.sub}` : ""}
+            </div>
+            <span
+              className={`mt-1.5 inline-block rounded-md px-2 py-0.5 text-[11px] font-medium ${statusCls}`}
+            >
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full bg-current mr-1 align-middle"
+                aria-hidden
+              />
+              {member.status}
+            </span>
           </div>
-          <span
-            className={`mt-1 inline-block rounded-md px-2 py-0.5 text-[11px] font-medium ${statusCls}`}
+        </div>
+
+        <div className="text-[11px] text-muted-foreground font-mono space-y-0.5 mb-3">
+          <div>{member.e}</div>
+          <div>{profile?.phone ?? "+44 7700 900 123"}</div>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {(
+            [
+              [MessageSquare, "Message", () => showToast(`Message ${member.n} (demo)`)],
+              [Phone, "Call", () => showToast(`Call ${member.n} (demo)`)],
+              [Mail, "Email", () => showToast(`Email ${member.n} (demo)`)],
+              [Calendar, "View rota", () => showToast("Opening rota (demo)")],
+            ] as [typeof MessageSquare, string, () => void][]
+          ).map(([Icon, label, handler]) => (
+            <button
+              key={label}
+              type="button"
+              aria-label={label}
+              onClick={handler}
+              title={label}
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors border border-border"
+            >
+              <Icon className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          ))}
+          <button
+            type="button"
+            aria-label="More actions"
+            onClick={() => showToast("Actions menu (demo)")}
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors border border-border"
           >
-            {member.status}
-          </span>
+            <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
+          </button>
         </div>
       </div>
-
-      <div className="mt-3 text-xs">
-        <a
-          href={`mailto:${member.e}`}
-          className="text-foreground hover:text-brand transition-colors"
-        >
-          {member.e}
-        </a>
-      </div>
-
-      <Link
-        to="/staff/$staffId"
-        params={{ staffId: member.id }}
-        className="mt-4 flex items-center justify-center gap-1.5 w-full rounded-xl border border-brand/30 bg-brand-soft text-brand text-xs font-semibold py-2 hover:bg-brand/10 transition-colors"
-      >
-        View full profile <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-      </Link>
 
       <div
         role="tablist"
         aria-label="Staff panel sections"
-        className="mt-5 border-b border-border flex flex-wrap gap-x-4 text-xs"
+        className="flex border-b border-border px-4"
       >
-        {PANEL_TABS.map((t, i) => (
-          <button
-            key={t}
-            role="tab"
-            type="button"
-            aria-selected={activePanelTab === i}
-            onClick={() => setActivePanelTab(i)}
-            className={`pb-2 ${activePanelTab === i ? "border-b-2 border-brand text-brand font-semibold" : "text-muted-foreground"}`}
-          >
-            {t}
-          </button>
-        ))}
+        {PANEL_TABS.map((t) => {
+          const docsAttention =
+            t === "Documents" ? docs.filter((d) => d.status !== "valid").length : 0;
+          return (
+            <button
+              key={t}
+              role="tab"
+              type="button"
+              aria-selected={activeTab === t}
+              onClick={() => setActiveTab(t)}
+              className={`pb-2 pt-2.5 mr-4 text-xs font-medium border-b-2 transition-colors inline-flex items-center gap-1.5 ${activeTab === t ? "border-brand text-brand" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              {t}
+              {docsAttention > 0 && (
+                <span className="rounded-full bg-info-soft text-info text-[10px] font-semibold px-1.5 py-0.5 leading-none">
+                  {docsAttention}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {activePanelTab === 0 && (
-        <>
-          <dl className="mt-4 text-xs space-y-2">
-            {overviewFields.map(([k, v]) => (
-              <div key={k} className="flex justify-between gap-2">
-                <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
-                <dd className="font-medium text-right">{v}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-5">
-            <div className="text-xs font-semibold mb-2">Skills &amp; Certifications</div>
-            {visibleSkills.length === 0 ? (
-              <span className="text-[11px] text-muted-foreground">No skills recorded</span>
+      <div className="px-4 py-3 space-y-4">
+        {activeTab === "Overview" && (
+          <StaffPanelOverview
+            member={member}
+            profile={profile}
+            employeeId={demoEmployeeId(member.id)}
+            payRate={demoPayRate(member.role)}
+          />
+        )}
+
+        {activeTab === "Documents" && (
+          <div className="space-y-0">
+            {docs.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No documents on record.</p>
             ) : (
-              <div className="flex flex-wrap gap-1.5">
-                {visibleSkills.map((t) => (
-                  <span key={t} className="rounded-md border border-border px-2 py-0.5 text-[11px]">
-                    {t}
-                  </span>
-                ))}
-                {extraSkills > 0 && (
-                  <span className="text-[11px] text-brand font-medium">+ {extraSkills} more</span>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="mt-5 rounded-xl border border-border p-3">
-            <div className="text-xs font-semibold mb-2">NEXT SCHEDULED SHIFT</div>
-            {hasShift ? (
-              <>
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-brand" aria-hidden />
-                  {nextShift!.date} <span className="ml-auto font-semibold">{nextShift!.time}</span>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>{nextShift!.dept}</span>
-                  <span>{nextShift!.role}</span>
-                </div>
-              </>
-            ) : (
-              <div className="text-xs text-muted-foreground">No upcoming shift recorded</div>
-            )}
-          </div>
-        </>
-      )}
-
-      {activePanelTab === 1 && (
-        <dl className="mt-4 text-xs space-y-2">
-          {[
-            ["Total", String(profile?.documentsSummary.total ?? "—")],
-            ["Expiring soon", String(profile?.documentsSummary.expiringSoon ?? "—")],
-            ["Missing", String(profile?.documentsSummary.missing ?? "—")],
-          ].map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-2">
-              <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
-              <dd className="font-medium text-right">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-
-      {activePanelTab === 2 && (
-        <dl className="mt-4 text-xs space-y-2">
-          {[
-            ["Usually available", profile?.availability.usuallyAvailable ?? "—"],
-            ["Last updated", profile?.availability.updated ?? "—"],
-            ["Conflicts", String(profile?.availability.conflicts ?? "—")],
-            ["Late changes", String(profile?.availability.lateChanges ?? "—")],
-          ].map(([k, v]) => (
-            <div key={k} className="flex justify-between gap-2">
-              <dt className="text-muted-foreground uppercase tracking-wider text-[10px]">{k}</dt>
-              <dd className="font-medium text-right">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-
-      {activePanelTab === 3 && (
-        <div className="mt-4 text-xs">
-          {profile?.notes.length ? (
-            <ul className="space-y-2">
-              {profile.notes.slice(0, 2).map((n, i) => (
-                <li key={i} className="border-b border-border/40 pb-2 last:border-0 last:pb-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-semibold">{n.author}</span>
-                    <span className="text-muted-foreground ml-auto">{n.date}</span>
+              docs.map((d) => {
+                const { label, cls } = docStatusLabel(d.status);
+                return (
+                  <div
+                    key={d.name}
+                    className="flex justify-between items-center py-1.5 border-b border-border/40 last:border-0 gap-2"
+                  >
+                    <span className="text-xs truncate">{d.name}</span>
+                    <span className={`text-[11px] font-semibold shrink-0 ${cls}`}>{label}</span>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed line-clamp-2">{n.text}</p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted-foreground">No manager notes recorded.</p>
-          )}
-        </div>
-      )}
+                );
+              })
+            )}
+          </div>
+        )}
+
+        {activeTab === "Notes" && (
+          <div className="space-y-2">
+            {notes.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No manager notes recorded.</p>
+            ) : (
+              notes.slice(0, 4).map((n, i) => (
+                <div key={i} className="pb-2 border-b border-border/40 last:border-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xs font-semibold">{n.author}</span>
+                    <span className="text-[11px] text-muted-foreground ml-auto">{n.date}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                    {n.text}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="px-4 pb-4">
+        <Link
+          to="/staff/$staffId"
+          params={{ staffId: member.id }}
+          className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-brand text-white text-xs font-semibold py-2.5 hover:opacity-90 transition-opacity"
+        >
+          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+          Open full profile
+        </Link>
+      </div>
     </Card>
   );
 }

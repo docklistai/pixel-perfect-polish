@@ -9,7 +9,7 @@ import {
   FormSection,
   FormRow,
 } from "@/components/dl";
-import { Users, CheckCircle2, UserPlus, AlertTriangle, Plus, ChevronDown } from "lucide-react";
+import { Users, CheckCircle2, UserPlus, AlertTriangle, Plus, Filter } from "lucide-react";
 import { rows } from "@/features/staff/data/mockStaffData";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { StaffTable } from "@/features/staff/components/StaffTable";
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/staff")({
   component: StaffPage,
 });
 
-type StatTone = "info" | "brand" | "warning" | "muted";
+type StatTone = "info" | "brand" | "warning" | "muted" | "danger";
 
 type StatCard = {
   icon: typeof Users;
@@ -40,31 +40,31 @@ function buildStats(staffRows: typeof rows): StatCard[] {
   return [
     {
       icon: Users,
-      label: "TOTAL STAFF",
+      label: "Total staff",
       value: String(total),
-      sub: "Across all departments",
+      sub: "+ 4 vs last month",
       tone: "info",
     },
     {
       icon: CheckCircle2,
-      label: "ACTIVE THIS WEEK",
+      label: "Active this week",
       value: String(active),
-      sub: `${activePct}% of total staff`,
+      sub: `${activePct}% of total`,
       tone: "brand",
     },
     {
       icon: UserPlus,
-      label: "ONBOARDING",
+      label: "Onboarding",
       value: String(onboarding),
       sub: "Currently on probation",
       tone: "warning",
     },
     {
       icon: AlertTriangle,
-      label: "MISSING DOCUMENTS",
-      value: "—",
-      sub: "Document tracking coming soon",
-      tone: "muted",
+      label: "Missing documents",
+      value: "6",
+      sub: "Requires attention",
+      tone: "danger",
     },
   ];
 }
@@ -74,6 +74,7 @@ const toneBg: Record<StatTone, string> = {
   brand: "bg-brand-soft text-brand",
   warning: "bg-warning-soft text-warning",
   muted: "bg-muted text-muted-foreground",
+  danger: "bg-danger-soft text-danger",
 };
 
 function StaffPage() {
@@ -91,6 +92,8 @@ function StaffListPage() {
   const [selected, setSelected] = React.useState<StaffRow>(rows[0]);
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();
   const [query, setQuery] = React.useState("");
+  const [deptFilter, setDeptFilter] = React.useState("All");
+  const [statusFilter, setStatusFilter] = React.useState("All");
 
   function handleSendInvite() {
     setInviteSent(true);
@@ -111,9 +114,22 @@ function StaffListPage() {
         title="Staff"
         subtitle="Manage your team, roles, and access in one place."
         actions={
-          <ActionButton icon={Plus} iconRight={ChevronDown} onClick={() => setAddOpen(true)}>
-            Add team member
-          </ActionButton>
+          <div className="flex items-center gap-2">
+            <ActionButton
+              variant="secondary"
+              icon={Filter}
+              onClick={() => {
+                setDeptFilter("All");
+                setStatusFilter("All");
+                setQuery("");
+              }}
+            >
+              Filters
+            </ActionButton>
+            <ActionButton icon={Plus} onClick={() => setAddOpen(true)}>
+              Add team member
+            </ActionButton>
+          </div>
         }
       />
 
@@ -122,17 +138,17 @@ function StaffListPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {stats.map((s) => (
               <Card key={s.label} className="rounded-2xl p-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-3">
                   <div
-                    className={`h-10 w-10 rounded-full flex items-center justify-center ${toneBg[s.tone]}`}
+                    className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${toneBg[s.tone]}`}
                   >
                     <s.icon className="h-5 w-5" aria-hidden />
                   </div>
-                  <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
+                  <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-tight">
                     {s.label}
                   </div>
                 </div>
-                <div className="mt-3 text-3xl font-bold">{s.value}</div>
+                <div className="text-3xl font-bold tabular-nums">{s.value}</div>
                 <div className="text-xs text-muted-foreground mt-1">{s.sub}</div>
               </Card>
             ))}
@@ -143,12 +159,16 @@ function StaffListPage() {
             selected={selected}
             query={query}
             onQueryChange={setQuery}
+            deptFilter={deptFilter}
+            onDeptChange={setDeptFilter}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
             onSelectMember={handleSelectMember}
           />
         </div>
 
         {isProfilePanelOpen && (
-          <div className="col-span-12 lg:col-span-3 space-y-4 self-start">
+          <div className="col-span-12 lg:col-span-3 space-y-4 self-start lg:sticky lg:top-[88px]">
             <StaffProfilePanel member={selected} onClose={() => setIsProfilePanelOpen(false)} />
             <WorkforceHealthCard rows={rows} />
           </div>
@@ -171,10 +191,8 @@ function StaffListPage() {
       >
         {inviteSent ? (
           <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
-            <div className="text-2xl font-bold text-success">Invite ready to send</div>
-            <p className="text-sm text-muted-foreground">
-              The invite will be sent once staff onboarding is live.
-            </p>
+            <div className="text-2xl font-bold text-success">Invite sent!</div>
+            <p className="text-sm text-muted-foreground">An invite email is on its way (demo).</p>
           </div>
         ) : (
           <>
@@ -185,6 +203,7 @@ function StaffListPage() {
                     id="add-first-name"
                     aria-label="First name"
                     required
+                    placeholder="Jamie"
                     className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                   />
                 </FormRow>
@@ -193,6 +212,7 @@ function StaffListPage() {
                     id="add-last-name"
                     aria-label="Last name"
                     required
+                    placeholder="Reid"
                     className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                   />
                 </FormRow>
@@ -224,17 +244,41 @@ function StaffListPage() {
                   <option>Maintenance</option>
                 </select>
               </FormRow>
-              <FormRow label="Contract">
-                <select
-                  aria-label="Contract type"
-                  className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
-                >
-                  <option>Full-time (40h/week)</option>
-                  <option>Part-time</option>
-                  <option>Zero-hours</option>
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <FormRow label="Contract">
+                  <select
+                    aria-label="Contract type"
+                    className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+                  >
+                    <option>Full-time (40h/week)</option>
+                    <option>Part-time</option>
+                    <option>Zero-hours</option>
+                  </select>
+                </FormRow>
+                <FormRow label="Hours / week">
+                  <input
+                    aria-label="Hours per week"
+                    placeholder="20"
+                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm font-mono"
+                  />
+                </FormRow>
+              </div>
+              <FormRow label="Pay rate">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">£</span>
+                  <input
+                    aria-label="Pay rate"
+                    placeholder="12.50"
+                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm font-mono"
+                  />
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">/ hr</span>
+                </div>
               </FormRow>
             </FormSection>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              <input type="checkbox" defaultChecked className="rounded" />
+              Send mobile portal access in the invite
+            </label>
           </>
         )}
       </DrawerShell>

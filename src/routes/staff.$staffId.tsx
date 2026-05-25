@@ -3,10 +3,7 @@ import * as React from "react";
 import { AppShell } from "@/components/dl";
 import { mockStaffProfiles } from "@/features/staff/data/mockStaffProfiles";
 import { StaffProfileHeader } from "@/features/staff/components/profile/StaffProfileHeader";
-import {
-  StaffProfileTabs,
-  type ProfileTab,
-} from "@/features/staff/components/profile/StaffProfileTabs";
+import { type ProfileTab } from "@/features/staff/components/profile/StaffProfileTabs";
 import { ProfileOverviewTab } from "@/features/staff/components/profile/ProfileOverviewTab";
 import { ProfileScheduleTab } from "@/features/staff/components/profile/ProfileScheduleTab";
 import { ProfileTimeTab } from "@/features/staff/components/profile/ProfileTimeTab";
@@ -54,8 +51,7 @@ function StaffProfilePage() {
 
   return (
     <AppShell searchPlaceholder="Search staff...">
-      <StaffProfileHeader profile={profile} onTabChange={setActiveTab} />
-      <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} />
+      <StaffProfileHeader profile={profile} activeTab={activeTab} onTabChange={setActiveTab} />
       {activeTab === "overview" && (
         <div
           role="tabpanel"

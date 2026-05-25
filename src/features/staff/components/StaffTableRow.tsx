@@ -1,0 +1,107 @@
+import * as React from "react";
+import { MoreHorizontal } from "lucide-react";
+import { StaffMonogram } from "./StaffMonogram";
+import type { StaffRow } from "../types";
+
+interface StaffTableRowProps {
+  row: StaffRow;
+  isSelected: boolean;
+  isChecked: boolean;
+  onSelect: () => void;
+  onCheck: () => void;
+  onAction: (msg: string) => void;
+}
+
+const STATUS_CLS: Record<string, string> = {
+  Active: "text-success",
+  Probation: "text-warning",
+  "On Leave": "text-accent-purple",
+};
+
+const AVAIL_BAR: Record<string, string> = {
+  high: "bg-success",
+  med: "bg-warning",
+  off: "bg-muted-foreground/30",
+};
+
+export function StaffTableRow({
+  row: r,
+  isSelected,
+  isChecked,
+  onSelect,
+  onCheck,
+  onAction,
+}: StaffTableRowProps) {
+  const pct = parseInt(r.avail, 10) || 0;
+
+  return (
+    <tr
+      tabIndex={0}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+      aria-selected={isSelected}
+      className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 transition-colors ${isSelected ? "bg-info-soft/30" : ""}`}
+    >
+      <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
+          aria-label={`Select ${r.n}`}
+          checked={isChecked}
+          onChange={onCheck}
+          className="rounded"
+        />
+      </td>
+      <td className="py-3 px-2">
+        <div className="flex items-center gap-2.5">
+          <StaffMonogram name={r.n} />
+          <div className="min-w-0">
+            <div className="font-medium text-sm">{r.n}</div>
+            <div className="text-[11px] text-muted-foreground font-mono truncate">{r.e}</div>
+          </div>
+        </div>
+      </td>
+      <td className="py-3 text-sm">
+        <div>{r.role}</div>
+        {r.sub && <div className="text-[11px] text-muted-foreground">{r.sub}</div>}
+      </td>
+      <td className="py-3 text-sm text-muted-foreground">{r.dept}</td>
+      <td className="py-3">
+        <span
+          className={`inline-flex items-center gap-1.5 text-xs font-medium ${STATUS_CLS[r.status] ?? "text-muted-foreground"}`}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-current shrink-0" aria-hidden />
+          {r.status}
+        </span>
+      </td>
+      <td className="py-3 text-sm text-muted-foreground">{r.contract}</td>
+      <td className="py-3">
+        <div className="flex items-center gap-2 min-w-[100px]">
+          <div className="flex-1 max-w-[72px] h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className={`h-full rounded-full ${AVAIL_BAR[r.availTone] ?? "bg-muted-foreground/30"}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <span className="text-[11px] font-semibold tabular-nums text-muted-foreground w-7">
+            {r.avail}
+          </span>
+        </div>
+      </td>
+      <td className="py-3 text-right pr-3" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          aria-label={`Actions for ${r.n}`}
+          onClick={() => onAction(`Actions for ${r.n} (demo)`)}
+          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors"
+        >
+          <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
+        </button>
+      </td>
+    </tr>
+  );
+}

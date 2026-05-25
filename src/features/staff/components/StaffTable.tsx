@@ -1,6 +1,9 @@
 import * as React from "react";
-import { Search } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, EmptyState } from "@/components/dl";
+import { StaffFilterBar } from "./StaffFilterBar";
+import { StaffBulkBar } from "./StaffBulkBar";
+import { StaffTableRow } from "./StaffTableRow";
 import type { StaffRow } from "../types";
 
 interface StaffTableProps {
@@ -8,133 +11,191 @@ interface StaffTableProps {
   selected: StaffRow;
   query: string;
   onQueryChange: (q: string) => void;
+  deptFilter: string;
+  onDeptChange: (d: string) => void;
+  statusFilter: string;
+  onStatusChange: (s: string) => void;
   onSelectMember: (row: StaffRow) => void;
 }
+
+const PAGE_SIZE = 10;
 
 export function StaffTable({
   rows,
   selected,
   query,
   onQueryChange,
+  deptFilter,
+  onDeptChange,
+  statusFilter,
+  onStatusChange,
   onSelectMember,
 }: StaffTableProps) {
-  const filteredRows = rows.filter((r) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      r.n.toLowerCase().includes(q) ||
-      r.e.toLowerCase().includes(q) ||
-      r.role.toLowerCase().includes(q) ||
-      r.dept.toLowerCase().includes(q)
-    );
-  });
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [page, setPage] = React.useState(1);
+  const [actionToast, setActionToast] = React.useState<string | null>(null);
+
+  const filteredRows = React.useMemo(
+    () =>
+      rows.filter((r) => {
+        if (deptFilter !== "All" && r.dept !== deptFilter) return false;
+        if (statusFilter !== "All" && r.status !== statusFilter) return false;
+        const q = query.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          r.n.toLowerCase().includes(q) ||
+          r.e.toLowerCase().includes(q) ||
+          r.role.toLowerCase().includes(q) ||
+          r.dept.toLowerCase().includes(q)
+        );
+      }),
+    [rows, query, deptFilter, statusFilter],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageRows = filteredRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [query, deptFilter, statusFilter]);
+
+  function toast(msg: string) {
+    setActionToast(msg);
+    setTimeout(() => setActionToast(null), 2200);
+  }
+
+  function toggleAll() {
+    if (selectedIds.size === filteredRows.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filteredRows.map((r) => r.id)));
+  }
+
+  function toggleRow(id: string) {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  }
 
   return (
-    <Card className="rounded-2xl p-4">
-      <div className="flex flex-wrap items-center gap-3 pb-3">
-        <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 flex-1 max-w-xs">
-          <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-          <input
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            aria-label="Search staff"
-            className="bg-transparent text-xs outline-none w-full"
-            placeholder="Search by name, email or role..."
-          />
+    <Card className="rounded-2xl overflow-hidden p-0">
+      {actionToast && (
+        <div className="mx-4 mt-4 rounded-xl bg-info-soft text-info text-xs font-medium px-3 py-2">
+          {actionToast}
         </div>
+      )}
+
+      <div className="p-4">
+        <StaffFilterBar
+          query={query}
+          onQueryChange={onQueryChange}
+          deptFilter={deptFilter}
+          onDeptChange={onDeptChange}
+          statusFilter={statusFilter}
+          onStatusChange={onStatusChange}
+          filteredCount={filteredRows.length}
+          totalCount={rows.length}
+        />
       </div>
 
-      <div
-        className="overflow-x-auto"
-        tabIndex={0}
-        role="region"
-        aria-label="Staff list, scroll horizontally to see all columns"
-      >
-        <table className="min-w-[880px] w-full text-sm">
+      {selectedIds.size > 0 && (
+        <StaffBulkBar
+          count={selectedIds.size}
+          onMessage={() => toast(`${selectedIds.size} staff messaged (demo)`)}
+          onTag={() => toast("Tag applied to selection (demo)")}
+          onExport={() => toast("selection.csv prepared (demo)")}
+          onClear={() => setSelectedIds(new Set())}
+        />
+      )}
+
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Staff list">
+        <table className="min-w-[900px] w-full text-sm">
           <thead>
-            <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
-              <th className="text-left py-2.5 px-2">STAFF MEMBER</th>
-              <th className="text-left py-2.5">ROLE</th>
-              <th className="text-left py-2.5">DEPARTMENT</th>
-              <th className="text-left py-2.5">STATUS</th>
-              <th className="text-left py-2.5">CONTRACT</th>
-              <th className="text-left py-2.5">AVAILABILITY</th>
-              <th className="text-left py-2.5">PORTAL</th>
+            <tr className="text-[10px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
+              <th className="py-2.5 px-3 w-9">
+                <input
+                  type="checkbox"
+                  aria-label="Select all"
+                  checked={filteredRows.length > 0 && selectedIds.size === filteredRows.length}
+                  onChange={toggleAll}
+                  className="rounded"
+                />
+              </th>
+              <th className="text-left py-2.5 px-2">Staff member</th>
+              <th className="text-left py-2.5">Role</th>
+              <th className="text-left py-2.5">Department</th>
+              <th className="text-left py-2.5">Status</th>
+              <th className="text-left py-2.5">Contract</th>
+              <th className="text-left py-2.5">Availability</th>
+              <th className="w-9" />
             </tr>
           </thead>
           <tbody>
-            {filteredRows.map((r) => (
-              <tr
+            {pageRows.map((r) => (
+              <StaffTableRow
                 key={r.id}
-                tabIndex={0}
-                onClick={() => onSelectMember(r)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onSelectMember(r);
-                  }
-                }}
-                aria-selected={selected.id === r.id}
-                className={`border-b border-border/60 last:border-0 cursor-pointer hover:bg-muted/40 ${selected.id === r.id ? "bg-info-soft/30" : ""}`}
-              >
-                <td className="py-3 px-2">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src={`https://i.pravatar.cc/64?img=${r.img}`}
-                      className="h-8 w-8 rounded-full object-cover"
-                      alt=""
-                    />
-                    <div>
-                      <div className="font-medium">{r.n}</div>
-                      <div className="text-[11px] text-muted-foreground">{r.e}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3">
-                  <div>{r.role}</div>
-                  {r.sub && <div className="text-[11px] text-muted-foreground">{r.sub}</div>}
-                </td>
-                <td className="py-3 text-muted-foreground">{r.dept}</td>
-                <td className="py-3">
-                  <span
-                    className={`inline-flex items-center gap-1.5 ${r.statusTone === "info" ? "text-info" : r.statusTone === "purple" ? "text-accent-purple" : "text-success"}`}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-                    {r.status}
-                  </span>
-                </td>
-                <td className="py-3 text-muted-foreground">{r.contract}</td>
-                <td className="py-3">
-                  <span className="font-medium">{r.avail}</span>{" "}
-                  <span
-                    className={`ml-1 text-[11px] ${r.availTone === "high" ? "text-success" : r.availTone === "med" ? "text-warning" : "text-muted-foreground"}`}
-                  >
-                    {r.availTone === "high" ? "High" : r.availTone === "med" ? "Medium" : ""}
-                  </span>
-                </td>
-                <td className="py-3">
-                  {r.portalStatus === "Claimed" ? (
-                    <span className="text-[11px] font-medium text-success">Claimed</span>
-                  ) : r.portalStatus === "Pending" ? (
-                    <span className="text-[11px] font-medium text-warning">Pending</span>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground">Not invited</span>
-                  )}
-                </td>
-              </tr>
+                row={r}
+                isSelected={selected.id === r.id}
+                isChecked={selectedIds.has(r.id)}
+                onSelect={() => onSelectMember(r)}
+                onCheck={() => toggleRow(r.id)}
+                onAction={toast}
+              />
             ))}
           </tbody>
         </table>
       </div>
 
       {filteredRows.length === 0 && (
-        <EmptyState title="No staff found" description="Try adjusting your search." />
+        <div className="px-4 pb-4">
+          <EmptyState title="No staff found" description="Try adjusting your search or filters." />
+        </div>
       )}
 
-      <div className="pt-4 text-xs text-muted-foreground">
-        {query.trim()
-          ? `Showing ${filteredRows.length} of ${rows.length} staff`
-          : `Showing ${rows.length} of ${rows.length} staff`}
+      <div className="flex items-center gap-3 px-4 py-3 border-t border-border/60">
+        <span className="text-xs text-muted-foreground">
+          Showing {filteredRows.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–
+          {Math.min(safePage * PAGE_SIZE, filteredRows.length)} of {filteredRows.length}
+        </span>
+        <div className="flex-1" />
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            disabled={safePage <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            aria-label="Previous page"
+            className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden />
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <button
+              key={p}
+              type="button"
+              onClick={() => setPage(p)}
+              className={`h-7 min-w-[28px] rounded-lg px-1.5 text-xs font-medium transition-colors ${safePage === p ? "bg-brand text-white" : "text-muted-foreground hover:bg-muted/60"}`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            type="button"
+            disabled={safePage >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            aria-label="Next page"
+            className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+        <select
+          aria-label="Rows per page"
+          className="h-7 rounded-lg border border-border bg-background px-2 text-xs"
+          defaultValue="10"
+        >
+          <option value="10">10 / pg</option>
+          <option value="20">20 / pg</option>
+        </select>
       </div>
     </Card>
   );
