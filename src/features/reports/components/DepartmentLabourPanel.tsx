@@ -1,3 +1,4 @@
+import { ExternalLink } from "lucide-react";
 import { Card } from "@/components/dl";
 
 const segments = [
@@ -15,10 +16,16 @@ export function DepartmentLabourPanel() {
 
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          COST BY DEPARTMENT
-        </div>
+      <div className="mb-3 flex items-center gap-2">
+        <div className="text-sm font-semibold">Cost by department</div>
+        <div className="grow" />
+        <button
+          type="button"
+          aria-label="Open cost by department detail"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60"
+        >
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
       </div>
 
       <div className="relative grid h-40 place-items-center">
@@ -47,18 +54,24 @@ export function DepartmentLabourPanel() {
           })}
         </svg>
         <div className="absolute text-center">
-          <div className="font-display text-[22px] font-bold">£42,180</div>
-          <div className="text-xs text-muted-foreground">Total cost</div>
+          <div className="font-display text-[22px] font-bold leading-none">£42,180</div>
+          <div className="mt-1 text-xs text-muted-foreground">Total cost</div>
         </div>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 flex flex-col gap-2">
         {segments.map((segment) => (
-          <div key={segment.department} className="row gap-2">
-            <span className="dot" style={{ background: segment.color }} />
-            <span className="grow txt-md">{segment.department}</span>
-            <span className="muted txt-xs">{segment.pct}%</span>
-            <span className="strong txt-md" style={{ minWidth: 64, textAlign: "right" }}>
+          <div key={segment.department} className="flex items-center gap-2 text-[13px]">
+            <span
+              className="inline-block h-2 w-2 shrink-0 rounded-full"
+              style={{ background: segment.color }}
+            />
+            <span className="grow truncate">{segment.department}</span>
+            <span className="shrink-0 text-[11px] text-muted-foreground">{segment.pct}%</span>
+            <span
+              className="shrink-0 font-mono text-[13px] font-semibold tabular-nums"
+              style={{ minWidth: 64, textAlign: "right" }}
+            >
               {segment.value}
             </span>
           </div>
