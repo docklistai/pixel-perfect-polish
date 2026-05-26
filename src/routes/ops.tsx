@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
-import { AlertTriangle, Plus, FileText, MoreHorizontal } from "lucide-react";
+import { useOverlays } from "@/components/AppShortcuts";
+import { AlertTriangle, Plus, FileText, MoreHorizontal, Sparkles } from "lucide-react";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
 import { OpsRightRail } from "@/features/ops/components/OpsRightRail";
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/ops")({
 });
 
 function OpsPage() {
+  const { openAiDrawer } = useOverlays();
   const [openDrawer, setOpenDrawer] = React.useState<DrawerMode>(null);
 
   return (
@@ -23,6 +25,9 @@ function OpsPage() {
         subtitle="Stay on top of today's activity and keep your team aligned."
         actions={
           <>
+            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
+              Ask assistant
+            </ActionButton>
             <ActionButton icon={AlertTriangle} onClick={() => setOpenDrawer("incident")}>
               Log incident
             </ActionButton>
@@ -45,7 +50,7 @@ function OpsPage() {
 
       <div className="grid grid-cols-12 gap-5">
         <OpsTimeline />
-        <OpsRightRail />
+        <OpsRightRail onOpenAssistant={openAiDrawer} />
       </div>
 
       <OpsDrawer mode={openDrawer} onClose={() => setOpenDrawer(null)} />

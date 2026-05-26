@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, FilterButton, ActionButton } from "@/components/dl";
-import { Calendar, Filter, Download } from "lucide-react";
+import { useOverlays } from "@/components/AppShortcuts";
+import { Calendar, Filter, Download, Sparkles } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/reports")({
 });
 
 function ReportsPage() {
+  const { openAiDrawer } = useOverlays();
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
   const [insightOpen, setInsightOpen] = React.useState(false);
@@ -41,6 +43,9 @@ function ReportsPage() {
               showCaret={false}
               onClick={() => setExportOpen(true)}
             />
+            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
+              AI review
+            </ActionButton>
             <ActionButton variant="secondary" onClick={() => setInsightOpen(true)}>
               View top review point
             </ActionButton>

@@ -1,10 +1,29 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Sparkles } from "lucide-react";
 import { Card } from "@/components/dl";
+import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
 import { opsHandoverNotes, opsFollowUps, opsQuickRef } from "../data/opsDemoData";
 
-export function OpsRightRail() {
+interface Props {
+  onOpenAssistant?: () => void;
+}
+
+export function OpsRightRail({ onOpenAssistant }: Props = {}) {
   return (
     <div className="col-span-12 lg:col-span-3 space-y-4">
+      <AiSuggestionCard
+        tone="teal"
+        title="Two open follow-ups look stale"
+        body="The lobby slip incident and Room 205 tap haven't moved in 24h. Ping the assigned staff or escalate to duty manager."
+        actions={[
+          {
+            label: "Open assistant",
+            primary: true,
+            icon: <Sparkles className="h-3.5 w-3.5" aria-hidden />,
+            onClick: onOpenAssistant,
+          },
+        ]}
+      />
+
       <Card className="rounded-2xl p-5">
         <h2 className="text-sm font-semibold mb-3">Shift handover</h2>
         {opsHandoverNotes.map((h, i) => (

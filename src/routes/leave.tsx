@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
-import { AlertTriangle, MoreHorizontal, UserCheck } from "lucide-react";
+import { useOverlays } from "@/components/AppShortcuts";
+import { AlertTriangle, MoreHorizontal, UserCheck, Sparkles } from "lucide-react";
 import { requests } from "@/features/leave/data/leaveDemoData";
 import { LeaveMetricCards } from "@/features/leave/components/LeaveMetricCards";
 import { LeaveRequestInbox } from "@/features/leave/components/LeaveRequestInbox";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/leave")({
 });
 
 function LeavePage() {
+  const { openAiDrawer } = useOverlays();
   const [reviewRow, setReviewRow] = React.useState<LeaveRequest | null>(null);
   const [approved, setApproved] = React.useState<Set<string>>(new Set());
   const [declined, setDeclined] = React.useState<Set<string>>(new Set());
@@ -33,6 +35,9 @@ function LeavePage() {
         subtitle="Review leave requests and ensure shifts are covered."
         actions={
           <>
+            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
+              Ask assistant
+            </ActionButton>
             <ActionButton icon={UserCheck} onClick={() => setReviewRow(requests[0])}>
               Review requests
             </ActionButton>
@@ -60,7 +65,7 @@ function LeavePage() {
           onReview={setReviewRow}
         />
         <LeaveCalendarPanel />
-        <LeaveRightRail />
+        <LeaveRightRail onOpenAssistant={openAiDrawer} />
         <LeaveCoverSummary />
       </div>
 
