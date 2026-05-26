@@ -503,6 +503,81 @@
     color: var(--ink-500);
   }
 
+  /* ── Prototype layout + text utilities ──
+     The prototype's theme.css ships these as bare classes. Routes and
+     feature components were authored against them, so we need them in
+     the app stylesheet too. Names are scoped to avoid Tailwind clashes
+     (Tailwind's .flex / .flex-col / .grow are still available). */
+  .row {
+    display: flex;
+    align-items: center;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+  .grow {
+    flex: 1;
+    min-width: 0;
+  }
+  .muted {
+    color: var(--ink-500);
+  }
+  .strong {
+    font-weight: 600;
+  }
+  .txt-xs {
+    font-size: 11px;
+  }
+  .txt-sm {
+    font-size: 12px;
+  }
+  .txt-md {
+    font-size: 13px;
+  }
+  .txt-lg {
+    font-size: 15px;
+  }
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    display: inline-block;
+  }
+  .divider {
+    height: 1px;
+    background: var(--border-faint);
+  }
+  .link {
+    color: var(--st-teal-ink);
+    font-weight: 600;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .link:hover {
+    color: var(--teal-500);
+  }
+  .text-teal {
+    color: var(--st-teal-ink);
+  }
+  .text-amber {
+    color: var(--st-amber-ink);
+  }
+  .text-red {
+    color: var(--st-red-ink);
+  }
+  .text-green {
+    color: var(--st-green-ink);
+  }
+
   /* ── Cards ── */
   .card {
     background: var(--bg-card);
