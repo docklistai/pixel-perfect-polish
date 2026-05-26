@@ -5,7 +5,7 @@ import {
   Card,
   PageHeader,
   ActionButton,
-  DrawerShell,
+  DialogShell,
   FormSection,
   FormRow,
 } from "@/components/dl";
@@ -87,19 +87,19 @@ function StaffPage() {
 function StaffListPage() {
   const stats = buildStats(rows);
   const [addOpen, setAddOpen] = React.useState(false);
-  const [inviteSent, setInviteSent] = React.useState(false);
+  const [invitePrepared, setInvitePrepared] = React.useState(false);
   const [selected, setSelected] = React.useState<StaffRow>(rows[0]);
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();
   const [query, setQuery] = React.useState("");
   const [deptFilter, setDeptFilter] = React.useState("All");
   const [statusFilter, setStatusFilter] = React.useState("All");
 
+  React.useEffect(() => {
+    if (!addOpen) setInvitePrepared(false);
+  }, [addOpen]);
+
   function handleSendInvite() {
-    setInviteSent(true);
-    setTimeout(() => {
-      setAddOpen(false);
-      setInviteSent(false);
-    }, 1400);
+    setInvitePrepared(true);
   }
 
   function handleSelectMember(row: StaffRow) {
@@ -173,11 +173,12 @@ function StaffListPage() {
         )}
       </div>
 
-      <DrawerShell
+      <DialogShell
         open={addOpen}
         onOpenChange={setAddOpen}
-        title="Add team member"
-        description="Invite a new colleague to Harbour View Hotel."
+        title="Add a team member"
+        description="Send an invite to join Harbour View."
+        size="lg"
         footer={
           <>
             <ActionButton variant="secondary" onClick={() => setAddOpen(false)}>
@@ -187,99 +188,100 @@ function StaffListPage() {
           </>
         }
       >
-        {inviteSent ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
-            <div className="text-2xl font-bold text-success">Invite sent!</div>
-            <p className="text-sm text-muted-foreground">An invite email is on its way (demo).</p>
+        <div className="space-y-4">
+          {invitePrepared && (
+            <div className="rounded-2xl border border-[var(--st-teal-line)] bg-[var(--st-teal-bg)] px-4 py-3 text-sm text-[var(--st-teal-ink)]">
+              Invite prepared locally (demo). No backend send is wired.
+            </div>
+          )}
+          <div className="rounded-2xl border border-border/40 bg-[var(--bg-raised)] px-4 py-3 text-sm text-muted-foreground">
+            Keep this invite focused on scheduling access, role setup, and mobile portal access.
           </div>
-        ) : (
-          <>
-            <FormSection title="Personal">
-              <div className="grid grid-cols-2 gap-3">
-                <FormRow label="First name" htmlFor="add-first-name" required>
-                  <input
-                    id="add-first-name"
-                    aria-label="First name"
-                    required
-                    placeholder="Jamie"
-                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
-                  />
-                </FormRow>
-                <FormRow label="Last name" htmlFor="add-last-name" required>
-                  <input
-                    id="add-last-name"
-                    aria-label="Last name"
-                    required
-                    placeholder="Reid"
-                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
-                  />
-                </FormRow>
-              </div>
-              <FormRow label="Work email" htmlFor="add-work-email" required>
+          <FormSection title="Personal">
+            <div className="grid grid-cols-2 gap-3">
+              <FormRow label="First name" htmlFor="add-first-name" required>
                 <input
-                  id="add-work-email"
-                  type="email"
-                  aria-label="Work email"
+                  id="add-first-name"
+                  aria-label="First name"
                   required
-                  placeholder="name@harbourview.co.uk"
+                  placeholder="Jamie"
                   className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
                 />
               </FormRow>
-            </FormSection>
-            <FormSection title="Role">
-              <FormRow label="Department" htmlFor="add-department" required>
-                <select
-                  id="add-department"
-                  aria-label="Department"
+              <FormRow label="Last name" htmlFor="add-last-name" required>
+                <input
+                  id="add-last-name"
+                  aria-label="Last name"
                   required
+                  placeholder="Reid"
+                  className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+                />
+              </FormRow>
+            </div>
+            <FormRow label="Work email" htmlFor="add-work-email" required>
+              <input
+                id="add-work-email"
+                type="email"
+                aria-label="Work email"
+                required
+                placeholder="name@harbourview.co.uk"
+                className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
+              />
+            </FormRow>
+          </FormSection>
+          <FormSection title="Role">
+            <FormRow label="Department" htmlFor="add-department" required>
+              <select
+                id="add-department"
+                aria-label="Department"
+                required
+                className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
+              >
+                <option>Front of House</option>
+                <option>Bar</option>
+                <option>Kitchen</option>
+                <option>Housekeeping</option>
+                <option>Events</option>
+                <option>Maintenance</option>
+              </select>
+            </FormRow>
+            <div className="grid grid-cols-2 gap-3">
+              <FormRow label="Contract">
+                <select
+                  aria-label="Contract type"
                   className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
                 >
-                  <option>Front of House</option>
-                  <option>Bar</option>
-                  <option>Kitchen</option>
-                  <option>Housekeeping</option>
-                  <option>Events</option>
-                  <option>Maintenance</option>
+                  <option>Full-time (40h/week)</option>
+                  <option>Part-time</option>
+                  <option>Zero-hours</option>
                 </select>
               </FormRow>
-              <div className="grid grid-cols-2 gap-3">
-                <FormRow label="Contract">
-                  <select
-                    aria-label="Contract type"
-                    className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
-                  >
-                    <option>Full-time (40h/week)</option>
-                    <option>Part-time</option>
-                    <option>Zero-hours</option>
-                  </select>
-                </FormRow>
-                <FormRow label="Hours / week">
-                  <input
-                    aria-label="Hours per week"
-                    placeholder="20"
-                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm font-mono"
-                  />
-                </FormRow>
-              </div>
-              <FormRow label="Pay rate">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">£</span>
-                  <input
-                    aria-label="Pay rate"
-                    placeholder="12.50"
-                    className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm font-mono"
-                  />
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">/ hr</span>
-                </div>
+              <FormRow label="Hours / week">
+                <input
+                  aria-label="Hours per week"
+                  placeholder="20"
+                  className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm font-mono"
+                />
               </FormRow>
-            </FormSection>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <input type="checkbox" defaultChecked className="rounded" />
-              Send mobile portal access in the invite
-            </label>
-          </>
-        )}
-      </DrawerShell>
+            </div>
+            <FormRow label="Pay rate">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">£</span>
+                <input
+                  aria-label="Pay rate"
+                  placeholder="12.50"
+                  className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm font-mono"
+                />
+                <span className="text-sm text-muted-foreground whitespace-nowrap">/ hr</span>
+              </div>
+            </FormRow>
+          </FormSection>
+          <label className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <input type="checkbox" defaultChecked className="rounded" />
+            Send mobile portal access in the invite
+          </label>
+        </div>
+      </DialogShell>
     </AppShell>
   );
 }

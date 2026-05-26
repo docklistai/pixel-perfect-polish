@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Lock, Plus } from "lucide-react";
+import { Pin, Plus } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
+import { ProfileNoteCard } from "./ProfileNoteCard";
 import type { StaffProfileNote } from "../../types";
 
 interface Props {
@@ -8,28 +9,49 @@ interface Props {
   onSaveNote: (note: StaffProfileNote) => void;
 }
 
-const NOTE_TYPE_OPTIONS = [
-  "General",
-  "Scheduling",
-  "Availability",
-  "Coverage",
-  "Feedback",
-  "Admin",
-];
+const NOTE_TYPES = ["General", "Scheduling", "Availability", "Coverage", "Documents", "Handover"];
+const NOTE_FILTERS = [
+  { id: "all", label: "All" },
+  { id: "internal", label: "Managers" },
+  { id: "shared", label: "Shared" },
+  { id: "availability", label: "Availability" },
+  { id: "coverage", label: "Coverage" },
+  { id: "documents", label: "Documents" },
+] as const;
+
+type NoteFilter = (typeof NOTE_FILTERS)[number]["id"];
+
+function matchesFilter(note: StaffProfileNote, filter: NoteFilter) {
+  const type = note.type.toLowerCase();
+  if (filter === "all") return true;
+  if (filter === "internal") return !note.visibleToStaff;
+  if (filter === "shared") return note.visibleToStaff;
+  if (filter === "documents") return type.includes("document");
+  return type.includes(filter);
+}
 
 export function ProfileNotesTab({ notes, onSaveNote }: Props) {
-  const [noteType, setNoteType] = React.useState("General");
+  const [filter, setFilter] = React.useState<NoteFilter>("all");
+  const [noteType, setNoteType] = React.useState("Scheduling");
   const [noteText, setNoteText] = React.useState("");
   const [visibleToStaff, setVisibleToStaff] = React.useState(false);
 
+  const filtered = React.useMemo(
+    () => notes.filter((note) => matchesFilter(note, filter)),
+    [filter, notes],
+  );
+  const featured = filtered.filter((note) => !note.visibleToStaff).slice(0, 2);
+  const remaining = filtered.filter((note) => !featured.includes(note));
+
   function handleSave() {
-    if (!noteText.trim()) return;
+    const trimmed = noteText.trim();
+    if (!trimmed) return;
 
     onSaveNote({
       date: "Just now",
       author: "You",
       type: noteType,
-      text: noteText.trim(),
+      text: trimmed,
       visibleToStaff,
     });
     setNoteText("");
@@ -38,83 +60,120 @@ export function ProfileNotesTab({ notes, onSaveNote }: Props) {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-4 min-w-0">
-        <ProfileCard title="Notes">
-          {notes.length === 0 ? (
-            <p className="py-2 text-xs text-muted-foreground">No notes recorded yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {notes.map((note, index) => (
-                <div
-                  key={`${note.date}-${index}`}
-                  className="rounded-xl border border-border/40 bg-card p-3 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-foreground">{note.author}</span>
-                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                      {note.type}
-                    </span>
-                    <span className="ml-auto text-[10px] text-muted-foreground">{note.date}</span>
-                  </div>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{note.text}</p>
-                  <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Lock className="h-3 w-3" aria-hidden />
-                    {note.visibleToStaff ? "Visible to staff" : "Manager note"}
-                  </div>
-                </div>
-              ))}
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/40 bg-card p-2">
+          {NOTE_FILTERS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setFilter(option.id)}
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors ${
+                filter === option.id
+                  ? "bg-[var(--bg-raised)] text-foreground shadow-[var(--shadow-1)]"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+          <div className="ml-auto text-xs text-muted-foreground">{filtered.length} notes</div>
+        </div>
+
+        {featured.length > 0 && (
+          <div className="space-y-2">
+            <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Priority notes
             </div>
+            {featured.map((note, index) => (
+              <ProfileNoteCard
+                key={`${note.date}-${note.author}-${index}`}
+                note={note}
+                featured
+                onReply={() => undefined}
+                onPin={() => undefined}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+            {featured.length > 0 ? "Other notes" : "Notes"}
+          </div>
+          {filtered.length === 0 ? (
+            <ProfileCard title="Notes">
+              <div className="rounded-2xl border border-dashed border-border/50 bg-[var(--bg-raised)] px-4 py-8 text-center">
+                <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
+                  <Pin className="h-4 w-4" aria-hidden />
+                </div>
+                <div className="text-sm font-semibold">No notes yet</div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add an operational note about rota, availability, coverage, or document follow-up.
+                </p>
+              </div>
+            </ProfileCard>
+          ) : (
+            remaining.map((note, index) => (
+              <ProfileNoteCard
+                key={`${note.date}-${note.author}-${index}`}
+                note={note}
+                onReply={() => undefined}
+                onPin={() => undefined}
+              />
+            ))
           )}
-        </ProfileCard>
+        </div>
       </div>
 
       <div className="min-w-0">
-        <ProfileCard title="Add note">
-          <div className="space-y-3">
+        <ProfileCard
+          title="Add note"
+          action={
+            <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-semibold text-info">
+              Manager use
+            </span>
+          }
+        >
+          <div className="space-y-4">
             <div>
-              <label
-                htmlFor="note-type"
-                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
-              >
-                Note type
-              </label>
-              <select
-                id="note-type"
-                value={noteType}
-                onChange={(e) => setNoteType(e.target.value)}
-                className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm"
-              >
-                {NOTE_TYPE_OPTIONS.map((type) => (
-                  <option key={type} value={type}>
+              <div className="mb-2 flex flex-wrap gap-2">
+                {NOTE_TYPES.map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setNoteType(type)}
+                    className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                      noteType === type
+                        ? "border-transparent bg-brand text-white"
+                        : "border-border/40 bg-[var(--bg-raised)] text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
                     {type}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Keep this to rota context, handover notes, availability, or document follow-up.
+              </p>
             </div>
-            <div>
-              <label
-                htmlFor="note-text"
-                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
-              >
-                Note
-              </label>
-              <textarea
-                id="note-text"
-                value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-                rows={5}
-                placeholder="Add a manager note..."
-                className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm"
-              />
-            </div>
+
+            <textarea
+              value={noteText}
+              onChange={(event) => setNoteText(event.target.value)}
+              rows={6}
+              placeholder="Add a manager note..."
+              className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-brand"
+            />
+
             <label className="flex items-start gap-2 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 checked={visibleToStaff}
-                onChange={(e) => setVisibleToStaff(e.target.checked)}
-                className="mt-0.5"
+                onChange={(event) => setVisibleToStaff(event.target.checked)}
+                className="mt-0.5 rounded border-border"
               />
               Visible to staff member
             </label>
+
             <button
               type="button"
               onClick={handleSave}

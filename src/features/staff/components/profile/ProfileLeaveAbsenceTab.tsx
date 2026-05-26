@@ -1,6 +1,7 @@
 import * as React from "react";
-import { AlertTriangle, Calendar, ChevronRight, Plane } from "lucide-react";
+import { Calendar, ChevronRight, Plane } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
+import { BalanceBar, LeaveBadge, LeaveTypeIcon } from "./ProfileLeaveWidgets";
 import type { StaffProfile } from "../../types";
 
 interface Props {
@@ -18,13 +19,14 @@ type LeaveRecord = {
 
 function buildLeaveRecords(profile: StaffProfile): LeaveRecord[] {
   const upcoming = profile.upcomingLeave?.[0];
+
   return [
     {
       type: "Annual",
       range: upcoming?.range ?? "31 May – 2 Jun 2026",
-      days: upcoming ? Number.parseInt(upcoming.duration, 10) || 3 : 3,
-      status: "approved",
-      approver: "Alex Thompson",
+      days: upcoming ? Number.parseInt(upcoming.duration, 10) || 2 : 2,
+      status: upcoming?.status?.toLowerCase() === "requested" ? "requested" : "approved",
+      approver: upcoming?.status?.toLowerCase() === "requested" ? "Pending" : "Alex Thompson",
       impact: "Medium · 2 conflicts",
     },
     {
@@ -62,50 +64,40 @@ function buildLeaveRecords(profile: StaffProfile): LeaveRecord[] {
   ];
 }
 
-function BalanceBar({
-  label,
-  used,
-  total,
-  tone = "teal",
-}: {
-  label: string;
-  used: number;
-  total: number;
-  tone?: "teal" | "amber" | "purple";
-}) {
-  const pct = total > 0 ? Math.min(100, Math.round((used / total) * 100)) : 0;
-  const fill =
-    tone === "amber"
-      ? "var(--st-amber-ink)"
-      : tone === "purple"
-        ? "var(--st-purple-ink)"
-        : "var(--st-teal-ink)";
-
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">{label}</span>
-        <span className="font-mono text-xs font-semibold tabular-nums">
-          {used} / {total}
-        </span>
-      </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: fill }} />
-      </div>
-    </div>
-  );
-}
-
 export function ProfileLeaveAbsenceTab({ profile }: Props) {
-  const la = profile.leaveAbsence;
   const leaveRows = buildLeaveRecords(profile);
-  const upcoming = profile.upcomingLeave ?? [];
-  const nextLeave = upcoming[0];
+  const upcoming = profile.upcomingLeave?.[0];
+  const nextRange = upcoming?.range ?? "No upcoming leave";
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-4 min-w-0">
         <ProfileCard title="Leave history">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            {["All", "Annual", "Sick", "Unpaid"].map((label, index) => (
+              <button
+                key={label}
+                type="button"
+                className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors ${
+                  index === 0
+                    ? "border-transparent bg-brand text-white"
+                    : "border-border/40 bg-[var(--bg-raised)] text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            <div className="ml-auto">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-xl border border-border/40 bg-[var(--bg-raised)] px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <Calendar className="h-3.5 w-3.5" aria-hidden />
+                New leave
+              </button>
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
@@ -115,6 +107,7 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
                   <th className="px-0 py-2 text-left">Days</th>
                   <th className="px-0 py-2 text-left">Status</th>
                   <th className="px-0 py-2 text-left">Approver</th>
+                  <th className="px-0 py-2 text-left">Impact</th>
                   <th className="px-0 py-2 text-right" />
                 </tr>
               </thead>
@@ -126,52 +119,17 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
                   >
                     <td className="py-3 pr-3">
                       <div className="flex items-center gap-2">
-                        <div
-                          className="flex size-7 items-center justify-center rounded-full"
-                          style={{
-                            background:
-                              entry.type === "Sick"
-                                ? "var(--st-red-bg)"
-                                : entry.type === "Unpaid"
-                                  ? "var(--st-purple-bg)"
-                                  : "var(--st-teal-bg)",
-                            color:
-                              entry.type === "Sick"
-                                ? "var(--st-red-ink)"
-                                : entry.type === "Unpaid"
-                                  ? "var(--st-purple-ink)"
-                                  : "var(--st-teal-ink)",
-                          }}
-                        >
-                          {entry.type === "Sick" ? (
-                            <AlertTriangle className="h-3 w-3" aria-hidden />
-                          ) : (
-                            <Plane className="h-3 w-3" aria-hidden />
-                          )}
-                        </div>
+                        <LeaveTypeIcon type={entry.type} />
                         <span className="font-semibold text-foreground">{entry.type}</span>
                       </div>
                     </td>
                     <td className="py-3 pr-3">{entry.range}</td>
                     <td className="py-3 pr-3 font-mono">{entry.days}</td>
                     <td className="py-3 pr-3">
-                      {entry.status === "approved" ? (
-                        <span className="inline-flex items-center rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-semibold text-success">
-                          Approved
-                        </span>
-                      ) : entry.status === "requested" ? (
-                        <span className="inline-flex items-center rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-semibold text-warning">
-                          Requested
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-accent-purple-soft px-2 py-0.5 text-[10px] font-semibold text-accent-purple">
-                          Logged
-                        </span>
-                      )}
+                      <LeaveBadge status={entry.status} />
                     </td>
-                    <td className="py-3 pr-3 text-muted-foreground">
-                      {entry.status === "requested" ? "Pending" : (entry.approver ?? "—")}
-                    </td>
+                    <td className="py-3 pr-3 text-muted-foreground">{entry.approver ?? "—"}</td>
+                    <td className="py-3 pr-3 text-muted-foreground">{entry.impact}</td>
                     <td className="py-3 text-right text-muted-foreground">
                       <ChevronRight className="ml-auto h-3.5 w-3.5" aria-hidden />
                     </td>
@@ -184,53 +142,46 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
       </div>
 
       <div className="space-y-4 min-w-0">
-        <ProfileCard title="Balances · 2025">
+        <ProfileCard title="Balances · 2026">
           <div className="space-y-3">
-            <BalanceBar label="Annual leave" used={28 - la.annualLeaveRemaining} total={28} />
+            <BalanceBar
+              label="Annual leave"
+              used={28 - profile.leaveAbsence.annualLeaveRemaining}
+              total={28}
+            />
             <BalanceBar
               label="Sick days · last 12m"
-              used={la.sickDaysThisYear}
+              used={profile.leaveAbsence.sickDaysThisYear}
               total={10}
               tone="amber"
             />
             <BalanceBar
               label="Unpaid leave"
-              used={la.shortNoticeAbsences}
+              used={profile.leaveAbsence.shortNoticeAbsences}
               total={5}
               tone="purple"
             />
+            <BalanceBar label="TOIL" used={0} total={8} />
           </div>
-          <div
-            className="mt-4 rounded-xl border border-border/40 px-3 py-2.5"
-            style={{ background: "var(--st-purple-bg)" }}
+          <button
+            type="button"
+            className="mt-4 inline-flex w-full items-center justify-center gap-1 rounded-xl border border-border/40 bg-[var(--bg-raised)] px-3 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
           >
-            <div className="flex items-start gap-2">
-              <Calendar className="mt-0.5 h-3.5 w-3.5 text-[var(--st-purple-ink)]" aria-hidden />
-              <div>
-                <div className="text-xs font-semibold text-[var(--st-purple-ink)]">
-                  Next leave · {nextLeave?.range ?? "No upcoming leave"}
-                </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">
-                  {nextLeave
-                    ? `${nextLeave.type} · ${nextLeave.status.toLowerCase()} · medium coverage impact`
-                    : "No upcoming leave approved."}
-                </div>
-              </div>
-            </div>
-          </div>
+            Adjust balances
+          </button>
         </ProfileCard>
 
         <ProfileCard title="Upcoming">
-          {nextLeave ? (
-            <div className="rounded-xl border border-border/40 bg-muted/20 p-3">
+          {upcoming ? (
+            <div className="rounded-[10px] border border-border/40 bg-[var(--st-purple-bg)] p-3">
               <div className="flex items-center gap-3">
                 <div className="flex size-7 items-center justify-center rounded-full bg-accent-purple-soft text-accent-purple">
                   <Plane className="h-3.5 w-3.5" aria-hidden />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold">{nextLeave.range}</div>
+                  <div className="text-sm font-semibold">{nextRange}</div>
                   <div className="text-xs text-muted-foreground">
-                    {nextLeave.type} · {nextLeave.duration} · {nextLeave.status.toLowerCase()}
+                    Annual leave · {upcoming.duration} · {upcoming.status.toLowerCase()}
                   </div>
                 </div>
               </div>
@@ -239,7 +190,9 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
             <p className="py-2 text-xs text-muted-foreground">No upcoming leave approved.</p>
           )}
           <p className="mt-3 text-xs text-muted-foreground">
-            2 conflicts detected for this period - check rota.
+            {profile.leaveAbsence.shortNoticeAbsences > 0
+              ? "Coverage needs a quick review before publishing."
+              : "No remaining coverage issues for this period."}
           </p>
         </ProfileCard>
       </div>
