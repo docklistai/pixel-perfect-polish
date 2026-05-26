@@ -14,8 +14,13 @@ const ghostBtn =
 
 export function StaffBulkBar({ count, onMessage, onTag, onExport, onClear }: StaffBulkBarProps) {
   return (
-    <div className="mx-4 mb-3 flex items-center gap-2.5 rounded-xl border border-brand/40 bg-brand-soft px-4 py-2.5 shadow-sm">
-      <span className="text-xs font-semibold text-brand">{count} selected</span>
+    <div
+      className="mx-4 mb-3 flex items-center gap-2.5 rounded-xl border px-4 py-2.5 shadow-sm"
+      style={{ background: "var(--st-teal-bg)", borderColor: "var(--st-teal-line)" }}
+    >
+      <span className="text-xs font-semibold" style={{ color: "var(--st-teal-ink)" }}>
+        {count} selected
+      </span>
       <div className="flex-1" />
       <button type="button" onClick={onMessage} className={ghostBtn}>
         <MessageSquare className="h-3.5 w-3.5" aria-hidden /> Message
@@ -29,7 +34,8 @@ export function StaffBulkBar({ count, onMessage, onTag, onExport, onClear }: Sta
       <button
         type="button"
         onClick={onClear}
-        className="text-xs font-medium text-brand hover:text-foreground transition-colors"
+        className="text-xs font-medium transition-colors"
+        style={{ color: "var(--st-teal-ink)" }}
       >
         Clear
       </button>

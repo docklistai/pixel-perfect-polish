@@ -8,6 +8,7 @@ export interface StaffRow {
   dept: string;
   status: string;
   contract: string;
+  hours: string;
   avail: string;
   availTone: "high" | "med" | "off";
   img: number;

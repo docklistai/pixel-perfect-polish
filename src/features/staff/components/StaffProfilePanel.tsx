@@ -72,7 +72,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-border/60">
+      <div className="flex items-center justify-between border-b border-border/60 px-4 pt-4 pb-3">
         <span className="text-sm font-semibold">{member.n}</span>
         <button
           type="button"
@@ -84,12 +84,12 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         </button>
       </div>
 
-      <div className="px-4 pt-4 pb-3 border-b border-border/60">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="border-b border-border/60 px-4 pt-4 pb-3">
+        <div className="mb-3 flex items-center gap-3">
           <StaffMonogram name={member.n} size="lg" />
           <div>
-            <div className="font-semibold text-base">{member.n}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">
+            <div className="text-base font-semibold">{member.n}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">
               {member.role}
               {member.sub ? ` · ${member.sub}` : ""}
             </div>
@@ -105,7 +105,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
           </div>
         </div>
 
-        <div className="text-[11px] text-muted-foreground font-mono space-y-0.5 mb-3">
+        <div className="mb-3 space-y-0.5 font-mono text-[11px] text-muted-foreground">
           <div>{member.e}</div>
           <div>{profile?.phone ?? "+44 7700 900 123"}</div>
         </div>
@@ -125,7 +125,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
               aria-label={label}
               onClick={handler}
               title={label}
-              className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors border border-border"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted/60"
             >
               <Icon className="h-3.5 w-3.5" aria-hidden />
             </button>
@@ -134,7 +134,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
             type="button"
             aria-label="More actions"
             onClick={() => showToast("Actions menu (demo)")}
-            className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors border border-border"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted/60"
           >
             <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
           </button>
@@ -169,7 +169,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         })}
       </div>
 
-      <div className="px-4 py-3 space-y-4">
+      <div className="space-y-4 px-4 py-3">
         {activeTab === "Overview" && (
           <StaffPanelOverview
             member={member}
@@ -225,7 +225,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
         <Link
           to="/staff/$staffId"
           params={{ staffId: member.id }}
-          className="flex items-center justify-center gap-1.5 w-full rounded-xl bg-brand text-white text-xs font-semibold py-2.5 hover:opacity-90 transition-opacity"
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
           <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
           Open full profile

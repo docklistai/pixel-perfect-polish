@@ -13,7 +13,17 @@ function portalTone(status: string): Tone {
 
 export function FlagsCard({ profile }: { profile: StaffProfile }) {
   return (
-    <ProfileCard title="Flags" className="p-5">
+    <ProfileCard
+      title="Flags"
+      action={
+        profile.flags.length > 0 ? (
+          <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-semibold text-warning">
+            {profile.flags.length}
+          </span>
+        ) : null
+      }
+      className="p-5"
+    >
       {profile.flags.length === 0 ? (
         <span className="text-xs text-muted-foreground">No active flags</span>
       ) : (

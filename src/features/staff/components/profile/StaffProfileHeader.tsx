@@ -12,10 +12,10 @@ const HEADER_TABS: { id: ProfileTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "schedule", label: "Schedule" },
   { id: "time", label: "Time" },
-  { id: "leave", label: "Leave & Absence" },
+  { id: "leave", label: "Leave" },
   { id: "documents", label: "Documents" },
   { id: "notes", label: "Notes" },
-  { id: "insights", label: "Work patterns" },
+  { id: "insights", label: "Patterns" },
 ];
 
 interface StaffProfileHeaderProps {
@@ -51,50 +51,52 @@ export function StaffProfileHeader({ profile, activeTab, onTabChange }: StaffPro
       )}
 
       <Card className="p-0 overflow-visible">
-        <div className="flex items-start gap-5 p-6 flex-wrap">
+        <div className="flex items-start gap-5 flex-wrap p-6">
           <StaffMonogram name={profile.name} size="xl" />
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap mb-1">
-              <h1 className="text-2xl font-bold tracking-tight leading-none">{profile.name}</h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-[24px] font-semibold leading-none tracking-[-0.02em]">
+                {profile.name}
+              </h1>
               <StatusBadge tone={statusTone(profile.status)} dot>
                 {profile.status}
               </StatusBadge>
               {profile.status === "Probation" && (
-                <span className="inline-flex items-center rounded-md bg-warning-soft text-warning text-[11px] font-semibold px-2 py-0.5">
+                <span className="inline-flex items-center rounded-md bg-warning-soft px-2 py-0.5 text-[11px] font-semibold text-warning">
                   Probation review · 12 Jun
                 </span>
               )}
             </div>
 
-            <div className="text-sm text-muted-foreground mt-1">
+            <div className="mt-1 text-sm text-muted-foreground">
               {profile.role}
               {profile.sub ? ` · ${profile.sub}` : ""} · {profile.dept}
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               <a
                 href={`mailto:${profile.email}`}
-                className="inline-flex items-center gap-1 hover:text-foreground transition-colors font-mono break-all"
+                className="inline-flex items-center gap-1 font-mono transition-colors hover:text-foreground"
               >
                 <Mail className="h-3 w-3 shrink-0" aria-hidden />
                 {profile.email}
               </a>
-              <span className="opacity-40" aria-hidden>
+              <span aria-hidden className="opacity-40">
                 •
               </span>
               <span className="inline-flex items-center gap-1 font-mono">
                 <Phone className="h-3 w-3 shrink-0" aria-hidden />
                 {profile.phone || "+44 7700 900 123"}
               </span>
-              <span className="opacity-40" aria-hidden>
+              <span aria-hidden className="opacity-40">
                 •
               </span>
               <span className="inline-flex items-center gap-1">
                 <Briefcase className="h-3 w-3 shrink-0" aria-hidden />
                 {profile.employmentType ?? profile.contract} · {profile.contractedHours}
               </span>
-              <span className="opacity-40" aria-hidden>
+              <span aria-hidden className="opacity-40">
                 •
               </span>
               <span className="inline-flex items-center gap-1">
@@ -113,11 +115,10 @@ export function StaffProfileHeader({ profile, activeTab, onTabChange }: StaffPro
           />
         </div>
 
-        {/* Tab strip inside header card */}
         <div
           role="tablist"
           aria-label="Staff profile sections"
-          className="flex border-t border-border overflow-x-auto px-2"
+          className="flex overflow-x-auto border-t border-border px-2"
         >
           {HEADER_TABS.map((tab) => (
             <button
@@ -125,13 +126,20 @@ export function StaffProfileHeader({ profile, activeTab, onTabChange }: StaffPro
               id={`staff-profile-tab-${tab.id}`}
               role="tab"
               type="button"
+              aria-controls={`staff-profile-panel-${tab.id}`}
               aria-selected={activeTab === tab.id}
               onClick={() => onTabChange(tab.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onTabChange(tab.id);
+                }
+              }}
               className={cn(
-                "px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0",
+                "shrink-0 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 activeTab === tab.id
-                  ? "border-b-2 border-brand text-brand"
-                  : "text-muted-foreground hover:text-foreground border-b-2 border-transparent",
+                  ? "border-brand text-brand"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               {tab.label}

@@ -14,10 +14,10 @@ const TABS: { id: ProfileTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "schedule", label: "Schedule" },
   { id: "time", label: "Time" },
-  { id: "leave", label: "Leave & Absence" },
+  { id: "leave", label: "Leave" },
   { id: "documents", label: "Documents" },
   { id: "notes", label: "Notes" },
-  { id: "insights", label: "Work patterns" },
+  { id: "insights", label: "Patterns" },
 ];
 
 interface StaffProfileTabsProps {
@@ -30,7 +30,7 @@ export function StaffProfileTabs({ activeTab, onChange }: StaffProfileTabsProps)
     <div
       role="tablist"
       aria-label="Staff profile sections"
-      className="border-b border-border flex gap-0 mb-6 overflow-x-auto"
+      className="mb-6 flex overflow-x-auto border-b border-border"
     >
       {TABS.map((tab) => (
         <button
@@ -38,13 +38,20 @@ export function StaffProfileTabs({ activeTab, onChange }: StaffProfileTabsProps)
           id={`staff-profile-tab-${tab.id}`}
           role="tab"
           type="button"
+          aria-controls={`staff-profile-panel-${tab.id}`}
           aria-selected={activeTab === tab.id}
           onClick={() => onChange(tab.id)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              onChange(tab.id);
+            }
+          }}
           className={cn(
-            "px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             activeTab === tab.id
-              ? "border-b-2 border-brand text-brand"
-              : "text-muted-foreground hover:text-foreground",
+              ? "border-brand text-brand"
+              : "border-transparent text-muted-foreground hover:text-foreground",
           )}
         >
           {tab.label}

@@ -27,8 +27,15 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
         setActionsOpen(false);
       }
     }
+    function keyHandler(e: KeyboardEvent) {
+      if (e.key === "Escape") setActionsOpen(false);
+    }
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("keydown", keyHandler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", keyHandler);
+    };
   }, [actionsOpen]);
 
   const firstName = name.split(" ")[0];
@@ -64,9 +71,16 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
         <div className="relative" ref={actionsRef}>
           <button
             type="button"
-            onClick={() => setActionsOpen((o) => !o)}
             aria-haspopup="menu"
+            aria-controls="staff-profile-header-actions-menu"
             aria-expanded={actionsOpen}
+            onClick={() => setActionsOpen((o) => !o)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setActionsOpen((o) => !o);
+              }
+            }}
             className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold hover:bg-muted/50 transition-colors"
           >
             Actions
@@ -74,6 +88,7 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
           </button>
           {actionsOpen && (
             <div
+              id="staff-profile-header-actions-menu"
               role="menu"
               className="absolute right-0 top-full mt-1.5 z-50 min-w-[200px] rounded-xl border border-border bg-card shadow-lg py-1 overflow-hidden"
             >

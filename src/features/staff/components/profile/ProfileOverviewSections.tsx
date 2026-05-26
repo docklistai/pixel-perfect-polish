@@ -96,7 +96,7 @@ export function ManagerSnapshotCard({ profile, onToast }: OverviewSectionProps) 
           <div className="size-8 rounded-full bg-brand text-white flex items-center justify-center">
             <Sparkles className="size-4" aria-hidden />
           </div>
-          <div className="text-xs font-bold uppercase">AI manager summary</div>
+          <div className="text-xs font-bold uppercase">AI summary</div>
         </div>
         <p className="text-sm leading-6 text-foreground text-pretty">{summary.join(" ")}</p>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ export function NextShiftCard({ profile, onTabChange }: OverviewSectionProps) {
 
   return (
     <ProfileCard
-      title="Next shift"
+      title="Next scheduled shift"
       className="p-5"
       action={
         <button

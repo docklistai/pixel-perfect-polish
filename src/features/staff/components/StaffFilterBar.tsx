@@ -21,8 +21,15 @@ function FilterDropdown({ value, options, allLabel, onChange, ariaLabel }: Filte
     function handler(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
+    function keyHandler(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("keydown", keyHandler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", keyHandler);
+    };
   }, [open]);
 
   const label = value === "All" ? allLabel : value;
@@ -33,8 +40,15 @@ function FilterDropdown({ value, options, allLabel, onChange, ariaLabel }: Filte
         type="button"
         aria-label={ariaLabel}
         aria-haspopup="listbox"
+        aria-controls={`${ariaLabel === "Filter by department" ? "staff-filter-department" : "staff-filter-status"}-menu`}
         aria-expanded={open}
         onClick={() => setOpen((p) => !p)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setOpen((p) => !p);
+          }
+        }}
         className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted/50 transition-colors shadow-sm"
       >
         {label}
@@ -42,6 +56,7 @@ function FilterDropdown({ value, options, allLabel, onChange, ariaLabel }: Filte
       </button>
       {open && (
         <div
+          id={`${ariaLabel === "Filter by department" ? "staff-filter-department" : "staff-filter-status"}-menu`}
           role="listbox"
           className="absolute left-0 top-full mt-1.5 z-50 min-w-[172px] rounded-xl border border-border bg-card shadow-lg py-1 overflow-hidden"
         >
@@ -99,13 +114,13 @@ export function StaffFilterBar({
 }: StaffFilterBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 pb-3 border-b border-border/60 mb-0">
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 flex-1 max-w-xs min-w-[180px] shadow-sm">
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 flex-1 max-w-[320px] min-w-[180px] shadow-sm">
         <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden />
         <input
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           aria-label="Search staff by name, email or role"
-          className="bg-transparent text-xs outline-none w-full"
+          className="bg-transparent text-xs outline-none w-full min-w-0"
           placeholder="Search by name, email or role…"
         />
         {query && (

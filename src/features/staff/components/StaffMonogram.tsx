@@ -1,12 +1,13 @@
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
-const AVATAR_COLORS = [
-  "bg-brand-soft text-brand",
-  "bg-success-soft text-success",
-  "bg-warning-soft text-warning",
-  "bg-accent-purple-soft text-accent-purple",
-  "bg-info-soft text-info",
-  "bg-danger-soft text-danger",
+const AVATAR_STYLES = [
+  "bg-[linear-gradient(135deg,var(--st-teal-bg),var(--st-teal-line))] text-[var(--st-teal-ink)]",
+  "bg-[linear-gradient(135deg,var(--st-green-bg),var(--st-green-line))] text-[var(--st-green-ink)]",
+  "bg-[linear-gradient(135deg,var(--st-amber-bg),var(--st-amber-line))] text-[var(--st-amber-ink)]",
+  "bg-[linear-gradient(135deg,var(--st-purple-bg),var(--st-purple-line))] text-[var(--st-purple-ink)]",
+  "bg-[linear-gradient(135deg,var(--st-blue-bg),var(--st-blue-line))] text-[var(--st-blue-ink)]",
+  "bg-[linear-gradient(135deg,var(--st-red-bg),var(--st-red-line))] text-[var(--st-red-ink)]",
 ];
 
 interface StaffMonogramProps {
@@ -30,11 +31,15 @@ function initialsFor(name: string): string {
 }
 
 export function StaffMonogram({ name, size = "sm" }: StaffMonogramProps) {
-  const colorCls = AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+  const colorCls = AVATAR_STYLES[name.charCodeAt(0) % AVATAR_STYLES.length];
 
   return (
     <div
-      className={`${SIZE_CLASS[size]} ${colorCls} shrink-0 rounded-full flex items-center justify-center font-bold ring-1 ring-border/50`}
+      className={cn(
+        SIZE_CLASS[size],
+        colorCls,
+        "shrink-0 rounded-full flex items-center justify-center font-bold ring-1 ring-border/50",
+      )}
       aria-hidden
     >
       {initialsFor(name)}

@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Lock } from "lucide-react";
-import { AlertCard } from "@/components/dl";
+import { Lock, Plus } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
 import type { StaffProfileNote } from "../../types";
 
@@ -12,10 +11,10 @@ interface Props {
 const NOTE_TYPE_OPTIONS = [
   "General",
   "Scheduling",
-  "Absence",
-  "Training",
-  "Positive feedback",
-  "Concern",
+  "Availability",
+  "Coverage",
+  "Feedback",
+  "Admin",
 ];
 
 export function ProfileNotesTab({ notes, onSaveNote }: Props) {
@@ -25,125 +24,108 @@ export function ProfileNotesTab({ notes, onSaveNote }: Props) {
 
   function handleSave() {
     if (!noteText.trim()) return;
-    const newNote: StaffProfileNote = {
+
+    onSaveNote({
       date: "Just now",
       author: "You",
       type: noteType,
       text: noteText.trim(),
       visibleToStaff,
-    };
-    onSaveNote(newNote);
+    });
     setNoteText("");
   }
 
   return (
-    <div className="space-y-4">
-      <AlertCard
-        tone="info"
-        icon={Lock}
-        title="Manager-only notes"
-        description="These notes are private by default and will not be visible to the staff member unless explicitly marked otherwise."
-      />
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        {/* Notes timeline */}
-        <div className="xl:col-span-2">
-          <ProfileCard title="Notes">
-            {notes.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-2">No notes recorded yet.</p>
-            ) : (
-              <ul className="space-y-4">
-                {notes.map((note, i) => (
-                  <li
-                    key={i}
-                    className="relative pl-5 pb-4 border-b border-border/40 last:border-0 last:pb-0"
-                  >
-                    <span
-                      className="absolute left-0 top-1.5 h-2 w-2 rounded-full bg-brand"
-                      aria-hidden
-                    />
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <span className="text-[11px] font-semibold">{note.author}</span>
-                      <span className="inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-                        {note.type}
-                      </span>
-                      <span className="ml-auto text-[10px] text-muted-foreground">{note.date}</span>
-                    </div>
-                    <p className="text-xs text-foreground leading-relaxed">{note.text}</p>
-                    {!note.visibleToStaff && (
-                      <div className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <Lock className="h-3 w-3" aria-hidden />
-                        Manager only
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </ProfileCard>
-        </div>
-
-        {/* Add note */}
-        <div>
-          <ProfileCard title="Add note">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="space-y-4 min-w-0">
+        <ProfileCard title="Notes">
+          {notes.length === 0 ? (
+            <p className="py-2 text-xs text-muted-foreground">No notes recorded yet.</p>
+          ) : (
             <div className="space-y-3">
-              <div>
-                <label
-                  htmlFor="note-type"
-                  className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-1.5"
+              {notes.map((note, index) => (
+                <div
+                  key={`${note.date}-${index}`}
+                  className="rounded-xl border border-border/40 bg-card p-3 transition-colors"
                 >
-                  Note type
-                </label>
-                <select
-                  id="note-type"
-                  value={noteType}
-                  onChange={(e) => setNoteType(e.target.value)}
-                  className="w-full h-9 rounded-lg border border-border bg-background px-3 text-sm"
-                >
-                  {NOTE_TYPE_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="note-text"
-                  className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-1.5"
-                >
-                  Note
-                </label>
-                <textarea
-                  id="note-text"
-                  value={noteText}
-                  onChange={(e) => setNoteText(e.target.value)}
-                  rows={4}
-                  placeholder="Add a manager note..."
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm resize-none"
-                />
-              </div>
-              <label htmlFor="note-visible" className="flex items-start gap-2 cursor-pointer">
-                <input
-                  id="note-visible"
-                  type="checkbox"
-                  checked={visibleToStaff}
-                  onChange={(e) => setVisibleToStaff(e.target.checked)}
-                  className="mt-0.5"
-                />
-                <span className="text-xs text-muted-foreground">Visible to staff member</span>
-              </label>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={!noteText.trim()}
-                className="w-full rounded-xl bg-brand text-brand-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Save note
-              </button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-foreground">{note.author}</span>
+                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                      {note.type}
+                    </span>
+                    <span className="ml-auto text-[10px] text-muted-foreground">{note.date}</span>
+                  </div>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{note.text}</p>
+                  <div className="mt-2 flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <Lock className="h-3 w-3" aria-hidden />
+                    {note.visibleToStaff ? "Visible to staff" : "Manager note"}
+                  </div>
+                </div>
+              ))}
             </div>
-          </ProfileCard>
-        </div>
+          )}
+        </ProfileCard>
+      </div>
+
+      <div className="min-w-0">
+        <ProfileCard title="Add note">
+          <div className="space-y-3">
+            <div>
+              <label
+                htmlFor="note-type"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+              >
+                Note type
+              </label>
+              <select
+                id="note-type"
+                value={noteType}
+                onChange={(e) => setNoteType(e.target.value)}
+                className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm"
+              >
+                {NOTE_TYPE_OPTIONS.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label
+                htmlFor="note-text"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+              >
+                Note
+              </label>
+              <textarea
+                id="note-text"
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                rows={5}
+                placeholder="Add a manager note..."
+                className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+            <label className="flex items-start gap-2 text-xs text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={visibleToStaff}
+                onChange={(e) => setVisibleToStaff(e.target.checked)}
+                className="mt-0.5"
+              />
+              Visible to staff member
+            </label>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!noteText.trim()}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Plus className="h-3.5 w-3.5" aria-hidden />
+              Save note
+            </button>
+          </div>
+        </ProfileCard>
       </div>
     </div>
   );
