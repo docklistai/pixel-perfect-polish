@@ -5,7 +5,7 @@ export function RotaGridFooter({ days }: { days: RotaGridDay[] }) {
     <>
       <div className="border-b border-border px-3 py-3">
         <div className="text-[11px] text-muted-foreground/70">
-          30 min unpaid break for shifts ≥ 6h
+          Breaks: 30 min unpaid for shifts ≥ 6h
         </div>
       </div>
       {days.map((day) => (
@@ -15,7 +15,7 @@ export function RotaGridFooter({ days }: { days: RotaGridDay[] }) {
             day.isToday ? "border-brand/20 bg-brand-soft/10" : "border-border"
           }`}
         >
-          {day.h}
+          {day.h} planned
         </div>
       ))}
     </>

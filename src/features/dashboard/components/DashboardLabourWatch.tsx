@@ -3,72 +3,103 @@ import { ArrowRight } from "lucide-react";
 import { Card } from "@/components/dl";
 
 interface Props {
-  scheduledHours: number;
   labourCost: string;
-  coveragePct: number;
+  projectedSales: string;
+  labourPct: number;
+  targetPct?: number;
 }
 
-function CoverageGauge({ value }: { value: number }) {
-  // Semi-circle: M 12 60 A 48 48 0 0 1 108 60 — arc length = π * 48 ≈ 150.8
-  const arcLen = Math.PI * 48;
-  const filled = (value / 100) * arcLen;
+function formatPct(value: number) {
+  return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
+}
+
+function LabourGauge({ value, targetPct }: { value: number; targetPct: number }) {
+  const pct = Math.max(0, Math.min(100, value));
+  const isHealthy = value <= targetPct;
+  const gaugeColor = isHealthy ? "var(--brand)" : "var(--warning)";
+  const gaugeTrack = "var(--border)";
+
   return (
-    <div className="relative shrink-0" style={{ width: 120, height: 72 }}>
-      <svg width="120" height="72" viewBox="0 0 120 72" aria-hidden="true">
+    <div className="relative shrink-0" style={{ width: 152, height: 96 }}>
+      <svg width="152" height="96" viewBox="0 0 152 96" aria-hidden="true">
         <path
-          d="M 12 60 A 48 48 0 0 1 108 60"
-          stroke="var(--color-muted)"
-          strokeWidth="10"
+          d="M 16 76 A 60 60 0 0 1 136 76"
+          stroke={gaugeTrack}
+          strokeWidth="12"
           fill="none"
           strokeLinecap="round"
         />
         <path
-          d="M 12 60 A 48 48 0 0 1 108 60"
-          stroke="var(--color-brand)"
-          strokeWidth="10"
+          d="M 16 76 A 60 60 0 0 1 136 76"
+          stroke={gaugeColor}
+          strokeWidth="12"
           fill="none"
           strokeLinecap="round"
-          strokeDasharray={`${filled} ${arcLen}`}
+          pathLength="100"
+          strokeDasharray={`${pct} 100`}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
-        <div className="text-[20px] font-bold tracking-tight leading-none">{value}%</div>
-        <div className="mt-0.5 text-[10px] text-muted-foreground">Coverage</div>
+      <div className="absolute inset-0 flex flex-col items-center justify-end pb-3">
+        <div className="font-display text-[20px] font-semibold leading-none tracking-tight">
+          {formatPct(value)}
+        </div>
+        <div className="mt-0.5 text-[10px] text-muted-foreground">Target {targetPct}%</div>
       </div>
     </div>
   );
 }
 
-export function DashboardLabourWatch({ scheduledHours, labourCost, coveragePct }: Props) {
+export function DashboardLabourWatch({
+  labourCost,
+  projectedSales,
+  labourPct,
+  targetPct = 30,
+}: Props) {
+  const isHealthy = labourPct <= targetPct;
+  const barClass = isHealthy ? "bg-brand" : "bg-warning";
+  const pctClass = isHealthy ? "text-brand" : "text-warning";
+
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 pb-4 pt-5">
         <div className="flex items-center justify-between gap-3">
-          <div className="dock-section-eyebrow">Scheduled labour</div>
-          <span className="text-xs text-muted-foreground">vs 100% target</span>
+          <div className="dock-section-eyebrow">Labour watch</div>
+          <span className="text-xs text-muted-foreground">vs {targetPct}% target</span>
         </div>
         <div className="mt-3 flex items-center gap-5">
-          <CoverageGauge value={coveragePct} />
-          <div className="flex flex-col gap-3">
+          <LabourGauge value={labourPct} targetPct={targetPct} />
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
             {(
               [
                 ["Labour cost", labourCost],
-                ["Scheduled hours", `${scheduledHours.toLocaleString()}h`],
-                ["Coverage", `${coveragePct}%`],
+                ["Projected sales", projectedSales],
+                ["Labour %", formatPct(labourPct)],
               ] as const
             ).map(([k, v]) => (
               <div key={k}>
                 <div className="text-[10px] text-muted-foreground">{k}</div>
-                <div className="text-[15px] font-semibold">{v}</div>
+                <div className={`text-[15px] font-semibold ${k === "Labour %" ? pctClass : ""}`}>
+                  {v}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
       <div className="border-t border-border px-5 py-3">
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className={`h-full rounded-full transition-all ${barClass}`}
+            style={{ width: `${Math.min(100, labourPct)}%` }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+          <span>Target 100%</span>
+          <span className="font-mono">{targetPct}% target</span>
+        </div>
         <Link
           to="/reports"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand"
         >
           Open labour report <ArrowRight className="h-3 w-3" />
         </Link>

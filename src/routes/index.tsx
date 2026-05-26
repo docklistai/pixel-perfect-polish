@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, ActionButton, IconButton } from "@/components/dl";
-import { Sparkles, MoreHorizontal, Calendar } from "lucide-react";
+import { useOverlays } from "@/components/AppShortcuts";
+import { Sparkles, MoreHorizontal, Plus, ChevronDown } from "lucide-react";
 import { DashboardAISummaryCard } from "@/features/dashboard/components/DashboardAISummaryCard";
 import { DashboardKpiCards } from "@/features/dashboard/components/DashboardKpiCards";
 import { DashboardAttentionPanel } from "@/features/dashboard/components/DashboardAttentionPanel";
@@ -36,56 +37,130 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const navigate = useNavigate();
+  const { openAiDrawer } = useOverlays();
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [summaryDismissed, setSummaryDismissed] = React.useState(false);
   const [filter, setFilter] = React.useState<"today" | "week">("week");
+  const [quickOpen, setQuickOpen] = React.useState(false);
+  const quickRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!quickOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (quickRef.current && !quickRef.current.contains(e.target as Node)) setQuickOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setQuickOpen(false);
+    };
+    document.addEventListener("click", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [quickOpen]);
 
   return (
     <AppShell>
-      {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      {/* Header — prototype: title + actions row */}
+      <div className="page-head flex-col lg:flex-row">
         <div className="min-w-0">
-          <div className="dock-section-eyebrow">Dashboard</div>
-          <h1 className="mt-2 text-balance text-[2rem] font-semibold tracking-tight md:text-[2.125rem]">
+          <h1>
             Good morning, Alex <span aria-hidden>👋</span>
           </h1>
-          <p className="mt-1.5 max-w-3xl text-sm leading-6 text-muted-foreground">
+          <p>
             Here&apos;s what&apos;s happening across Harbour View Hotel{" "}
             {filter === "today" ? "today" : "this week"}.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2.5 lg:justify-end">
-          {/* Today / This week toggle */}
-          <div className="inline-flex gap-0.5 rounded-[10px] border border-border bg-muted/40 p-0.5">
+        <div className="actions flex-wrap">
+          {/* Today / This week segmented control */}
+          <div
+            className="inline-flex gap-0.5 rounded-[10px] p-0.5"
+            style={{ background: "var(--ink-100)", border: "1px solid var(--border-faint)" }}
+          >
             {(["today", "week"] as const).map((k) => (
               <button
                 key={k}
                 type="button"
                 onClick={() => setFilter(k)}
-                className={`rounded-[8px] px-3 py-1.5 text-[12px] font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${
+                className="rounded-[8px] px-3 py-1.5 text-[12px] font-semibold focus:outline-none"
+                style={
                   filter === k
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+                    ? {
+                        background: "var(--bg-card)",
+                        color: "var(--ink-900)",
+                        boxShadow: "var(--shadow-1)",
+                      }
+                    : {
+                        color: "var(--ink-500)",
+                        background: "transparent",
+                      }
+                }
               >
                 {k === "today" ? "Today" : "This week"}
               </button>
             ))}
           </div>
-          <ActionButton
-            icon={Sparkles}
-            variant="secondary"
-            onClick={() =>
-              toast.info("AI manager review", {
-                description: "Manager review assistant is on the roadmap.",
-              })
-            }
-          >
+          <ActionButton icon={Sparkles} variant="outline" onClick={openAiDrawer}>
             Ask assistant
           </ActionButton>
-          <ActionButton icon={Calendar} onClick={() => navigate({ to: "/rota" })}>
-            Publish Rota
-          </ActionButton>
+          <div className="relative" ref={quickRef}>
+            <ActionButton
+              icon={Plus}
+              iconRight={ChevronDown}
+              variant="primary"
+              onClick={() => setQuickOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={quickOpen}
+            >
+              Quick action
+            </ActionButton>
+            {quickOpen && (
+              <div className="popover absolute top-[44px] right-0 z-50 w-56 animate-in fade-in slide-in-from-top-2 duration-150">
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setQuickOpen(false);
+                    navigate({ to: "/rota" });
+                  }}
+                >
+                  Open this week&apos;s rota
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setQuickOpen(false);
+                    navigate({ to: "/leave" });
+                  }}
+                >
+                  Review leave requests
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setQuickOpen(false);
+                    navigate({ to: "/staff" });
+                  }}
+                >
+                  Add a team member
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setQuickOpen(false);
+                    navigate({ to: "/team" });
+                  }}
+                >
+                  Draft an announcement
+                </button>
+              </div>
+            )}
+          </div>
           <IconButton
             icon={MoreHorizontal}
             label="More dashboard actions"
@@ -101,7 +176,12 @@ function Home() {
       {/* AI manager summary (dismissible) */}
       {!summaryDismissed && (
         <div className="mb-4">
-          <DashboardAISummaryCard onDismiss={() => setSummaryDismissed(true)} />
+          <DashboardAISummaryCard
+            onDismiss={() => setSummaryDismissed(true)}
+            onOpenAssistant={openAiDrawer}
+            onOpenRota={() => navigate({ to: "/rota" })}
+            onReviewTimesheets={() => navigate({ to: "/time" })}
+          />
         </div>
       )}
 
@@ -117,21 +197,17 @@ function Home() {
 
       {/* Secondary row: labour watch · rota countdown · leave queue */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatch scheduledHours={1248} labourCost="£18,420" coveragePct={98} />
+        <DashboardLabourWatch labourCost="£18,420" projectedSales="£64,420" labourPct={28.6} />
         <DashboardRotaPublish />
         <DashboardPendingLeave items={leaveItems} />
       </div>
 
       {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardTimesheets items={timesheetItems} />
         <DashboardStaffOnShift items={staffDeptItems} total={28} />
+        <DashboardTimesheets items={timesheetItems} />
         <DashboardAnnouncements items={announcementItems} />
         <DashboardQuickActions items={quickActionItems} />
-      </div>
-
-      <div className="mt-7 text-center text-xs text-muted-foreground">
-        All times shown in Europe/London (GMT+1)
       </div>
 
       <DashboardAlertDrawer open={alertOpen} onOpenChange={setAlertOpen} />

@@ -1,15 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import {
-  AppShell,
-  Card,
-  PageHeader,
-  ActionButton,
-  FeedbackBanner,
-  EmptyState,
-} from "@/components/dl";
+import { AppShell, PageHeader, ActionButton, FeedbackBanner } from "@/components/dl";
+import type { SettingsContentTab } from "@/features/settings/components/SettingsContent";
 import { SettingsSidebar } from "@/features/settings/components/SettingsSidebar";
-import { WorkspaceSection } from "@/features/settings/components/WorkspaceSection";
+import { SettingsContent } from "@/features/settings/components/SettingsContent";
 import { SettingsRightRail } from "@/features/settings/components/SettingsRightRail";
 
 export const Route = createFileRoute("/settings")({
@@ -77,18 +71,7 @@ function SettingsPage() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)_300px]">
         <SettingsSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-
-        {activeTab !== "Workspace" ? (
-          <Card className="rounded-3xl p-6">
-            <EmptyState
-              title={`${activeTab} settings`}
-              description="This section is not available yet."
-            />
-          </Card>
-        ) : (
-          <WorkspaceSection onDirty={markDirty} />
-        )}
-
+        <SettingsContent activeTab={activeTab as SettingsContentTab} onDirty={markDirty} />
         <SettingsRightRail activeTab={activeTab} />
       </div>
     </AppShell>

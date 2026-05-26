@@ -106,7 +106,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script
@@ -115,10 +115,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
               (function() {
                 try {
                   var theme = localStorage.getItem('docklist.theme') || 'dark';
+                  var root = document.documentElement;
+                  root.setAttribute('data-theme', theme);
                   if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
+                    root.classList.add('dark');
                   } else {
-                    document.documentElement.classList.remove('dark');
+                    root.classList.remove('dark');
                   }
                 } catch (e) {}
               })();

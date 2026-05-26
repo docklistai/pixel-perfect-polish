@@ -12,7 +12,7 @@ interface Props {
 
 export function DashboardAttentionPanel({ items, total, onAlertClick }: Props) {
   return (
-    <Card className="p-5">
+    <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="dock-section-eyebrow">Attention</div>
         <StatusBadge tone="warning">{total}</StatusBadge>

@@ -1,5 +1,5 @@
-import { Filter, Sparkles, Plus } from "lucide-react";
-import { ActionButton } from "@/components/dl";
+import { Copy, Filter, Plus, Sparkles } from "lucide-react";
+import { ActionButton, IconButton } from "@/components/dl";
 
 export function RotaGridToolbar({
   conflictCount,
@@ -9,6 +9,7 @@ export function RotaGridToolbar({
   onGenerateRota,
   onAddShift,
   onViewConflicts,
+  onCopyLastWeek,
 }: {
   conflictCount: number;
   openShiftCount: number;
@@ -17,6 +18,7 @@ export function RotaGridToolbar({
   onGenerateRota: () => void;
   onAddShift: () => void;
   onViewConflicts: () => void;
+  onCopyLastWeek: () => void;
 }) {
   const coverageTone = coveragePct > 110 ? "warning" : coveragePct >= 95 ? "success" : "warning";
 
@@ -32,7 +34,7 @@ export function RotaGridToolbar({
           onClick={conflictCount > 0 ? onViewConflicts : undefined}
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${
             conflictCount > 0
-              ? "bg-danger-soft text-danger hover:bg-danger-soft/80 cursor-pointer"
+              ? "cursor-pointer bg-danger-soft text-danger hover:bg-danger-soft/80"
               : "bg-muted text-muted-foreground"
           }`}
         >
@@ -48,7 +50,7 @@ export function RotaGridToolbar({
           onClick={openShiftCount > 0 ? onViewConflicts : undefined}
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${
             openShiftCount > 0
-              ? "bg-warning-soft text-warning-700 hover:bg-warning-soft/80 cursor-pointer"
+              ? "cursor-pointer bg-warning-soft text-warning-700 hover:bg-warning-soft/80"
               : "bg-muted text-muted-foreground"
           }`}
         >
@@ -75,12 +77,13 @@ export function RotaGridToolbar({
       </div>
 
       <div className="ml-auto flex flex-wrap items-center gap-2">
+        <ActionButton variant="secondary" size="sm" icon={Copy} onClick={onCopyLastWeek}>
+          Copy last week
+        </ActionButton>
         <ActionButton variant="outline" size="sm" icon={Sparkles} onClick={onGenerateRota}>
           Generate
         </ActionButton>
-        <ActionButton size="sm" icon={Plus} onClick={onAddShift}>
-          Add shift
-        </ActionButton>
+        <IconButton icon={Plus} label="Add shift" onClick={onAddShift} />
       </div>
     </div>
   );

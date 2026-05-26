@@ -140,9 +140,9 @@ export function totalScheduledHours(shifts: DraftShift[]): number {
 }
 
 export function coveragePercent(staff: StaffMember[], shifts: DraftShift[]): number {
-  const target = staffWeeklyHourTarget(staff);
-  if (!target) return 0;
-  return Math.max(0, Math.round((totalScheduledHours(shifts) / target) * 100));
+  const planned = countPlannedShifts(shifts);
+  if (!planned) return 0;
+  return Math.max(0, Math.round((countAssignedShifts(shifts) / planned) * 100));
 }
 
 export type RotaDayStat = {
@@ -157,6 +157,9 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
     const assigned = dayShifts.filter((shift) => shift.staffId !== null);
     const open = dayShifts.length - assigned.length;
     const hours = assigned.reduce((sum, shift) => sum + shiftHours(shift.start, shift.end), 0);
+    const coverage = dayShifts.length
+      ? Math.round((assigned.length / dayShifts.length) * 100)
+      : 100;
     const tone =
       open > 0
         ? "warning"
@@ -165,8 +168,8 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
           : "muted";
 
     return {
-      h: `${Math.round(hours)}h planned`,
-      c: `${assigned.length}/${dayShifts.length} assigned`,
+      h: `${Math.round(hours)}h`,
+      c: `${coverage}%`,
       tone,
     };
   });

@@ -7,6 +7,15 @@ interface Props {
   items: TimesheetItem[];
 }
 
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
 export function DashboardTimesheets({ items }: Props) {
   return (
     <Card className="overflow-hidden p-0">
@@ -23,14 +32,9 @@ export function DashboardTimesheets({ items }: Props) {
             to="/time"
             className="flex items-center gap-3 px-5 py-3 transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            <img
-              src={`https://i.pravatar.cc/64?img=${p.img}`}
-              className="h-8 w-8 rounded-full object-cover"
-              alt=""
-              loading="lazy"
-              width={32}
-              height={32}
-            />
+            <div className="bubble purple text-[11px] font-semibold uppercase tracking-tight">
+              {initials(p.n)}
+            </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium">{p.n}</div>
               <div className="text-xs text-muted-foreground">{p.d}</div>

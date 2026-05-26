@@ -5,6 +5,7 @@ type StatusTone = "success" | "warning";
 
 export function RotaPageHeader({
   weekLabel,
+  staffCount,
   statusTone,
   statusLabel,
   canPublish,
@@ -16,6 +17,7 @@ export function RotaPageHeader({
   onPublish,
 }: {
   weekLabel: string;
+  staffCount: number;
   statusTone: StatusTone;
   statusLabel: string;
   canPublish: boolean;
@@ -27,7 +29,7 @@ export function RotaPageHeader({
   onPublish: () => void;
 }) {
   return (
-    <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-[2rem] font-semibold tracking-tight md:text-[2.125rem]">Rota</h1>
@@ -36,7 +38,7 @@ export function RotaPageHeader({
           </StatusBadge>
         </div>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Week of {weekLabel} · Harbour View Hotel
+          Week of {weekLabel} · Harbour View Hotel · {staffCount} staff
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2 lg:justify-end">

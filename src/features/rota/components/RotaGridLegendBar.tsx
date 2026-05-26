@@ -27,7 +27,7 @@ export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
           Conflict
         </span>
         <span className="hidden text-muted-foreground/70 sm:inline">
-          Click a shift to edit · ⋯ for actions
+          Tip: click a shift to edit · shift-click for menu
         </span>
       </div>
     </div>

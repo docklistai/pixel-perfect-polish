@@ -43,7 +43,7 @@ function StaffSearchHeader({
 }) {
   return (
     <div className="border-b border-border px-4 py-4">
-      <div className="text-sm font-semibold">
+      <div className="text-sm font-semibold uppercase tracking-[0.08em]">
         Staff{" "}
         <span className="font-normal text-muted-foreground">
           ({visibleStaffCount}
@@ -52,7 +52,7 @@ function StaffSearchHeader({
       </div>
       <div className="mt-2">
         <SearchField
-          placeholder="Search staff or role..."
+          placeholder="Search..."
           aria-label="Search staff in rota"
           value={staffSearch}
           onChange={(event) => onStaffSearchChange(event.target.value)}

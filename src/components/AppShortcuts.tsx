@@ -16,11 +16,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { CommandPalette } from "./CommandPalette";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { NotificationDrawer } from "./NotificationDrawer";
+import { AiDrawer } from "./ai/AiDrawer";
 
 interface OverlayApi {
   openPalette: () => void;
   openShortcuts: () => void;
   openNotifications: () => void;
+  openAiDrawer: () => void;
   unreadCount: number;
 }
 
@@ -34,6 +36,7 @@ export function useOverlays(): OverlayApi {
       openPalette: () => {},
       openShortcuts: () => {},
       openNotifications: () => {},
+      openAiDrawer: () => {},
       unreadCount: 0,
     };
   }
@@ -59,6 +62,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
   const [palette, setPalette] = React.useState(false);
   const [shortcuts, setShortcuts] = React.useState(false);
   const [notifs, setNotifs] = React.useState(false);
+  const [aiOpen, setAiOpen] = React.useState(false);
   const navigate = useNavigate();
   const gPending = React.useRef<number | null>(null);
 
@@ -67,6 +71,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       openPalette: () => setPalette(true),
       openShortcuts: () => setShortcuts(true),
       openNotifications: () => setNotifs(true),
+      openAiDrawer: () => setAiOpen(true),
       // Fixed mock unread count — matches the seed data in NotificationDrawer.
       unreadCount: 3,
     }),
@@ -124,6 +129,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       <CommandPalette open={palette} onOpenChange={setPalette} />
       <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} />
       <NotificationDrawer open={notifs} onOpenChange={setNotifs} />
+      <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
     </OverlayContext.Provider>
   );
 }

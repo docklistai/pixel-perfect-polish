@@ -135,7 +135,7 @@ export function CommandPalette({
                 value={`${item.label} ${item.to}`}
                 onSelect={() => go(item.to)}
               >
-                <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
+                <Icon className="ico h-4 w-4" aria-hidden />
                 <span>{item.label}</span>
                 {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
               </CommandItem>
@@ -152,14 +152,29 @@ export function CommandPalette({
                 value={action.label}
                 onSelect={() => runAction(action)}
               >
-                <Icon className="h-4 w-4 text-muted-foreground" aria-hidden />
+                <Icon className="ico h-4 w-4" aria-hidden />
                 <span>{action.label}</span>
-                <span className="ml-auto text-[11px] text-muted-foreground">{action.hint}</span>
+                <span className="meta ml-auto">{action.hint}</span>
               </CommandItem>
             );
           })}
         </CommandGroup>
       </CommandList>
+      <div className="cmd-foot">
+        <span className="flex items-center gap-1.5">
+          <span className="kbd">↑</span>
+          <span className="kbd">↓</span>
+          <span>navigate</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="kbd">↵</span>
+          <span>select</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="kbd">esc</span>
+          <span>close</span>
+        </span>
+      </div>
     </CommandDialog>
   );
 }

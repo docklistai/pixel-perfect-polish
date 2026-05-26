@@ -5,8 +5,8 @@ export function RoleCoverageCard({ roleCoverage }: { roleCoverage: RoleCoverageS
   return (
     <Card className="p-4">
       <div className="mb-4 flex items-center justify-between">
-        <div className="text-sm font-semibold">Role days covered</div>
-        <span className="text-xs text-muted-foreground">Assigned days</span>
+        <div className="text-sm font-semibold">Role coverage</div>
+        <span className="text-xs text-muted-foreground">This week</span>
       </div>
       <div className="space-y-3">
         {roleCoverage.slice(0, 5).map((row) => (

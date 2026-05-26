@@ -1,0 +1,196 @@
+import {
+  AlertTriangle,
+  Plane,
+  PoundSterling,
+  Users,
+  Megaphone,
+  CheckCircle2,
+  Info,
+  TrendingUp,
+  Trophy,
+  Calendar,
+  BarChart3,
+  FileText,
+  Edit,
+  type LucideIcon,
+} from "lucide-react";
+
+export type ProtoTone = "teal" | "amber" | "purple" | "blue" | "red" | "green";
+
+export interface AnswerBullet {
+  title: string;
+  body: string;
+  tone?: ProtoTone;
+  icon?: LucideIcon;
+}
+
+export interface AnswerAction {
+  label: string;
+  primary?: boolean;
+  icon?: LucideIcon;
+}
+
+export interface SimulatedAnswer {
+  title: string;
+  summary: string;
+  bullets?: AnswerBullet[];
+  actions?: AnswerAction[];
+}
+
+export type Phase = "idle" | "running" | "answered";
+
+export const QUICK_PROMPTS: { icon: LucideIcon; label: string }[] = [
+  { icon: AlertTriangle, label: "Anything I should review before publishing this week's rota?" },
+  { icon: Plane, label: "Summarise leave impact for week of 19 May" },
+  { icon: PoundSterling, label: "Why is labour up 6% vs last week?" },
+  { icon: Users, label: "Who's been picking up the most extra shifts this month?" },
+  { icon: Megaphone, label: "Draft an announcement about Monday's deep clean" },
+];
+
+export const HISTORY = [
+  { when: "Today, 13:40", q: "Rota review for week 12–18 May" },
+  { when: "Today, 09:12", q: "Draft a polite reminder about uniform standards" },
+  { when: "Yesterday", q: "Leave impact summary — 31 May" },
+  { when: "9 May", q: "Coverage gaps in Housekeeping" },
+];
+
+export const ANSWERS: Record<string, SimulatedAnswer> = {
+  default: {
+    title: "Here's what I'm seeing",
+    summary:
+      "I don't have a tailored answer for that prompt yet in this demo. In production I'd ground each answer in your rota, time, leave and labour data — only this workspace, never shared.",
+    bullets: [
+      {
+        title: "Try a built-in prompt",
+        body: "The five suggestions above pull from real signals I can already model in this prototype.",
+        tone: "blue",
+        icon: Info,
+      },
+    ],
+  },
+  "Anything I should review before publishing this week's rota?": {
+    title: "Three things to check before publishing",
+    summary: "Coverage looks solid (98%), but I'd resolve these before you send it to staff.",
+    bullets: [
+      {
+        title: "Conflict — Liam, Wed 14 May",
+        body: "Liam is on Bar 16:00 – 00:00 but also on the Events list. One needs to drop.",
+        tone: "red",
+        icon: AlertTriangle,
+      },
+      {
+        title: "Priya's leave clashes with Sat cover",
+        body: "Approving 31 May–2 Jun leaves Housekeeping at 50% on Sunday.",
+        tone: "purple",
+        icon: Plane,
+      },
+      {
+        title: "Saturday Bar is at 118% — overscheduled",
+        body: "Two bartenders overlap 18:00 – 22:00. You could move one to Sunday and save ~£86.",
+        tone: "amber",
+        icon: Users,
+      },
+    ],
+    actions: [
+      { label: "Open rota", icon: Calendar, primary: true },
+      { label: "Show leave", icon: Plane },
+    ],
+  },
+  "Summarise leave impact for week of 19 May": {
+    title: "Week of 19 May — leave impact",
+    summary:
+      "Four staff are off across the week. Coverage stays above 90% except Sunday in Housekeeping.",
+    bullets: [
+      {
+        title: "Mon – Fri all comfortable",
+        body: "Highest gap is FOH on Thursday at 92% — no action needed.",
+        tone: "green",
+        icon: CheckCircle2,
+      },
+      {
+        title: "Sunday HK dips to 50%",
+        body: "Two HK staff off — Priya and Amelia. You could ask Ava if she can swap.",
+        tone: "amber",
+        icon: AlertTriangle,
+      },
+      {
+        title: "All requests are within notice",
+        body: "Average notice is 16 days — well over your 7-day workspace policy.",
+        tone: "blue",
+        icon: Info,
+      },
+    ],
+    actions: [{ label: "Open rota for that week", icon: Calendar, primary: true }],
+  },
+  "Why is labour up 6% vs last week?": {
+    title: "Labour is up 6% — mostly from Bar overtime",
+    summary:
+      "You spent £18,420 on labour this week vs £17,380 last week. The increase concentrates on Bar shifts after 22:00.",
+    bullets: [
+      {
+        title: "Bar overtime contributed £640",
+        body: "Three Bar shifts ran past 23:30 — closing took 25–40 min longer than scheduled.",
+        tone: "amber",
+        icon: TrendingUp,
+      },
+      {
+        title: "Cover shift on Saturday",
+        body: "You added Liam's open Saturday shift — that's £92 of the increase.",
+        tone: "blue",
+        icon: Users,
+      },
+      {
+        title: "Labour % still on target",
+        body: "At 28.6% you're below the 30% target — the absolute increase is OK.",
+        tone: "green",
+        icon: CheckCircle2,
+      },
+    ],
+    actions: [{ label: "Open reports", icon: BarChart3, primary: true }],
+  },
+  "Who's been picking up the most extra shifts this month?": {
+    title: "Top extra-shift pickups — May so far",
+    summary:
+      "Three people have stepped up the most. Worth a thank-you and a check that they're not heading for burnout.",
+    bullets: [
+      {
+        title: "Sophie Carter — 5 extra shifts",
+        body: "All covered short-notice. Currently at 92% of contracted hours — watch for fatigue.",
+        tone: "amber",
+        icon: Trophy,
+      },
+      {
+        title: "Daniel Mitchell — 3 extra shifts",
+        body: "All in Kitchen — covered Noah's probation training days.",
+        tone: "teal",
+        icon: Trophy,
+      },
+      {
+        title: "Liam O'Connor — 3 extra shifts",
+        body: "Picked up Saturday Bar each week. You may want to formalise this as a regular.",
+        tone: "purple",
+        icon: Trophy,
+      },
+    ],
+    actions: [{ label: "Draft a thank-you announcement", icon: Megaphone, primary: true }],
+  },
+  "Draft an announcement about Monday's deep clean": {
+    title: "Draft — Monday's deep clean briefing",
+    summary: "Here's a starting draft. Tone is direct and friendly — adjust before sending.",
+    bullets: [
+      {
+        title: "Subject",
+        body: "Deep clean on Monday 19 May — what to expect",
+        tone: "blue",
+        icon: FileText,
+      },
+      {
+        title: "Body",
+        body: "Hi everyone — we're running our quarterly deep clean on Monday 19 May, 06:00 – 10:00. Bar and Kitchen will be closed during this window; please use the staff entrance only. Daniel will hand over to housekeeping at 10:00. Thanks for your flexibility — bring trainers, no chef whites until 11:00.",
+        tone: "blue",
+        icon: FileText,
+      },
+    ],
+    actions: [{ label: "Open in composer", icon: Edit, primary: true }],
+  },
+};

@@ -13,7 +13,6 @@ import { Users, CheckCircle2, UserPlus, AlertTriangle, Plus, Filter } from "luci
 import { rows } from "@/features/staff/data/mockStaffData";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { StaffTable } from "@/features/staff/components/StaffTable";
-import { WorkforceHealthCard } from "@/features/staff/components/WorkforceHealthCard";
 import { useStaffPanelState } from "@/features/staff/hooks/useStaffPanelState";
 import type { StaffRow } from "@/features/staff/types";
 
@@ -170,7 +169,6 @@ function StaffListPage() {
         {isProfilePanelOpen && (
           <div className="col-span-12 lg:col-span-3 space-y-4 self-start lg:sticky lg:top-[88px]">
             <StaffProfilePanel member={selected} onClose={() => setIsProfilePanelOpen(false)} />
-            <WorkforceHealthCard rows={rows} />
           </div>
         )}
       </div>

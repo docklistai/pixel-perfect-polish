@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   Plane,
   DollarSign,
+  TrendingUp,
 } from "lucide-react";
 import type {
   KpiItem,
@@ -23,7 +24,7 @@ import type {
 export const kpiItems: KpiItem[] = [
   {
     icon: Users,
-    label: "Scheduled Hours",
+    label: "Scheduled hours",
     value: "1,248h",
     delta: "6% vs last week",
     up: true,
@@ -32,7 +33,7 @@ export const kpiItems: KpiItem[] = [
   },
   {
     icon: DollarSign,
-    label: "Labour Cost",
+    label: "Labour cost",
     value: "£18,420",
     delta: "3% vs last week",
     up: true,
@@ -58,13 +59,13 @@ export const kpiItems: KpiItem[] = [
     tip: "Scheduled vs role requirement. 100% = fully staffed.",
   },
   {
-    icon: Clock3,
-    label: "On Shift Today",
-    value: "28",
-    delta: "vs 26 last week",
+    icon: TrendingUp,
+    label: "Sales : labour",
+    value: "3.48",
+    delta: "0.18 vs last week",
     up: true,
-    tone: "purple",
-    tip: "Staff clocked in or scheduled for today's shifts.",
+    tone: "warning",
+    tip: "Lightweight demo ratio used to mirror the prototype KPI row.",
   },
 ];
 
@@ -138,20 +139,20 @@ export const staffDeptItems: StaffDeptItem[] = [
 // Announcements — relative dates anchored to Wed 20 May 2026
 export const announcementItems: AnnouncementItem[] = [
   {
-    t: "New Summer Menu Launch",
-    s: "Check out the new menu additions",
+    t: "Summer Menu Launch",
+    s: "Read 18 / 24",
     a: "2d ago",
     tone: "info",
   },
   {
-    t: "Training: Upselling Workshop",
-    s: "Mon, 25 May · 14:00 – 15:30",
+    t: "Food Safety Refresher",
+    s: "Read 14 / 18",
     a: "3d ago",
     tone: "warning",
   },
   {
-    t: "Staff Party",
-    s: "Sat, 30 May · 19:00 at Harbour Lounge",
+    t: "Bank Holiday: Opening Hours",
+    s: "Read 24 / 24",
     a: "5d ago",
     tone: "purple",
   },
@@ -161,5 +162,5 @@ export const quickActionItems: QuickActionItem[] = [
   { t: "Add Shift", s: "Open or assigned shift", icon: Calendar, route: "/rota" },
   { t: "New Leave Request", s: "Annual, sick, compassionate", icon: Plane, route: "/leave" },
   { t: "Post Announcement", s: "To a department or everyone", icon: Megaphone, route: "/team" },
-  { t: "Clock In / Out", s: "Record time for a team member", icon: Clock3, route: "/time" },
+  { t: "Log Incident", s: "Incident or maintenance ticket", icon: AlertTriangle, route: "/ops" },
 ];

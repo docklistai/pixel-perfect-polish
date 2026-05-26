@@ -1,4 +1,5 @@
-import { CircleAlert, Send } from "lucide-react";
+import { CircleAlert, FileDown, Send, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { ActionButton } from "@/components/dl";
 
 export function RotaStatusBanner({
@@ -21,41 +22,31 @@ export function RotaStatusBanner({
   onPublish: () => void;
 }) {
   const isClean = publishState === "published" || publishState === "ready";
-  const tone = isClean ? "success" : "warning";
-  const issueSummary = `${openShiftCount} open shift${openShiftCount === 1 ? "" : "s"} · ${conflictCount} conflict${conflictCount === 1 ? "" : "s"} · ${workingTimeAlertCount} working time alert${workingTimeAlertCount === 1 ? "" : "s"}`;
   const title =
     publishState === "published"
       ? "Published rota"
       : publishState === "published-issues"
         ? "Published with issues"
-        : publishState === "unpublished-changes"
-          ? "Unpublished changes"
-          : publishState === "ready"
-            ? "Ready to publish"
-            : "Draft rota";
+        : "Draft rota";
+  const summary = `${openShiftCount} open shift${openShiftCount === 1 ? "" : "s"} · ${conflictCount} conflict${conflictCount === 1 ? "" : "s"} · ${workingTimeAlertCount} working time alert${workingTimeAlertCount === 1 ? "" : "s"} · ${coveragePct}% coverage`;
   const body =
     publishState === "published"
-      ? "Staff should only see this published version."
-      : publishState === "published-issues"
-        ? `${issueSummary}. Staff should only see this published version; keep reviewing the remaining issues.`
-        : publishState === "unpublished-changes"
-          ? `${issueSummary}. Publish updates when the changed draft is ready for staff.`
-          : publishState === "ready"
-            ? "No open shifts or conflicts remain. Publish when this rota is ready for staff."
-            : `${issueSummary}. Review issues before publishing, or publish with acknowledgement if the rota is ready for staff.`;
+      ? "Staff see only the published rota."
+      : "Not yet shared with staff. Resolve issues before publishing, or publish with acknowledgement if the team is ready.";
   const canPublish = !published || hasUnpublishedChanges;
-  const cta = canPublish
-    ? published && hasUnpublishedChanges
-      ? "Publish updates"
-      : "Publish rota"
-    : publishState === "published-issues"
-      ? "Published with issues"
-      : "Published";
+  const publishLabel =
+    published && !hasUnpublishedChanges
+      ? publishState === "published-issues"
+        ? "Published with issues"
+        : "Published"
+      : "Publish to staff";
 
   return (
     <div
       className={`mb-4 rounded-[18px] border px-5 py-4 shadow-[var(--shadow-card)] ${
-        isClean ? "border-success/20 bg-success-soft/30" : "border-warning/20 bg-warning-soft"
+        isClean
+          ? "border-success/20 bg-success-soft/30"
+          : "border-warning/25 bg-gradient-to-r from-warning-soft/80 via-warning-soft/40 to-transparent"
       }`}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
@@ -69,15 +60,28 @@ export function RotaStatusBanner({
           </div>
           <div className="min-w-0">
             <div className="text-sm font-semibold text-foreground">{title}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{body}</div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              Scheduled hours are {coveragePct}% of weekly target.
-            </div>
+            <div className="mt-1 text-sm text-muted-foreground">{summary}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{body}</div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
+          <ActionButton
+            variant="secondary"
+            size="sm"
+            icon={Share2}
+            onClick={() =>
+              toast.info("Share draft", {
+                description: "Sharing is not wired in this prototype.",
+              })
+            }
+          >
+            Share draft
+          </ActionButton>
+          <ActionButton variant="outline" size="sm" icon={FileDown} onClick={() => window.print()}>
+            Export PDF
+          </ActionButton>
           <ActionButton size="sm" icon={Send} onClick={onPublish} disabled={!canPublish}>
-            {cta}
+            {publishLabel}
           </ActionButton>
         </div>
       </div>

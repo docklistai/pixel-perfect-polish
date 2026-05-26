@@ -10,10 +10,10 @@ interface Props {
 
 export function DashboardKpiCards({ items }: Props) {
   return (
-    <Card className="p-6">
+    <Card className="p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="dock-section-eyebrow">Weekly overview</div>
-        <div className="text-xs text-muted-foreground">Rota health snapshot</div>
+        <div className="text-xs text-muted-foreground">Vs last week</div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {items.map((m) => (

@@ -69,7 +69,7 @@ export function PublishReadinessCard({
         : "Published"
       : openShiftCount > 0 || conflictCount > 0 || workingTimeAlertCount > 0
         ? "Publish with issues"
-        : "Publish rota";
+        : "Publish to staff";
   const canPublish = !published || hasUnpublishedChanges;
 
   return (

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
+import { toast } from "sonner";
 import { AppShell, Card, ConfirmDialog, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
 
@@ -10,7 +11,6 @@ import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
 import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
-import { PrePublishReviewBlock } from "@/features/rota/components/PrePublishReviewBlock";
 import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
 import { LegendCard } from "@/features/rota/components/LegendCard";
 import { AddShiftDrawer } from "@/features/rota/components/AddShiftDrawer";
@@ -113,6 +113,7 @@ function RotaPage() {
       <div className="w-full max-w-full overflow-x-hidden">
         <RotaPageHeader
           weekLabel={rota.weekLabel}
+          staffCount={rota.staff.length}
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
           canPublish={!rota.published || rota.hasUnpublishedChanges}
@@ -145,7 +146,7 @@ function RotaPage() {
           />
         )}
 
-        <div className="grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_300px]">
           <Card className="min-w-0 overflow-hidden p-0">
             <RotaGridToolbar
               conflictCount={rota.conflictCount}
@@ -155,6 +156,11 @@ function RotaPage() {
               onGenerateRota={() => setGenerateOpen(true)}
               onAddShift={() => setAddOpen(true)}
               onViewConflicts={() => setConflictOpen(true)}
+              onCopyLastWeek={() =>
+                toast.info("Copy last week", {
+                  description: "Duplicating a draft is not wired in this prototype.",
+                })
+              }
             />
             <RotaGrid
               days={rota.days}
@@ -195,15 +201,6 @@ function RotaPage() {
               plannedShiftCount={rota.plannedShiftCount}
               coveragePct={rota.coveragePct}
               onPublish={() => setPublishOpen(true)}
-            />
-            <PrePublishReviewBlock
-              openShiftCount={rota.openShiftCount}
-              conflictCount={rota.conflictCount}
-              workingTimeAlertCount={workingTimeAlertCount}
-              plannedShiftCount={rota.plannedShiftCount}
-              onReviewOpenShifts={() => setAddOpen(true)}
-              onReviewConflicts={() => setConflictOpen(true)}
-              onReviewWorkingTime={() => setWorkingTimeOpen(true)}
             />
             <RoleCoverageCard roleCoverage={rota.roleCoverage} />
             <LegendCard />

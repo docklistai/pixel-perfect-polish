@@ -39,6 +39,20 @@ import { cn } from "@/lib/utils";
 
 export type Tone = "brand" | "info" | "success" | "warning" | "danger" | "purple" | "muted";
 
+/** Prototype status family name per tone — feeds .badge.<x>, .bubble.<x>, .rota-status.<x>. */
+export const toneProto: Record<
+  Tone,
+  "teal" | "blue" | "green" | "amber" | "red" | "purple" | "slate"
+> = {
+  brand: "teal",
+  info: "blue",
+  success: "green",
+  warning: "amber",
+  danger: "red",
+  purple: "purple",
+  muted: "slate",
+};
+
 /** Background + foreground pair for soft tone surfaces (badges, icon chips). */
 export const toneSoft: Record<Tone, string> = {
   brand: "bg-brand-soft text-brand",
@@ -77,7 +91,7 @@ export function AppShell({
   return (
     <div className="flex min-h-screen w-full">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="dl-main flex-1">
         <Topbar searchPlaceholder={searchPlaceholder} />
         <div className="md:hidden px-4 pt-4">
           <FeedbackBanner
@@ -86,12 +100,10 @@ export function AppShell({
             description="Docklist manager is optimised for desktop. Please use a larger screen."
           />
         </div>
-        <main id="main-content" tabIndex={-1} className="flex-1 px-8 py-7 focus:outline-none">
+        <main id="main-content" tabIndex={-1} className="flex-1 dl-page-in focus:outline-none">
           {children}
         </main>
-        <footer className="px-8 py-5 text-center text-xs text-muted-foreground">
-          All times shown in Europe/London (GMT+1)
-        </footer>
+        <footer>All times shown in Europe/London (GMT+1)</footer>
       </div>
     </div>
   );
@@ -111,20 +123,12 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <div className="page-head flex-col md:flex-row">
       <div className="min-w-0">
-        <h1 className="text-balance text-[1.875rem] font-semibold tracking-tight md:text-[2rem]">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-1.5 max-w-3xl text-pretty text-sm leading-6 text-muted-foreground">
-            {subtitle}
-          </p>
-        )}
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
       </div>
-      {actions && (
-        <div className="flex flex-wrap items-center gap-2.5 md:justify-end">{actions}</div>
-      )}
+      {actions && <div className="actions flex-wrap">{actions}</div>}
     </div>
   );
 }
@@ -159,23 +163,33 @@ export function SectionHeader({
 /* Cards                                                               */
 /* ------------------------------------------------------------------ */
 
-/** Base card surface — used by every card-shaped block in the app. */
+/** Base card surface — emits prototype `.card`. Padding defaults to none so legacy callers can keep using Tailwind utilities. */
 export function DashboardCard({
   className = "",
   children,
   as: Tag = "div",
+  padding = "none",
 }: {
   className?: string;
   children: React.ReactNode;
   as?: "div" | "section" | "article";
+  padding?: "none" | "sm" | "md" | "lg";
 }) {
-  return <Tag className={cn("dock-card", className)}>{children}</Tag>;
+  const padCls =
+    padding === "none"
+      ? ""
+      : padding === "sm"
+        ? "card-pad-sm"
+        : padding === "lg"
+          ? "card-pad-lg"
+          : "card-pad";
+  return <Tag className={cn("card", padCls, className)}>{children}</Tag>;
 }
 
 // Backwards-compat alias for routes that still import { Card }.
 export const Card = DashboardCard;
 
-/** Headline metric tile — large value, supporting label and optional delta. */
+/** Headline metric tile — emits prototype `.kpi`. */
 export function MetricCard({
   icon: Icon,
   label,
@@ -197,35 +211,27 @@ export function MetricCard({
   action?: React.ReactNode;
   className?: string;
 }) {
+  const proto = toneProto[tone];
   return (
-    <DashboardCard className={cn("p-4", className)}>
+    <div className={cn("kpi", className)}>
       <div className="flex items-center gap-3">
         {Icon && (
-          <div
-            className={cn(
-              "h-10 w-10 rounded-full flex items-center justify-center",
-              toneSoft[tone],
-            )}
-            aria-hidden
-          >
-            <Icon className="h-5 w-5" />
-          </div>
+          <span className={cn("icon-bubble bubble", proto)} aria-hidden>
+            <Icon className="h-4 w-4" />
+          </span>
         )}
-        <div className="text-[11px] font-semibold tracking-widest text-muted-foreground">
-          {label}
-        </div>
+        <div className="label">{label}</div>
       </div>
-      <div className="mt-3 text-3xl font-bold tracking-tight">{value}</div>
+      <div className="value">{value}</div>
       {(sub || delta) && (
-        <div className="text-xs text-muted-foreground mt-1">
+        <div className="delta">
           {sub}
           {delta && (
             <span
               className={cn(
                 "ml-1 font-semibold",
-                deltaTone === "success" && "text-success",
-                deltaTone === "danger" && "text-danger",
-                deltaTone === "muted" && "text-muted-foreground",
+                deltaTone === "success" && "delta up",
+                deltaTone === "danger" && "delta down",
               )}
             >
               {delta}
@@ -233,8 +239,8 @@ export function MetricCard({
           )}
         </div>
       )}
-      {action && <div className="mt-3">{action}</div>}
-    </DashboardCard>
+      {action && <div className="mt-1">{action}</div>}
+    </div>
   );
 }
 
@@ -290,23 +296,14 @@ export function QuickActionCard({
 /* ------------------------------------------------------------------ */
 
 type ActionVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
-type ActionSize = "sm" | "md";
+type ActionSize = "sm" | "md" | "lg";
 
-const actionBase =
-  "inline-flex min-h-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-
-const actionVariants: Record<ActionVariant, string> = {
-  primary: "bg-brand text-brand-foreground hover:opacity-95 shadow-[var(--shadow-card)]",
-  secondary:
-    "bg-card border border-border text-foreground hover:bg-muted/50 shadow-[var(--shadow-card)]",
-  outline: "border border-brand text-brand hover:bg-brand-soft shadow-[var(--shadow-card)]",
-  ghost: "text-foreground hover:bg-muted/50",
-  danger: "bg-danger text-white hover:opacity-95 shadow-[var(--shadow-card)]",
-};
-
-const actionSizes: Record<ActionSize, string> = {
-  sm: "px-3 py-1.5 text-xs",
-  md: "px-4 py-2.5 text-sm font-semibold",
+const actionVariantClass: Record<ActionVariant, string> = {
+  primary: "primary",
+  secondary: "secondary",
+  outline: "outline-teal",
+  ghost: "ghost",
+  danger: "danger",
 };
 
 export interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -316,7 +313,7 @@ export interface ActionButtonProps extends React.ButtonHTMLAttributes<HTMLButton
   iconRight?: LucideIcon;
 }
 
-/** Primary text-bearing button used in headers, modals and forms. */
+/** Primary text-bearing button — emits prototype .btn variants. */
 export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
   function ActionButton(
     {
@@ -330,10 +327,12 @@ export const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProp
     },
     ref,
   ) {
+    const sizeCls = size === "sm" ? "sm" : size === "lg" ? "lg" : "";
     return (
       <button
         ref={ref}
-        className={cn(actionBase, actionVariants[variant], actionSizes[size], className)}
+        type={rest.type ?? "button"}
+        className={cn("btn", actionVariantClass[variant], sizeCls, className)}
         {...rest}
       >
         {Icon && <Icon className="h-4 w-4" aria-hidden />}
@@ -352,31 +351,21 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
   size?: "sm" | "md";
 }
 
-/** Square icon-only button with mandatory aria-label. */
+/** Square icon-only button — prototype `.icon-btn`. */
 export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
   { icon: Icon, label, variant = "card", size = "md", className, ...rest },
   ref,
 ) {
-  const sizeCls = size === "sm" ? "p-1.5" : "p-2.5";
   const iconSize = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
-  const variantCls =
-    variant === "card"
-      ? "rounded-xl border border-border bg-card shadow-[var(--shadow-card)] hover:bg-muted/50"
-      : variant === "outline"
-        ? "rounded-xl border border-border bg-card shadow-[var(--shadow-card)] hover:bg-muted/50"
-        : "rounded-xl bg-transparent hover:bg-muted/50 text-muted-foreground";
+  const sizeCls = size === "sm" ? "sm" : "";
+  const variantCls = variant === "ghost" ? "border-transparent bg-transparent" : "";
   return (
     <button
       ref={ref}
       type="button"
       aria-label={label}
       title={label}
-      className={cn(
-        "inline-flex items-center justify-center transition-colors",
-        sizeCls,
-        variantCls,
-        className,
-      )}
+      className={cn("icon-btn", sizeCls, variantCls, className)}
       {...rest}
     >
       <Icon className={iconSize} aria-hidden />
@@ -384,7 +373,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(f
   );
 });
 
-/** Pill-style filter trigger ("All teams ▾"). */
+/** Pill-style filter trigger ("All teams ▾") — prototype .btn variant. */
 export function FilterButton({
   label,
   icon: Icon,
@@ -404,13 +393,7 @@ export function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        "min-h-10 rounded-xl border px-3.5 py-2 text-xs font-medium flex items-center gap-2 transition-colors",
-        active
-          ? "border-brand text-brand bg-brand-soft"
-          : "border-border bg-card hover:bg-muted/50",
-        className,
-      )}
+      className={cn("btn sm", active ? "outline-teal" : "secondary", className)}
     >
       {Icon && <Icon className="h-3.5 w-3.5" aria-hidden />}
       <span>{label}</span>
@@ -423,7 +406,7 @@ export function FilterButton({
 /* Badges                                                              */
 /* ------------------------------------------------------------------ */
 
-/** Small status pill — solid soft-tone background. */
+/** Small status pill — prototype `.badge.<tone>`. */
 export function StatusBadge({
   tone = "muted",
   children,
@@ -435,15 +418,9 @@ export function StatusBadge({
   dot?: boolean;
   className?: string;
 }) {
+  const proto = toneProto[tone];
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none",
-        toneSoft[tone],
-        className,
-      )}
-    >
-      {dot && <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+    <span className={cn("badge", proto !== "slate" && proto, dot && "dot", className)}>
       {children}
     </span>
   );
@@ -459,28 +436,20 @@ export interface SearchFieldProps extends React.InputHTMLAttributes<HTMLInputEle
   variant?: "card" | "inline";
 }
 
-/** Text search input with leading magnifier icon. */
+/** Text search input — emits prototype `.input-group`. */
 export const SearchField = React.forwardRef<HTMLInputElement, SearchFieldProps>(
   function SearchField(
     { containerClassName, variant = "inline", placeholder = "Search...", className, ...rest },
     ref,
   ) {
-    const wrapper =
-      variant === "card"
-        ? "flex items-center gap-2 rounded-xl border border-border bg-card px-3.5 py-2 shadow-[var(--shadow-card)]"
-        : "flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5";
     return (
-      <div className={cn(wrapper, containerClassName)}>
-        <Search className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+      <div className={cn("input-group", containerClassName)}>
+        <Search className="ico h-3.5 w-3.5" aria-hidden />
         <input
           ref={ref}
           type="search"
           placeholder={placeholder}
-          className={cn(
-            "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
-            variant === "card" ? "text-sm" : "text-xs",
-            className,
-          )}
+          className={cn(className)}
           {...rest}
         />
       </div>
@@ -529,7 +498,7 @@ export function DataTable<Row>({
 }: DataTableProps<Row>) {
   return (
     <div className={cn("w-full", className)}>
-      <table className="dock-table text-sm">
+      <table className="tbl">
         {caption && (
           <caption className="text-left text-xs text-muted-foreground pb-2">{caption}</caption>
         )}
@@ -540,10 +509,8 @@ export function DataTable<Row>({
                 key={c.key}
                 style={c.width ? { width: c.width } : undefined}
                 className={cn(
-                  "py-3 px-3",
                   c.align === "right" && "text-right",
                   c.align === "center" && "text-center",
-                  c.align !== "right" && c.align !== "center" && "text-left",
                   c.className,
                 )}
               >
@@ -555,14 +522,14 @@ export function DataTable<Row>({
         <tbody>
           {loading && (
             <tr>
-              <td colSpan={columns.length} className="py-10">
+              <td colSpan={columns.length} style={{ padding: "40px 14px" }}>
                 <LoadingState compact />
               </td>
             </tr>
           )}
           {!loading && rows.length === 0 && (
             <tr>
-              <td colSpan={columns.length} className="py-10">
+              <td colSpan={columns.length} style={{ padding: "40px 14px" }}>
                 {empty ?? <EmptyState compact title="No results" />}
               </td>
             </tr>
@@ -574,7 +541,6 @@ export function DataTable<Row>({
                   <td
                     key={c.key}
                     className={cn(
-                      "py-3.5 px-3",
                       c.align === "right" && "text-right",
                       c.align === "center" && "text-center",
                     )}
@@ -728,23 +694,12 @@ export function EmptyState({
   compact?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center text-center",
-        compact ? "py-6 gap-2" : "py-12 gap-3",
-      )}
-    >
-      <div
-        className={cn(
-          "rounded-full bg-muted text-muted-foreground flex items-center justify-center shadow-[var(--shadow-card)]",
-          compact ? "h-10 w-10" : "h-14 w-14",
-        )}
-        aria-hidden
-      >
+    <div className="empty" style={compact ? { padding: "24px 16px" } : undefined}>
+      <div className="ill" aria-hidden>
         <Icon className={compact ? "h-5 w-5" : "h-6 w-6"} />
       </div>
-      <div className={compact ? "text-sm font-medium" : "text-base font-semibold"}>{title}</div>
-      {description && <div className="text-xs text-muted-foreground max-w-xs">{description}</div>}
+      <h4>{title}</h4>
+      {description && <p>{description}</p>}
       {action && <div className="mt-1">{action}</div>}
     </div>
   );
@@ -761,15 +716,13 @@ export function LoadingState({
     <div
       role="status"
       aria-live="polite"
-      className={cn(
-        "flex flex-col items-center justify-center text-center text-muted-foreground",
-        compact ? "py-4 gap-2 text-xs" : "py-12 gap-3 text-sm",
-      )}
+      className="empty"
+      style={compact ? { padding: "16px" } : undefined}
     >
-      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shadow-[var(--shadow-card)]">
-        <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden />
+      <div className="ill" aria-hidden>
+        <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
       </div>
-      <span>{label}</span>
+      <p>{label}</p>
     </div>
   );
 }
@@ -815,6 +768,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -851,13 +805,13 @@ export interface DrawerShellProps {
 }
 
 const drawerWidths: Record<NonNullable<DrawerShellProps["width"]>, string> = {
-  sm: "sm:max-w-sm",
-  md: "sm:max-w-lg",
-  lg: "sm:max-w-2xl",
-  xl: "sm:max-w-3xl",
+  sm: "sm:!max-w-[360px]",
+  md: "sm:!max-w-[420px]",
+  lg: "sm:!max-w-[520px]",
+  xl: "sm:!max-w-[600px]",
 };
 
-/** Right-side drawer with the Docklist header / scrollable body / sticky footer. */
+/** Right-side drawer using prototype `.drawer` chrome wrapped over Radix Sheet. */
 export function DrawerShell({
   open,
   onOpenChange,
@@ -873,32 +827,44 @@ export function DrawerShell({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={side}
+        hideCloseButton
         className={cn(
-          "flex w-full flex-col gap-0 overflow-hidden border-border bg-card p-0 text-card-foreground shadow-[var(--shadow-elevated)]",
+          "drawer !flex w-full flex-col gap-0 overflow-hidden p-0 !rounded-none !border-l",
           drawerWidths[width],
         )}
+        style={{
+          background: "var(--bg-overlay)",
+          borderColor: "var(--border)",
+        }}
       >
-        <SheetHeader className="border-b border-border bg-card px-6 pb-4 pt-5 pr-12">
-          <div className="flex items-start justify-between gap-3">
+        <SheetHeader className="drawer-head !block !space-y-0">
+          <div className="flex w-full items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <SheetTitle className="text-lg font-semibold leading-tight text-balance">
+              <SheetTitle
+                className="!text-[15px] !font-semibold leading-tight"
+                style={{ color: "var(--ink-900)" }}
+              >
                 {title}
               </SheetTitle>
               {description && (
-                <SheetDescription className="text-sm leading-5 text-muted-foreground text-pretty">
+                <SheetDescription
+                  className="!text-xs leading-5"
+                  style={{ color: "var(--ink-500)" }}
+                >
                   {description}
                 </SheetDescription>
               )}
             </div>
-            {meta && <div className="shrink-0">{meta}</div>}
+            <div className="flex shrink-0 items-start gap-2">
+              {meta && <div>{meta}</div>}
+              <SheetClose asChild>
+                <IconButton icon={X} label="Close drawer" variant="ghost" size="sm" />
+              </SheetClose>
+            </div>
           </div>
         </SheetHeader>
-        <div className="flex-1 space-y-5 overflow-y-auto bg-muted/35 px-6 py-5">{children}</div>
-        {footer && (
-          <div className="shrink-0 border-t border-border bg-card px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-[0_-10px_24px_-20px_oklch(0.19_0.035_250_/_0.35)] flex items-center justify-end gap-2">
-            {footer}
-          </div>
-        )}
+        <div className="drawer-body">{children}</div>
+        {footer && <div className="drawer-foot">{footer}</div>}
       </SheetContent>
     </Sheet>
   );
@@ -915,12 +881,12 @@ export interface DialogShellProps {
 }
 
 const dialogSizes: Record<NonNullable<DialogShellProps["size"]>, string> = {
-  sm: "sm:max-w-sm",
-  md: "sm:max-w-md",
-  lg: "sm:max-w-lg",
+  sm: "sm:!max-w-[420px]",
+  md: "sm:!max-w-[480px]",
+  lg: "sm:!max-w-[560px]",
 };
 
-/** Centred modal dialog with the Docklist header/body/footer rhythm. */
+/** Centred modal dialog using prototype `.modal` chrome wrapped over Radix Dialog. */
 export function DialogShell({
   open,
   onOpenChange,
@@ -934,26 +900,22 @@ export function DialogShell({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "overflow-hidden gap-0 border-border bg-card p-0 text-card-foreground shadow-[var(--shadow-elevated)] sm:rounded-2xl",
+          "modal !block p-0 !overflow-hidden !border !rounded-[16px]",
           dialogSizes[size],
         )}
+        style={{
+          background: "var(--bg-overlay)",
+          borderColor: "var(--border)",
+        }}
       >
-        <DialogHeader className="border-b border-border bg-card px-6 pb-4 pt-5 pr-12">
-          <DialogTitle className="text-lg font-semibold leading-tight text-balance">
-            {title}
-          </DialogTitle>
+        <DialogHeader className="modal-head !block !space-y-0">
+          <DialogTitle className="modal-title">{title}</DialogTitle>
           {description && (
-            <DialogDescription className="text-sm leading-5 text-muted-foreground text-pretty">
-              {description}
-            </DialogDescription>
+            <DialogDescription className="modal-sub">{description}</DialogDescription>
           )}
         </DialogHeader>
-        {children && <div className="space-y-4 bg-muted/35 px-6 py-5 text-sm">{children}</div>}
-        {footer && (
-          <DialogFooter className="border-t border-border bg-card px-6 py-4 gap-2 sm:gap-2">
-            {footer}
-          </DialogFooter>
-        )}
+        {children && <div className="modal-body">{children}</div>}
+        {footer && <DialogFooter className="modal-foot">{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
   );
@@ -983,30 +945,24 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="overflow-hidden gap-0 border-border bg-card p-0 text-card-foreground shadow-[var(--shadow-elevated)] sm:rounded-2xl">
-        <AlertDialogHeader className="border-b border-border bg-card px-6 pb-4 pt-5">
-          <AlertDialogTitle className="text-lg font-semibold leading-tight text-balance">
-            {title}
-          </AlertDialogTitle>
+      <AlertDialogContent
+        className="modal !block p-0 !overflow-hidden !border !rounded-[16px] sm:!max-w-[480px]"
+        style={{
+          background: "var(--bg-overlay)",
+          borderColor: "var(--border)",
+        }}
+      >
+        <AlertDialogHeader className="modal-head !block !space-y-0">
+          <AlertDialogTitle className="modal-title">{title}</AlertDialogTitle>
           {description && (
-            <AlertDialogDescription className="text-sm leading-5 text-muted-foreground text-pretty">
-              {description}
-            </AlertDialogDescription>
+            <AlertDialogDescription className="modal-sub">{description}</AlertDialogDescription>
           )}
         </AlertDialogHeader>
-        <AlertDialogFooter className="border-t border-border bg-card px-6 py-4 gap-2 sm:gap-2">
-          <AlertDialogCancel
-            className={cn(actionBase, actionVariants.secondary, actionSizes.sm, "mt-0")}
-          >
-            {cancelLabel}
-          </AlertDialogCancel>
+        <AlertDialogFooter className="modal-foot">
+          <AlertDialogCancel className="btn secondary sm !mt-0">{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className={cn(
-              actionBase,
-              tone === "danger" ? actionVariants.danger : actionVariants.primary,
-              actionSizes.sm,
-            )}
+            className={cn("btn sm", tone === "danger" ? "danger" : "primary")}
           >
             {confirmLabel}
           </AlertDialogAction>
