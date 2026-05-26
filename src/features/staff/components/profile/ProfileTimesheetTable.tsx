@@ -73,7 +73,7 @@ export function ProfileTimesheetTable({ rows, onToast }: ProfileTimesheetTablePr
       <div className="overflow-x-auto">
         <table className="min-w-[600px] w-full text-sm">
           <thead>
-            <tr className="text-[10px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-b border-border">
+            <tr className="text-[10.5px] font-bold tracking-[0.08em] uppercase text-muted-foreground border-b border-border">
               <th className="text-left py-2.5 px-5">Day</th>
               <th className="text-left py-2.5">Scheduled</th>
               <th className="text-left py-2.5">Clocked</th>

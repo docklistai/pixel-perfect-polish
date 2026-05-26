@@ -12,9 +12,7 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
       {/* onChange on the wrapper catches all child <input> change events via bubbling */}
       <div onChange={onDirty} className="space-y-5">
         <div>
-          <div className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">
-            Workspace
-          </div>
+          <div className="dock-section-eyebrow">Workspace</div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             Update your workspace details and default settings.
           </p>
