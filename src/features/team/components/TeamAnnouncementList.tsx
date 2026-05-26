@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Pin, MoreHorizontal, Users, Shield } from "lucide-react";
-import { Card, EmptyState } from "@/components/dl";
+import { Pin, MoreHorizontal, Users, ChevronDown, Shield } from "lucide-react";
+import { StatusBadge, EmptyState } from "@/components/dl";
+import { cn } from "@/lib/utils";
 import { toneBg } from "../types";
 import { audienceOptions } from "../data/teamDemoData";
 import type { TeamAnnouncement, TabKey } from "../types";
@@ -10,15 +11,29 @@ interface Props {
   onSelect: (a: TeamAnnouncement) => void;
 }
 
-const tabs: { key: TabKey; label: string }[] = [
-  { key: "all", label: "All announcements" },
-  { key: "pinned", label: "Pinned" },
-  { key: "myAck", label: "My acknowledgements" },
+interface TabSpec {
+  key: TabKey;
+  label: string;
+  tone?: "purple" | "warning";
+}
+
+const tabs: TabSpec[] = [
+  { key: "all", label: "All" },
+  { key: "pinned", label: "Pinned", tone: "purple" },
+  { key: "myAck", label: "Need my ack", tone: "warning" },
 ];
 
 export function TeamAnnouncementList({ announcements, onSelect }: Props) {
   const [tab, setTab] = React.useState<TabKey>("all");
   const [audience, setAudience] = React.useState("All audiences");
+
+  const counts = React.useMemo(() => {
+    return {
+      all: announcements.length,
+      pinned: announcements.filter((a) => a.pinned).length,
+      myAck: announcements.filter((a) => !a.myAck).length,
+    } as Record<TabKey, number>;
+  }, [announcements]);
 
   const visible = React.useMemo(() => {
     return announcements
@@ -31,117 +46,135 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
   }, [announcements, tab, audience]);
 
   return (
-    <Card className="rounded-2xl">
-      <div className="flex items-center justify-between px-5 pt-4">
-        <div role="tablist" className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
-          {tabs.map(({ key, label }) => (
-            <button
-              key={key}
-              role="tab"
-              aria-selected={tab === key}
-              onClick={() => setTab(key)}
-              className={`pb-3 border-b-2 transition-colors ${
-                tab === key
-                  ? "border-brand text-brand font-semibold"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+    <div className="card overflow-hidden">
+      <div className="card-section flex flex-wrap items-center gap-3">
+        <div role="tablist" className="dl-tabs flex-1 min-w-0" style={{ borderBottom: "none" }}>
+          {tabs.map(({ key, label, tone }) => {
+            const count = counts[key];
+            return (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={tab === key}
+                className={cn("dl-tab", tab === key && "active")}
+                onClick={() => setTab(key)}
+              >
+                {label}
+                {count > 0 && (
+                  <StatusBadge tone={tone ?? "muted"} className="ml-1">
+                    {count}
+                  </StatusBadge>
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-2 pb-3">
-          <label htmlFor="team-audience-filter" className="sr-only">
-            Filter by audience
-          </label>
-          <div className="relative flex items-center">
-            <Users className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-muted-foreground" />
-            <select
-              id="team-audience-filter"
-              value={audience}
-              onChange={(e) => setAudience(e.target.value)}
-              className="h-8 appearance-none rounded-lg border border-border bg-background pl-8 pr-3 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-brand"
-            >
-              {audienceOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          </div>
+
+        <label htmlFor="team-audience-filter" className="sr-only">
+          Filter by audience
+        </label>
+        <div className="relative flex items-center">
+          <Users
+            className="pointer-events-none absolute left-3 h-3.5 w-3.5 text-muted-foreground"
+            aria-hidden
+          />
+          <ChevronDown
+            className="pointer-events-none absolute right-2 h-3.5 w-3.5 text-muted-foreground"
+            aria-hidden
+          />
+          <select
+            id="team-audience-filter"
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+            className="dl-select appearance-none !w-auto pl-8 pr-7 !py-1.5 text-xs"
+          >
+            {audienceOptions.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      <div className="border-t border-border">
-        {visible.length === 0 ? (
-          <EmptyState
-            title="No announcements"
-            description="No announcements match the current filter."
-          />
-        ) : (
-          visible.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              onClick={() => onSelect(a)}
-              className="block w-full text-left border-b border-border/60 last:border-0 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
-            >
-              {a.pinned && (
-                <div className="inline-flex items-center gap-1 rounded-full bg-accent-purple-soft text-accent-purple text-[11px] font-medium px-2 py-0.5 mb-2">
-                  <Pin className="h-3 w-3" aria-hidden="true" /> Pinned
-                </div>
-              )}
-              <div className="flex items-start gap-3">
-                <div
-                  className={`h-10 w-10 rounded-lg flex items-center justify-center shrink-0 ${toneBg[a.tone]}`}
-                >
-                  <a.icon className="h-5 w-5" aria-hidden="true" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 font-semibold">
-                    {a.t} <span aria-hidden="true">{a.emoji}</span>
-                    {a.id === "food-safety" && (
-                      <Shield className="h-4 w-4 text-success" aria-hidden="true" />
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{a.body}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {a.tags.map((tg) => (
-                      <span
-                        key={tg}
-                        className="rounded-md border border-border px-2 py-0.5 text-[11px] text-muted-foreground"
-                      >
-                        {tg}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="text-right text-xs shrink-0 min-w-[72px]">
-                  <div className="font-semibold">
-                    {a.ackDone} / {a.ackTotal}
-                  </div>
-                  <div className="text-muted-foreground">Acknowledged</div>
-                  <div className="mt-1 h-1 w-full rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full bg-brand"
-                      style={{ width: `${(a.ackDone / a.ackTotal) * 100}%` }}
-                    />
-                  </div>
-                  <div className="mt-2 text-muted-foreground">
-                    Published
-                    <br />
-                    <span className="text-foreground font-medium">{a.date}</span>
-                  </div>
-                </div>
-                <MoreHorizontal
-                  className="h-4 w-4 text-muted-foreground shrink-0 mt-1"
-                  aria-hidden="true"
-                />
+      {visible.length === 0 ? (
+        <EmptyState
+          title="No announcements"
+          description="No announcements match the current filter."
+        />
+      ) : (
+        visible.map((a) => (
+          <button
+            key={a.id}
+            type="button"
+            onClick={() => onSelect(a)}
+            className="block w-full text-left border-t border-border/40 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+          >
+            {a.pinned && (
+              <div className="mb-2">
+                <StatusBadge tone="purple">
+                  <Pin className="h-3 w-3" aria-hidden /> Pinned
+                </StatusBadge>
               </div>
-            </button>
-          ))
-        )}
-      </div>
-    </Card>
+            )}
+            <div className="flex items-start gap-3">
+              <div
+                className={cn(
+                  "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+                  toneBg[a.tone],
+                )}
+                aria-hidden
+              >
+                <a.icon className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 font-semibold text-[14.5px]">
+                  {a.t} <span aria-hidden>{a.emoji}</span>
+                  {a.id === "food-safety" && (
+                    <Shield className="h-4 w-4 text-success" aria-hidden />
+                  )}
+                  {!a.myAck && (
+                    <span className="ml-auto">
+                      <StatusBadge tone="warning">Needs your ack</StatusBadge>
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{a.body}</p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {a.tags.map((tg) => (
+                    <span key={tg} className="badge outline">
+                      {tg}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="text-right text-xs shrink-0 min-w-[120px]">
+                <div className="font-semibold">
+                  {a.ackDone} / {a.ackTotal} read
+                </div>
+                <div className="text-muted-foreground">{a.date}</div>
+                <div className="bar mt-2 ml-auto" style={{ width: 110, height: 4 }}>
+                  <i style={{ width: `${(a.ackDone / a.ackTotal) * 100}%` }} />
+                </div>
+              </div>
+              <MoreHorizontal className="h-4 w-4 text-muted-foreground shrink-0 mt-1" aria-hidden />
+            </div>
+          </button>
+        ))
+      )}
+
+      {visible.length > 0 && (
+        <div className="card-foot flex flex-wrap items-center gap-3">
+          <span className="text-xs text-muted-foreground">
+            Showing {visible.length} of {announcements.length}
+          </span>
+          <div className="flex-1" />
+          <button type="button" className="btn ghost sm">
+            Load more
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

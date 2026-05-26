@@ -1,31 +1,105 @@
-import { Card } from "@/components/dl";
+import * as React from "react";
+import { Search } from "lucide-react";
+import { StatusBadge } from "@/components/dl";
+import { cn } from "@/lib/utils";
 import type { TimesheetRow } from "../types";
 
-const stTones: Record<string, string> = {
-  success: "bg-success-soft text-success",
-  warning: "bg-warning-soft text-warning",
-  muted: "bg-muted text-muted-foreground",
-  danger: "bg-danger-soft text-danger",
+export type TimesheetTab = "all" | "pending" | "unapproved" | "exceptions" | "approved";
+
+const cellTone: Record<string, string> = {
+  warning: "text-warning",
+  danger: "text-danger",
 };
 
-const noteTones: Record<string, string> = { warning: "text-warning", danger: "text-danger" };
+interface TabCounts {
+  all: number;
+  pending: number;
+  unapproved: number;
+  exceptions: number;
+  approved: number;
+}
 
 interface Props {
   rows: TimesheetRow[];
+  totalRows: number;
   approved: Set<string>;
   declined: Set<string>;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+  onToggleAll: () => void;
   onReview: (row: TimesheetRow) => void;
+  tab: TimesheetTab;
+  onTabChange: (tab: TimesheetTab) => void;
+  query: string;
+  onQueryChange: (q: string) => void;
+  counts: TabCounts;
+  onResetFilters: () => void;
 }
 
-export function TimesheetTable({ rows, approved, declined, onReview }: Props) {
+const tabs: Array<{
+  key: TimesheetTab;
+  label: string;
+  countKey: keyof TabCounts;
+  tone?: "warning" | "danger" | "success";
+}> = [
+  { key: "all", label: "All", countKey: "all" },
+  { key: "pending", label: "Pending", countKey: "pending", tone: "warning" },
+  { key: "unapproved", label: "Unapproved", countKey: "unapproved", tone: "danger" },
+  { key: "exceptions", label: "Exceptions", countKey: "exceptions", tone: "danger" },
+  { key: "approved", label: "Approved", countKey: "approved", tone: "success" },
+];
+
+export function TimesheetTable({
+  rows,
+  totalRows,
+  approved,
+  declined,
+  selectedIds,
+  onToggleSelect,
+  onToggleAll,
+  onReview,
+  tab,
+  onTabChange,
+  query,
+  onQueryChange,
+  counts,
+  onResetFilters,
+}: Props) {
+  const allSelected = rows.length > 0 && rows.every((r) => selectedIds.has(r.id));
+
   return (
-    <Card className="rounded-2xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <span className="font-semibold">Weekly Timesheet</span>{" "}
-          <span className="text-xs text-muted-foreground ml-1">{rows.length} staff</span>
+    <div className="card overflow-hidden">
+      <div className="card-section flex flex-wrap items-center gap-3">
+        <div className="dl-tabs flex-1 min-w-0" style={{ borderBottom: "none" }}>
+          {tabs.map((t) => {
+            const count = counts[t.countKey];
+            return (
+              <button
+                key={t.key}
+                type="button"
+                className={cn("dl-tab", tab === t.key && "active")}
+                onClick={() => onTabChange(t.key)}
+              >
+                {t.label}
+                {count > 0 && (
+                  <StatusBadge tone={t.tone ?? "muted"} className="ml-1">
+                    {count}
+                  </StatusBadge>
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="text-xs text-muted-foreground">18 – 24 May 2026</div>
+        <div className="input-group" style={{ width: 220 }}>
+          <Search className="ico h-3.5 w-3.5" aria-hidden />
+          <input
+            type="search"
+            placeholder="Search staff…"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            aria-label="Search timesheets"
+          />
+        </div>
       </div>
 
       <div
@@ -34,32 +108,26 @@ export function TimesheetTable({ rows, approved, declined, onReview }: Props) {
         role="region"
         aria-label="Weekly timesheet, scroll horizontally to see all columns"
       >
-        <table className="min-w-[1100px] w-full text-sm">
+        <table className="tbl min-w-[1100px] w-full">
           <thead>
-            <tr className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground border-y border-border">
-              <th className="py-2 text-left">Staff</th>
-              <th className="py-2 text-left">
-                Scheduled
-                <div className="font-normal normal-case tracking-normal text-[10px]">
-                  Start − End
-                </div>
+            <tr>
+              <th style={{ width: 36 }}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={onToggleAll}
+                  aria-label="Select all visible timesheets"
+                />
               </th>
-              <th className="py-2 text-left">
-                Clock In
-                <div className="font-normal normal-case tracking-normal text-[10px]">Actual</div>
-              </th>
-              <th className="py-2 text-left">
-                Clock Out
-                <div className="font-normal normal-case tracking-normal text-[10px]">Actual</div>
-              </th>
-              <th className="py-2 text-left">
-                Breaks
-                <div className="font-normal normal-case tracking-normal text-[10px]">Unpaid</div>
-              </th>
-              <th className="py-2 text-left">Paid Hours</th>
-              <th className="py-2 text-left">Exceptions</th>
-              <th className="py-2 text-left">Approval</th>
-              <th className="py-2" />
+              <th>Staff</th>
+              <th>Scheduled</th>
+              <th>Clock in</th>
+              <th>Clock out</th>
+              <th>Break</th>
+              <th>Paid</th>
+              <th>Exceptions</th>
+              <th>Status</th>
+              <th style={{ width: 36 }} />
             </tr>
           </thead>
           <tbody>
@@ -72,57 +140,68 @@ export function TimesheetTable({ rows, approved, declined, onReview }: Props) {
                 : isDeclined
                   ? ("muted" as const)
                   : r.stTone;
+              const isSelected = selectedIds.has(r.id);
               return (
-                <tr key={r.id} className="border-b border-border/60 last:border-0">
-                  <td className="py-3">
-                    <div className="flex items-center gap-2">
+                <tr key={r.id} className={cn(isSelected && "selected")} onClick={() => onReview(r)}>
+                  <td onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onToggleSelect(r.id)}
+                      aria-label={`Select timesheet for ${r.n}`}
+                    />
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-3">
                       <img
                         src={`https://i.pravatar.cc/64?img=${r.img}`}
                         className="h-7 w-7 rounded-full object-cover"
                         alt=""
                       />
                       <div>
-                        <div className="font-medium">{r.n}</div>
+                        <div className="text-sm font-medium">{r.n}</div>
                         <div className="text-[11px] text-muted-foreground">{r.role}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3">{r.sched}</td>
-                  <td className="py-3">
-                    <div>{r.in}</div>
+                  <td className="font-mono text-sm">{r.sched}</td>
+                  <td>
+                    <div className="font-mono text-sm font-semibold">{r.in}</div>
                     <div
-                      className={`text-[11px] ${r.inTone ? noteTones[r.inTone] : "text-muted-foreground"}`}
+                      className={cn(
+                        "text-[11px]",
+                        r.inTone ? cellTone[r.inTone] : "text-muted-foreground",
+                      )}
                     >
                       {r.inN}
                     </div>
                   </td>
-                  <td className="py-3">
-                    <div>{r.out}</div>
+                  <td>
+                    <div className="font-mono text-sm font-semibold">{r.out}</div>
                     <div
-                      className={`text-[11px] ${r.outTone ? noteTones[r.outTone] : "text-muted-foreground"}`}
+                      className={cn(
+                        "text-[11px]",
+                        r.outTone ? cellTone[r.outTone] : "text-muted-foreground",
+                      )}
                     >
                       {r.outN}
                     </div>
                   </td>
-                  <td className="py-3">{r.brk}</td>
-                  <td className="py-3">{r.paid}</td>
-                  <td className="py-3">
+                  <td className="font-mono text-sm">{r.brk}</td>
+                  <td className="font-mono text-sm font-semibold">{r.paid}</td>
+                  <td>
                     {r.exc === "—" ? (
                       <span className="text-muted-foreground">—</span>
                     ) : (
-                      <span className={`rounded-md px-2 py-0.5 text-[11px] ${stTones.danger}`}>
+                      <StatusBadge tone={r.excTone === "danger" ? "danger" : "warning"}>
                         {r.exc}
-                      </span>
+                      </StatusBadge>
                     )}
                   </td>
-                  <td className="py-3">
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${stTones[stTone]}`}
-                    >
-                      {stLabel}
-                    </span>
+                  <td>
+                    <StatusBadge tone={stTone}>{stLabel}</StatusBadge>
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="text-right" onClick={(e) => e.stopPropagation()}>
                     {!isApproved && !isDeclined && (
                       <button
                         type="button"
@@ -141,9 +220,25 @@ export function TimesheetTable({ rows, approved, declined, onReview }: Props) {
         </table>
       </div>
 
-      <div className="pt-3 text-xs text-muted-foreground">
-        Showing {rows.length} staff for this week
+      {rows.length === 0 && (
+        <div className="empty">
+          <div className="ill" aria-hidden>
+            <Search className="h-5 w-5" />
+          </div>
+          <h4>Nothing to review</h4>
+          <p>You&apos;re all caught up on this view.</p>
+        </div>
+      )}
+
+      <div className="card-foot flex flex-wrap items-center gap-3">
+        <span className="text-xs text-muted-foreground">
+          {rows.length} of {totalRows} entries
+        </span>
+        <div className="flex-1" />
+        <button type="button" className="btn ghost sm" onClick={onResetFilters}>
+          Reset filters
+        </button>
       </div>
-    </Card>
+    </div>
   );
 }

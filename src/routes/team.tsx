@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
-import { Megaphone, MoreHorizontal } from "lucide-react";
+import { useOverlays } from "@/components/AppShortcuts";
+import { Megaphone, MoreHorizontal, Sparkles } from "lucide-react";
 import { TeamKpiCards } from "@/features/team/components/TeamKpiCards";
 import { TeamAnnouncementList } from "@/features/team/components/TeamAnnouncementList";
 import { TeamRightRail } from "@/features/team/components/TeamRightRail";
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/team")({
 });
 
 function TeamPage() {
+  const { openAiDrawer } = useOverlays();
   const [composeOpen, setComposeOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<TeamAnnouncement | null>(null);
 
@@ -33,8 +35,11 @@ function TeamPage() {
         subtitle="Share updates, keep everyone informed and connected."
         actions={
           <>
+            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
+              Draft with AI
+            </ActionButton>
             <ActionButton icon={Megaphone} onClick={() => setComposeOpen(true)}>
-              Compose announcement
+              Compose
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
           </>
@@ -52,6 +57,7 @@ function TeamPage() {
             birthdays={birthdayItems}
             events={staffEvents}
             groups={quickGroups}
+            onDraftWithAI={openAiDrawer}
           />
         </div>
       </div>
