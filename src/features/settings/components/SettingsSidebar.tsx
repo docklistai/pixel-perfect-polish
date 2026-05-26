@@ -38,9 +38,7 @@ export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps
 
       {/* Desktop: rich vertical sidebar, sticky to top. */}
       <Card className="hidden lg:block rounded-3xl p-2.5 self-start lg:sticky lg:top-6">
-        <div className="px-3 py-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-muted-foreground">
-          SETTINGS
-        </div>
+        <div className="dock-section-eyebrow px-3 py-2">Settings</div>
         <nav aria-label="Settings navigation">
           <div className="space-y-1.5">
             {settingsTabs.map((t) => {

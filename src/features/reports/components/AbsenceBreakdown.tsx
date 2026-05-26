@@ -3,11 +3,8 @@ import { Card } from "@/components/dl";
 export function AbsenceBreakdown() {
   return (
     <Card className="col-span-12 lg:col-span-4 rounded-2xl p-4 lg:p-5">
-      <div
-        id="absence-chart-title"
-        className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3"
-      >
-        ABSENCE BREAKDOWN
+      <div id="absence-chart-title" className="text-sm font-semibold mb-3">
+        Absence breakdown
       </div>
       <div id="absence-chart-summary" className="sr-only">
         Absence breakdown for the week of 18 May 2026. Total 36 hours: sickness 22 hours (61

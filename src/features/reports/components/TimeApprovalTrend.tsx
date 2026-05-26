@@ -17,9 +17,7 @@ export function TimeApprovalTrend() {
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-          ATTENDANCE RATE
-        </div>
+        <div className="text-sm font-semibold">Attendance rate</div>
         <span className="text-xs text-muted-foreground">Weekly view</span>
       </div>
 

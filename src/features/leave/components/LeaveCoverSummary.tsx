@@ -5,9 +5,7 @@ export function LeaveCoverSummary() {
     <>
       <Card className="col-span-12 lg:col-span-6 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            COVER SUMMARY
-          </div>
+          <div className="dock-section-eyebrow">COVER SUMMARY</div>
           <span className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground">
             This month
           </span>
@@ -30,9 +28,7 @@ export function LeaveCoverSummary() {
 
       <Card className="col-span-12 lg:col-span-6 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            TEAM COVERAGE
-          </div>
+          <div className="dock-section-eyebrow">TEAM COVERAGE</div>
           <span className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground">
             Next 14 days
           </span>

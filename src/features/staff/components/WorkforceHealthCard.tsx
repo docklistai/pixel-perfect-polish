@@ -140,9 +140,7 @@ export function WorkforceHealthCard({ rows }: { rows: StaffRow[] }) {
 
   return (
     <Card className="rounded-2xl p-3">
-      <p className="mb-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-        Workforce Health
-      </p>
+      <p className="dock-section-eyebrow mb-2">Workforce health</p>
 
       <div className="flex items-center gap-3">
         <ScoreRing score={score} tone={tone} />

@@ -1017,10 +1017,7 @@ export function FormRow({
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
-      <label
-        htmlFor={htmlFor}
-        className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1"
-      >
+      <label htmlFor={htmlFor} className="dock-section-eyebrow flex items-center gap-1">
         {label}
         {required && (
           <span className="text-danger" aria-hidden>

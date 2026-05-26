@@ -14,10 +14,10 @@ const TABS: { id: ProfileTab; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "schedule", label: "Schedule" },
   { id: "time", label: "Time" },
-  { id: "leave", label: "Leave" },
+  { id: "leave", label: "Leave & Absence" },
   { id: "documents", label: "Documents" },
   { id: "notes", label: "Notes" },
-  { id: "insights", label: "Patterns" },
+  { id: "insights", label: "Work patterns" },
 ];
 
 interface StaffProfileTabsProps {

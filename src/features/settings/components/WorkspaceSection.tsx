@@ -21,9 +21,7 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
         </div>
 
         <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
-          <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            Workspace details
-          </div>
+          <div className="dock-section-eyebrow">Workspace details</div>
           <div className="grid gap-3 md:grid-cols-2">
             <div>
               <label htmlFor="workspace-name" className="text-xs font-medium text-muted-foreground">
@@ -64,9 +62,7 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
         </div>
 
         <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
-          <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            Shift defaults
-          </div>
+          <div className="dock-section-eyebrow">Shift defaults</div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
               <label htmlFor="shift-start" className="text-xs text-muted-foreground">
@@ -122,9 +118,7 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
         </div>
 
         <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
-          <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            Break rules
-          </div>
+          <div className="dock-section-eyebrow">Break rules</div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label htmlFor="break-shift-over" className="text-xs text-muted-foreground">
@@ -169,9 +163,7 @@ export function WorkspaceSection({ onDirty }: WorkspaceSectionProps) {
         </div>
 
         <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
-          <div className="text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            Approval settings
-          </div>
+          <div className="dock-section-eyebrow">Approval settings</div>
           <div className="flex items-center gap-3">
             <SettingsToggle aria-label="Require approval for timesheets" onClick={onDirty} />
             <div>

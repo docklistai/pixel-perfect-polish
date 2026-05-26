@@ -12,9 +12,7 @@ const savedReports = [
 export function ReportsSavedReportsCard() {
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
-      <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-        SAVED REPORTS
-      </div>
+      <div className="mb-3 text-sm font-semibold">Saved reports</div>
       <div className="space-y-2">
         {savedReports.map((report) => (
           <div key={report.name} className="row gap-3 w-full rounded-lg px-2.5 py-2 text-left">

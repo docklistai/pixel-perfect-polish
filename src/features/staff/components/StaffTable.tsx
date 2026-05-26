@@ -111,7 +111,7 @@ export function StaffTable({
       <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Staff list">
         <table className="min-w-[940px] w-full text-sm">
           <thead>
-            <tr className="border-y border-border text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <tr className="border-y border-border text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
               <th className="py-2.5 px-3 w-9">
                 <input
                   type="checkbox"

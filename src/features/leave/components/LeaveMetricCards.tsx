@@ -19,9 +19,7 @@ export function LeaveMetricCards() {
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-5">
       {metrics.map((t) => (
         <Card key={t.l} className="p-5">
-          <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
-            {t.l}
-          </div>
+          <div className="dock-section-eyebrow mb-3">{t.l}</div>
           <div className="flex items-center gap-3">
             <div
               aria-hidden="true"

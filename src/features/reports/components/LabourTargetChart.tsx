@@ -15,11 +15,8 @@ export function LabourTargetChart() {
     <Card className="col-span-12 lg:col-span-8 p-4 lg:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div
-            id="reports-chart-title"
-            className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
-          >
-            LABOUR COST VS SALES
+          <div id="reports-chart-title" className="text-sm font-semibold">
+            Labour cost vs sales
           </div>
           <div className="text-xs text-muted-foreground">Weekly trend · last 12 weeks</div>
         </div>

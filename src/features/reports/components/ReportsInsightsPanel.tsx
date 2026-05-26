@@ -8,9 +8,7 @@ export function ReportsInsightsPanel() {
     <Card className="p-4 lg:p-5">
       <div className="flex items-center gap-2 mb-3">
         <Lightbulb className="h-4 w-4 text-warning" />
-        <span className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-          3 THINGS TO LOOK AT IN THIS PERIOD
-        </span>
+        <span className="text-sm font-semibold">3 things to look at in this period</span>
       </div>
       <div className="space-y-3">
         {insights.map((ins) => (

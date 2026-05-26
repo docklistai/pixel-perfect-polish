@@ -76,11 +76,7 @@ export function SectionCard({
 }
 
 export function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-      {children}
-    </div>
-  );
+  return <div className="dock-section-eyebrow">{children}</div>;
 }
 
 export function TextField(props: React.InputHTMLAttributes<HTMLInputElement>) {

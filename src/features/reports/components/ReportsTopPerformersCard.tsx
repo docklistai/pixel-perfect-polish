@@ -20,9 +20,7 @@ function initials(name: string): string {
 export function ReportsTopPerformersCard() {
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
-      <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-        TOP PERFORMERS
-      </div>
+      <div className="mb-3 text-sm font-semibold">Top performers</div>
       <div className="space-y-3">
         {performers.map((performer, index) => (
           <div key={performer.name} className="row gap-3" style={{ alignItems: "center" }}>
