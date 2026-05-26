@@ -1,18 +1,18 @@
-import { Calendar, Percent, Users, Clock, Shield, TrendingUp, CheckCircle2 } from "lucide-react";
+import { PoundSterling, Percent, Clock3, Users, TrendingUp } from "lucide-react";
 import type { Kpi, Insight } from "../types";
 
 export const kpis: Kpi[] = [
   {
-    l: "Scheduled Hours",
-    v: "312 hrs",
-    d: "4 hrs",
+    l: "Labour cost",
+    v: "£42,180",
+    d: "3.2%",
     up: false,
     vs: "vs last period",
-    icon: Calendar,
-    tone: "info",
+    icon: PoundSterling,
+    tone: "brand",
   },
   {
-    l: "Labour %",
+    l: "Labour vs sales",
     v: "28.4%",
     d: "0.8pp",
     up: false,
@@ -21,57 +21,42 @@ export const kpis: Kpi[] = [
     tone: "warning",
   },
   {
-    l: "Absence Rate",
-    v: "4.2%",
-    d: "0.6pp",
-    up: false,
+    l: "Hours worked",
+    v: "3,124h",
+    d: "1.5%",
+    up: true,
+    vs: "vs last period",
+    icon: Clock3,
+    tone: "info",
+  },
+  {
+    l: "Avg headcount",
+    v: "46",
+    d: "2",
+    up: true,
     vs: "vs last period",
     icon: Users,
-    tone: "purple",
-  },
-  {
-    l: "Overtime",
-    v: "18.7 hrs",
-    d: "2.1 hrs",
-    up: true,
-    vs: "vs last period",
-    icon: Clock,
-    tone: "danger",
-  },
-  {
-    l: "Rota Compliance",
-    v: "92%",
-    d: "3pp",
-    up: true,
-    vs: "vs last period",
-    icon: Shield,
-    tone: "success",
+    tone: "warning",
   },
 ];
 
 export const insights: Insight[] = [
   {
-    t: "Labour ran 1.8pp above target on weekends",
-    s: "Weekend labour % was 31.2% vs a planning target of 29.4%.",
+    t: "Labour % is improving",
+    s: "Down 0.8pp vs the last 4 weeks and tracking ahead of target.",
     icon: TrendingUp,
+    tone: "success",
+  },
+  {
+    t: "Saturday is spending more than needed",
+    s: "Bar shifts overlap 18:00–22:00. One lighter change would save cover.",
+    icon: Clock3,
     tone: "warning",
   },
   {
-    t: "2 teams have repeated late clock-ins",
-    s: "Kitchen and Bar teams had the most late starts this week.",
+    t: "Headcount is creeping up",
+    s: "Staffing growth is still leaning toward front-of-house cover.",
     icon: Users,
-    tone: "danger",
-  },
-  {
-    t: "Overtime increased by 2.1 hrs vs last week",
-    s: "Mostly driven by Friday and Saturday shifts.",
-    icon: Calendar,
     tone: "info",
-  },
-  {
-    t: "Rota compliance improved to 92%",
-    s: "Keep an eye on next week's gaps before publishing.",
-    icon: CheckCircle2,
-    tone: "success",
   },
 ];

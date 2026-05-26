@@ -18,7 +18,7 @@ export function LeaveMetricCards() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-5">
       {metrics.map((t) => (
-        <Card key={t.l} className="rounded-2xl p-5">
+        <Card key={t.l} className="p-5">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-3">
             {t.l}
           </div>

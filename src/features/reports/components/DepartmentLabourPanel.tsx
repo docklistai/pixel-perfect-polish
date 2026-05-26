@@ -1,39 +1,68 @@
 import { Card } from "@/components/dl";
 
+const segments = [
+  { department: "Front of House", value: "£14,820", pct: 35, color: "#3B82F6" },
+  { department: "Kitchen", value: "£12,640", pct: 30, color: "#E8A33D" },
+  { department: "Housekeeping", value: "£8,450", pct: 20, color: "#1DA672" },
+  { department: "Bar", value: "£3,210", pct: 8, color: "#E94358" },
+  { department: "Other", value: "£3,060", pct: 7, color: "#97A0B3" },
+];
+
 export function DepartmentLabourPanel() {
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
   return (
-    <Card className="col-span-12 lg:col-span-4 p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-          LABOUR % BY DEPARTMENT
+    <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          COST BY DEPARTMENT
         </div>
-        <span className="text-[11px] text-muted-foreground">vs target (pp)</span>
       </div>
-      {[
-        ["Front of House", 80, "+0.9pp", "success", "On target"],
-        ["Kitchen", 92, "+2.6pp", "danger", "Above target"],
-        ["Housekeeping", 65, "-1.4pp", "success", "On target"],
-        ["Bar", 88, "+1.2pp", "danger", "Above target"],
-      ].map(([n, w, d, tone, label]) => (
-        <div key={n as string} className="py-2.5">
-          <div className="flex items-center justify-between text-sm mb-1">
-            <span>{n}</span>
-            <span className="font-semibold">{((w as number) / 3 + 5).toFixed(1)}%</span>
-          </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden flex">
-            <div style={{ width: `${(w as number) - 10}%`, background: "var(--brand)" }} />
-            <div style={{ width: "10%", background: "var(--brand)", opacity: 0.4 }} />
-          </div>
-          <div
-            className={`text-[11px] mt-1 flex items-center justify-between ${tone === "danger" ? "text-danger" : "text-success"}`}
-          >
-            <span>{label as string}</span>
-            <span>{d}</span>
-          </div>
+
+      <div className="relative grid h-40 place-items-center">
+        <svg width="160" height="160" viewBox="0 0 160 160" aria-hidden="true">
+          <circle cx="80" cy="80" r={radius} stroke="var(--ink-100)" strokeWidth="18" fill="none" />
+          {segments.map((segment) => {
+            const length = (segment.pct / 100) * circumference;
+            const dash = `${length} ${circumference - length}`;
+            const dashOffset = -offset;
+            offset += length;
+
+            return (
+              <circle
+                key={segment.department}
+                cx="80"
+                cy="80"
+                r={radius}
+                stroke={segment.color}
+                strokeWidth="18"
+                fill="none"
+                strokeDasharray={dash}
+                strokeDashoffset={dashOffset}
+                transform="rotate(-90 80 80)"
+              />
+            );
+          })}
+        </svg>
+        <div className="absolute text-center">
+          <div className="font-display text-[22px] font-bold">£42,180</div>
+          <div className="text-xs text-muted-foreground">Total cost</div>
         </div>
-      ))}
-      <div className="text-xs text-muted-foreground mt-2">
-        Kitchen and Bar are driving labour % over target.
+      </div>
+
+      <div className="mt-3 space-y-2">
+        {segments.map((segment) => (
+          <div key={segment.department} className="row gap-2">
+            <span className="dot" style={{ background: segment.color }} />
+            <span className="grow txt-md">{segment.department}</span>
+            <span className="muted txt-xs">{segment.pct}%</span>
+            <span className="strong txt-md" style={{ minWidth: 64, textAlign: "right" }}>
+              {segment.value}
+            </span>
+          </div>
+        ))}
       </div>
     </Card>
   );

@@ -1,17 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, FilterButton, ActionButton } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import { Calendar, Filter, Download, Sparkles } from "lucide-react";
+import { Briefcase, CalendarDays, ChevronDown, Download, Sparkles } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
 import { TimeApprovalTrend } from "@/features/reports/components/TimeApprovalTrend";
-import { AbsenceBreakdown } from "@/features/reports/components/AbsenceBreakdown";
 import { DepartmentLabourPanel } from "@/features/reports/components/DepartmentLabourPanel";
+import { ReportsTopPerformersCard } from "@/features/reports/components/ReportsTopPerformersCard";
+import { ReportsSavedReportsCard } from "@/features/reports/components/ReportsSavedReportsCard";
+import { ReportsCoverageHeatmapCard } from "@/features/reports/components/ReportsCoverageHeatmapCard";
 import { ReportsFilterDrawer } from "@/features/reports/components/ReportsFilterDrawer";
 import { ReportsExportDialog } from "@/features/reports/components/ReportsExportDialog";
-import { InsightDetailDrawer } from "@/features/reports/components/InsightDetailDrawer";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "Reports — Docklist" }] }),
@@ -22,7 +23,6 @@ function ReportsPage() {
   const { openAiDrawer } = useOverlays();
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
-  const [insightOpen, setInsightOpen] = React.useState(false);
   return (
     <AppShell>
       <PageHeader
@@ -30,24 +30,27 @@ function ReportsPage() {
         subtitle="Review labour and coverage, then return to Rota, Time, or Leave to act."
         actions={
           <>
-            <FilterButton icon={Calendar} label="18 – 24 May 2026" />
-            <FilterButton
-              icon={Filter}
-              label="Filters"
-              showCaret={false}
+            <ActionButton
+              variant="secondary"
+              icon={CalendarDays}
+              iconRight={ChevronDown}
               onClick={() => setFilterOpen(true)}
-            />
-            <FilterButton
-              icon={Download}
-              label="Export"
-              showCaret={false}
-              onClick={() => setExportOpen(true)}
-            />
+            >
+              Last 4 weeks
+            </ActionButton>
+            <ActionButton
+              variant="secondary"
+              icon={Briefcase}
+              iconRight={ChevronDown}
+              onClick={() => setFilterOpen(true)}
+            >
+              All departments
+            </ActionButton>
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
               AI review
             </ActionButton>
-            <ActionButton variant="secondary" onClick={() => setInsightOpen(true)}>
-              View top review point
+            <ActionButton variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
+              Export
             </ActionButton>
           </>
         }
@@ -55,16 +58,24 @@ function ReportsPage() {
 
       <ReportsKpiCards />
 
-      <div className="grid grid-cols-12 gap-5">
+      <div className="grid grid-cols-12 gap-5 items-start">
         <LabourTargetChart />
-        <ReportsInsightsPanel />
-        <TimeApprovalTrend />
-        <AbsenceBreakdown />
         <DepartmentLabourPanel />
       </div>
 
+      <div className="mt-4">
+        <ReportsInsightsPanel />
+      </div>
+
+      <div className="mt-4 grid grid-cols-12 gap-5 items-start">
+        <TimeApprovalTrend />
+        <ReportsTopPerformersCard />
+        <ReportsSavedReportsCard />
+      </div>
+
+      <ReportsCoverageHeatmapCard />
+
       <ReportsFilterDrawer open={filterOpen} onOpenChange={setFilterOpen} />
-      <InsightDetailDrawer open={insightOpen} onOpenChange={setInsightOpen} />
       <ReportsExportDialog open={exportOpen} onOpenChange={setExportOpen} />
     </AppShell>
   );

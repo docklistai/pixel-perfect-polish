@@ -9,9 +9,10 @@ interface Props {
   requests: LeaveRequest[];
   approved: Set<string>;
   declined: Set<string>;
+  activeId: string;
   onApprove: (id: string) => void;
   onDecline: (id: string) => void;
-  onReview: (req: LeaveRequest) => void;
+  onSelect: (id: string) => void;
 }
 
 const tabs: Array<{ key: Tab; label: string; tone?: "warning" | "success" | "danger" }> = [
@@ -25,9 +26,10 @@ export function LeaveRequestInbox({
   requests,
   approved,
   declined,
+  activeId,
   onApprove,
   onDecline,
-  onReview,
+  onSelect,
 }: Props) {
   const [tab, setTab] = React.useState<Tab>("needs");
 
@@ -53,7 +55,7 @@ export function LeaveRequestInbox({
   }, [requests, tab, approved, declined]);
 
   return (
-    <div className="col-span-12 lg:col-span-3 card overflow-hidden">
+    <div className="col-span-12 lg:col-span-7 card overflow-hidden">
       <div className="card-section">
         <div className="section-label mb-2">Leave request inbox</div>
         <div className="dl-tabs flex-wrap" style={{ borderBottom: "none" }}>
@@ -91,12 +93,20 @@ export function LeaveRequestInbox({
           visible.map((r) => {
             const isApproved = approved.has(r.id);
             const isDeclined = declined.has(r.id);
+            const isActive = activeId === r.id;
             return (
-              <div key={r.id} className="rounded-xl border border-border p-3">
+              <div
+                key={r.id}
+                className={cn(
+                  "rounded-xl border p-3 transition-colors",
+                  isActive ? "border-brand bg-brand-soft" : "border-border",
+                )}
+              >
                 <button
                   type="button"
-                  className="flex items-center gap-2.5 w-full text-left"
-                  onClick={() => onReview(r)}
+                  className="flex w-full items-center gap-2.5 text-left"
+                  aria-pressed={isActive}
+                  onClick={() => onSelect(r.id)}
                 >
                   <img
                     src={`https://i.pravatar.cc/64?img=${r.img}`}

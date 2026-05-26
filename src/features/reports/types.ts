@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
-export type KpiTone = "info" | "warning" | "purple" | "danger" | "success";
+export type KpiTone = "brand" | "info" | "warning" | "purple" | "danger" | "success";
 
 export interface Kpi {
   l: string;
@@ -20,6 +20,7 @@ export interface Insight {
 }
 
 export const toneBg: Record<KpiTone, string> = {
+  brand: "bg-brand-soft text-brand",
   info: "bg-info-soft text-info",
   warning: "bg-warning-soft text-warning",
   purple: "bg-accent-purple-soft text-accent-purple",
