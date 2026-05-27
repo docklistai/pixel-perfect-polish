@@ -21,7 +21,6 @@ Task: Full repo audit.
 Route: audit-only + review / pre-commit.
 Stage: audit.
 Files: entire repo excluding node_modules and .git.
-Extra checks: 10 largest files; flag any over hard max in guardrails.md.
 ```
 
 ## Department audit
@@ -31,7 +30,6 @@ Task: Audit the <DEPARTMENT> area.
 Route: audit-only (+ matching domain route from skill-router.md).
 Stage: audit.
 Files: <list>.
-Extra checks: line counts vs guardrails.md.
 ```
 
 ## Frontend review
@@ -40,7 +38,6 @@ Extra checks: line counts vs guardrails.md.
 Task: Review frontend changes in <files/PR>.
 Route: frontend page or component work + lovable frontend review.
 Stage: audit.
-Extra checks: animation durations, typography scale, hardcoded colors/sizes, aria, keyboard nav, layout anti-patterns; line counts per file.
 ```
 
 ## Implementation pass
@@ -76,7 +73,6 @@ Checks: targeted typecheck on changed files + targeted tests for affected featur
 Task: Review <migration/policy/query>.
 Route: supabase / RLS / schema work.
 Stage: audit.
-Extra checks: select('*'), workspace scope, RLS on new tables, staff-visible vs manager-visible fields.
 ```
 
 ## Pre-commit review
@@ -85,7 +81,6 @@ Extra checks: select('*'), workspace scope, RLS on new tables, staff-visible vs 
 Task: Review all staged changes before commit.
 Route: review / pre-commit.
 Stage: audit + verification.
-Extra checks: secrets, debug code, typecheck on changed files, targeted tests, non-negotiables, line counts.
 ```
 
 ## Commit prompt
