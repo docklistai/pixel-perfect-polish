@@ -64,8 +64,9 @@ Use `docklist-proactive-maintenance-guard` to classify any nearby issue into: Fi
 
 ## Skill discovery by platform
 
-- **Claude Code** — skills in `.claude/skills/`.
-- **Codex** — skills in `.agents/skills/`. If a skill referenced by `skill-router.md` is missing there, fall back to the canonical copy in `.claude/skills/`.
+- **Claude Code** — skills in `.claude/skills/`. This is the canonical source of truth.
+- **Codex** — skills in `.agents/skills/`, which is a mirror of `.claude/skills/`. If a skill referenced by `skill-router.md` is missing there, fall back to the canonical copy in `.claude/skills/`.
+- After editing any skill, run `scripts/check-skill-parity.sh`. Run `scripts/sync-skills.sh` only when intentionally mirroring `.claude/skills/` into `.agents/skills/`.
 
 ## Required artifacts per task
 

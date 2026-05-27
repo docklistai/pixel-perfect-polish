@@ -14,8 +14,9 @@ Read `AGENTS.md` first, then `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`. Codex does 
 
 ## Skill discovery
 
-- Codex skills live in `.agents/skills/`.
+- Codex skills live in `.agents/skills/`, which is mirrored from the canonical `.claude/skills/`.
 - If a skill named in `skill-router.md` is missing from `.agents/skills/`, fall back to the canonical copy in `.claude/skills/`. Both directories share the same skill names; `.claude/skills/` is the source of truth when they diverge.
+- If a skill is missing or stale, run `scripts/check-skill-parity.sh` and then `scripts/sync-skills.sh`. Do not hand-edit `.agents/skills/`.
 
 ## Final report
 
