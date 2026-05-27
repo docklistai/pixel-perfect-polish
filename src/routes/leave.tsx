@@ -26,6 +26,7 @@ import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPa
 import { LeaveDetailPanel } from "@/features/leave/components/LeaveDetailPanel";
 import { LeaveBottomCards } from "@/features/leave/components/LeaveBottomCards";
 import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialogs";
+import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
 
@@ -41,6 +42,7 @@ function LeavePage() {
   const [newRequestOpen, setNewRequestOpen] = React.useState(false);
   const [decisionRequest, setDecisionRequest] = React.useState<LeaveRequest | null>(null);
   const [decisionType, setDecisionType] = React.useState<"approve" | "decline" | null>(null);
+  const [riskOpen, setRiskOpen] = React.useState(false);
 
   const activeRequest = requests.find((request) => request.id === activeId) ?? requests[0] ?? null;
   const pendingCount = requests.filter((request) => request.state === "pending").length;
@@ -157,6 +159,7 @@ function LeavePage() {
             onApprove={(request) => openDecision(request, "approve")}
             onDecline={(request) => openDecision(request, "decline")}
             onReopen={handleReopen}
+            onOpenRisk={() => setRiskOpen(true)}
           />
         )}
       </div>
@@ -168,6 +171,7 @@ function LeavePage() {
         onOpenChange={setCalendarOpen}
         onNewRequest={() => setNewRequestOpen(true)}
       />
+      <LeaveRiskDrawer open={riskOpen} onOpenChange={setRiskOpen} />
       <LeaveActionDialogs
         decisionRequest={decisionRequest}
         decisionType={decisionType}

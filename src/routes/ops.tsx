@@ -7,7 +7,8 @@ import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
 import { OpsRightRail } from "@/features/ops/components/OpsRightRail";
 import { OpsDrawer } from "@/features/ops/components/OpsDrawer";
-import type { DrawerMode } from "@/features/ops/types";
+import { OpsDetailDrawer } from "@/features/ops/components/OpsDetailDrawer";
+import type { DrawerMode, TimelineEntry } from "@/features/ops/types";
 
 export const Route = createFileRoute("/ops")({
   head: () => ({ meta: [{ title: "Operations — Docklist" }] }),
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/ops")({
 function OpsPage() {
   const { openAiDrawer } = useOverlays();
   const [openDrawer, setOpenDrawer] = React.useState<DrawerMode>(null);
+  const [selectedEntry, setSelectedEntry] = React.useState<TimelineEntry | null>(null);
 
   return (
     <AppShell>
@@ -49,11 +51,15 @@ function OpsPage() {
       <OpsStatCards />
 
       <div className="grid grid-cols-12 gap-5">
-        <OpsTimeline />
+        <OpsTimeline onOpenEntry={setSelectedEntry} />
         <OpsRightRail onOpenAssistant={openAiDrawer} />
       </div>
 
       <OpsDrawer mode={openDrawer} onClose={() => setOpenDrawer(null)} />
+      <OpsDetailDrawer
+        entry={selectedEntry}
+        onOpenChange={(open) => !open && setSelectedEntry(null)}
+      />
     </AppShell>
   );
 }

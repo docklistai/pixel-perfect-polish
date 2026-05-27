@@ -1,7 +1,12 @@
 import { Card, EmptyState } from "@/components/dl";
 import { opsTimeline, toneBg } from "../data/opsDemoData";
+import type { TimelineEntry } from "../types";
 
-export function OpsTimeline() {
+interface OpsTimelineProps {
+  onOpenEntry: (entry: TimelineEntry) => void;
+}
+
+export function OpsTimeline({ onOpenEntry }: OpsTimelineProps) {
   return (
     <Card className="col-span-12 lg:col-span-9 rounded-2xl p-5">
       <div className="flex items-center gap-3 mb-3">
@@ -36,8 +41,10 @@ export function OpsTimeline() {
                 />
                 {e.t}
               </div>
-              <div
-                className={`min-w-0 overflow-hidden flex items-center gap-3 rounded-2xl border border-border p-3 ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
+              <button
+                type="button"
+                onClick={() => onOpenEntry(e)}
+                className={`flex min-w-0 items-center gap-3 overflow-hidden rounded-2xl border border-border p-3 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${e.highlight ? "bg-danger-soft/30 border-danger/30" : ""}`}
               >
                 <div
                   className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${toneBg[e.dot === "danger" ? "warning" : e.dot]}`}
@@ -76,7 +83,7 @@ export function OpsTimeline() {
                 >
                   {e.st}
                 </span>
-              </div>
+              </button>
             </div>
           ))}
         </div>

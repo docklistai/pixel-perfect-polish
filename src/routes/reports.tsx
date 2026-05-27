@@ -13,6 +13,7 @@ import { ReportsSavedReportsCard } from "@/features/reports/components/ReportsSa
 import { ReportsCoverageHeatmapCard } from "@/features/reports/components/ReportsCoverageHeatmapCard";
 import { ReportsFilterDrawer } from "@/features/reports/components/ReportsFilterDrawer";
 import { ReportsExportDialog } from "@/features/reports/components/ReportsExportDialog";
+import { InsightDetailDrawer } from "@/features/reports/components/InsightDetailDrawer";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "Reports — Docklist" }] }),
@@ -23,6 +24,7 @@ function ReportsPage() {
   const { openAiDrawer } = useOverlays();
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
+  const [insightOpen, setInsightOpen] = React.useState(false);
   return (
     <AppShell>
       <PageHeader
@@ -64,7 +66,7 @@ function ReportsPage() {
       </div>
 
       <div className="mt-4">
-        <ReportsInsightsPanel />
+        <ReportsInsightsPanel onOpenDetail={() => setInsightOpen(true)} />
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-5 items-start">
@@ -77,6 +79,7 @@ function ReportsPage() {
 
       <ReportsFilterDrawer open={filterOpen} onOpenChange={setFilterOpen} />
       <ReportsExportDialog open={exportOpen} onOpenChange={setExportOpen} />
+      <InsightDetailDrawer open={insightOpen} onOpenChange={setInsightOpen} />
     </AppShell>
   );
 }

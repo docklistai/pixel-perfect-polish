@@ -15,6 +15,14 @@ import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel
 import { StaffTable } from "@/features/staff/components/StaffTable";
 import { useStaffPanelState } from "@/features/staff/hooks/useStaffPanelState";
 import type { StaffRow } from "@/features/staff/types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/staff")({
   head: () => ({ meta: [{ title: "Staff — Docklist" }] }),
@@ -114,17 +122,35 @@ function StaffListPage() {
         subtitle="Manage your team, roles, and access in one place."
         actions={
           <div className="flex items-center gap-2">
-            <ActionButton
-              variant="secondary"
-              icon={Filter}
-              onClick={() => {
-                setDeptFilter("All");
-                setStatusFilter("All");
-                setQuery("");
-              }}
-            >
-              Filters
-            </ActionButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <ActionButton variant="secondary" icon={Filter}>
+                  Filters
+                </ActionButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-56">
+                <DropdownMenuLabel>Staff filters</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={() => setDeptFilter("Front of House")}>
+                  Front of House
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDeptFilter("Kitchen")}>
+                  Kitchen
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setStatusFilter("Probation")}>
+                  Probation
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setDeptFilter("All");
+                    setStatusFilter("All");
+                    setQuery("");
+                  }}
+                >
+                  Clear filters
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <ActionButton icon={Plus} onClick={() => setAddOpen(true)}>
               Add team member
             </ActionButton>

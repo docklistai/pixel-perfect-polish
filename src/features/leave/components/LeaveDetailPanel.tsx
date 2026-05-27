@@ -8,6 +8,7 @@ interface Props {
   onApprove: (request: LeaveRequest) => void;
   onDecline: (request: LeaveRequest) => void;
   onReopen: (id: string) => void;
+  onOpenRisk: () => void;
 }
 
 function initials(name: string): string {
@@ -30,7 +31,7 @@ const otherRequests = [
   { name: "Sophie Carter", dates: "18 – 20 May" },
 ];
 
-export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen }: Props) {
+export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOpenRisk }: Props) {
   const isApproved = request.state === "approved";
   const isDeclined = request.state === "declined";
   const impactTone =
@@ -72,7 +73,13 @@ export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen }: Pr
       </div>
 
       <div className="card-section">
-        <div className="section-label mb-2">Coverage on these days</div>
+        <div className="row gap-2 mb-2">
+          <div className="section-label">Coverage on these days</div>
+          <div className="grow" />
+          <button type="button" className="btn ghost sm" onClick={onOpenRisk}>
+            View risk
+          </button>
+        </div>
         <div className="space-y-3">
           {coverageRows.map((row) => (
             <div key={row.label} className="row gap-3 txt-sm" style={{ alignItems: "center" }}>

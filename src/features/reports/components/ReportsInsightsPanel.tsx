@@ -3,7 +3,11 @@ import { Lightbulb } from "lucide-react";
 import { toneBg } from "../types";
 import { insights } from "../data/reportsDemoData";
 
-export function ReportsInsightsPanel() {
+interface ReportsInsightsPanelProps {
+  onOpenDetail: () => void;
+}
+
+export function ReportsInsightsPanel({ onOpenDetail }: ReportsInsightsPanelProps) {
   return (
     <Card className="p-4 lg:p-5">
       <div className="flex items-center gap-2 mb-3">
@@ -12,7 +16,12 @@ export function ReportsInsightsPanel() {
       </div>
       <div className="space-y-3">
         {insights.map((ins) => (
-          <div key={ins.t} className="flex gap-3">
+          <button
+            key={ins.t}
+            type="button"
+            className="flex w-full gap-3 rounded-xl text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={onOpenDetail}
+          >
             <div
               className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${toneBg[ins.tone]}`}
             >
@@ -22,7 +31,7 @@ export function ReportsInsightsPanel() {
               <div className="text-sm font-medium">{ins.t}</div>
               <div className="text-xs text-muted-foreground">{ins.s}</div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
