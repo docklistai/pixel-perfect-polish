@@ -30,7 +30,9 @@ These rules are enforced on every task. Violations require an immediate stop and
 - 50/30/20: scheduling / lightweight HR / limited AI. See `docs/adr/0001`.
 - No generic AI SaaS UI. No feature bloat. No backend/product-scope drift.
 
-**Forbidden scope drift (unless explicitly requested)**
+**Forbidden scope drift**
+
+Forbidden scope drift requires a new ADR in `docs/adr/` and an explicit product-boundary update before implementation. A user prompt alone is not enough.
 
 - No full HR suite.
 - No LMS / training platform.

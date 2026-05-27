@@ -2,13 +2,12 @@
 
 Frontend agents working in DocklistAI must use this anti-slop stack for any UI, UX, visual polish, accessibility, staff portal, dashboards, forms, tabs, drawers, empty states, loading states, or design-system work:
 
-- `baseline-ui`
-- `frontend-design`
-- `ui-visual-validator`
-- `react-ui-patterns`
-- `fixing-accessibility`
-- `tailwind-design-system`
-- `copy-editing`
+- `docklist-baseline-ui`
+- `docklist-frontend-dev-guidelines`
+- `docklist-ui-visual-validator`
+- `docklist-react-ui-patterns`
+- `docklist-fixing-accessibility`
+- `docklist-tailwind-design-system`
 
 ## Required rules
 

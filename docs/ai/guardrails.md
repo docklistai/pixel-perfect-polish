@@ -1,6 +1,6 @@
 # DocklistAI Architecture Guardrails
 
-Canonical file-size and worktree rules for all agents. Supersedes the previous `repo-architecture-guardrails.md` and `frontend-architecture-guardrails.md`.
+Canonical file-size and worktree rules for all agents.
 
 ## Universal pre-edit rule
 

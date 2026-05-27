@@ -29,6 +29,7 @@ Follow DOCKLIST_OPERATING_SYSTEM.md.
 - 50/30/20 split (scheduling / HR / AI). See `docs/adr/0001`.
 - No generic AI SaaS UI. No feature bloat. No backend/product-scope drift. No broad refactors unless clearly necessary.
 - Lovable owns frontend design direction unless told otherwise.
+- Scope expansion into forbidden areas requires an ADR and product-boundary update first. A user prompt alone is not enough.
 
 ## Non-negotiables
 
