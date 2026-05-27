@@ -846,14 +846,12 @@ export function DrawerShell({
               >
                 {title}
               </SheetTitle>
-              {description && (
-                <SheetDescription
-                  className="!text-xs leading-5"
-                  style={{ color: "var(--ink-500)" }}
-                >
-                  {description}
-                </SheetDescription>
-              )}
+              <SheetDescription
+                className={cn("!text-xs leading-5", !description && "sr-only")}
+                style={{ color: "var(--ink-500)" }}
+              >
+                {description ?? "Panel content"}
+              </SheetDescription>
             </div>
             <div className="flex shrink-0 items-start gap-2">
               {meta && <div>{meta}</div>}
@@ -910,9 +908,9 @@ export function DialogShell({
       >
         <DialogHeader className="modal-head !block !space-y-0">
           <DialogTitle className="modal-title">{title}</DialogTitle>
-          {description && (
-            <DialogDescription className="modal-sub">{description}</DialogDescription>
-          )}
+          <DialogDescription className={cn("modal-sub", !description && "sr-only")}>
+            {description ?? "Dialog content"}
+          </DialogDescription>
         </DialogHeader>
         {children && <div className="modal-body">{children}</div>}
         {footer && <DialogFooter className="modal-foot">{footer}</DialogFooter>}
@@ -954,9 +952,9 @@ export function ConfirmDialog({
       >
         <AlertDialogHeader className="modal-head !block !space-y-0">
           <AlertDialogTitle className="modal-title">{title}</AlertDialogTitle>
-          {description && (
-            <AlertDialogDescription className="modal-sub">{description}</AlertDialogDescription>
-          )}
+          <AlertDialogDescription className={cn("modal-sub", !description && "sr-only")}>
+            {description ?? "Confirmation dialog"}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="modal-foot">
           <AlertDialogCancel className="btn secondary sm !mt-0">{cancelLabel}</AlertDialogCancel>

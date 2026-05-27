@@ -63,6 +63,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
   const [shortcuts, setShortcuts] = React.useState(false);
   const [notifs, setNotifs] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
+  const [unreadCount, setUnreadCount] = React.useState(3);
   const navigate = useNavigate();
   const gPending = React.useRef<number | null>(null);
 
@@ -72,10 +73,9 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       openShortcuts: () => setShortcuts(true),
       openNotifications: () => setNotifs(true),
       openAiDrawer: () => setAiOpen(true),
-      // Fixed mock unread count — matches the seed data in NotificationDrawer.
-      unreadCount: 3,
+      unreadCount,
     }),
-    [],
+    [unreadCount],
   );
 
   React.useEffect(() => {
@@ -128,7 +128,11 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       {children}
       <CommandPalette open={palette} onOpenChange={setPalette} />
       <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} />
-      <NotificationDrawer open={notifs} onOpenChange={setNotifs} />
+      <NotificationDrawer
+        open={notifs}
+        onOpenChange={setNotifs}
+        onUnreadCountChange={setUnreadCount}
+      />
       <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
     </OverlayContext.Provider>
   );

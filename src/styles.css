@@ -1411,6 +1411,10 @@
   .scrim-portal.open .scrim {
     opacity: 1;
   }
+  .radix-scrim {
+    background: var(--bg-scrim);
+    backdrop-filter: blur(2px);
+  }
 
   .modal {
     position: relative;
@@ -1431,6 +1435,22 @@
   .scrim-portal.open .modal {
     transform: translateY(0) scale(1);
     opacity: 1;
+  }
+  .modal[data-state="open"] {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    translate: none !important;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .modal[data-state="closed"] {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    translate: none !important;
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
   }
   .modal.wide {
     max-width: 560px;

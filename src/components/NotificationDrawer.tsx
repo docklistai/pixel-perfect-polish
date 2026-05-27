@@ -82,13 +82,19 @@ const SEED: MockNotification[] = [
 export function NotificationDrawer({
   open,
   onOpenChange,
+  onUnreadCountChange,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUnreadCountChange?: (count: number) => void;
 }) {
   const navigate = useNavigate();
   const [items, setItems] = React.useState<MockNotification[]>(SEED);
   const unread = items.filter((i) => i.unread).length;
+
+  React.useEffect(() => {
+    onUnreadCountChange?.(unread);
+  }, [onUnreadCountChange, unread]);
 
   const markAllRead = () => setItems((prev) => prev.map((i) => ({ ...i, unread: false })));
 
