@@ -1,31 +1,22 @@
-# DocklistAI Codex Instructions
+# Codex — Platform Deltas
 
-- `AGENTS.md` is the shared source of truth.
-- Read `AGENTS.md` before every task.
-- Inspect the available repo skills, then select only the skills relevant to the current task.
-- Do not apply unrelated skills just because they exist.
+Read `AGENTS.md` first, then `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`. Codex does not resolve `@`-includes, so follow file paths explicitly.
 
-## Task-to-skill rules
+## Required reading at session start
 
-- Frontend/UI/UX/visual/accessibility/design-system work: use the relevant frontend, design, accessibility, and validation skills. `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md` is mandatory only for these tasks.
-- Backend/data/security/RLS/Supabase work: use the relevant backend, database, security, and multi-tenant skills.
-- Testing/QA work: use the relevant testing, verification, and bug-investigation skills.
-- Documentation/copy/product messaging: use the relevant writing, copy, product, and clarity skills.
-- Agent workflow/refactor work: use the relevant code-organisation, repo hygiene, and workflow skills.
-- Proactive maintenance / Scoped auditing: use `.claude/skills/docklist-proactive-maintenance-guard/SKILL.md` when noticing nearby issues during scoped work. Classify all findings (Fix Now / Scope Allows / Report / Risk Log / Forbidden) before action. Do not silently expand scope.
+- `AGENTS.md`
+- `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`
+- `docs/ai/skill-router.md`
+- `docs/ai/guardrails.md`
+- `docs/ai/snippets/declaration.md`
+- `docs/ai/snippets/completion-report.md`
+- `docs/ai/snippets/non-negotiables.md`
 
-## Product Direction
+## Skill discovery
 
-- Keep the product centered on scheduling, with lightweight HR and limited AI.
-- Avoid generic AI SaaS UI.
-- Avoid feature bloat.
-- Avoid backend or product-scope drift.
-- Avoid broad refactors unless clearly necessary.
+- Codex skills live in `.agents/skills/`.
+- If a skill named in `skill-router.md` is missing from `.agents/skills/`, fall back to the canonical copy in `.claude/skills/`. Both directories share the same skill names; `.claude/skills/` is the source of truth when they diverge.
 
-## Final Report
+## Final report
 
-Include:
-- skills inspected
-- skills selected
-- skills intentionally skipped, if obvious
-- why the selected skills were relevant
+Use the format in `docs/ai/snippets/completion-report.md`. Also list skills inspected, skills selected, skills intentionally skipped (with reason).
