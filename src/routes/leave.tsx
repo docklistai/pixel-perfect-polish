@@ -1,13 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
-import { useOverlays } from "@/components/AppShortcuts";
-import { CalendarDays, MoreHorizontal, Sparkles } from "lucide-react";
-import { requests } from "@/features/leave/data/leaveDemoData";
+import { AppShell, PageHeader, ActionButton } from "@/components/dl";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertTriangle,
+  CalendarDays,
+  Check,
+  Clock,
+  Filter,
+  Heart,
+  Plane,
+  Plus,
+} from "lucide-react";
+import { requests as initialRequests } from "@/features/leave/data/leaveDemoData";
 import { LeaveMetricCards } from "@/features/leave/components/LeaveMetricCards";
 import { LeaveRequestInbox } from "@/features/leave/components/LeaveRequestInbox";
 import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPanel";
 import { LeaveDetailPanel } from "@/features/leave/components/LeaveDetailPanel";
+import { LeaveBottomCards } from "@/features/leave/components/LeaveBottomCards";
+import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialogs";
+import { toast } from "sonner";
+import type { LeaveRequest } from "@/features/leave/types";
 
 export const Route = createFileRoute("/leave")({
   head: () => ({ meta: [{ title: "Leave — Docklist" }] }),
@@ -15,48 +35,58 @@ export const Route = createFileRoute("/leave")({
 });
 
 function LeavePage() {
-  const { openAiDrawer } = useOverlays();
-  const [activeId, setActiveId] = React.useState(requests[0]?.id ?? "");
-  const [approved, setApproved] = React.useState<Set<string>>(new Set());
-  const [declined, setDeclined] = React.useState<Set<string>>(new Set());
+  const [requests, setRequests] = React.useState<LeaveRequest[]>(initialRequests);
+  const [activeId, setActiveId] = React.useState("l3");
   const [calendarOpen, setCalendarOpen] = React.useState(false);
+  const [newRequestOpen, setNewRequestOpen] = React.useState(false);
+  const [decisionRequest, setDecisionRequest] = React.useState<LeaveRequest | null>(null);
+  const [decisionType, setDecisionType] = React.useState<"approve" | "decline" | null>(null);
 
   const activeRequest = requests.find((request) => request.id === activeId) ?? requests[0] ?? null;
+  const pendingCount = requests.filter((request) => request.state === "pending").length;
+
+  const openDecision = (request: LeaveRequest, type: "approve" | "decline") => {
+    setDecisionRequest(request);
+    setDecisionType(type);
+  };
+
+  const closeDecision = () => {
+    setDecisionRequest(null);
+    setDecisionType(null);
+  };
+
+  const updateState = (id: string, state: LeaveRequest["state"]) => {
+    setRequests((items) => items.map((item) => (item.id === id ? { ...item, state } : item)));
+    setActiveId(id);
+  };
 
   const handleApprove = (id: string) => {
-    setApproved((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-    setDeclined((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
+    updateState(id, "approved");
+    closeDecision();
+    toast.success("Leave approved", {
+      description: `${decisionRequest?.n ?? "Team member"} has been notified`,
     });
   };
+
   const handleDecline = (id: string) => {
-    setDeclined((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      return next;
-    });
-    setApproved((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
+    updateState(id, "declined");
+    closeDecision();
+    toast.warning("Request declined", {
+      description: `${decisionRequest?.n ?? "Team member"} has been notified with your reason`,
     });
   };
+
   const handleReopen = (id: string) => {
-    setApproved((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-    setDeclined((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
+    updateState(id, "pending");
+    toast.info("Reopened", { description: "Request returned to review queue" });
+  };
+
+  const handleCreateRequest = (request: LeaveRequest) => {
+    setRequests((items) => [request, ...items]);
+    setActiveId(request.id);
+    setNewRequestOpen(false);
+    toast.success("Request created", {
+      description: "Added to the queue · automatically approved by manager",
     });
   };
 
@@ -64,7 +94,7 @@ function LeavePage() {
     <AppShell>
       <PageHeader
         title="Leave"
-        subtitle="Review leave requests and ensure shifts are covered."
+        subtitle="Review requests, see balances, and plan around upcoming time off."
         actions={
           <>
             <ActionButton
@@ -74,45 +104,82 @@ function LeavePage() {
             >
               Calendar
             </ActionButton>
-            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Ask assistant
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <ActionButton variant="secondary" icon={Filter}>
+                  Filters
+                </ActionButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-52">
+                <DropdownMenuLabel>Filters</DropdownMenuLabel>
+                <DropdownMenuItem>
+                  <Plane className="h-3.5 w-3.5" aria-hidden /> Annual leave
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Heart className="h-3.5 w-3.5" aria-hidden /> Sick leave
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Check className="h-3.5 w-3.5" aria-hidden /> All types
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Coverage at risk
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Clock className="h-3.5 w-3.5" aria-hidden /> High notice (&gt;30d)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <ActionButton icon={Plus} onClick={() => setNewRequestOpen(true)}>
+              New request
             </ActionButton>
-            <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />
 
-      <LeaveMetricCards />
+      <LeaveMetricCards pendingCount={pendingCount} />
 
       <div className="grid grid-cols-12 gap-5 items-start">
         <LeaveRequestInbox
           requests={requests}
-          approved={approved}
-          declined={declined}
           activeId={activeRequest?.id ?? ""}
-          onApprove={handleApprove}
-          onDecline={handleDecline}
+          onAsk={(request) =>
+            toast.info("Message sent", { description: `Asked ${request.n} for more details` })
+          }
+          onApprove={(request) => openDecision(request, "approve")}
+          onDecline={(request) => openDecision(request, "decline")}
+          onReopen={handleReopen}
           onSelect={setActiveId}
         />
         {activeRequest && (
           <LeaveDetailPanel
             request={activeRequest}
-            approved={approved}
-            declined={declined}
-            onApprove={(id) => {
-              handleApprove(id);
-              setActiveId(id);
-            }}
-            onDecline={(id) => {
-              handleDecline(id);
-              setActiveId(id);
-            }}
+            onApprove={(request) => openDecision(request, "approve")}
+            onDecline={(request) => openDecision(request, "decline")}
             onReopen={handleReopen}
           />
         )}
       </div>
 
-      <LeaveCalendarDrawer open={calendarOpen} onOpenChange={setCalendarOpen} />
+      <LeaveBottomCards />
+
+      <LeaveCalendarDrawer
+        open={calendarOpen}
+        onOpenChange={setCalendarOpen}
+        onNewRequest={() => setNewRequestOpen(true)}
+      />
+      <LeaveActionDialogs
+        decisionRequest={decisionRequest}
+        decisionType={decisionType}
+        newRequestOpen={newRequestOpen}
+        onDecisionOpenChange={(open) => {
+          if (!open) closeDecision();
+        }}
+        onNewRequestOpenChange={setNewRequestOpen}
+        onApprove={handleApprove}
+        onDecline={handleDecline}
+        onCreateRequest={handleCreateRequest}
+      />
     </AppShell>
   );
 }

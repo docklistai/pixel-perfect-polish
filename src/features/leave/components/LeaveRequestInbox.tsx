@@ -1,188 +1,223 @@
 import * as React from "react";
 import { StatusBadge } from "@/components/dl";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { Check, ChevronDown, MessageSquare, Plane, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
 
 type Tab = "needs" | "approved" | "declined" | "all";
 
 interface Props {
   requests: LeaveRequest[];
-  approved: Set<string>;
-  declined: Set<string>;
   activeId: string;
-  onApprove: (id: string) => void;
-  onDecline: (id: string) => void;
+  onAsk: (request: LeaveRequest) => void;
+  onApprove: (request: LeaveRequest) => void;
+  onDecline: (request: LeaveRequest) => void;
+  onReopen: (id: string) => void;
   onSelect: (id: string) => void;
 }
 
-const tabs: Array<{ key: Tab; label: string; tone?: "warning" | "success" | "danger" }> = [
-  { key: "needs", label: "Needs review", tone: "warning" },
-  { key: "approved", label: "Approved", tone: "success" },
-  { key: "declined", label: "Declined", tone: "danger" },
-  { key: "all", label: "All" },
-];
+const tabs: Array<{ key: Tab; label: string; tone?: "warning" | "success" | "danger" | "muted" }> =
+  [
+    { key: "needs", label: "Needs review", tone: "warning" },
+    { key: "approved", label: "Approved", tone: "success" },
+    { key: "declined", label: "Declined", tone: "danger" },
+    { key: "all", label: "All", tone: "muted" },
+  ];
+
+const avatarTones = ["av-c1", "av-c2", "av-c3", "av-c4"] as const;
+
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0] ?? "")
+    .join("")
+    .toUpperCase();
+}
 
 export function LeaveRequestInbox({
   requests,
-  approved,
-  declined,
   activeId,
+  onAsk,
   onApprove,
   onDecline,
+  onReopen,
   onSelect,
 }: Props) {
   const [tab, setTab] = React.useState<Tab>("needs");
 
   const counts = React.useMemo(() => {
-    let needs = 0;
-    let app = 0;
-    let dec = 0;
+    let pending = 0;
+    let approved = 0;
+    let declined = 0;
     for (const r of requests) {
-      if (approved.has(r.id)) app += 1;
-      else if (declined.has(r.id)) dec += 1;
-      else needs += 1;
+      if (r.state === "approved") approved += 1;
+      else if (r.state === "declined") declined += 1;
+      else pending += 1;
     }
-    return { needs, approved: app, declined: dec, all: requests.length };
-  }, [requests, approved, declined]);
+    return { needs: pending, approved, declined, all: requests.length };
+  }, [requests]);
 
   const visible = React.useMemo(() => {
     return requests.filter((r) => {
-      if (tab === "approved") return approved.has(r.id);
-      if (tab === "declined") return declined.has(r.id);
-      if (tab === "needs") return !approved.has(r.id) && !declined.has(r.id);
+      if (tab === "approved") return r.state === "approved";
+      if (tab === "declined") return r.state === "declined";
+      if (tab === "needs") return r.state === "pending";
       return true;
     });
-  }, [requests, tab, approved, declined]);
+  }, [requests, tab]);
 
   return (
     <div className="col-span-12 lg:col-span-7 card overflow-hidden">
-      <div className="card-section">
-        <div className="section-label mb-2">Leave request inbox</div>
-        <div className="dl-tabs flex-wrap" style={{ borderBottom: "none" }}>
-          {tabs.map((t) => {
-            const count = counts[t.key];
-            return (
-              <button
-                key={t.key}
-                type="button"
-                className={cn("dl-tab", tab === t.key && "active")}
-                onClick={() => setTab(t.key)}
-              >
-                {t.label}
-                {count > 0 && (
-                  <StatusBadge tone={t.tone ?? "muted"} className="ml-1">
-                    {count}
-                  </StatusBadge>
-                )}
-              </button>
-            );
-          })}
+      <div className="card-section row gap-3" style={{ padding: "10px 18px" }}>
+        <div className="dl-tabs flex-wrap grow" style={{ borderBottom: "none" }}>
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              className={cn("dl-tab", tab === t.key && "active")}
+              onClick={() => setTab(t.key)}
+            >
+              {t.label}
+              {counts[t.key] > 0 && (
+                <StatusBadge tone={t.tone ?? "muted"}>{counts[t.key]}</StatusBadge>
+              )}
+            </button>
+          ))}
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button type="button" className="btn ghost sm">
+              Sort: Newest <ChevronDown className="h-3 w-3" aria-hidden />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-44">
+            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+            <DropdownMenuItem>
+              <Check className="h-3.5 w-3.5" aria-hidden /> Newest first
+            </DropdownMenuItem>
+            <DropdownMenuItem>Coverage impact</DropdownMenuItem>
+            <DropdownMenuItem>Notice period</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => setTab("needs")}>Needs review</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <div className="px-4 py-3 space-y-3">
-        {visible.length === 0 ? (
-          <div className="empty">
-            <div className="ill" aria-hidden>
-              <span className="text-xl">🛫</span>
-            </div>
-            <h4>Nothing in this list</h4>
-            <p>You&apos;re all caught up on this view.</p>
+      {visible.length === 0 ? (
+        <div className="empty">
+          <div className="ill" aria-hidden>
+            <Plane className="h-5 w-5" />
           </div>
-        ) : (
-          visible.map((r) => {
-            const isApproved = approved.has(r.id);
-            const isDeclined = declined.has(r.id);
-            const isActive = activeId === r.id;
-            return (
-              <div
-                key={r.id}
-                className={cn(
-                  "rounded-xl border p-3 transition-colors",
-                  isActive ? "border-brand bg-brand-soft" : "border-border",
-                )}
+          <h4>Nothing in this list</h4>
+          <p>
+            {tab === "needs"
+              ? "All requests are reviewed."
+              : tab === "approved"
+                ? "No approved requests yet."
+                : "No declined requests."}
+          </p>
+        </div>
+      ) : (
+        visible.map((r, index) => {
+          const isActive = activeId === r.id;
+          const impactTone =
+            r.tone === "danger" ? "danger" : r.tone === "warning" ? "warning" : "success";
+          const avatarTone = avatarTones[index % avatarTones.length];
+
+          return (
+            <div
+              key={r.id}
+              className={cn(
+                "border-t border-border/70 px-[18px] py-4 outline-none transition-colors",
+                isActive && "bg-[var(--bg-hover)]",
+              )}
+            >
+              <button
+                type="button"
+                className="block w-full text-left"
+                aria-pressed={isActive}
+                onClick={() => onSelect(r.id)}
               >
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2.5 text-left"
-                  aria-pressed={isActive}
-                  onClick={() => onSelect(r.id)}
-                >
-                  <img
-                    src={`https://i.pravatar.cc/64?img=${r.img}`}
-                    className="h-8 w-8 rounded-full object-cover"
-                    alt=""
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{r.n}</div>
-                    <div className="text-[11px] text-muted-foreground truncate">{r.role}</div>
+                <div className="row gap-3" style={{ alignItems: "flex-start" }}>
+                  <div className={cn("av", avatarTone)}>{initials(r.n)}</div>
+                  <div className="grow min-w-0">
+                    <div className="row gap-2 flex-wrap">
+                      <span className="strong">{r.n}</span>
+                      <span className="muted txt-sm">
+                        · {r.role.split(" ").slice(0, 2).join(" ")}
+                      </span>
+                    </div>
+                    <div className="muted txt-sm mt-1">{r.reason}</div>
+                    <div className="row gap-2 mt-2 flex-wrap">
+                      <StatusBadge tone="purple" className="shrink-0 whitespace-nowrap">
+                        <Plane className="h-3 w-3" aria-hidden /> {r.type}
+                      </StatusBadge>
+                      <StatusBadge tone={impactTone} dot className="shrink-0 whitespace-nowrap">
+                        {r.impact} impact
+                      </StatusBadge>
+                      <StatusBadge tone="muted" className="shrink-0 whitespace-nowrap">
+                        {r.notice}d notice
+                      </StatusBadge>
+                    </div>
                   </div>
-                </button>
-                <div className="mt-2 flex items-center justify-between text-[11px]">
-                  <div>
-                    <div className="font-medium">{r.date}</div>
-                    <div className="text-muted-foreground">{r.dur}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-muted-foreground">Rota impact</div>
-                    <StatusBadge
-                      tone={
-                        r.tone === "danger"
-                          ? "danger"
-                          : r.tone === "warning"
-                            ? "warning"
-                            : "success"
-                      }
-                      dot
-                    >
-                      {r.impact}
-                    </StatusBadge>
+                  <div className="shrink-0 text-right">
+                    <div className="strong mono txt-sm">{r.date}</div>
+                    <div className="muted txt-xs">{r.days} days</div>
                   </div>
                 </div>
-                {!isApproved && !isDeclined ? (
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      type="button"
-                      aria-label={`Decline leave request for ${r.n}`}
-                      className="btn secondary sm flex-1 justify-center"
-                      onClick={() => onDecline(r.id)}
-                    >
-                      Decline
-                    </button>
-                    <button
-                      type="button"
-                      aria-label={`Approve leave request for ${r.n}`}
-                      className="btn primary sm flex-1 justify-center"
-                      onClick={() => onApprove(r.id)}
-                    >
-                      Approve
-                    </button>
-                  </div>
-                ) : (
-                  <div className="mt-2">
-                    <StatusBadge
-                      tone={isApproved ? "success" : "muted"}
-                      className="w-full justify-center"
-                    >
-                      {isApproved ? "Approved" : "Declined"}
-                    </StatusBadge>
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
+              </button>
 
-      <div className="card-foot flex items-center gap-3">
-        <span className="text-xs text-muted-foreground">
-          {visible.length} of {requests.length}
-        </span>
-        <div className="flex-1" />
-        <button type="button" className="btn ghost sm" onClick={() => setTab("needs")}>
-          Reset
-        </button>
-      </div>
+              {r.state === "pending" && (
+                <div className="row gap-2 mt-3">
+                  <button type="button" className="btn ghost sm" onClick={() => onAsk(r)}>
+                    <MessageSquare className="h-3 w-3" aria-hidden /> Ask
+                  </button>
+                  <div className="grow" />
+                  <button type="button" className="btn secondary sm" onClick={() => onDecline(r)}>
+                    Decline
+                  </button>
+                  <button type="button" className="btn primary sm" onClick={() => onApprove(r)}>
+                    <Check className="h-3 w-3" aria-hidden /> Approve
+                  </button>
+                </div>
+              )}
+
+              {r.state === "approved" && (
+                <div className="row gap-2 mt-3">
+                  <StatusBadge tone="success">
+                    <Check className="h-3 w-3" aria-hidden /> Approved
+                  </StatusBadge>
+                  <div className="grow" />
+                  <button type="button" className="btn ghost sm" onClick={() => onReopen(r.id)}>
+                    Undo
+                  </button>
+                </div>
+              )}
+
+              {r.state === "declined" && (
+                <div className="row gap-2 mt-3">
+                  <StatusBadge tone="danger">
+                    <X className="h-3 w-3" aria-hidden /> Declined
+                  </StatusBadge>
+                  <div className="grow" />
+                  <button type="button" className="btn ghost sm" onClick={() => onReopen(r.id)}>
+                    Undo
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }

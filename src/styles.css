@@ -542,7 +542,7 @@
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
   }
-  .dot {
+  .dot:not(.badge) {
     width: 6px;
     height: 6px;
     border-radius: 999px;

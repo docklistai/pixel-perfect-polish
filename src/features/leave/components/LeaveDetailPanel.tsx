@@ -1,13 +1,12 @@
-import { Card, ActionButton, DetailRow, FormSection, StatusBadge } from "@/components/dl";
+import { Card, ActionButton, DetailRow, StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
+import { Check, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
 
 interface Props {
   request: LeaveRequest;
-  approved: Set<string>;
-  declined: Set<string>;
-  onApprove: (id: string) => void;
-  onDecline: (id: string) => void;
+  onApprove: (request: LeaveRequest) => void;
+  onDecline: (request: LeaveRequest) => void;
   onReopen: (id: string) => void;
 }
 
@@ -28,20 +27,14 @@ const coverageRows = [
 
 const otherRequests = [
   { name: "Daniel Mitchell", dates: "26 – 27 May" },
-  { name: "Sophie Carter", dates: "27 – 29 May" },
+  { name: "Sophie Carter", dates: "18 – 20 May" },
 ];
 
-export function LeaveDetailPanel({
-  request,
-  approved,
-  declined,
-  onApprove,
-  onDecline,
-  onReopen,
-}: Props) {
-  const isApproved = approved.has(request.id);
-  const isDeclined = declined.has(request.id);
-  const badgeTone = isApproved ? "success" : isDeclined ? "danger" : "warning";
+export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen }: Props) {
+  const isApproved = request.state === "approved";
+  const isDeclined = request.state === "declined";
+  const impactTone =
+    request.tone === "danger" ? "danger" : request.tone === "warning" ? "warning" : "success";
 
   return (
     <Card
@@ -51,15 +44,15 @@ export function LeaveDetailPanel({
       <div className="card-section">
         <div className="section-label mb-2">Decision context</div>
         <div className="row gap-3" style={{ alignItems: "center" }}>
-          <div className={cn("av av-c4")}>{initials(request.n)}</div>
+          <div className={cn("av av-c3 lg")}>{initials(request.n)}</div>
           <div className="min-w-0">
             <div className="strong">{request.n}</div>
             <div className="muted txt-sm">
               {request.role} · {request.dept}
             </div>
             <div className="mt-2">
-              <StatusBadge tone={badgeTone}>
-                {isApproved ? "Approved" : isDeclined ? "Declined" : "Pending"}
+              <StatusBadge tone={impactTone} dot>
+                {request.impact} coverage impact
               </StatusBadge>
             </div>
           </div>
@@ -69,17 +62,17 @@ export function LeaveDetailPanel({
           <div className="card-section">
             <dl className="divide-y divide-border">
               <DetailRow label="Requested" value={request.date} />
-              <DetailRow label="Days" value={request.dur} />
-              <DetailRow label="Submitted" value={request.submitted} />
+              <DetailRow label="Days" value={`${request.days} days`} />
+              <DetailRow label="Notice" value={`${request.notice} days`} />
               <DetailRow label="Balance after" value={request.balance} />
-              <DetailRow label="Type" value="Annual leave" />
+              <DetailRow label="Type" value={request.type} />
             </dl>
           </div>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">{request.coverNote}</p>
       </div>
 
-      <FormSection title="Coverage on these days">
+      <div className="card-section">
+        <div className="section-label mb-2">Coverage on these days</div>
         <div className="space-y-3">
           {coverageRows.map((row) => (
             <div key={row.label} className="row gap-3 txt-sm" style={{ alignItems: "center" }}>
@@ -103,9 +96,10 @@ export function LeaveDetailPanel({
             </div>
           ))}
         </div>
-      </FormSection>
+      </div>
 
-      <FormSection title="Also off this period">
+      <div className="card-section">
+        <div className="section-label mb-2">Also off this period</div>
         <div className="space-y-3">
           {otherRequests.map((person) => (
             <div key={person.name} className="row gap-3">
@@ -118,26 +112,37 @@ export function LeaveDetailPanel({
             </div>
           ))}
         </div>
-      </FormSection>
+      </div>
 
       <div className="card-foot row gap-2">
-        {isApproved || isDeclined ? (
-          <ActionButton className="flex-1" onClick={() => onReopen(request.id)}>
-            Reopen
-          </ActionButton>
+        {isApproved ? (
+          <StatusBadge tone="success" className="w-full justify-center">
+            <Check className="h-3 w-3" aria-hidden /> Approved
+          </StatusBadge>
+        ) : isDeclined ? (
+          <StatusBadge tone="danger" className="w-full justify-center">
+            <X className="h-3 w-3" aria-hidden /> Declined
+          </StatusBadge>
         ) : (
           <>
             <ActionButton
               variant="secondary"
               className="flex-1"
-              onClick={() => onDecline(request.id)}
+              size="sm"
+              onClick={() => onDecline(request)}
             >
               Decline
             </ActionButton>
-            <ActionButton className="flex-1" onClick={() => onApprove(request.id)}>
+            <ActionButton className="flex-1" size="sm" onClick={() => onApprove(request)}>
+              <Check className="h-3 w-3" aria-hidden />
               Approve
             </ActionButton>
           </>
+        )}
+        {(isApproved || isDeclined) && (
+          <ActionButton variant="secondary" size="sm" onClick={() => onReopen(request.id)}>
+            Reopen
+          </ActionButton>
         )}
       </div>
     </Card>

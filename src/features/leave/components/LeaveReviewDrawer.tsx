@@ -17,17 +17,10 @@ interface Props {
   onClose: () => void;
 }
 
-export function LeaveReviewDrawer({
-  row,
-  approved,
-  declined,
-  onApprove,
-  onDecline,
-  onClose,
-}: Props) {
+export function LeaveReviewDrawer({ row, onApprove, onDecline, onClose }: Props) {
   if (!row) return null;
-  const isApproved = approved.has(row.id);
-  const isDeclined = declined.has(row.id);
+  const isApproved = row.state === "approved";
+  const isDeclined = row.state === "declined";
 
   return (
     <DrawerShell
@@ -72,8 +65,8 @@ export function LeaveReviewDrawer({
     >
       <FormSection title="Request">
         <dl className="divide-y divide-border">
-          <DetailRow label="Type" value="Annual leave" />
-          <DetailRow label="Dates" value={`${row.date} (${row.dur})`} />
+          <DetailRow label="Type" value={row.type} />
+          <DetailRow label="Dates" value={`${row.date} (${row.days} days)`} />
           <DetailRow label="Remaining balance" value={row.balance} />
           <DetailRow label="Submitted" value={row.submitted} />
         </dl>

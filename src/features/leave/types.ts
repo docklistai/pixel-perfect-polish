@@ -4,9 +4,13 @@ export interface LeaveRequest {
   role: string;
   dept: string;
   date: string;
-  dur: string;
+  days: number;
+  type: string;
   impact: "Low" | "Medium" | "High";
   tone: "success" | "warning" | "danger";
+  state: "pending" | "approved" | "declined";
+  notice: number;
+  reason: string;
   img: number;
   balance: string;
   submitted: string;

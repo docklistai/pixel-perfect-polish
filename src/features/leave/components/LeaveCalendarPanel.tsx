@@ -1,9 +1,11 @@
 import { ActionButton, DrawerShell, StatusBadge } from "@/components/dl";
+import { Plus } from "lucide-react";
 import { cal, CAL_DAYS, CAL_DATES } from "../data/leaveDemoData";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onNewRequest?: () => void;
 }
 
 function legendItem(label: string, tone: "teal" | "amber" | "red") {
@@ -26,19 +28,29 @@ function legendItem(label: string, tone: "teal" | "amber" | "red") {
   );
 }
 
-export function LeaveCalendarDrawer({ open, onOpenChange }: Props) {
+export function LeaveCalendarDrawer({ open, onOpenChange, onNewRequest }: Props) {
   return (
     <DrawerShell
       open={open}
       onOpenChange={onOpenChange}
       title="Leave calendar"
-      description="May 2026 · Approved, pending and unavailable coverage"
+      description="May 2025 · Approved & pending"
       width="xl"
       footer={
         <>
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Close
           </ActionButton>
+          {onNewRequest && (
+            <ActionButton
+              onClick={() => {
+                onOpenChange(false);
+                onNewRequest();
+              }}
+            >
+              <Plus className="h-3 w-3" aria-hidden /> New request
+            </ActionButton>
+          )}
         </>
       }
     >
