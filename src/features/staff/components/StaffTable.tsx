@@ -139,7 +139,6 @@ export function StaffTable({
                 isChecked={selectedIds.has(r.id)}
                 onSelect={() => onSelectMember(r)}
                 onCheck={() => toggleRow(r.id)}
-                onAction={toast}
               />
             ))}
           </tbody>

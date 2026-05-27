@@ -17,6 +17,7 @@ import { CommandPalette } from "./CommandPalette";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { NotificationDrawer } from "./NotificationDrawer";
 import { AiDrawer } from "./ai/AiDrawer";
+import { InteractionIntentProvider } from "@/lib/interactionIntents";
 
 interface OverlayApi {
   openPalette: () => void;
@@ -51,11 +52,12 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return false;
 }
 
-const G_TARGETS: Record<string, "/" | "/rota" | "/staff" | "/time"> = {
+const G_TARGETS: Record<string, "/" | "/rota" | "/staff" | "/time" | "/leave"> = {
   h: "/",
   r: "/rota",
   s: "/staff",
   t: "/time",
+  l: "/leave",
 };
 
 export function AppShortcuts({ children }: { children: React.ReactNode }) {
@@ -124,16 +126,18 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
   }, [navigate]);
 
   return (
-    <OverlayContext.Provider value={api}>
-      {children}
-      <CommandPalette open={palette} onOpenChange={setPalette} />
-      <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} />
-      <NotificationDrawer
-        open={notifs}
-        onOpenChange={setNotifs}
-        onUnreadCountChange={setUnreadCount}
-      />
-      <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
-    </OverlayContext.Provider>
+    <InteractionIntentProvider>
+      <OverlayContext.Provider value={api}>
+        {children}
+        <CommandPalette open={palette} onOpenChange={setPalette} />
+        <ShortcutsDialog open={shortcuts} onOpenChange={setShortcuts} />
+        <NotificationDrawer
+          open={notifs}
+          onOpenChange={setNotifs}
+          onUnreadCountChange={setUnreadCount}
+        />
+        <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
+      </OverlayContext.Provider>
+    </InteractionIntentProvider>
   );
 }

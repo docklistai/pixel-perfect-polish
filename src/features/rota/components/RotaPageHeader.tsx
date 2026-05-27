@@ -1,5 +1,15 @@
-import { ChevronLeft, ChevronRight, Calendar, MoreHorizontal, Send, Sparkles } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Eraser,
+  Printer,
+  Send,
+  SlidersHorizontal,
+  Sparkles,
+} from "lucide-react";
 import { FilterButton, IconButton, StatusBadge, ActionButton } from "@/components/dl";
+import { RowActionMenu } from "@/components/RowActionMenu";
 
 type StatusTone = "success" | "warning";
 
@@ -12,7 +22,9 @@ export function RotaPageHeader({
   onPrevWeek,
   onPickWeek,
   onNextWeek,
-  onMoreActions,
+  onTemplates,
+  onPrintRota,
+  onClearWeek,
   onGenerateRota,
   onPublish,
 }: {
@@ -24,7 +36,9 @@ export function RotaPageHeader({
   onPrevWeek: () => void;
   onPickWeek: () => void;
   onNextWeek: () => void;
-  onMoreActions: () => void;
+  onTemplates: () => void;
+  onPrintRota: () => void;
+  onClearWeek: () => void;
   onGenerateRota: () => void;
   onPublish: () => void;
 }) {
@@ -53,7 +67,16 @@ export function RotaPageHeader({
             Publish
           </ActionButton>
         )}
-        <IconButton icon={MoreHorizontal} label="More actions" onClick={onMoreActions} />
+        <RowActionMenu
+          triggerLabel="More rota actions"
+          items={[
+            { kind: "label", text: "Planning" },
+            { label: "Templates", icon: SlidersHorizontal, onSelect: onTemplates },
+            { label: "Print rota", icon: Printer, onSelect: onPrintRota },
+            { kind: "separator" },
+            { label: "Clear week", icon: Eraser, onSelect: onClearWeek, danger: true },
+          ]}
+        />
       </div>
     </div>
   );

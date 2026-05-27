@@ -3,6 +3,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, Card, ConfirmDialog, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
+import { useIntentHandler } from "@/lib/interactionIntents";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 import { RotaStatusBanner } from "@/features/rota/components/RotaStatusBanner";
@@ -19,7 +20,6 @@ import { GenerateRotaDialog } from "@/features/rota/components/GenerateRotaDialo
 import { ShiftDetailDrawer } from "@/features/rota/components/ShiftDetailDrawer";
 import { WeekPickerDialog } from "@/features/rota/components/WeekPickerDialog";
 import { RotaFiltersDrawer } from "@/features/rota/components/RotaFiltersDrawer";
-import { MoreActionsDialog } from "@/features/rota/components/MoreActionsDialog";
 import { TemplatesDialog } from "@/features/rota/components/TemplatesDialog";
 import { CoverageDetailsDrawer } from "@/features/rota/components/CoverageDetailsDrawer";
 import { WorkingTimeDetailsDrawer } from "@/features/rota/components/WorkingTimeDetailsDrawer";
@@ -57,11 +57,14 @@ function RotaPage() {
   const [generateOpen, setGenerateOpen] = React.useState(false);
   const [weekPickerOpen, setWeekPickerOpen] = React.useState(false);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
-  const [moreActionsOpen, setMoreActionsOpen] = React.useState(false);
   const [templatesOpen, setTemplatesOpen] = React.useState(false);
   const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
   const [workingTimeOpen, setWorkingTimeOpen] = React.useState(false);
   const [fillSummary, setFillSummary] = React.useState<string | null>(null);
+
+  useIntentHandler("rota.publish", () => setPublishOpen(true));
+  useIntentHandler("rota.generate", () => setGenerateOpen(true));
+  useIntentHandler("rota.addShift", () => setAddOpen(true));
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
   const readinessIssueCount = rota.openShiftCount + rota.conflictCount + workingTimeAlertCount;
@@ -120,7 +123,9 @@ function RotaPage() {
           onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
           onPickWeek={() => setWeekPickerOpen(true)}
           onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
-          onMoreActions={() => setMoreActionsOpen(true)}
+          onTemplates={() => setTemplatesOpen(true)}
+          onPrintRota={() => window.print()}
+          onClearWeek={rota.requestClearWeek}
           onGenerateRota={() => setGenerateOpen(true)}
           onPublish={() => setPublishOpen(true)}
         />
@@ -253,12 +258,6 @@ function RotaPage() {
         filters={rota.filters}
         roleOptions={rota.roleOptions}
         onFiltersChange={rota.setFilters}
-      />
-      <MoreActionsDialog
-        open={moreActionsOpen}
-        onOpenChange={setMoreActionsOpen}
-        onTemplates={() => setTemplatesOpen(true)}
-        onClearWeek={rota.requestClearWeek}
       />
       <TemplatesDialog
         open={templatesOpen}

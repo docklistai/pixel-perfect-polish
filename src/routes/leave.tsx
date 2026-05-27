@@ -29,6 +29,7 @@ import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialo
 import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
+import { useIntentHandler } from "@/lib/interactionIntents";
 
 export const Route = createFileRoute("/leave")({
   head: () => ({ meta: [{ title: "Leave — Docklist" }] }),
@@ -43,6 +44,8 @@ function LeavePage() {
   const [decisionRequest, setDecisionRequest] = React.useState<LeaveRequest | null>(null);
   const [decisionType, setDecisionType] = React.useState<"approve" | "decline" | null>(null);
   const [riskOpen, setRiskOpen] = React.useState(false);
+
+  useIntentHandler("leave.new", () => setNewRequestOpen(true));
 
   const activeRequest = requests.find((request) => request.id === activeId) ?? requests[0] ?? null;
   const pendingCount = requests.filter((request) => request.state === "pending").length;

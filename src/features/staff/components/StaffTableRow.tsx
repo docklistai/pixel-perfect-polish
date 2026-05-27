@@ -1,5 +1,9 @@
 import * as React from "react";
-import { MoreHorizontal } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { CalendarDays, Eye, Plane, ShieldOff, UserMinus } from "lucide-react";
+import { RowActionMenu } from "@/components/RowActionMenu";
+import { useIntents } from "@/lib/interactionIntents";
 import { StaffMonogram } from "./StaffMonogram";
 import type { StaffRow } from "../types";
 
@@ -9,7 +13,6 @@ interface StaffTableRowProps {
   isChecked: boolean;
   onSelect: () => void;
   onCheck: () => void;
-  onAction: (msg: string) => void;
 }
 
 const STATUS_CLS: Record<string, string> = {
@@ -30,9 +33,52 @@ export function StaffTableRow({
   isChecked,
   onSelect,
   onCheck,
-  onAction,
 }: StaffTableRowProps) {
+  const navigate = useNavigate();
+  const { requestIntent } = useIntents();
   const pct = parseInt(r.avail, 10) || 0;
+
+  const actions = [
+    {
+      label: "View profile",
+      icon: Eye,
+      onSelect: () => navigate({ to: "/staff/$staffId", params: { staffId: r.id } }),
+    },
+    {
+      label: "Add a shift",
+      icon: CalendarDays,
+      onSelect: () => {
+        navigate({ to: "/rota" });
+        requestIntent("rota.addShift");
+      },
+    },
+    {
+      label: "Log leave",
+      icon: Plane,
+      onSelect: () => {
+        navigate({ to: "/leave" });
+        requestIntent("leave.new");
+      },
+    },
+    { kind: "separator" as const },
+    {
+      label: "Suspend access",
+      icon: ShieldOff,
+      onSelect: () =>
+        toast.info(`Suspend access for ${r.n}`, {
+          description: "Suspend is a demo state in this prototype.",
+        }),
+    },
+    {
+      label: "Remove from team",
+      icon: UserMinus,
+      danger: true,
+      onSelect: () =>
+        toast.warning(`Remove ${r.n}`, {
+          description: "Remove is disabled while this prototype runs frontend-only.",
+        }),
+    },
+  ];
 
   return (
     <tr
@@ -100,14 +146,7 @@ export function StaffTableRow({
         </div>
       </td>
       <td className="py-3 text-right pr-3" onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          aria-label={`Actions for ${r.n}`}
-          onClick={() => onAction(`Actions for ${r.n} (demo)`)}
-          className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors border border-transparent hover:border-border"
-        >
-          <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
-        </button>
+        <RowActionMenu triggerLabel={`Actions for ${r.n}`} items={actions} />
       </td>
     </tr>
   );

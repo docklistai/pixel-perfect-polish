@@ -645,8 +645,10 @@
     cursor: pointer;
     color: var(--ink-900);
   }
-  .btn:active {
-    transform: translateY(1px);
+  .btn:active:not([disabled]):not(.disabled) {
+    transform: translateY(1px) scale(0.985);
+    box-shadow: none;
+    filter: brightness(0.97);
   }
   .btn:focus-visible {
     outline: 0;
@@ -741,6 +743,15 @@
     background: var(--bg-hover);
     color: var(--ink-900);
   }
+  .icon-btn:active:not([disabled]):not(.disabled) {
+    transform: translateY(1px) scale(0.97);
+    filter: brightness(0.97);
+  }
+  .icon-btn[disabled],
+  .icon-btn.disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
   .icon-btn.sm {
     width: 28px;
     height: 28px;
@@ -764,6 +775,10 @@
       background 130ms,
       transform 80ms,
       box-shadow 130ms;
+  }
+  .ai-btn:active:not([disabled]):not(.disabled) {
+    transform: translateY(1px) scale(0.985);
+    filter: brightness(0.97);
   }
   .ai-btn:hover {
     background: var(--st-teal-bg);

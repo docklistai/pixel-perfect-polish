@@ -23,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useIntentHandler } from "@/lib/interactionIntents";
 
 export const Route = createFileRoute("/staff")({
   head: () => ({ meta: [{ title: "Staff — Docklist" }] }),
@@ -95,6 +96,8 @@ function StaffPage() {
 function StaffListPage() {
   const stats = buildStats(rows);
   const [addOpen, setAddOpen] = React.useState(false);
+
+  useIntentHandler("staff.add", () => setAddOpen(true));
   const [invitePrepared, setInvitePrepared] = React.useState(false);
   const [selected, setSelected] = React.useState<StaffRow>(rows[0]);
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();

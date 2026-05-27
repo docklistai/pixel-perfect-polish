@@ -1,6 +1,9 @@
 /**
- * Global command palette (Ctrl/Cmd+K). Navigation-only.
- * Wraps the shadcn cmdk-based <Command/> primitives in a Dialog.
+ * Global command palette (Ctrl/Cmd+K).
+ *
+ * Navigation entries route to top-level pages. Quick-action entries navigate
+ * to the relevant route and then request a route-local surface to open via
+ * the interaction intent bus (see src/lib/interactionIntents.tsx).
  */
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -16,8 +19,9 @@ import {
   Settings as SettingsIcon,
   Plus,
   UserPlus,
-  Inbox,
-  Download,
+  Send,
+  Sparkles,
+  Moon,
 } from "lucide-react";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -30,6 +34,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import { useIntents, type IntentName } from "@/lib/interactionIntents";
 
 type NavTarget =
   | "/"
@@ -54,7 +59,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Rota", to: "/rota", icon: CalendarDays, shortcut: "G R" },
   { label: "Staff", to: "/staff", icon: Users, shortcut: "G S" },
   { label: "Time", to: "/time", icon: Clock, shortcut: "G T" },
-  { label: "Leave", to: "/leave", icon: CalendarOff },
+  { label: "Leave", to: "/leave", icon: CalendarOff, shortcut: "G L" },
   { label: "Team", to: "/team", icon: MessageSquare },
   { label: "Ops", to: "/ops", icon: Wrench },
   { label: "Reports", to: "/reports", icon: BarChart3 },
@@ -66,34 +71,65 @@ interface QuickAction {
   hint: string;
   icon: React.ComponentType<{ className?: string }>;
   to: NavTarget;
+  intent?: IntentName;
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
   {
-    label: "Add shift",
-    hint: "Open the rota",
+    label: "Publish rota",
+    hint: "Open the publish dialog",
+    icon: Send,
+    to: "/rota",
+    intent: "rota.publish",
+  },
+  {
+    label: "Generate rota draft",
+    hint: "Open the rota generator",
+    icon: Sparkles,
+    to: "/rota",
+    intent: "rota.generate",
+  },
+  {
+    label: "Add a shift",
+    hint: "Open the add shift surface",
     icon: Plus,
     to: "/rota",
+    intent: "rota.addShift",
   },
   {
     label: "Add team member",
-    hint: "Open the staff directory",
+    hint: "Open the invite dialog",
     icon: UserPlus,
     to: "/staff",
+    intent: "staff.add",
   },
   {
-    label: "Review leave requests",
-    hint: "Open the leave queue",
-    icon: Inbox,
+    label: "New leave request",
+    hint: "Open the new leave form",
+    icon: CalendarOff,
     to: "/leave",
-  },
-  {
-    label: "Export reports",
-    hint: "Open the reports workspace",
-    icon: Download,
-    to: "/reports",
+    intent: "leave.new",
   },
 ];
+
+function readTheme(): "light" | "dark" {
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
+function toggleDarkMode() {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  const next = readTheme() === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  root.classList.toggle("dark", next === "dark");
+  try {
+    localStorage.setItem("docklist.theme", next);
+  } catch {
+    /* ignore storage errors */
+  }
+  window.dispatchEvent(new Event("theme-change"));
+}
 
 export function CommandPalette({
   open,
@@ -103,6 +139,7 @@ export function CommandPalette({
   onOpenChange: (open: boolean) => void;
 }) {
   const navigate = useNavigate();
+  const { requestIntent } = useIntents();
 
   const go = React.useCallback(
     (to: NavTarget) => {
@@ -116,9 +153,19 @@ export function CommandPalette({
     (action: QuickAction) => {
       onOpenChange(false);
       navigate({ to: action.to });
+      if (action.intent) {
+        // Dispatch after navigation; the bus will fire immediately if the
+        // target route is already mounted, otherwise it drains on mount.
+        requestIntent(action.intent);
+      }
     },
-    [navigate, onOpenChange],
+    [navigate, onOpenChange, requestIntent],
   );
+
+  const runToggleTheme = React.useCallback(() => {
+    onOpenChange(false);
+    toggleDarkMode();
+  }, [onOpenChange]);
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
@@ -161,6 +208,13 @@ export function CommandPalette({
               </CommandItem>
             );
           })}
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Preferences">
+          <CommandItem value="Toggle dark mode" onSelect={runToggleTheme}>
+            <Moon className="ico h-4 w-4" aria-hidden />
+            <span>Toggle dark mode</span>
+          </CommandItem>
         </CommandGroup>
       </CommandList>
       <div className="cmd-foot">

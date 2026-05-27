@@ -3,6 +3,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, ActionButton, IconButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
+import { useIntents, type IntentName } from "@/lib/interactionIntents";
 import { Sparkles, MoreHorizontal, Plus, ChevronDown } from "lucide-react";
 import { DashboardAISummaryCard } from "@/features/dashboard/components/DashboardAISummaryCard";
 import { DashboardKpiCards } from "@/features/dashboard/components/DashboardKpiCards";
@@ -38,11 +39,21 @@ export const Route = createFileRoute("/")({
 function Home() {
   const navigate = useNavigate();
   const { openAiDrawer } = useOverlays();
+  const { requestIntent } = useIntents();
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [summaryDismissed, setSummaryDismissed] = React.useState(false);
   const [filter, setFilter] = React.useState<"today" | "week">("week");
   const [quickOpen, setQuickOpen] = React.useState(false);
   const quickRef = React.useRef<HTMLDivElement>(null);
+
+  const runQuickAction = React.useCallback(
+    (to: "/" | "/rota" | "/staff" | "/leave" | "/team", intent?: IntentName) => {
+      setQuickOpen(false);
+      navigate({ to });
+      if (intent) requestIntent(intent);
+    },
+    [navigate, requestIntent],
+  );
 
   React.useEffect(() => {
     if (!quickOpen) return;
@@ -121,42 +132,37 @@ function Home() {
                 <button
                   type="button"
                   className="menu-item"
-                  onClick={() => {
-                    setQuickOpen(false);
-                    navigate({ to: "/rota" });
-                  }}
+                  onClick={() => runQuickAction("/rota", "rota.addShift")}
                 >
-                  Open this week&apos;s rota
+                  Add a shift
                 </button>
                 <button
                   type="button"
                   className="menu-item"
-                  onClick={() => {
-                    setQuickOpen(false);
-                    navigate({ to: "/leave" });
-                  }}
+                  onClick={() => runQuickAction("/rota", "rota.publish")}
                 >
-                  Review leave requests
+                  Publish rota
                 </button>
                 <button
                   type="button"
                   className="menu-item"
-                  onClick={() => {
-                    setQuickOpen(false);
-                    navigate({ to: "/staff" });
-                  }}
+                  onClick={() => runQuickAction("/rota", "rota.generate")}
+                >
+                  Generate rota draft
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => runQuickAction("/leave", "leave.new")}
+                >
+                  New leave request
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => runQuickAction("/staff", "staff.add")}
                 >
                   Add a team member
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => {
-                    setQuickOpen(false);
-                    navigate({ to: "/team" });
-                  }}
-                >
-                  Draft an announcement
                 </button>
               </div>
             )}
