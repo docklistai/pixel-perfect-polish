@@ -3,7 +3,7 @@ import {
   ClipboardList,
   Clock3,
   MessageSquare,
-  PalmtreeIcon as Palmtree,
+  Palmtree,
   Users,
 } from "lucide-react";
 
