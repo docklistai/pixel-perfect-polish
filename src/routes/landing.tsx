@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
+  LandingAdminLayer,
   LandingBecause,
   LandingChecks,
+  LandingControlRoom,
   LandingFinalCTA,
   LandingFooter,
   LandingHero,
-  LandingHowItWorks,
   LandingLogoStrip,
+  LandingManagerAI,
   LandingMoments,
   LandingNavbar,
   LandingPricing,
@@ -36,11 +38,13 @@ function LandingPage() {
         <LandingHero />
         <LandingLogoStrip />
         <LandingThreeSteps />
-        <LandingBecause />
-        <LandingHowItWorks />
-        <LandingChecks />
+        <LandingControlRoom />
         <LandingProductProof />
+        <LandingChecks />
+        <LandingAdminLayer />
+        <LandingManagerAI />
         <LandingMoments />
+        <LandingBecause />
         <LandingPricing />
         <LandingFinalCTA />
       </main>
