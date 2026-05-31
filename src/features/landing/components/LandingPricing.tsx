@@ -1,9 +1,79 @@
-const coreFeatures = [
-  "Drag-and-drop week planning, splits and doubles",
-  "Pre-publish checks — clashes, coverage, hours, leave",
-  "Open shift management and cover requests",
-  "Handover notes and shift context",
-  "Roles, sections, contracted hours and availability",
+import { Check, Star } from "lucide-react";
+
+type Tier = {
+  name: string;
+  price: string;
+  priceSuffix?: string;
+  cap: string;
+  bullets: readonly string[];
+  cta: string;
+  ctaNote?: string;
+  recommended?: boolean;
+};
+
+const tiers: readonly Tier[] = [
+  {
+    name: "Free",
+    price: "£0",
+    priceSuffix: "/mo",
+    cap: "Up to 5 staff",
+    bullets: [
+      "Basic rota-focused workspace",
+      "Week planning & publishing",
+      "Open shifts & basic checks",
+    ],
+    cta: "Start free",
+  },
+  {
+    name: "Core",
+    price: "£39",
+    priceSuffix: "/mo",
+    cap: "Up to 25 staff",
+    bullets: [
+      "Everything in Free",
+      "Pre-publish checks & coverage",
+      "Leave, approved hours & staff records",
+      "Handover notes & team updates",
+    ],
+    cta: "Choose Core",
+  },
+  {
+    name: "Pro",
+    price: "£79",
+    priceSuffix: "/mo",
+    cap: "Up to 50 staff",
+    bullets: [
+      "Everything in Core",
+      "Advanced rota review & warnings",
+      "Labour & coverage pressure insights",
+      "AI manager support & drafting",
+    ],
+    cta: "Start 14-day Pro trial",
+    ctaNote: "14-day full trial · no card",
+    recommended: true,
+  },
+  {
+    name: "Custom",
+    price: "Let's talk",
+    cap: "50+ staff or multi-site",
+    bullets: ["Everything in Pro", "Larger teams & multiple venues", "Onboarding & priority support"],
+    cta: "Talk to us",
+  },
+];
+
+const valueLines = [
+  {
+    label: "Workspace pricing",
+    body: "Pay for the workspace, not every staff name you add.",
+  },
+  {
+    label: "Manager-led",
+    body: "AI suggests. You confirm before anything publishes.",
+  },
+  {
+    label: "Hospitality-native",
+    body: "Built around how the floor actually runs the week.",
+  },
 ] as const;
 
 export function LandingPricing() {
@@ -13,67 +83,113 @@ export function LandingPricing() {
       className="border-t border-[#0c1412]/10 bg-[var(--landing-cream)] py-24 text-[var(--landing-ink)] sm:py-32"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12">
-          <p className="landing-section-eyebrow">Pricing</p>
-          <h2 className="landing-section-title">Pricing in beta.</h2>
-          <p className="max-w-md text-pretty text-[17px] leading-7 text-[#526064]">
-            Early access pricing will be confirmed before launch.
+        <div className="mb-14 grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-end">
+          <div>
+            <p className="landing-section-eyebrow">Pricing</p>
+            <h2 className="landing-section-title">
+              Workspace pricing.
+              <br />
+              No per-seat <span className="italic text-[var(--landing-teal-deep)]">anxiety.</span>
+            </h2>
+          </div>
+          <p className="max-w-md text-pretty text-[17px] leading-7 text-[#3f4744]">
+            One workspace, one team, all the rota tools. Pricing is in beta — early access pricing
+            will be confirmed before launch.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr]">
-          <article className="flex min-h-[360px] flex-col rounded-lg border border-[#0c1412]/10 bg-[var(--landing-paper)] p-8">
-            <div className="landing-mono flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[var(--landing-teal-deep)]">
-              <span className="size-1.5 rounded-full bg-[var(--landing-teal)]" />
-              Core product
-            </div>
-            <h3 className="mt-4 font-serif text-4xl font-normal tracking-[-0.02em]">
-              DocklistAI Core
-            </h3>
-            <p className="mt-2 max-w-sm text-[15px] leading-6 text-[#5c645f]">
-              The rota and scheduling workspace for hospitality teams.
-            </p>
-            <ul className="mt-6 space-y-3 border-t border-dashed border-[#0c1412]/15 pt-6">
-              {coreFeatures.map((feature) => (
-                <li key={feature} className="flex gap-3 text-sm leading-6 text-[#3f4744]">
-                  <span className="mt-2 size-1.5 rounded-full bg-[var(--landing-teal-deep)]" />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            <div className="landing-mono mt-auto flex flex-wrap justify-between gap-3 pt-8 text-[11px] uppercase tracking-[0.12em] text-[#8c8273]">
-              <span>Early access pricing</span>
-              <span>Confirmed before launch</span>
-            </div>
-          </article>
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {tiers.map((t) => (
+            <article
+              key={t.name}
+              className={`relative flex flex-col rounded-2xl border bg-[var(--landing-paper)] p-7 ${
+                t.recommended
+                  ? "border-[var(--landing-teal)]/50 ring-1 ring-[var(--landing-teal)]/30 shadow-[0_30px_80px_-40px_rgba(91,162,156,0.45)]"
+                  : "border-[#0c1412]/12"
+              }`}
+            >
+              {t.recommended && (
+                <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--landing-teal-deep)] px-3 py-1 landing-mono text-[9.5px] font-semibold uppercase tracking-[0.18em] text-[var(--landing-cream)]">
+                  <Star className="size-3 fill-current" aria-hidden="true" />
+                  Recommended
+                </span>
+              )}
 
-          <article className="flex min-h-[360px] flex-col overflow-hidden rounded-lg border border-white/10 bg-gradient-to-b from-[#0f1816] to-[#0a100e] text-[var(--landing-cream)]">
-            <div className="p-8 pb-0">
-              <div className="landing-mono flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-[var(--landing-teal)]">
-                <span className="size-1.5 rounded-full bg-[var(--landing-teal)]" />
-                Workspace session
-              </div>
-              <h3 className="mt-4 font-serif text-4xl font-light tracking-[-0.02em]">
-                See the <span className="italic text-[var(--landing-teal)]">workspace.</span>
-              </h3>
-              <p className="mt-2 max-w-sm text-[14.5px] leading-6 text-[var(--landing-cream)]/60">
-                A short session with the rota builder, pre-publish checks and shift management — in
-                your context, when you request access.
-              </p>
-            </div>
-            <div className="mx-8 my-8 grid min-h-[170px] place-items-center rounded-md border border-dashed border-[var(--landing-teal)]/30 bg-[radial-gradient(80%_60%_at_50%_50%,rgba(91,162,156,0.08),transparent_70%)]">
-              <a
-                href="#top"
-                className="landing-mono inline-flex items-center gap-2 rounded-md border border-[var(--landing-teal)]/35 bg-[var(--landing-teal)]/10 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-[var(--landing-teal)] transition hover:bg-[var(--landing-teal)]/15"
+              <p
+                className={`landing-mono text-[10px] uppercase tracking-[0.18em] ${
+                  t.recommended ? "text-[var(--landing-teal-deep)]" : "text-[#8c8273]"
+                }`}
               >
-                Request access
-              </a>
+                {t.name}
+              </p>
+
+              <div className="mt-4 flex items-baseline gap-1">
+                <span className="font-serif text-[44px] font-medium leading-none tracking-[-0.025em] text-[var(--landing-ink)]">
+                  {t.price}
+                </span>
+                {t.priceSuffix && (
+                  <span className="text-[14px] text-[#8c8273]">{t.priceSuffix}</span>
+                )}
+              </div>
+              <p
+                className={`mt-1 text-[14px] ${
+                  t.recommended ? "text-[var(--landing-teal-deep)]" : "text-[#5c645f]"
+                }`}
+              >
+                {t.cap}
+              </p>
+
+              <ul className="mt-6 space-y-2.5 border-t border-dashed border-[#0c1412]/12 pt-6">
+                {t.bullets.map((b) => (
+                  <li
+                    key={b}
+                    className="flex items-start gap-2.5 text-[13.5px] leading-6 text-[#3f4744]"
+                  >
+                    <Check
+                      className="mt-1 size-3.5 shrink-0 text-[var(--landing-teal-deep)]"
+                      aria-hidden="true"
+                    />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-auto pt-7">
+                <button
+                  type="button"
+                  className={`w-full rounded-lg px-4 py-3 text-[13px] font-semibold transition ${
+                    t.recommended
+                      ? "bg-[var(--landing-teal)] text-[var(--landing-ink)] hover:bg-[#6ab3ad]"
+                      : "border border-[#0c1412]/15 bg-transparent text-[var(--landing-ink)] hover:bg-[#0c1412]/[0.04]"
+                  }`}
+                >
+                  {t.cta}
+                </button>
+                {t.ctaNote && (
+                  <p className="mt-3 text-center landing-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--landing-teal-deep)]">
+                    {t.ctaNote}
+                  </p>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <p className="mx-auto mt-12 max-w-3xl text-center text-[15px] leading-7 text-[#3f4744]">
+          Start on the{" "}
+          <span className="font-semibold text-[var(--landing-ink)]">14-day full Pro trial</span> —
+          then upgrade, stay on Core, or fall back to Free. No per-seat billing, ever.
+        </p>
+
+        <div className="mt-10 grid gap-4 border-t border-[#0c1412]/10 pt-8 sm:grid-cols-3">
+          {valueLines.map((v) => (
+            <div key={v.label}>
+              <p className="landing-mono text-[10px] uppercase tracking-[0.18em] text-[var(--landing-teal-deep)]">
+                {v.label}
+              </p>
+              <p className="mt-2 text-[14px] leading-6 text-[#3f4744]">{v.body}</p>
             </div>
-            <div className="landing-mono mt-auto flex justify-between gap-3 px-8 pb-8 text-[10px] uppercase tracking-[0.14em] text-white/45">
-              <span>Early access</span>
-              <span>On request</span>
-            </div>
-          </article>
+          ))}
         </div>
       </div>
     </section>

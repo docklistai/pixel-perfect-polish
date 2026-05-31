@@ -34,7 +34,9 @@ export function LandingNavbar() {
         </a>
 
         <nav
-          className="hidden items-center gap-9 text-sm text-[var(--landing-cream)]/78 md:flex"
+          className={`hidden items-center gap-9 text-sm text-[var(--landing-cream)]/78 transition-opacity duration-300 md:flex ${
+            scrolled ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
           aria-label="Landing navigation"
         >
           {navLinks.map((link) => (
@@ -45,17 +47,19 @@ export function LandingNavbar() {
         </nav>
 
         <div className="flex items-center gap-4">
-          <Link
-            to="/auth"
-            className="hidden text-sm text-[var(--landing-cream)]/80 hover:text-[var(--landing-cream)] sm:inline-flex"
-          >
-            Sign in
-          </Link>
+          {scrolled && (
+            <Link
+              to="/auth"
+              className="hidden text-sm text-[var(--landing-cream)]/80 hover:text-[var(--landing-cream)] sm:inline-flex"
+            >
+              Sign in
+            </Link>
+          )}
           <Link
             to="/auth"
             className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--landing-teal)] px-5 py-2.5 text-sm font-semibold text-[var(--landing-ink)] transition hover:bg-[#6ab3ad]"
           >
-            Get started
+            Get early access
             <ArrowRight
               className="hidden size-4 transition group-hover:translate-x-0.5 sm:block"
               aria-hidden="true"
