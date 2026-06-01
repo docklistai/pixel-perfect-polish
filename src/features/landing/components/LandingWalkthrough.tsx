@@ -1,13 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, ClipboardList, Inbox, LayoutGrid, Users } from "lucide-react";
 
-const sidebarItems = [
+const sidebarItems: ReadonlyArray<{
+  Icon: typeof Calendar;
+  label: string;
+  count?: string;
+  active?: boolean;
+}> = [
   { Icon: Calendar, label: "Rota", count: "3", active: true },
   { Icon: Users, label: "Staff" },
   { Icon: Inbox, label: "Leave", count: "4" },
   { Icon: ClipboardList, label: "Ops handover" },
   { Icon: LayoutGrid, label: "Reports" },
-] as const;
+];
 
 const chips = ["Interactive walkthrough", "Full manager app", "No sign-up"];
 
