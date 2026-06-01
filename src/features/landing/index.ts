@@ -1,5 +1,6 @@
 export { LandingNavbar } from "./components/LandingNavbar";
 export { LandingHero } from "./components/LandingHero";
+export { LandingTrustStrip } from "./components/LandingTrustStrip";
 export { LandingLogoStrip } from "./components/LandingLogoStrip";
 export { LandingThreeSteps } from "./components/LandingThreeSteps";
 export { LandingControlRoom } from "./components/LandingControlRoom";
@@ -7,6 +8,7 @@ export { LandingBecause } from "./components/LandingBecause";
 export { LandingHowItWorks } from "./components/LandingHowItWorks";
 export { LandingChecks } from "./components/LandingChecks";
 export { LandingProductProof } from "./components/LandingProductProof";
+export { LandingWalkthrough } from "./components/LandingWalkthrough";
 export { LandingAdminLayer } from "./components/LandingAdminLayer";
 export { LandingManagerAI } from "./components/LandingManagerAI";
 export { LandingMoments } from "./components/LandingMoments";

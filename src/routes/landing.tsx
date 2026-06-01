@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
   LandingAdminLayer,
   LandingBecause,
-  LandingChecks,
   LandingControlRoom,
   LandingFinalCTA,
   LandingFooter,
@@ -14,6 +13,8 @@ import {
   LandingPricing,
   LandingProductProof,
   LandingThreeSteps,
+  LandingTrustStrip,
+  LandingWalkthrough,
 } from "@/features/landing";
 
 export const Route = createFileRoute("/landing")({
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/landing")({
       {
         name: "description",
         content:
-          "DocklistAI is the rota-first workspace for hospitality teams. Build the week, check coverage, handle staff changes, and publish a rota your team can trust.",
+          "The scheduling workspace for hospitality teams — build rotas, catch coverage gaps, review leave and approved hours, and get practical manager support before you publish.",
       },
     ],
   }),
@@ -36,21 +37,20 @@ function LandingPage() {
       <LandingNavbar />
       <main id="main-content" className="!p-0">
         <LandingHero />
+        <LandingTrustStrip />
         <LandingLogoStrip />
         <LandingThreeSteps />
         <LandingControlRoom />
         <LandingProductProof />
-        <LandingChecks />
+        <LandingWalkthrough />
+        <LandingBecause />
         <LandingAdminLayer />
         <LandingManagerAI />
         <LandingMoments />
-        <LandingBecause />
         <LandingPricing />
         <LandingFinalCTA />
       </main>
-      <div>
-        <LandingFooter />
-      </div>
+      <LandingFooter />
     </div>
   );
 }
