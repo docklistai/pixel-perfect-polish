@@ -37,9 +37,9 @@ export function LandingHero() {
             <span className="italic text-[var(--landing-teal)]">rebuilt.</span>
           </h1>
 
-          <p className="mt-10 max-w-[480px] text-pretty text-[17.5px] leading-7 text-[var(--landing-cream)]/82">
-            Build the week, check coverage, handle staff changes, and publish a rota your team can
-            trust.
+          <p className="mt-10 max-w-[520px] text-pretty text-[17.5px] leading-7 text-[var(--landing-cream)]/82">
+            The scheduling workspace for hospitality teams — build rotas, catch coverage gaps,
+            review leave and approved hours, and get practical manager support before you publish.
           </p>
 
           <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -47,7 +47,7 @@ export function LandingHero() {
               to="/auth"
               className="group inline-flex items-center justify-center gap-3 rounded-lg bg-[var(--landing-teal)] px-6 py-3.5 text-sm font-semibold text-[var(--landing-ink)] transition hover:bg-[#6ab3ad]"
             >
-              Get started
+              Get early access
               <ArrowRight
                 className="size-4 transition group-hover:translate-x-0.5"
                 aria-hidden="true"
@@ -58,7 +58,7 @@ export function LandingHero() {
               className="inline-flex items-center justify-center gap-3 rounded-lg border border-[var(--landing-cream)]/20 bg-black/10 px-6 py-3.5 text-sm font-semibold text-[var(--landing-cream)] backdrop-blur-sm transition hover:border-[var(--landing-cream)]/35 hover:bg-white/10"
             >
               <CirclePlay className="size-4" aria-hidden="true" />
-              See how it works
+              Preview the manager app
             </a>
           </div>
 
