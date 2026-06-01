@@ -26,7 +26,7 @@ export function LandingFinalCTA() {
                 to="/auth"
                 className="group inline-flex items-center justify-center gap-3 rounded-lg bg-[var(--landing-teal)] px-6 py-3.5 text-sm font-semibold text-[var(--landing-ink)] transition hover:bg-[#6ab3ad]"
               >
-                Get started
+                Get early access
                 <ArrowRight
                   className="size-4 transition group-hover:translate-x-0.5"
                   aria-hidden="true"
@@ -37,7 +37,7 @@ export function LandingFinalCTA() {
                 className="inline-flex items-center justify-center gap-3 rounded-lg border border-[var(--landing-cream)]/20 bg-black/10 px-6 py-3.5 text-sm font-semibold text-[var(--landing-cream)] transition hover:bg-white/10"
               >
                 <CirclePlay className="size-4" aria-hidden="true" />
-                See how it works
+                Preview the manager app
               </a>
             </div>
           </div>
