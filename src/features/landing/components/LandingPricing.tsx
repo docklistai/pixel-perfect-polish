@@ -1,195 +1,186 @@
-import { Check, Star } from "lucide-react";
+import { Check } from "lucide-react";
+import { pricingNotes } from "../data/landingContent";
 
-type Tier = {
-  name: string;
-  price: string;
-  priceSuffix?: string;
-  cap: string;
-  bullets: readonly string[];
-  cta: string;
-  ctaNote?: string;
-  recommended?: boolean;
-};
+const proFeatures = [
+  "Pre-publish checks and leave clash review",
+  "Coverage pressure and open shift visibility",
+  "Light staff records, approved hours, and handover notes",
+  "Manager-led AI support for checks and drafts",
+] as const;
 
-const tiers: readonly Tier[] = [
-  {
-    name: "Free",
-    price: "£0",
-    priceSuffix: "/mo",
-    cap: "Up to 5 staff",
-    bullets: [
-      "Basic rota-focused workspace",
-      "Week planning & publishing",
-      "Open shifts & basic checks",
-    ],
-    cta: "Start free",
-  },
+const supportPlans = [
   {
     name: "Core",
     price: "£39",
-    priceSuffix: "/mo",
-    cap: "Up to 25 staff",
-    bullets: [
-      "Everything in Free",
-      "Pre-publish checks & coverage",
-      "Leave, approved hours & staff records",
-      "Handover notes & team updates",
-    ],
-    cta: "Choose Core",
+    meta: "Up to 25 staff · workspace pricing",
+    body: "A focused rota workspace with checks, leave context, approved hours, and handover notes.",
+    cta: "Join early access",
   },
   {
-    name: "Pro",
-    price: "£79",
-    priceSuffix: "/mo",
-    cap: "Up to 50 staff",
-    bullets: [
-      "Everything in Core",
-      "Advanced rota review & warnings",
-      "Labour & coverage pressure insights",
-      "AI manager support & drafting",
-    ],
-    cta: "Start 14-day Pro trial",
-    ctaNote: "14-day full trial · no card",
-    recommended: true,
+    name: "Free",
+    price: "£0",
+    meta: "Up to 5 staff · workspace pricing",
+    body: "Basic weekly rota planning for small teams getting started.",
+    cta: "Join early access",
   },
-  {
-    name: "Custom",
-    price: "Let's talk",
-    cap: "50+ staff or multi-site",
-    bullets: ["Everything in Pro", "Larger teams & multiple venues", "Onboarding & priority support"],
-    cta: "Talk to us",
-  },
-];
+] as const;
 
-const valueLines = [
-  {
-    label: "Workspace pricing",
-    body: "Pay for the workspace, not every staff name you add.",
-  },
-  {
-    label: "Manager-led",
-    body: "AI suggests. You confirm before anything publishes.",
-  },
-  {
-    label: "Hospitality-native",
-    body: "Built around how the floor actually runs the week.",
-  },
+const comparePoints = [
+  ["Workspace price", "No per-seat meter for every staff name."],
+  ["Manager confirms", "AI can suggest checks, but publishing stays manual."],
+  ["Rota first", "Scheduling stays the centre of the product."],
 ] as const;
 
 export function LandingPricing() {
   return (
     <section
       id="pricing"
-      className="border-t border-[#0c1412]/10 bg-[var(--landing-cream)] py-24 text-[var(--landing-ink)] sm:py-32"
+      className="relative scroll-mt-24 overflow-hidden border-t py-12 sm:py-16 lg:py-20"
+      style={{ background: "var(--landing-paper)", borderColor: "var(--landing-border)" }}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-14 grid gap-8 lg:grid-cols-[1.05fr_1fr] lg:items-end">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[360px]"
+        style={{
+          background: "radial-gradient(46% 54% at 50% 0%,rgba(201,149,77,.18),transparent 70%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
+        <div className="grid gap-8 lg:grid-cols-[.32fr_.68fr] lg:items-start">
           <div>
-            <p className="landing-section-eyebrow">Pricing</p>
-            <h2 className="landing-section-title">
-              Workspace pricing.
+            <span className="landing-section-eyebrow">Pricing</span>
+            <h2 className="landing-section-title max-w-[380px]">
+              Start with Pro,
               <br />
-              No per-seat <span className="italic text-[var(--landing-teal-deep)]">anxiety.</span>
+              then choose <span className="landing-it">what fits.</span>
             </h2>
-          </div>
-          <p className="max-w-md text-pretty text-[17px] leading-7 text-[#3f4744]">
-            One workspace, one team, all the rota tools. Pricing is in beta — early access pricing
-            will be confirmed before launch.
-          </p>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {tiers.map((t) => (
-            <article
-              key={t.name}
-              className={`relative flex flex-col rounded-2xl border bg-[var(--landing-paper)] p-7 ${
-                t.recommended
-                  ? "border-[var(--landing-teal)]/50 ring-1 ring-[var(--landing-teal)]/30 shadow-[0_30px_80px_-40px_rgba(91,162,156,0.45)]"
-                  : "border-[#0c1412]/12"
-              }`}
-            >
-              {t.recommended && (
-                <span className="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-[var(--landing-teal-deep)] px-3 py-1 landing-mono text-[9.5px] font-semibold uppercase tracking-[0.18em] text-[var(--landing-cream)]">
-                  <Star className="size-3 fill-current" aria-hidden="true" />
-                  Recommended
+            <p className="max-w-[360px] text-pretty text-[15px] leading-[1.6] text-[var(--landing-ink-600)] sm:text-[16px]">
+              A 14-day full Pro trial gives managers the complete rota workspace before choosing the
+              right early-access path.
+            </p>
+            <div className="landing-mono mt-6 grid gap-2.5 text-[10.5px] uppercase text-[var(--landing-teal-deep)]">
+              {pricingNotes.map((note) => (
+                <span key={note} className="inline-flex items-center gap-2">
+                  <span className="size-[5px] rounded-full bg-[var(--landing-teal)]" />
+                  {note}
                 </span>
-              )}
-
-              <p
-                className={`landing-mono text-[10px] uppercase tracking-[0.18em] ${
-                  t.recommended ? "text-[var(--landing-teal-deep)]" : "text-[#8c8273]"
-                }`}
-              >
-                {t.name}
-              </p>
-
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="font-serif text-[44px] font-medium leading-none tracking-[-0.025em] text-[var(--landing-ink)]">
-                  {t.price}
-                </span>
-                {t.priceSuffix && (
-                  <span className="text-[14px] text-[#8c8273]">{t.priceSuffix}</span>
-                )}
-              </div>
-              <p
-                className={`mt-1 text-[14px] ${
-                  t.recommended ? "text-[var(--landing-teal-deep)]" : "text-[#5c645f]"
-                }`}
-              >
-                {t.cap}
-              </p>
-
-              <ul className="mt-6 space-y-2.5 border-t border-dashed border-[#0c1412]/12 pt-6">
-                {t.bullets.map((b) => (
-                  <li
-                    key={b}
-                    className="flex items-start gap-2.5 text-[13.5px] leading-6 text-[#3f4744]"
-                  >
-                    <Check
-                      className="mt-1 size-3.5 shrink-0 text-[var(--landing-teal-deep)]"
-                      aria-hidden="true"
-                    />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-auto pt-7">
-                <button
-                  type="button"
-                  className={`w-full rounded-lg px-4 py-3 text-[13px] font-semibold transition ${
-                    t.recommended
-                      ? "bg-[var(--landing-teal)] text-[var(--landing-ink)] hover:bg-[#6ab3ad]"
-                      : "border border-[#0c1412]/15 bg-transparent text-[var(--landing-ink)] hover:bg-[#0c1412]/[0.04]"
-                  }`}
-                >
-                  {t.cta}
-                </button>
-                {t.ctaNote && (
-                  <p className="mt-3 text-center landing-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--landing-teal-deep)]">
-                    {t.ctaNote}
-                  </p>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-
-        <p className="mx-auto mt-12 max-w-3xl text-center text-[15px] leading-7 text-[#3f4744]">
-          Start on the{" "}
-          <span className="font-semibold text-[var(--landing-ink)]">14-day full Pro trial</span> —
-          then upgrade, stay on Core, or fall back to Free. No per-seat billing, ever.
-        </p>
-
-        <div className="mt-10 grid gap-4 border-t border-[#0c1412]/10 pt-8 sm:grid-cols-3">
-          {valueLines.map((v) => (
-            <div key={v.label}>
-              <p className="landing-mono text-[10px] uppercase tracking-[0.18em] text-[var(--landing-teal-deep)]">
-                {v.label}
-              </p>
-              <p className="mt-2 text-[14px] leading-6 text-[#3f4744]">{v.body}</p>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div>
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.18fr)_minmax(300px,.82fr)]">
+              <article
+                className="landing-reveal relative overflow-hidden rounded-[18px] p-5 text-[var(--landing-cream)] sm:p-7"
+                style={{
+                  background:
+                    "linear-gradient(145deg,rgba(20,35,30,1),rgba(12,20,18,1) 58%,rgba(30,24,16,1))",
+                  border: "1px solid rgba(201,149,77,.76)",
+                  boxShadow: "0 30px 80px -28px rgba(17,23,20,.75)",
+                }}
+              >
+                <div
+                  aria-hidden="true"
+                  className="absolute right-0 top-0 h-44 w-44 rounded-full"
+                  style={{ background: "rgba(201,149,77,.14)", filter: "blur(54px)" }}
+                />
+                <div className="relative flex items-center justify-between gap-4">
+                  <p className="landing-mono text-[11px] uppercase text-[#d9ad70]">Pro</p>
+                  <span className="landing-mono rounded-full bg-[#c9954d] px-3 py-1 text-[10px] font-bold uppercase text-[#111714]">
+                    Recommended
+                  </span>
+                </div>
+                <div className="relative mt-6">
+                  <p className="text-[56px] font-extrabold leading-none sm:text-[62px]">
+                    £79 <span className="text-[16px] font-semibold text-white/60">/mo flat</span>
+                  </p>
+                  <p className="mt-3 text-[14px] font-semibold text-[var(--landing-teal-400)]">
+                    Up to 50 staff · workspace pricing
+                  </p>
+                  <p className="mt-5 text-pretty text-[15px] leading-[1.55] text-[var(--landing-cream-dim)]">
+                    The best fit for hospitality managers who need rota control, lightweight
+                    workforce context, and practical support before publishing.
+                  </p>
+                </div>
+
+                <ul className="relative mt-6 grid gap-3">
+                  {proFeatures.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-3 text-[13.5px] text-white/74"
+                    >
+                      <Check className="mt-0.5 size-4 shrink-0 text-[#d9ad70]" aria-hidden="true" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="relative mt-7">
+                  <a
+                    href="/auth"
+                    className="inline-flex w-full justify-center rounded-xl bg-[#c9954d] px-6 py-4 text-[14px] font-extrabold text-[#111714] transition duration-200 hover:-translate-y-0.5 hover:bg-[#d6a865] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                  >
+                    Get Pro early access
+                  </a>
+                  <p className="mt-3 text-center text-[12px] text-white/52">
+                    14-day full Pro trial. No live billing implied.
+                  </p>
+                </div>
+              </article>
+
+              <div className="grid gap-4">
+                {supportPlans.map((plan) => (
+                  <article
+                    key={plan.name}
+                    className="rounded-[16px] border bg-white/88 p-4 transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-lg sm:p-5"
+                    style={{
+                      borderColor: "var(--landing-border)",
+                      boxShadow: "0 18px 42px -36px rgba(17,23,20,.42)",
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="landing-mono text-[10px] uppercase text-[var(--landing-ink-400)]">
+                          {plan.name}
+                        </p>
+                        <p className="mt-2 text-[32px] font-extrabold leading-none text-[var(--landing-ink-900)]">
+                          {plan.price}
+                        </p>
+                        <p className="mt-2 text-[12.5px] text-[var(--landing-ink-500)]">
+                          {plan.meta}
+                        </p>
+                      </div>
+                      <a
+                        href="/auth"
+                        className="shrink-0 rounded-full border border-[var(--landing-border)] px-3.5 py-2 text-[12px] font-bold text-[var(--landing-ink-900)] transition hover:bg-[var(--landing-paper)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--landing-teal)]"
+                      >
+                        {plan.cta}
+                      </a>
+                    </div>
+                    <p className="mt-4 max-w-[420px] text-[13px] leading-[1.55] text-[var(--landing-ink-600)]">
+                      {plan.body}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-2.5 text-center sm:grid-cols-3">
+              {comparePoints.map(([heading, body]) => (
+                <div
+                  key={heading}
+                  className="rounded-[12px] border bg-white/78 px-4 py-2.5 text-[12px] leading-[1.4] text-[var(--landing-ink-600)]"
+                  style={{ borderColor: "var(--landing-border-faint)" }}
+                >
+                  <p className="landing-mono mb-1 text-[9.5px] font-bold uppercase text-[var(--landing-teal-deep)]">
+                    {heading}
+                  </p>
+                  {body}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,378 +1,198 @@
-import { Sparkles } from "lucide-react";
+import { LandingProductProofRota } from "./LandingProductProofRota";
+import { LandingProductProofSidebar } from "./LandingProductProofSidebar";
+import { managerPreviewUrl } from "../data/landingContent";
 
-type ShiftTone = "foh" | "kitchen" | "house" | "bar" | "lunch" | "open" | "clash" | "off" | "leave";
-
-type Cell =
-  | { kind: "shift"; tone: ShiftTone; time: string; sub: string }
-  | { kind: "label"; tone: ShiftTone; text: string };
-
-type StaffRow = {
-  initials: string;
-  name: string;
-  role: string;
-  avatar: string;
-  cells: readonly Cell[];
-};
-
-const days = [
-  { label: "Mon", date: "12" },
-  { label: "Tue", date: "13" },
-  { label: "Wed", date: "14" },
-  { label: "Thu", date: "15" },
-  { label: "Fri", date: "16" },
-];
-
-const rows: readonly StaffRow[] = [
+const proofAnnotations = [
   {
-    initials: "SC",
-    name: "Sophie C.",
-    role: "FOH",
-    avatar: "bg-[var(--landing-teal-deep)]",
-    cells: [
-      { kind: "shift", tone: "foh", time: "08–16", sub: "Front of House" },
-      { kind: "shift", tone: "foh", time: "08–16", sub: "Front of House" },
-      { kind: "shift", tone: "foh", time: "09–17", sub: "Front of House" },
-      { kind: "shift", tone: "foh", time: "08–16", sub: "Front of House" },
-      { kind: "label", tone: "off", text: "Day off" },
-    ],
+    label: "Open shifts",
+    value: "2",
+    body: "Lunch and Friday service need cover.",
+    tone: "warn",
   },
   {
-    initials: "DM",
-    name: "Daniel M.",
-    role: "Chef",
-    avatar: "bg-[#c99a5b]",
-    cells: [
-      { kind: "shift", tone: "kitchen", time: "09–17", sub: "Kitchen" },
-      { kind: "shift", tone: "kitchen", time: "09–17", sub: "Kitchen" },
-      { kind: "label", tone: "off", text: "Day off" },
-      { kind: "shift", tone: "kitchen", time: "13–21", sub: "Kitchen" },
-      { kind: "shift", tone: "kitchen", time: "13–21", sub: "Kitchen" },
-    ],
+    label: "Leave clash",
+    value: "1",
+    body: "Approved leave overlaps a bar shift.",
+    tone: "warn",
   },
   {
-    initials: "PP",
-    name: "Priya P.",
-    role: "Housekeeping",
-    avatar: "bg-[#9b8acc]",
-    cells: [
-      { kind: "shift", tone: "house", time: "06–14", sub: "Housekeeping" },
-      { kind: "shift", tone: "house", time: "06–14", sub: "Housekeeping" },
-      { kind: "shift", tone: "house", time: "06–14", sub: "Housekeeping" },
-      { kind: "label", tone: "leave", text: "Annual leave" },
-      { kind: "label", tone: "leave", text: "Annual leave" },
-    ],
+    label: "Publish",
+    value: "Private draft",
+    body: "Staff see the rota only after manager confirmation.",
+    tone: "safe",
   },
-  {
-    initials: "LO",
-    name: "Liam O.",
-    role: "Bar",
-    avatar: "bg-[#5b8acc]",
-    cells: [
-      { kind: "shift", tone: "bar", time: "16–00", sub: "Bar" },
-      { kind: "shift", tone: "bar", time: "16–00", sub: "Bar" },
-      { kind: "shift", tone: "clash", time: "16–00", sub: "Clash · leave" },
-      { kind: "label", tone: "off", text: "Day off" },
-      { kind: "shift", tone: "bar", time: "16–00", sub: "Bar" },
-    ],
-  },
-  {
-    initials: "EV",
-    name: "Elena V.",
-    role: "Server",
-    avatar: "bg-[#3f7256]",
-    cells: [
-      { kind: "shift", tone: "lunch", time: "12–17", sub: "Lunch" },
-      { kind: "label", tone: "off", text: "Day off" },
-      { kind: "shift", tone: "open", time: "— Open —", sub: "5h · Lunch" },
-      { kind: "shift", tone: "lunch", time: "12–17", sub: "Lunch" },
-      { kind: "shift", tone: "open", time: "— Open —", sub: "6h · Service" },
-    ],
-  },
-];
-
-const toneClass: Record<ShiftTone, string> = {
-  foh: "border-[var(--landing-teal)]/35 bg-[var(--landing-teal)]/12 text-[#cdeae5]",
-  kitchen: "border-[#c99a5b]/45 bg-[#c99a5b]/12 text-[#e8c590]",
-  house: "border-[#9b8acc]/45 bg-[#9b8acc]/12 text-[#c9bce8]",
-  bar: "border-[#5b8acc]/45 bg-[#5b8acc]/12 text-[#b8ccea]",
-  lunch: "border-[#7fb89c]/40 bg-[#7fb89c]/12 text-[#c2e0cf]",
-  open: "border-dashed border-[#d9a968]/55 bg-[#d9a968]/8 text-[#e8c08c]",
-  clash: "border-[#b8674a]/55 bg-[#b8674a]/15 text-[#e89880]",
-  off: "border-dashed border-white/10 bg-transparent text-white/30",
-  leave: "border-[#9b8acc]/30 bg-[#9b8acc]/8 text-[#c9bce8]",
-};
-
-const statusChips = [
-  { label: "2 conflicts", dot: "bg-[#e87864]" },
-  { label: "3 open", dot: "bg-[var(--landing-teal)]" },
-  { label: "1 leave clash", dot: "bg-[#a896d6]" },
-  { label: "98% coverage", dot: "bg-[#7fb89c]" },
 ] as const;
-
-const thingsToCheck = [
-  {
-    dot: "bg-[#e87864]",
-    text: (
-      <>
-        <span className="font-semibold text-[var(--landing-cream)]">Liam O. · Wed</span> bar shift
-        clashes with approved leave.
-      </>
-    ),
-  },
-  {
-    dot: "bg-[#d9a968]",
-    text: (
-      <>
-        <span className="font-semibold text-[var(--landing-cream)]">2 open lunch shifts</span>{" "}
-        unfilled mid-week — coverage dips below target.
-      </>
-    ),
-  },
-  {
-    dot: "bg-[var(--landing-teal)]",
-    text: (
-      <>
-        <span className="font-semibold text-[var(--landing-cream)]">Kitchen hours</span> running
-        under contract for Daniel M.
-      </>
-    ),
-  },
-];
-
-const stats = [
-  { label: "Shifts assigned", value: "24 / 27", tone: "ok" as const, sub: "Draft" },
-  { label: "Coverage target", value: "98%", tone: "ok" as const, sub: "" },
-  { label: "Leave clashes", value: "1", tone: "warn" as const, sub: "Wed · bar" },
-  { label: "Labour estimate", value: "802h", tone: "ok" as const, sub: "of 820h budget" },
-];
 
 export function LandingProductProof() {
   return (
     <section
-      className="relative overflow-hidden bg-[var(--landing-ink)] py-24 text-[var(--landing-cream)] sm:py-32"
-      aria-labelledby="landing-product-proof-title"
+      id="product"
+      className="relative scroll-mt-24 overflow-hidden py-12 text-[var(--landing-cream)] sm:py-16 lg:py-18"
+      style={{ background: "var(--landing-ink)" }}
+      aria-labelledby="reveal-title"
     >
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_0%,rgba(91,162,156,0.08),transparent_70%)]"
         aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(54% 44% at 50% 0%,rgba(14,165,162,.13),transparent 70%), radial-gradient(42% 42% at 86% 82%,rgba(201,149,77,.1),transparent 72%)",
+        }}
       />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 grid gap-8 lg:grid-cols-2 lg:items-end">
+
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          backgroundImage: "radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.4px)",
+          backgroundSize: "28px 28px",
+          WebkitMaskImage: "radial-gradient(74% 70% at 50% 42%,#000,transparent 78%)",
+          maskImage: "radial-gradient(74% 70% at 50% 42%,#000,transparent 78%)",
+        }}
+      />
+
+      <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
+        <div className="mb-7 grid gap-5 lg:grid-cols-[.48fr_.52fr] lg:items-end">
           <div>
-            <p className="landing-section-eyebrow text-[var(--landing-teal)]">The week, in view</p>
-            <h2
-              id="landing-product-proof-title"
-              className="landing-section-title text-[var(--landing-cream)]"
-            >
-              A working view of the{" "}
-              <span className="italic text-[var(--landing-teal)]">week ahead.</span>
+            <span className="landing-section-eyebrow on-dark">The Manager Workspace</span>
+            <h2 id="reveal-title" className="landing-section-title on-dark">
+              Your week,
+              <br />
+              in one <span className="landing-it on-dark">place.</span>
             </h2>
           </div>
-          <p className="max-w-xl text-pretty text-[17px] leading-7 text-[var(--landing-cream)]/65">
-            Coverage, clashes, open shifts and publish readiness — held together in one calm,
-            considered view. Manager confirms every change before it reaches the floor.
+          <p className="max-w-[500px] text-pretty text-[15px] leading-[1.55] text-[var(--landing-cream-dim)] sm:text-[16px]">
+            Not a dashboard dump: a calm view of the things that decide your week. The draft rota,
+            what's left before publishing, where the pressure sits, and what's worth a second look.
           </p>
         </div>
 
         <div
-          className="overflow-hidden rounded-2xl border border-white/10 bg-[var(--landing-paper)] text-[var(--landing-ink)] shadow-[0_60px_140px_-40px_rgba(0,0,0,0.7)]"
-          aria-hidden="true"
+          className="landing-reveal relative overflow-hidden rounded-[18px] border border-white/10"
+          style={{
+            background: "rgba(17, 23, 20, 0.45)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 50px 100px -30px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.05)",
+          }}
         >
-          {/* Top bar */}
-          <header className="flex flex-wrap items-center gap-3 border-b border-[#0c1412]/10 px-5 py-3.5 sm:px-6">
-            <span className="inline-flex items-center gap-2 rounded-md bg-[var(--landing-ink)] px-2.5 py-1 text-[12px] font-medium text-[var(--landing-cream)]">
-              <span className="grid size-4 place-items-center rounded-sm bg-[var(--landing-teal)] text-[9px] font-bold text-[var(--landing-ink)]">
-                D
-              </span>
-              Rota · Week 21
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#d9a968]/15 px-2.5 py-1 text-[11px] font-medium text-[#8e6629]">
-              <span className="size-1.5 rounded-full bg-[#d9a968]" />
-              Draft · not shared
-            </span>
-            <div className="ml-auto hidden flex-wrap gap-1.5 sm:flex">
-              {statusChips.map((c) => (
-                <span
-                  key={c.label}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-[#0c1412]/[0.04] px-2.5 py-1 text-[11px] text-[#3f4744]"
-                >
-                  <span className={`size-1.5 rounded-full ${c.dot}`} />
-                  {c.label}
-                </span>
-              ))}
+          <div
+            className="flex items-center gap-3 border-b px-4 py-3 sm:px-5"
+            style={{ borderColor: "rgba(255,255,255,0.08)" }}
+          >
+            <div className="flex gap-1.5">
+              <span className="size-3 rounded-full bg-white/10" />
+              <span className="size-3 rounded-full bg-white/10" />
+              <span className="size-3 rounded-full bg-white/10" />
             </div>
-          </header>
-
-          {/* Mobile chips */}
-          <div className="flex flex-wrap gap-1.5 border-b border-[#0c1412]/10 px-5 py-3 sm:hidden">
-            {statusChips.map((c) => (
-              <span
-                key={c.label}
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#0c1412]/[0.04] px-2.5 py-1 text-[11px] text-[#3f4744]"
-              >
-                <span className={`size-1.5 rounded-full ${c.dot}`} />
-                {c.label}
-              </span>
-            ))}
+            <span className="landing-mono ml-2 text-[10px] text-white/40 sm:ml-4 sm:text-[11px]">
+              docklist-workspace / Week 21 / Friday Night Service
+            </span>
+            <span className="landing-mono ml-auto hidden rounded-full border border-white/10 px-2.5 py-1 text-[9.5px] uppercase text-white/45 sm:inline-flex">
+              draft
+            </span>
           </div>
 
-          {/* Grid */}
-          <div className="relative overflow-x-auto">
-            <div className="min-w-[820px]">
-              <div className="grid grid-cols-[180px_repeat(5,1fr)] border-b border-[#0c1412]/10 bg-[#fbf8f1]/60 px-2 py-3 landing-mono text-[10px] uppercase tracking-[0.14em] text-[#8c8273]">
-                <span className="pl-3">Staff · 24</span>
-                {days.map((d) => (
-                  <span key={d.label} className="px-2">
-                    {d.label} {d.date}
-                  </span>
+          <div className="grid gap-3 p-3 sm:p-4 lg:grid-cols-[.34fr_1.42fr_.48fr] lg:items-start">
+            <aside className="rounded-xl border border-white/10 p-4 text-[var(--landing-cream)] lg:p-5">
+              <p className="landing-mono text-[10.5px] uppercase text-[#d9ad70]">
+                Scheduling-first workspace
+              </p>
+              <h3 className="mt-3 text-balance break-words text-[22px] font-extrabold leading-[1.04] sm:text-[25px]">
+                This is where the week becomes publishable.
+              </h3>
+              <p className="mt-3 text-pretty text-[13px] leading-[1.55] text-[var(--landing-cream-dim)]">
+                Build the draft, check coverage, resolve open shifts, and confirm the version your
+                team should see.
+              </p>
+              <ul className="mt-4 grid gap-2 text-[12px] text-white/72 sm:grid-cols-2 lg:grid-cols-1">
+                {[
+                  "Draft changes stay private",
+                  "Leave clashes and notes stay in context",
+                  "Open shifts remain visible until resolved",
+                  "Manager confirms before publishing",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-md border border-[#c9954d]/40 text-[#d9ad70]">
+                      <svg
+                        className="size-3"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        aria-hidden="true"
+                      >
+                        <path d="M3.5 8.2 6.7 11.4 12.7 4.8" />
+                      </svg>
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <a
+                href={managerPreviewUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex items-center gap-2 text-[13px] font-bold text-[var(--landing-teal-400)] transition hover:text-[var(--landing-cream)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--landing-teal-400)]"
+              >
+                Preview manager app
+                <svg
+                  className="size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </a>
+            </aside>
+            <div className="relative">
+              <LandingProductProofRota />
+              <div className="product-annotations pointer-events-none mt-3 grid gap-2 sm:grid-cols-3">
+                {proofAnnotations.map((annotation) => (
+                  <div
+                    key={annotation.label}
+                    className="rounded-xl border p-3 shadow-2xl"
+                    style={{
+                      background:
+                        annotation.tone === "safe" ? "rgba(14,48,43,.92)" : "rgba(35,27,17,.94)",
+                      borderColor:
+                        annotation.tone === "safe"
+                          ? "rgba(43,184,181,.32)"
+                          : "rgba(201,149,77,.36)",
+                    }}
+                  >
+                    <p className="landing-mono text-[9.5px] uppercase text-white/45">
+                      {annotation.label}
+                    </p>
+                    <p
+                      className="mt-1 text-[16px] font-extrabold"
+                      style={{
+                        color: annotation.tone === "safe" ? "var(--landing-teal-400)" : "#d9ad70",
+                      }}
+                    >
+                      {annotation.value}
+                    </p>
+                    <p className="mt-1.5 text-[12px] leading-[1.45] text-white/66">
+                      {annotation.body}
+                    </p>
+                  </div>
                 ))}
               </div>
-              {rows.map((row, ri) => (
-                <div
-                  key={row.name}
-                  className={`grid grid-cols-[180px_repeat(5,1fr)] items-stretch px-2 py-2 ${
-                    ri < rows.length - 1 ? "border-b border-dashed border-[#0c1412]/8" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 pl-3">
-                    <span
-                      className={`grid size-8 shrink-0 place-items-center rounded-full text-[11px] font-medium text-[var(--landing-cream)] ${row.avatar}`}
-                    >
-                      {row.initials}
-                    </span>
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate text-[13.5px] font-medium text-[var(--landing-ink)]">
-                        {row.name}
-                      </span>
-                      <span className="landing-mono mt-0.5 truncate text-[9.5px] uppercase tracking-[0.12em] text-[#8c8273]">
-                        {row.role}
-                      </span>
-                    </div>
-                  </div>
-                  {row.cells.map((cell, ci) => (
-                    <div key={ci} className="px-1.5 py-1">
-                      <ShiftCell cell={cell} />
-                    </div>
-                  ))}
-                </div>
-              ))}
             </div>
-          </div>
-
-          {/* Stats bar */}
-          <div className="grid border-t border-[#0c1412]/10 bg-[#fbf8f1] sm:grid-cols-4">
-            {stats.map((s, i) => (
-              <div
-                key={s.label}
-                className={`p-5 ${i < stats.length - 1 ? "border-b border-r border-dashed border-[#0c1412]/10 sm:border-b-0" : ""}`}
-              >
-                <div className="landing-mono mb-1.5 text-[9.5px] uppercase tracking-[0.16em] text-[#8c8273]">
-                  {s.label}
-                </div>
-                <div
-                  className={`font-serif text-[26px] font-medium leading-none tracking-[-0.02em] ${
-                    s.tone === "ok" ? "text-[var(--landing-ink)]" : "text-[#a8651f]"
-                  }`}
-                >
-                  {s.value}
-                </div>
-                {s.sub && (
-                  <div className="landing-mono mt-1.5 text-[9.5px] uppercase tracking-[0.14em] text-[#8c8273]">
-                    {s.sub}
-                  </div>
-                )}
-              </div>
-            ))}
+            <LandingProductProofSidebar />
           </div>
         </div>
 
-        <p className="mt-3 landing-mono text-[9.5px] uppercase tracking-[0.16em] text-white/35 sm:hidden">
-          ← Scroll to see the full week →
-        </p>
-
-        {/* Things to check panel */}
-        <div
-          className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#10201d] to-[#0b1614]"
-          aria-hidden="true"
+        <p
+          className="landing-mono mt-7 flex flex-wrap items-center gap-[11px] text-[10px] uppercase sm:text-[11px]"
+          style={{ color: "rgba(234,240,247,.4)" }}
         >
-          <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-            <div className="flex items-center gap-2.5">
-              <span className="grid size-8 place-items-center rounded-lg border border-[var(--landing-teal)]/30 bg-[var(--landing-teal)]/10 text-[var(--landing-teal)]">
-                <Sparkles className="size-4" />
-              </span>
-              <span className="text-[15px] font-medium text-[var(--landing-cream)]">
-                Things to check
-              </span>
-            </div>
-            <span className="landing-mono text-[10px] uppercase tracking-[0.18em] text-[var(--landing-cream)]/45">
-              AI
-            </span>
-          </header>
-
-          <ul className="divide-y divide-white/8 px-6">
-            {thingsToCheck.map((t, i) => (
-              <li key={i} className="flex items-start gap-3 py-4 text-[14.5px] leading-6 text-[var(--landing-cream)]/72">
-                <span className={`mt-2 size-2 shrink-0 rounded-full ${t.dot}`} />
-                <span>{t.text}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="m-6 mt-2 rounded-xl border border-[var(--landing-teal)]/25 bg-[var(--landing-teal)]/[0.06] p-5">
-            <p className="landing-mono text-[10px] uppercase tracking-[0.18em] text-[var(--landing-teal)]">
-              Ask · summarise leave impact
-            </p>
-            <p className="mt-3 text-[14.5px] leading-7 text-[var(--landing-cream)]/85">
-              Priya&apos;s two days off drop housekeeping coverage by{" "}
-              <span className="font-semibold text-[var(--landing-teal)]">4%</span> and create{" "}
-              <span className="font-semibold text-[var(--landing-teal)]">2 open shifts</span>.
-              Draft a staff update to review?
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-md bg-[var(--landing-teal)] px-3 py-1.5 text-[12px] font-semibold text-[var(--landing-ink)]">
-                Draft update
-              </span>
-              <span className="inline-flex items-center rounded-md border border-white/15 px-3 py-1.5 text-[12px] font-medium text-[var(--landing-cream)]/80">
-                Not now
-              </span>
-            </div>
-          </div>
-
-          <footer className="border-t border-white/10 px-6 py-3 landing-mono text-[10px] uppercase tracking-[0.18em] text-[var(--landing-cream)]/50">
-            <span className="inline-flex items-center gap-2">
-              <span className="size-1.5 rounded-full bg-[var(--landing-teal)]" />
-              AI suggests · you confirm before any change
-            </span>
-          </footer>
-        </div>
+          <span className="h-px w-6 bg-[var(--landing-teal-400)] opacity-60" />A working view of the
+          week — manager confirms every change before it reaches the floor
+        </p>
       </div>
     </section>
-  );
-}
-
-function ShiftCell({ cell }: { cell: Cell }) {
-  if (cell.kind === "label") {
-    return (
-      <div
-        className={`grid h-full place-items-center rounded-md border px-2 py-3 text-center landing-mono text-[10px] uppercase tracking-[0.14em] ${
-          cell.tone === "leave"
-            ? "border-[#9b8acc]/30 bg-[#9b8acc]/10 text-[#6c5ca8]"
-            : "border-dashed border-[#0c1412]/15 bg-transparent text-[#8c8273]"
-        }`}
-      >
-        {cell.text}
-      </div>
-    );
-  }
-  const cls = toneClass[cell.tone];
-  return (
-    <div
-      className={`flex h-full flex-col justify-between gap-1 rounded-md border px-2.5 py-2 text-left ${cls.replace("text-[#cdeae5]", "text-[#2f6e68]").replace("text-[#e8c590]", "text-[#8e6629]").replace("text-[#c9bce8]", "text-[#6c5ca8]").replace("text-[#b8ccea]", "text-[#3f6aa6]").replace("text-[#c2e0cf]", "text-[#3f7256]").replace("text-[#e8c08c]", "text-[#8e6629]").replace("text-[#e89880]", "text-[#a8451f]")}`}
-    >
-      <span className="landing-mono text-[11px] font-medium tracking-[0.02em]">{cell.time}</span>
-      <span className="landing-mono text-[9.5px] uppercase tracking-[0.1em] opacity-80">
-        {cell.sub}
-      </span>
-    </div>
   );
 }

@@ -1,71 +1,123 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, CirclePlay } from "lucide-react";
-import { landingImages } from "../data/landingContent";
+import landingHeroManagerWriting from "@/assets/landing/landing-hero-manager-writing.png";
+import { managerPreviewUrl } from "../data/landingContent";
+
+const heroCues = ["Draft stays private", "Manager confirms", "Staff see published rota"] as const;
 
 export function LandingHero() {
   return (
     <section
       id="top"
-      className="relative flex min-h-[600px] items-end overflow-hidden bg-[var(--landing-ink)] pb-16 pt-24 text-[var(--landing-cream)] sm:min-h-[760px] sm:pb-24 lg:min-h-[900px]"
+      className="landing-hero relative isolate min-h-[760px] overflow-hidden bg-[var(--landing-ink)] pb-16 pt-24 text-[var(--landing-cream)] sm:pb-20 sm:pt-32 lg:min-h-[900px] lg:pb-24"
     >
       <img
-        src={landingImages.hero}
+        src={landingHeroManagerWriting}
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 size-full object-cover object-[64%_44%] contrast-110 saturate-105"
+        className="landing-hero-photo absolute inset-0 z-0 size-full object-cover object-[68%_48%]"
+        decoding="async"
         fetchPriority="high"
       />
       <div
-        className="absolute inset-0 bg-[radial-gradient(55%_75%_at_22%_58%,rgba(12,20,18,0.72),transparent_65%),radial-gradient(110%_70%_at_82%_32%,rgba(91,162,156,0.12),transparent_55%),linear-gradient(98deg,rgba(12,20,18,0.97)_0%,rgba(12,20,18,0.82)_22%,rgba(12,20,18,0.34)_50%,rgba(12,20,18,0.14)_72%,rgba(12,20,18,0.5)_100%),linear-gradient(180deg,rgba(12,20,18,0.45)_0%,rgba(12,20,18,0.2)_28%,rgba(12,20,18,0.55)_70%,rgba(12,20,18,0.96)_100%)]"
         aria-hidden="true"
+        className="absolute inset-0 z-10 bg-[radial-gradient(42%_50%_at_78%_42%,rgba(205,150,75,0.1),transparent_62%),linear-gradient(98deg,rgba(9,12,11,0.98)_0%,rgba(13,17,15,0.94)_30%,rgba(13,17,15,0.6)_54%,rgba(13,17,15,0.16)_76%,rgba(13,17,15,0.48)_100%),linear-gradient(180deg,rgba(8,11,10,0.28)_0%,rgba(8,11,10,0.08)_38%,rgba(8,11,10,0.78)_100%)]"
       />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--landing-teal)]/35 to-transparent" />
+      <div aria-hidden="true" className="landing-hero-grain absolute inset-0 z-20" />
+      <div className="absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-[rgba(201,149,77,.32)] to-transparent" />
 
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[780px]">
-          <span className="landing-mono inline-flex items-center gap-2 rounded-full border border-[var(--landing-teal)]/35 bg-[var(--landing-teal)]/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--landing-teal)]">
-            <span className="size-1.5 rounded-full bg-[var(--landing-teal)] shadow-[0_0_0_3px_rgba(91,162,156,0.18)]" />
-            Built for hospitality rota teams
-          </span>
-
-          <h1
-            aria-label="The rota, rebuilt."
-            className="mt-9 text-balance font-serif text-[clamp(4rem,9.4vw,9.5rem)] font-light leading-[0.92] tracking-[-0.045em] text-[var(--landing-cream)] [text-shadow:0_1px_40px_rgba(0,0,0,0.4)] before:mb-6 before:block before:h-px before:w-12 before:bg-gradient-to-r before:from-[var(--landing-teal)]/70 before:to-transparent"
-          >
-            The rota,
-            <br />
-            <span className="italic text-[var(--landing-teal)]">rebuilt.</span>
-          </h1>
-
-          <p className="mt-10 max-w-[520px] text-pretty text-[17.5px] leading-7 text-[var(--landing-cream)]/82">
-            The scheduling workspace for hospitality teams — build rotas, catch coverage gaps,
-            review leave and approved hours, and get practical manager support before you publish.
-          </p>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/auth"
-              className="group inline-flex items-center justify-center gap-3 rounded-lg bg-[var(--landing-teal)] px-6 py-3.5 text-sm font-semibold text-[var(--landing-ink)] transition hover:bg-[#6ab3ad]"
+      <div className="relative z-30 mx-auto flex min-h-[calc(100dvh-10rem)] max-w-[1240px] items-center px-6 lg:min-h-[calc(100dvh-12rem)] lg:px-10">
+        <div className="w-full py-10 sm:py-14 lg:py-16">
+          <div className="max-w-[760px]">
+            <p
+              className="landing-hero-step landing-hero-step-eyebrow landing-mono inline-flex border-y py-2 text-[11px] font-medium uppercase text-[#d9ad70]"
+              style={{ borderColor: "rgba(201,149,77,.26)" }}
             >
-              Get early access
-              <ArrowRight
-                className="size-4 transition group-hover:translate-x-0.5"
-                aria-hidden="true"
-              />
-            </Link>
-            <a
-              href="#how-it-works"
-              className="inline-flex items-center justify-center gap-3 rounded-lg border border-[var(--landing-cream)]/20 bg-black/10 px-6 py-3.5 text-sm font-semibold text-[var(--landing-cream)] backdrop-blur-sm transition hover:border-[var(--landing-cream)]/35 hover:bg-white/10"
-            >
-              <CirclePlay className="size-4" aria-hidden="true" />
-              Preview the manager app
-            </a>
-          </div>
+              FOR THE PERSON HOLDING THE WEEK TOGETHER BEFORE SERVICE
+            </p>
 
-          <div className="landing-mono mt-12 flex max-w-[680px] flex-wrap gap-x-8 gap-y-3 border-t border-white/10 pt-6 text-[10px] uppercase tracking-[0.18em] text-[var(--landing-cream)]/50">
-            <span>Built for hospitality teams</span>
-            <span>Scheduling first</span>
-            <span>Made in Scotland</span>
+            <h1
+              className="mt-8 text-balance font-sans font-extrabold text-[var(--landing-cream)]"
+              style={{
+                fontSize: "clamp(64px,8.4vw,132px)",
+                lineHeight: "0.92",
+                letterSpacing: "0",
+                textShadow: "0 4px 34px rgba(8,18,32,.6)",
+              }}
+            >
+              <span className="landing-hero-step landing-hero-step-title block">The rota,</span>
+              <span className="landing-hero-step landing-hero-step-rebuilt landing-it mt-2 block text-[#d9ad70] sm:mt-3">
+                rebuilt.
+              </span>
+            </h1>
+
+            <p className="landing-hero-step landing-hero-step-copy mt-8 max-w-[560px] text-pretty text-[18px] font-medium leading-[1.62] text-[var(--landing-cream-dim)]">
+              Scheduling-first hospitality software for building the week, checking pressure, and
+              publishing only when the manager is ready.
+            </p>
+
+            <div className="landing-hero-step landing-hero-step-actions mt-9 flex flex-wrap gap-4">
+              <a
+                href="#pricing"
+                className="group inline-flex items-center gap-2.5 rounded-xl bg-[#c9954d] px-6 py-3.5 text-[14px] font-bold text-[#111714] shadow-[0_1px_0_rgba(255,255,255,.32)_inset,0_20px_40px_-16px_rgba(201,149,77,.45)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#d6a865] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5]"
+              >
+                Get Pro early access
+                <svg
+                  className="size-4 transition-transform duration-200 group-hover:translate-x-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12h14M13 5l7 7-7 7" />
+                </svg>
+              </a>
+              <a
+                href={managerPreviewUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2.5 rounded-xl border px-6 py-3.5 text-[14px] font-semibold text-[var(--landing-cream)] backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5]"
+                style={{
+                  borderColor: "rgba(255,255,255,.24)",
+                  background: "rgba(255,255,255,.05)",
+                }}
+              >
+                <svg
+                  className="size-4 text-[#d9ad70]"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M10 8l6 4-6 4z" fill="currentColor" stroke="none" />
+                </svg>
+                Preview manager app
+              </a>
+            </div>
+
+            <div
+              className="landing-hero-step landing-hero-step-cues mt-10 flex max-w-[620px] flex-wrap gap-x-6 gap-y-3 border-t pt-6 text-[12px] text-[var(--landing-cream-dim)]"
+              style={{ borderColor: "rgba(243,238,229,.1)" }}
+            >
+              {heroCues.map((cue) => (
+                <span key={cue} className="inline-flex items-center gap-2">
+                  <span className="grid size-5 place-items-center rounded-full border border-[#c9954d]/70 text-[10px] text-[#d9ad70]">
+                    <svg
+                      className="size-3"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <path d="M3.5 8.2 6.7 11.4 12.7 4.8" />
+                    </svg>
+                  </span>
+                  {cue}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>

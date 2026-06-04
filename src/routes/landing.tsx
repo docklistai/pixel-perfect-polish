@@ -1,20 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  LandingAdminLayer,
+  LandingAI,
   LandingBecause,
-  LandingControlRoom,
   LandingFinalCTA,
   LandingFooter,
   LandingHero,
-  LandingLogoStrip,
-  LandingManagerAI,
-  LandingMoments,
   LandingNavbar,
   LandingPricing,
   LandingProductProof,
-  LandingThreeSteps,
-  LandingTrustStrip,
-  LandingWalkthrough,
+  LandingWeeklyRhythm,
+  LandingWeekBeforeService,
 } from "@/features/landing";
 
 export const Route = createFileRoute("/landing")({
@@ -24,7 +19,7 @@ export const Route = createFileRoute("/landing")({
       {
         name: "description",
         content:
-          "The scheduling workspace for hospitality teams — build rotas, catch coverage gaps, review leave and approved hours, and get practical manager support before you publish.",
+          "DocklistAI is the rota-first workspace for hospitality teams. Build the week, check coverage, handle staff changes, and publish a rota your team can trust.",
       },
     ],
   }),
@@ -33,24 +28,21 @@ export const Route = createFileRoute("/landing")({
 
 function LandingPage() {
   return (
-    <div className="landing-page min-h-dvh bg-[var(--landing-ink)] text-[var(--landing-ink)]">
+    <div className="landing-page min-h-dvh text-[var(--landing-ink)]">
       <LandingNavbar />
       <main id="main-content" className="!p-0">
         <LandingHero />
-        <LandingTrustStrip />
-        <LandingLogoStrip />
-        <LandingThreeSteps />
-        <LandingControlRoom />
+        <LandingWeeklyRhythm />
         <LandingProductProof />
-        <LandingWalkthrough />
+        <LandingWeekBeforeService />
         <LandingBecause />
-        <LandingAdminLayer />
-        <LandingManagerAI />
-        <LandingMoments />
+        <LandingAI />
         <LandingPricing />
         <LandingFinalCTA />
       </main>
-      <LandingFooter />
+      <div>
+        <LandingFooter />
+      </div>
     </div>
   );
 }
