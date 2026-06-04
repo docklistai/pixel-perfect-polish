@@ -35,99 +35,105 @@ export function LandingWeeklyRhythm() {
   return (
     <section
       id="rhythm"
-      className="relative scroll-mt-24 overflow-hidden border-b py-10 text-[var(--landing-ink)] sm:py-12 lg:py-14"
+      className="relative scroll-mt-24 overflow-hidden border-b py-16 text-[var(--landing-ink)] sm:py-20 lg:py-24"
       style={{ background: "var(--landing-paper)", borderColor: "var(--landing-border)" }}
     >
+      {/* Background subtleties */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-36"
+        className="pointer-events-none absolute inset-x-0 top-0 h-64"
         style={{
-          background: "linear-gradient(180deg,rgba(201,149,77,.12),rgba(246,241,232,0))",
+          background: "linear-gradient(180deg,rgba(17,23,20,.04),rgba(246,241,232,0))",
         }}
       />
       <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
         <div className="mx-auto max-w-[1040px]">
-          <div className="mx-auto max-w-[760px] text-center">
-            <span className="landing-section-eyebrow">Weekly rhythm</span>
-            <h2 className="mt-3 text-balance text-[clamp(32px,4vw,48px)] font-extrabold leading-[1.04] text-[var(--landing-ink)]">
-              Build the week. Check the pressure. Publish with{" "}
-              <span className="landing-it">confidence.</span>
-            </h2>
+          <div className="mb-12 flex flex-col items-end justify-between gap-6 border-b border-[var(--landing-border)] pb-8 text-center sm:flex-row sm:text-left">
+            <div className="max-w-[500px]">
+              <span className="landing-section-eyebrow">Weekly rhythm</span>
+              <h2 className="mt-4 text-balance text-[clamp(28px,3vw,40px)] font-extrabold leading-[1.08] text-[var(--landing-ink)]">
+                Build the week. Check the pressure. Publish with{" "}
+                <span className="landing-it">confidence.</span>
+              </h2>
+            </div>
+            <p className="hidden max-w-[340px] text-pretty text-[14.5px] leading-[1.6] text-[var(--landing-ink-600)] sm:block">
+              An elegant operational sequence ensuring the team only sees the rota when it is
+              perfectly ready.
+            </p>
           </div>
 
-          <div className="relative mt-7 sm:mt-8">
+          <div className="relative">
+            {/* The horizontal brass rail */}
             <div
               aria-hidden="true"
-              className="absolute left-[8%] right-[8%] top-[26px] hidden h-px lg:block"
+              className="absolute left-6 right-6 top-[3.25rem] hidden h-0.5 rounded-full lg:block"
               style={{
                 background:
-                  "linear-gradient(90deg,rgba(201,149,77,.2),rgba(14,165,162,.42),rgba(201,149,77,.2))",
+                  "linear-gradient(90deg, transparent, rgba(201,149,77,.3) 15%, rgba(201,149,77,.3) 85%, transparent)",
               }}
             />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
               {rhythmSteps.map((step) => {
                 const Icon = step.icon;
                 return (
                   <article
                     key={step.title}
-                    className="landing-rhythm-card relative min-h-[150px] rounded-[14px] border p-4 transition duration-200 hover:-translate-y-0.5 focus-within:-translate-y-0.5 sm:p-5"
-                    style={{
-                      background: step.active
-                        ? "linear-gradient(145deg,#111714,#17201c 62%,#211a12)"
-                        : "rgba(255,255,255,.72)",
-                      borderColor: step.active ? "rgba(201,149,77,.62)" : "var(--landing-border)",
-                      boxShadow: step.active
-                        ? "0 24px 54px -30px rgba(17,23,20,.8)"
-                        : "0 16px 38px -34px rgba(17,23,20,.45)",
-                      color: step.active ? "var(--landing-cream)" : "var(--landing-ink)",
-                    }}
+                    className="group relative flex flex-col text-left transition duration-200"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <span
-                        className="landing-mono text-[22px] leading-none"
+                    <div className="mb-6 flex items-center lg:justify-center">
+                      <div
+                        className="relative z-10 grid size-14 shrink-0 place-items-center rounded-2xl border transition-transform duration-300 motion-safe:group-hover:-translate-y-1"
                         style={{
-                          color: step.active ? "#d9ad70" : "rgba(74,84,104,.32)",
-                        }}
-                      >
-                        {step.number}
-                      </span>
-                      <span
-                        className="grid size-9 place-items-center rounded-xl border"
-                        style={{
-                          background: step.active ? "rgba(217,173,112,.12)" : "#fff",
+                          background: step.active
+                            ? "linear-gradient(145deg,#111714,#1a221e)"
+                            : "#fff",
                           borderColor: step.active
-                            ? "rgba(217,173,112,.32)"
-                            : "var(--landing-border-faint)",
-                          color: step.active ? "#d9ad70" : "var(--landing-teal-deep)",
+                            ? "rgba(201,149,77,.4)"
+                            : "var(--landing-border)",
+                          boxShadow: step.active
+                            ? "0 12px 24px -10px rgba(17,23,20,.6)"
+                            : "0 4px 12px -8px rgba(17,23,20,.1)",
+                          color: step.active ? "#d9ad70" : "var(--landing-ink-400)",
                         }}
                       >
-                        <Icon className="size-4.5" aria-hidden="true" />
-                      </span>
+                        <Icon className="size-5" aria-hidden="true" />
+                        {step.active && (
+                          <div className="absolute -bottom-1 -right-1 grid size-4.5 place-items-center rounded-full border-2 border-[var(--landing-paper)] bg-[var(--landing-teal-deep)] text-white">
+                            <div className="size-1.5 rounded-full bg-white motion-safe:animate-pulse" />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <h3 className="mt-5 text-[17px] font-extrabold">{step.title}</h3>
-                    <p
-                      className="mt-2.5 text-pretty text-[13px] leading-[1.5]"
+
+                    <div
+                      className="flex w-full flex-1 flex-col rounded-[20px] border p-5 transition-all duration-300 sm:p-6"
                       style={{
-                        color: step.active ? "var(--landing-cream-dim)" : "var(--landing-ink-600)",
+                        background: step.active ? "white" : "rgba(255,255,255,.45)",
+                        borderColor: step.active ? "var(--landing-border)" : "transparent",
+                        boxShadow: step.active ? "0 12px 30px -15px rgba(17,23,20,.08)" : "none",
                       }}
                     >
-                      {step.body}
-                    </p>
+                      <span
+                        className="landing-mono mb-3 block text-[10px] font-bold uppercase tracking-wider"
+                        style={{
+                          color: step.active
+                            ? "var(--landing-amber-700)"
+                            : "var(--landing-ink-400)",
+                        }}
+                      >
+                        Step {step.number}
+                      </span>
+                      <h3 className="text-[18px] font-extrabold text-[var(--landing-ink-900)]">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2 text-pretty text-[14px] leading-[1.55] text-[var(--landing-ink-600)]">
+                        {step.body}
+                      </p>
+                    </div>
                   </article>
                 );
               })}
-            </div>
-            <div
-              className="mt-5 flex items-center justify-center gap-2 lg:hidden"
-              aria-hidden="true"
-            >
-              {rhythmSteps.map((step) => (
-                <span
-                  key={step.title}
-                  className="h-1.5 w-6 rounded-full"
-                  style={{ background: step.active ? "#c9954d" : "var(--landing-border)" }}
-                />
-              ))}
             </div>
           </div>
         </div>
