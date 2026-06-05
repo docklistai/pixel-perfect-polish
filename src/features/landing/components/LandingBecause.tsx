@@ -140,8 +140,16 @@ function SupportModule({
   const Icon = item.icon;
   return (
     <div
-      className={`group relative overflow-hidden rounded-[20px] border border-[var(--landing-border)] bg-white/80 p-5 text-left backdrop-blur-md transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-[0_12px_30px_-15px_rgba(17,23,20,.1)] ${alignClass}`}
+      className={`group relative overflow-hidden rounded-[20px] border border-[var(--landing-border)] bg-white/85 p-5 text-left shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_8px_22px_-18px_rgba(17,23,20,0.18)] backdrop-blur-md transition-all duration-300 focus-within:-translate-y-1 focus-within:shadow-xl motion-safe:hover:-translate-y-1 motion-safe:hover:border-[var(--landing-amber-100)] motion-safe:hover:shadow-[0_18px_40px_-20px_rgba(201,149,77,0.28),0_1px_0_rgba(255,255,255,0.9)_inset] ${alignClass}`}
     >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, rgba(201,149,77,0.55), transparent)",
+        }}
+      />
       <div
         className={`mb-4 flex size-10 items-center justify-center rounded-xl border border-[var(--landing-border-faint)] bg-[var(--landing-paper)] text-[var(--landing-teal-deep)] transition-colors group-hover:bg-[var(--landing-teal-50)] group-hover:text-[var(--landing-teal)] ${iconClass}`}
       >
