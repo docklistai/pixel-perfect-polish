@@ -117,9 +117,15 @@ export function LandingWeeklyRhythm() {
                     <div
                       className="flex w-full flex-1 flex-col rounded-[20px] border p-5 transition-all duration-300 sm:p-6"
                       style={{
-                        background: step.active ? "white" : "rgba(255,255,255,.45)",
-                        borderColor: step.active ? "var(--landing-border)" : "transparent",
-                        boxShadow: step.active ? "0 12px 30px -15px rgba(17,23,20,.08)" : "none",
+                        background: step.active
+                          ? "linear-gradient(180deg,#ffffff,#fbf6ec)"
+                          : "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.7))",
+                        borderColor: step.active
+                          ? "var(--landing-amber-100)"
+                          : "var(--landing-border-faint)",
+                        boxShadow: step.active
+                          ? "0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(255,255,255,0.5) inset, 0 22px 44px -22px rgba(201,149,77,0.32), 0 4px 10px -4px rgba(17,23,20,0.06)"
+                          : "0 1px 0 rgba(255,255,255,0.85) inset, 0 8px 22px -18px rgba(17,23,20,0.12)",
                       }}
                     >
                       <span
