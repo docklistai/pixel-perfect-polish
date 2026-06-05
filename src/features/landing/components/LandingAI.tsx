@@ -71,16 +71,7 @@ export function LandingAI() {
 
           {/* AI UI Artifact */}
           <div className="relative mx-auto w-full max-w-[500px]">
-            <div
-              className="relative z-10 overflow-hidden rounded-[24px] border p-1"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))",
-                borderColor: "rgba(255,255,255,0.1)",
-                boxShadow: "0 30px 60px -20px rgba(0,0,0,0.9)",
-                backdropFilter: "blur(20px)",
-              }}
-            >
+            <div className="landing-surface-dark landing-surface-dark-brass relative z-10 overflow-hidden rounded-[24px] p-1">
               <div className="rounded-[20px] border border-white/5 bg-[#101513]/90 px-6 py-6">
                 <div className="flex items-center justify-between border-b border-white/10 pb-5">
                   <div className="flex items-center gap-3">
