@@ -133,11 +133,7 @@ export function LandingPricing() {
                 {supportPlans.map((plan) => (
                   <article
                     key={plan.name}
-                    className="rounded-[16px] border bg-white/88 p-4 transition duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-lg sm:p-5"
-                    style={{
-                      borderColor: "var(--landing-border)",
-                      boxShadow: "0 18px 42px -36px rgba(17,23,20,.42)",
-                    }}
+                    className="landing-surface-light landing-surface-light-hover p-4 sm:p-5"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
