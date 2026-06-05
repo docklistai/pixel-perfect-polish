@@ -22,6 +22,14 @@ export function LandingHero() {
         className="absolute inset-0 z-10 bg-[radial-gradient(42%_50%_at_78%_42%,rgba(205,150,75,0.1),transparent_62%),linear-gradient(98deg,rgba(9,12,11,0.98)_0%,rgba(13,17,15,0.94)_30%,rgba(13,17,15,0.6)_54%,rgba(13,17,15,0.16)_76%,rgba(13,17,15,0.48)_100%),linear-gradient(180deg,rgba(8,11,10,0.28)_0%,rgba(8,11,10,0.08)_38%,rgba(8,11,10,0.78)_100%)]"
       />
       <div aria-hidden="true" className="landing-hero-grain absolute inset-0 z-20" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-40"
+        style={{
+          background:
+            "linear-gradient(180deg, transparent 0%, rgba(17,23,20,0) 30%, rgba(246,241,232,0.04) 70%, rgba(246,241,232,0.18) 100%)",
+        }}
+      />
       <div className="absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-[rgba(201,149,77,.32)] to-transparent" />
 
       <div className="relative z-30 mx-auto flex min-h-[calc(100dvh-10rem)] max-w-[1240px] items-center px-6 lg:min-h-[calc(100dvh-12rem)] lg:px-10">
