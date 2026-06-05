@@ -107,13 +107,17 @@ export function LandingPressureTimeline() {
                   ? isReady
                     ? "linear-gradient(135deg,#ecfaf9,#ffffff)"
                     : "linear-gradient(135deg,#fff7e9,#ffffff)"
-                  : "rgba(255,255,255,.78)",
+                  : "linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.72))",
                 borderColor: isActive
                   ? isReady
                     ? "rgba(14,165,162,.42)"
                     : "rgba(201,149,77,.5)"
                   : "var(--landing-border-faint)",
-                boxShadow: isActive ? "0 18px 42px -30px rgba(17,23,20,.58)" : "none",
+                boxShadow: isActive
+                  ? isReady
+                    ? "0 1px 0 rgba(255,255,255,0.9) inset, 0 22px 44px -24px rgba(14,165,162,0.3)"
+                    : "0 1px 0 rgba(255,255,255,0.9) inset, 0 22px 44px -24px rgba(201,149,77,0.32)"
+                  : "0 1px 0 rgba(255,255,255,0.85) inset, 0 4px 12px -10px rgba(17,23,20,0.08)",
               }}
             >
               <span className="relative z-[1] flex gap-3">
