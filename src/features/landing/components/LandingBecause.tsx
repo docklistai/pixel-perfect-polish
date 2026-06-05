@@ -37,6 +37,14 @@ export function LandingBecause() {
           WebkitMaskImage: "radial-gradient(ellipse at center, black 20%, transparent 70%)",
         }}
       />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(38% 42% at 22% 28%, rgba(14,122,120,0.10), transparent 70%), radial-gradient(36% 44% at 80% 76%, rgba(201,149,77,0.14), transparent 72%)",
+        }}
+      />
       <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
         <div className="mx-auto mb-16 max-w-[640px] text-center">
           <span className="landing-section-eyebrow">Around the rota</span>
