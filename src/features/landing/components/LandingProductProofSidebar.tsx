@@ -40,13 +40,7 @@ export function LandingProductProofSidebar() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-col">
       {/* Publish readiness panel */}
-      <div
-        className="rounded-xl border border-white/10 p-4"
-        style={{
-          background: "var(--landing-ink-raised)",
-          boxShadow: "0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
-        }}
-      >
+      <div className="landing-surface-dark landing-surface-dark-brass p-4">
         <div
           className="flex items-center gap-2 border-b pb-3"
           style={{ borderColor: "rgba(255,255,255,.08)" }}
@@ -84,13 +78,7 @@ export function LandingProductProofSidebar() {
       </div>
 
       {/* AI Things to check panel */}
-      <div
-        className="rounded-xl border border-white/10 p-4"
-        style={{
-          background: "var(--landing-ink-raised)",
-          boxShadow: "0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
-        }}
-      >
+      <div className="landing-surface-dark landing-surface-dark-brass p-4">
         <div
           className="flex items-center gap-2 border-b pb-3"
           style={{ borderColor: "rgba(255,255,255,.08)" }}
