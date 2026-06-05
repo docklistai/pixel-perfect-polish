@@ -43,7 +43,15 @@ export function LandingWeeklyRhythm() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-64"
         style={{
-          background: "linear-gradient(180deg,rgba(17,23,20,.04),rgba(246,241,232,0))",
+          background: "linear-gradient(180deg,rgba(17,23,20,.06),rgba(246,241,232,0))",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-40"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(246,241,232,0) 0%, rgba(17,23,20,0.04) 60%, rgba(17,23,20,0.12) 100%)",
         }}
       />
       <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
