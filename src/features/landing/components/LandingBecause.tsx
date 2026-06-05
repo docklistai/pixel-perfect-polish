@@ -146,8 +146,7 @@ function SupportModule({
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(201,149,77,0.55), transparent)",
+          background: "linear-gradient(90deg, transparent, rgba(201,149,77,0.55), transparent)",
         }}
       />
       <div

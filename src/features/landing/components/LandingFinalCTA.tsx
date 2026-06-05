@@ -32,8 +32,7 @@ export function LandingFinalCTA() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay"
         style={{
-          backgroundImage:
-            "radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1.2px)",
+          backgroundImage: "radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1.2px)",
           backgroundSize: "3px 3px",
         }}
       />
