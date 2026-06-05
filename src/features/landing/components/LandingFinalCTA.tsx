@@ -15,21 +15,40 @@ export function LandingFinalCTA() {
         loading="lazy"
         decoding="async"
       />
-      {/* Bg gradients */}
+      {/* Bg gradients — cinematic vignette */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background: `radial-gradient(70% 60% at 86% 30%,rgba(14,165,162,.14),transparent 60%),
-                     linear-gradient(90deg,rgba(17,23,20,.82),rgba(17,23,20,.38) 54%,rgba(17,23,20,.74)),
-                     radial-gradient(50% 70% at 6% 100%,rgba(201,149,77,.18),transparent 70%)`,
+                     linear-gradient(90deg,rgba(17,23,20,.88),rgba(17,23,20,.42) 54%,rgba(17,23,20,.78)),
+                     radial-gradient(50% 70% at 6% 100%,rgba(201,149,77,.22),transparent 70%),
+                     radial-gradient(120% 90% at 50% 110%, rgba(8,11,10,0.85), transparent 60%),
+                     radial-gradient(120% 90% at 50% -10%, rgba(8,11,10,0.7), transparent 60%)`,
+        }}
+      />
+      {/* Grain */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1.2px)",
+          backgroundSize: "3px 3px",
         }}
       />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
-          background: "linear-gradient(to right,transparent,rgba(201,149,77,.42) 50%,transparent)",
+          background: "linear-gradient(to right,transparent,rgba(201,149,77,.5) 50%,transparent)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+        style={{
+          background: "linear-gradient(to right,transparent,rgba(201,149,77,.22) 50%,transparent)",
         }}
       />
 
