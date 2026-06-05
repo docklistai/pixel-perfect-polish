@@ -1,4 +1,5 @@
 import { LandingProductProofRota } from "./LandingProductProofRota";
+import { LandingProductProofRotaMobile } from "./LandingProductProofRotaMobile";
 import { LandingProductProofSidebar } from "./LandingProductProofSidebar";
 import { managerPreviewUrl } from "../data/landingContent";
 
@@ -147,9 +148,10 @@ export function LandingProductProof() {
                 </svg>
               </a>
             </aside>
-            <div className="relative">
+            <div className="relative flex flex-col gap-3">
               <LandingProductProofRota />
-              <div className="product-annotations pointer-events-none mt-3 grid gap-2 sm:grid-cols-3">
+              <LandingProductProofRotaMobile />
+              <div className="product-annotations pointer-events-none grid gap-2 sm:mt-0 sm:grid-cols-3">
                 {proofAnnotations.map((annotation) => (
                   <div
                     key={annotation.label}
@@ -163,20 +165,22 @@ export function LandingProductProof() {
                           : "rgba(201,149,77,.36)",
                     }}
                   >
-                    <p className="landing-mono text-[9.5px] uppercase text-white/45">
+                    <p className="landing-mono text-[10px] uppercase text-white/50 sm:text-[9.5px] sm:text-white/45">
                       {annotation.label}
                     </p>
-                    <p
-                      className="mt-1 text-[16px] font-extrabold"
-                      style={{
-                        color: annotation.tone === "safe" ? "var(--landing-teal-400)" : "#d9ad70",
-                      }}
-                    >
-                      {annotation.value}
-                    </p>
-                    <p className="mt-1.5 text-[12px] leading-[1.45] text-white/66">
-                      {annotation.body}
-                    </p>
+                    <div className="mt-1 flex items-baseline justify-between gap-3 sm:block sm:mt-1">
+                      <p
+                        className="text-[18px] font-extrabold sm:text-[16px]"
+                        style={{
+                          color: annotation.tone === "safe" ? "var(--landing-teal-400)" : "#d9ad70",
+                        }}
+                      >
+                        {annotation.value}
+                      </p>
+                      <p className="text-right text-[12.5px] leading-[1.4] text-white/70 sm:mt-1.5 sm:text-left sm:text-[12px] sm:leading-[1.45] sm:text-white/66">
+                        {annotation.body}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>

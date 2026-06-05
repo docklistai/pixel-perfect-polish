@@ -56,7 +56,7 @@ const days = ["Tue 13", "Wed 14", "Thu 15", "Fri 16"];
 export function LandingProductProofRota() {
   return (
     <div
-      className="landing-product-rota relative z-[1] flex flex-col overflow-hidden rounded-xl border border-white/10"
+      className="landing-product-rota relative z-[1] hidden sm:flex flex-col overflow-hidden rounded-xl border border-white/10"
       style={{
         background: "linear-gradient(180deg,#111a17,#0c1210)",
         color: "var(--landing-cream)",
@@ -93,7 +93,7 @@ export function LandingProductProofRota() {
             borderColor: "var(--landing-amber-100)",
           }}
         >
-          <span className="size-[6px] rounded-full bg-[var(--landing-amber)] animate-pulse" />
+          <span className="size-[6px] rounded-full bg-[var(--landing-amber)] motion-safe:animate-pulse" />
           Draft changes private
         </span>
       </div>
