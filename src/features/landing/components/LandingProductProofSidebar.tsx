@@ -44,7 +44,7 @@ export function LandingProductProofSidebar() {
         className="rounded-xl border border-white/10 p-4"
         style={{
           background: "var(--landing-ink-raised)",
-          boxShadow: "0 20px 40px rgba(0,0,0,.4)",
+          boxShadow: "0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
         }}
       >
         <div
@@ -88,7 +88,7 @@ export function LandingProductProofSidebar() {
         className="rounded-xl border border-white/10 p-4"
         style={{
           background: "var(--landing-ink-raised)",
-          boxShadow: "0 20px 40px rgba(0,0,0,.4)",
+          boxShadow: "0 30px 60px -15px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)",
         }}
       >
         <div

@@ -44,7 +44,7 @@ export function LandingProductProofRotaMobile() {
       style={{
         background: "linear-gradient(180deg,#111a17,#0c1210)",
         color: "var(--landing-cream)",
-        boxShadow: "0 20px 50px rgba(0,0,0,.5)",
+        boxShadow: "0 40px 80px -20px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)",
       }}
     >
       <div
@@ -74,11 +74,14 @@ export function LandingProductProofRotaMobile() {
 
       <div className="flex flex-col divide-y divide-white/5">
         {mobileShifts.map((shift, idx) => (
-          <div key={idx} className="flex items-start gap-3.5 px-4 py-4">
+          <div
+            key={idx}
+            className="flex items-start gap-3.5 px-4 py-4 transition-colors hover:bg-white/[0.02]"
+          >
             <span
               className={`mt-0.5 grid size-10 shrink-0 place-items-center rounded-full text-[13px] font-extrabold shadow-sm ${
                 shift.status === "open"
-                  ? "border border-dashed border-[#d9ad70]/60 bg-transparent text-[#d9ad70]"
+                  ? "border border-dashed border-[#d9ad70]/80 bg-[#d9ad70]/10 text-[#d9ad70]"
                   : "text-white"
               }`}
               style={shift.status !== "open" ? { background: shift.color } : {}}

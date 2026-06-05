@@ -60,7 +60,7 @@ export function LandingProductProofRota() {
       style={{
         background: "linear-gradient(180deg,#111a17,#0c1210)",
         color: "var(--landing-cream)",
-        boxShadow: "0 20px 50px rgba(0,0,0,.5)",
+        boxShadow: "0 40px 80px -20px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.06)",
       }}
     >
       {/* Rota Header bar inside mockup */}
@@ -164,7 +164,7 @@ export function LandingProductProofRota() {
               </React.Fragment>
             ))}
             <div className="mrn">
-              <span className="grid size-[24px] shrink-0 place-items-center rounded-full border border-dashed border-[#d9ad70]/60 text-[10px] font-bold text-[#d9ad70]">
+              <span className="grid size-[24px] shrink-0 place-items-center rounded-full border border-dashed border-[#d9ad70]/80 bg-[#d9ad70]/10 text-[10px] font-bold text-[#d9ad70]">
                 +
               </span>
               <div className="truncate">
