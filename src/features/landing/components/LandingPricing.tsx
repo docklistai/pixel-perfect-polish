@@ -135,15 +135,27 @@ export function LandingPricing() {
                 {supportPlans.map((plan) => (
                   <article
                     key={plan.name}
-                    className="landing-surface-light landing-surface-light-hover p-4 sm:p-5"
+                    className="landing-surface-light landing-surface-light-hover group relative overflow-hidden p-5 sm:p-6"
                   >
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-5 top-0 h-px"
+                      style={{
+                        background:
+                          "linear-gradient(90deg,transparent,rgba(11,122,120,.35),transparent)",
+                      }}
+                    />
                     <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="landing-mono text-[10px] uppercase text-[var(--landing-ink-400)]">
+                      <div className="min-w-0">
+                        <p className="landing-mono inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[var(--landing-ink-500)]">
+                          <span className="size-1 rounded-full bg-[var(--landing-teal)]" />
                           {plan.name}
                         </p>
-                        <p className="mt-2 text-[32px] font-extrabold leading-none text-[var(--landing-ink-900)]">
+                        <p className="mt-2.5 text-[34px] font-extrabold leading-none text-[var(--landing-ink-900)]">
                           {plan.price}
+                          <span className="ml-1.5 text-[12px] font-semibold text-[var(--landing-ink-400)]">
+                            /mo
+                          </span>
                         </p>
                         <p className="mt-2 text-[12.5px] text-[var(--landing-ink-500)]">
                           {plan.meta}
@@ -151,14 +163,28 @@ export function LandingPricing() {
                       </div>
                       <a
                         href="/auth"
-                        className="shrink-0 rounded-full border border-[var(--landing-border)] px-3.5 py-2 text-[12px] font-bold text-[var(--landing-ink-900)] transition hover:bg-[var(--landing-paper)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--landing-teal)]"
+                        className="shrink-0 rounded-full border border-[var(--landing-border)] bg-white px-3.5 py-2 text-[12px] font-bold text-[var(--landing-ink-900)] shadow-[0_1px_0_rgba(255,255,255,.9)_inset,0_6px_14px_-10px_rgba(17,23,20,.18)] transition hover:-translate-y-0.5 hover:border-[var(--landing-teal)] hover:text-[var(--landing-teal-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--landing-teal)]"
                       >
                         {plan.cta}
                       </a>
                     </div>
-                    <p className="mt-4 max-w-[420px] text-[13px] leading-[1.55] text-[var(--landing-ink-600)]">
+                    <p className="mt-4 max-w-[440px] text-[13px] leading-[1.55] text-[var(--landing-ink-600)]">
                       {plan.body}
                     </p>
+                    <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-[var(--landing-border-faint)] pt-3">
+                      {plan.highlights.map((h) => (
+                        <li
+                          key={h}
+                          className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-[var(--landing-ink-600)]"
+                        >
+                          <Check
+                            className="size-3 text-[var(--landing-teal-deep)]"
+                            aria-hidden="true"
+                          />
+                          {h}
+                        </li>
+                      ))}
+                    </ul>
                   </article>
                 ))}
               </div>
