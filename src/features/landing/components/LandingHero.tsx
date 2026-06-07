@@ -32,6 +32,31 @@ export function LandingHero() {
       />
       <div className="absolute inset-x-0 bottom-0 z-20 h-px bg-gradient-to-r from-transparent via-[rgba(201,149,77,.32)] to-transparent" />
 
+      {/* Scroll cue */}
+      <a
+        href="#rhythm"
+        aria-label="Scroll to the weekly rhythm"
+        className="landing-mono group absolute bottom-6 right-6 z-30 hidden items-center gap-2 text-[10.5px] font-medium uppercase tracking-[0.16em] text-[var(--landing-cream-dim)] transition-colors hover:text-[#d9ad70] lg:inline-flex"
+      >
+        <span>Scroll</span>
+        <span
+          aria-hidden="true"
+          className="relative grid size-7 place-items-center rounded-full border"
+          style={{ borderColor: "rgba(201,149,77,.35)" }}
+        >
+          <svg
+            className="size-3 text-[#d9ad70] motion-safe:animate-bounce"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            aria-hidden="true"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+      </a>
+
       <div className="relative z-30 mx-auto flex min-h-[calc(100dvh-10rem)] max-w-[1240px] items-center px-6 lg:min-h-[calc(100dvh-12rem)] lg:px-10">
         <div className="w-full py-10 sm:py-14 lg:py-16">
           <div className="max-w-[760px]">
