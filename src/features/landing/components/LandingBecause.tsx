@@ -77,21 +77,52 @@ export function LandingBecause() {
 
               {/* The Rota Core */}
               <div
-                className="relative z-10 mx-auto hidden aspect-square w-full flex-col items-center justify-center rounded-[24px] border border-[var(--landing-amber-100)] p-6 transition-transform duration-500 lg:flex motion-safe:hover:scale-105"
+                className="relative z-10 mx-auto hidden aspect-square w-full flex-col items-center justify-center rounded-[24px] border border-[var(--landing-amber-100)] p-6 transition-transform duration-500 lg:flex motion-safe:hover:scale-[1.04]"
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7))",
-                  boxShadow: "0 24px 50px -20px rgba(201,149,77,0.2), inset 0 0 0 1px white",
+                    "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,250,240,0.78))",
+                  boxShadow:
+                    "0 30px 60px -22px rgba(201,149,77,0.28), 0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(255,255,255,0.55) inset",
                   backdropFilter: "blur(10px)",
                 }}
               >
-                <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-[var(--landing-teal-deep)] text-white shadow-xl">
-                  <CalendarCheck className="size-6" strokeWidth={2} aria-hidden="true" />
+                {/* Concentric brass orbits */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-3 rounded-[20px] border"
+                  style={{ borderColor: "rgba(201,149,77,.16)" }}
+                />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-7 rounded-full border"
+                  style={{ borderColor: "rgba(11,122,120,.12)" }}
+                />
+                {/* Orbiting dot */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-7 motion-safe:animate-[spin_18s_linear_infinite]"
+                >
+                  <span
+                    className="absolute -top-1 left-1/2 size-2 -translate-x-1/2 rounded-full bg-[#c9954d]"
+                    style={{ boxShadow: "0 0 12px rgba(201,149,77,.7)" }}
+                  />
+                </span>
+
+                <div
+                  className="relative mb-4 grid size-14 place-items-center rounded-2xl text-white"
+                  style={{
+                    background:
+                      "linear-gradient(145deg, var(--landing-teal), var(--landing-teal-deep))",
+                    boxShadow:
+                      "0 14px 28px -10px rgba(11,122,120,.55), 0 0 0 4px rgba(11,122,120,.08), 0 1px 0 rgba(255,255,255,.18) inset",
+                  }}
+                >
+                  <CalendarCheck className="size-6" strokeWidth={2.2} aria-hidden="true" />
                 </div>
-                <h3 className="text-center text-[17px] font-bold text-[var(--landing-ink-900)]">
+                <h3 className="relative text-center text-[17px] font-extrabold text-[var(--landing-ink-900)]">
                   The Rota
                 </h3>
-                <p className="mt-1 text-center text-[11px] font-bold uppercase tracking-widest text-[var(--landing-amber-700)]">
+                <p className="landing-mono relative mt-1.5 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--landing-amber-700)]">
                   Core Engine
                 </p>
               </div>
