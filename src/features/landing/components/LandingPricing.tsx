@@ -15,6 +15,7 @@ const supportPlans = [
     meta: "Up to 25 staff · workspace pricing",
     body: "A focused rota workspace with checks, leave context, approved hours, and handover notes.",
     cta: "Join early access",
+    highlights: ["Pre-publish checks", "Leave clash review", "Approved hours export"],
   },
   {
     name: "Free",
@@ -22,6 +23,7 @@ const supportPlans = [
     meta: "Up to 5 staff · workspace pricing",
     body: "Basic weekly rota planning for small teams getting started.",
     cta: "Join early access",
+    highlights: ["Weekly rota build", "Manager publish", "Staff sees confirmed"],
   },
 ] as const;
 
