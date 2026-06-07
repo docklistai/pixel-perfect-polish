@@ -87,7 +87,7 @@ export function LandingWeeklyRhythm() {
                 return (
                   <article
                     key={step.title}
-                    className="group relative flex flex-col text-left transition duration-200"
+                    className="group relative flex flex-col text-left transition duration-300"
                   >
                     <div className="mb-6 flex items-center lg:justify-center">
                       <div
@@ -95,14 +95,14 @@ export function LandingWeeklyRhythm() {
                         style={{
                           background: step.active
                             ? "linear-gradient(145deg,#111714,#1a221e)"
-                            : "#fff",
+                            : "linear-gradient(180deg,#ffffff,#f7f2e7)",
                           borderColor: step.active
-                            ? "rgba(201,149,77,.4)"
+                            ? "rgba(201,149,77,.45)"
                             : "var(--landing-border)",
                           boxShadow: step.active
-                            ? "0 12px 24px -10px rgba(17,23,20,.6)"
-                            : "0 4px 12px -8px rgba(17,23,20,.1)",
-                          color: step.active ? "#d9ad70" : "var(--landing-ink-400)",
+                            ? "0 1px 0 rgba(255,255,255,.08) inset, 0 14px 28px -10px rgba(17,23,20,.55), 0 0 0 4px rgba(201,149,77,.08)"
+                            : "0 1px 0 rgba(255,255,255,.9) inset, 0 6px 14px -8px rgba(17,23,20,.14)",
+                          color: step.active ? "#d9ad70" : "var(--landing-ink-600)",
                         }}
                       >
                         <Icon className="size-5" aria-hidden="true" />
@@ -115,33 +115,71 @@ export function LandingWeeklyRhythm() {
                     </div>
 
                     <div
-                      className="flex w-full flex-1 flex-col rounded-[20px] border p-5 transition-all duration-300 sm:p-6"
+                      className="relative flex w-full flex-1 flex-col overflow-hidden rounded-[20px] border p-5 transition-all duration-300 motion-safe:group-hover:-translate-y-0.5 sm:p-6"
                       style={{
                         background: step.active
                           ? "linear-gradient(180deg,#ffffff,#fbf6ec)"
-                          : "linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.7))",
+                          : "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.72))",
                         borderColor: step.active
                           ? "var(--landing-amber-100)"
                           : "var(--landing-border-faint)",
                         boxShadow: step.active
-                          ? "0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(255,255,255,0.5) inset, 0 22px 44px -22px rgba(201,149,77,0.32), 0 4px 10px -4px rgba(17,23,20,0.06)"
-                          : "0 1px 0 rgba(255,255,255,0.85) inset, 0 8px 22px -18px rgba(17,23,20,0.12)",
+                          ? "0 1px 0 rgba(255,255,255,0.95) inset, 0 0 0 1px rgba(255,255,255,0.5) inset, 0 26px 50px -22px rgba(201,149,77,0.38), 0 4px 10px -4px rgba(17,23,20,0.06)"
+                          : "0 1px 0 rgba(255,255,255,0.9) inset, 0 14px 30px -22px rgba(17,23,20,0.18)",
                       }}
                     >
+                      {/* Oversized brass numeral watermark */}
                       <span
-                        className="landing-mono mb-3 block text-[10px] font-bold uppercase tracking-wider"
+                        aria-hidden="true"
+                        className="landing-mono pointer-events-none absolute -right-1 -top-2 select-none text-[78px] font-black leading-none tracking-tight"
                         style={{
                           color: step.active
-                            ? "var(--landing-amber-700)"
-                            : "var(--landing-ink-400)",
+                            ? "rgba(201,149,77,.18)"
+                            : "rgba(17,23,20,.045)",
                         }}
                       >
+                        0{step.number}
+                      </span>
+
+                      {/* Top accent rule */}
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-x-5 top-0 h-px"
+                        style={{
+                          background: step.active
+                            ? "linear-gradient(90deg,transparent,rgba(201,149,77,.55),transparent)"
+                            : "linear-gradient(90deg,transparent,rgba(17,23,20,.08),transparent)",
+                        }}
+                      />
+
+                      <span
+                        className="landing-mono relative mb-3 inline-flex items-center gap-1.5 self-start rounded-full border px-2 py-0.5 text-[9.5px] font-bold uppercase tracking-wider"
+                        style={{
+                          background: step.active
+                            ? "var(--landing-amber-50)"
+                            : "rgba(255,255,255,.7)",
+                          borderColor: step.active
+                            ? "var(--landing-amber-100)"
+                            : "var(--landing-border-faint)",
+                          color: step.active
+                            ? "var(--landing-amber-700)"
+                            : "var(--landing-ink-500)",
+                        }}
+                      >
+                        <span
+                          className="size-1 rounded-full"
+                          style={{
+                            background: step.active
+                              ? "var(--landing-amber-700)"
+                              : "var(--landing-ink-400)",
+                          }}
+                        />
                         Step {step.number}
                       </span>
-                      <h3 className="text-[18px] font-extrabold text-[var(--landing-ink-900)]">
+                      <h3 className="relative text-[18px] font-extrabold text-[var(--landing-ink-900)]">
                         {step.title}
                       </h3>
-                      <p className="mt-2 text-pretty text-[14px] leading-[1.55] text-[var(--landing-ink-600)]">
+                      <p className="relative mt-2 text-pretty text-[14px] leading-[1.55] text-[var(--landing-ink-600)]">
                         {step.body}
                       </p>
                     </div>
