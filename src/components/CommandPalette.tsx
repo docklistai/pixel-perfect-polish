@@ -22,6 +22,7 @@ import {
   Send,
   Sparkles,
   Moon,
+  CheckCircle2,
 } from "lucide-react";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -35,6 +36,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import { useIntents, type IntentName } from "@/lib/interactionIntents";
+import { useOverlays } from "./AppShortcuts";
 
 type NavTarget =
   | "/"
@@ -90,6 +92,13 @@ const QUICK_ACTIONS: QuickAction[] = [
     intent: "rota.generate",
   },
   {
+    label: "Review publish readiness",
+    hint: "Check the rota before publishing",
+    icon: CheckCircle2,
+    to: "/rota",
+    intent: "rota.publish",
+  },
+  {
     label: "Add a shift",
     hint: "Open the add shift surface",
     icon: Plus,
@@ -104,11 +113,29 @@ const QUICK_ACTIONS: QuickAction[] = [
     intent: "staff.add",
   },
   {
+    label: "Review leave requests",
+    hint: "Open the leave inbox",
+    icon: CalendarOff,
+    to: "/leave",
+  },
+  {
     label: "New leave request",
     hint: "Open the new leave form",
     icon: CalendarOff,
     to: "/leave",
     intent: "leave.new",
+  },
+  {
+    label: "Open timesheets",
+    hint: "Review clocked hours",
+    icon: Clock,
+    to: "/time",
+  },
+  {
+    label: "Open settings",
+    hint: "Workspace settings",
+    icon: SettingsIcon,
+    to: "/settings",
   },
 ];
 
@@ -140,6 +167,7 @@ export function CommandPalette({
 }) {
   const navigate = useNavigate();
   const { requestIntent } = useIntents();
+  const { openAiDrawer } = useOverlays();
 
   const go = React.useCallback(
     (to: NavTarget) => {
@@ -167,13 +195,18 @@ export function CommandPalette({
     toggleDarkMode();
   }, [onOpenChange]);
 
+  const runAskAssistant = React.useCallback(() => {
+    onOpenChange(false);
+    openAiDrawer();
+  }, [onOpenChange, openAiDrawer]);
+
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <DialogTitle className="sr-only">Command palette</DialogTitle>
       <DialogDescription className="sr-only">
         Search Docklist pages and quick actions. Use arrow keys to navigate and Enter to select.
       </DialogDescription>
-      <CommandInput placeholder="Search Docklist or jump to…" />
+      <CommandInput placeholder="Search anywhere, jump to anything…" />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigate">
@@ -193,7 +226,7 @@ export function CommandPalette({
           })}
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Quick actions">
+        <CommandGroup heading="Actions">
           {QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
@@ -208,6 +241,13 @@ export function CommandPalette({
               </CommandItem>
             );
           })}
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Assistant">
+          <CommandItem value="Ask manager assistant" onSelect={runAskAssistant}>
+            <Sparkles className="ico h-4 w-4" aria-hidden />
+            <span>Ask manager assistant</span>
+          </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Preferences">
@@ -231,6 +271,7 @@ export function CommandPalette({
           <span className="kbd">esc</span>
           <span>close</span>
         </span>
+        <span className="ml-auto">Search by name, action or page</span>
       </div>
     </CommandDialog>
   );
