@@ -1224,6 +1224,9 @@
     border-radius: 999px;
     background: currentColor;
   }
+  .rota-status .dot.pulse {
+    position: relative;
+  }
   .rota-status.amber {
     background: var(--st-amber-bg);
     color: var(--st-amber-ink);
@@ -1277,6 +1280,95 @@
       linear-gradient(180deg, var(--st-green-bg), transparent 80%),
       var(--bg-card);
     border-color: var(--st-green-line);
+  }
+
+  /* Rota-only alignment layer: keeps the scheduling surface dense and scan-first. */
+  .rota-page-header {
+    padding-top: 2px;
+  }
+  .rota-page-title {
+    margin: 0;
+    color: var(--ink-900);
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.15;
+  }
+  .rota-page-subtitle {
+    margin-top: 5px;
+    color: var(--ink-500);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .rota-page-actions {
+    padding-top: 1px;
+  }
+  .rota-week-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-1);
+  }
+  .rota-week-controls > button {
+    min-height: 30px;
+  }
+  .rota-grid-toolbar {
+    background: color-mix(in srgb, var(--bg-raised) 92%, var(--ink-100));
+  }
+  .rota-toolbar-separator {
+    width: 1px;
+    height: 18px;
+    margin: 0 2px;
+    background: var(--border);
+  }
+  .rota-toolbar-chip {
+    min-height: 22px;
+    border: 1px solid transparent;
+  }
+  .rota-toolbar-chip:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .rota-staff-header,
+  .rota-day-header {
+    background: color-mix(in srgb, var(--bg-raised) 94%, var(--ink-100));
+  }
+  .rota-day-header {
+    min-height: 82px;
+  }
+  .rota-day-metric {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .rota-shift-pill {
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .rota-shift-pill:hover {
+    border-color: var(--border-strong);
+  }
+  .rota-empty-cell {
+    font-family: var(--font-mono);
+  }
+  .rota-grid-legend {
+    background: color-mix(in srgb, var(--bg-raised) 94%, var(--ink-100));
+  }
+  .rota-grid-legend-summary {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .rota-legend-chip {
+    padding: 3px 7px;
+    border: 1px solid var(--border-faint);
+    border-radius: var(--r-pill);
+    background: var(--bg-card);
+  }
+  .rota-role-coverage .role-row + .role-row {
+    border-top: 1px solid var(--border-faint);
   }
 
   .tag-future {

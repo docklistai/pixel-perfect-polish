@@ -27,14 +27,14 @@ export function ShiftCell({
   if (shifts.length === 0) {
     if (context === "open") {
       return (
-        <div className="flex min-h-[52px] items-center justify-center text-xs text-muted-foreground">
+        <div className="rota-empty-cell flex min-h-[48px] items-center justify-center text-xs text-muted-foreground">
           <span aria-hidden>—</span>
           <span className="sr-only">{emptyAriaLabel}</span>
         </div>
       );
     }
     return (
-      <div className="flex min-h-[52px] items-center justify-center text-[11px] text-muted-foreground/60">
+      <div className="rota-empty-cell flex min-h-[48px] items-center justify-center text-[11px] text-muted-foreground/60">
         <span aria-hidden>—</span>
         <span className="sr-only">{emptyAriaLabel}</span>
       </div>
@@ -55,7 +55,7 @@ export function ShiftCell({
   }
 
   return (
-    <div className="flex min-h-[52px] flex-col gap-1">
+    <div className="flex min-h-[48px] flex-col gap-1">
       {shifts.map((shift) => (
         <ShiftPill
           key={shift.id}
@@ -89,7 +89,7 @@ function ShiftPill({
   const [menuOpen, setMenuOpen] = React.useState(false);
   const isOpen = shift.staffId === null;
   const isConflict = shift.status === "conflict";
-  const minH = compact ? "min-h-[32px] py-1" : "min-h-[52px] py-1.5";
+  const minH = compact ? "min-h-[31px] py-1" : "min-h-[48px] py-1.5";
   const pillTone = isConflict
     ? "border-warning/70 bg-warning-soft/80 text-foreground shadow-[inset_3px_0_0_hsl(var(--warning))]"
     : isOpen
@@ -107,11 +107,11 @@ function ShiftPill({
             setMenuOpen(true);
           }}
           aria-label={`Open shift, ${shift.role}, ${formatShiftTime(shift.start, shift.end)}`}
-          className={`flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-xs transition hover:bg-warning-soft/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
+          className={`rota-shift-pill flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-xs transition hover:bg-warning-soft/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
         >
           <div className="font-semibold leading-snug text-warning-700">Open shift</div>
           <div className="flex items-center gap-1 text-[10px] text-warning-700/80">
-            {shift.role}
+            <span className="truncate">{shift.role}</span>
             <Plus className="h-2.5 w-2.5" aria-hidden />
           </div>
         </button>
@@ -138,14 +138,14 @@ function ShiftPill({
           setMenuOpen(true);
         }}
         aria-label={`${shift.role}, ${formatShiftTime(shift.start, shift.end)}${isConflict ? ", conflict" : ""}`}
-        className={`relative flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-left transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
+        className={`rota-shift-pill relative flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-left transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
       >
         <div className="font-mono text-xs font-semibold leading-snug tracking-tight">
           {formatShiftTime(shift.start, shift.end)}
         </div>
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
           {isConflict && <AlertTriangle className="h-3 w-3 text-warning" aria-hidden />}
-          <span>{shift.role}</span>
+          <span className="truncate">{shift.role}</span>
         </div>
       </button>
       <ShiftActionMenu

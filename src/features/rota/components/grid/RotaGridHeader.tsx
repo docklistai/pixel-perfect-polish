@@ -42,10 +42,10 @@ function StaffSearchHeader({
   onStaffSearchChange: (value: string) => void;
 }) {
   return (
-    <div className="border-b border-border px-4 py-4">
-      <div className="text-sm font-semibold uppercase tracking-[0.08em]">
+    <div className="rota-staff-header border-b border-border px-4 py-3">
+      <div className="text-xs font-semibold uppercase text-muted-foreground">
         Staff{" "}
-        <span className="font-normal text-muted-foreground">
+        <span className="font-mono font-normal tabular-nums">
           ({visibleStaffCount}
           {visibleStaffCount !== staffCount ? ` of ${staffCount}` : ""})
         </span>
@@ -65,11 +65,11 @@ function StaffSearchHeader({
 function DayHeader({ day }: { day: RotaGridDay }) {
   return (
     <div
-      className={`border-b border-l px-3 py-4 ${
+      className={`rota-day-header border-b border-l px-3 py-3 ${
         day.isToday ? "border-brand/30 bg-brand-soft/25" : "border-border"
       }`}
     >
-      <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+      <div className="flex items-center gap-2 text-sm font-semibold">
         <span>{day.d}</span>
         {day.isToday && (
           <span className="rounded-full bg-brand-soft px-1.5 py-0.5 text-[10px] font-semibold text-brand">
@@ -77,12 +77,12 @@ function DayHeader({ day }: { day: RotaGridDay }) {
           </span>
         )}
       </div>
-      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <div className="rota-day-metric mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <Clock className="h-3 w-3" aria-hidden />
         <span>{day.h}</span>
       </div>
       <div
-        className={`mt-1 flex items-center gap-1.5 text-xs ${
+        className={`rota-day-metric mt-1 flex items-center gap-1.5 text-[11px] ${
           day.tone === "danger"
             ? "text-danger"
             : day.tone === "warning"

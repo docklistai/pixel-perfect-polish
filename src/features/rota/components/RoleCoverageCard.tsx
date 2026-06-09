@@ -3,28 +3,24 @@ import type { RoleCoverageSummary } from "../types";
 
 export function RoleCoverageCard({ roleCoverage }: { roleCoverage: RoleCoverageSummary[] }) {
   return (
-    <Card className="p-4">
-      <div className="mb-4 flex items-center justify-between">
+    <Card className="rota-role-coverage p-4">
+      <div className="mb-3 flex items-center justify-between">
         <div className="text-sm font-semibold">Role coverage</div>
         <span className="text-xs text-muted-foreground">This week</span>
       </div>
-      <div className="space-y-3">
-        {roleCoverage.slice(0, 5).map((row) => (
-          <div key={row.label} className="space-y-1">
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="font-medium text-foreground">{row.label}</span>
-              <span className="text-muted-foreground">{row.value}</span>
+      <div>
+        {roleCoverage.slice(0, 5).map((row) => {
+          const state = row.pct >= 85 ? "ok" : row.pct >= 70 ? "under" : "over";
+          return (
+            <div key={row.label} className={`role-row ${state}`}>
+              <span className="role-name truncate font-medium">{row.label}</span>
+              <div className="role-bar">
+                <i aria-hidden style={{ width: `${row.pct}%` }} />
+              </div>
+              <span className="role-val font-mono tabular-nums">{row.value}</span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
-              <div
-                className={`h-full rounded-full ${
-                  row.pct >= 85 ? "bg-success" : row.pct >= 70 ? "bg-warning" : "bg-danger"
-                }`}
-                style={{ width: `${row.pct}%` }}
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );
