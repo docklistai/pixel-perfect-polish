@@ -7,20 +7,20 @@ export function TopbarWeekPill() {
   const weekLabel = getWeekLabelForOffset(weekOffset);
 
   return (
-    <div className="hidden flex-1 justify-center items-center gap-1.5 md:flex select-none">
+    <>
       <button
         type="button"
         onClick={() => setWeekOffset((prev) => prev - 1)}
-        className="topbar-arrow"
+        className="topbar-arrow hidden md:grid"
         title="Previous week"
         aria-label="Previous week"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
 
-      <div className="topbar-pill date pointer-events-none select-none">
+      <div className="topbar-pill date pointer-events-none select-none hidden md:flex">
         <Calendar className="ico h-4 w-4" style={{ color: "var(--st-teal-ink)" }} aria-hidden />
-        <div className="stack items-center">
+        <div className="stack">
           <div className="text-sm font-semibold" suppressHydrationWarning>
             {weekLabel}
           </div>
@@ -31,12 +31,12 @@ export function TopbarWeekPill() {
       <button
         type="button"
         onClick={() => setWeekOffset((prev) => prev + 1)}
-        className="topbar-arrow"
+        className="topbar-arrow hidden md:grid"
         title="Next week"
         aria-label="Next week"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
-    </div>
+    </>
   );
 }

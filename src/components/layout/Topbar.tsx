@@ -12,9 +12,10 @@ export function Topbar({
   const { theme, toggleTheme } = useDocklistTheme();
 
   return (
-    <header className="dl-topbar" aria-label="Workspace toolbar">
+    <header className="topbar" aria-label="Workspace toolbar">
       <TopbarWorkspacePill />
       <TopbarWeekPill />
+      <div className="spacer" />
       <TopbarSearch searchPlaceholder={searchPlaceholder} />
       <TopbarActions theme={theme} toggleTheme={toggleTheme} />
     </header>

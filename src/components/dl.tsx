@@ -89,9 +89,9 @@ export function AppShell({
   searchPlaceholder?: string;
 }) {
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="app">
       <Sidebar />
-      <div className="dl-main flex-1">
+      <div className="main">
         <Topbar searchPlaceholder={searchPlaceholder} />
         <div className="md:hidden px-4 pt-4">
           <FeedbackBanner
@@ -100,10 +100,9 @@ export function AppShell({
             description="Docklist manager is optimised for desktop. Please use a larger screen."
           />
         </div>
-        <main id="main-content" tabIndex={-1} className="flex-1 dl-page-in focus:outline-none">
+        <main id="main-content" tabIndex={-1} className="dl-page-in focus:outline-none">
           {children}
         </main>
-        <footer>All times shown in Europe/London (GMT+1)</footer>
       </div>
     </div>
   );

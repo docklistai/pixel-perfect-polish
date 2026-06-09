@@ -88,7 +88,7 @@ export function Sidebar() {
   }, [workspaceOpen]);
 
   return (
-    <aside className="hidden md:flex dl-sidebar w-[240px] shrink-0 select-none">
+    <aside className="sidebar hidden md:flex select-none">
       {/* Brand */}
       <div className="brand">
         <span className="brand-glyph">D</span>
@@ -98,7 +98,7 @@ export function Sidebar() {
       <div className="flex flex-col gap-1 overflow-y-auto pr-1 flex-1">
         {NAV_GROUPS.map((group) => (
           <div key={group.key}>
-            <div className="dl-nav-section">{group.label}</div>
+            <div className="nav-section">{group.label}</div>
             <nav className="nav" aria-label={group.ariaLabel}>
               {navItems
                 .filter((it) => it.group === group.key)
@@ -110,12 +110,12 @@ export function Sidebar() {
                       key={item.to}
                       to={item.to}
                       aria-current={active ? "page" : undefined}
-                      className="dl-nav-item"
+                      className={`nav-item ${active ? "active" : ""}`}
                     >
                       <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
                       <span>{item.label}</span>
                       {item.badge && (
-                        <span className={`count${item.badge.kind === "amber" ? " amber" : ""}`}>
+                        <span className={`count ${item.badge.kind === "amber" ? "amber" : ""}`}>
                           {item.badge.count}
                         </span>
                       )}
