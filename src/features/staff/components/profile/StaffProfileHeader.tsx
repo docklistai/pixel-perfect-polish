@@ -8,12 +8,12 @@ import type { StaffProfile } from "../../types";
 import { type ProfileTab } from "./StaffProfileTabs";
 import { StaffProfileHeaderActions } from "./StaffProfileHeaderActions";
 
-const HEADER_TABS: { id: ProfileTab; label: string }[] = [
+const HEADER_TABS: { id: ProfileTab; label: string; badge?: { count: number } }[] = [
   { id: "overview", label: "Overview" },
   { id: "schedule", label: "Schedule" },
   { id: "time", label: "Time" },
   { id: "leave", label: "Leave & Absence" },
-  { id: "documents", label: "Documents" },
+  { id: "documents", label: "Documents", badge: { count: 2 } },
   { id: "notes", label: "Notes" },
   { id: "insights", label: "Work patterns" },
 ];
@@ -136,13 +136,18 @@ export function StaffProfileHeader({ profile, activeTab, onTabChange }: StaffPro
                 }
               }}
               className={cn(
-                "shrink-0 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "shrink-0 border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring inline-flex items-center gap-1.5",
                 activeTab === tab.id
                   ? "border-brand text-brand"
                   : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               {tab.label}
+              {tab.badge && (
+                <span className="rounded-md bg-warning-soft px-1.5 py-0.5 text-[10px] font-semibold text-warning leading-none">
+                  {tab.badge.count}
+                </span>
+              )}
             </button>
           ))}
         </div>

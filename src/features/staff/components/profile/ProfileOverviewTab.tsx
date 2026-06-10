@@ -44,7 +44,7 @@ export function ProfileOverviewTab({ profile, onTabChange }: Props) {
         </div>
 
         <aside className="min-w-0 space-y-5">
-          <FlagsCard profile={profile} />
+          <FlagsCard profile={profile} onTabChange={onTabChange} />
           <LeaveAbsenceCard profile={profile} />
           <WorkloadBalanceCard profile={profile} />
           <ProfileOverviewRailCard profile={profile} onTabChange={onTabChange} />

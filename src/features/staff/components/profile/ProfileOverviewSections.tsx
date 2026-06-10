@@ -56,7 +56,7 @@ function SnapStat({ label, value, sub, tone = "default" }: SnapStatProps) {
   );
 }
 
-export function ManagerSnapshotCard({ profile, onToast }: OverviewSectionProps) {
+export function ManagerSnapshotCard({ profile, onTabChange, onToast }: OverviewSectionProps) {
   const summary = profile.managerSnapshot.filter(
     (line) => !line.startsWith("Watch:") && !line.startsWith("Next action:"),
   );
@@ -71,7 +71,19 @@ export function ManagerSnapshotCard({ profile, onToast }: OverviewSectionProps) 
   const docsTone = profile.documentsSummary.missing > 0 ? "amber" : "green";
 
   return (
-    <ProfileCard title="Manager snapshot" className="p-0 overflow-hidden">
+    <ProfileCard
+      title="Manager snapshot"
+      className="p-0 overflow-hidden"
+      action={
+        <span
+          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-500"
+          style={{ color: "var(--teal-400)" }}
+        >
+          <Sparkles className="h-3 w-3" aria-hidden />
+          Updated just now
+        </span>
+      }
+    >
       <div className="grid grid-cols-4 gap-4 px-5 pt-5 pb-4 border-b border-border/50">
         <SnapStat
           label="Hours this week"
@@ -102,18 +114,18 @@ export function ManagerSnapshotCard({ profile, onToast }: OverviewSectionProps) 
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => onToast(`Drafting rota note for ${firstName} (demo)`)}
+            onClick={() => onTabChange("documents")}
             className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs font-semibold text-brand hover:bg-muted/50 border border-brand/20"
           >
-            Draft rota note
+            Resolve documents
             <ChevronRight className="size-3" aria-hidden />
           </button>
           <button
             type="button"
-            onClick={() => onToast(`Availability check for ${firstName} queued (demo)`)}
+            onClick={() => onTabChange("notes")}
             className="inline-flex items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs font-semibold text-brand hover:bg-muted/50 border border-brand/20"
           >
-            Check availability
+            Open notes
             <ChevronRight className="size-3" aria-hidden />
           </button>
         </div>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Plane } from "lucide-react";
+import { AlertTriangle, ChevronRight, Plane } from "lucide-react";
 import { StatusBadge, type Tone } from "@/components/dl";
 import { ProfileCard, Pair } from "./ProfileCard";
 import type { StaffProfile } from "../../types";
@@ -11,7 +11,13 @@ function portalTone(status: string): Tone {
   return "muted";
 }
 
-export function FlagsCard({ profile }: { profile: StaffProfile }) {
+export function FlagsCard({
+  profile,
+  onTabChange,
+}: {
+  profile: StaffProfile;
+  onTabChange?: (tab: ProfileTab) => void;
+}) {
   return (
     <ProfileCard
       title="Flags"
@@ -27,11 +33,36 @@ export function FlagsCard({ profile }: { profile: StaffProfile }) {
       {profile.flags.length === 0 ? (
         <span className="text-xs text-muted-foreground">No active flags</span>
       ) : (
-        <ul className="space-y-3">
-          {profile.flags.map((flag) => (
-            <li key={flag} className="flex items-start gap-2.5 text-xs">
-              <span className="mt-1 size-2 rounded-full bg-warning shrink-0" aria-hidden />
-              <span className="leading-snug">{flag}</span>
+        <ul className="space-y-2">
+          {profile.flags.map((flag, i) => (
+            <li
+              key={flag}
+              className="flex items-start gap-2.5 rounded-lg p-2.5"
+              style={{ background: i === 0 ? "var(--warning-soft)" : "var(--danger-soft)" }}
+            >
+              <span
+                className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
+                style={{
+                  background: i === 0 ? "var(--warning-soft)" : "var(--danger-soft)",
+                  color: i === 0 ? "var(--warning)" : "var(--danger)",
+                }}
+                aria-hidden
+              >
+                <AlertTriangle className="h-3 w-3" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium leading-snug">{flag}</div>
+                {onTabChange && (
+                  <button
+                    type="button"
+                    onClick={() => onTabChange("documents")}
+                    className="mt-1 inline-flex items-center gap-0.5 text-[11px] font-semibold text-brand hover:underline"
+                  >
+                    Resolve
+                    <ChevronRight className="h-3 w-3" aria-hidden />
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
