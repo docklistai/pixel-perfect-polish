@@ -16,6 +16,7 @@ import {
   Clock,
   Filter,
   Heart,
+  Info,
   Plane,
   Plus,
 } from "lucide-react";
@@ -141,6 +142,11 @@ function LeavePage() {
           </>
         }
       />
+
+      <div className="guidance-note mb-4">
+        <Info className="h-3 w-3 shrink-0" aria-hidden />
+        Check coverage impact before deciding — high-impact requests are highlighted.
+      </div>
 
       <LeaveMetricCards pendingCount={pendingCount} />
 

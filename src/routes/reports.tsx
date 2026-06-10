@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import { Briefcase, CalendarDays, ChevronDown, Download, Sparkles } from "lucide-react";
+import { Briefcase, CalendarDays, ChevronDown, Download, Info, Sparkles } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
@@ -57,6 +57,11 @@ function ReportsPage() {
           </>
         }
       />
+
+      <div className="guidance-note mb-4">
+        <Info className="h-3 w-3 shrink-0" aria-hidden />
+        Use AI review points to spot rota issues — click each point to mark as reviewed.
+      </div>
 
       <ReportsKpiCards />
 

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import { AlertTriangle, Plus, FileText, MoreHorizontal, Sparkles } from "lucide-react";
+import { AlertTriangle, Info, Plus, FileText, MoreHorizontal, Sparkles } from "lucide-react";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
 import { OpsRightRail } from "@/features/ops/components/OpsRightRail";
@@ -47,6 +47,11 @@ function OpsPage() {
           </>
         }
       />
+
+      <div className="guidance-note mb-4">
+        <Info className="h-3 w-3 shrink-0" aria-hidden />
+        Clear open risks before handover — use the AI risk panel to review what needs attention.
+      </div>
 
       <OpsStatCards />
 
