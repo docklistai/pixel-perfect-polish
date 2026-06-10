@@ -85,10 +85,7 @@ export function RowActionMenu({
             <DropdownMenuItem
               key={`${item.label}-${i}`}
               disabled={item.disabled}
-              onSelect={(event) => {
-                event.preventDefault();
-                item.onSelect();
-              }}
+              onSelect={item.onSelect}
               className={cn("menu-item", item.danger && "danger")}
             >
               {Icon && <Icon className="ico h-3.5 w-3.5" aria-hidden />}

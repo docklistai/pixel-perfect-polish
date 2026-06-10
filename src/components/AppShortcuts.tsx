@@ -77,7 +77,10 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       openPalette: () => setPalette(true),
       openShortcuts: () => setShortcuts(true),
       openNotifications: () => setNotifs(true),
-      openAiDrawer: () => setAiOpen(true),
+      openAiDrawer: () => {
+        setAiPrompt(null);
+        setAiOpen(true);
+      },
       askAssistant: (prompt: string) => {
         setAiPrompt(prompt);
         setAiOpen(true);
@@ -143,14 +146,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
           onOpenChange={setNotifs}
           onUnreadCountChange={setUnreadCount}
         />
-        <AiDrawer
-          open={aiOpen}
-          initialPrompt={aiPrompt}
-          onOpenChange={(open) => {
-            setAiOpen(open);
-            if (!open) setAiPrompt(null);
-          }}
-        />
+        <AiDrawer open={aiOpen} initialPrompt={aiPrompt} onOpenChange={setAiOpen} />
       </OverlayContext.Provider>
     </InteractionIntentProvider>
   );
