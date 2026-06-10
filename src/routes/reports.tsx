@@ -29,7 +29,7 @@ function ReportsPage() {
     <AppShell>
       <PageHeader
         title="Reports"
-        subtitle="Review labour and coverage, then return to Rota, Time, or Leave to act."
+        subtitle="Review labour cost, coverage, and attendance — with scheduling context and manager review points."
         actions={
           <>
             <ActionButton

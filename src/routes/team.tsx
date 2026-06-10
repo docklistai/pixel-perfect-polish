@@ -32,7 +32,7 @@ function TeamPage() {
     <AppShell>
       <PageHeader
         title="Team"
-        subtitle="Share updates, keep everyone informed and connected."
+        subtitle="Share updates and briefings with your team — track who's read what."
         actions={
           <>
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>

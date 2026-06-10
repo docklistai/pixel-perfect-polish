@@ -121,8 +121,8 @@ function TimePage() {
   return (
     <AppShell>
       <PageHeader
-        title="Time & Attendance"
-        subtitle="Review clocked hours, approve, and export to payroll."
+        title="Time & attendance"
+        subtitle="Review clocked hours, approve, and export approved hours."
         actions={
           <>
             <FilterButton icon={Calendar} label="18 – 24 May" />

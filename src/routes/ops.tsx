@@ -23,8 +23,8 @@ function OpsPage() {
   return (
     <AppShell>
       <PageHeader
-        title="Operations"
-        subtitle="Stay on top of today's activity and keep your team aligned."
+        title="Ops"
+        subtitle="Today's handover, incidents, tasks, and maintenance — in one operational log."
         actions={
           <>
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>

@@ -76,11 +76,9 @@ function Home() {
       {/* Header — prototype: title + actions row */}
       <div className="page-head flex-col lg:flex-row">
         <div className="min-w-0">
-          <h1>
-            Good morning, Alex <span aria-hidden>👋</span>
-          </h1>
+          <h1>Good morning, Alex</h1>
           <p>
-            Here&apos;s what&apos;s happening across Harbour View Hotel{" "}
+            Here&apos;s what needs your attention across Harbour View Hotel{" "}
             {filter === "today" ? "today" : "this week"}.
           </p>
         </div>

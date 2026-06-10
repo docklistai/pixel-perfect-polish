@@ -25,7 +25,7 @@ function SettingsPage() {
     <AppShell>
       <PageHeader
         title="Settings"
-        subtitle="Manage your workspace settings, policies and preferences."
+        subtitle="Your workspace, teams, scheduling rules, and assistant preferences."
         actions={
           <>
             <ActionButton
