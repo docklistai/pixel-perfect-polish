@@ -1,15 +1,5 @@
 import * as React from "react";
-import {
-  MessageSquare,
-  ChevronDown,
-  Edit2,
-  Lock,
-  Download,
-  Key,
-  Plus,
-  Plane,
-  Clock,
-} from "lucide-react";
+import { Bell, ChevronDown, Edit2, Lock, Download, Key, Plus, Plane, Clock } from "lucide-react";
 
 interface StaffProfileHeaderActionsProps {
   name: string;
@@ -61,11 +51,11 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
       <div className="flex max-w-full flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => onToast(`Message ${firstName} (demo)`)}
+          onClick={() => onToast(`Reminder prepared for ${firstName} — review before sending`)}
           className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold hover:bg-muted/50 transition-colors"
         >
-          <MessageSquare className="h-3.5 w-3.5" aria-hidden />
-          Message
+          <Bell className="h-3.5 w-3.5" aria-hidden />
+          Prepare reminder
         </button>
 
         <div className="relative" ref={actionsRef}>
