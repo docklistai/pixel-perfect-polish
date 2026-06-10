@@ -1,17 +1,31 @@
+import * as React from "react";
 import {
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
+  Briefcase,
+  ChevronDown,
+  Copy,
   Eraser,
+  Globe,
+  Link2,
+  List,
   Printer,
   Send,
   SlidersHorizontal,
   Sparkles,
+  TriangleAlert,
+  Users,
 } from "lucide-react";
-import { FilterButton, IconButton, ActionButton } from "@/components/dl";
+import { toast } from "sonner";
+import { ActionButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 
 type StatusTone = "success" | "warning";
+
+const VIEW_MODES = ["Day", "Week", "Month"] as const;
+const VIEW_BY_OPTIONS = [
+  { label: "Employee", icon: Users },
+  { label: "Role", icon: Briefcase },
+  { label: "Location", icon: Globe },
+] as const;
 
 export function RotaPageHeader({
   weekLabel,
@@ -19,13 +33,12 @@ export function RotaPageHeader({
   statusTone,
   statusLabel,
   canPublish,
-  onPrevWeek,
-  onPickWeek,
-  onNextWeek,
   onTemplates,
   onPrintRota,
   onClearWeek,
+  onCopyLastWeek,
   onGenerateRota,
+  onAskAssistant,
   onPublish,
 }: {
   weekLabel: string;
@@ -33,15 +46,17 @@ export function RotaPageHeader({
   statusTone: StatusTone;
   statusLabel: string;
   canPublish: boolean;
-  onPrevWeek: () => void;
-  onPickWeek: () => void;
-  onNextWeek: () => void;
   onTemplates: () => void;
   onPrintRota: () => void;
   onClearWeek: () => void;
+  onCopyLastWeek: () => void;
   onGenerateRota: () => void;
+  onAskAssistant: (prompt: string) => void;
   onPublish: () => void;
 }) {
+  const [viewMode, setViewMode] = React.useState<(typeof VIEW_MODES)[number]>("Week");
+  const [viewBy, setViewBy] = React.useState<(typeof VIEW_BY_OPTIONS)[number]["label"]>("Employee");
+
   return (
     <div className="rota-page-header mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
@@ -57,14 +72,75 @@ export function RotaPageHeader({
         </p>
       </div>
       <div className="rota-page-actions flex flex-wrap items-center gap-2 lg:justify-end">
-        <div className="rota-week-controls" aria-label="Rota week controls">
-          <IconButton icon={ChevronLeft} label="Previous week" onClick={onPrevWeek} />
-          <FilterButton icon={Calendar} label={weekLabel} onClick={onPickWeek} />
-          <IconButton icon={ChevronRight} label="Next week" onClick={onNextWeek} />
+        <div
+          className="inline-flex items-center gap-0.5 rounded-[9px] border border-border bg-muted/40 p-[3px]"
+          role="group"
+          aria-label="Rota view"
+        >
+          {VIEW_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              aria-pressed={viewMode === mode}
+              onClick={() => setViewMode(mode)}
+              className={`rounded-[7px] px-3 py-1 text-xs font-semibold transition ${
+                viewMode === mode
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {mode}
+            </button>
+          ))}
         </div>
-        <ActionButton variant="outline" size="sm" icon={Sparkles} onClick={onGenerateRota}>
-          Generate
-        </ActionButton>
+        <RowActionMenu
+          triggerLabel="Group rota by"
+          trigger={
+            <button type="button" className="btn secondary sm">
+              View: {viewBy}
+              <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          }
+          items={[
+            { kind: "label", text: "View by" },
+            ...VIEW_BY_OPTIONS.map((option) => ({
+              label: option.label,
+              icon: option.icon,
+              onSelect: () => {
+                setViewBy(option.label);
+                toast.info("View changed", {
+                  description: `Now grouping rota by ${option.label.toLowerCase()}`,
+                });
+              },
+            })),
+          ]}
+        />
+        <RowActionMenu
+          triggerLabel="AI rota actions"
+          trigger={
+            <button type="button" className="btn outline-teal sm">
+              <Sparkles className="h-3.5 w-3.5" aria-hidden />
+              AI
+              <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+            </button>
+          }
+          items={[
+            { kind: "label", text: "AI rota actions" },
+            { label: "Generate draft", icon: Sparkles, onSelect: onGenerateRota },
+            {
+              label: "Suggest fix",
+              icon: TriangleAlert,
+              onSelect: () =>
+                onAskAssistant("Suggest a fix for the current rota conflicts and alerts"),
+            },
+            {
+              label: "Summarise issues",
+              icon: List,
+              onSelect: () =>
+                onAskAssistant("Summarise the open issues in this rota before I publish"),
+            },
+          ]}
+        />
         {canPublish && (
           <ActionButton size="sm" icon={Send} onClick={onPublish}>
             Publish
@@ -74,8 +150,17 @@ export function RotaPageHeader({
           triggerLabel="More rota actions"
           items={[
             { kind: "label", text: "Planning" },
+            { label: "Copy last week", icon: Copy, onSelect: onCopyLastWeek },
             { label: "Templates", icon: SlidersHorizontal, onSelect: onTemplates },
             { label: "Print rota", icon: Printer, onSelect: onPrintRota },
+            {
+              label: "Share draft link",
+              icon: Link2,
+              onSelect: () =>
+                toast.info("Share link copied", {
+                  description: "Read-only link copied to clipboard — not visible to staff.",
+                }),
+            },
             { kind: "separator" },
             { label: "Clear week", icon: Eraser, onSelect: onClearWeek, danger: true },
           ]}

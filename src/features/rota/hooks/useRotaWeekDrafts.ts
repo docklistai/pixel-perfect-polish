@@ -80,6 +80,19 @@ export function useRotaWeekDrafts() {
     }));
   };
 
+  const copyPreviousWeek = () => {
+    const previousShifts = weekDrafts[String(weekOffset - 1)]?.shifts;
+    const shifts = previousShifts
+      ? previousShifts.map(({ id: _id, ...shift }) => makeDraftShift(shift))
+      : createInitialDraftShifts(initialDraftShifts);
+
+    setCurrentDraft((draft) => ({
+      ...draft,
+      shifts,
+      hasUnpublishedChanges: true,
+    }));
+  };
+
   const applyOpenShiftSuggestions = (): OpenShiftSuggestion[] => {
     const result = fillOpenShiftsWithSuggestions(currentDraft.shifts, staff);
     setCurrentDraft((draft) => ({
@@ -177,6 +190,7 @@ export function useRotaWeekDrafts() {
       updateShift(id, { staffId: null, status: "open", tone: "open" }),
     requestRemoveShift,
     requestApplyStandardTemplate,
+    copyPreviousWeek,
     applyOpenShiftSuggestions,
     requestClearWeek,
     handlePublish,

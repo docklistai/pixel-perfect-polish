@@ -59,8 +59,11 @@ export function matchAnswer(q: string): SimulatedAnswer {
   const exact = ANSWERS[q];
   if (exact) return exact;
   const lower = q.toLowerCase();
-  if (lower.startsWith("suggest a fix for the conflict")) return ANSWERS["conflict-fix"]!;
+  if (lower.startsWith("suggest a fix")) return ANSWERS["conflict-fix"]!;
   if (lower.startsWith("find cover")) return ANSWERS["find-cover"]!;
+  if (lower.startsWith("summarise the open issues")) {
+    return ANSWERS["Anything I should review before publishing this week's rota?"]!;
+  }
   return ANSWERS.default!;
 }
 

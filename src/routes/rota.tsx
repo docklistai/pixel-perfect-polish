@@ -20,7 +20,6 @@ import { AddShiftDrawer } from "@/features/rota/components/AddShiftDrawer";
 import { ConflictDrawer } from "@/features/rota/components/ConflictDrawer";
 import { GenerateRotaDialog } from "@/features/rota/components/GenerateRotaDialog";
 import { ShiftDetailDrawer } from "@/features/rota/components/ShiftDetailDrawer";
-import { WeekPickerDialog } from "@/features/rota/components/WeekPickerDialog";
 import { RotaFiltersDrawer } from "@/features/rota/components/RotaFiltersDrawer";
 import { TemplatesDialog } from "@/features/rota/components/TemplatesDialog";
 import { CoverageDetailsDrawer } from "@/features/rota/components/CoverageDetailsDrawer";
@@ -59,7 +58,6 @@ function RotaPage() {
   const [publishOpen, setPublishOpen] = React.useState(false);
   const [conflictOpen, setConflictOpen] = React.useState(false);
   const [generateOpen, setGenerateOpen] = React.useState(false);
-  const [weekPickerOpen, setWeekPickerOpen] = React.useState(false);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [templatesOpen, setTemplatesOpen] = React.useState(false);
   const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
@@ -111,6 +109,12 @@ function RotaPage() {
         : "No open shifts could be filled from the current staff list.",
     );
   };
+  const handleCopyLastWeek = () => {
+    rota.copyPreviousWeek();
+    toast.success("Pattern copied", {
+      description: "Last week's pattern applied as a draft. Review before publishing.",
+    });
+  };
 
   return (
     <AppShell>
@@ -121,13 +125,12 @@ function RotaPage() {
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
           canPublish={!rota.published || rota.hasUnpublishedChanges}
-          onPrevWeek={() => rota.setWeekOffset((w) => w - 1)}
-          onPickWeek={() => setWeekPickerOpen(true)}
-          onNextWeek={() => rota.setWeekOffset((w) => w + 1)}
           onTemplates={() => setTemplatesOpen(true)}
           onPrintRota={() => window.print()}
           onClearWeek={rota.requestClearWeek}
+          onCopyLastWeek={handleCopyLastWeek}
           onGenerateRota={() => setGenerateOpen(true)}
+          onAskAssistant={askAssistant}
           onPublish={() => setPublishOpen(true)}
         />
 
@@ -139,7 +142,10 @@ function RotaPage() {
           conflictCount={rota.conflictCount}
           workingTimeAlertCount={workingTimeAlertCount}
           coveragePct={rota.coveragePct}
+          weekLabel={rota.weekLabel}
+          staff={rota.staff}
           onPublish={() => setPublishOpen(true)}
+          onViewConflicts={() => setConflictOpen(true)}
         />
 
         {fillSummary && (
@@ -162,11 +168,7 @@ function RotaPage() {
               onGenerateRota={() => setGenerateOpen(true)}
               onAddShift={() => setAddOpen(true)}
               onViewConflicts={() => setConflictOpen(true)}
-              onCopyLastWeek={() =>
-                toast.info("Copy last week", {
-                  description: "Duplicating a draft is not wired in this prototype.",
-                })
-              }
+              onCopyLastWeek={handleCopyLastWeek}
             />
             <RotaGrid
               days={rota.days}
@@ -257,12 +259,6 @@ function RotaPage() {
         shifts={rota.draftShifts}
         staff={rota.staff}
         onApplySuggestions={handleApplySuggestions}
-      />
-      <WeekPickerDialog
-        open={weekPickerOpen}
-        onOpenChange={setWeekPickerOpen}
-        weekLabel={rota.weekLabel}
-        onSelectOffset={rota.setWeekOffset}
       />
       <RotaFiltersDrawer
         open={filtersOpen}
