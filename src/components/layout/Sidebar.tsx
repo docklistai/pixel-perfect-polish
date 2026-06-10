@@ -18,6 +18,7 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   group: "workspace" | "communication" | "admin";
+  flagship?: boolean;
   badge?: {
     count: number;
     kind: "amber" | "neutral" | "red";
@@ -31,6 +32,7 @@ const navItems: readonly NavItem[] = [
     label: "Rota",
     icon: Calendar,
     group: "workspace",
+    flagship: true,
     badge: { count: 3, kind: "amber" },
   },
   { to: "/staff", label: "Staff", icon: Users, group: "workspace" },
@@ -114,6 +116,21 @@ export function Sidebar() {
                     >
                       <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
                       <span>{item.label}</span>
+                      {item.flagship && !active && (
+                        <span
+                          style={{
+                            marginLeft: "auto",
+                            fontSize: 9,
+                            fontWeight: 700,
+                            letterSpacing: "0.08em",
+                            color: "var(--teal-400)",
+                            opacity: 0.8,
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          Core
+                        </span>
+                      )}
                       {item.badge && (
                         <span
                           className="count"

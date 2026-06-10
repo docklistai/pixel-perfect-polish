@@ -9,13 +9,13 @@ import { WorkspaceTab } from "./WorkspaceTab";
 
 export type SettingsContentTab =
   | "Workspace"
-  | "Teams"
-  | "Access"
-  | "Time Rules"
+  | "Locations & teams"
+  | "Roles & permissions"
   | "Leave Policies"
+  | "Time & attendance"
   | "Notifications"
   | "Branding"
-  | "Exports";
+  | "Data & privacy";
 
 export function SettingsContent({
   activeTab,
@@ -27,13 +27,13 @@ export function SettingsContent({
   return (
     <div className="min-w-0 space-y-4">
       {activeTab === "Workspace" && <WorkspaceTab onDirty={onDirty} />}
-      {activeTab === "Teams" && <TeamsTab onDirty={onDirty} />}
-      {activeTab === "Access" && <AccessTab onDirty={onDirty} />}
-      {activeTab === "Time Rules" && <TimeRulesTab onDirty={onDirty} />}
+      {activeTab === "Locations & teams" && <TeamsTab onDirty={onDirty} />}
+      {activeTab === "Roles & permissions" && <AccessTab onDirty={onDirty} />}
+      {activeTab === "Time & attendance" && <TimeRulesTab onDirty={onDirty} />}
       {activeTab === "Leave Policies" && <LeavePoliciesTab onDirty={onDirty} />}
       {activeTab === "Notifications" && <NotificationsTab onDirty={onDirty} />}
       {activeTab === "Branding" && <BrandingTab onDirty={onDirty} />}
-      {activeTab === "Exports" && <ExportsTab onDirty={onDirty} />}
+      {activeTab === "Data & privacy" && <ExportsTab onDirty={onDirty} />}
     </div>
   );
 }

@@ -2,13 +2,13 @@ import { Card, DetailRow, StatusBadge } from "@/components/dl";
 
 type SettingsTabName =
   | "Workspace"
-  | "Teams"
-  | "Access"
-  | "Time Rules"
+  | "Locations & teams"
+  | "Roles & permissions"
   | "Leave Policies"
+  | "Time & attendance"
   | "Notifications"
   | "Branding"
-  | "Exports";
+  | "Data & privacy";
 
 interface SettingsRightRailProps {
   activeTab: string;
@@ -16,7 +16,7 @@ interface SettingsRightRailProps {
 
 function railCopy(tab: SettingsTabName) {
   switch (tab) {
-    case "Teams":
+    case "Locations & teams":
       return {
         title: "Location preview",
         subtitle: "Location labels and team coverage are shown locally only.",
@@ -30,7 +30,7 @@ function railCopy(tab: SettingsTabName) {
           ["Bar", "Weekends"],
         ] as const,
       };
-    case "Access":
+    case "Roles & permissions":
       return {
         title: "Role preview",
         subtitle: "Access rules stay in the manager preview only.",
@@ -44,7 +44,7 @@ function railCopy(tab: SettingsTabName) {
           ["Staff", "Own shifts only"],
         ] as const,
       };
-    case "Time Rules":
+    case "Time & attendance":
       return {
         title: "Time rule preview",
         subtitle: "Shift defaults and break rules used in the local editor.",
@@ -100,7 +100,7 @@ function railCopy(tab: SettingsTabName) {
           ["Logo", "Local preview"],
         ] as const,
       };
-    case "Exports":
+    case "Data & privacy":
       return {
         title: "Export preview",
         subtitle: "Export settings are visible before the download flow.",
