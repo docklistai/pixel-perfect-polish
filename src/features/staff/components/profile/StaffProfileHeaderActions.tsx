@@ -1,13 +1,17 @@
 import * as React from "react";
 import { Bell, ChevronDown, Edit2, Lock, Download, Key, Plus, Plane, Clock } from "lucide-react";
+import type { StaffProfile } from "../../types";
+import { StaffProfileActionDialogs } from "./StaffProfileActionDialogs";
 
 interface StaffProfileHeaderActionsProps {
-  name: string;
+  profile: StaffProfile;
   onToast: (msg: string) => void;
 }
 
-export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderActionsProps) {
+export function StaffProfileHeaderActions({ profile, onToast }: StaffProfileHeaderActionsProps) {
   const [actionsOpen, setActionsOpen] = React.useState(false);
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [suspendOpen, setSuspendOpen] = React.useState(false);
   const actionsRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -28,14 +32,14 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
     };
   }, [actionsOpen]);
 
-  const firstName = name.split(" ")[0];
+  const firstName = profile.name.split(" ")[0];
 
   const menuItems = [
     { icon: Plus, label: "Add a shift", action: () => onToast("Shift modal — connect to rota") },
     { icon: Plane, label: "Log leave", action: () => onToast("Leave modal — connect to leave") },
     { icon: Clock, label: "Adjust timesheet", action: () => onToast("Adjustment modal (demo)") },
     null,
-    { icon: Edit2, label: "Edit details", action: () => onToast("Edit modal (demo)") },
+    { icon: Edit2, label: "Edit details", action: () => setEditOpen(true) },
     { icon: Key, label: "Reset mobile PIN", action: () => onToast("New PIN sent by SMS (demo)") },
     null,
     {
@@ -43,7 +47,7 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
       label: "Export profile",
       action: () => onToast("profile.pdf prepared (demo)"),
     },
-    { icon: Lock, label: "Suspend", danger: true, action: () => onToast("Suspend — coming soon") },
+    { icon: Lock, label: "Suspend", danger: true, action: () => setSuspendOpen(true) },
   ] as const;
 
   return (
@@ -109,7 +113,7 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
 
         <button
           type="button"
-          onClick={() => onToast("Edit details (demo)")}
+          onClick={() => setEditOpen(true)}
           className="inline-flex items-center gap-1.5 rounded-xl bg-brand text-white px-3 py-2 text-xs font-semibold hover:opacity-90 transition-opacity"
         >
           <Edit2 className="h-3.5 w-3.5" aria-hidden />
@@ -120,6 +124,14 @@ export function StaffProfileHeaderActions({ name, onToast }: StaffProfileHeaderA
       <div className="text-xs text-muted-foreground">
         Reports to <strong className="text-foreground font-semibold">Alex Thompson</strong>
       </div>
+      <StaffProfileActionDialogs
+        profile={profile}
+        editOpen={editOpen}
+        suspendOpen={suspendOpen}
+        onEditOpenChange={setEditOpen}
+        onSuspendOpenChange={setSuspendOpen}
+        onToast={onToast}
+      />
     </div>
   );
 }

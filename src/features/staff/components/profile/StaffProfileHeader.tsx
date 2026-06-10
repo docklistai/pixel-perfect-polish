@@ -107,7 +107,7 @@ export function StaffProfileHeader({ profile, activeTab, onTabChange }: StaffPro
           </div>
 
           <StaffProfileHeaderActions
-            name={profile.name}
+            profile={profile}
             onToast={(msg) => {
               setToast(msg);
               setTimeout(() => setToast(null), 2200);
