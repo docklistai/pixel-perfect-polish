@@ -1,5 +1,8 @@
 import * as React from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Plus, Plane, Bell, Clock, Upload, Sparkles, type LucideIcon } from "lucide-react";
+import { useOverlays } from "@/components/AppShortcuts";
+import { useIntents } from "@/lib/interactionIntents";
 
 interface ActionTileProps {
   icon: LucideIcon;
@@ -33,20 +36,28 @@ interface ProfileManagerActionsProps {
 }
 
 export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActionsProps) {
+  const navigate = useNavigate();
+  const { openAiDrawer } = useOverlays();
+  const { requestIntent } = useIntents();
+  const openRouteIntent = (to: "/rota" | "/leave", intent: "rota.addShift" | "leave.new") => {
+    navigate({ to });
+    requestIntent(intent);
+  };
+
   const tiles: ActionTileProps[] = [
     {
       icon: Plus,
       iconClassName: "bg-brand text-white",
       title: "Add a shift",
       sub: "Open the shift modal",
-      onClick: () => onToast("Shift modal would open — connect to rota"),
+      onClick: () => openRouteIntent("/rota", "rota.addShift"),
     },
     {
       icon: Plane,
       iconClassName: "bg-accent-purple text-white",
       title: "Log leave",
       sub: "On their behalf",
-      onClick: () => onToast("Leave modal would open — connect to leave"),
+      onClick: () => openRouteIntent("/leave", "leave.new"),
     },
     {
       icon: Bell,
@@ -74,7 +85,7 @@ export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActi
       iconClassName: "bg-brand text-white",
       title: "Ask the assistant",
       sub: `Anything about ${firstName}`,
-      onClick: () => onToast("AI assistant — coming soon"),
+      onClick: openAiDrawer,
     },
   ];
 

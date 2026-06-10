@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, ChevronRight, Clock, ExternalLink, Plus } from "lucide-react";
+import { useIntents } from "@/lib/interactionIntents";
 import { ProfileCard } from "./ProfileCard";
 import type { StaffProfile } from "../../types";
 
@@ -71,6 +72,8 @@ function flagLabel(flag?: WeekShift["flag"]): string | null {
 }
 
 export function ProfileScheduleWeekCard({ profile }: Props) {
+  const navigate = useNavigate();
+  const { requestIntent } = useIntents();
   const shifts = React.useMemo(() => buildWeeklySchedule(profile), [profile]);
   const weekly = profile.weeklyHours ?? [7.5, 8, 7, 0, 8, 6.5, 0];
 
@@ -89,7 +92,10 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
             </Link>
             <button
               type="button"
-              onClick={() => undefined}
+              onClick={() => {
+                navigate({ to: "/rota" });
+                requestIntent("rota.addShift");
+              }}
               className="inline-flex items-center gap-1.5 rounded-xl bg-brand px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
             >
               <Plus className="h-3 w-3" aria-hidden />

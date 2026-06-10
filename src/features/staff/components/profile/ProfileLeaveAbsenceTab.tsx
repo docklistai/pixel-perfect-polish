@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Calendar, ChevronRight, Plane } from "lucide-react";
+import { useIntents } from "@/lib/interactionIntents";
 import { ProfileCard } from "./ProfileCard";
 import { BalanceBar, LeaveBadge, LeaveTypeIcon } from "./ProfileLeaveWidgets";
 import type { StaffProfile } from "../../types";
@@ -65,6 +67,8 @@ function buildLeaveRecords(profile: StaffProfile): LeaveRecord[] {
 }
 
 export function ProfileLeaveAbsenceTab({ profile }: Props) {
+  const navigate = useNavigate();
+  const { requestIntent } = useIntents();
   const leaveRows = buildLeaveRecords(profile);
   const upcoming = profile.upcomingLeave?.[0];
   const nextRange = upcoming?.range ?? "No upcoming leave";
@@ -90,6 +94,10 @@ export function ProfileLeaveAbsenceTab({ profile }: Props) {
             <div className="ml-auto">
               <button
                 type="button"
+                onClick={() => {
+                  navigate({ to: "/leave" });
+                  requestIntent("leave.new");
+                }}
                 className="inline-flex items-center gap-1 rounded-xl border border-border/40 bg-[var(--bg-raised)] px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
                 <Calendar className="h-3.5 w-3.5" aria-hidden />

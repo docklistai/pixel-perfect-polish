@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronDown, Edit2, Lock, Download, Key, Plus, Plane, Clock } from "lucide-react";
+import { useIntents } from "@/lib/interactionIntents";
 import type { StaffProfile } from "../../types";
 import { StaffProfileActionDialogs } from "./StaffProfileActionDialogs";
 
@@ -9,6 +11,8 @@ interface StaffProfileHeaderActionsProps {
 }
 
 export function StaffProfileHeaderActions({ profile, onToast }: StaffProfileHeaderActionsProps) {
+  const navigate = useNavigate();
+  const { requestIntent } = useIntents();
   const [actionsOpen, setActionsOpen] = React.useState(false);
   const [editOpen, setEditOpen] = React.useState(false);
   const [suspendOpen, setSuspendOpen] = React.useState(false);
@@ -33,10 +37,22 @@ export function StaffProfileHeaderActions({ profile, onToast }: StaffProfileHead
   }, [actionsOpen]);
 
   const firstName = profile.name.split(" ")[0];
+  const openRouteIntent = (to: "/rota" | "/leave", intent: "rota.addShift" | "leave.new") => {
+    navigate({ to });
+    requestIntent(intent);
+  };
 
   const menuItems = [
-    { icon: Plus, label: "Add a shift", action: () => onToast("Shift modal — connect to rota") },
-    { icon: Plane, label: "Log leave", action: () => onToast("Leave modal — connect to leave") },
+    {
+      icon: Plus,
+      label: "Add a shift",
+      action: () => openRouteIntent("/rota", "rota.addShift"),
+    },
+    {
+      icon: Plane,
+      label: "Log leave",
+      action: () => openRouteIntent("/leave", "leave.new"),
+    },
     { icon: Clock, label: "Adjust timesheet", action: () => onToast("Adjustment modal (demo)") },
     null,
     { icon: Edit2, label: "Edit details", action: () => setEditOpen(true) },
