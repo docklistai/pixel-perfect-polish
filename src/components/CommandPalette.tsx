@@ -7,23 +7,7 @@
  */
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Home,
-  CalendarDays,
-  Users,
-  Clock,
-  CalendarOff,
-  MessageSquare,
-  Wrench,
-  BarChart3,
-  Settings as SettingsIcon,
-  Plus,
-  UserPlus,
-  Send,
-  Sparkles,
-  Moon,
-  CheckCircle2,
-} from "lucide-react";
+import { Sparkles, Moon } from "lucide-react";
 import { DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import {
   CommandDialog,
@@ -35,109 +19,14 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
-import { useIntents, type IntentName } from "@/lib/interactionIntents";
+import { useIntents } from "@/lib/interactionIntents";
 import { useOverlays } from "./AppShortcuts";
-
-type NavTarget =
-  | "/"
-  | "/rota"
-  | "/staff"
-  | "/time"
-  | "/leave"
-  | "/team"
-  | "/ops"
-  | "/reports"
-  | "/settings";
-
-interface NavItem {
-  label: string;
-  to: NavTarget;
-  icon: React.ComponentType<{ className?: string }>;
-  shortcut?: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: "Home", to: "/", icon: Home, shortcut: "G H" },
-  { label: "Rota", to: "/rota", icon: CalendarDays, shortcut: "G R" },
-  { label: "Staff", to: "/staff", icon: Users, shortcut: "G S" },
-  { label: "Time", to: "/time", icon: Clock, shortcut: "G T" },
-  { label: "Leave", to: "/leave", icon: CalendarOff, shortcut: "G L" },
-  { label: "Team", to: "/team", icon: MessageSquare },
-  { label: "Ops", to: "/ops", icon: Wrench },
-  { label: "Reports", to: "/reports", icon: BarChart3 },
-  { label: "Settings", to: "/settings", icon: SettingsIcon },
-];
-
-interface QuickAction {
-  label: string;
-  hint: string;
-  icon: React.ComponentType<{ className?: string }>;
-  to: NavTarget;
-  intent?: IntentName;
-}
-
-const QUICK_ACTIONS: QuickAction[] = [
-  {
-    label: "Publish rota",
-    hint: "Open the publish dialog",
-    icon: Send,
-    to: "/rota",
-    intent: "rota.publish",
-  },
-  {
-    label: "Generate rota draft",
-    hint: "Open the rota generator",
-    icon: Sparkles,
-    to: "/rota",
-    intent: "rota.generate",
-  },
-  {
-    label: "Review publish readiness",
-    hint: "Check the rota before publishing",
-    icon: CheckCircle2,
-    to: "/rota",
-    intent: "rota.publish",
-  },
-  {
-    label: "Add a shift",
-    hint: "Open the add shift surface",
-    icon: Plus,
-    to: "/rota",
-    intent: "rota.addShift",
-  },
-  {
-    label: "Add team member",
-    hint: "Open the invite dialog",
-    icon: UserPlus,
-    to: "/staff",
-    intent: "staff.add",
-  },
-  {
-    label: "Review leave requests",
-    hint: "Open the leave inbox",
-    icon: CalendarOff,
-    to: "/leave",
-  },
-  {
-    label: "New leave request",
-    hint: "Open the new leave form",
-    icon: CalendarOff,
-    to: "/leave",
-    intent: "leave.new",
-  },
-  {
-    label: "Open timesheets",
-    hint: "Review clocked hours",
-    icon: Clock,
-    to: "/time",
-  },
-  {
-    label: "Open settings",
-    hint: "Workspace settings",
-    icon: SettingsIcon,
-    to: "/settings",
-  },
-];
+import {
+  COMMAND_NAV_ITEMS,
+  COMMAND_QUICK_ACTIONS,
+  type CommandQuickAction,
+  type NavTarget,
+} from "./commandPaletteData";
 
 function readTheme(): "light" | "dark" {
   if (typeof document === "undefined") return "dark";
@@ -178,7 +67,7 @@ export function CommandPalette({
   );
 
   const runAction = React.useCallback(
-    (action: QuickAction) => {
+    (action: CommandQuickAction) => {
       onOpenChange(false);
       navigate({ to: action.to });
       if (action.intent) {
@@ -210,7 +99,7 @@ export function CommandPalette({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigate">
-          {NAV_ITEMS.map((item) => {
+          {COMMAND_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
               <CommandItem
@@ -227,7 +116,7 @@ export function CommandPalette({
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Actions">
-          {QUICK_ACTIONS.map((action) => {
+          {COMMAND_QUICK_ACTIONS.map((action) => {
             const Icon = action.icon;
             return (
               <CommandItem
