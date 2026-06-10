@@ -13,6 +13,7 @@ import { Users, CheckCircle2, UserPlus, AlertTriangle, Plus, Filter } from "luci
 import { rows } from "@/features/staff/data/mockStaffData";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { StaffTable } from "@/features/staff/components/StaffTable";
+import type { StaffAttentionFilter } from "@/features/staff/components/StaffTable";
 import { useStaffPanelState } from "@/features/staff/hooks/useStaffPanelState";
 import type { StaffRow } from "@/features/staff/types";
 import {
@@ -104,6 +105,7 @@ function StaffListPage() {
   const [query, setQuery] = React.useState("");
   const [deptFilter, setDeptFilter] = React.useState("All");
   const [statusFilter, setStatusFilter] = React.useState("All");
+  const [attentionFilter, setAttentionFilter] = React.useState<StaffAttentionFilter>("all");
 
   React.useEffect(() => {
     if (!addOpen) setInvitePrepared(false);
@@ -136,13 +138,18 @@ function StaffListPage() {
                 <DropdownMenuItem onSelect={() => setStatusFilter("Probation")}>
                   Onboarding only
                 </DropdownMenuItem>
-                <DropdownMenuItem>Missing documents</DropdownMenuItem>
-                <DropdownMenuItem>Outside availability</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setAttentionFilter("missing-documents")}>
+                  Missing documents
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setAttentionFilter("outside-availability")}>
+                  Outside availability
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={() => {
                     setDeptFilter("All");
                     setStatusFilter("All");
+                    setAttentionFilter("all");
                     setQuery("");
                   }}
                 >
@@ -187,6 +194,7 @@ function StaffListPage() {
             onDeptChange={setDeptFilter}
             statusFilter={statusFilter}
             onStatusChange={setStatusFilter}
+            attentionFilter={attentionFilter}
             onSelectMember={handleSelectMember}
           />
         </div>

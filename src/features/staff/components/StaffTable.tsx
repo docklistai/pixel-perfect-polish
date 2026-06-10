@@ -4,7 +4,10 @@ import { Card, EmptyState } from "@/components/dl";
 import { StaffFilterBar } from "./StaffFilterBar";
 import { StaffBulkBar } from "./StaffBulkBar";
 import { StaffTableRow } from "./StaffTableRow";
+import { mockStaffProfiles } from "../data/mockStaffProfiles";
 import type { StaffRow } from "../types";
+
+export type StaffAttentionFilter = "all" | "missing-documents" | "outside-availability";
 
 interface StaffTableProps {
   rows: StaffRow[];
@@ -15,6 +18,7 @@ interface StaffTableProps {
   onDeptChange: (d: string) => void;
   statusFilter: string;
   onStatusChange: (s: string) => void;
+  attentionFilter: StaffAttentionFilter;
   onSelectMember: (row: StaffRow) => void;
 }
 
@@ -29,6 +33,7 @@ export function StaffTable({
   onDeptChange,
   statusFilter,
   onStatusChange,
+  attentionFilter,
   onSelectMember,
 }: StaffTableProps) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
@@ -40,6 +45,13 @@ export function StaffTable({
       rows.filter((r) => {
         if (deptFilter !== "All" && r.dept !== deptFilter) return false;
         if (statusFilter !== "All" && r.status !== statusFilter) return false;
+        const profile = mockStaffProfiles[r.id];
+        if (attentionFilter === "missing-documents" && !profile?.documentsSummary.missing) {
+          return false;
+        }
+        if (attentionFilter === "outside-availability" && !profile?.availability.conflicts) {
+          return false;
+        }
         const q = query.trim().toLowerCase();
         if (!q) return true;
         return (
@@ -49,7 +61,7 @@ export function StaffTable({
           r.dept.toLowerCase().includes(q)
         );
       }),
-    [rows, query, deptFilter, statusFilter],
+    [rows, query, deptFilter, statusFilter, attentionFilter],
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
@@ -58,7 +70,7 @@ export function StaffTable({
 
   React.useEffect(() => {
     setPage(1);
-  }, [query, deptFilter, statusFilter]);
+  }, [query, deptFilter, statusFilter, attentionFilter]);
 
   function toast(msg: string) {
     setActionToast(msg);
