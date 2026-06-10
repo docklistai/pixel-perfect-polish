@@ -151,8 +151,8 @@ export function LeaveActionDialogs({
               </div>
             </div>
             <label className="row gap-2 mt-3 txt-sm">
-              <input type="checkbox" defaultChecked /> Notify {decisionRequest.n} by push
-              notification
+              <input type="checkbox" defaultChecked /> Prepare a staff-app update for{" "}
+              {decisionRequest.n}
             </label>
             <label className="row gap-2 mt-2 txt-sm">
               <input type="checkbox" /> Mark these days as unavailable on the rota

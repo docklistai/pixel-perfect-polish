@@ -21,15 +21,35 @@ type WeekShift = {
 };
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-const WEEK_LABELS = [
-  "Mon 12 May",
-  "Tue 13 May",
-  "Wed 14 May",
-  "Thu 15 May",
-  "Fri 16 May",
-  "Sat 17 May",
-  "Sun 18 May",
-];
+const WEEK_LABELS_MAP: Record<number, string[]> = {
+  [-1]: [
+    "Mon 5 May",
+    "Tue 6 May",
+    "Wed 7 May",
+    "Thu 8 May",
+    "Fri 9 May",
+    "Sat 10 May",
+    "Sun 11 May",
+  ],
+  [0]: [
+    "Mon 12 May",
+    "Tue 13 May",
+    "Wed 14 May",
+    "Thu 15 May",
+    "Fri 16 May",
+    "Sat 17 May",
+    "Sun 18 May",
+  ],
+  [1]: [
+    "Mon 19 May",
+    "Tue 20 May",
+    "Wed 21 May",
+    "Thu 22 May",
+    "Fri 23 May",
+    "Sat 24 May",
+    "Sun 25 May",
+  ],
+};
 const BLOCKS = [
   { start: "07:00", end: "15:00", label: "Day" },
   { start: "08:00", end: "16:00", label: "Morning" },
@@ -38,11 +58,12 @@ const BLOCKS = [
   { start: "11:00", end: "19:00", label: "Mid" },
 ];
 
-function buildWeeklySchedule(profile: StaffProfile): WeekShift[] {
+function buildWeeklySchedule(profile: StaffProfile, weekOffset: number): WeekShift[] {
   const seed = profile.id.charCodeAt(1) || 1;
+  const labels = WEEK_LABELS_MAP[weekOffset] ?? WEEK_LABELS_MAP[0]!;
 
-  return WEEK_LABELS.map((date, i) => {
-    const base = (seed + i) % 7;
+  return labels.map((date, i) => {
+    const base = (seed + i + Math.abs(weekOffset)) % 7;
     if (base === 4) {
       return {
         date,
@@ -54,15 +75,20 @@ function buildWeeklySchedule(profile: StaffProfile): WeekShift[] {
       };
     }
 
-    const block = BLOCKS[(seed + i) % BLOCKS.length];
+    const block = BLOCKS[(seed + i + Math.abs(weekOffset)) % BLOCKS.length]!;
     return {
       date,
       start: block.start,
       end: block.end,
       label: block.label,
       hours: 8,
-      status: i < 3 ? "published" : "draft",
-      flag: base === 5 ? "conflict" : base === 6 ? "tight-rest" : undefined,
+      status:
+        weekOffset === -1
+          ? ("published" as const)
+          : i < 3
+            ? ("published" as const)
+            : ("draft" as const),
+      flag: base === 5 ? ("conflict" as const) : base === 6 ? ("tight-rest" as const) : undefined,
     };
   });
 }
@@ -76,10 +102,17 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
   const navigate = useNavigate();
   const { requestIntent } = useIntents();
   const [weekOffset, setWeekOffset] = React.useState(0);
-  const shifts = React.useMemo(() => buildWeeklySchedule(profile), [profile]);
+  const shifts = React.useMemo(
+    () => buildWeeklySchedule(profile, weekOffset),
+    [profile, weekOffset],
+  );
   const weekly = profile.weeklyHours ?? [7.5, 8, 7, 0, 8, 6.5, 0];
   const weekTitle =
-    weekOffset === 0 ? "This week · 12–18 May" : weekOffset < 0 ? "Last week" : "Next week";
+    weekOffset === 0
+      ? "This week · 12–18 May"
+      : weekOffset < 0
+        ? "Last week · 5–11 May"
+        : "Next week · 19–25 May";
 
   return (
     <div className="space-y-4 min-w-0">

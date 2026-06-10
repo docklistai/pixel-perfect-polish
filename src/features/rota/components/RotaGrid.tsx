@@ -8,7 +8,13 @@ import {
   type RotaGridDay,
   type ShiftActionHandlers,
 } from "./grid";
-import type { RotaGridOpenRow, RotaGridStaffRow } from "../types";
+import type {
+  RotaGridOpenRow,
+  RotaGridStaffRow,
+  DraftShift,
+  DraftShiftInput,
+  ShiftId,
+} from "../types";
 
 export function RotaGrid({
   days,
@@ -27,6 +33,8 @@ export function RotaGrid({
   onShiftDuplicate,
   onShiftRemove,
   onShiftMarkOpen,
+  onShiftAdd,
+  onShiftUpdate,
 }: {
   days: RotaGridDay[];
   staffRows: RotaGridStaffRow[];
@@ -40,6 +48,8 @@ export function RotaGrid({
   scheduleDescId: string;
   onStaffSearchChange: (value: string) => void;
   onClearFilters: () => void;
+  onShiftAdd?: (input: DraftShiftInput) => void;
+  onShiftUpdate?: (shiftId: ShiftId, patch: Partial<DraftShift>) => void;
 } & ShiftActionHandlers) {
   const handlers = React.useMemo<ShiftActionHandlers>(
     () => ({
@@ -47,8 +57,10 @@ export function RotaGrid({
       onShiftDuplicate,
       onShiftRemove,
       onShiftMarkOpen,
+      onShiftAdd,
+      onShiftUpdate,
     }),
-    [onShiftDuplicate, onShiftMarkOpen, onShiftOpen, onShiftRemove],
+    [onShiftDuplicate, onShiftMarkOpen, onShiftOpen, onShiftRemove, onShiftAdd, onShiftUpdate],
   );
   const totalOpenShifts = React.useMemo(
     () => openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0),

@@ -127,6 +127,10 @@ export const trainingItems: TeamTrainingItem[] = [
     w: "Today",
     icon: GraduationCap,
     tone: "info",
+    source: "Manager-scheduled",
+    assigned: "FOH",
+    mandatory: false,
+    complete: "8 / 12",
   },
   {
     t: "Food Safety Refresher",
@@ -134,6 +138,10 @@ export const trainingItems: TeamTrainingItem[] = [
     w: "3 days",
     icon: Shield,
     tone: "warning",
+    source: "Staff training requirements",
+    assigned: "FOH + Kitchen",
+    mandatory: true,
+    complete: "14 / 18",
   },
   {
     t: "Cocktail Masterclass",
@@ -141,6 +149,10 @@ export const trainingItems: TeamTrainingItem[] = [
     w: "7 days",
     icon: Wine,
     tone: "purple",
+    source: "Manager-scheduled",
+    assigned: "Bar",
+    mandatory: false,
+    complete: "4 / 6",
   },
 ];
 

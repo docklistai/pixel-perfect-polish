@@ -7,7 +7,7 @@ import type { Tone } from "@/components/dl";
 interface Props {
   items: AttentionItem[];
   total: number;
-  onAlertClick: () => void;
+  onAlertClick: (index: number) => void;
 }
 
 export function DashboardAttentionPanel({ items, total, onAlertClick }: Props) {
@@ -18,14 +18,14 @@ export function DashboardAttentionPanel({ items, total, onAlertClick }: Props) {
         <StatusBadge tone="warning">{total}</StatusBadge>
       </div>
       <div className="mt-3 space-y-2">
-        {items.map((a) => {
+        {items.map((a, idx) => {
           const tone = (a.tone ?? "warning") as Tone;
           const Icon = a.icon ?? AlertTriangle;
           return (
             <button
               key={a.t}
               type="button"
-              onClick={onAlertClick}
+              onClick={() => onAlertClick(idx)}
               className="flex w-full items-start gap-3 rounded-[10px] border border-border px-3 py-2.5 text-left transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               <div
@@ -47,7 +47,7 @@ export function DashboardAttentionPanel({ items, total, onAlertClick }: Props) {
       </div>
       <button
         type="button"
-        onClick={onAlertClick}
+        onClick={() => onAlertClick(0)}
         className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand"
       >
         View all alerts ({total}) <ArrowRight className="h-3 w-3" aria-hidden />

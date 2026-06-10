@@ -1,10 +1,10 @@
 import { Card } from "@/components/dl";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, type LucideIcon } from "lucide-react";
 import { toneBg } from "../types";
 import { insights } from "../data/reportsDemoData";
 
 interface ReportsInsightsPanelProps {
-  onOpenDetail: () => void;
+  onOpenDetail: (insight: { t: string; s: string; icon: LucideIcon }) => void;
 }
 
 export function ReportsInsightsPanel({ onOpenDetail }: ReportsInsightsPanelProps) {
@@ -19,8 +19,8 @@ export function ReportsInsightsPanel({ onOpenDetail }: ReportsInsightsPanelProps
           <button
             key={ins.t}
             type="button"
-            className="flex w-full gap-3 rounded-xl text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={onOpenDetail}
+            className="flex w-full gap-3 rounded-xl text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring p-2 -m-2"
+            onClick={() => onOpenDetail(ins)}
           >
             <div
               className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${toneBg[ins.tone]}`}

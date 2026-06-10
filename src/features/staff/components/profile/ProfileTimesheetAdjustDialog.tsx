@@ -64,7 +64,20 @@ export function ProfileTimesheetAdjustDialog({ profileName, row, onOpenChange, o
           </div>
         </div>
         <div className="field col-span-2">
-          <label htmlFor="timesheet-reason">Reason for adjustment</label>
+          <label htmlFor="timesheet-reason-select">Reason category</label>
+          <select
+            id="timesheet-reason-select"
+            className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-brand"
+          >
+            <option value="worked-late">Worked late (approved by manager)</option>
+            <option value="forgot-swipe">Forgot to clock in/out</option>
+            <option value="early-dismiss">Early dismissal (business slow)</option>
+            <option value="break-adjust">Unplanned break deviation</option>
+            <option value="other">Other (explain in notes below)</option>
+          </select>
+        </div>
+        <div className="field col-span-2">
+          <label htmlFor="timesheet-reason">Audit notes</label>
           <textarea
             id="timesheet-reason"
             className="dl-textarea"

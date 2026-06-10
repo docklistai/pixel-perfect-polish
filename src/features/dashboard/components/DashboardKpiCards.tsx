@@ -1,18 +1,19 @@
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { Card } from "@/components/dl";
-import { toast } from "sonner";
 import type { KpiItem } from "../types";
 import { toneBg } from "../types";
 
 interface Props {
   items: KpiItem[];
+  title: string;
+  onKpiClick?: (item: KpiItem) => void;
 }
 
-export function DashboardKpiCards({ items }: Props) {
+export function DashboardKpiCards({ items, title, onKpiClick }: Props) {
   return (
     <Card className="p-5">
       <div className="flex items-center justify-between gap-3">
-        <div className="dock-section-eyebrow">Weekly overview</div>
+        <div className="dock-section-eyebrow">{title}</div>
         <div className="text-xs text-muted-foreground">Vs last week</div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
@@ -20,7 +21,7 @@ export function DashboardKpiCards({ items }: Props) {
           <button
             key={m.label}
             type="button"
-            onClick={() => m.tip && toast.info(m.label, { description: m.tip })}
+            onClick={() => onKpiClick?.(m)}
             className="flex min-w-0 flex-col gap-2 rounded-[10px] p-1 text-left transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
             <div

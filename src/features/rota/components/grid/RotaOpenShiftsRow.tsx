@@ -38,6 +38,9 @@ export function RotaOpenShiftsRow({
           context="open"
           handlers={handlers}
           openRow
+          staffId={null}
+          staffRole="FOH"
+          dayIndex={dayIndex}
           emptyAriaLabel={`Open shifts, ${days[dayIndex]?.d ?? ""}: none`}
         />
       ))}

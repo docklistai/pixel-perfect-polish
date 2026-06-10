@@ -40,6 +40,10 @@ export interface TeamTrainingItem {
   w: string;
   icon: LucideIcon;
   tone: Tone;
+  source?: string;
+  assigned?: string;
+  mandatory?: boolean;
+  complete?: string;
 }
 
 export interface TeamBirthdayItem {

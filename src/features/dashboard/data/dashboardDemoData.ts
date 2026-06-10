@@ -4,6 +4,8 @@ import {
   Star,
   Calendar,
   Clock3,
+  Clock,
+  Percent,
   Megaphone,
   AlertTriangle,
   Plane,
@@ -66,6 +68,54 @@ export const kpiItems: KpiItem[] = [
     up: true,
     tone: "warning",
     tip: "Scheduled vs role requirement. 100% = fully staffed.",
+  },
+];
+
+export const todayKpiItems: KpiItem[] = [
+  {
+    icon: Users,
+    label: "On shift today",
+    value: "28",
+    delta: "96% coverage",
+    up: true,
+    tone: "info",
+    tip: "Staff currently on shift across all departments.",
+  },
+  {
+    icon: Clock,
+    label: "Hours today",
+    value: "168h",
+    delta: "vs 160h target",
+    up: true,
+    tone: "brand",
+    tip: "Total scheduled hours across today's shifts.",
+  },
+  {
+    icon: Percent,
+    label: "Labour % today",
+    value: "28.1%",
+    delta: "0.5pp better",
+    up: false,
+    tone: "success",
+    tip: "Labour cost / projected today's sales.",
+  },
+  {
+    icon: AlertTriangle,
+    label: "Open incidents",
+    value: "2",
+    delta: "1 high priority",
+    up: false,
+    tone: "warning",
+    tip: "Active incidents logged today.",
+  },
+  {
+    icon: Star,
+    label: "Coverage",
+    value: "96%",
+    delta: "2pp vs target",
+    up: true,
+    tone: "warning",
+    tip: "Scheduled vs role requirement today.",
   },
 ];
 

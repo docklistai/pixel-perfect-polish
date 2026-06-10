@@ -1,5 +1,5 @@
 import { Card } from "@/components/dl";
-import { Clock3, Download, Plane, PoundSterling, Trophy } from "lucide-react";
+import { Clock3, Download, Plane, PoundSterling, Trophy, type LucideIcon } from "lucide-react";
 
 const savedReports = [
   { icon: PoundSterling, name: "Weekly labour summary", sub: "Owned by you" },
@@ -9,13 +9,22 @@ const savedReports = [
   { icon: Download, name: "Payroll export May", sub: "Last run 2d ago" },
 ] as const;
 
-export function ReportsSavedReportsCard() {
+interface ReportsSavedReportsCardProps {
+  onOpenReport: (report: { name: string; sub: string; icon: LucideIcon }) => void;
+}
+
+export function ReportsSavedReportsCard({ onOpenReport }: ReportsSavedReportsCardProps) {
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
       <div className="mb-3 text-sm font-semibold">Saved reports</div>
       <div className="space-y-2">
         {savedReports.map((report) => (
-          <div key={report.name} className="row gap-3 w-full rounded-lg px-2.5 py-2 text-left">
+          <button
+            key={report.name}
+            type="button"
+            onClick={() => onOpenReport(report)}
+            className="flex items-center gap-3 w-full rounded-lg px-2.5 py-2 text-left hover:bg-muted/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
             <div className="av av-c8 sm">
               <report.icon className="h-3.5 w-3.5" aria-hidden />
             </div>
@@ -23,7 +32,7 @@ export function ReportsSavedReportsCard() {
               <div className="strong txt-md">{report.name}</div>
               <div className="muted txt-xs">{report.sub}</div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </Card>

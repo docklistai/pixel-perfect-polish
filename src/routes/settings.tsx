@@ -14,7 +14,7 @@ export const Route = createFileRoute("/settings")({
 function SettingsPage() {
   const [dirty, setDirty] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState("Workspace");
+  const [activeTab, setActiveTab] = React.useState("General");
 
   const markDirty = () => {
     setDirty(true);

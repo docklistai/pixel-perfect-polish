@@ -1,4 +1,4 @@
-import type { DraftShift, ShiftId } from "../../types";
+import type { DraftShift, DraftShiftInput, ShiftId } from "../../types";
 
 export type RotaGridDay = {
   d: string;
@@ -13,6 +13,8 @@ export type ShiftActionHandlers = {
   onShiftDuplicate: (shiftId: ShiftId) => void;
   onShiftRemove: (shiftId: ShiftId) => void;
   onShiftMarkOpen: (shiftId: ShiftId) => void;
+  onShiftAdd?: (input: DraftShiftInput) => void;
+  onShiftUpdate?: (shiftId: ShiftId, patch: Partial<DraftShift>) => void;
 };
 
 export type ShiftPillActionHandlers = {

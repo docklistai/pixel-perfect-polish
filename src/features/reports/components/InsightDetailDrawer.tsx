@@ -1,26 +1,259 @@
-import { DrawerShell, FormSection, DetailRow, ActionButton } from "@/components/dl";
+import * as React from "react";
+import { DrawerShell, ActionButton, StatusBadge } from "@/components/dl";
+import {
+  BarChart2,
+  Star,
+  Download,
+  TrendingUp,
+  AlertTriangle,
+  Users,
+  Clock,
+  Info,
+  Check,
+} from "lucide-react";
+import { toast } from "sonner";
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface ReportDetail {
+  name: string;
+  sub?: string;
+  tag?: string;
+  icon?: React.ComponentType<{ className?: string }>;
 }
 
-export function InsightDetailDrawer({ open, onOpenChange }: Props) {
+interface Props {
+  report: ReportDetail | null;
+  onOpenChange: (open: boolean) => void;
+  onExport?: () => void;
+}
+
+interface ReviewPoint {
+  title: string;
+  body: string;
+  tone: "success" | "warning" | "info";
+  icon: React.ComponentType<{ className?: string }>;
+  reviewed: boolean;
+}
+
+export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
+  const [reviewedPoints, setReviewedPoints] = React.useState<Record<string, boolean>>({});
+
+  const reportData = React.useMemo(() => {
+    if (!report) return null;
+    return {
+      name: report.name,
+      sub: report.sub ?? "Report owned by you · last refreshed 8 min ago",
+      tag: report.tag ?? "Standard",
+      icon: report.icon ?? BarChart2,
+      numbers: [
+        { key: "Period total", value: "£42,180", delta: "−3.2% vs prev", down: false },
+        { key: "Best week", value: "W20", delta: "£10,640", down: false },
+        { key: "Variance", value: "£1,420", delta: "vs target", down: true },
+      ],
+      reviewPoints: [
+        {
+          title: "Labour % is improving",
+          body: "Down 0.8pp vs last 4 weeks — you're tracking ahead of target.",
+          tone: "success" as const,
+          icon: TrendingUp,
+        },
+        {
+          title: "Saturday is spending more than needed",
+          body: "Bar shifts overlap 18:00–22:00. ~£86/week saving available.",
+          tone: "warning" as const,
+          icon: Clock,
+        },
+        {
+          title: "Kitchen ratios look healthy",
+          body: "Daniel, Noah and Emma cover well — no obvious gaps to fill.",
+          tone: "info" as const,
+          icon: Users,
+        },
+      ],
+      breakdown: [
+        { dept: "Front of House", hours: "1,124h", cost: "£14,820", pct: "35%" },
+        { dept: "Kitchen", hours: "892h", cost: "£12,640", pct: "30%" },
+        { dept: "Housekeeping", hours: "640h", cost: "£8,450", pct: "20%" },
+        { dept: "Bar", hours: "240h", cost: "£3,210", pct: "8%" },
+        { dept: "Other", hours: "228h", cost: "£3,060", pct: "7%" },
+      ],
+    };
+  }, [report]);
+
+  if (!report || !reportData) return null;
+
+  const handleSave = () => {
+    toast.success("Saved", {
+      description: `${reportData.name} saved to your library`,
+    });
+  };
+
+  const toggleReviewed = (title: string) => {
+    setReviewedPoints((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
+
+  const IconComponent = reportData.icon;
+
   return (
     <DrawerShell
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Labour % above target"
-      description="Week of 18 May 2026 · Europe/London"
-      footer={<ActionButton onClick={() => onOpenChange(false)}>Close</ActionButton>}
+      open={report !== null}
+      onOpenChange={(open) => {
+        if (!open) onOpenChange(false);
+      }}
+      title={reportData.name}
+      description="Last 4 weeks · All departments"
+      meta={
+        <StatusBadge tone={reportData.tag === "Custom" ? "purple" : "brand"}>
+          {reportData.tag}
+        </StatusBadge>
+      }
+      footer={
+        <div className="flex w-full items-center justify-end gap-2">
+          <ActionButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
+            Close
+          </ActionButton>
+          <ActionButton variant="secondary" size="sm" icon={Star} onClick={handleSave}>
+            Save
+          </ActionButton>
+          {onExport && (
+            <ActionButton variant="secondary" size="sm" icon={Download} onClick={onExport}>
+              Export
+            </ActionButton>
+          )}
+        </div>
+      }
+      width="lg"
     >
-      <FormSection title="Detail">
-        <dl className="divide-y divide-border">
-          <DetailRow label="Actual" value="28.6%" />
-          <DetailRow label="Target" value="27.0%" />
-          <DetailRow label="Driver" value="Kitchen overtime, Sat" />
-        </dl>
-      </FormSection>
+      <div className="space-y-4">
+        {/* Report Header Card */}
+        <div className="flex items-start gap-3">
+          <div className="p-2.5 rounded-xl bg-brand-soft text-brand shrink-0">
+            <IconComponent className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold leading-tight">{reportData.name}</div>
+            <div className="text-xs text-muted-foreground mt-0.5">{reportData.sub}</div>
+          </div>
+        </div>
+
+        {/* Key Numbers Grid Card */}
+        <div className="card p-4 bg-muted/20 border border-border rounded-xl">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+            Key numbers
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {reportData.numbers.map((n, i) => (
+              <div key={i} className="space-y-1">
+                <div className="text-[11px] text-muted-foreground font-medium">{n.key}</div>
+                <div className="text-lg font-bold tracking-tight text-foreground">{n.value}</div>
+                <div
+                  className={`text-[10px] font-semibold ${n.down ? "text-danger" : "text-success"}`}
+                >
+                  {n.delta}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* AI Review Points Panel */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5 mb-1">
+            <TrendingUp className="h-3.5 w-3.5 text-brand" />
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Review points
+            </div>
+          </div>
+          <div className="space-y-2">
+            {reportData.reviewPoints.map((point) => {
+              const isReviewed = reviewedPoints[point.title];
+              const PointIcon = point.icon;
+              return (
+                <button
+                  key={point.title}
+                  type="button"
+                  onClick={() => toggleReviewed(point.title)}
+                  className={`flex w-full items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+                    isReviewed
+                      ? "bg-muted/10 border-border/40 opacity-50"
+                      : "bg-card border-border hover:bg-muted/40"
+                  }`}
+                >
+                  <div
+                    className={`p-1.5 rounded-lg shrink-0 ${
+                      point.tone === "success"
+                        ? "bg-success-soft text-success"
+                        : point.tone === "warning"
+                          ? "bg-warning-soft text-warning"
+                          : "bg-info-soft text-info"
+                    }`}
+                  >
+                    {isReviewed ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : (
+                      <PointIcon className="h-3.5 w-3.5" />
+                    )}
+                  </div>
+                  <div className="space-y-0.5">
+                    <div
+                      className={`text-xs font-semibold ${isReviewed ? "line-through text-muted-foreground" : "text-foreground"}`}
+                    >
+                      {point.title}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground leading-normal">
+                      {point.body}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Department Breakdown Table */}
+        <div className="space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Breakdown
+          </div>
+          <div className="card border border-border/80 rounded-xl overflow-hidden bg-card">
+            <table className="tbl w-full text-xs">
+              <thead>
+                <tr>
+                  <th className="text-left font-semibold text-muted-foreground p-2 px-3 bg-muted/20 border-b border-border">
+                    Department
+                  </th>
+                  <th className="text-left font-semibold text-muted-foreground p-2 border-b border-border">
+                    Hours
+                  </th>
+                  <th className="text-left font-semibold text-muted-foreground p-2 border-b border-border">
+                    Cost
+                  </th>
+                  <th className="text-right font-semibold text-muted-foreground p-2 px-3 border-b border-border">
+                    % of total
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.breakdown.map((row, i) => (
+                  <tr
+                    key={i}
+                    className="hover:bg-muted/20 border-b border-border/40 last:border-b-0"
+                  >
+                    <td className="p-2.5 px-3 font-medium text-foreground">{row.dept}</td>
+                    <td className="p-2.5 font-mono text-muted-foreground">{row.hours}</td>
+                    <td className="p-2.5 font-mono text-muted-foreground">{row.cost}</td>
+                    <td className="p-2.5 px-3 text-right font-mono text-muted-foreground">
+                      {row.pct}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </DrawerShell>
   );
 }

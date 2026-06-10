@@ -1,15 +1,28 @@
-import { LayoutGrid, Users, Shield, Clock, Calendar, Bell, Smile, Cloud } from "lucide-react";
+import {
+  User,
+  LayoutGrid,
+  Users,
+  Shield,
+  Calendar,
+  Clock,
+  Bell,
+  Sparkles,
+  Lock,
+  Tag,
+} from "lucide-react";
 import type { SettingsTab } from "../types";
 
 export const settingsTabs: SettingsTab[] = [
+  { t: "General", s: "Personal preferences", icon: User, group: "Workspace" },
   { t: "Workspace", s: "General workspace settings", icon: LayoutGrid, group: "Workspace" },
   { t: "Locations & teams", s: "Manage teams and departments", icon: Users, group: "Workspace" },
   { t: "Roles & permissions", s: "Set roles and access levels", icon: Shield, group: "Workspace" },
-  { t: "Leave Policies", s: "Configure leave policies", icon: Calendar, group: "Operations" },
+  { t: "Rota & scheduling", s: "Rota rules and targets", icon: Calendar, group: "Operations" },
   { t: "Time & attendance", s: "Rules for time tracking", icon: Clock, group: "Operations" },
   { t: "Notifications", s: "Email and app notifications", icon: Bell, group: "Operations" },
-  { t: "Branding", s: "Customise your brand", icon: Smile, group: "Platform" },
-  { t: "Data & privacy", s: "Export timesheets and rota data", icon: Cloud, group: "Platform" },
+  { t: "AI manager support", s: "AI assistant preferences", icon: Sparkles, group: "Platform" },
+  { t: "Data & privacy", s: "Security and data exports", icon: Lock, group: "Platform" },
+  { t: "Plan & limits", s: "Plan usage and limits", icon: Tag, group: "Platform" },
 ];
 
 export const SETTINGS_GROUPS: ReadonlyArray<{

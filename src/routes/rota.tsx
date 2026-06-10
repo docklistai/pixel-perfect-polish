@@ -182,6 +182,8 @@ function RotaPage() {
               onShiftDuplicate={rota.duplicateShiftAsOpen}
               onShiftRemove={rota.requestRemoveShift}
               onShiftMarkOpen={rota.markShiftOpen}
+              onShiftAdd={rota.addShift}
+              onShiftUpdate={rota.updateShift}
             />
             <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
           </Card>

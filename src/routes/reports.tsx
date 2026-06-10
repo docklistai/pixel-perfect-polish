@@ -2,7 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import { Briefcase, CalendarDays, ChevronDown, Download, Info, Sparkles } from "lucide-react";
+import {
+  Briefcase,
+  CalendarDays,
+  ChevronDown,
+  Download,
+  Info,
+  Sparkles,
+  Plus,
+  BarChart2,
+} from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
@@ -24,7 +33,13 @@ function ReportsPage() {
   const { openAiDrawer } = useOverlays();
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
-  const [insightOpen, setInsightOpen] = React.useState(false);
+  const [selectedReport, setSelectedReport] = React.useState<{
+    name: string;
+    sub?: string;
+    tag?: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  } | null>(null);
+
   return (
     <AppShell>
       <PageHeader
@@ -54,6 +69,15 @@ function ReportsPage() {
             <ActionButton variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
               Export
             </ActionButton>
+            <ActionButton
+              variant="primary"
+              icon={Plus}
+              onClick={() =>
+                setSelectedReport({ name: "New custom report", tag: "Custom", icon: BarChart2 })
+              }
+            >
+              New report
+            </ActionButton>
           </>
         }
       />
@@ -71,20 +95,30 @@ function ReportsPage() {
       </div>
 
       <div className="mt-4">
-        <ReportsInsightsPanel onOpenDetail={() => setInsightOpen(true)} />
+        <ReportsInsightsPanel
+          onOpenDetail={(ins) => setSelectedReport({ name: ins.t, sub: ins.s, icon: ins.icon })}
+        />
       </div>
 
       <div className="mt-4 grid grid-cols-12 gap-5 items-start">
         <TimeApprovalTrend />
         <ReportsTopPerformersCard />
-        <ReportsSavedReportsCard />
+        <ReportsSavedReportsCard onOpenReport={setSelectedReport} />
       </div>
 
       <ReportsCoverageHeatmapCard />
 
       <ReportsFilterDrawer open={filterOpen} onOpenChange={setFilterOpen} />
-      <ReportsExportDialog open={exportOpen} onOpenChange={setExportOpen} />
-      <InsightDetailDrawer open={insightOpen} onOpenChange={setInsightOpen} />
+      <ReportsExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        reportName={selectedReport?.name ?? "weekly_report"}
+      />
+      <InsightDetailDrawer
+        report={selectedReport}
+        onOpenChange={(open) => !open && setSelectedReport(null)}
+        onExport={() => setExportOpen(true)}
+      />
     </AppShell>
   );
 }

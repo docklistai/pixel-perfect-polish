@@ -38,6 +38,9 @@ export function RotaStaffRow({
           day={days[dayIndex]}
           context="staff"
           handlers={handlers}
+          staffId={row.staff.id}
+          staffRole={row.staff.role}
+          dayIndex={dayIndex}
           emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: no shift`}
         />
       ))}

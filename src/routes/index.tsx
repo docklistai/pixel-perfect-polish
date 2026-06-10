@@ -16,8 +16,11 @@ import { DashboardStaffOnShift } from "@/features/dashboard/components/Dashboard
 import { DashboardAnnouncements } from "@/features/dashboard/components/DashboardAnnouncements";
 import { DashboardQuickActions } from "@/features/dashboard/components/DashboardQuickActions";
 import { DashboardAlertDrawer } from "@/features/dashboard/components/DashboardAlertDrawer";
+import { DashboardKpiDetailDrawer } from "@/features/dashboard/components/DashboardKpiDetailDrawer";
+import type { KpiItem } from "@/features/dashboard/types";
 import {
   kpiItems,
+  todayKpiItems,
   attentionItems,
   leaveItems,
   timesheetItems,
@@ -41,10 +44,14 @@ function Home() {
   const { openAiDrawer } = useOverlays();
   const { requestIntent } = useIntents();
   const [alertOpen, setAlertOpen] = React.useState(false);
+  const [selectedAlertIdx, setSelectedAlertIdx] = React.useState(0);
+  const [selectedKpi, setSelectedKpi] = React.useState<KpiItem | null>(null);
   const [summaryDismissed, setSummaryDismissed] = React.useState(false);
   const [filter, setFilter] = React.useState<"today" | "week">("week");
   const [quickOpen, setQuickOpen] = React.useState(false);
+  const [moreOpen, setMoreOpen] = React.useState(false);
   const quickRef = React.useRef<HTMLDivElement>(null);
+  const moreRef = React.useRef<HTMLDivElement>(null);
 
   const runQuickAction = React.useCallback(
     (to: "/" | "/rota" | "/staff" | "/leave" | "/team" | "/ops", intent?: IntentName) => {
@@ -70,6 +77,22 @@ function Home() {
       document.removeEventListener("keydown", onKey);
     };
   }, [quickOpen]);
+
+  React.useEffect(() => {
+    if (!moreOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMoreOpen(false);
+    };
+    document.addEventListener("click", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [moreOpen]);
 
   return (
     <AppShell>
@@ -166,15 +189,57 @@ function Home() {
               </div>
             )}
           </div>
-          <IconButton
-            icon={MoreHorizontal}
-            label="More dashboard actions"
-            onClick={() =>
-              toast.info("Dashboard options", {
-                description: "Dashboard customisation is on the roadmap.",
-              })
-            }
-          />
+          <div className="relative" ref={moreRef}>
+            <IconButton
+              icon={MoreHorizontal}
+              label="More dashboard actions"
+              onClick={() => setMoreOpen((v) => !v)}
+              aria-haspopup="menu"
+              aria-expanded={moreOpen}
+            />
+            {moreOpen && (
+              <div className="popover absolute top-[44px] right-0 z-50 w-52 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="menu-label">Dashboard</div>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    toast.info("Customise dashboard", {
+                      description: "Dashboard layout customisation coming soon.",
+                    });
+                  }}
+                >
+                  Customise dashboard…
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    toast.info("Export snapshot", {
+                      description: "Preparing weekly snapshot export…",
+                    });
+                  }}
+                >
+                  Export snapshot…
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    setSummaryDismissed(false);
+                    toast.info("Hints reset", {
+                      description: "Dashboard hints are visible again.",
+                    });
+                  }}
+                >
+                  Reset hints
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -192,11 +257,18 @@ function Home() {
 
       {/* KPI row + attention rail */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
-        <DashboardKpiCards items={kpiItems} />
+        <DashboardKpiCards
+          items={filter === "today" ? todayKpiItems : kpiItems}
+          title={filter === "today" ? "Today's snapshot" : "Weekly overview"}
+          onKpiClick={setSelectedKpi}
+        />
         <DashboardAttentionPanel
           items={attentionItems}
           total={attentionItems.length}
-          onAlertClick={() => setAlertOpen(true)}
+          onAlertClick={(idx) => {
+            setSelectedAlertIdx(idx);
+            setAlertOpen(true);
+          }}
         />
       </div>
 
@@ -215,7 +287,15 @@ function Home() {
         <DashboardQuickActions items={quickActionItems} />
       </div>
 
-      <DashboardAlertDrawer open={alertOpen} onOpenChange={setAlertOpen} />
+      <DashboardAlertDrawer
+        open={alertOpen}
+        onOpenChange={setAlertOpen}
+        selectedIndex={selectedAlertIdx}
+      />
+      <DashboardKpiDetailDrawer
+        item={selectedKpi}
+        onOpenChange={(open) => !open && setSelectedKpi(null)}
+      />
     </AppShell>
   );
 }
