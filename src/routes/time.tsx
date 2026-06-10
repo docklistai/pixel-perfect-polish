@@ -4,6 +4,7 @@ import { AppShell, PageHeader, ActionButton, IconButton, FilterButton } from "@/
 import { useOverlays } from "@/components/AppShortcuts";
 import {
   Download,
+  Info,
   MoreHorizontal,
   Calendar,
   Users,
@@ -131,12 +132,17 @@ function TimePage() {
               Ask assistant
             </ActionButton>
             <ActionButton icon={Download} onClick={() => setExportOpen(true)}>
-              Preview hours export
+              Export approved hours
             </ActionButton>
             <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
       />
+
+      <div className="guidance-note mb-4">
+        <Info className="h-3 w-3 shrink-0" aria-hidden />
+        Review flagged rows first — exceptions and unapproved entries are highlighted in the table.
+      </div>
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">

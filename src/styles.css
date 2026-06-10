@@ -1476,6 +1476,18 @@
     font-size: 12.5px;
     line-height: 1.55;
   }
+  .guidance-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--st-blue-bg);
+    border: 1px solid var(--st-blue-line);
+    border-radius: 8px;
+    color: var(--st-blue-ink);
+    font-size: 12px;
+  }
+
   .skel {
     background: linear-gradient(90deg, var(--ink-100) 0%, var(--ink-50) 50%, var(--ink-100) 100%);
     background-size: 200% 100%;
