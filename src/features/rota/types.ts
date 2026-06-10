@@ -25,6 +25,12 @@ export type DraftShift = {
   breakMinutes: number;
   tone: ShiftTone;
   status: DraftShiftStatus;
+  /** Manual chip colour override (dept colour preset id). Draft/local only. */
+  colourOverride?: string;
+  /** Department override applied from the cell menu. Draft/local only. */
+  deptOverride?: string;
+  /** Marks the shift as edited in the current draft (amber indicator). */
+  edited?: boolean;
 };
 
 export type PublishedShiftStatus = "scheduled" | "open" | "changed";

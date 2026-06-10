@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Pencil } from "lucide-react";
 
 export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
   return (
@@ -25,6 +25,14 @@ export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
         <span className="rota-legend-chip flex items-center gap-1.5 text-warning">
           <AlertTriangle className="h-3 w-3" aria-hidden />
           Conflict
+        </span>
+        <span className="rota-legend-chip flex items-center gap-1.5">
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" aria-hidden />
+          Edited
+        </span>
+        <span className="rota-legend-chip flex items-center gap-1.5">
+          <Pencil className="h-2.5 w-2.5" aria-hidden />
+          Colour override
         </span>
         <span className="hidden text-muted-foreground/70 lg:inline">
           Click a shift to edit · right-click for actions

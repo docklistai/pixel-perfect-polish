@@ -4,20 +4,24 @@ import { ActionButton, IconButton } from "@/components/dl";
 export function RotaGridToolbar({
   conflictCount,
   openShiftCount,
+  workingTimeAlertCount,
   coveragePct,
   onFilter,
   onGenerateRota,
   onAddShift,
   onViewConflicts,
+  onViewWorkingTime,
   onCopyLastWeek,
 }: {
   conflictCount: number;
   openShiftCount: number;
+  workingTimeAlertCount: number;
   coveragePct: number;
   onFilter: () => void;
   onGenerateRota: () => void;
   onAddShift: () => void;
   onViewConflicts: () => void;
+  onViewWorkingTime: () => void;
   onCopyLastWeek: () => void;
 }) {
   const coverageTone = coveragePct > 110 ? "warning" : coveragePct >= 95 ? "success" : "warning";
@@ -62,6 +66,25 @@ export function RotaGridToolbar({
               aria-hidden
             />
             {openShiftCount} open
+          </button>
+
+          <button
+            type="button"
+            onClick={workingTimeAlertCount > 0 ? onViewWorkingTime : undefined}
+            title="Working-time alerts — rest breaks and weekly limits"
+            className={`rota-toolbar-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${
+              workingTimeAlertCount > 0
+                ? "cursor-pointer bg-accent-purple-soft text-accent-purple hover:bg-accent-purple-soft/80"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${
+                workingTimeAlertCount > 0 ? "bg-accent-purple" : "bg-muted-foreground"
+              }`}
+              aria-hidden
+            />
+            {workingTimeAlertCount} working time
           </button>
 
           <span

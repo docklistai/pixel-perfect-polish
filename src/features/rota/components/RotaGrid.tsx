@@ -32,7 +32,11 @@ export function RotaGrid({
   onShiftOpen,
   onShiftDuplicate,
   onShiftRemove,
+  onShiftClear,
   onShiftMarkOpen,
+  onShiftSetDept,
+  onShiftSetColour,
+  onShiftResetColour,
   onShiftAdd,
   onShiftUpdate,
 }: {
@@ -56,11 +60,26 @@ export function RotaGrid({
       onShiftOpen,
       onShiftDuplicate,
       onShiftRemove,
+      onShiftClear,
       onShiftMarkOpen,
+      onShiftSetDept,
+      onShiftSetColour,
+      onShiftResetColour,
       onShiftAdd,
       onShiftUpdate,
     }),
-    [onShiftDuplicate, onShiftMarkOpen, onShiftOpen, onShiftRemove, onShiftAdd, onShiftUpdate],
+    [
+      onShiftDuplicate,
+      onShiftMarkOpen,
+      onShiftOpen,
+      onShiftRemove,
+      onShiftClear,
+      onShiftSetDept,
+      onShiftSetColour,
+      onShiftResetColour,
+      onShiftAdd,
+      onShiftUpdate,
+    ],
   );
   const totalOpenShifts = React.useMemo(
     () => openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0),
@@ -101,7 +120,10 @@ export function RotaGrid({
 
       <div className="w-full max-w-full min-w-0 overflow-hidden [contain:layout_paint]">
         <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden overscroll-x-contain">
-          <div className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]">
+          <div
+            data-rota-grid
+            className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]"
+          >
             <RotaGridHeader
               days={days}
               staffCount={staffCount}
@@ -111,8 +133,14 @@ export function RotaGrid({
             />
 
             {staffRows.length > 0 ? (
-              staffRows.map((row) => (
-                <RotaStaffRow key={row.staff.id} row={row} days={days} handlers={handlers} />
+              staffRows.map((row, rowIndex) => (
+                <RotaStaffRow
+                  key={row.staff.id}
+                  row={row}
+                  days={days}
+                  handlers={handlers}
+                  rowIndex={rowIndex}
+                />
               ))
             ) : (
               <RotaEmptyState
@@ -127,6 +155,7 @@ export function RotaGrid({
               days={days}
               totalOpenShifts={totalOpenShifts}
               handlers={handlers}
+              rowIndex={staffRows.length}
             />
             <RotaGridFooter days={days} />
           </div>

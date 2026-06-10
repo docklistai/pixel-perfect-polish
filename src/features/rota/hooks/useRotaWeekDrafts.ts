@@ -8,7 +8,7 @@ import {
   fillOpenShiftsWithSuggestions,
   makeDraftShift,
 } from "../lib/draftRota";
-import { duplicateDraftShiftAsOpen } from "../lib/draftActions";
+import { copyShiftToNextDay, duplicateDraftShiftAsOpen } from "../lib/draftActions";
 import { buildPublishedRotaSnapshot } from "../lib/publishedSnapshot";
 import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
 import { getWeekLabel } from "../lib/weekHelpers";
@@ -64,6 +64,20 @@ export function useRotaWeekDrafts() {
 
   const duplicateShiftAsOpen = (id: ShiftId) => {
     mutateShifts((current) => duplicateDraftShiftAsOpen(current, id));
+  };
+
+  const duplicateShiftToNextDay = (id: ShiftId): ShiftId | null => {
+    const source = currentDraft.shifts.find((shift) => shift.id === id);
+    if (!source) return null;
+    const copy = copyShiftToNextDay(source);
+    mutateShifts((current) => [...current, copy]);
+    return copy.id;
+  };
+
+  const restoreShift = (shift: DraftShift) => {
+    mutateShifts((current) =>
+      current.some((existing) => existing.id === shift.id) ? current : [...current, shift],
+    );
   };
 
   const updateShift = (id: ShiftId, patch: Partial<DraftShift>) => {
@@ -185,6 +199,9 @@ export function useRotaWeekDrafts() {
     closeShiftDetail: () => setSelectedShiftId(null),
     addShift,
     duplicateShiftAsOpen,
+    duplicateShiftToNextDay,
+    removeShiftNow,
+    restoreShift,
     updateShift,
     markShiftOpen: (id: ShiftId) =>
       updateShift(id, { staffId: null, status: "open", tone: "open" }),

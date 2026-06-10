@@ -7,10 +7,12 @@ export function RotaStaffRow({
   row,
   days,
   handlers,
+  rowIndex,
 }: {
   row: RotaGridStaffRowData;
   days: RotaGridDay[];
   handlers: ShiftActionHandlers;
+  rowIndex: number;
 }) {
   return (
     <React.Fragment>
@@ -41,6 +43,7 @@ export function RotaStaffRow({
           staffId={row.staff.id}
           staffRole={row.staff.role}
           dayIndex={dayIndex}
+          rowIndex={rowIndex}
           emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: no shift`}
         />
       ))}

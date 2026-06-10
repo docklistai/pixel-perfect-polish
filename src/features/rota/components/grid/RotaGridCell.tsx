@@ -1,7 +1,12 @@
 import * as React from "react";
 import { ShiftCell } from "../ShiftCell";
-import type { RotaGridDay, ShiftActionHandlers } from "./types";
-import type { RotaGridCell as RotaGridCellData, DraftShift, RotaDayIndex } from "../../types";
+import type { RotaGridDay, ShiftActionHandlers, ShiftMenuHandlers } from "./types";
+import type {
+  RotaGridCell as RotaGridCellData,
+  DraftShift,
+  RotaDayIndex,
+  ShiftId,
+} from "../../types";
 import { toast } from "sonner";
 
 interface InlineCellEditorProps {
@@ -95,6 +100,7 @@ export function RotaGridCell({
   staffId,
   staffRole,
   dayIndex,
+  rowIndex,
 }: {
   cell: RotaGridCellData;
   day: RotaGridDay | undefined;
@@ -105,8 +111,10 @@ export function RotaGridCell({
   staffId?: string | null;
   staffRole?: string;
   dayIndex: number;
+  rowIndex: number;
 }) {
   const [isEditing, setIsEditing] = React.useState(false);
+  const [openMenuShiftId, setOpenMenuShiftId] = React.useState<ShiftId | null>(null);
 
   const todayClass = openRow
     ? "border-brand/20 bg-warning-soft/20"
@@ -124,13 +132,11 @@ export function RotaGridCell({
     setIsEditing(false);
     if (val === "off") {
       if (cell.shifts.length > 0) {
-        cell.shifts.forEach((s) => handlers.onShiftRemove(s.id));
-        toast.success("Shift removed");
+        cell.shifts.forEach((s) => handlers.onShiftClear(s.id));
       }
     } else if (val === "open") {
       if (cell.shifts.length > 0) {
         cell.shifts.forEach((s) => handlers.onShiftMarkOpen(s.id));
-        toast.success("Shift set to open");
       } else {
         handlers.onShiftAdd?.({
           dayIndex: dayIndex as RotaDayIndex,
@@ -158,9 +164,10 @@ export function RotaGridCell({
             end: parsed.end,
             status: staffId ? "scheduled" : "open",
             tone: staffId ? "info" : "open",
+            edited: true,
           });
         });
-        toast.success("Shift time updated");
+        toast.success("Shift updated", { description: "Saved to draft" });
       } else {
         handlers.onShiftAdd?.({
           dayIndex: dayIndex as RotaDayIndex,
@@ -176,17 +183,66 @@ export function RotaGridCell({
     }
   };
 
+  const menuHandlers = React.useMemo<ShiftMenuHandlers>(
+    () => ({
+      onEditInline: () => setIsEditing(true),
+      onOpen: handlers.onShiftOpen,
+      onDuplicate: handlers.onShiftDuplicate,
+      onMarkOpen: handlers.onShiftMarkOpen,
+      onSetDept: handlers.onShiftSetDept,
+      onSetColour: handlers.onShiftSetColour,
+      onResetColour: handlers.onShiftResetColour,
+      onClear: handlers.onShiftClear,
+    }),
+    [handlers],
+  );
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // The inline editor owns its keys (↵ save / esc cancel).
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    if (["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(e.key)) {
+      e.preventDefault();
+      const nr =
+        e.key === "ArrowUp" ? rowIndex - 1 : e.key === "ArrowDown" ? rowIndex + 1 : rowIndex;
+      const nc =
+        e.key === "ArrowLeft" ? dayIndex - 1 : e.key === "ArrowRight" ? dayIndex + 1 : dayIndex;
+      const grid = document.querySelector("[data-rota-grid]");
+      const target = grid?.querySelector<HTMLElement>(
+        `[data-gridrow="${nr}"][data-gridcol="${nc}"]`,
+      );
+      target?.focus();
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (firstShift) handlers.onShiftOpen(firstShift.id);
+      else setIsEditing(true);
+    }
+    if (e.key === "F2") {
+      e.preventDefault();
+      setIsEditing(true);
+    }
+    if (e.key === "m" || e.key === "M") {
+      e.preventDefault();
+      if (firstShift) setOpenMenuShiftId(firstShift.id);
+      else setIsEditing(true);
+    }
+  };
+
+  const cellAriaLabel = firstShift
+    ? undefined
+    : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
+
   return (
     <div
       tabIndex={0}
+      role="gridcell"
+      aria-label={cellAriaLabel}
+      data-gridrow={rowIndex}
+      data-gridcol={dayIndex}
       onDoubleClick={() => setIsEditing(true)}
-      onKeyDown={(e) => {
-        if (e.key === "F2") {
-          e.preventDefault();
-          setIsEditing(true);
-        }
-      }}
-      className={`border-b border-l px-2 py-2 select-none outline-none focus-within:ring-2 focus-within:ring-brand/40 ${
+      onKeyDown={handleKeyDown}
+      className={`border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass
       }`}
     >
@@ -200,10 +256,9 @@ export function RotaGridCell({
         <ShiftCell
           shifts={cell.shifts}
           context={context}
-          onOpenShift={handlers.onShiftOpen}
-          onDuplicateShift={handlers.onShiftDuplicate}
-          onRemoveShift={handlers.onShiftRemove}
-          onMarkOpenShift={handlers.onShiftMarkOpen}
+          menuHandlers={menuHandlers}
+          openMenuShiftId={openMenuShiftId}
+          onMenuOpenChange={(shiftId, open) => setOpenMenuShiftId(open ? shiftId : null)}
           emptyAriaLabel={emptyAriaLabel}
         />
       )}

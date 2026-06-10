@@ -1,67 +1,148 @@
-import { Copy, Edit3, MoreHorizontal, Trash2, UserMinus } from "lucide-react";
+import {
+  Briefcase,
+  Copy,
+  Edit3,
+  ExternalLink,
+  History,
+  MoreHorizontal,
+  Tag,
+  Trash2,
+  UserMinus,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DEPT_COLOUR_PRESETS } from "../../lib/deptColours";
 import type { DraftShift } from "../../types";
-import type { ShiftPillActionHandlers } from "./types";
+import type { ShiftMenuHandlers } from "./types";
+
+export const ROTA_DEPT_NAMES = [
+  "Front of House",
+  "Kitchen",
+  "Bar",
+  "Housekeeping",
+  "Events",
+  "Maintenance",
+  "Porter",
+] as const;
+
+const COLOUR_PRESET_LABELS: Record<string, string> = {
+  blue: "Blue",
+  amber: "Amber",
+  purple: "Purple",
+  green: "Green",
+  rose: "Rose",
+  teal: "Teal",
+  slate: "Slate",
+};
 
 export function ShiftActionMenu({
   shift,
   open,
   onOpenChange,
-  onEdit,
-  onDuplicate,
-  onRemove,
-  onMarkOpen,
+  handlers,
 }: {
   shift: DraftShift;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  onEdit: ShiftPillActionHandlers["onOpen"];
-  onDuplicate: ShiftPillActionHandlers["onDuplicate"];
-  onRemove: ShiftPillActionHandlers["onRemove"];
-  onMarkOpen: ShiftPillActionHandlers["onMarkOpen"];
+  handlers: ShiftMenuHandlers;
 }) {
   const isOpen = shift.staffId === null;
+  const hasOverride = Boolean(shift.colourOverride || shift.deptOverride);
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={`Actions for ${shift.role} shift`}
+          aria-label={`Actions for ${shift.role} shift (M)`}
           className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition group-hover:opacity-80 hover:bg-background/80 hover:text-foreground focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           onClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem onSelect={() => onEdit(shift.id)}>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>Shift</DropdownMenuLabel>
+        <DropdownMenuItem onSelect={handlers.onEditInline}>
           <Edit3 className="h-4 w-4" aria-hidden />
-          Edit details
+          Edit inline
+          <DropdownMenuShortcut>↩</DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => onDuplicate(shift.id)}>
+        <DropdownMenuItem onSelect={() => handlers.onOpen(shift.id)}>
+          <ExternalLink className="h-4 w-4" aria-hidden />
+          Open details
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => handlers.onDuplicate(shift.id)}>
           <Copy className="h-4 w-4" aria-hidden />
-          Duplicate as open
+          Duplicate to next day
+          <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         {!isOpen && (
-          <DropdownMenuItem onSelect={() => onMarkOpen(shift.id)}>
+          <DropdownMenuItem onSelect={() => handlers.onMarkOpen(shift.id)}>
             <UserMinus className="h-4 w-4" aria-hidden />
-            Mark as open
+            Mark as open shift
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Briefcase className="mr-2 h-4 w-4" aria-hidden />
+            Change department…
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-48">
+            <DropdownMenuLabel>Change department for this shift</DropdownMenuLabel>
+            {ROTA_DEPT_NAMES.map((dept) => (
+              <DropdownMenuItem key={dept} onSelect={() => handlers.onSetDept(shift.id, dept)}>
+                <Briefcase className="h-4 w-4" aria-hidden />
+                {dept}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Tag className="mr-2 h-4 w-4" aria-hidden />
+            Change chip colour…
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-44">
+            <DropdownMenuLabel>Override chip colour</DropdownMenuLabel>
+            {Object.values(DEPT_COLOUR_PRESETS).map((preset) => (
+              <DropdownMenuItem
+                key={preset.id}
+                onSelect={() => handlers.onSetColour(shift.id, preset.id)}
+              >
+                <span
+                  className={`inline-block h-3 w-3 rounded-[3px] ${preset.swatch}`}
+                  aria-hidden
+                />
+                {COLOUR_PRESET_LABELS[preset.id] ?? preset.id}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        {hasOverride && (
+          <DropdownMenuItem onSelect={() => handlers.onResetColour(shift.id)}>
+            <History className="h-4 w-4" aria-hidden />
+            Reset to default colour
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-danger focus:text-danger"
-          onSelect={() => onRemove(shift.id)}
+          onSelect={() => handlers.onClear(shift.id)}
         >
           <Trash2 className="h-4 w-4" aria-hidden />
-          Remove shift
+          Clear shift
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

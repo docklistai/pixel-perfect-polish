@@ -1,27 +1,26 @@
 import * as React from "react";
-import { AlertTriangle, Plus } from "lucide-react";
+import { AlertTriangle, Pencil, Plus } from "lucide-react";
 import { ShiftActionMenu } from "./grid/ShiftActionMenu";
 import { resolveShiftChipClasses } from "../lib/deptColours";
 import { formatShiftTime } from "../lib/draftRota";
-import type { DraftShift } from "../types";
+import type { ShiftMenuHandlers } from "./grid/types";
+import type { DraftShift, ShiftId } from "../types";
 
 type CellContext = "staff" | "open";
 
 export function ShiftCell({
   shifts,
   context,
-  onOpenShift,
-  onDuplicateShift,
-  onRemoveShift,
-  onMarkOpenShift,
+  menuHandlers,
+  openMenuShiftId,
+  onMenuOpenChange,
   emptyAriaLabel,
 }: {
   shifts: DraftShift[];
   context: CellContext;
-  onOpenShift: (shiftId: DraftShift["id"]) => void;
-  onDuplicateShift: (shiftId: DraftShift["id"]) => void;
-  onRemoveShift: (shiftId: DraftShift["id"]) => void;
-  onMarkOpenShift: (shiftId: DraftShift["id"]) => void;
+  menuHandlers: ShiftMenuHandlers;
+  openMenuShiftId: ShiftId | null;
+  onMenuOpenChange: (shiftId: ShiftId, open: boolean) => void;
   emptyAriaLabel: string;
 }) {
   if (shifts.length === 0) {
@@ -45,10 +44,9 @@ export function ShiftCell({
     return (
       <ShiftPill
         shift={shifts[0]!}
-        onOpen={onOpenShift}
-        onDuplicate={onDuplicateShift}
-        onRemove={onRemoveShift}
-        onMarkOpen={onMarkOpenShift}
+        handlers={menuHandlers}
+        menuOpen={openMenuShiftId === shifts[0]!.id}
+        onMenuOpenChange={onMenuOpenChange}
         compact={false}
       />
     );
@@ -60,10 +58,9 @@ export function ShiftCell({
         <ShiftPill
           key={shift.id}
           shift={shift}
-          onOpen={onOpenShift}
-          onDuplicate={onDuplicateShift}
-          onRemove={onRemoveShift}
-          onMarkOpen={onMarkOpenShift}
+          handlers={menuHandlers}
+          menuOpen={openMenuShiftId === shift.id}
+          onMenuOpenChange={onMenuOpenChange}
           compact
         />
       ))}
@@ -73,56 +70,80 @@ export function ShiftCell({
 
 function ShiftPill({
   shift,
-  onOpen,
-  onDuplicate,
-  onRemove,
-  onMarkOpen,
+  handlers,
+  menuOpen,
+  onMenuOpenChange,
   compact,
 }: {
   shift: DraftShift;
-  onOpen: (shiftId: DraftShift["id"]) => void;
-  onDuplicate: (shiftId: DraftShift["id"]) => void;
-  onRemove: (shiftId: DraftShift["id"]) => void;
-  onMarkOpen: (shiftId: DraftShift["id"]) => void;
+  handlers: ShiftMenuHandlers;
+  menuOpen: boolean;
+  onMenuOpenChange: (shiftId: ShiftId, open: boolean) => void;
   compact: boolean;
 }) {
-  const [menuOpen, setMenuOpen] = React.useState(false);
   const isOpen = shift.staffId === null;
   const isConflict = shift.status === "conflict";
+  const hasOverride = Boolean(shift.colourOverride || shift.deptOverride);
+  const roleLabel = shift.deptOverride ?? shift.role;
   const minH = compact ? "min-h-[31px] py-1" : "min-h-[48px] py-1.5";
   const pillTone = isConflict
     ? "border-warning/70 bg-warning-soft/80 text-foreground shadow-[inset_3px_0_0_hsl(var(--warning))]"
     : isOpen
       ? "border-2 border-dashed border-warning/80 bg-warning-soft/60 text-warning-700"
-      : resolveShiftChipClasses(shift.role);
+      : resolveShiftChipClasses(roleLabel, shift.colourOverride);
+
+  const indicator = isConflict ? (
+    <span
+      className="absolute right-1.5 top-1.5"
+      title="Schedule conflict — resolve before publishing"
+    >
+      <AlertTriangle className="h-3 w-3 text-danger" aria-hidden />
+    </span>
+  ) : shift.edited ? (
+    <span
+      className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-warning"
+      title="Edited in draft"
+      aria-hidden
+    />
+  ) : hasOverride ? (
+    <span className="absolute right-1.5 top-1.5" title="Manual colour override · Reset from menu">
+      <Pencil className="h-2.5 w-2.5 opacity-70" aria-hidden />
+    </span>
+  ) : null;
+
+  const ariaState = `${isConflict ? ", conflict" : ""}${shift.edited ? ", edited in draft" : ""}`;
 
   if (isOpen) {
     return (
       <div className="group relative">
         <button
           type="button"
-          onClick={() => onOpen(shift.id)}
+          onClick={() => handlers.onOpen(shift.id)}
           onContextMenu={(e) => {
             e.preventDefault();
-            setMenuOpen(true);
+            onMenuOpenChange(shift.id, true);
           }}
-          aria-label={`Open shift, ${shift.role}, ${formatShiftTime(shift.start, shift.end)}`}
-          className={`rota-shift-pill flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-xs transition hover:bg-warning-soft/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
+          aria-label={`Open shift, ${roleLabel}, ${formatShiftTime(shift.start, shift.end)}${ariaState}`}
+          className={`rota-shift-pill relative flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-xs transition hover:bg-warning-soft/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
         >
           <div className="font-semibold leading-snug text-warning-700">Open shift</div>
           <div className="flex items-center gap-1 text-[10px] text-warning-700/80">
-            <span className="truncate">{shift.role}</span>
+            <span className="truncate">{roleLabel}</span>
             <Plus className="h-2.5 w-2.5" aria-hidden />
           </div>
+          {shift.edited && (
+            <span
+              className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-warning"
+              title="Edited in draft"
+              aria-hidden
+            />
+          )}
         </button>
         <ShiftActionMenu
           shift={shift}
           open={menuOpen}
-          onOpenChange={setMenuOpen}
-          onEdit={onOpen}
-          onDuplicate={onDuplicate}
-          onRemove={onRemove}
-          onMarkOpen={onMarkOpen}
+          onOpenChange={(open) => onMenuOpenChange(shift.id, open)}
+          handlers={handlers}
         />
       </div>
     );
@@ -132,30 +153,27 @@ function ShiftPill({
     <div className="group relative">
       <button
         type="button"
-        onClick={() => onOpen(shift.id)}
+        onClick={() => handlers.onOpen(shift.id)}
         onContextMenu={(e) => {
           e.preventDefault();
-          setMenuOpen(true);
+          onMenuOpenChange(shift.id, true);
         }}
-        aria-label={`${shift.role}, ${formatShiftTime(shift.start, shift.end)}${isConflict ? ", conflict" : ""}`}
+        aria-label={`${roleLabel}, ${formatShiftTime(shift.start, shift.end)}${ariaState}`}
         className={`rota-shift-pill relative flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-left transition hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
       >
         <div className="font-mono text-xs font-semibold leading-snug tracking-tight">
           {formatShiftTime(shift.start, shift.end)}
         </div>
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          {isConflict && <AlertTriangle className="h-3 w-3 text-warning" aria-hidden />}
-          <span className="truncate">{shift.role}</span>
+          <span className="truncate">{roleLabel}</span>
         </div>
+        {indicator}
       </button>
       <ShiftActionMenu
         shift={shift}
         open={menuOpen}
-        onOpenChange={setMenuOpen}
-        onEdit={onOpen}
-        onDuplicate={onDuplicate}
-        onRemove={onRemove}
-        onMarkOpen={onMarkOpen}
+        onOpenChange={(open) => onMenuOpenChange(shift.id, open)}
+        handlers={handlers}
       />
     </div>
   );

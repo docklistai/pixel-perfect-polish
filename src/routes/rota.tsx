@@ -116,6 +116,120 @@ function RotaPage() {
     });
   };
 
+  const findShift = (shiftId: string) => rota.draftShifts.find((s) => s.id === shiftId);
+  const colourLabel = (presetId: string) =>
+    presetId.charAt(0).toUpperCase() + presetId.slice(1).toLowerCase();
+
+  const handleDuplicateShift = (shiftId: string) => {
+    const newId = rota.duplicateShiftToNextDay(shiftId);
+    if (!newId) return;
+    toast.success("Shift duplicated", {
+      description: "Copied to the next day (draft).",
+      action: {
+        label: "Undo",
+        onClick: () => {
+          rota.removeShiftNow(newId);
+          toast.info("Undone", { description: "Duplicate removed." });
+        },
+      },
+    });
+  };
+
+  const handleMarkShiftOpen = (shiftId: string) => {
+    const prev = findShift(shiftId);
+    rota.markShiftOpen(shiftId);
+    toast.info("Marked as open", {
+      description: "Shift now needs cover (draft).",
+      ...(prev && prev.staffId
+        ? {
+            action: {
+              label: "Undo",
+              onClick: () => {
+                rota.updateShift(shiftId, {
+                  staffId: prev.staffId,
+                  status: "scheduled",
+                  tone: prev.tone === "open" ? "info" : prev.tone,
+                });
+                toast.info("Reverted", { description: "Shift restored." });
+              },
+            },
+          }
+        : {}),
+    });
+  };
+
+  const handleClearShift = (shiftId: string) => {
+    const prev = findShift(shiftId);
+    if (!prev) return;
+    const restored = {
+      ...prev,
+      status: prev.staffId ? ("scheduled" as const) : ("open" as const),
+    };
+    rota.removeShiftNow(shiftId);
+    toast.warning("Shift cleared", {
+      description: "Removed from this week's draft.",
+      action: {
+        label: "Undo",
+        onClick: () => {
+          rota.restoreShift(restored);
+          toast.success("Restored", { description: "Shift restored." });
+        },
+      },
+    });
+  };
+
+  const handleSetShiftDept = (shiftId: string, dept: string) => {
+    const prev = findShift(shiftId)?.deptOverride;
+    rota.updateShift(shiftId, { deptOverride: dept, edited: true });
+    toast.info("Department changed", {
+      description: `Shift set to ${dept} (draft).`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          rota.updateShift(shiftId, { deptOverride: prev });
+          toast.info("Reverted", { description: "Department change undone." });
+        },
+      },
+    });
+  };
+
+  const handleSetShiftColour = (shiftId: string, presetId: string) => {
+    const prev = findShift(shiftId)?.colourOverride;
+    rota.updateShift(shiftId, { colourOverride: presetId });
+    toast.success("Colour overridden", {
+      description: `Chip now shows in ${colourLabel(presetId)}.`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          rota.updateShift(shiftId, { colourOverride: prev });
+          toast.info("Colour reset", { description: "Chip back to previous colour." });
+        },
+      },
+    });
+  };
+
+  const handleResetShiftColour = (shiftId: string) => {
+    const prev = findShift(shiftId);
+    rota.updateShift(shiftId, { colourOverride: undefined, deptOverride: undefined });
+    toast.info("Colour reset", {
+      description: "Chip back to department default.",
+      ...(prev
+        ? {
+            action: {
+              label: "Undo",
+              onClick: () => {
+                rota.updateShift(shiftId, {
+                  colourOverride: prev.colourOverride,
+                  deptOverride: prev.deptOverride,
+                });
+                toast.info("Restored", { description: "Override restored." });
+              },
+            },
+          }
+        : {}),
+    });
+  };
+
   return (
     <AppShell>
       <div className="w-full max-w-full overflow-x-hidden">
@@ -163,11 +277,13 @@ function RotaPage() {
             <RotaGridToolbar
               conflictCount={rota.conflictCount}
               openShiftCount={rota.openShiftCount}
+              workingTimeAlertCount={workingTimeAlertCount}
               coveragePct={rota.coveragePct}
               onFilter={() => setFiltersOpen(true)}
               onGenerateRota={() => setGenerateOpen(true)}
               onAddShift={() => setAddOpen(true)}
               onViewConflicts={() => setConflictOpen(true)}
+              onViewWorkingTime={() => setWorkingTimeOpen(true)}
               onCopyLastWeek={handleCopyLastWeek}
             />
             <RotaGrid
@@ -184,9 +300,13 @@ function RotaPage() {
               onStaffSearchChange={rota.setStaffSearch}
               onClearFilters={rota.clearFilters}
               onShiftOpen={rota.setSelectedShiftId}
-              onShiftDuplicate={rota.duplicateShiftAsOpen}
+              onShiftDuplicate={handleDuplicateShift}
               onShiftRemove={rota.requestRemoveShift}
-              onShiftMarkOpen={rota.markShiftOpen}
+              onShiftClear={handleClearShift}
+              onShiftMarkOpen={handleMarkShiftOpen}
+              onShiftSetDept={handleSetShiftDept}
+              onShiftSetColour={handleSetShiftColour}
+              onShiftResetColour={handleResetShiftColour}
               onShiftAdd={rota.addShift}
               onShiftUpdate={rota.updateShift}
             />
@@ -294,7 +414,7 @@ function RotaPage() {
         onClose={rota.closeShiftDetail}
         onUpdate={rota.updateShift}
         onRemove={rota.requestRemoveShift}
-        onMarkOpen={rota.markShiftOpen}
+        onMarkOpen={handleMarkShiftOpen}
       />
       <ConfirmDialog
         open={Boolean(rota.confirmation)}

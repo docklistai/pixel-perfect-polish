@@ -8,11 +8,13 @@ export function RotaOpenShiftsRow({
   days,
   totalOpenShifts,
   handlers,
+  rowIndex,
 }: {
   openRow: RotaGridOpenRow;
   days: RotaGridDay[];
   totalOpenShifts: number;
   handlers: ShiftActionHandlers;
+  rowIndex: number;
 }) {
   return (
     <>
@@ -41,6 +43,7 @@ export function RotaOpenShiftsRow({
           staffId={null}
           staffRole="FOH"
           dayIndex={dayIndex}
+          rowIndex={rowIndex}
           emptyAriaLabel={`Open shifts, ${days[dayIndex]?.d ?? ""}: none`}
         />
       ))}
