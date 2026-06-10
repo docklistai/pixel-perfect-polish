@@ -3,14 +3,17 @@ import { DrawerShell } from "@/components/dl";
 import { AiChip } from "./AiChip";
 import { AiDrawerBody } from "./AiDrawerBody";
 import { AiDrawerHeader } from "./AiDrawerHeader";
-import { ANSWERS, type Phase, type SimulatedAnswer } from "./aiDrawerData";
+import { matchAnswer, type Phase, type SimulatedAnswer } from "./aiDrawerData";
 
 export function AiDrawer({
   open,
   onOpenChange,
+  initialPrompt = null,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** When set, the drawer opens with this prompt already running (prototype "Suggest fix" flows). */
+  initialPrompt?: string | null;
 }) {
   const [input, setInput] = React.useState("");
   const [phase, setPhase] = React.useState<Phase>("idle");
@@ -38,7 +41,7 @@ export function AiDrawer({
     [],
   );
 
-  const run = (q: string) => {
+  const run = React.useCallback((q: string) => {
     setInput(q);
     setAnswer(null);
     setPhase("running");
@@ -47,10 +50,16 @@ export function AiDrawer({
     }
     timeoutRef.current = window.setTimeout(() => {
       setPhase("answered");
-      setAnswer(ANSWERS[q] ?? ANSWERS.default);
+      setAnswer(matchAnswer(q));
       timeoutRef.current = null;
     }, 900);
-  };
+  }, []);
+
+  React.useEffect(() => {
+    if (open && initialPrompt) {
+      run(initialPrompt);
+    }
+  }, [open, initialPrompt, run]);
 
   const resetConversation = () => {
     setAnswer(null);

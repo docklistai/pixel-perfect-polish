@@ -54,6 +54,16 @@ export const HISTORY = [
   { when: "9 May", q: "Coverage gaps in Housekeeping" },
 ];
 
+/** Resolves a prompt to a simulated answer — exact key first, then intent patterns. */
+export function matchAnswer(q: string): SimulatedAnswer {
+  const exact = ANSWERS[q];
+  if (exact) return exact;
+  const lower = q.toLowerCase();
+  if (lower.startsWith("suggest a fix for the conflict")) return ANSWERS["conflict-fix"]!;
+  if (lower.startsWith("find cover")) return ANSWERS["find-cover"]!;
+  return ANSWERS.default!;
+}
+
 export const ANSWERS: Record<string, SimulatedAnswer> = {
   default: {
     title: "Here's what I'm seeing",
@@ -173,6 +183,52 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
       },
     ],
     actions: [{ label: "Draft a thank-you announcement", icon: Megaphone, primary: true }],
+  },
+  "conflict-fix": {
+    title: "Suggested fix for this conflict",
+    summary:
+      "Two shifts overlap on the same day. The cleanest fix keeps coverage steady without adding hours.",
+    bullets: [
+      {
+        title: "Reassign the later shift",
+        body: "Move the overlapping shift to a colleague in the same department who is under contracted hours this week.",
+        tone: "teal",
+        icon: CheckCircle2,
+      },
+      {
+        title: "Or adjust the times",
+        body: "If both shifts are needed, shorten one so they no longer overlap — keep an 11h rest gap.",
+        tone: "blue",
+        icon: Info,
+      },
+      {
+        title: "Publishing stays blocked until resolved",
+        body: "Conflicts must be cleared (or explicitly acknowledged) before staff see the rota.",
+        tone: "amber",
+        icon: AlertTriangle,
+      },
+    ],
+    actions: [{ label: "Open rota", icon: Calendar, primary: true }],
+  },
+  "find-cover": {
+    title: "Cover options",
+    summary:
+      "Based on availability and contracted hours, two colleagues could take the extra day without new alerts.",
+    bullets: [
+      {
+        title: "Best option — same department",
+        body: "Pick a colleague in the same department who is under contracted hours and has the day free.",
+        tone: "teal",
+        icon: Users,
+      },
+      {
+        title: "Keep the working pattern intact",
+        body: "Avoid giving anyone a 7th day — that just moves the alert to someone else.",
+        tone: "amber",
+        icon: AlertTriangle,
+      },
+    ],
+    actions: [{ label: "Open rota", icon: Calendar, primary: true }],
   },
   "Draft an announcement about Monday's deep clean": {
     title: "Draft — Monday's deep clean briefing",

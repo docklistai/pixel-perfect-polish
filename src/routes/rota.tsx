@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { AppShell, Card, ConfirmDialog, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
 import { useIntentHandler } from "@/lib/interactionIntents";
+import { useOverlays } from "@/components/AppShortcuts";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 import { RotaStatusBanner } from "@/features/rota/components/RotaStatusBanner";
@@ -11,6 +12,7 @@ import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
 import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
+import { IssuesToResolveCard } from "@/features/rota/components/IssuesToResolveCard";
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
 import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
 import { LegendCard } from "@/features/rota/components/LegendCard";
@@ -52,6 +54,7 @@ function publishStateLabel(state: PublishState): string {
 
 function RotaPage() {
   const rota = useRotaDraftController();
+  const { askAssistant } = useOverlays();
   const [addOpen, setAddOpen] = React.useState(false);
   const [publishOpen, setPublishOpen] = React.useState(false);
   const [conflictOpen, setConflictOpen] = React.useState(false);
@@ -195,6 +198,13 @@ function RotaPage() {
               coveragePct={rota.coveragePct}
               onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
             />
+            <LegendCard shifts={rota.draftShifts} />
+            <IssuesToResolveCard
+              conflicts={rota.conflictSummaries}
+              workingTimeAlerts={rota.workingTimeAlertList}
+              onReviewShift={rota.setSelectedShiftId}
+              onAskAssistant={askAssistant}
+            />
             <PublishReadinessCard
               published={rota.published}
               hasUnpublishedChanges={rota.hasUnpublishedChanges}
@@ -208,7 +218,6 @@ function RotaPage() {
               onPublish={() => setPublishOpen(true)}
             />
             <RoleCoverageCard roleCoverage={rota.roleCoverage} />
-            <LegendCard />
           </div>
         </div>
       </div>

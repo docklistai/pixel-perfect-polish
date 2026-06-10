@@ -106,8 +106,12 @@ export function resolveShiftChipClasses(role: string, colourOverride?: string): 
   if (colourOverride && DEPT_COLOUR_PRESETS[colourOverride]) {
     return DEPT_COLOUR_PRESETS[colourOverride]!.chip;
   }
+  return (DEPT_COLOUR_PRESETS[resolvePresetIdForRole(role)] ?? DEPT_COLOUR_PRESETS.slate!).chip;
+}
+
+/** Resolves a shift role to its department colour preset ID (legend counts, swatches). */
+export function resolvePresetIdForRole(role: string): string {
   const roleKey = role.toLowerCase().trim();
   const dept = ROLE_TO_DEPT[roleKey] ?? roleKey;
-  const presetId = DEPT_PRESET[dept] ?? DEPT_PRESET[roleKey] ?? "slate";
-  return (DEPT_COLOUR_PRESETS[presetId] ?? DEPT_COLOUR_PRESETS.slate!).chip;
+  return DEPT_PRESET[dept] ?? DEPT_PRESET[roleKey] ?? "slate";
 }

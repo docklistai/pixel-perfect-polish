@@ -24,6 +24,7 @@ interface OverlayApi {
   openShortcuts: () => void;
   openNotifications: () => void;
   openAiDrawer: () => void;
+  askAssistant: (prompt: string) => void;
   unreadCount: number;
 }
 
@@ -38,6 +39,7 @@ export function useOverlays(): OverlayApi {
       openShortcuts: () => {},
       openNotifications: () => {},
       openAiDrawer: () => {},
+      askAssistant: () => {},
       unreadCount: 0,
     };
   }
@@ -65,6 +67,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
   const [shortcuts, setShortcuts] = React.useState(false);
   const [notifs, setNotifs] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
+  const [aiPrompt, setAiPrompt] = React.useState<string | null>(null);
   const [unreadCount, setUnreadCount] = React.useState(3);
   const navigate = useNavigate();
   const gPending = React.useRef<number | null>(null);
@@ -75,6 +78,10 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       openShortcuts: () => setShortcuts(true),
       openNotifications: () => setNotifs(true),
       openAiDrawer: () => setAiOpen(true),
+      askAssistant: (prompt: string) => {
+        setAiPrompt(prompt);
+        setAiOpen(true);
+      },
       unreadCount,
     }),
     [unreadCount],
@@ -136,7 +143,14 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
           onOpenChange={setNotifs}
           onUnreadCountChange={setUnreadCount}
         />
-        <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
+        <AiDrawer
+          open={aiOpen}
+          initialPrompt={aiPrompt}
+          onOpenChange={(open) => {
+            setAiOpen(open);
+            if (!open) setAiPrompt(null);
+          }}
+        />
       </OverlayContext.Provider>
     </InteractionIntentProvider>
   );
