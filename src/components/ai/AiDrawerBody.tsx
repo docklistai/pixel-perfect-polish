@@ -51,7 +51,7 @@ export function AiDrawerBody({
           </div>
           <div className="text-xs mt-2 flex items-center gap-1" style={{ color: "var(--ink-500)" }}>
             <Info className="h-3 w-3" />
-            Suggestions are based on your demo data. Nothing is sent to staff.
+            Suggestions only — nothing is shared with staff until you act on them.
           </div>
         </div>
       </div>
