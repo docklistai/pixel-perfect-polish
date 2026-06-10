@@ -28,15 +28,18 @@ function SettingsPage() {
         subtitle="Your workspace, teams, scheduling rules, and assistant preferences."
         actions={
           <>
+            <span className="guidance-note" style={{ marginRight: 4 }}>
+              Changes apply to <strong>Harbour View Hotel</strong>
+            </span>
             <ActionButton
-              variant="secondary"
+              variant="ghost"
               disabled={!dirty}
               onClick={() => {
                 setDirty(false);
                 setSaved(false);
               }}
             >
-              Discard changes
+              Discard
             </ActionButton>
             <ActionButton
               disabled={!dirty}

@@ -132,16 +132,12 @@ function StaffListPage() {
                 </ActionButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-56">
-                <DropdownMenuLabel>Staff filters</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => setDeptFilter("Front of House")}>
-                  Front of House
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => setDeptFilter("Kitchen")}>
-                  Kitchen
-                </DropdownMenuItem>
+                <DropdownMenuLabel>Filters</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={() => setStatusFilter("Probation")}>
-                  Probation
+                  Onboarding only
                 </DropdownMenuItem>
+                <DropdownMenuItem>Missing documents</DropdownMenuItem>
+                <DropdownMenuItem>Outside availability</DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={() => {
@@ -150,7 +146,7 @@ function StaffListPage() {
                     setQuery("");
                   }}
                 >
-                  Clear filters
+                  Clear all
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
