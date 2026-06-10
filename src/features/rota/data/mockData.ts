@@ -53,7 +53,7 @@ export const staff: StaffMember[] = [
   { id: "noah-evans", name: "Noah Evans", role: "Porter", hrs: "15h", img: 33, tone: "success" },
 ];
 
-export type SeedShift = Omit<DraftShift, "id">;
+export type SeedShift = Omit<DraftShift, "id" | "breakMinutes">;
 
 const sched = (
   staffId: string | null,

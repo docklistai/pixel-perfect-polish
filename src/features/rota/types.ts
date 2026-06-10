@@ -22,6 +22,7 @@ export type DraftShift = {
   start: string;
   /** 24-hour HH:MM. May wrap past midnight (e.g. start "16:00", end "00:00"). */
   end: string;
+  breakMinutes: number;
   tone: ShiftTone;
   status: DraftShiftStatus;
 };
@@ -64,6 +65,7 @@ export type DraftShiftInput = {
   role: string;
   start: string;
   end: string;
+  breakMinutes?: number;
   tone?: ShiftTone;
   status?: DraftShiftStatus;
 };

@@ -22,7 +22,7 @@ export function isRotaDayIndex(value: number): value is RotaDayIndex {
 }
 
 export function createInitialDraftShifts(seeds: SeedShift[]): DraftShift[] {
-  return seeds.map((seed) => ({ ...seed, id: makeShiftId() }));
+  return seeds.map((seed) => ({ ...seed, id: makeShiftId(), breakMinutes: 30 }));
 }
 
 export function makeDraftShift(input: DraftShiftInput): DraftShift {
@@ -35,6 +35,7 @@ export function makeDraftShift(input: DraftShiftInput): DraftShift {
     role: input.role,
     start: input.start,
     end: input.end,
+    breakMinutes: input.breakMinutes ?? 30,
     tone,
     status,
   };

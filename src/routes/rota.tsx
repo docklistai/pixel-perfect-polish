@@ -23,6 +23,7 @@ import { RotaFiltersDrawer } from "@/features/rota/components/RotaFiltersDrawer"
 import { TemplatesDialog } from "@/features/rota/components/TemplatesDialog";
 import { CoverageDetailsDrawer } from "@/features/rota/components/CoverageDetailsDrawer";
 import { WorkingTimeDetailsDrawer } from "@/features/rota/components/WorkingTimeDetailsDrawer";
+import { PublishRotaDialog } from "@/features/rota/components/PublishRotaDialog";
 
 export const Route = createFileRoute("/rota")({
   head: () => ({ meta: [{ title: "Rota — Docklist" }] }),
@@ -82,9 +83,14 @@ function RotaPage() {
     rota.setSelectedShiftId(shiftId);
     setConflictOpen(false);
   };
-  const handlePublish = () => {
+  const handlePublish = (prepareStaffUpdate: boolean) => {
     rota.handlePublish();
     setPublishOpen(false);
+    toast.success("Rota published", {
+      description: prepareStaffUpdate
+        ? "Published snapshot ready. Staff-app update prepared for review."
+        : "Staff see the published snapshot the next time they open the app.",
+    });
   };
   const confirmationTone =
     rota.confirmation?.kind === "remove" || rota.confirmation?.kind === "clear"
@@ -102,14 +108,6 @@ function RotaPage() {
         : "No open shifts could be filled from the current staff list.",
     );
   };
-
-  const publishTitle = hasReadinessIssues
-    ? `Publish rota with ${readinessIssueCount} unresolved issue${readinessIssueCount === 1 ? "" : "s"}?`
-    : `Publish rota for w/c ${rota.weekLabel}?`;
-  const publishDescription = hasReadinessIssues
-    ? `${rota.openShiftCount} open shift${rota.openShiftCount === 1 ? "" : "s"}, ${rota.conflictCount} conflict${rota.conflictCount === 1 ? "" : "s"}, and ${workingTimeAlertCount} working time alert${workingTimeAlertCount === 1 ? "" : "s"} remain. Staff should only see the published rota, so publish with issues only if the team is ready for this version.`
-    : "Staff should only see the published rota. Publish when this week is ready for the team.";
-  const publishConfirmLabel = hasReadinessIssues ? "Publish with issues" : "Publish rota";
 
   return (
     <AppShell>
@@ -227,14 +225,17 @@ function RotaPage() {
         conflicts={rota.conflictSummaries}
         onReviewShift={reviewConflictShift}
       />
-      <ConfirmDialog
+      <PublishRotaDialog
         open={publishOpen}
         onOpenChange={setPublishOpen}
-        title={publishTitle}
-        description={publishDescription}
-        confirmLabel={publishConfirmLabel}
-        cancelLabel="Keep reviewing"
-        tone={hasReadinessIssues ? "danger" : "brand"}
+        weekLabel={rota.weekLabel}
+        staffCount={rota.staff.length}
+        assignedShiftCount={rota.assignedShiftCount}
+        plannedShiftCount={rota.plannedShiftCount}
+        coveragePct={rota.coveragePct}
+        conflictCount={rota.conflictCount}
+        openShiftCount={rota.openShiftCount}
+        workingTimeAlertCount={workingTimeAlertCount}
         onConfirm={handlePublish}
       />
       <GenerateRotaDialog

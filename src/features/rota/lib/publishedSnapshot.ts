@@ -8,7 +8,6 @@ import type {
 import { getWeekDateIsoLabels, getWeekDayLabels, getWeekStartIso } from "./weekHelpers";
 
 const STAFF_SAFE_LOCATION = "Harbour View Hotel";
-const DEFAULT_BREAK_MINUTES = 30;
 const DEFAULT_WORKSPACE_ID = "harbour-view";
 const DEFAULT_PUBLISHER = { id: "sophie-carter" as StaffId, name: "Sophie Carter" };
 
@@ -33,6 +32,7 @@ function didShiftChange(
     previous.role !== shift.role ||
     previous.start !== shift.start ||
     previous.end !== shift.end ||
+    previous.breakMinutes !== shift.breakMinutes ||
     previous.dayIndex !== shift.dayIndex
   );
 }
@@ -79,7 +79,7 @@ export function buildPublishedRotaSnapshot({
         start: shift.start,
         end: shift.end,
         location: STAFF_SAFE_LOCATION,
-        breakMinutes: DEFAULT_BREAK_MINUTES,
+        breakMinutes: shift.breakMinutes,
         status: shift.staffId === null ? "open" : changed ? "changed" : "scheduled",
       };
     }),
