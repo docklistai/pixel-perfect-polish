@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, ChevronRight, Clock, ExternalLink, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { useIntents } from "@/lib/interactionIntents";
 import { ProfileCard } from "./ProfileCard";
 import type { StaffProfile } from "../../types";
@@ -74,13 +75,16 @@ function flagLabel(flag?: WeekShift["flag"]): string | null {
 export function ProfileScheduleWeekCard({ profile }: Props) {
   const navigate = useNavigate();
   const { requestIntent } = useIntents();
+  const [weekOffset, setWeekOffset] = React.useState(0);
   const shifts = React.useMemo(() => buildWeeklySchedule(profile), [profile]);
   const weekly = profile.weeklyHours ?? [7.5, 8, 7, 0, 8, 6.5, 0];
+  const weekTitle =
+    weekOffset === 0 ? "This week · 12–18 May" : weekOffset < 0 ? "Last week" : "Next week";
 
   return (
     <div className="space-y-4 min-w-0">
       <ProfileCard
-        title="This week · 12–18 May"
+        title={weekTitle}
         action={
           <div className="flex items-center gap-2">
             <Link
@@ -176,6 +180,11 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
                     {shift.status !== "off" ? (
                       <button
                         type="button"
+                        onClick={() =>
+                          toast.info("Shift options", {
+                            description: `${shift.date} · ${shift.start} – ${shift.end}`,
+                          })
+                        }
                         aria-label={`Open ${shift.date} shift options`}
                         className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60"
                       >
@@ -194,14 +203,16 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
           <div className="flex-1" />
           <button
             type="button"
-            onClick={() => undefined}
+            disabled={weekOffset <= -1}
+            onClick={() => setWeekOffset(-1)}
             className="rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors"
           >
             Last week
           </button>
           <button
             type="button"
-            onClick={() => undefined}
+            disabled={weekOffset >= 1}
+            onClick={() => setWeekOffset(1)}
             className="inline-flex items-center gap-1 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors"
           >
             Next week

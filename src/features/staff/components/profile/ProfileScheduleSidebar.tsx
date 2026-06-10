@@ -1,5 +1,6 @@
 import * as React from "react";
 import { AlertTriangle, Calendar, Clock } from "lucide-react";
+import { toast } from "sonner";
 import { ProfileCard } from "./ProfileCard";
 
 export function ProfileScheduleSidebar() {
@@ -10,7 +11,11 @@ export function ProfileScheduleSidebar() {
         action={
           <button
             type="button"
-            onClick={() => undefined}
+            onClick={() =>
+              toast.info("Availability", {
+                description: "Availability editing is preview-only in this build.",
+              })
+            }
             className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60"
             aria-label="Edit availability"
           >
