@@ -1,14 +1,23 @@
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Bell, CheckCircle2, Info, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { Card } from "@/components/dl";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
 import { missedClockIns, timeQueries } from "../data/timeDemoData";
+import type { TimeQuery } from "../types";
 
 interface Props {
   onApproveSuggested: () => void;
   onOpenAssistant: () => void;
+  onPrepareReminder: (name: string) => void;
+  onOpenQuery: (query: TimeQuery) => void;
 }
 
-export function TimeRightRail({ onApproveSuggested, onOpenAssistant }: Props) {
+export function TimeRightRail({
+  onApproveSuggested,
+  onOpenAssistant,
+  onPrepareReminder,
+  onOpenQuery,
+}: Props) {
   return (
     <div className="col-span-12 lg:col-span-3 space-y-4">
       <AiSuggestionCard
@@ -109,7 +118,12 @@ export function TimeRightRail({ onApproveSuggested, onOpenAssistant }: Props) {
           <span className="badge red">{missedClockIns.length}</span>
         </div>
         {missedClockIns.map((p) => (
-          <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-t border-border/40">
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onPrepareReminder(p.n)}
+            className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left transition hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
             <img
               src={`https://i.pravatar.cc/64?img=${p.img}`}
               className="h-8 w-8 rounded-full object-cover"
@@ -119,18 +133,34 @@ export function TimeRightRail({ onApproveSuggested, onOpenAssistant }: Props) {
               <div className="text-sm font-medium">{p.n}</div>
               <div className="text-[11px] text-muted-foreground">{p.t}</div>
             </div>
-            <span className="badge red">Missing</span>
-          </div>
+            <span
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
+              title={`Prepare reminder for ${p.n}`}
+            >
+              <Bell className="h-3.5 w-3.5" aria-hidden />
+            </span>
+          </button>
         ))}
       </Card>
 
       <Card className="p-0">
         <div className="card-section flex items-center justify-between">
-          <span className="text-sm font-semibold">Disputes</span>
+          <span className="text-sm font-semibold">Hours queries</span>
           <span className="badge">{timeQueries.length}</span>
         </div>
+        <div className="mx-3 mb-2 flex items-start gap-2 rounded-xl border border-border/60 bg-muted/20 px-2.5 py-2">
+          <Info className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="text-[11px] text-muted-foreground">
+            Staff-raised questions about recorded hours — Docklist records hours only
+          </span>
+        </div>
         {timeQueries.map((p) => (
-          <div key={p.id} className="flex items-center gap-3 px-4 py-3 border-t border-border/40">
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => onOpenQuery(p)}
+            className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left transition hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
             <img
               src={`https://i.pravatar.cc/64?img=${p.img}`}
               className="h-8 w-8 rounded-full object-cover"
@@ -141,8 +171,19 @@ export function TimeRightRail({ onApproveSuggested, onOpenAssistant }: Props) {
               <div className="text-[11px] text-muted-foreground">{p.t}</div>
             </div>
             <span className={`badge ${p.stTone === "danger" ? "red" : "blue"}`}>{p.st}</span>
-          </div>
+          </button>
         ))}
+        <div className="card-foot">
+          <button
+            type="button"
+            className="link txt-sm inline-flex items-center gap-1"
+            onClick={() =>
+              toast.info("Hours queries", { description: "All open queries are shown." })
+            }
+          >
+            View all <ArrowRight className="h-3 w-3" aria-hidden />
+          </button>
+        </div>
       </Card>
     </div>
   );

@@ -1,10 +1,21 @@
 import * as React from "react";
-import { Search } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  Calendar,
+  CheckCircle2,
+  Edit3,
+  ExternalLink,
+  Search,
+  X,
+} from "lucide-react";
 import { StatusBadge } from "@/components/dl";
+import { RowActionMenu } from "@/components/RowActionMenu";
 import { cn } from "@/lib/utils";
 import type { TimesheetRow } from "../types";
 
 export type TimesheetTab = "all" | "pending" | "unapproved" | "exceptions" | "approved";
+export type TimesheetStatus = "approved" | "pending" | "unapproved";
 
 const cellTone: Record<string, string> = {
   warning: "text-warning",
@@ -22,12 +33,17 @@ interface TabCounts {
 interface Props {
   rows: TimesheetRow[];
   totalRows: number;
-  approved: Set<string>;
-  declined: Set<string>;
+  statusOf: (row: TimesheetRow) => TimesheetStatus;
+  flaggedIds: Set<string>;
   selectedIds: Set<string>;
   onToggleSelect: (id: string) => void;
   onToggleAll: () => void;
   onReview: (row: TimesheetRow) => void;
+  onAdjust: (row: TimesheetRow) => void;
+  onToggleApprove: (row: TimesheetRow) => void;
+  onToggleFlag: (row: TimesheetRow) => void;
+  onPrepareReminder: (name: string) => void;
+  onViewRota: () => void;
   tab: TimesheetTab;
   onTabChange: (tab: TimesheetTab) => void;
   query: string;
@@ -49,15 +65,29 @@ const tabs: Array<{
   { key: "approved", label: "Approved", countKey: "approved", tone: "success" },
 ];
 
+const statusBadge: Record<
+  TimesheetStatus,
+  { label: string; tone: "success" | "warning" | "danger" }
+> = {
+  approved: { label: "Approved", tone: "success" },
+  pending: { label: "Pending", tone: "warning" },
+  unapproved: { label: "Unapproved", tone: "danger" },
+};
+
 export function TimesheetTable({
   rows,
   totalRows,
-  approved,
-  declined,
+  statusOf,
+  flaggedIds,
   selectedIds,
   onToggleSelect,
   onToggleAll,
   onReview,
+  onAdjust,
+  onToggleApprove,
+  onToggleFlag,
+  onPrepareReminder,
+  onViewRota,
   tab,
   onTabChange,
   query,
@@ -132,17 +162,33 @@ export function TimesheetTable({
           </thead>
           <tbody>
             {rows.map((r) => {
-              const isApproved = approved.has(r.id);
-              const isDeclined = declined.has(r.id);
-              const stLabel = isApproved ? "Approved" : isDeclined ? "Declined" : r.st;
-              const stTone = isApproved
-                ? ("success" as const)
-                : isDeclined
-                  ? ("muted" as const)
-                  : r.stTone;
+              const status = statusOf(r);
+              const flagged = flaggedIds.has(r.id);
+              const badge = statusBadge[status];
               const isSelected = selectedIds.has(r.id);
               return (
-                <tr key={r.id} className={cn(isSelected && "selected")} onClick={() => onReview(r)}>
+                <tr
+                  key={r.id}
+                  tabIndex={0}
+                  aria-label={`${r.n}, ${badge.label}. Press Enter to open the entry`}
+                  className={cn(
+                    isSelected && "selected",
+                    r.exc === "Missing in" || status === "unapproved"
+                      ? "row-error"
+                      : r.exc !== "—"
+                        ? "row-warn"
+                        : "",
+                    flagged && "row-flagged",
+                  )}
+                  onClick={() => onReview(r)}
+                  onKeyDown={(e) => {
+                    if (e.target !== e.currentTarget) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onReview(r);
+                    }
+                  }}
+                >
                   <td onClick={(e) => e.stopPropagation()}>
                     <input
                       type="checkbox"
@@ -199,19 +245,38 @@ export function TimesheetTable({
                     )}
                   </td>
                   <td>
-                    <StatusBadge tone={stTone}>{stLabel}</StatusBadge>
+                    <span className="inline-flex flex-wrap items-center gap-1">
+                      <StatusBadge tone={badge.tone} dot={status === "pending"}>
+                        {badge.label}
+                      </StatusBadge>
+                      {flagged && <StatusBadge tone="info">Flagged</StatusBadge>}
+                    </span>
                   </td>
                   <td className="text-right" onClick={(e) => e.stopPropagation()}>
-                    {!isApproved && !isDeclined && (
-                      <button
-                        type="button"
-                        aria-label={`Review timesheet for ${r.n}`}
-                        className="text-[11px] text-brand font-semibold"
-                        onClick={() => onReview(r)}
-                      >
-                        Review
-                      </button>
-                    )}
+                    <RowActionMenu
+                      triggerLabel={`Actions for ${r.n}`}
+                      items={[
+                        { label: "Open entry", icon: ExternalLink, onSelect: () => onReview(r) },
+                        { label: "Adjust", icon: Edit3, onSelect: () => onAdjust(r) },
+                        {
+                          label: status === "approved" ? "Revert approval" : "Approve",
+                          icon: status === "approved" ? X : CheckCircle2,
+                          onSelect: () => onToggleApprove(r),
+                        },
+                        {
+                          label: flagged ? "Remove flag" : "Flag for review",
+                          icon: AlertTriangle,
+                          onSelect: () => onToggleFlag(r),
+                        },
+                        { kind: "separator" },
+                        {
+                          label: "Prepare reminder",
+                          icon: Bell,
+                          onSelect: () => onPrepareReminder(r.n),
+                        },
+                        { label: "View rota", icon: Calendar, onSelect: onViewRota },
+                      ]}
+                    />
                   </td>
                 </tr>
               );
@@ -225,8 +290,24 @@ export function TimesheetTable({
           <div className="ill" aria-hidden>
             <Search className="h-5 w-5" />
           </div>
-          <h4>Nothing to review</h4>
-          <p>You&apos;re all caught up on this view.</p>
+          <h4>
+            {tab === "pending"
+              ? "No pending approvals"
+              : tab === "unapproved"
+                ? "No unapproved entries"
+                : tab === "exceptions"
+                  ? "No exceptions"
+                  : tab === "approved"
+                    ? "No approved entries yet"
+                    : "Nothing to review"}
+          </h4>
+          <p>
+            {tab === "pending"
+              ? "All entries have been reviewed."
+              : tab === "exceptions"
+                ? "Staff clocked in and out as scheduled this period."
+                : "You're all caught up on this view."}
+          </p>
         </div>
       )}
 
