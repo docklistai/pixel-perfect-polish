@@ -872,6 +872,8 @@ export interface DialogShellProps {
   onOpenChange: (open: boolean) => void;
   title: React.ReactNode;
   description?: React.ReactNode;
+  icon?: LucideIcon;
+  iconTone?: Tone;
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg";
   children?: React.ReactNode;
@@ -889,6 +891,8 @@ export function DialogShell({
   onOpenChange,
   title,
   description,
+  icon: Icon,
+  iconTone = "brand",
   footer,
   size = "md",
   children,
@@ -905,11 +909,22 @@ export function DialogShell({
           borderColor: "var(--border)",
         }}
       >
-        <DialogHeader className="modal-head !block !space-y-0">
-          <DialogTitle className="modal-title">{title}</DialogTitle>
-          <DialogDescription className={cn("modal-sub", !description && "sr-only")}>
-            {description ?? "Dialog content"}
-          </DialogDescription>
+        <DialogHeader className="modal-head !flex !flex-row !items-start !space-y-0">
+          {Icon && (
+            <div
+              className={cn("modal-icon border", toneSoft[iconTone])}
+              style={{ borderColor: `var(--st-${toneProto[iconTone]}-line)` }}
+              aria-hidden
+            >
+              <Icon className="h-[18px] w-[18px]" />
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <DialogTitle className="modal-title">{title}</DialogTitle>
+            <DialogDescription className={cn("modal-sub", !description && "sr-only")}>
+              {description ?? "Dialog content"}
+            </DialogDescription>
+          </div>
         </DialogHeader>
         {children && <div className="modal-body">{children}</div>}
         {footer && <DialogFooter className="modal-foot">{footer}</DialogFooter>}

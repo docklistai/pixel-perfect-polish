@@ -72,6 +72,7 @@ export function PublishRotaDialog({
       onOpenChange={onOpenChange}
       title="Publish this rota?"
       description={`${weekLabel} · ${staffCount} staff`}
+      icon={Send}
       footer={
         <>
           <ActionButton variant="ghost" onClick={() => onOpenChange(false)}>

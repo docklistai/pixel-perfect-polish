@@ -211,6 +211,7 @@ function StaffListPage() {
         onOpenChange={setAddOpen}
         title="Add a team member"
         description="Send an invite to join Harbour View."
+        icon={UserPlus}
         size="lg"
         footer={
           <>

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ActionButton, DialogShell, StatusBadge } from "@/components/dl";
-import { CalendarDays, Check, X } from "lucide-react";
+import { CalendarDays, Check, Plane, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
 
 interface StaffOption {
@@ -94,6 +94,8 @@ export function LeaveActionDialogs({
               : `${decisionRequest.n} · ${decisionRequest.date}`
             : undefined
         }
+        icon={isApprove ? Check : X}
+        iconTone={isApprove ? "success" : "danger"}
         footer={
           <>
             <ActionButton variant="secondary" size="sm" onClick={() => onDecisionOpenChange(false)}>
@@ -182,6 +184,8 @@ export function LeaveActionDialogs({
         onOpenChange={onNewRequestOpenChange}
         title="New leave request"
         description="On behalf of a team member"
+        icon={Plane}
+        iconTone="purple"
         size="lg"
         footer={
           <>

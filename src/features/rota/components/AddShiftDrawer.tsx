@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { DialogShell, ActionButton } from "@/components/dl";
 import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
@@ -84,6 +84,7 @@ export function AddShiftDrawer({
       onOpenChange={onOpenChange}
       title="Add a shift"
       description="Choose staff, day and time"
+      icon={Plus}
       size="lg"
       footer={
         <>
