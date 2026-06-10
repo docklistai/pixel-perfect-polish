@@ -1,6 +1,8 @@
 import * as React from "react";
 import { AlertTriangle, CheckCircle2, ChevronRight, Upload } from "lucide-react";
+import { toast } from "sonner";
 import { ProfileCard } from "./ProfileCard";
+import { ProfileDocumentUploadDialog } from "./ProfileDocumentUploadDialog";
 import type { StaffProfile, StaffProfileDocument } from "../../types";
 
 interface Props {
@@ -50,7 +52,7 @@ function DocStat({
   );
 }
 
-function DocumentTile({ doc }: { doc: StaffProfileDocument }) {
+function DocumentTile({ doc, onOpen }: { doc: StaffProfileDocument; onOpen: () => void }) {
   const status = STATUS_LABELS[doc.status];
   const bubble =
     doc.status === "valid"
@@ -62,6 +64,7 @@ function DocumentTile({ doc }: { doc: StaffProfileDocument }) {
   return (
     <button
       type="button"
+      onClick={onOpen}
       className="flex items-start gap-3 rounded-2xl border border-border/40 bg-card p-4 text-left transition-colors hover:bg-muted/40"
     >
       <div className={`flex size-10 shrink-0 items-center justify-center rounded-full ${bubble}`}>
@@ -85,6 +88,7 @@ function DocumentTile({ doc }: { doc: StaffProfileDocument }) {
 }
 
 export function ProfileDocumentsTab({ profile }: Props) {
+  const [uploadDocument, setUploadDocument] = React.useState<StaffProfileDocument | null>(null);
   const counts = {
     verified: profile.documents.filter((doc) => doc.status === "valid").length,
     expiring: profile.documents.filter((doc) => doc.status === "expiring").length,
@@ -178,6 +182,13 @@ export function ProfileDocumentsTab({ profile }: Props) {
             </button>
             <button
               type="button"
+              onClick={() =>
+                setUploadDocument(
+                  profile.documents.find((document) => document.status === "missing") ??
+                    profile.documents[0] ??
+                    null,
+                )
+              }
               className="inline-flex items-center gap-1 rounded-xl bg-brand px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
             >
               <Upload className="h-3 w-3" aria-hidden />
@@ -188,10 +199,22 @@ export function ProfileDocumentsTab({ profile }: Props) {
       >
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {profile.documents.map((doc) => (
-            <DocumentTile key={doc.name} doc={doc} />
+            <DocumentTile key={doc.name} doc={doc} onOpen={() => setUploadDocument(doc)} />
           ))}
         </div>
       </ProfileCard>
+      <ProfileDocumentUploadDialog
+        firstName={profile.name.split(" ")[0]}
+        profileName={profile.name}
+        document={uploadDocument}
+        onOpenChange={(open) => !open && setUploadDocument(null)}
+        onSave={() => {
+          toast.success("Document saved", {
+            description: `${uploadDocument?.name ?? "Document"} marked verified`,
+          });
+          setUploadDocument(null);
+        }}
+      />
     </div>
   );
 }

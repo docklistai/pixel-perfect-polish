@@ -92,7 +92,7 @@ export function ProfileTimeTab({ profile }: Props) {
         ))}
       </div>
 
-      <ProfileTimesheetTable rows={timesheets} onToast={showToast} />
+      <ProfileTimesheetTable profileName={profile.name} rows={timesheets} onToast={showToast} />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         <ProfileCard title="Clock-in pattern">

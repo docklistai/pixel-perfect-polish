@@ -1,18 +1,13 @@
 import * as React from "react";
 import { Download, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ProfileTimesheetAdjustDialog,
+  type ProfileTimesheetRow,
+} from "./ProfileTimesheetAdjustDialog";
 
 type TimesheetFilter = "all" | "pending" | "flagged" | "approved";
 
-interface TimesheetRow {
-  day: string;
-  scheduled: string;
-  actual: string;
-  hours: number;
-  status: "pending" | "flagged" | "approved";
-  note: string | null;
-}
-
-function StatusPill({ status }: { status: TimesheetRow["status"] }) {
+function StatusPill({ status }: { status: ProfileTimesheetRow["status"] }) {
   if (status === "approved")
     return (
       <span className="inline-flex items-center gap-1 rounded-md bg-success-soft text-success text-[11px] font-semibold px-2 py-0.5">
@@ -33,12 +28,14 @@ function StatusPill({ status }: { status: TimesheetRow["status"] }) {
 }
 
 interface ProfileTimesheetTableProps {
-  rows: TimesheetRow[];
+  profileName: string;
+  rows: ProfileTimesheetRow[];
   onToast: (msg: string) => void;
 }
 
-export function ProfileTimesheetTable({ rows, onToast }: ProfileTimesheetTableProps) {
+export function ProfileTimesheetTable({ profileName, rows, onToast }: ProfileTimesheetTableProps) {
   const [filter, setFilter] = React.useState<TimesheetFilter>("all");
+  const [selectedRow, setSelectedRow] = React.useState<ProfileTimesheetRow | null>(null);
   const filtered = filter === "all" ? rows : rows.filter((r) => r.status === filter);
   const pendingCount = filtered.filter((r) => r.status !== "approved").length;
 
@@ -87,7 +84,7 @@ export function ProfileTimesheetTable({ rows, onToast }: ProfileTimesheetTablePr
               <tr
                 key={i}
                 className="border-b border-border/60 last:border-0 hover:bg-muted/40 transition-colors cursor-pointer"
-                onClick={() => onToast(`Adjust timesheet for ${r.day} (demo)`)}
+                onClick={() => setSelectedRow(r)}
               >
                 <td className="py-3 px-5 font-medium text-sm">{r.day}</td>
                 <td className="py-3 text-muted-foreground font-mono text-xs">{r.scheduled}</td>
@@ -141,6 +138,15 @@ export function ProfileTimesheetTable({ rows, onToast }: ProfileTimesheetTablePr
           <ChevronRight className="size-3.5" aria-hidden />
         </button>
       </div>
+      <ProfileTimesheetAdjustDialog
+        profileName={profileName}
+        row={selectedRow}
+        onOpenChange={(open) => !open && setSelectedRow(null)}
+        onApprove={() => {
+          onToast("Timesheet updated and marked approved");
+          setSelectedRow(null);
+        }}
+      />
     </div>
   );
 }
