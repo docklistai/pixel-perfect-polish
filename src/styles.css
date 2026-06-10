@@ -2166,6 +2166,7 @@
   .search-input {
     flex: 1;
     max-width: 340px;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2187,12 +2188,14 @@
     border: 0;
     outline: 0;
     flex: 1;
+    min-width: 0;
     background: transparent;
     color: var(--ink-900);
     cursor: pointer;
   }
   .search-input input::placeholder {
     color: var(--ink-400);
+    text-overflow: ellipsis;
   }
   .search-input kbd {
     font-family: var(--font-mono);
@@ -3092,7 +3095,7 @@
 
 
 /* PROTOTYPE SHELL CLASSES */
-.app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
+.app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); min-height: 100vh; }
 
 .sidebar {
   background: var(--sidebar-bg);
@@ -3239,7 +3242,7 @@
 }
 .topbar-arrow:hover { background: var(--bg-hover); color: var(--ink-900); }
 .search-input {
-  flex: 1; max-width: 340px;
+  flex: 1; max-width: 340px; min-width: 0;
   display: flex; align-items: center; gap: 10px;
   padding: 7px 12px;
   border-radius: 9px;
@@ -3251,8 +3254,8 @@
   transition: background 120ms, border-color 120ms;
 }
 .search-input:hover { border-color: var(--border-strong); }
-.search-input input { border: 0; outline: 0; flex: 1; background: transparent; color: var(--ink-900); cursor: pointer; }
-.search-input input::placeholder { color: var(--ink-400); }
+.search-input input { border: 0; outline: 0; flex: 1; min-width: 0; background: transparent; color: var(--ink-900); cursor: pointer; }
+.search-input input::placeholder { color: var(--ink-400); text-overflow: ellipsis; }
 .search-input kbd {
   font-family: var(--font-mono);
   font-size: 10.5px;
