@@ -47,7 +47,7 @@ function Home() {
   const quickRef = React.useRef<HTMLDivElement>(null);
 
   const runQuickAction = React.useCallback(
-    (to: "/" | "/rota" | "/staff" | "/leave" | "/team", intent?: IntentName) => {
+    (to: "/" | "/rota" | "/staff" | "/leave" | "/team" | "/ops", intent?: IntentName) => {
       setQuickOpen(false);
       navigate({ to });
       if (intent) requestIntent(intent);
@@ -123,44 +123,45 @@ function Home() {
               aria-haspopup="menu"
               aria-expanded={quickOpen}
             >
-              Quick action
+              New
             </ActionButton>
             {quickOpen && (
               <div className="popover absolute top-[44px] right-0 z-50 w-56 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="menu-label">Create</div>
                 <button
                   type="button"
                   className="menu-item"
                   onClick={() => runQuickAction("/rota", "rota.addShift")}
                 >
-                  Add a shift
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/rota", "rota.publish")}
-                >
-                  Publish rota
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/rota", "rota.generate")}
-                >
-                  Generate rota draft
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/leave", "leave.new")}
-                >
-                  New leave request
+                  Add a shift…
                 </button>
                 <button
                   type="button"
                   className="menu-item"
                   onClick={() => runQuickAction("/staff", "staff.add")}
                 >
-                  Add a team member
+                  Add team member…
+                </button>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => runQuickAction("/leave", "leave.new")}
+                >
+                  Log a leave request…
+                </button>
+                <button type="button" className="menu-item" onClick={() => runQuickAction("/team")}>
+                  Compose announcement…
+                </button>
+                <button type="button" className="menu-item" onClick={() => runQuickAction("/ops")}>
+                  Log an incident…
+                </button>
+                <div className="menu-sep" />
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => runQuickAction("/rota", "rota.generate")}
+                >
+                  Generate rota draft…
                 </button>
               </div>
             )}

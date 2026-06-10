@@ -44,10 +44,19 @@ export const kpiItems: KpiItem[] = [
     icon: Star,
     label: "Labour %",
     value: "28.6%",
-    delta: "1.4pp below target",
-    up: true,
+    delta: "1.4pp vs last week",
+    up: false,
     tone: "success",
     tip: "Labour cost as % of projected revenue. Target: 30%.",
+  },
+  {
+    icon: TrendingUp,
+    label: "Sales : labour",
+    value: "3.48",
+    delta: "0.18 vs last week",
+    up: true,
+    tone: "warning",
+    tip: "Projected sales for every £1 of labour spent.",
   },
   {
     icon: Calendar,
@@ -57,15 +66,6 @@ export const kpiItems: KpiItem[] = [
     up: true,
     tone: "warning",
     tip: "Scheduled vs role requirement. 100% = fully staffed.",
-  },
-  {
-    icon: TrendingUp,
-    label: "Sales : labour",
-    value: "3.48",
-    delta: "0.18 vs last week",
-    up: true,
-    tone: "warning",
-    tip: "Lightweight demo ratio used to mirror the prototype KPI row.",
   },
 ];
 
@@ -159,8 +159,8 @@ export const announcementItems: AnnouncementItem[] = [
 ];
 
 export const quickActionItems: QuickActionItem[] = [
-  { t: "Add Shift", s: "Open or assigned shift", icon: Calendar, route: "/rota" },
-  { t: "New Leave Request", s: "Annual, sick, compassionate", icon: Plane, route: "/leave" },
-  { t: "Post Announcement", s: "To a department or everyone", icon: Megaphone, route: "/team" },
-  { t: "Log Incident", s: "Incident or maintenance ticket", icon: AlertTriangle, route: "/ops" },
+  { t: "Add shift", s: "Open or assigned shift", icon: Calendar, route: "/rota" },
+  { t: "New leave request", s: "Annual, sick, compassionate", icon: Plane, route: "/leave" },
+  { t: "Announcement", s: "To a department or everyone", icon: Megaphone, route: "/team" },
+  { t: "Log incident", s: "Incident or maintenance ticket", icon: AlertTriangle, route: "/ops" },
 ];
