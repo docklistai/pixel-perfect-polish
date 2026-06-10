@@ -18,10 +18,14 @@ export const Route = createFileRoute("/staff/$staffId")({
   component: StaffProfilePage,
 });
 
+const DEMO_PROFILE_ALIASES: Record<string, keyof typeof mockStaffProfiles> = {
+  "staff-1": "sophie-carter",
+};
+
 function StaffProfilePage() {
   const { staffId } = Route.useParams();
   const [activeTab, setActiveTab] = React.useState<ProfileTab>("overview");
-  const profile = mockStaffProfiles[staffId] ?? null;
+  const profile = mockStaffProfiles[DEMO_PROFILE_ALIASES[staffId] ?? staffId] ?? null;
   const [notes, setNotes] = React.useState<StaffProfileNote[]>(profile?.notes ?? []);
 
   React.useEffect(() => {
