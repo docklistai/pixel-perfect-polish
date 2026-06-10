@@ -219,6 +219,7 @@ export function LeaveActionDialogs({
               <option>Sick leave</option>
               <option>Compassionate</option>
               <option>Unpaid</option>
+              <option>Maternity / paternity</option>
             </select>
           </div>
           <div className="field">

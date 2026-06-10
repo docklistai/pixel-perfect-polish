@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Plus, Plane, MessageSquare, Clock, Upload, Sparkles, type LucideIcon } from "lucide-react";
+import { Plus, Plane, Bell, Clock, Upload, Sparkles, type LucideIcon } from "lucide-react";
 
 interface ActionTileProps {
   icon: LucideIcon;
@@ -49,11 +49,11 @@ export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActi
       onClick: () => onToast("Leave modal would open — connect to leave"),
     },
     {
-      icon: MessageSquare,
+      icon: Bell,
       iconClassName: "bg-info text-white",
-      title: "Send a message",
-      sub: "Open chat",
-      onClick: () => onToast(`Conversation with ${firstName} — messaging coming soon`),
+      title: "Prepare reminder",
+      sub: "Draft a staff reminder",
+      onClick: () => onToast(`Reminder prepared for ${firstName} — review before sending`),
     },
     {
       icon: Clock,
