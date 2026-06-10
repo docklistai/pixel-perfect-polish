@@ -112,7 +112,7 @@ export function LeaveActionDialogs({
             >
               {isApprove ? (
                 <>
-                  <Check className="h-3 w-3" aria-hidden /> Approve & notify
+                  <Check className="h-3 w-3" aria-hidden /> Approve
                 </>
               ) : (
                 <>
@@ -163,7 +163,7 @@ export function LeaveActionDialogs({
         {decisionRequest && !isApprove && (
           <>
             <p className="muted txt-sm mb-3">
-              {decisionRequest.n} will receive a notification with your reason. They can request
+              {decisionRequest.n} will see your reason in their staff app preview. They can request
               again with a new date.
             </p>
             <div className="field">

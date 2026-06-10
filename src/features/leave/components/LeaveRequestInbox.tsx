@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, MessageSquare, Plane, X } from "lucide-react";
+import { Bell, Check, ChevronDown, Plane, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
 
 type Tab = "needs" | "approved" | "declined" | "all";
@@ -179,7 +179,7 @@ export function LeaveRequestInbox({
               {r.state === "pending" && (
                 <div className="row gap-2 mt-3">
                   <button type="button" className="btn ghost sm" onClick={() => onAsk(r)}>
-                    <MessageSquare className="h-3 w-3" aria-hidden /> Ask
+                    <Bell className="h-3 w-3" aria-hidden /> Ask for details
                   </button>
                   <div className="grow" />
                   <button type="button" className="btn secondary sm" onClick={() => onDecline(r)}>

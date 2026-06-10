@@ -38,10 +38,7 @@ export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOp
     request.tone === "danger" ? "danger" : request.tone === "warning" ? "warning" : "success";
 
   return (
-    <Card
-      className="col-span-12 lg:col-span-5 sticky top-[88px] self-start overflow-hidden"
-      padding="none"
-    >
+    <Card className="overflow-hidden" padding="none">
       <div className="card-section">
         <div className="section-label mb-2">Decision context</div>
         <div className="row gap-3" style={{ alignItems: "center" }}>

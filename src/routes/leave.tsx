@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import {
@@ -27,7 +27,9 @@ import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPa
 import { LeaveDetailPanel } from "@/features/leave/components/LeaveDetailPanel";
 import { LeaveBottomCards } from "@/features/leave/components/LeaveBottomCards";
 import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialogs";
+import { LeaveImpactSummaryCard } from "@/features/leave/components/LeaveImpactSummaryCard";
 import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
+import { useOverlays } from "@/components/AppShortcuts";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
 import { useIntentHandler } from "@/lib/interactionIntents";
@@ -38,6 +40,8 @@ export const Route = createFileRoute("/leave")({
 });
 
 function LeavePage() {
+  const navigate = useNavigate();
+  const { askAssistant } = useOverlays();
   const [requests, setRequests] = React.useState<LeaveRequest[]>(initialRequests);
   const [activeId, setActiveId] = React.useState("l3");
   const [calendarOpen, setCalendarOpen] = React.useState(false);
@@ -70,7 +74,14 @@ function LeavePage() {
     updateState(id, "approved");
     closeDecision();
     toast.success("Leave approved", {
-      description: `${decisionRequest?.n ?? "Team member"} has been notified`,
+      description: `${decisionRequest?.n ?? "The team member"}'s request is approved — visible in their staff app preview.`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          updateState(id, "pending");
+          toast.info("Reverted", { description: "Request returned to pending." });
+        },
+      },
     });
   };
 
@@ -78,7 +89,14 @@ function LeavePage() {
     updateState(id, "declined");
     closeDecision();
     toast.warning("Request declined", {
-      description: `${decisionRequest?.n ?? "Team member"} has been notified with your reason`,
+      description: `${decisionRequest?.n ?? "The team member"}'s request is declined — your reason is saved to the record.`,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          updateState(id, "pending");
+          toast.info("Reverted", { description: "Request returned to pending review." });
+        },
+      },
     });
   };
 
@@ -155,7 +173,9 @@ function LeavePage() {
           requests={requests}
           activeId={activeRequest?.id ?? ""}
           onAsk={(request) =>
-            toast.info("Message sent", { description: `Asked ${request.n} for more details` })
+            toast.info("Reminder prepared", {
+              description: `Draft prepared asking ${request.n} for more details — review before sending.`,
+            })
           }
           onApprove={(request) => openDecision(request, "approve")}
           onDecline={(request) => openDecision(request, "decline")}
@@ -163,13 +183,27 @@ function LeavePage() {
           onSelect={setActiveId}
         />
         {activeRequest && (
-          <LeaveDetailPanel
-            request={activeRequest}
-            onApprove={(request) => openDecision(request, "approve")}
-            onDecline={(request) => openDecision(request, "decline")}
-            onReopen={handleReopen}
-            onOpenRisk={() => setRiskOpen(true)}
-          />
+          <div className="col-span-12 space-y-3 self-start lg:sticky lg:top-[88px] lg:col-span-5">
+            <LeaveDetailPanel
+              request={activeRequest}
+              onApprove={(request) => openDecision(request, "approve")}
+              onDecline={(request) => openDecision(request, "decline")}
+              onReopen={handleReopen}
+              onOpenRisk={() => setRiskOpen(true)}
+            />
+            {activeRequest.state === "pending" && (
+              <LeaveImpactSummaryCard
+                request={activeRequest}
+                onAskAssistant={askAssistant}
+                onCheckRota={() => {
+                  navigate({ to: "/rota" });
+                  toast.info("Rota opened", {
+                    description: "Checking coverage for these dates.",
+                  });
+                }}
+              />
+            )}
+          </div>
         )}
       </div>
 
@@ -179,6 +213,7 @@ function LeavePage() {
         open={calendarOpen}
         onOpenChange={setCalendarOpen}
         onNewRequest={() => setNewRequestOpen(true)}
+        requests={requests}
       />
       <LeaveRiskDrawer open={riskOpen} onOpenChange={setRiskOpen} />
       <LeaveActionDialogs
