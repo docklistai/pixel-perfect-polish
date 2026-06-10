@@ -38,8 +38,7 @@ export function LandingFooter() {
         aria-hidden="true"
         className="absolute inset-x-0 top-0 h-px"
         style={{
-          background:
-            "linear-gradient(90deg, transparent, rgba(201,149,77,.48), transparent)",
+          background: "linear-gradient(90deg, transparent, rgba(201,149,77,.48), transparent)",
         }}
       />
       <div

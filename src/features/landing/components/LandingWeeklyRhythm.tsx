@@ -133,9 +133,7 @@ export function LandingWeeklyRhythm() {
                         aria-hidden="true"
                         className="landing-mono pointer-events-none absolute -right-1 -top-2 select-none text-[78px] font-black leading-none tracking-tight"
                         style={{
-                          color: step.active
-                            ? "rgba(201,149,77,.18)"
-                            : "rgba(17,23,20,.045)",
+                          color: step.active ? "rgba(201,149,77,.18)" : "rgba(17,23,20,.045)",
                         }}
                       >
                         0{step.number}
