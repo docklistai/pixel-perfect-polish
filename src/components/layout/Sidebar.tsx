@@ -20,7 +20,7 @@ interface NavItem {
   group: "workspace" | "communication" | "admin";
   badge?: {
     count: number;
-    kind: "amber" | "neutral";
+    kind: "amber" | "neutral" | "red";
   };
 }
 
@@ -39,7 +39,7 @@ const navItems: readonly NavItem[] = [
     label: "Time",
     icon: Clock,
     group: "workspace",
-    badge: { count: 18, kind: "neutral" },
+    badge: { count: 5, kind: "red" },
   },
   {
     to: "/leave",
@@ -115,7 +115,22 @@ export function Sidebar() {
                       <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
                       <span>{item.label}</span>
                       {item.badge && (
-                        <span className={`count ${item.badge.kind === "amber" ? "amber" : ""}`}>
+                        <span
+                          className="count"
+                          style={
+                            item.badge.kind === "amber"
+                              ? {
+                                  background: "rgba(240,182,91,0.20)",
+                                  color: "#F6CC85",
+                                }
+                              : item.badge.kind === "red"
+                                ? {
+                                    background: "rgba(242,100,122,0.22)",
+                                    color: "#FF8A9C",
+                                  }
+                                : {}
+                          }
+                        >
                           {item.badge.count}
                         </span>
                       )}
