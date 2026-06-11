@@ -13,7 +13,7 @@ export function ProfileScheduleSidebar() {
             type="button"
             onClick={() =>
               toast.info("Availability", {
-                description: "Availability editing is preview-only in this build.",
+                description: "Availability editing arrives with the staff app rollout.",
               })
             }
             className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted/60"

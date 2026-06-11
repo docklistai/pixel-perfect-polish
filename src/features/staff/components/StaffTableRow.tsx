@@ -66,7 +66,7 @@ export function StaffTableRow({
       icon: ShieldOff,
       onSelect: () =>
         toast.info(`Suspend access for ${r.n}`, {
-          description: "Suspend is a demo state in this prototype.",
+          description: "Suspending pauses shifts and sign-in until you reactivate them.",
         }),
     },
     {
@@ -75,7 +75,7 @@ export function StaffTableRow({
       danger: true,
       onSelect: () =>
         toast.warning(`Remove ${r.n}`, {
-          description: "Remove is disabled while this prototype runs frontend-only.",
+          description: "Removing a team member is permanent — contact support to proceed.",
         }),
     },
   ];

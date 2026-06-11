@@ -206,7 +206,7 @@ function Home() {
                   onClick={() => {
                     setMoreOpen(false);
                     toast.info("Customise dashboard", {
-                      description: "Dashboard layout customisation coming soon.",
+                      description: "Dashboard layout customisation arrives in a later update.",
                     });
                   }}
                 >

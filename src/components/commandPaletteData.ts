@@ -57,14 +57,14 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
 export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   {
     label: "Publish rota",
-    hint: "Open the publish dialog",
+    hint: "Review and publish this week's rota",
     icon: Send,
     to: "/rota",
     intent: "rota.publish",
   },
   {
     label: "Generate rota draft",
-    hint: "Open the rota generator",
+    hint: "Draft next week from templates",
     icon: Sparkles,
     to: "/rota",
     intent: "rota.generate",
@@ -78,27 +78,27 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   },
   {
     label: "Add a shift",
-    hint: "Open the add shift surface",
+    hint: "Create an open or assigned shift",
     icon: Plus,
     to: "/rota",
     intent: "rota.addShift",
   },
   {
     label: "Add team member",
-    hint: "Open the invite dialog",
+    hint: "Invite someone to the workspace",
     icon: UserPlus,
     to: "/staff",
     intent: "staff.add",
   },
   {
     label: "Review leave requests",
-    hint: "Open the leave inbox",
+    hint: "Approve or decline pending requests",
     icon: CalendarOff,
     to: "/leave",
   },
   {
     label: "New leave request",
-    hint: "Open the new leave form",
+    hint: "Log leave on someone's behalf",
     icon: CalendarOff,
     to: "/leave",
     intent: "leave.new",

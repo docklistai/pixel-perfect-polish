@@ -49,7 +49,7 @@ export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActi
       icon: Plus,
       iconClassName: "bg-brand text-white",
       title: "Add a shift",
-      sub: "Open the shift modal",
+      sub: "Add a shift for Sophie this week",
       onClick: () => openRouteIntent("/rota", "rota.addShift"),
     },
     {
@@ -78,7 +78,7 @@ export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActi
       iconClassName: "bg-success text-white",
       title: "Upload document",
       sub: "Add to record",
-      onClick: () => onToast("File picker would open — documents coming soon"),
+      onClick: () => onToast("Document upload arrives with the staff records rollout"),
     },
     {
       icon: Sparkles,

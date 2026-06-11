@@ -335,7 +335,7 @@ function TimePage() {
                   icon: Settings2,
                   onSelect: () =>
                     toast.info("Column settings", {
-                      description: "Custom columns are coming soon.",
+                      description: "Column customisation arrives in a later update.",
                     }),
                 },
               ]}

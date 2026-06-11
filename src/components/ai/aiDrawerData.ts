@@ -71,11 +71,11 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
   default: {
     title: "Here's what I'm seeing",
     summary:
-      "I don't have a tailored answer for that prompt yet in this demo. In production I'd ground each answer in your rota, time, leave and labour data — only this workspace, never shared.",
+      "I don't have a tailored answer for that one yet. I ground every answer in your rota, time, leave, and labour data — only this workspace, never shared.",
     bullets: [
       {
         title: "Try a built-in prompt",
-        body: "The five suggestions above pull from real signals I can already model in this prototype.",
+        body: "The suggestions above pull from live signals across your rota, timesheets, and leave queue.",
         tone: "blue",
         icon: Info,
       },
