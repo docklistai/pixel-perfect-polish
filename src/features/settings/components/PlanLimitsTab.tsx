@@ -35,10 +35,10 @@ export function PlanLimitsTab() {
       <SectionCard title="Usage" description="Your resource consumption for this billing period.">
         <div className="space-y-4">
           {[
-            { label: "Staff seats", used: 48, total: 50 },
-            { label: "Locations", used: 3, total: 5 },
-            { label: "Active managers", used: 6, total: 10 },
-            { label: "AI assistant calls (this month)", used: 1840, total: 5000 },
+            { label: "Staff seats", used: 8, total: 50 },
+            { label: "Locations", used: 1, total: 5 },
+            { label: "Active managers", used: 1, total: 10 },
+            { label: "AI assistant calls (this month)", used: 42, total: 5000 },
           ].map((item, index) => {
             const pct = (item.used / item.total) * 100;
             const isHigh = pct >= 90;
@@ -78,7 +78,7 @@ export function PlanLimitsTab() {
               name: "Pro",
               price: "£89",
               desc: "50 staff",
-              features: ["+ Reports", "+ AI assistant", "+ Integrations"],
+              features: ["+ Reports", "+ AI assistant", "+ Approved-hours exports"],
               current: true,
             },
             {

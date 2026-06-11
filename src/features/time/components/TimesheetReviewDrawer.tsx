@@ -45,11 +45,18 @@ export function TimesheetReviewDrawer({
   ];
 
   const auditTrail = [
-    { time: "Tue 13:24", title: "Manager opened entry", body: "Alex Thompson", icon: User },
-    { time: "Mon 16:07", title: "Clocked out", body: `at ${row.out}`, icon: Clock },
-    { time: "Mon 07:58", title: "Clocked in", body: `at ${row.in}`, icon: Clock },
+    ...(status === "approved"
+      ? [{ time: "Thu 11:10", title: "Approved", body: "Alex Thompson", icon: Check }]
+      : []),
+    { time: "Thu 10:45", title: "Manager opened entry", body: "Alex Thompson", icon: User },
+    ...(row.out !== "—"
+      ? [{ time: row.out, title: "Clocked out", body: `Recorded at ${row.out}`, icon: Clock }]
+      : []),
+    ...(row.in !== "—"
+      ? [{ time: row.in, title: "Clocked in", body: `Recorded at ${row.in}`, icon: Clock }]
+      : []),
     {
-      time: "Mon 06:30",
+      time: "Before shift",
       title: "Reminder prepared",
       body: "15 min before scheduled start",
       icon: Bell,

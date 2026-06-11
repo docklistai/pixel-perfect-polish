@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PasswordChecklist } from "./PasswordChecklist";
 import { AuthModeToggle } from "./AuthModeToggle";
 import { AuthNextStepNotice } from "./AuthNextStepNotice";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PASSWORD_HINT = "At least 8 characters, one uppercase letter, and one number.";
@@ -19,12 +20,14 @@ interface AuthFormProps {
   variant?: "standalone" | "embedded";
   /** Suppress the "Welcome back" heading when it would duplicate a parent heading. */
   hideHeader?: boolean;
+  onValidSignIn?: () => void;
 }
 
 export function AuthForm({
   onBackToHome,
   variant = "standalone",
   hideHeader = false,
+  onValidSignIn,
 }: AuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
@@ -40,6 +43,18 @@ export function AuthForm({
     setAuthError("");
     setStatusMessage("");
 
+    if (!isSignUp && (!email.trim() || !password)) {
+      setAuthError("Enter the demo manager email and password to continue.");
+      return;
+    }
+    if (
+      !isSignUp &&
+      (email.trim().toLowerCase() !== DEMO_WORLD.manager.email ||
+        password !== DEMO_WORLD.manager.password)
+    ) {
+      setAuthError("Those demo manager details do not match. Check the sign-in hint below.");
+      return;
+    }
     if (isSignUp && !consentAccepted) {
       setAuthError("Please accept the Privacy Policy and Terms of Service to continue.");
       return;
@@ -51,11 +66,11 @@ export function AuthForm({
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      setAuthError(
-        isSignUp
-          ? "Sign up is not available yet. Please check back soon."
-          : "Sign in is not available yet. Please check back soon.",
-      );
+      if (!isSignUp) {
+        onValidSignIn?.();
+        return;
+      }
+      setAuthError("Sign up is not available yet. Please check back soon.");
     }, 600);
   };
 
@@ -108,7 +123,8 @@ export function AuthForm({
             placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            required={isSignUp}
+            aria-invalid={Boolean(authError)}
             autoComplete="email"
           />
         </div>
@@ -121,7 +137,8 @@ export function AuthForm({
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
+            required={isSignUp}
+            aria-invalid={Boolean(authError)}
             minLength={isSignUp ? 8 : 1}
             autoComplete={isSignUp ? "new-password" : "current-password"}
           />
@@ -183,6 +200,12 @@ export function AuthForm({
         </Button>
 
         {!isSignUp && <AuthNextStepNotice />}
+        {!isSignUp && (
+          <p className="text-center text-xs text-muted-foreground">
+            Demo manager: <strong>{DEMO_WORLD.manager.email}</strong> · password{" "}
+            <strong>{DEMO_WORLD.manager.password}</strong>
+          </p>
+        )}
       </form>
 
       <div className="border-t border-border/60 pt-4 text-center">

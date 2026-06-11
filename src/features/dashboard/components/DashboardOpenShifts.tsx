@@ -11,7 +11,7 @@ export function DashboardOpenShifts({ items }: Props) {
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 pb-4 pt-5">
-        <div className="dock-section-eyebrow">Open shifts this week</div>
+        <div className="dock-section-eyebrow">Next-week open shifts</div>
         <div className="mt-4 space-y-3">
           {items.map((s) => (
             <div key={s.label} className="flex items-center gap-3">

@@ -1,33 +1,33 @@
 import type { LeaveRequest, LeaveCalEntry } from "../types";
 
 // Calendar covers Mon 8 Jun – Sun 21 Jun 2026 (two full weeks)
-// Index 0 = Mon 18, Index 13 = Sun 31
+// Index 0 = Mon 8, Index 13 = Sun 21
 export const CAL_DAYS = ["M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T", "F", "S", "S"];
-export const CAL_DATES = [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
+export const CAL_DATES = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 
 export const requests: LeaveRequest[] = [
   {
     id: "l1",
     n: "Sophie Carter",
-    role: "Manager",
+    role: "FOH Supervisor",
     dept: "Front of House",
-    date: "8 – 10 Jun 2026",
-    days: 3,
+    date: "18 – 19 Jun 2026",
+    days: 2,
     type: "Annual leave",
     impact: "Low",
     tone: "success",
     state: "pending",
-    notice: 6,
+    notice: 7,
     reason: "Friend's wedding in Manchester.",
     img: 5,
     balance: "11 / 28 days",
     submitted: "2 Jun 2026, 09:14 (Europe/London)",
-    coverNote: "Front of House is covered by Daniel and James for these dates.",
+    coverNote: "Front of House is covered by Olivia and James for these dates.",
   },
   {
     id: "l2",
     n: "Daniel Mitchell",
-    role: "Senior Chef",
+    role: "Kitchen Supervisor",
     dept: "Kitchen",
     date: "16 – 17 Jun 2026",
     days: 2,
@@ -45,8 +45,8 @@ export const requests: LeaveRequest[] = [
   {
     id: "l3",
     n: "Priya Patel",
-    role: "Housekeeping Attendant",
-    dept: "Housekeeping",
+    role: "Head Chef",
+    dept: "Kitchen",
     date: "21 – 23 Jun 2026",
     days: 3,
     type: "Annual leave",
@@ -58,7 +58,7 @@ export const requests: LeaveRequest[] = [
     img: 47,
     balance: "11 / 28 days",
     submitted: "5 Jun 2026, 14:05 (Europe/London)",
-    coverNote: "Kitchen is short on Sat 30 and Sun 31. Cover needed before approving.",
+    coverNote: "Kitchen is short on Sun 21. Cover is needed before approving.",
   },
   {
     id: "l4",
@@ -81,9 +81,9 @@ export const requests: LeaveRequest[] = [
 ];
 
 export const cal: LeaveCalEntry[] = [
-  { n: "Sophie Carter", dept: "Front of House", img: 5, range: [9, 11], type: "pending" },
-  { n: "Daniel Mitchell", dept: "Front of House", img: 12, range: [8, 9], type: "pending" },
-  { n: "Priya Patel", dept: "Kitchen", img: 47, range: [12, 13], type: "pending" },
+  { n: "Sophie Carter", dept: "Front of House", img: 5, range: [10, 11], type: "pending" },
+  { n: "Daniel Mitchell", dept: "Kitchen", img: 12, range: [8, 9], type: "pending" },
+  { n: "Priya Patel", dept: "Kitchen", img: 47, range: [13, 13], type: "pending" },
   { n: "Amelia Stone", dept: "Housekeeping", img: 23, range: [3, 7], type: "unavail" },
   { n: "Olivia Bennett", dept: "Front of House", img: 16, range: [10, 13], type: "annual" },
   { n: "Liam O'Connor", dept: "Bar", img: 13, range: [7, 13], type: "pending" },

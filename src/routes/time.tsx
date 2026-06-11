@@ -49,7 +49,6 @@ const TEAM_OPTIONS = [
   "Kitchen",
   "Bar",
   "Housekeeping",
-  "Events",
   "Maintenance",
 ];
 

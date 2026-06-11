@@ -148,7 +148,7 @@ export function LandingBecause() {
               <span>
                 Approved hours are for review and export.{" "}
                 <strong className="font-bold text-[var(--landing-ink-900)]">
-                  Payroll integrations remain outside the product.
+                  Docklist exports approved hours without running pay.
                 </strong>
               </span>
             </p>

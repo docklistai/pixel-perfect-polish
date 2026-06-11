@@ -18,7 +18,7 @@ export function DashboardAISummaryCard({
     <AiSuggestionCard
       tone="teal"
       title="3 things worth your attention today"
-      body="Saturday is busy — Bar is overscheduled by about £86. Friday rota still has open shifts, and last week's timesheets need approval before the payroll run."
+      body="Next week's draft has Daniel's Friday overlap and two open shifts. Four timesheets need manager review before approved hours can be exported."
       onDismiss={onDismiss}
       actions={[
         {

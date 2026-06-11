@@ -19,7 +19,7 @@ export const toneBg: Record<string, string> = {
 };
 
 export const opsStats: OpsStatCard[] = [
-  { l: "Active shifts", v: "3", s: "48 staff on duty", icon: Briefcase, tone: "info" },
+  { l: "Active shifts", v: "6", s: "6 staff scheduled today", icon: Briefcase, tone: "info" },
   { l: "Tasks completed", v: "14", s: "Today", icon: CheckCircle2, tone: "brand" },
   {
     l: "Open incidents",
@@ -120,7 +120,7 @@ export const opsTimeline: TimelineEntry[] = [
   {
     t: "12:05",
     title: "Broken wine glass",
-    area: "Riverside Restaurant  ·  Incident",
+    area: "Harbour View Hotel  ·  Incident",
     who: { n: "Daniel Mitchell", img: 12 },
     prio: "Low",
     prioTone: "info",

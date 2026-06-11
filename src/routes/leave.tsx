@@ -110,7 +110,7 @@ function LeavePage() {
     setActiveId(request.id);
     setNewRequestOpen(false);
     toast.success("Request created", {
-      description: "Added to the queue · automatically approved by manager",
+      description: "Added to the pending review queue",
     });
   };
 

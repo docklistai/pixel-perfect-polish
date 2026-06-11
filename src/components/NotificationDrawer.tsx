@@ -34,6 +34,15 @@ export function NotificationDrawer({
     onUnreadCountChange?.(unreadCount);
   }, [onUnreadCountChange, unreadCount]);
 
+  React.useEffect(() => {
+    if (!open) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onOpenChange(false);
+    };
+    document.addEventListener("keydown", closeOnEscape, true);
+    return () => document.removeEventListener("keydown", closeOnEscape, true);
+  }, [onOpenChange, open]);
+
   const visible =
     filter === "unread"
       ? items.filter((i) => !i.read)

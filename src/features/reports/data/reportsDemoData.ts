@@ -4,7 +4,7 @@ import type { Kpi, Insight } from "../types";
 export const kpis: Kpi[] = [
   {
     l: "Labour cost",
-    v: "£42,180",
+    v: "£20,840",
     d: "3.2%",
     up: false,
     vs: "vs last period",
@@ -13,7 +13,7 @@ export const kpis: Kpi[] = [
   },
   {
     l: "Labour vs sales",
-    v: "28.4%",
+    v: "28.6%",
     d: "0.8pp",
     up: false,
     vs: "vs last period",
@@ -22,7 +22,7 @@ export const kpis: Kpi[] = [
   },
   {
     l: "Hours worked",
-    v: "3,124h",
+    v: "1,368h",
     d: "1.5%",
     up: true,
     vs: "vs last period",
@@ -31,9 +31,9 @@ export const kpis: Kpi[] = [
   },
   {
     l: "Avg headcount",
-    v: "46",
-    d: "2",
-    up: true,
+    v: "8",
+    d: "0",
+    up: false,
     vs: "vs last period",
     icon: Users,
     tone: "warning",
@@ -49,13 +49,13 @@ export const insights: Insight[] = [
   },
   {
     t: "Saturday is spending more than needed",
-    s: "Bar shifts overlap 18:00–22:00. One lighter change would save cover.",
+    s: "Late Bar cover runs beyond forecast demand. One lighter close would save cover.",
     icon: Clock3,
     tone: "warning",
   },
   {
-    t: "Headcount is creeping up",
-    s: "Staffing growth is still leaning toward front-of-house cover.",
+    t: "Headcount is stable",
+    s: "The eight-person team is unchanged across the current reporting period.",
     icon: Users,
     tone: "info",
   },

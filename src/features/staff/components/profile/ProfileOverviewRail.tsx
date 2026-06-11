@@ -101,6 +101,7 @@ function LeaveBar({ label, display, pct, barColor }: LeaveBarProps) {
 
 export function LeaveAbsenceCard({ profile }: { profile: StaffProfile }) {
   const la = profile.leaveAbsence;
+  const nextLeave = profile.upcomingLeave?.[0];
   const annualUsed = ANNUAL_LEAVE_TOTAL - la.annualLeaveRemaining;
   const annualPct = Math.round((annualUsed / ANNUAL_LEAVE_TOTAL) * 100);
   const sickPct = Math.round((la.sickDaysThisYear / SICK_DAYS_MAX) * 100);
@@ -129,27 +130,29 @@ export function LeaveAbsenceCard({ profile }: { profile: StaffProfile }) {
         />
       </div>
       {/* Next leave callout */}
-      <div
-        className="mt-4 flex items-start gap-2 rounded-lg px-3 py-2.5"
-        style={{ background: "var(--accent-purple-soft, #f5f3ff)" }}
-      >
-        <Plane
-          className="h-3.5 w-3.5 shrink-0 mt-0.5"
-          style={{ color: "var(--accent-purple, #8b5cf6)" }}
-          aria-hidden
-        />
-        <div>
-          <div
-            className="text-xs font-semibold leading-snug"
+      {nextLeave && (
+        <div
+          className="mt-4 flex items-start gap-2 rounded-lg px-3 py-2.5"
+          style={{ background: "var(--accent-purple-soft, #f5f3ff)" }}
+        >
+          <Plane
+            className="h-3.5 w-3.5 shrink-0 mt-0.5"
             style={{ color: "var(--accent-purple, #8b5cf6)" }}
-          >
-            Next leave · 21 – 23 Jun
-          </div>
-          <div className="text-[11px] text-muted-foreground mt-0.5">
-            Annual leave · approved · medium coverage impact
+            aria-hidden
+          />
+          <div>
+            <div
+              className="text-xs font-semibold leading-snug"
+              style={{ color: "var(--accent-purple, #8b5cf6)" }}
+            >
+              Next leave · {nextLeave.range}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">
+              {nextLeave.type} · {nextLeave.status.toLowerCase()}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </ProfileCard>
   );
 }

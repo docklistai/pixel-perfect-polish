@@ -9,6 +9,7 @@ import {
 } from "@/components/dl";
 import { mockClockEntries } from "../data/mockPortalData";
 import { portalPublishedNextShift } from "../data/publishedRotaPortalData";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 
 function formatElapsed(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -32,6 +33,17 @@ export function TimeTab() {
 
   const elapsed = clockedIn && startedAt ? now - startedAt : 0;
   const currentShift = portalPublishedNextShift;
+  const currentMinutes = 16 * 60;
+  const startMinutes = currentShift
+    ? Number(currentShift.start.slice(0, 2)) * 60 + Number(currentShift.start.slice(3))
+    : 0;
+  const endMinutes = currentShift
+    ? Number(currentShift.end.slice(0, 2)) * 60 + Number(currentShift.end.slice(3))
+    : 0;
+  const clockInAvailable =
+    currentShift?.date === DEMO_WORLD.todayIso &&
+    currentMinutes >= startMinutes &&
+    currentMinutes < endMinutes;
   const sinceLabel = startedAt
     ? new Date(startedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
     : null;
@@ -39,7 +51,7 @@ export function TimeTab() {
   const hasMissing = entries.some((e) => e.flag === "missing-clock-out");
 
   const onToggle = () => {
-    if (!currentShift) return;
+    if (!currentShift || (!clockInAvailable && !clockedIn)) return;
     if (clockedIn) {
       setClockedIn(false);
       setOnBreak(false);
@@ -55,10 +67,10 @@ export function TimeTab() {
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            CURRENT SHIFT
+            NEXT PUBLISHED SHIFT
           </div>
           <StatusBadge tone={clockedIn ? "success" : "muted"}>
-            {clockedIn ? "Scheduled" : "Off shift"}
+            {clockedIn ? "Clocked in" : "Not active"}
           </StatusBadge>
         </div>
         {currentShift ? (
@@ -90,7 +102,7 @@ export function TimeTab() {
             <button
               type="button"
               onClick={onToggle}
-              disabled={!currentShift}
+              disabled={!clockInAvailable && !clockedIn}
               className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
                 clockedIn
                   ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
@@ -105,14 +117,22 @@ export function TimeTab() {
                   <PlayCircle className="h-9 w-9" />
                 )}
                 <span className="text-[22px] font-bold leading-none">
-                  {!currentShift ? "No shift" : clockedIn ? "Clock out" : "Clock in"}
+                  {!currentShift
+                    ? "No shift"
+                    : clockedIn
+                      ? "Clock out"
+                      : clockInAvailable
+                        ? "Clock in"
+                        : "Not available"}
                 </span>
                 <span className="text-[11px] font-medium text-white/85">
                   {clockedIn
                     ? sinceLabel
                       ? `since ${sinceLabel}`
                       : "End your shift"
-                    : "Tap to start your shift"}
+                    : clockInAvailable
+                      ? "Tap to start your shift"
+                      : "Available during your active shift"}
                 </span>
               </span>
             </button>

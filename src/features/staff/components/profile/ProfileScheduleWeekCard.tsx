@@ -74,13 +74,11 @@ function buildWeeklySchedule(profile: StaffProfile, weekOffset: number): WeekShi
       end: block.end,
       label: block.label,
       hours: 8,
-      status:
-        weekOffset === -1
-          ? ("published" as const)
-          : i < 3
-            ? ("published" as const)
-            : ("draft" as const),
-      flag: base === 5 ? ("conflict" as const) : base === 6 ? ("tight-rest" as const) : undefined,
+      status: weekOffset <= 0 ? ("published" as const) : ("draft" as const),
+      flag:
+        profile.id === "daniel-mitchell" && weekOffset === 1 && i === 4
+          ? ("conflict" as const)
+          : undefined,
     };
   });
 }
@@ -99,6 +97,8 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
     [profile, weekOffset],
   );
   const weekly = profile.weeklyHours ?? [7.5, 8, 7, 0, 8, 6.5, 0];
+  const scheduledShifts = shifts.filter((shift) => shift.status !== "off");
+  const scheduledHours = scheduledShifts.reduce((total, shift) => total + shift.hours, 0);
   const weekTitle =
     weekOffset === 0
       ? "This week · 8–14 Jun"
@@ -224,7 +224,9 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
         </div>
 
         <div className="flex items-center gap-2 border-t border-border/60 px-4 py-3">
-          <span className="text-xs text-muted-foreground">5 shifts · 32.0h scheduled</span>
+          <span className="text-xs text-muted-foreground">
+            {scheduledShifts.length} shifts · {scheduledHours.toFixed(1)}h scheduled
+          </span>
           <div className="flex-1" />
           <button
             type="button"

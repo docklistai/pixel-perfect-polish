@@ -20,20 +20,42 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-const coverageRows = [
-  { label: "Sun 21 Jun", value: 50, tone: "danger" as const },
-  { label: "Mon 22 Jun", value: 60, tone: "warning" as const },
-  { label: "Tue 23 Jun", value: 66, tone: "warning" as const },
-];
+const coverageByRequest: Record<
+  string,
+  { label: string; value: number; tone: "danger" | "warning" }[]
+> = {
+  l1: [
+    { label: "Thu 18 Jun", value: 85, tone: "warning" },
+    { label: "Fri 19 Jun", value: 80, tone: "warning" },
+  ],
+  l2: [
+    { label: "Tue 16 Jun", value: 75, tone: "warning" },
+    { label: "Wed 17 Jun", value: 70, tone: "warning" },
+  ],
+  l3: [
+    { label: "Sun 21 Jun", value: 50, tone: "danger" },
+    { label: "Mon 22 Jun", value: 60, tone: "warning" },
+    { label: "Tue 23 Jun", value: 66, tone: "warning" },
+  ],
+  l4: [
+    { label: "Mon 15 Jun", value: 70, tone: "warning" },
+    { label: "Fri 19 Jun", value: 65, tone: "warning" },
+    { label: "Sun 21 Jun", value: 60, tone: "warning" },
+  ],
+};
 
-const otherRequests = [
+const requestPeriods = [
   { name: "Daniel Mitchell", dates: "16 – 17 Jun" },
-  { name: "Sophie Carter", dates: "8 – 10 Jun" },
+  { name: "Sophie Carter", dates: "18 – 19 Jun" },
+  { name: "Priya Patel", dates: "21 – 23 Jun" },
+  { name: "Liam O'Connor", dates: "15 – 21 Jun" },
 ];
 
 export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOpenRisk }: Props) {
   const isApproved = request.state === "approved";
   const isDeclined = request.state === "declined";
+  const coverageRows = coverageByRequest[request.id] ?? coverageByRequest.l3;
+  const otherRequests = requestPeriods.filter((person) => person.name !== request.n);
   const impactTone =
     request.tone === "danger" ? "danger" : request.tone === "warning" ? "warning" : "success";
 
@@ -103,7 +125,7 @@ export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOp
       </div>
 
       <div className="card-section">
-        <div className="section-label mb-2">Also off this period</div>
+        <div className="section-label mb-2">Other requests in this period</div>
         <div className="space-y-3">
           {otherRequests.map((person) => (
             <div key={person.name} className="row gap-3">
@@ -112,7 +134,7 @@ export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOp
                 <div className="strong txt-sm">{person.name}</div>
                 <div className="muted txt-xs mono">{person.dates}</div>
               </div>
-              <StatusBadge tone="muted">Annual</StatusBadge>
+              <StatusBadge tone="warning">Pending</StatusBadge>
             </div>
           ))}
         </div>

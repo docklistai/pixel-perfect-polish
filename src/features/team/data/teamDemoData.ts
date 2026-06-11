@@ -23,7 +23,7 @@ import type {
 
 export const kpiItems: TeamKpi[] = [
   {
-    v: "5",
+    v: "2",
     l: "Unread announcements",
     s: "2 require your acknowledgement",
     icon: Megaphone,
@@ -37,7 +37,7 @@ export const kpiItems: TeamKpi[] = [
     tone: "warning",
   },
   {
-    v: "7",
+    v: "3",
     l: "Recent updates",
     s: "Since your last visit",
     icon: Bell,
@@ -54,8 +54,8 @@ export const announcements: TeamAnnouncement[] = [
     body: "We're excited to launch our new summer menu from Monday 15 Jun. Please take time to familiarise yourself with the new dishes, ingredients...",
     tags: ["All Staff", "Restaurant, Bar, Kitchen"],
     audiences: ["All Staff"],
-    ackDone: 18,
-    ackTotal: 24,
+    ackDone: 6,
+    ackTotal: 8,
     date: "6 Jun 2026",
     icon: Cake,
     tone: "purple",
@@ -67,10 +67,10 @@ export const announcements: TeamAnnouncement[] = [
     t: "Food Safety Refresher",
     emoji: "🛡",
     body: "A friendly reminder to complete your Food Safety Refresher module by 21 Jun. This short training helps us keep...",
-    tags: ["Kitchen, FOH", "All Locations"],
+    tags: ["Kitchen, FOH", "Harbour View Hotel"],
     audiences: ["Kitchen", "Front of House"],
-    ackDone: 14,
-    ackTotal: 18,
+    ackDone: 5,
+    ackTotal: 8,
     date: "4 Jun 2026",
     icon: Shield,
     tone: "warning",
@@ -83,8 +83,8 @@ export const announcements: TeamAnnouncement[] = [
     body: "Please note our opening hours for the upcoming summer bank holiday on Monday 31 Aug.",
     tags: ["All Staff"],
     audiences: ["All Staff"],
-    ackDone: 24,
-    ackTotal: 24,
+    ackDone: 8,
+    ackTotal: 8,
     date: "2 Jun 2026",
     icon: Clock,
     tone: "info",
@@ -95,10 +95,10 @@ export const announcements: TeamAnnouncement[] = [
     t: "Team Shout-Outs",
     emoji: "👏",
     body: "Big thanks to everyone for a fantastic week! Your hard work and positive energy are what make Harbour View special.",
-    tags: ["All Staff", "All Locations"],
+    tags: ["All Staff", "Harbour View Hotel"],
     audiences: ["All Staff"],
-    ackDone: 22,
-    ackTotal: 24,
+    ackDone: 7,
+    ackTotal: 8,
     date: "30 May 2026",
     icon: Trophy,
     tone: "purple",
@@ -111,8 +111,8 @@ export const announcements: TeamAnnouncement[] = [
     body: "New uniform items are now available in all sizes. See Reception to collect yours.",
     tags: ["All Staff"],
     audiences: ["All Staff"],
-    ackDone: 11,
-    ackTotal: 24,
+    ackDone: 6,
+    ackTotal: 8,
     date: "28 May 2026",
     icon: Shirt,
     tone: "danger",
@@ -130,7 +130,7 @@ export const trainingItems: TeamTrainingItem[] = [
     source: "Manager-scheduled",
     assigned: "FOH",
     mandatory: false,
-    complete: "8 / 12",
+    complete: "3 / 3",
   },
   {
     t: "Food Safety Refresher",
@@ -141,7 +141,7 @@ export const trainingItems: TeamTrainingItem[] = [
     source: "Staff training requirements",
     assigned: "FOH + Kitchen",
     mandatory: true,
-    complete: "14 / 18",
+    complete: "5 / 8",
   },
   {
     t: "Cocktail Masterclass",
@@ -152,7 +152,7 @@ export const trainingItems: TeamTrainingItem[] = [
     source: "Manager-scheduled",
     assigned: "Bar",
     mandatory: false,
-    complete: "4 / 6",
+    complete: "1 / 1",
   },
 ];
 
@@ -187,10 +187,10 @@ export const staffEvents: TeamEventItem[] = [
 ];
 
 export const quickGroups: TeamGroup[] = [
-  { label: "All Staff", members: "24 members" },
-  { label: "Front of House", members: "12 members" },
-  { label: "Kitchen", members: "9 members" },
-  { label: "Housekeeping", members: "4 members" },
+  { label: "All Staff", members: "8 members" },
+  { label: "Front of House", members: "3 members" },
+  { label: "Kitchen", members: "2 members" },
+  { label: "Housekeeping", members: "1 member" },
 ];
 
 export const audienceOptions = [
@@ -201,4 +201,4 @@ export const audienceOptions = [
   "Housekeeping",
 ] as const;
 
-export const TOTAL_STAFF = 24;
+export const TOTAL_STAFF = 8;

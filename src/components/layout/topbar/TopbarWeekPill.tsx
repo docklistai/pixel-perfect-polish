@@ -5,12 +5,16 @@ import { getWeekLabelForOffset, getWeekSubtitle } from "./topbarUtils";
 export function TopbarWeekPill() {
   const [weekOffset, setWeekOffset] = React.useState(0);
   const weekLabel = getWeekLabelForOffset(weekOffset);
+  const changeWeek = (offset: number) => {
+    setWeekOffset(offset);
+    window.dispatchEvent(new CustomEvent("docklist:week-change", { detail: offset }));
+  };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setWeekOffset((prev) => prev - 1)}
+        onClick={() => changeWeek(weekOffset - 1)}
         className="topbar-arrow hidden md:grid"
         title="Previous week"
         aria-label="Previous week"
@@ -30,7 +34,7 @@ export function TopbarWeekPill() {
 
       <button
         type="button"
-        onClick={() => setWeekOffset((prev) => prev + 1)}
+        onClick={() => changeWeek(weekOffset + 1)}
         className="topbar-arrow hidden md:grid"
         title="Next week"
         aria-label="Next week"

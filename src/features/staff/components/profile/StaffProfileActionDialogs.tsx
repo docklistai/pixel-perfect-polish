@@ -11,15 +11,7 @@ interface StaffProfileActionDialogsProps {
   onToast: (message: string) => void;
 }
 
-const departments = [
-  "Front of House",
-  "Kitchen",
-  "Bar",
-  "Events",
-  "Housekeeping",
-  "Maintenance",
-  "Porter",
-];
+const departments = ["Front of House", "Kitchen", "Bar", "Housekeeping", "Maintenance"];
 
 export function StaffProfileActionDialogs({
   profile,
@@ -147,8 +139,7 @@ export function StaffProfileActionDialogs({
             <div>
               <div className="text-sm font-semibold">3 shifts will be unassigned</div>
               <div className="mt-1 text-xs text-muted-foreground">
-                Tue 13, Wed 14, and Thu 11 Jun. The rota will be marked as draft and require
-                re-publishing.
+                Thu 11, Fri 12, and Sun 14 Jun. The published rota will need a reviewed replacement.
               </div>
             </div>
           </div>

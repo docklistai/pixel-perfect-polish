@@ -3,8 +3,8 @@ import { Calendar, Send } from "lucide-react";
 import { Card, StatusBadge } from "@/components/dl";
 import { toast } from "sonner";
 
-// Next rota: week of Mon 15 Jun 2026. Due by Fri 12 Jun 12:00 (2 days from Wed 10 Jun).
-// Counts consistent with /rota mock data: 1 conflict, 2 open shifts, 98% coverage.
+// Next rota: week of Mon 15 Jun 2026. Due by Fri 12 Jun 16:00.
+// Counts consistent with /rota mock data: 1 conflict, 2 open shifts, 96% coverage.
 export function DashboardRotaPublish() {
   return (
     <Card className="overflow-hidden p-0">
@@ -24,7 +24,7 @@ export function DashboardRotaPublish() {
         </div>
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Due by Fri, 12 Jun 12:00</span>
+            <span className="text-muted-foreground">Due by Fri, 12 Jun 16:00</span>
             <span className="font-semibold text-warning">1d remaining</span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
@@ -34,7 +34,7 @@ export function DashboardRotaPublish() {
         <div className="mt-3 flex flex-wrap gap-1.5">
           <StatusBadge tone="danger">1 conflict</StatusBadge>
           <StatusBadge tone="warning">2 open</StatusBadge>
-          <StatusBadge tone="success">98% cov</StatusBadge>
+          <StatusBadge tone="success">96% cov</StatusBadge>
         </div>
       </div>
       <div className="flex items-center gap-2 border-t border-border px-5 py-3">

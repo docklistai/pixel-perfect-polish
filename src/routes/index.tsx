@@ -274,14 +274,14 @@ function Home() {
 
       {/* Secondary row: labour watch · rota countdown · leave queue */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatch labourCost="£18,420" projectedSales="£64,420" labourPct={28.6} />
+        <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} />
         <DashboardRotaPublish />
         <DashboardPendingLeave items={leaveItems} />
       </div>
 
       {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardStaffOnShift items={staffDeptItems} total={28} />
+        <DashboardStaffOnShift items={staffDeptItems} total={6} />
         <DashboardTimesheets items={timesheetItems} />
         <DashboardAnnouncements items={announcementItems} />
         <DashboardQuickActions items={quickActionItems} />

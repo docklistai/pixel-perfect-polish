@@ -6,7 +6,7 @@ const savedReports = [
   { icon: Clock3, name: "Attendance — Kitchen", sub: "Last run yesterday" },
   { icon: Plane, name: "Leave forecast Q3", sub: "Owned by Olivia" },
   { icon: Trophy, name: "Performance review", sub: "Last run 7d ago" },
-  { icon: Download, name: "Payroll export May", sub: "Last run 2d ago" },
+  { icon: Download, name: "Approved hours export", sub: "Last run 2d ago" },
 ] as const;
 
 interface ReportsSavedReportsCardProps {

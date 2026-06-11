@@ -71,7 +71,7 @@ export function ProfileScheduleSidebar() {
             <div>
               <div className="text-sm font-semibold">Rota published</div>
               <div className="text-xs text-muted-foreground">
-                Mon-Wed locked. Thu-Sun still draft.
+                The full 8–14 Jun rota is published and live.
               </div>
             </div>
           </div>
@@ -80,9 +80,9 @@ export function ProfileScheduleSidebar() {
               <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
             </div>
             <div>
-              <div className="text-sm font-semibold">1 coverage gap remaining</div>
+              <div className="text-sm font-semibold">Next week needs review</div>
               <div className="text-xs text-muted-foreground">
-                Fri 12 Jun · Bar evening, 17:00 – 23:00
+                Daniel has overlapping draft shifts on Fri 19 Jun.
               </div>
             </div>
           </div>

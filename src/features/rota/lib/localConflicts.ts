@@ -72,26 +72,17 @@ export function buildLocalConflictSummaries(
   staff: StaffMember[],
   dayLabels: string[],
 ): ConflictSummary[] {
-  const pairsByShift = new Map<ShiftId, DraftShift[]>();
-  for (const { base, overlapping } of localConflictPairs(shifts)) {
-    const current = pairsByShift.get(base.id) ?? [];
-    current.push(overlapping);
-    pairsByShift.set(base.id, current);
-  }
-
-  return shifts
-    .filter((shift) => pairsByShift.has(shift.id))
-    .map((shift) => {
-      const staffName = staff.find((member) => member.id === shift.staffId)?.name ?? "Unknown";
-      const overlapping = pairsByShift.get(shift.id) ?? [];
-      const overlapTimes = overlapping.map((item) => formatShiftTime(item.start, item.end));
+  return localConflictPairs(shifts)
+    .filter(({ base, overlapping }) => base.id < overlapping.id)
+    .map(({ base, overlapping }) => {
+      const staffName = staff.find((member) => member.id === base.staffId)?.name ?? "Unknown";
 
       return {
-        id: shift.id,
+        id: base.id,
         staff: staffName,
-        day: dayLabels[shift.dayIndex] ?? "",
-        detail: `${shift.role} · ${formatShiftTime(shift.start, shift.end)}`,
-        cause: `${staffName} has an overlapping shift: ${overlapTimes.join(", ")}.`,
+        day: dayLabels[base.dayIndex] ?? "",
+        detail: `${base.role} · ${formatShiftTime(base.start, base.end)} and ${formatShiftTime(overlapping.start, overlapping.end)}`,
+        cause: `${staffName} has two overlapping shifts.`,
         guidance: "Review the times or assign one shift to another staff member.",
       };
     });

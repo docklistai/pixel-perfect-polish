@@ -1,11 +1,18 @@
 import type { DraftShift, ShiftTone, StaffMember } from "../types";
 
 export const staff: StaffMember[] = [
-  { id: "sophie-carter", name: "Sophie Carter", role: "Manager", hrs: "32h", img: 5, tone: "info" },
+  {
+    id: "sophie-carter",
+    name: "Sophie Carter",
+    role: "FOH Supervisor",
+    hrs: "32h",
+    img: 5,
+    tone: "info",
+  },
   {
     id: "daniel-mitchell",
     name: "Daniel Mitchell",
-    role: "Supervisor",
+    role: "Kitchen Supervisor",
     hrs: "35h",
     img: 12,
     tone: "info",
@@ -74,22 +81,22 @@ const sched = (
 });
 
 export const initialDraftShifts: SeedShift[] = [
-  // Sophie Carter — Manager (Mon–Sat)
-  sched("sophie-carter", 0, "Manager", "08:00", "16:00", "info"),
-  sched("sophie-carter", 1, "Manager", "08:00", "16:00", "info"),
-  sched("sophie-carter", 2, "Manager", "09:00", "17:00", "info"),
-  sched("sophie-carter", 3, "Manager", "08:00", "16:00", "info"),
-  sched("sophie-carter", 4, "Manager", "08:00", "16:00", "info"),
-  sched("sophie-carter", 5, "Manager", "10:00", "18:00", "info"),
+  // Sophie Carter — FOH Supervisor (Mon–Sat)
+  sched("sophie-carter", 0, "FOH Supervisor", "08:00", "16:00", "info"),
+  sched("sophie-carter", 1, "FOH Supervisor", "08:00", "16:00", "info"),
+  sched("sophie-carter", 2, "FOH Supervisor", "09:00", "17:00", "info"),
+  sched("sophie-carter", 3, "FOH Supervisor", "08:00", "16:00", "info"),
+  sched("sophie-carter", 4, "FOH Supervisor", "08:00", "16:00", "info"),
+  sched("sophie-carter", 5, "FOH Supervisor", "10:00", "18:00", "info"),
 
-  // Daniel Mitchell — Supervisor (Fri has a local overlap for conflict review)
-  sched("daniel-mitchell", 0, "Supervisor", "09:00", "17:00", "info"),
-  sched("daniel-mitchell", 1, "Supervisor", "09:00", "17:00", "info"),
-  sched("daniel-mitchell", 3, "Supervisor", "13:00", "21:00", "info"),
-  sched("daniel-mitchell", 4, "Supervisor", "13:00", "21:00", "info"),
-  sched("daniel-mitchell", 4, "Supervisor", "18:00", "22:00", "info"),
-  sched("daniel-mitchell", 5, "Supervisor", "13:00", "21:00", "info"),
-  sched("daniel-mitchell", 6, "Supervisor", "09:00", "17:00", "info"),
+  // Daniel Mitchell — Kitchen Supervisor (Fri has the single draft conflict)
+  sched("daniel-mitchell", 0, "Kitchen Supervisor", "09:00", "17:00", "info"),
+  sched("daniel-mitchell", 1, "Kitchen Supervisor", "09:00", "17:00", "info"),
+  sched("daniel-mitchell", 3, "Kitchen Supervisor", "13:00", "21:00", "info"),
+  sched("daniel-mitchell", 4, "Kitchen Supervisor", "13:00", "21:00", "info"),
+  sched("daniel-mitchell", 4, "Kitchen Supervisor", "18:00", "22:00", "info"),
+  sched("daniel-mitchell", 5, "Kitchen Supervisor", "13:00", "21:00", "info"),
+  sched("daniel-mitchell", 6, "Kitchen Supervisor", "09:00", "17:00", "info"),
 
   // Priya Patel — Head Chef (Thu off)
   sched("priya-patel", 0, "Head Chef", "06:00", "14:00", "warning"),
@@ -155,6 +162,5 @@ export const roleLegend = [
   { label: "Bar", preset: "purple" },
   { label: "Housekeeping", preset: "green" },
   { label: "Porter", preset: "teal" },
-  { label: "Events", preset: "rose" },
   { label: "Maintenance", preset: "slate" },
 ];

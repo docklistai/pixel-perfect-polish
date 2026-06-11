@@ -5,7 +5,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "sophie-carter",
     n: "Sophie Carter",
-    role: "Front of House",
+    role: "FOH Supervisor",
     img: 5,
     sched: "08:00 – 16:00",
     in: "07:58",
@@ -22,7 +22,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "daniel-mitchell",
     n: "Daniel Mitchell",
-    role: "Front of House",
+    role: "Kitchen Supervisor",
     img: 12,
     sched: "10:00 – 18:00",
     in: "10:12",
@@ -41,7 +41,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "priya-patel",
     n: "Priya Patel",
-    role: "Kitchen",
+    role: "Head Chef",
     img: 47,
     sched: "09:00 – 17:00",
     in: "08:59",
@@ -58,7 +58,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "liam-oconnor",
     n: "Liam O'Connor",
-    role: "Bar",
+    role: "Bartender",
     img: 13,
     sched: "16:00 – 00:00",
     in: "16:05",
@@ -76,7 +76,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "olivia-bennett",
     n: "Olivia Bennett",
-    role: "Front of House",
+    role: "Barista",
     img: 16,
     sched: "07:00 – 15:00",
     in: "07:00",
@@ -92,7 +92,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "james-walker",
     n: "James Walker",
-    role: "Front of House",
+    role: "Waiter",
     img: 14,
     sched: "11:00 – 19:00",
     in: "—",
@@ -111,7 +111,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "amelia-stone",
     n: "Amelia Stone",
-    role: "Housekeeping",
+    role: "Housekeeper",
     img: 23,
     sched: "08:30 – 16:30",
     in: "08:34",
@@ -130,7 +130,7 @@ export const rows: TimesheetRow[] = [
   {
     id: "noah-evans",
     n: "Noah Evans",
-    role: "Maintenance",
+    role: "Porter",
     img: 33,
     sched: "15:00 – 23:00",
     in: "14:58",
@@ -148,7 +148,6 @@ export const rows: TimesheetRow[] = [
 
 export const missedClockIns: MissedClockIn[] = [
   { id: "james-walker", n: "James Walker", t: "Today, 11:00", img: 14 },
-  { id: "noah-williams", n: "Noah Williams", t: "Yesterday, 09:00", img: 9 },
 ];
 
 export const timeQueries: TimeQuery[] = [

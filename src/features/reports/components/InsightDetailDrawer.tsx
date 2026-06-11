@@ -45,7 +45,7 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
       tag: report.tag ?? "Standard",
       icon: report.icon ?? BarChart2,
       numbers: [
-        { key: "Period total", value: "£42,180", delta: "−3.2% vs prev", down: false },
+        { key: "Period total", value: "£20,840", delta: "−3.2% vs prev", down: false },
         { key: "Best week", value: "W20", delta: "£10,640", down: false },
         { key: "Variance", value: "£1,420", delta: "vs target", down: true },
       ],
@@ -58,23 +58,23 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
         },
         {
           title: "Saturday is spending more than needed",
-          body: "Bar shifts overlap 18:00–22:00. ~£86/week saving available.",
+          body: "Late Bar cover runs beyond forecast demand. ~£86/week saving available.",
           tone: "warning" as const,
           icon: Clock,
         },
         {
           title: "Kitchen ratios look healthy",
-          body: "Daniel, Noah and Emma cover well — no obvious gaps to fill.",
+          body: "Daniel and Priya cover well — no obvious kitchen gaps to fill.",
           tone: "info" as const,
           icon: Users,
         },
       ],
       breakdown: [
-        { dept: "Front of House", hours: "1,124h", cost: "£14,820", pct: "35%" },
-        { dept: "Kitchen", hours: "892h", cost: "£12,640", pct: "30%" },
-        { dept: "Housekeeping", hours: "640h", cost: "£8,450", pct: "20%" },
-        { dept: "Bar", hours: "240h", cost: "£3,210", pct: "8%" },
-        { dept: "Other", hours: "228h", cost: "£3,060", pct: "7%" },
+        { dept: "Front of House", hours: "492h", cost: "£7,750", pct: "37%" },
+        { dept: "Kitchen", hours: "384h", cost: "£6,250", pct: "30%" },
+        { dept: "Housekeeping", hours: "196h", cost: "£2,840", pct: "14%" },
+        { dept: "Bar", hours: "168h", cost: "£2,400", pct: "12%" },
+        { dept: "Maintenance", hours: "128h", cost: "£1,600", pct: "7%" },
       ],
     };
   }, [report]);

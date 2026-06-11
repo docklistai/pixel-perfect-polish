@@ -2,11 +2,11 @@ import { ExternalLink } from "lucide-react";
 import { Card } from "@/components/dl";
 
 const segments = [
-  { department: "Front of House", value: "£14,820", pct: 35, color: "#3B82F6" },
-  { department: "Kitchen", value: "£12,640", pct: 30, color: "#E8A33D" },
-  { department: "Housekeeping", value: "£8,450", pct: 20, color: "#1DA672" },
-  { department: "Bar", value: "£3,210", pct: 8, color: "#E94358" },
-  { department: "Other", value: "£3,060", pct: 7, color: "#97A0B3" },
+  { department: "Front of House", value: "£7,294", pct: 35, color: "#3B82F6" },
+  { department: "Kitchen", value: "£6,252", pct: 30, color: "#E8A33D" },
+  { department: "Housekeeping", value: "£3,126", pct: 15, color: "#1DA672" },
+  { department: "Bar", value: "£2,084", pct: 10, color: "#E94358" },
+  { department: "Maintenance", value: "£2,084", pct: 10, color: "#97A0B3" },
 ];
 
 export function DepartmentLabourPanel() {
@@ -54,7 +54,7 @@ export function DepartmentLabourPanel() {
           })}
         </svg>
         <div className="absolute text-center">
-          <div className="font-display text-[22px] font-bold leading-none">£42,180</div>
+          <div className="font-display text-[22px] font-bold leading-none">£20,840</div>
           <div className="mt-1 text-xs text-muted-foreground">Total cost</div>
         </div>
       </div>

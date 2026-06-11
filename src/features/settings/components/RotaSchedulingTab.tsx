@@ -213,7 +213,7 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
           <label className="space-y-1.5">
             <FieldLabel>Apply to</FieldLabel>
             <SelectField defaultValue="all" onChange={onDirty}>
-              <option value="all">All locations (this workspace)</option>
+              <option value="all">Harbour View Hotel</option>
               <option value="brighton">Harbour View only</option>
               <option value="hove">The Anchor Inn only</option>
             </SelectField>
@@ -224,8 +224,8 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
           <Info className="h-4 w-4 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
             These figures appear in <strong>Rota → Labour summary</strong> and{" "}
-            <strong>Home → Labour watch</strong>. They are not connected to payroll or finance
-            software — they are planning targets only.
+            <strong>Home → Labour watch</strong>. They are planning targets only; approved hours can
+            be exported separately after manager review.
           </p>
         </div>
       </SectionCard>

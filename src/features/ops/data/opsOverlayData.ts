@@ -10,13 +10,7 @@ export const logEntryTypes = [
 
 export const logEntrySeverities = ["Low", "Medium", "High", "Critical"];
 
-export const logEntryLocations = [
-  "Riverside Restaurant",
-  "Bar",
-  "Lobby",
-  "Room (specify)…",
-  "Kitchen",
-];
+export const logEntryLocations = ["Main restaurant", "Bar", "Lobby", "Room (specify)…", "Kitchen"];
 
 export const logEntryStaff = [
   "Alex Thompson (you)",
@@ -25,14 +19,15 @@ export const logEntryStaff = [
   "Priya Patel",
   "Liam O'Connor",
   "Olivia Bennett",
-  "Ava Thompson",
-  "James Lewis",
+  "James Walker",
+  "Amelia Stone",
+  "Noah Evans",
 ];
 
 export const handoverRecipients = [
-  { name: "Olivia Bennett", role: "Duty manager", current: true },
-  { name: "Daniel Mitchell", role: "Sous chef", current: false },
-  { name: "Alex Thompson", role: "GM", current: false },
+  { name: "Olivia Bennett", role: "Barista", current: true },
+  { name: "Daniel Mitchell", role: "Kitchen Supervisor", current: false },
+  { name: "Alex Thompson", role: "Manager", current: false },
 ];
 
 export const handoverAiDraft = `Heading into evening service. Three open items to keep an eye on:

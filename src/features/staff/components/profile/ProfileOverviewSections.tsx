@@ -67,8 +67,13 @@ export function ManagerSnapshotCard({ profile, onTabChange, onToast }: OverviewS
   const docsValue =
     profile.documentsSummary.missing > 0
       ? `${profile.documentsSummary.missing} missing`
-      : "Up to date";
-  const docsTone = profile.documentsSummary.missing > 0 ? "amber" : "green";
+      : profile.documentsSummary.expiringSoon > 0
+        ? `${profile.documentsSummary.expiringSoon} expiring`
+        : "Up to date";
+  const docsTone =
+    profile.documentsSummary.missing > 0 || profile.documentsSummary.expiringSoon > 0
+      ? "amber"
+      : "green";
 
   return (
     <ProfileCard
@@ -94,7 +99,11 @@ export function ManagerSnapshotCard({ profile, onTabChange, onToast }: OverviewS
         <SnapStat
           label="Documents"
           value={docsValue}
-          sub={profile.documentsSummary.missing > 0 ? "Requires attention" : "All verified"}
+          sub={
+            profile.documentsSummary.missing > 0 || profile.documentsSummary.expiringSoon > 0
+              ? "Requires attention"
+              : "All verified"
+          }
           tone={docsTone}
         />
         <SnapStat

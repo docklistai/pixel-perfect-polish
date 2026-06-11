@@ -83,23 +83,23 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
   },
   "Anything I should review before publishing this week's rota?": {
     title: "Three things to check before publishing",
-    summary: "Coverage looks solid (98%), but I'd resolve these before you send it to staff.",
+    summary: "Coverage is at 96%, but I'd resolve these before you send it to staff.",
     bullets: [
       {
-        title: "Conflict — Liam, Wed 10 Jun",
-        body: "Liam is on Bar 16:00 – 00:00 but also on the Events list. One needs to drop.",
+        title: "Conflict — Daniel, Fri 19 Jun",
+        body: "Daniel's Kitchen Supervisor shifts overlap from 18:00 – 21:00. One needs to change.",
         tone: "red",
         icon: AlertTriangle,
       },
       {
-        title: "Priya's leave clashes with Sat cover",
-        body: "Approving 21–23 Jun leaves Housekeeping at 50% on Sunday.",
+        title: "Priya's leave reduces Sunday kitchen cover",
+        body: "Approving 21–23 Jun leaves the kitchen without its Head Chef on Sunday.",
         tone: "purple",
         icon: Plane,
       },
       {
-        title: "Saturday Bar is at 118% — overscheduled",
-        body: "Two bartenders overlap 18:00 – 22:00. You could move one to Sunday and save ~£86.",
+        title: "Saturday Bar is above forecast demand",
+        body: "Late Bar cover runs beyond forecast demand. Trimming the close could save ~£86.",
         tone: "amber",
         icon: Users,
       },
@@ -112,7 +112,7 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
   "Summarise leave impact for week of 15 Jun": {
     title: "Week of 15 Jun — leave impact",
     summary:
-      "Four staff are off across the week. Coverage stays above 90% except Sunday in Housekeeping.",
+      "Four pending requests affect the week. Coverage stays above 90% except Sunday in Kitchen.",
     bullets: [
       {
         title: "Mon – Fri all comfortable",
@@ -138,7 +138,7 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
   "Why is labour up 6% vs last week?": {
     title: "Labour is up 6% — mostly from Bar overtime",
     summary:
-      "You spent £18,420 on labour this week vs £17,380 last week. The increase concentrates on Bar shifts after 22:00.",
+      "You scheduled £5,291 of labour this week vs £4,991 last week. The increase concentrates on Bar shifts after 22:00.",
     bullets: [
       {
         title: "Bar overtime contributed £640",
@@ -162,19 +162,19 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
     actions: [{ label: "Open reports", icon: BarChart3, primary: true }],
   },
   "Who's been picking up the most extra shifts this month?": {
-    title: "Top extra-shift pickups — May so far",
+    title: "Top extra-shift pickups — June so far",
     summary:
       "Three people have stepped up the most. Worth a thank-you and a check that they're not heading for burnout.",
     bullets: [
       {
-        title: "Sophie Carter — 5 extra shifts",
+        title: "Sophie Carter — 2 extra shifts",
         body: "All covered short-notice. Currently at 92% of contracted hours — watch for fatigue.",
         tone: "amber",
         icon: Trophy,
       },
       {
-        title: "Daniel Mitchell — 3 extra shifts",
-        body: "All in Kitchen — covered Noah's probation training days.",
+        title: "Daniel Mitchell — 2 extra shifts",
+        body: "Both in Kitchen — covered Priya's planning time.",
         tone: "teal",
         icon: Trophy,
       },

@@ -1,11 +1,11 @@
 import { Card } from "@/components/dl";
 
 const performers = [
-  { name: "Sophie Carter", role: "Manager", score: 98, tone: "av-c1" },
-  { name: "Daniel Mitchell", role: "Supervisor", score: 96, tone: "av-c4" },
+  { name: "Sophie Carter", role: "FOH Supervisor", score: 98, tone: "av-c1" },
+  { name: "Daniel Mitchell", role: "Kitchen Supervisor", score: 96, tone: "av-c4" },
   { name: "Priya Patel", role: "Head Chef", score: 94, tone: "av-c3" },
   { name: "Liam O'Connor", role: "Bartender", score: 92, tone: "av-c2" },
-  { name: "Amelia Stone", role: "Housekeeping", score: 89, tone: "av-c5" },
+  { name: "Amelia Stone", role: "Housekeeper", score: 89, tone: "av-c5" },
 ];
 
 function initials(name: string): string {

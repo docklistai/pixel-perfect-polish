@@ -18,7 +18,7 @@ const valuePillars = [
   },
 ];
 
-const trustBadges = ["Role-based permissions", "Staff access codes", "Payroll-ready exports"];
+const trustBadges = ["Role-based permissions", "Staff access codes", "Approved-hours exports"];
 
 export function AuthValuePanel() {
   return (

@@ -18,17 +18,7 @@ export function applyTheme(theme: ThemeMode) {
 }
 
 export function getWeekLabelForOffset(offset: number = 0): string {
-  const now = new Date();
-
-  const londonStr = now.toLocaleDateString("en-CA", {
-    timeZone: "Europe/London",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const [y, m, d] = londonStr.split("-").map(Number);
-
-  const londonDate = new Date(y, m - 1, d + offset * 7);
+  const londonDate = new Date(2026, 5, 11 + offset * 7);
   const weekday = londonDate.getDay();
   const diffToMonday = weekday === 0 ? -6 : 1 - weekday;
 

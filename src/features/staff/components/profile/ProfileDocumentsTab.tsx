@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AlertTriangle, CheckCircle2, ChevronRight, Upload } from "lucide-react";
+import { CheckCircle2, ChevronRight, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { ProfileCard } from "./ProfileCard";
 import { ProfileDocumentUploadDialog } from "./ProfileDocumentUploadDialog";
@@ -16,41 +16,6 @@ const STATUS_LABELS: Record<StaffProfileDocument["status"], { label: string; cla
     expired: { label: "Expired", className: "bg-danger-soft text-danger" },
     missing: { label: "Missing", className: "bg-danger-soft text-danger" },
   };
-
-function DocStat({
-  icon: Icon,
-  tone,
-  label,
-  value,
-  sub,
-}: {
-  icon: React.ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
-  tone: "green" | "amber" | "red";
-  label: string;
-  value: number;
-  sub: string;
-}) {
-  const bubble =
-    tone === "green"
-      ? "bg-[var(--st-green-bg)] text-[var(--st-green-ink)]"
-      : tone === "amber"
-        ? "bg-[var(--st-amber-bg)] text-[var(--st-amber-ink)]"
-        : "bg-[var(--st-red-bg)] text-[var(--st-red-ink)]";
-
-  return (
-    <ProfileCard title={label} className="p-4">
-      <div className="flex items-start gap-3">
-        <div className={`flex size-8 shrink-0 items-center justify-center rounded-full ${bubble}`}>
-          <Icon className="h-4 w-4" aria-hidden />
-        </div>
-        <div>
-          <div className="text-2xl font-bold tabular-nums leading-none">{value}</div>
-          <div className="mt-1 text-xs text-muted-foreground">{sub}</div>
-        </div>
-      </div>
-    </ProfileCard>
-  );
-}
 
 function DocumentTile({ doc, onOpen }: { doc: StaffProfileDocument; onOpen: () => void }) {
   const status = STATUS_LABELS[doc.status];
@@ -89,11 +54,6 @@ function DocumentTile({ doc, onOpen }: { doc: StaffProfileDocument; onOpen: () =
 
 export function ProfileDocumentsTab({ profile }: Props) {
   const [uploadDocument, setUploadDocument] = React.useState<StaffProfileDocument | null>(null);
-  const counts = {
-    verified: profile.documents.filter((doc) => doc.status === "valid").length,
-    expiring: profile.documents.filter((doc) => doc.status === "expiring").length,
-    missing: profile.documents.filter((doc) => doc.status === "missing").length,
-  };
   const summary = profile.documentsSummary;
   const attention = summary.expiringSoon + summary.missing;
 
@@ -145,30 +105,6 @@ export function ProfileDocumentsTab({ profile }: Props) {
           </div>
         </div>
       </ProfileCard>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <DocStat
-          icon={CheckCircle2}
-          tone="green"
-          label="Verified"
-          value={counts.verified}
-          sub="On file and in date"
-        />
-        <DocStat
-          icon={AlertTriangle}
-          tone="amber"
-          label="Expiring soon"
-          value={counts.expiring}
-          sub="Within 90 days"
-        />
-        <DocStat
-          icon={AlertTriangle}
-          tone="red"
-          label="Missing"
-          value={counts.missing}
-          sub="Action required"
-        />
-      </div>
 
       <ProfileCard
         title="Documents"

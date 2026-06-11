@@ -22,13 +22,13 @@ export function LeaveMetricCards({ pendingCount }: Props) {
         value="12"
         sub="On track"
       />
-      <MetricCard icon={Plane} tone="brand" label="Out today" value="2" sub="Priya · Isabella" />
+      <MetricCard icon={Plane} tone="brand" label="Out today" value="1" sub="Priya Patel" />
       <MetricCard
         icon={Users}
         tone="danger"
         label="Coverage at risk"
         value="1"
-        sub="21 Jun · Housekeeping"
+        sub="21 Jun · Kitchen"
       />
     </div>
   );

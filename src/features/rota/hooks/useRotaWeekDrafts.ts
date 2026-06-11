@@ -21,7 +21,7 @@ type Confirmation =
 export function useRotaWeekDrafts() {
   const [weekOffset, setWeekOffsetState] = React.useState(0);
   const [weekDrafts, setWeekDrafts] = React.useState<Record<string, WeekDraftState>>(() => ({
-    "0": createWeekDraft(),
+    "0": createWeekDraft(0),
   }));
   const [selectedShiftId, setSelectedShiftId] = React.useState<ShiftId | null>(null);
   const [confirmation, setConfirmation] = React.useState<Confirmation | null>(null);
@@ -32,11 +32,11 @@ export function useRotaWeekDrafts() {
   const setCurrentDraft = React.useCallback(
     (updater: (draft: WeekDraftState) => WeekDraftState) => {
       setWeekDrafts((current) => {
-        const draft = current[weekKey] ?? createWeekDraft();
+        const draft = current[weekKey] ?? createWeekDraft(weekOffset);
         return { ...current, [weekKey]: updater(draft) };
       });
     },
-    [weekKey],
+    [weekKey, weekOffset],
   );
 
   const mutateShifts = React.useCallback(
@@ -50,13 +50,26 @@ export function useRotaWeekDrafts() {
     [setCurrentDraft],
   );
 
-  const setWeekOffset = (next: number | ((current: number) => number)) => {
-    const resolved = typeof next === "function" ? next(weekOffset) : next;
-    const key = String(resolved);
-    setWeekDrafts((current) => (current[key] ? current : { ...current, [key]: createWeekDraft() }));
-    setSelectedShiftId(null);
-    setWeekOffsetState(resolved);
-  };
+  const setWeekOffset = React.useCallback((next: number | ((current: number) => number)) => {
+    setWeekOffsetState((currentOffset) => {
+      const resolved = typeof next === "function" ? next(currentOffset) : next;
+      const key = String(resolved);
+      setWeekDrafts((current) =>
+        current[key] ? current : { ...current, [key]: createWeekDraft(resolved) },
+      );
+      setSelectedShiftId(null);
+      return resolved;
+    });
+  }, []);
+
+  React.useEffect(() => {
+    const handleWeekChange = (event: Event) => {
+      const nextOffset = (event as CustomEvent<number>).detail;
+      if (Number.isInteger(nextOffset)) setWeekOffset(nextOffset);
+    };
+    window.addEventListener("docklist:week-change", handleWeekChange);
+    return () => window.removeEventListener("docklist:week-change", handleWeekChange);
+  }, [setWeekOffset]);
 
   const addShift = (input: DraftShiftInput) => {
     mutateShifts((current) => [...current, makeDraftShift(input)]);

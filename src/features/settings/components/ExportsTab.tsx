@@ -12,7 +12,7 @@ const EXPORT_CARDS = [
   },
   {
     title: "Approved timesheets",
-    description: "Approved hours only — ready for your wages processor.",
+    description: "Approved hours only — ready to export as a clean CSV.",
     format: "CSV · per pay period",
     icon: FileSpreadsheet,
   },
@@ -27,8 +27,8 @@ const EXPORT_CARDS = [
 const AUDIT_EVENTS = [
   { event: "Rota published — week of 8 Jun", who: "Alex Thompson", when: "Mon 8 Jun, 16:42" },
   { event: "Timesheet approved — Priya Patel", who: "Alex Thompson", when: "Mon 8 Jun, 09:15" },
-  { event: "Leave approved — Sophie Carter", who: "Daniel Mitchell", when: "Sun 7 Jun, 18:03" },
-  { event: "Role updated — Supervisor", who: "Alex Thompson", when: "Fri 5 Jun, 11:27" },
+  { event: "Leave approved — Sophie Carter", who: "Alex Thompson", when: "Sun 7 Jun, 18:03" },
+  { event: "Role updated — FOH Supervisor", who: "Alex Thompson", when: "Fri 5 Jun, 11:27" },
 ] as const;
 
 export function ExportsTab({ onDirty }: { onDirty: () => void }) {

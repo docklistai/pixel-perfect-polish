@@ -15,12 +15,7 @@ const MONTH_NAMES = [
 ];
 
 function currentWeekStart(): Date {
-  const today = new Date();
-  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const day = start.getDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  start.setDate(start.getDate() + mondayOffset);
-  return start;
+  return new Date(2026, 5, 8);
 }
 
 function weekStart(offset: number): Date {
@@ -61,8 +56,7 @@ export function getWeekDateIsoLabels(offset: number): string[] {
 
 export function getCurrentWeekDayIndex(offset: number): number | null {
   if (offset !== 0) return null;
-  const day = new Date().getDay();
-  return day === 0 ? 6 : day - 1;
+  return 3;
 }
 
 export function getWeekLabel(offset: number): string {

@@ -30,7 +30,6 @@ export const ROTA_DEPT_NAMES = [
   "Kitchen",
   "Bar",
   "Housekeeping",
-  "Events",
   "Maintenance",
   "Porter",
 ] as const;

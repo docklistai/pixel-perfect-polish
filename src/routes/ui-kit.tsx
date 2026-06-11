@@ -313,8 +313,8 @@ function UIKitPage() {
 
         <Block name="PermissionState" description="Shown when the viewer lacks access to an area.">
           <PermissionState
-            title="You don't have access to Payroll exports"
-            description="Ask a workspace admin to grant you the Payroll role."
+            title="You don't have access to approved-hours exports"
+            description="Ask a workspace admin to grant export access."
           />
         </Block>
 

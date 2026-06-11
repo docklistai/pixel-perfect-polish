@@ -22,12 +22,13 @@ import type {
   AnnouncementItem,
   QuickActionItem,
 } from "../types";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 
 export const kpiItems: KpiItem[] = [
   {
     icon: Users,
     label: "Scheduled hours",
-    value: "1,248h",
+    value: `${DEMO_WORLD.labour.scheduledHours}h`,
     delta: "6% vs last week",
     up: true,
     tone: "info",
@@ -36,7 +37,7 @@ export const kpiItems: KpiItem[] = [
   {
     icon: DollarSign,
     label: "Labour cost",
-    value: "£18,420",
+    value: "£5,291",
     delta: "3% vs last week",
     up: true,
     tone: "brand",
@@ -54,7 +55,7 @@ export const kpiItems: KpiItem[] = [
   {
     icon: TrendingUp,
     label: "Sales : labour",
-    value: "3.48",
+    value: "3.50",
     delta: "0.18 vs last week",
     up: true,
     tone: "warning",
@@ -63,8 +64,8 @@ export const kpiItems: KpiItem[] = [
   {
     icon: Calendar,
     label: "Coverage",
-    value: "98%",
-    delta: "2pp vs last week",
+    value: "96%",
+    delta: "Next-week draft",
     up: true,
     tone: "warning",
     tip: "Scheduled vs role requirement. 100% = fully staffed.",
@@ -75,7 +76,7 @@ export const todayKpiItems: KpiItem[] = [
   {
     icon: Users,
     label: "On shift today",
-    value: "28",
+    value: String(DEMO_WORLD.headcount.scheduledToday),
     delta: "96% coverage",
     up: true,
     tone: "info",
@@ -84,8 +85,8 @@ export const todayKpiItems: KpiItem[] = [
   {
     icon: Clock,
     label: "Hours today",
-    value: "168h",
-    delta: "vs 160h target",
+    value: "48h",
+    delta: "6 scheduled shifts",
     up: true,
     tone: "brand",
     tip: "Total scheduled hours across today's shifts.",
@@ -121,14 +122,14 @@ export const todayKpiItems: KpiItem[] = [
 
 export const attentionItems: AttentionItem[] = [
   {
-    t: "3 shifts still unassigned this week",
+    t: "Next week has 2 open shifts",
     s: "Resolve before Fri 16:00 to publish on time",
     icon: AlertTriangle,
     tone: "warning",
   },
   {
-    t: "2 timesheets need approval",
-    s: "Last week · payroll closes Friday",
+    t: "4 timesheets need manager review",
+    s: "3 pending · 1 unapproved · export after review",
     icon: Clock3,
     tone: "danger",
   },
@@ -140,18 +141,17 @@ export const attentionItems: AttentionItem[] = [
   },
 ];
 
-// Open shifts this week (8–14 Jun 2026) — days of week confirmed
+// Open shifts in next week's draft (15–21 Jun 2026)
 export const openShiftItems: OpenShiftItem[] = [
-  { label: "Bar — Evening", date: "Thu 11 Jun · 17:00–23:00", filled: "1 of 2 filled" },
-  { label: "Kitchen — Lunch", date: "Fri 12 Jun · 12:00–20:00", filled: "2 of 3 filled" },
-  { label: "Front of House", date: "Sat 13 Jun · 09:00–17:00", filled: "3 of 4 filled" },
+  { label: "Bar — Evening", date: "Fri 19 Jun · 16:00–00:00", filled: "Open" },
+  { label: "Porter — Day", date: "Fri 19 Jun · 07:00–15:00", filled: "Open" },
 ];
 
 // Pending leave — future dates, consistent with leave feature demo data
 export const leaveItems: LeaveItem[] = [
   {
     n: "Sophie Carter",
-    d: "8 – 10 Jun 2026  (3 days)",
+    d: "18 – 19 Jun 2026  (2 days)",
     img: 5,
     impact: "Low",
     impactTone: "success",
@@ -170,39 +170,47 @@ export const leaveItems: LeaveItem[] = [
     impact: "High",
     impactTone: "danger",
   },
+  {
+    n: "Liam O'Connor",
+    d: "15 – 21 Jun 2026  (7 days)",
+    img: 13,
+    impact: "Moderate",
+    impactTone: "warning",
+  },
 ];
 
 // Timesheets — previous week Mon 1 – Sun 7 Jun 2026
 export const timesheetItems: TimesheetItem[] = [
-  { n: "Emma Johnson", d: "1 – 7 Jun 2026", late: "2 days late", img: 9, lateTone: "danger" },
+  { n: "Daniel Mitchell", d: "1 – 7 Jun 2026", late: "Pending", img: 12, lateTone: "warning" },
   { n: "Liam O'Connor", d: "1 – 7 Jun 2026", late: "1 day late", img: 13, lateTone: "warning" },
-  { n: "Olivia Bennett", d: "1 – 7 Jun 2026", late: "1 day late", img: 16, lateTone: "warning" },
+  { n: "Amelia Stone", d: "1 – 7 Jun 2026", late: "Pending", img: 23, lateTone: "warning" },
+  { n: "James Walker", d: "1 – 7 Jun 2026", late: "Unapproved", img: 14, lateTone: "danger" },
 ];
 
 export const staffDeptItems: StaffDeptItem[] = [
-  { dept: "Front of House", count: 12, tone: "info" },
-  { dept: "Kitchen", count: 9, tone: "warning" },
-  { dept: "Housekeeping", count: 4, tone: "success" },
-  { dept: "Bar", count: 3, tone: "danger" },
+  { dept: "Front of House", count: 3, tone: "info" },
+  { dept: "Kitchen", count: 1, tone: "warning" },
+  { dept: "Housekeeping", count: 1, tone: "success" },
+  { dept: "Maintenance", count: 1, tone: "purple" },
 ];
 
 // Announcements — relative dates anchored to Thu 11 Jun 2026
 export const announcementItems: AnnouncementItem[] = [
   {
     t: "Summer Menu Launch",
-    s: "Read 18 / 24",
+    s: "Read 6 / 8",
     a: "2d ago",
     tone: "info",
   },
   {
     t: "Food Safety Refresher",
-    s: "Read 14 / 18",
+    s: "Read 5 / 8",
     a: "3d ago",
     tone: "warning",
   },
   {
     t: "Bank Holiday: Opening Hours",
-    s: "Read 24 / 24",
+    s: "Read 8 / 8",
     a: "5d ago",
     tone: "purple",
   },

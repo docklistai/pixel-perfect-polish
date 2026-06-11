@@ -2,6 +2,7 @@ import { demoPublishedRotaSnapshot } from "@/features/rota/data/publishedRotaSna
 import type { PublishedRotaSnapshot, PublishedShiftSnapshot } from "@/features/rota/types";
 import { shiftHours } from "@/features/rota/lib/draftRota";
 import { mockProfile } from "./mockPortalData";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import type { PortalShift, ShiftStatus } from "../types";
 
 function portalStatus(status: PublishedShiftSnapshot["status"]): ShiftStatus {
@@ -40,4 +41,5 @@ export const portalPublishedWeekShifts = mapPublishedSnapshotToPortalShifts(
   mockProfile.staffId,
 );
 
-export const portalPublishedNextShift = portalPublishedWeekShifts[0] ?? null;
+export const portalPublishedNextShift =
+  portalPublishedWeekShifts.find((shift) => shift.date > DEMO_WORLD.todayIso) ?? null;

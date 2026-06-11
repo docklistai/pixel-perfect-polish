@@ -51,7 +51,7 @@ function buildStats(staffRows: typeof rows): StatCard[] {
       icon: Users,
       label: "Total staff",
       value: String(total),
-      sub: "+ 4 vs last month",
+      sub: "Canonical demo team",
       tone: "info",
     },
     {
@@ -71,8 +71,8 @@ function buildStats(staffRows: typeof rows): StatCard[] {
     {
       icon: AlertTriangle,
       label: "Missing documents",
-      value: "6",
-      sub: "Requires attention",
+      value: "1",
+      sub: "One record needs attention",
       tone: "danger",
     },
   ];
@@ -276,7 +276,6 @@ function StaffListPage() {
                 <option>Bar</option>
                 <option>Kitchen</option>
                 <option>Housekeeping</option>
-                <option>Events</option>
                 <option>Maintenance</option>
               </select>
             </FormRow>

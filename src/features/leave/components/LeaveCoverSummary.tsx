@@ -12,8 +12,8 @@ export function LeaveCoverSummary() {
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["Days booked", "46", "↑ 12% vs last month"],
-            ["Available days", "284", "↑ 5% vs last month"],
+            ["Days booked", "15", "4 requests pending"],
+            ["Available days", "89", "Across 8 staff"],
             ["Most common type", "Annual Leave", "76% of days"],
             ["Avg. notice given", "10.4 days", "↑ 2.1 vs last month"],
           ].map(([l, v, s]) => (

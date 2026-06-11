@@ -9,7 +9,7 @@ import { getWeekDateIsoLabels, getWeekDayLabels, getWeekStartIso } from "./weekH
 
 const STAFF_SAFE_LOCATION = "Harbour View Hotel";
 const DEFAULT_WORKSPACE_ID = "harbour-view";
-const DEFAULT_PUBLISHER = { id: "sophie-carter" as StaffId, name: "Sophie Carter" };
+const DEFAULT_PUBLISHER = { id: "alex-thompson" as StaffId, name: "Alex Thompson" };
 
 function initials(name: string): string {
   return name

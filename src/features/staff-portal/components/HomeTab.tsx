@@ -1,11 +1,15 @@
 import { Calendar, Clock, MapPin, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
 import { DashboardCard, StatusBadge } from "@/components/dl";
 import { mockNotices, mockProfile } from "../data/mockPortalData";
-import { portalPublishedNextShift } from "../data/publishedRotaPortalData";
+import {
+  portalPublishedNextShift,
+  portalPublishedWeekShifts,
+} from "../data/publishedRotaPortalData";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const nextShift = portalPublishedNextShift;
+  const publishedDates = new Set(portalPublishedWeekShifts.map((shift) => shift.date));
 
   return (
     <div className="space-y-4">
@@ -40,11 +44,11 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             </div>
             <button
               type="button"
-              onClick={() => onNavigate("time")}
+              onClick={() => onNavigate("shifts")}
               className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-brand font-semibold shadow-[var(--shadow-card)] hover:bg-white/95"
             >
               <Clock className="h-4 w-4" />
-              Clock in
+              View shift details
             </button>
             <button
               type="button"
@@ -79,8 +83,8 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </div>
         <div className="mt-3 grid grid-cols-7 gap-1.5">
           {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
-            const active = i < 5;
             const day = [8, 9, 10, 11, 12, 13, 14][i];
+            const active = publishedDates.has(`2026-06-${String(day).padStart(2, "0")}`);
             return (
               <div
                 key={day}

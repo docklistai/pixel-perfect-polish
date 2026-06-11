@@ -5,7 +5,7 @@ const OPS_DETAILS: Record<string, OpsEntryDetails> = {
     description:
       "Front of House daily briefing covered allergens, VIPs, daily specials and uniform spot-check.",
     location: "FOH back-of-house",
-    notes: "All 12 FOH staff attended. Sophie ran the briefing — minutes attached.",
+    notes: "All 3 FOH staff attended. Sophie ran the briefing — minutes attached.",
     followups: [
       { title: "Print updated allergen sheet for kitchen pass", done: true },
       { title: "Confirm VIP table 14 with sommelier", done: true },

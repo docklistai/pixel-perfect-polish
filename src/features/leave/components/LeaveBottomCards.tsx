@@ -12,13 +12,12 @@ function initials(name: string): string {
 
 const outThisWeek = [
   {
-    name: "Isabella Martin",
-    dates: "8 – 12 Jun",
-    type: "Annual",
-    tone: "av-c1",
-    badge: "purple" as const,
+    name: "Priya Patel",
+    dates: "11 Jun only",
+    type: "Unavailable",
+    tone: "av-c3",
+    badge: "red" as const,
   },
-  { name: "Priya Patel", dates: "11 Jun only", type: "Sick", tone: "av-c4", badge: "red" as const },
 ];
 
 const publicHolidays = [

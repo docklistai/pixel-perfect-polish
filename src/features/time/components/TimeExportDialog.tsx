@@ -10,17 +10,16 @@ interface Props {
 
 export function TimeExportDialog({ open, onOpenChange }: Props) {
   const previewRows = [
-    { id: "EM902", name: "Emma Johnson", hours: "32.5h", rate: "£14.50", wages: "£471.25" },
-    { id: "LO108", name: "Liam O'Connor", hours: "28.0h", rate: "£13.50", wages: "£378.00" },
-    { id: "OB883", name: "Olivia Bennett", hours: "34.0h", rate: "£12.50", wages: "£425.00" },
-    { id: "DM029", name: "Daniel Mitchell", hours: "30.5h", rate: "£15.00", wages: "£457.50" },
-    { id: "SC192", name: "Sophie Carter", hours: "40.0h", rate: "£16.00", wages: "£640.00" },
+    { id: "SC192", name: "Sophie Carter", hours: "32.0h", role: "FOH Supervisor" },
+    { id: "PP447", name: "Priya Patel", hours: "40.0h", role: "Head Chef" },
+    { id: "OB883", name: "Olivia Bennett", hours: "34.0h", role: "Barista" },
+    { id: "NE033", name: "Noah Evans", hours: "28.0h", role: "Porter" },
   ];
 
   const handleDownload = () => {
     onOpenChange(false);
     toast.success("CSV ready", {
-      description: "harbour_view_week20.csv downloading",
+      description: "harbour_view_approved_hours_1-7-jun.csv downloading",
     });
   };
 
@@ -57,7 +56,7 @@ export function TimeExportDialog({ open, onOpenChange }: Props) {
     >
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: "Rows", value: "38 rows" },
+          { label: "Rows", value: "4 rows" },
           { label: "Period", value: "1 – 7 Jun 2026" },
           { label: "Format", value: "CSV · standard" },
         ].map((stat, idx) => (
@@ -78,8 +77,7 @@ export function TimeExportDialog({ open, onOpenChange }: Props) {
                 <th className="px-3 py-2">Employee ID</th>
                 <th className="px-3 py-2">Name</th>
                 <th className="px-3 py-2">Approved Hours</th>
-                <th className="px-3 py-2">Est. Rate</th>
-                <th className="px-3 py-2">Est. Wages</th>
+                <th className="px-3 py-2">Role</th>
               </tr>
             </thead>
             <tbody>
@@ -91,8 +89,7 @@ export function TimeExportDialog({ open, onOpenChange }: Props) {
                   <td className="px-3 py-2 font-mono text-muted-foreground">{row.id}</td>
                   <td className="px-3 py-2 font-medium">{row.name}</td>
                   <td className="px-3 py-2 font-mono">{row.hours}</td>
-                  <td className="px-3 py-2 font-mono">{row.rate}</td>
-                  <td className="px-3 py-2 font-mono font-semibold">{row.wages}</td>
+                  <td className="px-3 py-2">{row.role}</td>
                 </tr>
               ))}
             </tbody>
@@ -103,8 +100,7 @@ export function TimeExportDialog({ open, onOpenChange }: Props) {
       <div className="mt-4 flex gap-2.5 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
         <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
         <span>
-          Only approved entries are included. Est. wages are for planning only — Docklist does not
-          run pay.
+          Only approved entries are included. This export contains approved hours and staff roles.
         </span>
       </div>
     </DialogShell>

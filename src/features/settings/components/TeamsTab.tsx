@@ -26,28 +26,26 @@ const DEFAULT_DEPT_TONES: Record<string, Tone> = {
   "Front of House": "brand",
   Kitchen: "warning",
   Bar: "info",
-  Events: "purple",
   Housekeeping: "success",
-  Ops: "muted",
   Maintenance: "danger",
-  Management: "brand",
 };
 
 const SHIFT_TEMPLATES = [
   { name: "Breakfast service", hours: "07:00 – 15:00", teams: "Front of House · Kitchen" },
   { name: "Evening service", hours: "16:00 – 00:00", teams: "Front of House · Kitchen · Bar" },
-  { name: "Night porter", hours: "22:00 – 06:00", teams: "Housekeeping" },
+  { name: "Night porter", hours: "22:00 – 06:00", teams: "Maintenance" },
 ] as const;
 
 export function TeamsTab({ onDirty }: { onDirty: () => void }) {
   const [deptTones, setDeptTones] = React.useState(DEFAULT_DEPT_TONES);
 
   const locations = [
-    { location: "Main venue", team: "Front of House", status: "Active", coverage: "Full week" },
-    { location: "Kitchen", team: "Kitchen", status: "Active", coverage: "Weeknights" },
-    { location: "Bar", team: "Bar", status: "Active", coverage: "Weekends" },
-    { location: "Events", team: "Events", status: "Preview", coverage: "Selected dates" },
-    { location: "Housekeeping", team: "Housekeeping", status: "Active", coverage: "Early shifts" },
+    {
+      location: "Harbour View Hotel",
+      team: "All departments",
+      status: "Active",
+      coverage: "Full week",
+    },
   ];
 
   const setTone = (dept: string, tone: Tone) => {

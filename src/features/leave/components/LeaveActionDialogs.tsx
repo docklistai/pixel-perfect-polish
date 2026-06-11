@@ -22,9 +22,9 @@ interface Props {
 }
 
 const staffOptions: StaffOption[] = [
-  { name: "Isabella Martin", role: "Supervisor", dept: "Front of House", img: 16 },
-  { name: "Amelia Stone", role: "Room Attendant", dept: "Housekeeping", img: 23 },
-  { name: "Oliver Bennett", role: "Chef de Partie", dept: "Kitchen", img: 28 },
+  { name: "James Walker", role: "Waiter", dept: "Front of House", img: 14 },
+  { name: "Amelia Stone", role: "Housekeeper", dept: "Housekeeping", img: 23 },
+  { name: "Noah Evans", role: "Porter", dept: "Maintenance", img: 33 },
 ];
 
 function initials(name: string): string {
@@ -67,13 +67,13 @@ export function LeaveActionDialogs({
       type: "Annual leave",
       impact: "Low",
       tone: "success",
-      state: "approved",
+      state: "pending",
       notice: 10,
       reason: "Added by manager.",
       img: selectedStaff.img,
       balance: "11 / 28 days",
       submitted: "Created just now",
-      coverNote: "Created by manager from the leave screen.",
+      coverNote: "Added by Alex Thompson for review.",
     });
   };
 

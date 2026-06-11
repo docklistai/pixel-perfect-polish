@@ -265,7 +265,12 @@ function AuthPage() {
                 )}
 
                 {loginMode === "manager" && (
-                  <AuthForm onBackToHome={handleBackToRoleSelect} variant="embedded" hideHeader />
+                  <AuthForm
+                    onBackToHome={handleBackToRoleSelect}
+                    onValidSignIn={() => navigate({ to: "/" })}
+                    variant="embedded"
+                    hideHeader
+                  />
                 )}
 
                 {loginMode === "staff" && <StaffAuthForm onBack={handleBackToRoleSelect} />}

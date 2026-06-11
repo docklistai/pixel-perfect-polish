@@ -47,12 +47,12 @@ export function TeamComposeDrawer({ open, onOpenChange }: Props) {
         <FormRow label="Send to">
           <select className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand">
             <option>All staff ({TOTAL_STAFF})</option>
-            <option>Front of House (12)</option>
-            <option>Kitchen (9)</option>
-            <option>Housekeeping (4)</option>
-            <option>Bar (5)</option>
-            <option>Events (3)</option>
-            <option>Managers only (4)</option>
+            <option>Front of House (3)</option>
+            <option>Kitchen (2)</option>
+            <option>Housekeeping (1)</option>
+            <option>Bar (1)</option>
+            <option>Maintenance (1)</option>
+            <option>Managers only (1)</option>
           </select>
         </FormRow>
       </FormSection>

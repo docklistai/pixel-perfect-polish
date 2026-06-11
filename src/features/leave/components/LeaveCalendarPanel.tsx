@@ -28,12 +28,12 @@ function buildCells(): CalendarCell[] {
 /** Derives calendar bands from live request state (declined requests drop off). */
 function buildBands(requests: LeaveRequest[]): LeaveBand[] {
   const ranges: Record<string, { start: number; end: number }> = {
-    l1: { start: 8, end: 10 },
+    l1: { start: 18, end: 19 },
     l2: { start: 16, end: 17 },
     l3: { start: 21, end: 23 },
     l4: { start: 15, end: 21 },
   };
-  const bands: LeaveBand[] = [{ who: "Isabella Martin", start: 8, end: 12, state: "approved" }];
+  const bands: LeaveBand[] = [{ who: "Olivia Bennett", start: 22, end: 26, state: "approved" }];
   for (const r of requests) {
     const range = ranges[r.id];
     if (!range || r.state === "declined") continue;

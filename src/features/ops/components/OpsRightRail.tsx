@@ -2,6 +2,7 @@ import { AlertTriangle, Sparkles } from "lucide-react";
 import { Card } from "@/components/dl";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
 import { opsHandoverNotes, opsFollowUps, opsQuickRef } from "../data/opsDemoData";
+import { toast } from "sonner";
 
 interface Props {
   onOpenAssistant?: () => void;
@@ -72,8 +73,12 @@ export function OpsRightRail({ onOpenAssistant }: Props = {}) {
         <h2 className="text-sm font-semibold mb-3">Quick reference</h2>
         <div className="grid grid-cols-2 gap-2">
           {opsQuickRef.map((q) => (
-            <div
+            <button
+              type="button"
               key={q.t}
+              onClick={() =>
+                toast.info(q.t, { description: "Reference preview opened for Harbour View Hotel." })
+              }
               className="flex items-center gap-2 rounded-xl border border-border px-2 py-1.5 text-xs"
             >
               <q.icon
@@ -81,7 +86,7 @@ export function OpsRightRail({ onOpenAssistant }: Props = {}) {
                 aria-hidden="true"
               />{" "}
               {q.t}
-            </div>
+            </button>
           ))}
         </div>
       </Card>

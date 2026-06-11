@@ -16,6 +16,17 @@ interface Comment {
   avatarColor: string;
 }
 
+const CANONICAL_STAFF = [
+  { name: "Sophie Carter", role: "FOH Supervisor" },
+  { name: "Daniel Mitchell", role: "Kitchen Supervisor" },
+  { name: "Priya Patel", role: "Head Chef" },
+  { name: "James Walker", role: "Waiter" },
+  { name: "Amelia Stone", role: "Housekeeper" },
+  { name: "Noah Evans", role: "Porter" },
+  { name: "Liam O'Connor", role: "Bartender" },
+  { name: "Olivia Bennett", role: "Barista" },
+] as const;
+
 function Avatar({
   name,
   size = "sm",
@@ -259,14 +270,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               Acknowledged ({announcement.ackDone})
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {[
-                { name: "Sophie Carter", role: "FOH Supervisor" },
-                { name: "Daniel Mitchell", role: "FOH Team Leader" },
-                { name: "Priya Patel", role: "Kitchen Supervisor" },
-                { name: "Jack Harrison", role: "FOH Staff" },
-                { name: "Chloe Wood", role: "Housekeeping" },
-                { name: "James Bennett", role: "Bar Staff" },
-              ].map((staff) => (
+              {CANONICAL_STAFF.slice(0, announcement.ackDone).map((staff) => (
                 <div
                   key={staff.name}
                   className="flex items-center gap-2 p-2 bg-muted/10 border border-border/40 rounded-lg"
@@ -278,9 +282,6 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
                   </div>
                 </div>
               ))}
-              <div className="col-span-2 text-center text-[10px] text-muted-foreground italic py-1">
-                +9 more team members
-              </div>
             </div>
           </div>
 
@@ -289,11 +290,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               Pending ({announcement.ackTotal - announcement.ackDone})
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {[
-                { name: "Liam O'Connor", role: "Maintenance Lead" },
-                { name: "Emma Johnson", role: "Bar Manager" },
-                { name: "Olivia Bennett", role: "Housekeeping Lead" },
-              ].map((staff) => (
+              {CANONICAL_STAFF.slice(announcement.ackDone, announcement.ackTotal).map((staff) => (
                 <div
                   key={staff.name}
                   className="flex items-center gap-2 p-2 bg-muted/10 border border-border/40 rounded-lg"
@@ -305,9 +302,6 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
                   </div>
                 </div>
               ))}
-              <div className="col-span-2 text-center text-[10px] text-muted-foreground italic py-1">
-                +6 more team members
-              </div>
             </div>
           </div>
         </div>

@@ -22,11 +22,11 @@ export function TimeRightRail({
     <div className="col-span-12 lg:col-span-3 space-y-4">
       <AiSuggestionCard
         tone="teal"
-        title="Three timesheets you can approve in one click"
-        body="Sophie, Priya and Olivia clocked exactly on schedule with no exceptions. I can approve them together if you want."
+        title="One clean pending timesheet is ready to review"
+        body="Liam's entry has no recorded exception. Review it before approving; Daniel and Amelia still need attention."
         actions={[
           {
-            label: "Approve 3",
+            label: "Review clean entry",
             primary: true,
             icon: <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />,
             onClick: onApproveSuggested,
