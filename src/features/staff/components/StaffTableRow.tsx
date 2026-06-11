@@ -13,6 +13,8 @@ interface StaffTableRowProps {
   isChecked: boolean;
   onSelect: () => void;
   onCheck: () => void;
+  /** Hides the availability column while the profile panel narrows the table. */
+  compact?: boolean;
 }
 
 const STATUS_CLS: Record<string, string> = {
@@ -33,6 +35,7 @@ export function StaffTableRow({
   isChecked,
   onSelect,
   onCheck,
+  compact = false,
 }: StaffTableRowProps) {
   const navigate = useNavigate();
   const { requestIntent } = useIntents();
@@ -132,19 +135,21 @@ export function StaffTableRow({
         <div className="font-medium text-foreground">{r.contract}</div>
         <div className="text-[11px] text-muted-foreground">{r.hours}</div>
       </td>
-      <td className="py-3">
-        <div className="flex items-center gap-2 min-w-[100px]">
-          <div className="flex-1 max-w-[90px] h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className={`h-full rounded-full ${AVAIL_BAR[r.availTone] ?? "bg-muted-foreground/30"}`}
-              style={{ width: `${pct}%` }}
-            />
+      {!compact && (
+        <td className="py-3">
+          <div className="flex items-center gap-2 min-w-[100px]">
+            <div className="flex-1 max-w-[90px] h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full ${AVAIL_BAR[r.availTone] ?? "bg-muted-foreground/30"}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className="text-[11px] font-semibold tabular-nums text-muted-foreground w-7">
+              {r.avail}
+            </span>
           </div>
-          <span className="text-[11px] font-semibold tabular-nums text-muted-foreground w-7">
-            {r.avail}
-          </span>
-        </div>
-      </td>
+        </td>
+      )}
       <td className="py-3 text-right pr-3" onClick={(e) => e.stopPropagation()}>
         <RowActionMenu triggerLabel={`Actions for ${r.n}`} items={actions} />
       </td>

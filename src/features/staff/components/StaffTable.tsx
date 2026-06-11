@@ -20,6 +20,8 @@ interface StaffTableProps {
   onStatusChange: (s: string) => void;
   attentionFilter: StaffAttentionFilter;
   onSelectMember: (row: StaffRow) => void;
+  /** Hides the availability column while the profile panel narrows the table. */
+  compact?: boolean;
 }
 
 const PAGE_SIZE = 10;
@@ -35,6 +37,7 @@ export function StaffTable({
   onStatusChange,
   attentionFilter,
   onSelectMember,
+  compact = false,
 }: StaffTableProps) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [page, setPage] = React.useState(1);
@@ -121,7 +124,7 @@ export function StaffTable({
       )}
 
       <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Staff list">
-        <table className="min-w-[860px] w-full text-sm">
+        <table className={`${compact ? "min-w-[700px]" : "min-w-[860px]"} w-full text-sm`}>
           <thead>
             <tr className="border-y border-border text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
               <th className="py-2.5 px-3 w-9">
@@ -138,7 +141,7 @@ export function StaffTable({
               <th className="text-left py-2.5">Department</th>
               <th className="text-left py-2.5">Status</th>
               <th className="text-left py-2.5">Contract</th>
-              <th className="text-left py-2.5">Availability</th>
+              {!compact && <th className="text-left py-2.5">Availability</th>}
               <th className="w-9" />
             </tr>
           </thead>
@@ -151,6 +154,7 @@ export function StaffTable({
                 isChecked={selectedIds.has(r.id)}
                 onSelect={() => onSelectMember(r)}
                 onCheck={() => toggleRow(r.id)}
+                compact={compact}
               />
             ))}
           </tbody>

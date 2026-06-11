@@ -196,6 +196,7 @@ function StaffListPage() {
             onStatusChange={setStatusFilter}
             attentionFilter={attentionFilter}
             onSelectMember={handleSelectMember}
+            compact={isProfilePanelOpen}
           />
         </div>
 
