@@ -1,6 +1,7 @@
 import { Card } from "@/components/dl";
 import { Clock, Users, AlertTriangle, FileText, CheckCircle2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { StoredTimesheetRow } from "../types";
 
 interface Stat {
   icon: LucideIcon;
@@ -15,46 +16,6 @@ interface Stat {
   isStatus?: boolean;
 }
 
-const stats: Stat[] = [
-  {
-    icon: Clock,
-    label: "Clocked Hours",
-    value: "52 h 01 m",
-    sub: "vs last week",
-    delta: "8%",
-    up: true,
-    tone: "info",
-  },
-  {
-    icon: Users,
-    label: "Pending Approvals",
-    value: "3",
-    sub2: "Entries",
-    subline: "vs last week",
-    delta: "4",
-    up: false,
-    tone: "warning",
-  },
-  {
-    icon: AlertTriangle,
-    label: "Unapproved",
-    value: "1",
-    sub2: "Entry",
-    subline: "Missing clock-in",
-    delta: "1",
-    up: false,
-    tone: "danger",
-  },
-  {
-    icon: FileText,
-    label: "Export Readiness",
-    value: "4 ready",
-    sub: "Four approved entries can be exported",
-    tone: "success",
-    isStatus: true,
-  },
-];
-
 const toneBg: Record<string, string> = {
   info: "bg-info-soft text-info",
   warning: "bg-warning-soft text-warning",
@@ -62,7 +23,49 @@ const toneBg: Record<string, string> = {
   success: "bg-success-soft text-success",
 };
 
-export function TimeMetricCards() {
+function paidMinutes(label: string): number {
+  const match = label.match(/(\d+) h (\d+) m/);
+  return match ? Number(match[1]) * 60 + Number(match[2]) : 0;
+}
+
+export function TimeMetricCards({ rows }: { rows: StoredTimesheetRow[] }) {
+  const pending = rows.filter((row) => row.status === "pending").length;
+  const needsAttention = rows.filter((row) => row.status === "unapproved" || row.flagged).length;
+  const approved = rows.filter((row) => row.status === "approved").length;
+  const totalMinutes = rows.reduce((sum, row) => sum + paidMinutes(row.paid), 0);
+  const stats: Stat[] = [
+    {
+      icon: Clock,
+      label: "Clocked Hours",
+      value: `${Math.floor(totalMinutes / 60)} h ${String(totalMinutes % 60).padStart(2, "0")} m`,
+      sub: "This period",
+      tone: "info",
+    },
+    {
+      icon: Users,
+      label: "Pending Approvals",
+      value: String(pending),
+      sub2: "Entries",
+      subline: "Need manager review",
+      tone: "warning",
+    },
+    {
+      icon: AlertTriangle,
+      label: "Needs Attention",
+      value: String(needsAttention),
+      sub2: needsAttention === 1 ? "Entry" : "Entries",
+      subline: "Unapproved or flagged",
+      tone: "danger",
+    },
+    {
+      icon: FileText,
+      label: "Export Readiness",
+      value: `${approved} ready`,
+      sub: `${approved} approved entries can be exported`,
+      tone: "success",
+      isStatus: true,
+    },
+  ];
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {stats.map((s) => (
@@ -92,10 +95,12 @@ export function TimeMetricCards() {
                 )}
               </div>
               <div className="text-xs text-muted-foreground mt-1">
-                {s.subline ?? s.sub}{" "}
-                <span className={`ml-1 font-semibold ${s.up ? "text-success" : "text-danger"}`}>
-                  {s.up ? "↑" : "↓"} {s.delta}
-                </span>
+                {s.subline ?? s.sub}
+                {s.delta && (
+                  <span className={`ml-1 font-semibold ${s.up ? "text-success" : "text-danger"}`}>
+                    {s.up ? "↑" : "↓"} {s.delta}
+                  </span>
+                )}
               </div>
             </>
           )}

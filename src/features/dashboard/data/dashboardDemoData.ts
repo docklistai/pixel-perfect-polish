@@ -14,10 +14,7 @@ import {
 } from "lucide-react";
 import type {
   KpiItem,
-  AttentionItem,
   OpenShiftItem,
-  LeaveItem,
-  TimesheetItem,
   StaffDeptItem,
   AnnouncementItem,
   QuickActionItem,
@@ -120,71 +117,10 @@ export const todayKpiItems: KpiItem[] = [
   },
 ];
 
-export const attentionItems: AttentionItem[] = [
-  {
-    t: "Next week has 2 open shifts",
-    s: "Resolve before Fri 16:00 to publish on time",
-    icon: AlertTriangle,
-    tone: "warning",
-  },
-  {
-    t: "4 timesheets need manager review",
-    s: "3 pending · 1 unapproved · export after review",
-    icon: Clock3,
-    tone: "danger",
-  },
-  {
-    t: "1 leave request — high coverage impact",
-    s: "Priya · 21 – 23 Jun",
-    icon: Plane,
-    tone: "purple",
-  },
-];
-
 // Open shifts in next week's draft (15–21 Jun 2026)
 export const openShiftItems: OpenShiftItem[] = [
   { label: "Bar — Evening", date: "Fri 19 Jun · 16:00–00:00", filled: "Open" },
   { label: "Porter — Day", date: "Fri 19 Jun · 07:00–15:00", filled: "Open" },
-];
-
-// Pending leave — future dates, consistent with leave feature demo data
-export const leaveItems: LeaveItem[] = [
-  {
-    n: "Sophie Carter",
-    d: "18 – 19 Jun 2026  (2 days)",
-    img: 5,
-    impact: "Low",
-    impactTone: "success",
-  },
-  {
-    n: "Daniel Mitchell",
-    d: "16 – 17 Jun 2026  (2 days)",
-    img: 12,
-    impact: "Moderate",
-    impactTone: "warning",
-  },
-  {
-    n: "Priya Patel",
-    d: "21 – 23 Jun 2026  (3 days)",
-    img: 47,
-    impact: "High",
-    impactTone: "danger",
-  },
-  {
-    n: "Liam O'Connor",
-    d: "15 – 21 Jun 2026  (7 days)",
-    img: 13,
-    impact: "Moderate",
-    impactTone: "warning",
-  },
-];
-
-// Timesheets — previous week Mon 1 – Sun 7 Jun 2026
-export const timesheetItems: TimesheetItem[] = [
-  { n: "Daniel Mitchell", d: "1 – 7 Jun 2026", late: "Pending", img: 12, lateTone: "warning" },
-  { n: "Liam O'Connor", d: "1 – 7 Jun 2026", late: "1 day late", img: 13, lateTone: "warning" },
-  { n: "Amelia Stone", d: "1 – 7 Jun 2026", late: "Pending", img: 23, lateTone: "warning" },
-  { n: "James Walker", d: "1 – 7 Jun 2026", late: "Unapproved", img: 14, lateTone: "danger" },
 ];
 
 export const staffDeptItems: StaffDeptItem[] = [

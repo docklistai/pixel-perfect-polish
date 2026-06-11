@@ -1,5 +1,8 @@
 import { createWeekDraft } from "@/features/rota/lib/weekDraftState";
+import { requests as leaveRequestSeed } from "@/features/leave/data/leaveDemoData";
 import { mockClockEntries, mockNotifications } from "@/features/staff-portal/data/mockPortalData";
+import { seedTimesheetRows } from "@/features/time/data/timeDemoData";
+import { NOTIFICATION_SEED } from "@/components/notificationData";
 import type { WorkspaceState } from "./workspaceStoreTypes";
 
 /**
@@ -14,6 +17,9 @@ export function seedWorkspaceState(): WorkspaceState {
       "0": createWeekDraft(0),
       "1": createWeekDraft(1),
     },
+    leaveRequests: leaveRequestSeed,
+    timeRows: seedTimesheetRows(),
+    managerNotifications: NOTIFICATION_SEED,
     portalClock: { clockedIn: false, onBreak: false, startedAtMs: null },
     portalClockEntries: mockClockEntries,
     portalNotifications: mockNotifications,

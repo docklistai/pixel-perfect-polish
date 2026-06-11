@@ -35,8 +35,6 @@ export const DEMO_WORLD = {
     fourWeekHours: 1368,
     fourWeekCost: 20840,
   },
-  leave: { pendingCount: 4 },
-  timesheets: { total: 8, pendingCount: 3, unapprovedCount: 1, approvedCount: 4 },
 } as const;
 
 export const DEMO_STAFF = [

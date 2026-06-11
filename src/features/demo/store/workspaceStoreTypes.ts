@@ -1,5 +1,8 @@
 import type { ClockEntry, PortalNotification } from "@/features/staff-portal/types";
+import type { LeaveRequest } from "@/features/leave/types";
 import type { WeekDraftState } from "@/features/rota/lib/weekDraftState";
+import type { StoredTimesheetRow } from "@/features/time/types";
+import type { MockNotification } from "@/components/notificationData";
 
 export type PortalClockState = {
   clockedIn: boolean;
@@ -19,6 +22,12 @@ export type WorkspaceState = {
   weekOffset: number;
   /** Per-week rota drafts and their published snapshots, keyed by offset. */
   weekDrafts: Record<string, WeekDraftState>;
+  /** All leave requests; decisions update calendars, badges, and the portal. */
+  leaveRequests: LeaveRequest[];
+  /** Live manager-facing timesheets; approvals, flags, and adjustments persist here. */
+  timeRows: StoredTimesheetRow[];
+  /** Manager notification inbox shown from the topbar. */
+  managerNotifications: MockNotification[];
   /** Staff portal clock state for the signed-in staff member (Olivia). */
   portalClock: PortalClockState;
   /** Olivia's recent clock entries; clock-outs append here. */

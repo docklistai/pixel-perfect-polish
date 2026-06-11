@@ -17,31 +17,23 @@ import {
   Settings2,
   Sparkles,
 } from "lucide-react";
-import { rows as allRows } from "@/features/time/data/timeDemoData";
 import { TimeMetricCards } from "@/features/time/components/TimeMetricCards";
-import {
-  TimesheetTable,
-  type TimesheetTab,
-  type TimesheetStatus,
-} from "@/features/time/components/TimesheetTable";
+import { TimesheetTable, type TimesheetTab } from "@/features/time/components/TimesheetTable";
 import { TimeRightRail } from "@/features/time/components/TimeRightRail";
 import { TimesheetReviewDrawer } from "@/features/time/components/TimesheetReviewDrawer";
 import { TimeExportDialog } from "@/features/time/components/TimeExportDialog";
 import { TimeAdjustDialog } from "@/features/time/components/TimeAdjustDialog";
 import { TimeQueryDrawer } from "@/features/time/components/TimeQueryDrawer";
-import type { TimesheetRow, TimeQuery } from "@/features/time/types";
+import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { useTimeActions } from "@/features/time/hooks/useTimeActions";
 
 export const Route = createFileRoute("/time")({
   head: () => ({ meta: [{ title: "Time & Attendance — Docklist" }] }),
   component: TimePage,
 });
 
-const PERIOD_OPTIONS = [
-  "This week (8 – 14 Jun)",
-  "Last week (1 – 7 Jun)",
-  "Pay period (Jun)",
-  "Custom range…",
-];
+const PERIOD_LABEL = "8 – 14 Jun 2026";
 
 const TEAM_OPTIONS = [
   "All teams",
@@ -52,51 +44,30 @@ const TEAM_OPTIONS = [
   "Maintenance",
 ];
 
-type RowOverride = { status?: TimesheetStatus; flagged?: boolean };
-
 function TimePage() {
   const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
-  const [reviewRow, setReviewRow] = React.useState<TimesheetRow | null>(null);
-  const [adjustRow, setAdjustRow] = React.useState<TimesheetRow | null>(null);
+  const allRows = useWorkspaceSelector((state) => state.timeRows);
+  const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
+  const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
   const [reminderFor, setReminderFor] = React.useState<string | null>(null);
   const [approveSuggestedOpen, setApproveSuggestedOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
-  const [overrides, setOverrides] = React.useState<Record<string, RowOverride>>({});
   const [tab, setTab] = React.useState<TimesheetTab>("all");
   const [query, setQuery] = React.useState("");
-  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
-  const [period, setPeriod] = React.useState(PERIOD_OPTIONS[0]!);
   const [team, setTeam] = React.useState(TEAM_OPTIONS[0]!);
 
-  const patchRows = React.useCallback((ids: string[], patch: RowOverride) => {
-    setOverrides((prev) => {
-      const next = { ...prev };
-      for (const id of ids) next[id] = { ...next[id], ...patch };
-      return next;
-    });
-  }, []);
-
-  const statusOf = React.useCallback(
-    (r: TimesheetRow): TimesheetStatus => {
-      const o = overrides[r.id]?.status;
-      if (o) return o;
-      if (r.st === "Approved") return "approved";
-      if (r.st === "Unapproved") return "unapproved";
-      return "pending";
-    },
-    [overrides],
+  const teamRows = React.useMemo(
+    () => (team === "All teams" ? allRows : allRows.filter((row) => row.department === team)),
+    [allRows, team],
   );
-  const flaggedIds = React.useMemo(
-    () => new Set(Object.keys(overrides).filter((id) => overrides[id]?.flagged)),
-    [overrides],
-  );
+  const time = useTimeActions(allRows, teamRows);
 
   const filtered = React.useMemo(() => {
-    return allRows.filter((r) => {
+    return teamRows.filter((r) => {
       if (query && !r.n.toLowerCase().includes(query.toLowerCase())) return false;
-      const status = statusOf(r);
+      const status = time.statusOf(r);
       switch (tab) {
         case "pending":
           return status === "pending";
@@ -105,156 +76,29 @@ function TimePage() {
         case "approved":
           return status === "approved";
         case "exceptions":
-          return r.exc !== "—";
+          return r.exc !== "—" || r.flagged;
         default:
           return true;
       }
     });
-  }, [query, tab, statusOf]);
+  }, [query, tab, teamRows, time]);
 
   const counts = React.useMemo(() => {
-    const c = { all: allRows.length, pending: 0, unapproved: 0, exceptions: 0, approved: 0 };
-    for (const r of allRows) {
-      const status = statusOf(r);
+    const c = { all: teamRows.length, pending: 0, unapproved: 0, exceptions: 0, approved: 0 };
+    for (const r of teamRows) {
+      const status = time.statusOf(r);
       if (status === "approved") c.approved += 1;
       else if (status === "unapproved") c.unapproved += 1;
       else c.pending += 1;
-      if (r.exc !== "—") c.exceptions += 1;
+      if (r.exc !== "—" || r.flagged) c.exceptions += 1;
     }
     return c;
-  }, [statusOf]);
-
-  /* ── row actions with undo toasts (prototype parity) ── */
-
-  const handleToggleApprove = (r: TimesheetRow) => {
-    const prev = statusOf(r);
-    if (prev === "approved") {
-      patchRows([r.id], { status: "pending" });
-      toast.info("Reverted", {
-        description: `${r.n}'s approval reverted to pending.`,
-        action: {
-          label: "Undo",
-          onClick: () => {
-            patchRows([r.id], { status: "approved" });
-            toast.success("Restored", { description: "Approval reinstated." });
-          },
-        },
-      });
-    } else {
-      patchRows([r.id], { status: "approved" });
-      toast.success("Approved", {
-        description: `${r.n}'s entry is ready to export as approved hours.`,
-        action: {
-          label: "Undo",
-          onClick: () => {
-            patchRows([r.id], { status: prev });
-            toast.info("Undone", { description: "Approval reverted." });
-          },
-        },
-      });
-    }
-  };
-
-  const handleApprove = (r: TimesheetRow) => {
-    if (statusOf(r) !== "approved") handleToggleApprove(r);
-  };
-  const handleRevert = (r: TimesheetRow) => {
-    if (statusOf(r) === "approved") handleToggleApprove(r);
-  };
-
-  const handleToggleFlag = (r: TimesheetRow) => {
-    const wasFlagged = flaggedIds.has(r.id);
-    patchRows([r.id], { flagged: !wasFlagged });
-    toast[wasFlagged ? "info" : "warning"](wasFlagged ? "Flag removed" : "Flagged", {
-      description: `${r.n}'s entry ${wasFlagged ? "unflagged" : "flagged for review"}.`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          patchRows([r.id], { flagged: wasFlagged });
-          toast.info("Undone", { description: "Flag state restored." });
-        },
-      },
-    });
-  };
-
-  const bulkApprove = (ids: string[], label: string) => {
-    if (ids.length === 0) return;
-    const prev = ids.map((id) => ({
-      id,
-      status: statusOf(allRows.find((r) => r.id === id)!),
-    }));
-    patchRows(ids, { status: "approved" });
-    toast.success(label, {
-      description: `${ids.length} timesheet${ids.length === 1 ? "" : "s"} approved.`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          for (const p of prev) patchRows([p.id], { status: p.status });
-          toast.info("Undone", { description: "Approvals reverted." });
-        },
-      },
-    });
-  };
-
-  const approveSelection = () => {
-    bulkApprove([...selectedIds], "Timesheets approved");
-    setSelectedIds(new Set());
-  };
-
-  const flagSelection = () => {
-    const ids = [...selectedIds];
-    patchRows(ids, { flagged: true });
-    toast.warning("Flagged for review", {
-      description: `${ids.length} timesheet${ids.length === 1 ? "" : "s"} flagged.`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          patchRows(ids, { flagged: false });
-          toast.info("Undone", { description: "Flags removed." });
-        },
-      },
-    });
-    setSelectedIds(new Set());
-  };
-
-  const approveAllPending = () => {
-    bulkApprove(
-      allRows.filter((r) => statusOf(r) === "pending").map((r) => r.id),
-      "Bulk approved",
-    );
-  };
-
-  const suggestedRows = React.useMemo(
-    () => allRows.filter((r) => r.exc === "—" && statusOf(r) !== "approved").slice(0, 3),
-    [statusOf],
-  );
-
-  /* ── selection plumbing ── */
-
-  const toggleSelect = (id: string) =>
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  const toggleAll = () => {
-    const visibleIds = filtered.map((r) => r.id);
-    setSelectedIds((prev) => {
-      const allOn = visibleIds.length > 0 && visibleIds.every((id) => prev.has(id));
-      if (allOn) {
-        const next = new Set(prev);
-        for (const id of visibleIds) next.delete(id);
-        return next;
-      }
-      return new Set([...prev, ...visibleIds]);
-    });
-  };
-  const clearSelection = () => setSelectedIds(new Set());
+  }, [teamRows, time]);
 
   const resetFilters = () => {
     setTab("all");
     setQuery("");
+    setTeam("All teams");
   };
 
   return (
@@ -264,27 +108,10 @@ function TimePage() {
         subtitle="Review clocked hours, approve, and export approved hours."
         actions={
           <>
-            <RowActionMenu
-              triggerLabel="Choose period"
-              trigger={
-                <button type="button" className="btn secondary sm">
-                  <Calendar className="h-3.5 w-3.5" aria-hidden />
-                  {period.includes("(") ? period.slice(period.indexOf("(") + 1, -1) : period}
-                  <ChevronDown className="h-3 w-3" aria-hidden />
-                </button>
-              }
-              items={[
-                { kind: "label", text: "Period" },
-                ...PERIOD_OPTIONS.map((p) => ({
-                  label: p,
-                  icon: p === period ? Check : undefined,
-                  onSelect: () => {
-                    setPeriod(p);
-                    toast.info("Period changed", { description: `Showing ${p.toLowerCase()}.` });
-                  },
-                })),
-              ]}
-            />
+            <span className="btn secondary sm" aria-label={`Current period ${PERIOD_LABEL}`}>
+              <Calendar className="h-3.5 w-3.5" aria-hidden />
+              {PERIOD_LABEL}
+            </span>
             <RowActionMenu
               triggerLabel="Filter by team"
               trigger={
@@ -318,7 +145,7 @@ function TimePage() {
                 {
                   label: "Approve all pending",
                   icon: CheckCircle2,
-                  onSelect: approveAllPending,
+                  onSelect: time.approveAllPending,
                 },
                 {
                   label: "Prepare reminders for missing clock-ins",
@@ -350,9 +177,9 @@ function TimePage() {
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">
-          <TimeMetricCards />
+          <TimeMetricCards rows={teamRows} />
 
-          {selectedIds.size > 0 && (
+          {time.selectedIds.size > 0 && (
             <div
               className="card flex flex-wrap items-center gap-3 px-4 py-2.5"
               style={{
@@ -360,15 +187,17 @@ function TimePage() {
                 borderColor: "var(--st-teal-line)",
               }}
             >
-              <span className="text-sm font-semibold text-brand">{selectedIds.size} selected</span>
+              <span className="text-sm font-semibold text-brand">
+                {time.selectedIds.size} selected
+              </span>
               <div className="flex-1" />
-              <button type="button" className="btn primary sm" onClick={approveSelection}>
-                <Check className="h-3.5 w-3.5" aria-hidden /> Approve {selectedIds.size}
+              <button type="button" className="btn primary sm" onClick={time.approveSelection}>
+                <Check className="h-3.5 w-3.5" aria-hidden /> Approve {time.selectedIds.size}
               </button>
-              <button type="button" className="btn secondary sm" onClick={flagSelection}>
+              <button type="button" className="btn secondary sm" onClick={time.flagSelection}>
                 <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Flag
               </button>
-              <button type="button" className="btn ghost sm" onClick={clearSelection}>
+              <button type="button" className="btn ghost sm" onClick={time.clearSelection}>
                 Clear
               </button>
             </div>
@@ -376,16 +205,16 @@ function TimePage() {
 
           <TimesheetTable
             rows={filtered}
-            totalRows={allRows.length}
-            statusOf={statusOf}
-            flaggedIds={flaggedIds}
-            selectedIds={selectedIds}
-            onToggleSelect={toggleSelect}
-            onToggleAll={toggleAll}
+            totalRows={teamRows.length}
+            statusOf={time.statusOf}
+            flaggedIds={time.flaggedIds}
+            selectedIds={time.selectedIds}
+            onToggleSelect={time.toggleSelect}
+            onToggleAll={() => time.toggleAll(filtered)}
             onReview={setReviewRow}
             onAdjust={setAdjustRow}
-            onToggleApprove={handleToggleApprove}
-            onToggleFlag={handleToggleFlag}
+            onToggleApprove={time.toggleApprove}
+            onToggleFlag={time.toggleFlag}
             onPrepareReminder={setReminderFor}
             onViewRota={() => navigate({ to: "/rota" })}
             tab={tab}
@@ -402,18 +231,23 @@ function TimePage() {
           onOpenAssistant={openAiDrawer}
           onPrepareReminder={setReminderFor}
           onOpenQuery={setQueryRow}
+          rows={teamRows}
         />
       </div>
 
       <TimesheetReviewDrawer
         row={reviewRow}
-        statusOf={statusOf}
-        onApprove={handleApprove}
-        onRevert={handleRevert}
+        statusOf={time.statusOf}
+        onApprove={time.approve}
+        onRevert={time.revert}
         onAdjust={setAdjustRow}
         onClose={() => setReviewRow(null)}
       />
-      <TimeAdjustDialog row={adjustRow} onClose={() => setAdjustRow(null)} />
+      <TimeAdjustDialog
+        row={adjustRow}
+        onClose={() => setAdjustRow(null)}
+        onSave={time.saveAdjustment}
+      />
       <TimeQueryDrawer
         query={queryRow}
         onClose={() => setQueryRow(null)}
@@ -444,13 +278,13 @@ function TimePage() {
       <ConfirmDialog
         open={approveSuggestedOpen}
         onOpenChange={setApproveSuggestedOpen}
-        title={`Approve ${suggestedRows.length} timesheets?`}
+        title={`Approve ${time.suggestedRows.length} timesheets?`}
         description={
-          suggestedRows.length > 0 ? (
+          time.suggestedRows.length > 0 ? (
             <span>
               Review the rows before confirming:{" "}
-              <strong>{suggestedRows.map((r) => r.n).join(", ")}</strong> — all clocked on schedule
-              with no exceptions.
+              <strong>{time.suggestedRows.map((r) => r.n).join(", ")}</strong> — all clocked on
+              schedule with no exceptions.
             </span>
           ) : (
             "Everything eligible is already approved."
@@ -459,13 +293,18 @@ function TimePage() {
         confirmLabel="Confirm & approve"
         onConfirm={() => {
           setApproveSuggestedOpen(false);
-          bulkApprove(
-            suggestedRows.map((r) => r.id),
+          time.bulkApprove(
+            time.suggestedRows.map((r) => r.id),
             "Approved",
           );
         }}
       />
-      <TimeExportDialog open={exportOpen} onOpenChange={setExportOpen} />
+      <TimeExportDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        rows={teamRows}
+        periodLabel={PERIOD_LABEL}
+      />
     </AppShell>
   );
 }

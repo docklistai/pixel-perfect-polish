@@ -1,15 +1,7 @@
 import * as React from "react";
 import { StatusBadge } from "@/components/dl";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Bell, Check, ChevronDown, Plane, X } from "lucide-react";
+import { Bell, Check, Plane, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
 
 type Tab = "needs" | "approved" | "declined" | "all";
@@ -93,23 +85,6 @@ export function LeaveRequestInbox({
             </button>
           ))}
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button type="button" className="btn ghost sm">
-              Sort: Newest <ChevronDown className="h-3 w-3" aria-hidden />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-44">
-            <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Check className="h-3.5 w-3.5" aria-hidden /> Newest first
-            </DropdownMenuItem>
-            <DropdownMenuItem>Coverage impact</DropdownMenuItem>
-            <DropdownMenuItem>Notice period</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={() => setTab("needs")}>Needs review</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {visible.length === 0 ? (

@@ -1,15 +1,16 @@
 import { Bell, Check, Clock, Edit3, User, X } from "lucide-react";
 import { DrawerShell, FormSection, FormRow, StatusBadge, ActionButton } from "@/components/dl";
 import { cn } from "@/lib/utils";
-import type { TimesheetRow } from "../types";
+import * as React from "react";
+import type { StoredTimesheetRow } from "../types";
 import type { TimesheetStatus } from "./TimesheetTable";
 
 interface Props {
-  row: TimesheetRow | null;
-  statusOf: (row: TimesheetRow) => TimesheetStatus;
-  onApprove: (row: TimesheetRow) => void;
-  onRevert: (row: TimesheetRow) => void;
-  onAdjust: (row: TimesheetRow) => void;
+  row: StoredTimesheetRow | null;
+  statusOf: (row: StoredTimesheetRow) => TimesheetStatus;
+  onApprove: (row: StoredTimesheetRow, note: string) => void;
+  onRevert: (row: StoredTimesheetRow) => void;
+  onAdjust: (row: StoredTimesheetRow) => void;
   onClose: () => void;
 }
 
@@ -24,6 +25,10 @@ export function TimesheetReviewDrawer({
   onAdjust,
   onClose,
 }: Props) {
+  const [managerNote, setManagerNote] = React.useState("");
+
+  React.useEffect(() => setManagerNote(""), [row]);
+
   if (!row) return null;
 
   const status = statusOf(row);
@@ -45,9 +50,11 @@ export function TimesheetReviewDrawer({
   ];
 
   const auditTrail = [
-    ...(status === "approved"
-      ? [{ time: "Thu 11:10", title: "Approved", body: "Alex Thompson", icon: Check }]
-      : []),
+    ...row.auditTrail.map((entry) => ({
+      ...entry,
+      icon: entry.title.includes("Approved") ? Check : Edit3,
+    })),
+    ...(status === "approved" ? [] : []),
     { time: "Thu 10:45", title: "Manager opened entry", body: "Alex Thompson", icon: User },
     ...(row.out !== "—"
       ? [{ time: row.out, title: "Clocked out", body: `Recorded at ${row.out}`, icon: Clock }]
@@ -93,7 +100,7 @@ export function TimesheetReviewDrawer({
           {status !== "approved" ? (
             <ActionButton
               onClick={() => {
-                onApprove(row);
+                onApprove(row, managerNote);
                 onClose();
               }}
             >
@@ -153,6 +160,8 @@ export function TimesheetReviewDrawer({
             id="time-manager-note"
             className="w-full min-h-20 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
             placeholder="Optional. Saved with the timesheet for the audit log…"
+            value={managerNote}
+            onChange={(event) => setManagerNote(event.target.value)}
           />
         </FormRow>
       </FormSection>

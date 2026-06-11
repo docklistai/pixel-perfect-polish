@@ -84,13 +84,6 @@ export interface LeaveBalance {
   tone: "brand" | "info" | "purple" | "success" | "warning";
 }
 
-export interface ApprovedLeave {
-  id: string;
-  rangeLabel: string;
-  type: string;
-  days: number;
-}
-
 export interface AvailabilityDay {
   shortLabel: string;
   date: string;
@@ -116,6 +109,7 @@ export interface PortalNotification {
   badge?: { tone: "warning" | "success" | "info" | "danger"; label: string };
   unread?: boolean;
   important?: boolean;
+  relatedLeaveRequestId?: string;
 }
 
 export interface PortalDocument {

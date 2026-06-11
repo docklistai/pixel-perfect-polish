@@ -6,6 +6,9 @@ interface Props {
   onOpenAssistant: () => void;
   onOpenRota: () => void;
   onReviewTimesheets: () => void;
+  openShiftCount: number;
+  pendingTimeCount: number;
+  pendingLeaveCount: number;
 }
 
 export function DashboardAISummaryCard({
@@ -13,12 +16,15 @@ export function DashboardAISummaryCard({
   onOpenAssistant,
   onOpenRota,
   onReviewTimesheets,
+  openShiftCount,
+  pendingTimeCount,
+  pendingLeaveCount,
 }: Props) {
   return (
     <AiSuggestionCard
       tone="teal"
-      title="3 things worth your attention today"
-      body="Next week's draft has Daniel's Friday overlap and two open shifts. Four timesheets need manager review before approved hours can be exported."
+      title={`${[openShiftCount, pendingTimeCount, pendingLeaveCount].filter((count) => count > 0).length} things worth your attention today`}
+      body={`Next week's draft has ${openShiftCount} open shifts. ${pendingTimeCount} timesheets need manager review and ${pendingLeaveCount} leave requests are pending.`}
       onDismiss={onDismiss}
       actions={[
         {

@@ -1,7 +1,8 @@
-import type { TimesheetRow, MissedClockIn, TimeQuery } from "../types";
+import { DEMO_STAFF } from "@/features/demo/data/demoWorld";
+import type { TimesheetRow, MissedClockIn, TimeQuery, StoredTimesheetRow } from "../types";
 
 // Week of Mon 8 – Sun 14 Jun 2026
-export const rows: TimesheetRow[] = [
+export const rows: Array<TimesheetRow & Pick<StoredTimesheetRow, "status">> = [
   {
     id: "sophie-carter",
     n: "Sophie Carter",
@@ -16,8 +17,7 @@ export const rows: TimesheetRow[] = [
     brk: "0:45",
     paid: "7 h 24 m",
     exc: "—",
-    st: "Approved",
-    stTone: "success",
+    status: "approved",
   },
   {
     id: "daniel-mitchell",
@@ -35,8 +35,7 @@ export const rows: TimesheetRow[] = [
     paid: "7 h 23 m",
     exc: "Late in",
     excTone: "danger",
-    st: "Pending",
-    stTone: "warning",
+    status: "pending",
   },
   {
     id: "priya-patel",
@@ -52,8 +51,7 @@ export const rows: TimesheetRow[] = [
     brk: "0:30",
     paid: "7 h 34 m",
     exc: "—",
-    st: "Approved",
-    stTone: "success",
+    status: "approved",
   },
   {
     id: "liam-oconnor",
@@ -70,8 +68,7 @@ export const rows: TimesheetRow[] = [
     brk: "0:30",
     paid: "7 h 20 m",
     exc: "—",
-    st: "Pending",
-    stTone: "warning",
+    status: "pending",
   },
   {
     id: "olivia-bennett",
@@ -86,8 +83,7 @@ export const rows: TimesheetRow[] = [
     brk: "0:30",
     paid: "7 h 30 m",
     exc: "—",
-    st: "Approved",
-    stTone: "success",
+    status: "approved",
   },
   {
     id: "james-walker",
@@ -105,8 +101,7 @@ export const rows: TimesheetRow[] = [
     paid: "—",
     exc: "Missing in",
     excTone: "danger",
-    st: "Unapproved",
-    stTone: "muted",
+    status: "unapproved",
   },
   {
     id: "amelia-stone",
@@ -124,8 +119,7 @@ export const rows: TimesheetRow[] = [
     paid: "7 h 17 m",
     exc: "Late in",
     excTone: "danger",
-    st: "Pending",
-    stTone: "warning",
+    status: "pending",
   },
   {
     id: "noah-evans",
@@ -141,8 +135,7 @@ export const rows: TimesheetRow[] = [
     brk: "0:30",
     paid: "7 h 33 m",
     exc: "—",
-    st: "Approved",
-    stTone: "success",
+    status: "approved",
   },
 ];
 
@@ -168,3 +161,13 @@ export const timeQueries: TimeQuery[] = [
     img: 23,
   },
 ];
+
+export function seedTimesheetRows(): StoredTimesheetRow[] {
+  return rows.map((row) => ({
+    ...row,
+    department: DEMO_STAFF.find((staff) => staff.id === row.id)?.department ?? "Other",
+    status: row.status,
+    flagged: false,
+    auditTrail: [],
+  }));
+}

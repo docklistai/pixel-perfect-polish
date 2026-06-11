@@ -54,19 +54,6 @@ export const HISTORY = [
   { when: "30 May", q: "Coverage gaps in Housekeeping" },
 ];
 
-/** Resolves a prompt to a simulated answer — exact key first, then intent patterns. */
-export function matchAnswer(q: string): SimulatedAnswer {
-  const exact = ANSWERS[q];
-  if (exact) return exact;
-  const lower = q.toLowerCase();
-  if (lower.startsWith("suggest a fix")) return ANSWERS["conflict-fix"]!;
-  if (lower.startsWith("find cover")) return ANSWERS["find-cover"]!;
-  if (lower.startsWith("summarise the open issues")) {
-    return ANSWERS["Anything I should review before publishing this week's rota?"]!;
-  }
-  return ANSWERS.default!;
-}
-
 export const ANSWERS: Record<string, SimulatedAnswer> = {
   default: {
     title: "Here's what I'm seeing",

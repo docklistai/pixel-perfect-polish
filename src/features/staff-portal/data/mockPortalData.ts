@@ -1,5 +1,4 @@
 import type {
-  ApprovedLeave,
   AvailabilityDay,
   ClockEntry,
   LeaveBalance,
@@ -86,14 +85,6 @@ export const mockClockEntries: ClockEntry[] = [
 
 export const mockRequests: PortalRequest[] = [
   {
-    id: "rq-001",
-    kind: "time-off",
-    title: "Time off · 19–21 Jun",
-    detail: "3 days, family wedding.",
-    submitted: "Submitted 9 Jun",
-    status: "pending",
-  },
-  {
     id: "rq-002",
     kind: "availability",
     title: "Availability · No Monday evenings from July",
@@ -149,15 +140,6 @@ export const mockLeaveBalances: LeaveBalance[] = [
   { label: "Sick leave", days: 5.0, unit: "days", tone: "info" },
 ];
 
-export const mockApprovedLeave: ApprovedLeave[] = [
-  {
-    id: "al-1",
-    rangeLabel: "Mon 22 Jun – Fri 26 Jun",
-    type: "Annual leave",
-    days: 5,
-  },
-];
-
 export const mockAvailability: AvailabilityDay[] = [
   { shortLabel: "Mon", date: "15", status: "limited" },
   { shortLabel: "Tue", date: "16", status: "available" },
@@ -178,6 +160,7 @@ export const mockNotifications: PortalNotification[] = [
     badge: { tone: "warning", label: "Changed" },
     unread: true,
     important: true,
+    relatedLeaveRequestId: "l6",
   },
   {
     id: "nt-2",

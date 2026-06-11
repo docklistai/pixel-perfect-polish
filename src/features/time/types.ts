@@ -14,8 +14,30 @@ export interface TimesheetRow {
   paid: string;
   exc: string;
   excTone?: "danger";
-  st: string;
-  stTone: "success" | "warning" | "muted" | "danger";
+}
+
+export type TimesheetStatus = "approved" | "pending" | "unapproved";
+
+export interface TimeAuditEntry {
+  id: string;
+  time: string;
+  title: string;
+  body: string;
+}
+
+export interface StoredTimesheetRow extends TimesheetRow {
+  department: string;
+  status: TimesheetStatus;
+  flagged: boolean;
+  auditTrail: TimeAuditEntry[];
+}
+
+export interface TimeAdjustment {
+  clockIn: string;
+  clockOut: string;
+  breakTime: string;
+  reason: string;
+  note: string;
 }
 
 export interface MissedClockIn {

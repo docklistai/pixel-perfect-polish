@@ -2,14 +2,15 @@ import { ArrowRight, Bell, CheckCircle2, Info, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/dl";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
-import { missedClockIns, timeQueries } from "../data/timeDemoData";
-import type { TimeQuery } from "../types";
+import { timeQueries } from "../data/timeDemoData";
+import type { StoredTimesheetRow, TimeQuery } from "../types";
 
 interface Props {
   onApproveSuggested: () => void;
   onOpenAssistant: () => void;
   onPrepareReminder: (name: string) => void;
   onOpenQuery: (query: TimeQuery) => void;
+  rows: StoredTimesheetRow[];
 }
 
 export function TimeRightRail({
@@ -17,13 +18,20 @@ export function TimeRightRail({
   onOpenAssistant,
   onPrepareReminder,
   onOpenQuery,
+  rows,
 }: Props) {
+  const cleanPending = rows.filter((row) => row.exc === "—" && row.status === "pending");
+  const missedClockIns = rows.filter((row) => row.in === "—");
   return (
     <div className="col-span-12 lg:col-span-3 space-y-4">
       <AiSuggestionCard
         tone="teal"
-        title="One clean pending timesheet is ready to review"
-        body="Liam's entry has no recorded exception. Review it before approving; Daniel and Amelia still need attention."
+        title={`${cleanPending.length} clean pending timesheet${cleanPending.length === 1 ? "" : "s"} ready to review`}
+        body={
+          cleanPending.length > 0
+            ? `${cleanPending.map((row) => row.n).join(", ")} clocked with no recorded exception. Review before approving.`
+            : "No clean pending timesheets remain in this view."
+        }
         actions={[
           {
             label: "Review clean entry",
@@ -131,7 +139,7 @@ export function TimeRightRail({
             />
             <div className="flex-1">
               <div className="text-sm font-medium">{p.n}</div>
-              <div className="text-[11px] text-muted-foreground">{p.t}</div>
+              <div className="text-[11px] text-muted-foreground">Today · {p.sched}</div>
             </div>
             <span
               className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"

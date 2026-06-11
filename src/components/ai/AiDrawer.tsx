@@ -3,7 +3,9 @@ import { DrawerShell } from "@/components/dl";
 import { AiChip } from "./AiChip";
 import { AiDrawerBody } from "./AiDrawerBody";
 import { AiDrawerHeader } from "./AiDrawerHeader";
-import { matchAnswer, type Phase, type SimulatedAnswer } from "./aiDrawerData";
+import { type Phase, type SimulatedAnswer } from "./aiDrawerData";
+import { matchWorkspaceAnswer, type AiWorkspaceContext } from "./aiWorkspaceAnswers";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 
 export function AiDrawer({
   open,
@@ -19,6 +21,19 @@ export function AiDrawer({
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [answer, setAnswer] = React.useState<SimulatedAnswer | null>(null);
   const timeoutRef = React.useRef<number | null>(null);
+  const workspace = useWorkspaceSelector((state) => state);
+  const context = React.useMemo<AiWorkspaceContext>(() => {
+    const draft = workspace.weekDrafts[String(workspace.weekOffset)] ?? workspace.weekDrafts["0"];
+    return {
+      pendingLeaveCount: workspace.leaveRequests.filter((request) => request.state === "pending")
+        .length,
+      approvedLeaveCount: workspace.leaveRequests.filter((request) => request.state === "approved")
+        .length,
+      pendingTimeCount: workspace.timeRows.filter((row) => row.status !== "approved").length,
+      approvedTimeCount: workspace.timeRows.filter((row) => row.status === "approved").length,
+      openShiftCount: draft?.shifts.filter((shift) => shift.status === "open").length ?? 0,
+    };
+  }, [workspace]);
 
   React.useEffect(() => {
     if (!open) {
@@ -41,19 +56,22 @@ export function AiDrawer({
     [],
   );
 
-  const run = React.useCallback((q: string) => {
-    setInput(q);
-    setAnswer(null);
-    setPhase("running");
-    if (timeoutRef.current !== null) {
-      window.clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = window.setTimeout(() => {
-      setPhase("answered");
-      setAnswer(matchAnswer(q));
-      timeoutRef.current = null;
-    }, 900);
-  }, []);
+  const run = React.useCallback(
+    (q: string) => {
+      setInput(q);
+      setAnswer(null);
+      setPhase("running");
+      if (timeoutRef.current !== null) {
+        window.clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = window.setTimeout(() => {
+        setPhase("answered");
+        setAnswer(matchWorkspaceAnswer(q, context));
+        timeoutRef.current = null;
+      }, 900);
+    },
+    [context],
+  );
 
   React.useEffect(() => {
     if (open && initialPrompt) {

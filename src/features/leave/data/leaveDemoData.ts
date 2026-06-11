@@ -1,17 +1,18 @@
-import type { LeaveRequest, LeaveCalEntry } from "../types";
+import type { LeaveRequest } from "../types";
 
-// Calendar covers Mon 8 Jun – Sun 21 Jun 2026 (two full weeks)
-// Index 0 = Mon 8, Index 13 = Sun 21
-export const CAL_DAYS = ["M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T", "F", "S", "S"];
-export const CAL_DATES = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-
+// Live demo requests — the workspace store seeds from this list. Olivia's
+// requests appear both here (manager view) and in her staff portal, derived
+// from the same records.
 export const requests: LeaveRequest[] = [
   {
     id: "l1",
+    staffId: "sophie-carter",
     n: "Sophie Carter",
     role: "FOH Supervisor",
     dept: "Front of House",
     date: "18 – 19 Jun 2026",
+    startIso: "2026-06-18",
+    endIso: "2026-06-19",
     days: 2,
     type: "Annual leave",
     impact: "Low",
@@ -26,10 +27,13 @@ export const requests: LeaveRequest[] = [
   },
   {
     id: "l2",
+    staffId: "daniel-mitchell",
     n: "Daniel Mitchell",
     role: "Kitchen Supervisor",
     dept: "Kitchen",
     date: "16 – 17 Jun 2026",
+    startIso: "2026-06-16",
+    endIso: "2026-06-17",
     days: 2,
     type: "Annual leave",
     impact: "Medium",
@@ -44,10 +48,13 @@ export const requests: LeaveRequest[] = [
   },
   {
     id: "l3",
+    staffId: "priya-patel",
     n: "Priya Patel",
     role: "Head Chef",
     dept: "Kitchen",
     date: "21 – 23 Jun 2026",
+    startIso: "2026-06-21",
+    endIso: "2026-06-23",
     days: 3,
     type: "Annual leave",
     impact: "High",
@@ -62,10 +69,13 @@ export const requests: LeaveRequest[] = [
   },
   {
     id: "l4",
+    staffId: "liam-oconnor",
     n: "Liam O'Connor",
     role: "Bartender",
     dept: "Bar",
     date: "15 – 21 Jun 2026",
+    startIso: "2026-06-15",
+    endIso: "2026-06-21",
     days: 7,
     type: "Annual leave",
     impact: "Medium",
@@ -78,13 +88,46 @@ export const requests: LeaveRequest[] = [
     submitted: "6 Jun 2026, 08:00 (Europe/London)",
     coverNote: "Bar will need cover across the bank holiday weekend.",
   },
-];
-
-export const cal: LeaveCalEntry[] = [
-  { n: "Sophie Carter", dept: "Front of House", img: 5, range: [10, 11], type: "pending" },
-  { n: "Daniel Mitchell", dept: "Kitchen", img: 12, range: [8, 9], type: "pending" },
-  { n: "Priya Patel", dept: "Kitchen", img: 47, range: [13, 13], type: "pending" },
-  { n: "Amelia Stone", dept: "Housekeeping", img: 23, range: [3, 7], type: "unavail" },
-  { n: "Olivia Bennett", dept: "Front of House", img: 16, range: [10, 13], type: "annual" },
-  { n: "Liam O'Connor", dept: "Bar", img: 13, range: [7, 13], type: "pending" },
+  {
+    id: "l5",
+    staffId: "olivia-bennett",
+    n: "Olivia Bennett",
+    role: "Barista",
+    dept: "Front of House",
+    date: "19 – 21 Jun 2026",
+    startIso: "2026-06-19",
+    endIso: "2026-06-21",
+    days: 3,
+    type: "Annual leave",
+    impact: "Medium",
+    tone: "warning",
+    state: "pending",
+    notice: 8,
+    reason: "Family wedding.",
+    img: 16,
+    balance: "12.5 / 28 days",
+    submitted: "9 Jun 2026, 18:24 (Europe/London)",
+    coverNote: "Olivia is on next week's draft for Sat 20 and Sun 21 — cover needed if approved.",
+  },
+  {
+    id: "l6",
+    staffId: "olivia-bennett",
+    n: "Olivia Bennett",
+    role: "Barista",
+    dept: "Front of House",
+    date: "22 – 26 Jun 2026",
+    startIso: "2026-06-22",
+    endIso: "2026-06-26",
+    days: 5,
+    type: "Annual leave",
+    impact: "Low",
+    tone: "success",
+    state: "approved",
+    notice: 25,
+    reason: "Pre-booked summer holiday.",
+    img: 16,
+    balance: "12.5 / 28 days",
+    submitted: "28 May 2026, 10:02 (Europe/London)",
+    coverNote: "James covers the espresso bar during this week.",
+  },
 ];

@@ -19,15 +19,11 @@ import { DashboardAlertDrawer } from "@/features/dashboard/components/DashboardA
 import { DashboardKpiDetailDrawer } from "@/features/dashboard/components/DashboardKpiDetailDrawer";
 import type { KpiItem } from "@/features/dashboard/types";
 import {
-  kpiItems,
-  todayKpiItems,
-  attentionItems,
-  leaveItems,
-  timesheetItems,
   staffDeptItems,
   announcementItems,
   quickActionItems,
 } from "@/features/dashboard/data/dashboardDemoData";
+import { useDashboardWorkspace } from "@/features/dashboard/hooks/useDashboardWorkspace";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,6 +48,7 @@ function Home() {
   const [moreOpen, setMoreOpen] = React.useState(false);
   const quickRef = React.useRef<HTMLDivElement>(null);
   const moreRef = React.useRef<HTMLDivElement>(null);
+  const dashboard = useDashboardWorkspace();
 
   const runQuickAction = React.useCallback(
     (to: "/" | "/rota" | "/staff" | "/leave" | "/team" | "/ops", intent?: IntentName) => {
@@ -251,6 +248,9 @@ function Home() {
             onOpenAssistant={openAiDrawer}
             onOpenRota={() => navigate({ to: "/rota" })}
             onReviewTimesheets={() => navigate({ to: "/time" })}
+            openShiftCount={dashboard.openShifts}
+            pendingTimeCount={dashboard.pendingTime.length}
+            pendingLeaveCount={dashboard.pendingLeave.length}
           />
         </div>
       )}
@@ -258,13 +258,13 @@ function Home() {
       {/* KPI row + attention rail */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
         <DashboardKpiCards
-          items={filter === "today" ? todayKpiItems : kpiItems}
+          items={filter === "today" ? dashboard.todayKpis : dashboard.weeklyKpis}
           title={filter === "today" ? "Today's snapshot" : "Weekly overview"}
           onKpiClick={setSelectedKpi}
         />
         <DashboardAttentionPanel
-          items={attentionItems}
-          total={attentionItems.length}
+          items={dashboard.attentionItems}
+          total={dashboard.attentionItems.length}
           onAlertClick={(idx) => {
             setSelectedAlertIdx(idx);
             setAlertOpen(true);
@@ -276,13 +276,13 @@ function Home() {
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} />
         <DashboardRotaPublish />
-        <DashboardPendingLeave items={leaveItems} />
+        <DashboardPendingLeave items={dashboard.leaveItems} />
       </div>
 
       {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <DashboardStaffOnShift items={staffDeptItems} total={6} />
-        <DashboardTimesheets items={timesheetItems} />
+        <DashboardTimesheets items={dashboard.timesheetItems} />
         <DashboardAnnouncements items={announcementItems} />
         <DashboardQuickActions items={quickActionItems} />
       </div>

@@ -1,29 +1,18 @@
 import * as React from "react";
-import {
-  CalendarDays,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Clock4,
-  HelpCircle,
-  Pencil,
-} from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import {
   ActionButton,
   DashboardCard,
   DetailRow,
   DrawerShell,
-  FormRow,
   FormSection,
   StatusBadge,
 } from "@/components/dl";
-import {
-  mockApprovedLeave,
-  mockAvailability,
-  mockLeaveBalances,
-  mockRequests,
-} from "../data/mockPortalData";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import type { LeaveRequest } from "@/features/leave/types";
+import { mockAvailability, mockLeaveBalances, mockRequests } from "../data/mockPortalData";
 import type { PortalRequest, RequestKind, RequestStatus } from "../types";
+import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
 
 const statusTone: Record<RequestStatus, "warning" | "success" | "danger"> = {
   pending: "warning",
@@ -45,8 +34,14 @@ const availabilityTone = {
 
 export function LeaveTab() {
   const [open, setOpen] = React.useState(false);
-  const [kind, setKind] = React.useState<RequestKind>("time-off");
   const [detail, setDetail] = React.useState<PortalRequest | null>(null);
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
+  const myLeave = leaveRequests.filter((request) => request.staffId === "olivia-bennett");
+  const approvedLeave = myLeave.filter((request) => request.state === "approved");
+  const requestHistory = [
+    ...myLeave.map(toPortalRequest),
+    ...mockRequests.filter((request) => request.kind !== "time-off"),
+  ];
 
   return (
     <div className="space-y-4">
@@ -67,33 +62,27 @@ export function LeaveTab() {
             </div>
           ))}
         </dl>
-        <button
-          type="button"
-          className="mt-3 w-full text-center text-xs font-semibold text-brand hover:underline"
-        >
-          View full balances
-        </button>
+        <div className="mt-3 text-center text-xs text-muted-foreground">
+          Balances shown as of today
+        </div>
       </DashboardCard>
 
       <ActionButton
         icon={CalendarDays}
         className="w-full justify-center"
-        onClick={() => {
-          setKind("time-off");
-          setOpen(true);
-        }}
+        onClick={() => setOpen(true)}
       >
         Request time off
       </ActionButton>
 
       {/* Upcoming approved leave */}
-      {mockApprovedLeave.length > 0 && (
+      {approvedLeave.length > 0 && (
         <DashboardCard className="p-5">
           <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             UPCOMING APPROVED LEAVE
           </div>
           <ul className="mt-3 space-y-2">
-            {mockApprovedLeave.map((l) => (
+            {approvedLeave.map((l) => (
               <li
                 key={l.id}
                 className="flex items-center justify-between rounded-2xl border border-border px-3 py-2.5"
@@ -101,7 +90,7 @@ export function LeaveTab() {
                 <div className="flex items-center gap-2.5 min-w-0">
                   <CalendarDays className="h-4 w-4 text-brand shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold truncate">{l.rangeLabel}</div>
+                    <div className="text-sm font-semibold truncate">{l.date}</div>
                     <div className="text-[11px] text-muted-foreground">
                       {l.type} · {l.days} days
                     </div>
@@ -120,23 +109,26 @@ export function LeaveTab() {
           <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             AVAILABILITY
           </div>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
-          >
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
             <Pencil className="h-3 w-3" /> Edit
-          </button>
+          </span>
         </div>
         <div className="mt-2 flex items-center justify-between">
           <button
             type="button"
             aria-label="Previous week"
-            className="p-1 rounded-md hover:bg-muted/60"
+            className="p-1 rounded-md opacity-40"
+            disabled
           >
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
           <div className="text-xs text-foreground font-medium">8 – 14 Jun 2026</div>
-          <button type="button" aria-label="Next week" className="p-1 rounded-md hover:bg-muted/60">
+          <button
+            type="button"
+            aria-label="Next week"
+            className="p-1 rounded-md opacity-40"
+            disabled
+          >
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
@@ -167,7 +159,7 @@ export function LeaveTab() {
           REQUEST HISTORY
         </div>
         <ul className="space-y-2">
-          {mockRequests.map((r) => (
+          {requestHistory.map((r) => (
             <li key={r.id}>
               <button type="button" onClick={() => setDetail(r)} className="w-full text-left">
                 <DashboardCard className="p-4 hover:bg-muted/30 transition-colors">
@@ -187,55 +179,7 @@ export function LeaveTab() {
         </ul>
       </div>
 
-      {/* New request drawer */}
-      <DrawerShell
-        open={open}
-        onOpenChange={setOpen}
-        title={`New request · ${kindLabel[kind]}`}
-        description="Request preview — saved for this session only."
-        width="lg"
-        footer={
-          <>
-            <ActionButton variant="secondary" onClick={() => setOpen(false)}>
-              Cancel
-            </ActionButton>
-            <ActionButton onClick={() => setOpen(false)}>Submit request</ActionButton>
-          </>
-        }
-      >
-        <FormSection title="Details">
-          <FormRow label="Type">
-            <select
-              value={kind}
-              onChange={(e) => setKind(e.target.value as RequestKind)}
-              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
-            >
-              <option value="time-off">Time off</option>
-              <option value="availability">Availability change</option>
-              <option value="shift-question">Shift question</option>
-            </select>
-          </FormRow>
-          <FormRow label="From">
-            <input
-              type="date"
-              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
-            />
-          </FormRow>
-          <FormRow label="To">
-            <input
-              type="date"
-              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
-            />
-          </FormRow>
-          <FormRow label="Note">
-            <textarea
-              rows={3}
-              placeholder="Add a short note about your request"
-              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
-            />
-          </FormRow>
-        </FormSection>
-      </DrawerShell>
+      <PortalLeaveRequestDrawer open={open} onOpenChange={setOpen} />
 
       {/* Detail drawer */}
       <DrawerShell
@@ -264,12 +208,19 @@ export function LeaveTab() {
           </FormSection>
         )}
       </DrawerShell>
-
-      {/* Hidden imports referenced for icons used in headers */}
-      <span className="hidden">
-        <Clock4 />
-        <HelpCircle />
-      </span>
     </div>
   );
+}
+
+function toPortalRequest(request: LeaveRequest): PortalRequest {
+  const latestDecision = request.decisionHistory?.at(-1);
+  return {
+    id: request.id,
+    kind: "time-off",
+    title: `${request.type} · ${request.date}`,
+    detail: request.reason,
+    submitted: request.submitted,
+    status: request.state,
+    managerResponse: latestDecision?.reason,
+  };
 }

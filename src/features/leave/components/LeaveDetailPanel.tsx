@@ -2,9 +2,11 @@ import { Card, ActionButton, DetailRow, StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
+import { leaveRangesOverlap } from "../lib/leaveDates";
 
 interface Props {
   request: LeaveRequest;
+  requests: LeaveRequest[];
   onApprove: (request: LeaveRequest) => void;
   onDecline: (request: LeaveRequest) => void;
   onReopen: (id: string) => void;
@@ -44,18 +46,30 @@ const coverageByRequest: Record<
   ],
 };
 
-const requestPeriods = [
-  { name: "Daniel Mitchell", dates: "16 – 17 Jun" },
-  { name: "Sophie Carter", dates: "18 – 19 Jun" },
-  { name: "Priya Patel", dates: "21 – 23 Jun" },
-  { name: "Liam O'Connor", dates: "15 – 21 Jun" },
-];
-
-export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOpenRisk }: Props) {
+export function LeaveDetailPanel({
+  request,
+  requests,
+  onApprove,
+  onDecline,
+  onReopen,
+  onOpenRisk,
+}: Props) {
   const isApproved = request.state === "approved";
   const isDeclined = request.state === "declined";
-  const coverageRows = coverageByRequest[request.id] ?? coverageByRequest.l3;
-  const otherRequests = requestPeriods.filter((person) => person.name !== request.n);
+  const coverageRows = coverageByRequest[request.id] ?? [
+    {
+      label: request.date,
+      value: request.impact === "High" ? 50 : request.impact === "Medium" ? 70 : 90,
+      tone: request.impact === "High" ? ("danger" as const) : ("warning" as const),
+    },
+  ];
+  const otherRequests = requests.filter(
+    (item) =>
+      item.id !== request.id &&
+      item.state !== "declined" &&
+      leaveRangesOverlap(item.startIso, item.endIso, request.startIso, request.endIso),
+  );
+  const latestDecision = request.decisionHistory?.at(-1);
   const impactTone =
     request.tone === "danger" ? "danger" : request.tone === "warning" ? "warning" : "success";
 
@@ -86,6 +100,7 @@ export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOp
               <DetailRow label="Notice" value={`${request.notice} days`} />
               <DetailRow label="Balance after" value={request.balance} />
               <DetailRow label="Type" value={request.type} />
+              {latestDecision && <DetailRow label="Decision note" value={latestDecision.reason} />}
             </dl>
           </div>
         </div>
@@ -128,15 +143,20 @@ export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOp
         <div className="section-label mb-2">Other requests in this period</div>
         <div className="space-y-3">
           {otherRequests.map((person) => (
-            <div key={person.name} className="row gap-3">
-              <div className="av av-c2 sm">{initials(person.name)}</div>
+            <div key={person.id} className="row gap-3">
+              <div className="av av-c2 sm">{initials(person.n)}</div>
               <div className="min-w-0 grow">
-                <div className="strong txt-sm">{person.name}</div>
-                <div className="muted txt-xs mono">{person.dates}</div>
+                <div className="strong txt-sm">{person.n}</div>
+                <div className="muted txt-xs mono">{person.date}</div>
               </div>
-              <StatusBadge tone="warning">Pending</StatusBadge>
+              <StatusBadge tone={person.state === "approved" ? "success" : "warning"}>
+                {person.state === "approved" ? "Approved" : "Pending"}
+              </StatusBadge>
             </div>
           ))}
+          {otherRequests.length === 0 && (
+            <div className="muted txt-sm">No overlapping requests.</div>
+          )}
         </div>
       </div>
 

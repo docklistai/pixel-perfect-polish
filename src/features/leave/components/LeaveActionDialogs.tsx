@@ -2,13 +2,8 @@ import * as React from "react";
 import { ActionButton, DialogShell, StatusBadge } from "@/components/dl";
 import { CalendarDays, Check, Plane, X } from "lucide-react";
 import type { LeaveRequest } from "../types";
-
-interface StaffOption {
-  name: string;
-  role: string;
-  dept: string;
-  img: number;
-}
+import { leaveDaysInclusive } from "../lib/leaveDates";
+import { buildLeaveRequest, type LeaveStaffOption } from "../lib/leaveRequests";
 
 interface Props {
   decisionRequest: LeaveRequest | null;
@@ -16,15 +11,15 @@ interface Props {
   newRequestOpen: boolean;
   onDecisionOpenChange: (open: boolean) => void;
   onNewRequestOpenChange: (open: boolean) => void;
-  onApprove: (id: string) => void;
-  onDecline: (id: string) => void;
+  onApprove: (id: string, reason: string) => void;
+  onDecline: (id: string, reason: string) => void;
   onCreateRequest: (request: LeaveRequest) => void;
 }
 
-const staffOptions: StaffOption[] = [
-  { name: "James Walker", role: "Waiter", dept: "Front of House", img: 14 },
-  { name: "Amelia Stone", role: "Housekeeper", dept: "Housekeeping", img: 23 },
-  { name: "Noah Evans", role: "Porter", dept: "Maintenance", img: 33 },
+const staffOptions: LeaveStaffOption[] = [
+  { id: "james-walker", name: "James Walker", role: "Waiter", dept: "Front of House", img: 14 },
+  { id: "amelia-stone", name: "Amelia Stone", role: "Housekeeper", dept: "Housekeeping", img: 23 },
+  { id: "noah-evans", name: "Noah Evans", role: "Porter", dept: "Maintenance", img: 33 },
 ];
 
 function initials(name: string): string {
@@ -47,34 +42,29 @@ export function LeaveActionDialogs({
   onCreateRequest,
 }: Props) {
   const [staffName, setStaffName] = React.useState(staffOptions[0].name);
-  const [days, setDays] = React.useState("3");
+  const [startIso, setStartIso] = React.useState("2026-06-12");
+  const [endIso, setEndIso] = React.useState("2026-06-14");
+  const [leaveType, setLeaveType] = React.useState("Annual leave");
+  const [reason, setReason] = React.useState("");
+  const [declineReason, setDeclineReason] = React.useState(
+    "Coverage on these days is already at risk. Could you suggest the week before or after?",
+  );
 
   const selectedStaff = staffOptions.find((staff) => staff.name === staffName) ?? staffOptions[0];
   const isApprove = decisionType === "approve";
   const decisionOpen = Boolean(decisionRequest && decisionType);
 
   const handleCreate = () => {
-    const parsedDays = Number.parseInt(days, 10);
-    const safeDays = Number.isFinite(parsedDays) && parsedDays > 0 ? parsedDays : 3;
-
-    onCreateRequest({
-      id: `new-${Date.now()}`,
-      n: selectedStaff.name,
-      role: selectedStaff.role,
-      dept: selectedStaff.dept,
-      date: "12 – 14 Jun 2026",
-      days: safeDays,
-      type: "Annual leave",
-      impact: "Low",
-      tone: "success",
-      state: "pending",
-      notice: 10,
-      reason: "Added by manager.",
-      img: selectedStaff.img,
-      balance: "11 / 28 days",
-      submitted: "Created just now",
-      coverNote: "Added by Alex Thompson for review.",
-    });
+    onCreateRequest(
+      buildLeaveRequest({
+        staff: selectedStaff,
+        startIso,
+        endIso,
+        type: leaveType,
+        reason,
+        source: "manager",
+      }),
+    );
   };
 
   return (
@@ -106,8 +96,8 @@ export function LeaveActionDialogs({
               size="sm"
               onClick={() => {
                 if (!decisionRequest) return;
-                if (isApprove) onApprove(decisionRequest.id);
-                else onDecline(decisionRequest.id);
+                if (isApprove) onApprove(decisionRequest.id, "Approved after coverage review.");
+                else onDecline(decisionRequest.id, declineReason);
               }}
             >
               {isApprove ? (
@@ -150,13 +140,10 @@ export function LeaveActionDialogs({
                 </div>
               </div>
             </div>
-            <label className="row gap-2 mt-3 txt-sm">
-              <input type="checkbox" defaultChecked /> Prepare a staff-app update for{" "}
-              {decisionRequest.n}
-            </label>
-            <label className="row gap-2 mt-2 txt-sm">
-              <input type="checkbox" /> Mark these days as unavailable on the rota
-            </label>
+            <p className="muted txt-sm mt-3">
+              Approved leave is included in rota conflict checks. Portal staff receive a staff-safe
+              decision update automatically.
+            </p>
           </>
         )}
 
@@ -172,7 +159,8 @@ export function LeaveActionDialogs({
                 id="leave-decline-reason"
                 className="dl-textarea"
                 rows={3}
-                defaultValue="Coverage on these days is already at risk. Could you suggest the week before or after?"
+                value={declineReason}
+                onChange={(event) => setDeclineReason(event.target.value)}
               />
             </div>
           </>
@@ -218,7 +206,12 @@ export function LeaveActionDialogs({
           </div>
           <div className="field">
             <label htmlFor="leave-type">Leave type</label>
-            <select id="leave-type" className="dl-select" defaultValue="Annual leave">
+            <select
+              id="leave-type"
+              className="dl-select"
+              value={leaveType}
+              onChange={(event) => setLeaveType(event.target.value)}
+            >
               <option>Annual leave</option>
               <option>Sick leave</option>
               <option>Compassionate</option>
@@ -231,22 +224,34 @@ export function LeaveActionDialogs({
             <input
               id="leave-days"
               className="dl-input mono"
-              value={days}
-              onChange={(event) => setDays(event.target.value)}
+              value={leaveDaysInclusive(startIso, endIso)}
+              readOnly
             />
           </div>
           <div className="field">
             <label htmlFor="leave-from">From</label>
             <div className="input-group">
               <CalendarDays className="ico h-3.5 w-3.5" aria-hidden />
-              <input id="leave-from" className="mono" defaultValue="12 Jun 2026" />
+              <input
+                id="leave-from"
+                className="mono"
+                type="date"
+                value={startIso}
+                onChange={(event) => setStartIso(event.target.value)}
+              />
             </div>
           </div>
           <div className="field">
             <label htmlFor="leave-to">To</label>
             <div className="input-group">
               <CalendarDays className="ico h-3.5 w-3.5" aria-hidden />
-              <input id="leave-to" className="mono" defaultValue="14 Jun 2026" />
+              <input
+                id="leave-to"
+                className="mono"
+                type="date"
+                value={endIso}
+                onChange={(event) => setEndIso(event.target.value)}
+              />
             </div>
           </div>
           <div className="field sm:col-span-2">
@@ -256,12 +261,14 @@ export function LeaveActionDialogs({
               className="dl-textarea"
               rows={2}
               placeholder="Add a note for the team..."
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
             />
           </div>
         </div>
-        <label className="row gap-2 mt-3 txt-sm">
-          <input type="checkbox" defaultChecked /> Mark these days as unavailable on the rota
-        </label>
+        <p className="muted txt-sm mt-3">
+          The request stays pending until approved; approved dates then appear in rota checks.
+        </p>
       </DialogShell>
     </>
   );

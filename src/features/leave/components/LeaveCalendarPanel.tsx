@@ -2,6 +2,7 @@ import { ActionButton, DrawerShell, StatusBadge } from "@/components/dl";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LeaveRequest } from "../types";
+import { leaveRangeDaysInMonth } from "../lib/leaveDates";
 
 interface Props {
   open: boolean;
@@ -27,20 +28,14 @@ function buildCells(): CalendarCell[] {
 
 /** Derives calendar bands from live request state (declined requests drop off). */
 function buildBands(requests: LeaveRequest[]): LeaveBand[] {
-  const ranges: Record<string, { start: number; end: number }> = {
-    l1: { start: 18, end: 19 },
-    l2: { start: 16, end: 17 },
-    l3: { start: 21, end: 23 },
-    l4: { start: 15, end: 21 },
-  };
-  const bands: LeaveBand[] = [{ who: "Olivia Bennett", start: 22, end: 26, state: "approved" }];
+  const bands: LeaveBand[] = [];
   for (const r of requests) {
-    const range = ranges[r.id];
-    if (!range || r.state === "declined") continue;
+    const days = leaveRangeDaysInMonth(r.startIso, r.endIso, 2026, 6);
+    if (days.length === 0 || r.state === "declined") continue;
     bands.push({
       who: r.n,
-      start: range.start,
-      end: range.end,
+      start: days[0]!,
+      end: days[days.length - 1]!,
       state: r.state === "approved" ? "approved" : "pending",
     });
   }

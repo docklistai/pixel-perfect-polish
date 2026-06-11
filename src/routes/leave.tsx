@@ -20,7 +20,8 @@ import {
   Plane,
   Plus,
 } from "lucide-react";
-import { requests as initialRequests } from "@/features/leave/data/leaveDemoData";
+import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import { createLeaveRequest, setLeaveRequestState } from "@/features/demo/store/leaveActions";
 import { LeaveMetricCards } from "@/features/leave/components/LeaveMetricCards";
 import { LeaveRequestInbox } from "@/features/leave/components/LeaveRequestInbox";
 import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPanel";
@@ -39,11 +40,38 @@ export const Route = createFileRoute("/leave")({
   component: LeavePage,
 });
 
+type LeaveFilter = "all" | "annual" | "sick" | "coverage" | "notice";
+
+const LEAVE_FILTER_LABELS: Record<LeaveFilter, string> = {
+  all: "All types",
+  annual: "Annual leave",
+  sick: "Sick leave",
+  coverage: "Coverage at risk",
+  notice: "High notice (>30d)",
+};
+
+function matchesLeaveFilter(request: LeaveRequest, filter: LeaveFilter): boolean {
+  switch (filter) {
+    case "all":
+      return true;
+    case "annual":
+      return request.type === "Annual leave";
+    case "sick":
+      return request.type === "Sick leave";
+    case "coverage":
+      return request.impact === "High";
+    case "notice":
+      return request.notice > 30;
+  }
+}
+
 function LeavePage() {
   const navigate = useNavigate();
   const { askAssistant } = useOverlays();
-  const [requests, setRequests] = React.useState<LeaveRequest[]>(initialRequests);
+  const store = useWorkspaceStore();
+  const requests = useWorkspaceSelector((state) => state.leaveRequests);
   const [activeId, setActiveId] = React.useState("l3");
+  const [filter, setFilter] = React.useState<LeaveFilter>("all");
   const [calendarOpen, setCalendarOpen] = React.useState(false);
   const [newRequestOpen, setNewRequestOpen] = React.useState(false);
   const [decisionRequest, setDecisionRequest] = React.useState<LeaveRequest | null>(null);
@@ -52,9 +80,12 @@ function LeavePage() {
 
   useIntentHandler("leave.new", () => setNewRequestOpen(true));
 
-  const activeRequest = requests.find((request) => request.id === activeId) ?? requests[0] ?? null;
-  const pendingCount = requests.filter((request) => request.state === "pending").length;
-
+  const visibleRequests = React.useMemo(
+    () => requests.filter((request) => matchesLeaveFilter(request, filter)),
+    [requests, filter],
+  );
+  const activeRequest =
+    visibleRequests.find((request) => request.id === activeId) ?? visibleRequests[0] ?? null;
   const openDecision = (request: LeaveRequest, type: "approve" | "decline") => {
     setDecisionRequest(request);
     setDecisionType(type);
@@ -65,35 +96,35 @@ function LeavePage() {
     setDecisionType(null);
   };
 
-  const updateState = (id: string, state: LeaveRequest["state"]) => {
-    setRequests((items) => items.map((item) => (item.id === id ? { ...item, state } : item)));
+  const updateState = (id: string, state: LeaveRequest["state"], reason: string) => {
+    setLeaveRequestState(store, id, state, reason);
     setActiveId(id);
   };
 
-  const handleApprove = (id: string) => {
-    updateState(id, "approved");
+  const handleApprove = (id: string, reason: string) => {
+    updateState(id, "approved", reason);
     closeDecision();
     toast.success("Leave approved", {
-      description: `${decisionRequest?.n ?? "The team member"}'s request is approved — visible in their staff app preview.`,
+      description: `${decisionRequest?.n ?? "The team member"}'s request is approved and rota checks were updated.`,
       action: {
         label: "Undo",
         onClick: () => {
-          updateState(id, "pending");
+          updateState(id, "pending", "Approval undone by manager.");
           toast.info("Reverted", { description: "Request returned to pending." });
         },
       },
     });
   };
 
-  const handleDecline = (id: string) => {
-    updateState(id, "declined");
+  const handleDecline = (id: string, reason: string) => {
+    updateState(id, "declined", reason);
     closeDecision();
     toast.warning("Request declined", {
-      description: `${decisionRequest?.n ?? "The team member"}'s request is declined — your reason is saved to the record.`,
+      description: `${decisionRequest?.n ?? "The team member"}'s request is declined and the reason is saved to the record.`,
       action: {
         label: "Undo",
         onClick: () => {
-          updateState(id, "pending");
+          updateState(id, "pending", "Decline decision undone by manager.");
           toast.info("Reverted", { description: "Request returned to pending review." });
         },
       },
@@ -101,12 +132,12 @@ function LeavePage() {
   };
 
   const handleReopen = (id: string) => {
-    updateState(id, "pending");
+    updateState(id, "pending", "Reopened for manager review.");
     toast.info("Reopened", { description: "Request returned to review queue" });
   };
 
   const handleCreateRequest = (request: LeaveRequest) => {
-    setRequests((items) => [request, ...items]);
+    createLeaveRequest(store, request);
     setActiveId(request.id);
     setNewRequestOpen(false);
     toast.success("Request created", {
@@ -131,26 +162,31 @@ function LeavePage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <ActionButton variant="secondary" icon={Filter}>
-                  Filters
+                  {filter === "all" ? "Filters" : LEAVE_FILTER_LABELS[filter]}
                 </ActionButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-52">
                 <DropdownMenuLabel>Filters</DropdownMenuLabel>
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("annual")}>
                   <Plane className="h-3.5 w-3.5" aria-hidden /> Annual leave
+                  {filter === "annual" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("sick")}>
                   <Heart className="h-3.5 w-3.5" aria-hidden /> Sick leave
+                  {filter === "sick" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("all")}>
                   <Check className="h-3.5 w-3.5" aria-hidden /> All types
+                  {filter === "all" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("coverage")}>
                   <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Coverage at risk
+                  {filter === "coverage" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setFilter("notice")}>
                   <Clock className="h-3.5 w-3.5" aria-hidden /> High notice (&gt;30d)
+                  {filter === "notice" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -166,11 +202,11 @@ function LeavePage() {
         Check coverage impact before deciding — high-impact requests are highlighted.
       </div>
 
-      <LeaveMetricCards pendingCount={pendingCount} />
+      <LeaveMetricCards requests={requests} />
 
       <div className="grid grid-cols-12 gap-5 items-start">
         <LeaveRequestInbox
-          requests={requests}
+          requests={visibleRequests}
           activeId={activeRequest?.id ?? ""}
           onAsk={(request) =>
             toast.info("Reminder prepared", {
@@ -186,6 +222,7 @@ function LeavePage() {
           <div className="col-span-12 space-y-3 self-start lg:sticky lg:top-[88px] lg:col-span-5">
             <LeaveDetailPanel
               request={activeRequest}
+              requests={requests}
               onApprove={(request) => openDecision(request, "approve")}
               onDecline={(request) => openDecision(request, "decline")}
               onReopen={handleReopen}
@@ -207,7 +244,7 @@ function LeavePage() {
         )}
       </div>
 
-      <LeaveBottomCards />
+      <LeaveBottomCards requests={requests} />
 
       <LeaveCalendarDrawer
         open={calendarOpen}

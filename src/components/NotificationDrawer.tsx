@@ -8,11 +8,14 @@ import { AlertTriangle, CheckCircle } from "lucide-react";
 import { DrawerShell, ActionButton } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import { NotificationItem } from "./NotificationItem";
+import { type MockNotification, type NotificationFilter } from "./notificationData";
+import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import {
-  NOTIFICATION_SEED,
-  type MockNotification,
-  type NotificationFilter,
-} from "./notificationData";
+  clearManagerNotifications,
+  markAllManagerNotificationsRead,
+  markManagerNotificationRead,
+  restoreManagerNotifications,
+} from "@/features/demo/store/notificationActions";
 
 export function NotificationDrawer({
   open,
@@ -24,7 +27,8 @@ export function NotificationDrawer({
   onUnreadCountChange?: (count: number) => void;
 }) {
   const navigate = useNavigate();
-  const [items, setItems] = React.useState<MockNotification[]>(NOTIFICATION_SEED);
+  const store = useWorkspaceStore();
+  const items = useWorkspaceSelector((state) => state.managerNotifications);
   const [filter, setFilter] = React.useState<NotificationFilter>("all");
 
   const unreadCount = items.filter((i) => !i.read).length;
@@ -50,11 +54,10 @@ export function NotificationDrawer({
         ? items.filter((i) => i.tone === "amber" || i.tone === "red")
         : items;
 
-  const markRead = (id: string) =>
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, read: true } : i)));
-  const markAllRead = () => setItems((prev) => prev.map((i) => ({ ...i, read: true })));
-  const clearAll = () => setItems([]);
-  const restoreDefaults = () => setItems(NOTIFICATION_SEED);
+  const markRead = (id: string) => markManagerNotificationRead(store, id);
+  const markAllRead = () => markAllManagerNotificationsRead(store);
+  const clearAll = () => clearManagerNotifications(store);
+  const restoreDefaults = () => restoreManagerNotifications(store);
 
   const openItem = (n: MockNotification) => {
     markRead(n.id);

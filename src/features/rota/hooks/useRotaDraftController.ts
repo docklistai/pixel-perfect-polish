@@ -17,6 +17,11 @@ import {
   workingTimeAlerts,
 } from "../lib/rotaSummaries";
 import { useRotaWeekDrafts } from "./useRotaWeekDrafts";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import {
+  buildApprovedLeaveConflictSummaries,
+  withApprovedLeaveConflictStatus,
+} from "@/features/leave/lib/leaveRotaConflicts";
 
 const DEFAULT_ROTA_FILTERS: RotaFilters = {
   department: "all",
@@ -26,12 +31,18 @@ const DEFAULT_ROTA_FILTERS: RotaFilters = {
 
 export function useRotaDraftController() {
   const weekDraft = useRotaWeekDrafts();
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
   const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
   const [staffSearch, setStaffSearch] = React.useState("");
 
   const displayShifts = React.useMemo(
-    () => withLocalConflictStatus(weekDraft.draftShifts),
-    [weekDraft.draftShifts],
+    () =>
+      withApprovedLeaveConflictStatus(
+        withLocalConflictStatus(weekDraft.draftShifts),
+        leaveRequests,
+        weekDraft.weekOffset,
+      ),
+    [leaveRequests, weekDraft.draftShifts, weekDraft.weekOffset],
   );
   const dayLabels = React.useMemo(
     () => getWeekDayLabels(weekDraft.weekOffset),
@@ -47,7 +58,16 @@ export function useRotaDraftController() {
     }));
   }, [dayLabels, displayShifts, weekDraft.weekOffset]);
   const visibleStaff = filterStaff(staff, displayShifts, filters, staffSearch);
-  const conflictSummaries = buildLocalConflictSummaries(displayShifts, staff, dayLabels);
+  const conflictSummaries = [
+    ...buildLocalConflictSummaries(displayShifts, staff, dayLabels),
+    ...buildApprovedLeaveConflictSummaries(
+      displayShifts,
+      leaveRequests,
+      weekDraft.weekOffset,
+      staff,
+      dayLabels,
+    ),
+  ];
   const selectedShift = weekDraft.selectedShiftId
     ? (displayShifts.find((shift) => shift.id === weekDraft.selectedShiftId) ?? null)
     : null;

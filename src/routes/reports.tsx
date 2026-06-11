@@ -2,16 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import {
-  Briefcase,
-  CalendarDays,
-  ChevronDown,
-  Download,
-  Info,
-  Sparkles,
-  Plus,
-  BarChart2,
-} from "lucide-react";
+import { CalendarDays, Download, Info, Sparkles, Plus, BarChart2 } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
@@ -20,9 +11,9 @@ import { DepartmentLabourPanel } from "@/features/reports/components/DepartmentL
 import { ReportsTopPerformersCard } from "@/features/reports/components/ReportsTopPerformersCard";
 import { ReportsSavedReportsCard } from "@/features/reports/components/ReportsSavedReportsCard";
 import { ReportsCoverageHeatmapCard } from "@/features/reports/components/ReportsCoverageHeatmapCard";
-import { ReportsFilterDrawer } from "@/features/reports/components/ReportsFilterDrawer";
 import { ReportsExportDialog } from "@/features/reports/components/ReportsExportDialog";
 import { InsightDetailDrawer } from "@/features/reports/components/InsightDetailDrawer";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 
 export const Route = createFileRoute("/reports")({
   head: () => ({ meta: [{ title: "Reports — Docklist" }] }),
@@ -31,8 +22,9 @@ export const Route = createFileRoute("/reports")({
 
 function ReportsPage() {
   const { openAiDrawer } = useOverlays();
-  const [filterOpen, setFilterOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
+  const timeRows = useWorkspaceSelector((state) => state.timeRows);
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
   const [selectedReport, setSelectedReport] = React.useState<{
     name: string;
     sub?: string;
@@ -47,22 +39,10 @@ function ReportsPage() {
         subtitle="Review labour cost, coverage, and attendance — with scheduling context and manager review points."
         actions={
           <>
-            <ActionButton
-              variant="secondary"
-              icon={CalendarDays}
-              iconRight={ChevronDown}
-              onClick={() => setFilterOpen(true)}
-            >
+            <span className="btn secondary sm" aria-label="Reporting period">
+              <CalendarDays className="h-3.5 w-3.5" aria-hidden />
               Last 4 weeks
-            </ActionButton>
-            <ActionButton
-              variant="secondary"
-              icon={Briefcase}
-              iconRight={ChevronDown}
-              onClick={() => setFilterOpen(true)}
-            >
-              All departments
-            </ActionButton>
+            </span>
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
               AI review
             </ActionButton>
@@ -87,7 +67,7 @@ function ReportsPage() {
         Use AI review points to spot rota issues — click each point to mark as reviewed.
       </div>
 
-      <ReportsKpiCards />
+      <ReportsKpiCards timeRows={timeRows} leaveRequests={leaveRequests} />
 
       <div className="grid grid-cols-12 gap-5 items-start">
         <LabourTargetChart />
@@ -108,7 +88,6 @@ function ReportsPage() {
 
       <ReportsCoverageHeatmapCard />
 
-      <ReportsFilterDrawer open={filterOpen} onOpenChange={setFilterOpen} />
       <ReportsExportDialog
         open={exportOpen}
         onOpenChange={setExportOpen}

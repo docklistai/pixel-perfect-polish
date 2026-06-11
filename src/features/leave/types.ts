@@ -1,9 +1,20 @@
+export interface LeaveDecisionEvent {
+  state: "pending" | "approved" | "declined";
+  reason: string;
+  at: string;
+}
+
 export interface LeaveRequest {
   id: string;
+  /** Staff id from the canonical demo world (matches rota staff ids). */
+  staffId: string;
   n: string;
   role: string;
   dept: string;
   date: string;
+  /** ISO range used to derive calendars and rota conflicts. */
+  startIso: string;
+  endIso: string;
   days: number;
   type: string;
   impact: "Low" | "Medium" | "High";
@@ -15,12 +26,6 @@ export interface LeaveRequest {
   balance: string;
   submitted: string;
   coverNote: string;
-}
-
-export interface LeaveCalEntry {
-  n: string;
-  dept: string;
-  img: number;
-  range: [number, number];
-  type: "annual" | "pending" | "unavail";
+  /** Manager decision/reopen history retained for the audit-facing views. */
+  decisionHistory?: LeaveDecisionEvent[];
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home,
@@ -12,6 +12,9 @@ import {
   Settings,
   ChevronDown,
 } from "lucide-react";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { withLocalConflictStatus } from "@/features/rota/lib/localConflicts";
+import { withApprovedLeaveConflictStatus } from "@/features/leave/lib/leaveRotaConflicts";
 
 interface NavItem {
   to: string;
@@ -33,7 +36,6 @@ const navItems: readonly NavItem[] = [
     icon: Calendar,
     group: "workspace",
     flagship: true,
-    badge: { count: 3, kind: "amber" },
   },
   { to: "/staff", label: "Staff", icon: Users, group: "workspace" },
   {
@@ -41,14 +43,12 @@ const navItems: readonly NavItem[] = [
     label: "Time",
     icon: Clock,
     group: "workspace",
-    badge: { count: 5, kind: "red" },
   },
   {
     to: "/leave",
     label: "Leave",
     icon: Plane,
     group: "workspace",
-    badge: { count: 4, kind: "amber" },
   },
   { to: "/team", label: "Team", icon: MessageSquare, group: "communication" },
   { to: "/ops", label: "Ops", icon: Briefcase, group: "communication" },
@@ -68,8 +68,34 @@ const NAV_GROUPS: ReadonlyArray<{
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const workspace = useWorkspaceSelector((state) => state);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
+  const badges = useMemo(() => {
+    const draft = workspace.weekDrafts[String(workspace.weekOffset)] ?? workspace.weekDrafts["0"];
+    const rotaShifts = draft
+      ? withApprovedLeaveConflictStatus(
+          withLocalConflictStatus(draft.shifts),
+          workspace.leaveRequests,
+          workspace.weekOffset,
+        )
+      : [];
+    return {
+      "/rota": {
+        count: rotaShifts.filter((shift) => shift.status === "open" || shift.status === "conflict")
+          .length,
+        kind: "amber" as const,
+      },
+      "/time": {
+        count: workspace.timeRows.filter((row) => row.status !== "approved" || row.flagged).length,
+        kind: "red" as const,
+      },
+      "/leave": {
+        count: workspace.leaveRequests.filter((request) => request.state === "pending").length,
+        kind: "amber" as const,
+      },
+    };
+  }, [workspace]);
 
   useEffect(() => {
     if (!workspaceOpen) return;
@@ -107,6 +133,7 @@ export function Sidebar() {
                 .map((item) => {
                   const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
                   const Icon = item.icon;
+                  const badge = badges[item.to as keyof typeof badges] ?? item.badge;
                   return (
                     <Link
                       key={item.to}
@@ -131,16 +158,16 @@ export function Sidebar() {
                           Core
                         </span>
                       )}
-                      {item.badge && (
+                      {badge && badge.count > 0 && (
                         <span
                           className="count"
                           style={
-                            item.badge.kind === "amber"
+                            badge.kind === "amber"
                               ? {
                                   background: "rgba(240,182,91,0.20)",
                                   color: "#F6CC85",
                                 }
-                              : item.badge.kind === "red"
+                              : badge.kind === "red"
                                 ? {
                                     background: "rgba(242,100,122,0.22)",
                                     color: "#FF8A9C",
@@ -148,7 +175,7 @@ export function Sidebar() {
                                 : {}
                           }
                         >
-                          {item.badge.count}
+                          {badge.count}
                         </span>
                       )}
                     </Link>

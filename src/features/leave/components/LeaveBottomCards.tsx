@@ -1,5 +1,7 @@
 import { Card } from "@/components/dl";
 import { AlertTriangle } from "lucide-react";
+import type { LeaveRequest } from "../types";
+import { leaveRangesOverlap } from "../lib/leaveDates";
 
 function initials(name: string): string {
   return name
@@ -9,16 +11,6 @@ function initials(name: string): string {
     .join("")
     .toUpperCase();
 }
-
-const outThisWeek = [
-  {
-    name: "Priya Patel",
-    dates: "11 Jun only",
-    type: "Unavailable",
-    tone: "av-c3",
-    badge: "red" as const,
-  },
-];
 
 const publicHolidays = [
   { d: "31 Aug", name: "Summer bank holiday", flag: true },
@@ -33,24 +25,32 @@ const balances: { name: string; tone: string; used: number; total: number }[] = 
   { name: "Liam O'Connor", tone: "av-c4", used: 5, total: 22 },
 ];
 
-export function LeaveBottomCards() {
+export function LeaveBottomCards({ requests }: { requests: LeaveRequest[] }) {
+  const outThisWeek = requests.filter(
+    (request) =>
+      request.state === "approved" &&
+      leaveRangesOverlap(request.startIso, request.endIso, "2026-06-08", "2026-06-14"),
+  );
   return (
     <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
       <Card className="card-pad">
         <div className="section-label mb-2">Out this week</div>
         <div className="flex flex-col gap-3 mt-2">
           {outThisWeek.map((p) => (
-            <div key={p.name} className="row gap-3">
-              <div className={`av ${p.tone} sm`}>{initials(p.name)}</div>
+            <div key={p.id} className="row gap-3">
+              <div className="av av-c3 sm">{initials(p.n)}</div>
               <div className="grow min-w-0">
-                <div className="strong txt-sm truncate">{p.name}</div>
+                <div className="strong txt-sm truncate">{p.n}</div>
                 <div className="muted txt-xs mono">
-                  {p.dates} · {p.type}
+                  {p.date} · {p.type}
                 </div>
               </div>
-              <span className={`badge ${p.badge}`}>{p.type}</span>
+              <span className="badge purple">{p.type}</span>
             </div>
           ))}
+          {outThisWeek.length === 0 && (
+            <div className="muted txt-sm">No approved leave this week.</div>
+          )}
         </div>
       </Card>
 
