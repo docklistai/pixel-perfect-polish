@@ -175,7 +175,7 @@ export function TimeTab() {
       {hasMissing && (
         <FeedbackBanner
           tone="warning"
-          title="Missing clock-out on Wed 6 May"
+          title="Missing clock-out on Wed 3 Jun"
           description="Please add the missing clock-out so your hours are accurate."
         />
       )}

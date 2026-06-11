@@ -7,7 +7,7 @@ export function AbsenceBreakdown() {
         Absence breakdown
       </div>
       <div id="absence-chart-summary" className="sr-only">
-        Absence breakdown for the week of 18 May 2026. Total 36 hours: sickness 22 hours (61
+        Absence breakdown for the week of 8 Jun 2026. Total 36 hours: sickness 22 hours (61
         percent), annual leave 8 hours (22 percent), unpaid leave 3 hours (8 percent), other 3 hours
         (8 percent). Absence rate was 4.2 percent.
       </div>

@@ -31,7 +31,7 @@ export const danielMitchell: StaffProfile = buildProfile({
     "Next action: review Thursday conflict with Daniel.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "09:00 – 17:00",
     dept: "Front of House",
     role: "Supervisor",
@@ -39,21 +39,21 @@ export const danielMitchell: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Front of House",
       role: "Supervisor",
       status: "Confirmed",
     },
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Front of House",
       role: "Supervisor",
       status: "Confirmed",
     },
     {
-      date: "Thu, 21 May 2026",
+      date: "Wed, 17 Jun 2026",
       time: "13:00 – 21:00",
       dept: "Front of House",
       role: "Supervisor",
@@ -62,7 +62,7 @@ export const danielMitchell: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Front of House",
       role: "Supervisor",
@@ -70,7 +70,7 @@ export const danielMitchell: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Front of House",
       role: "Supervisor",
@@ -78,7 +78,7 @@ export const danielMitchell: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Thu, 14 May 2026",
+      date: "Wed, 10 Jun 2026",
       time: "13:00 – 21:00",
       dept: "Front of House",
       role: "Supervisor",
@@ -87,8 +87,8 @@ export const danielMitchell: StaffProfile = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "10 May 2026", type: "Document", note: "Personal license uploaded" },
-    { date: "2 May 2026", type: "Availability", note: "Availability updated for May" },
+    { date: "6 Jun 2026", type: "Document", note: "Personal license uploaded" },
+    { date: "29 May 2026", type: "Availability", note: "Availability updated for June" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
@@ -98,7 +98,7 @@ export const danielMitchell: StaffProfile = buildProfile({
   ],
   notes: [
     {
-      date: "8 May 2026",
+      date: "4 Jun 2026",
       author: "Alex Thompson",
       type: "Positive feedback",
       text: "Stepped in to cover supervisor shift on short notice last weekend.",
@@ -106,7 +106,7 @@ export const danielMitchell: StaffProfile = buildProfile({
     },
   ],
   availability: {
-    updated: "2 May 2026",
+    updated: "29 May 2026",
     conflicts: 1,
     lateChanges: 0,
     usuallyAvailable: "Mon–Sun, daytime and evenings",
@@ -125,12 +125,12 @@ export const danielMitchell: StaffProfile = buildProfile({
     overtimeTrend: "+2h this month",
   },
   timeStats: { hoursThisWeek: 40, avgWeeklyHours: 37, hoursThisMonth: 148, overtimeThisMonth: 2 },
-  portalAccess: { status: "Active", lastLogin: "14 May 2026, 09:05" },
+  portalAccess: { status: "Active", lastLogin: "10 Jun 2026, 09:05" },
   breakSummary: { averageBreak: "32 min", missedBreaks: 1, complianceStatus: "Compliant" },
   weeklyHours: [8, 8, 0, 8, 0, 0, 8],
   timeEntries: [
     {
-      date: "Thu, 14 May",
+      date: "Wed, 10 Jun",
       shift: "Late",
       role: "Supervisor",
       location: "Main Floor",
@@ -140,7 +140,7 @@ export const danielMitchell: StaffProfile = buildProfile({
       total: "7h 34m",
     },
     {
-      date: "Tue, 12 May",
+      date: "Mon, 8 Jun",
       shift: "Morning",
       role: "Supervisor",
       location: "Main Floor",
@@ -150,7 +150,7 @@ export const danielMitchell: StaffProfile = buildProfile({
       total: "7h 35m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Morning",
       role: "Supervisor",
       location: "Main Floor",
@@ -203,7 +203,7 @@ export const jamesWalker: StaffProfile = buildProfile({
     "Next action: book wine service refresher.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "11:00 – 19:00",
     dept: "Front of House",
     role: "Waiter",
@@ -211,21 +211,21 @@ export const jamesWalker: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Front of House",
       role: "Waiter",
       status: "Confirmed",
     },
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Front of House",
       role: "Waiter",
       status: "Confirmed",
     },
     {
-      date: "Fri, 22 May 2026",
+      date: "Thu, 18 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Front of House",
       role: "Waiter",
@@ -234,7 +234,7 @@ export const jamesWalker: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Front of House",
       role: "Waiter",
@@ -242,7 +242,7 @@ export const jamesWalker: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Front of House",
       role: "Waiter",
@@ -250,7 +250,7 @@ export const jamesWalker: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Fri, 15 May 2026",
+      date: "Thu, 11 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Front of House",
       role: "Waiter",
@@ -259,7 +259,7 @@ export const jamesWalker: StaffProfile = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "7 May 2026", type: "Document", note: "Allergens certificate uploaded" },
+    { date: "3 Jun 2026", type: "Document", note: "Allergens certificate uploaded" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
@@ -268,7 +268,7 @@ export const jamesWalker: StaffProfile = buildProfile({
     { name: "Contract", type: "HR", status: "valid" },
   ],
   availability: {
-    updated: "1 May 2026",
+    updated: "28 May 2026",
     conflicts: 0,
     lateChanges: 0,
     usuallyAvailable: "Weekdays, mid-day to evening",
@@ -287,11 +287,11 @@ export const jamesWalker: StaffProfile = buildProfile({
     overtimeTrend: "+0h",
   },
   timeStats: { hoursThisWeek: 24, avgWeeklyHours: 22, hoursThisMonth: 88, overtimeThisMonth: 0 },
-  portalAccess: { status: "Active", lastLogin: "11 May 2026, 11:02" },
+  portalAccess: { status: "Active", lastLogin: "7 Jun 2026, 11:02" },
   weeklyHours: [8, 8, 0, 0, 8, 0, 0],
   timeEntries: [
     {
-      date: "Fri, 15 May",
+      date: "Thu, 11 Jun",
       shift: "Mid-day",
       role: "Waiter",
       location: "Restaurant",
@@ -301,7 +301,7 @@ export const jamesWalker: StaffProfile = buildProfile({
       total: "7h 34m",
     },
     {
-      date: "Tue, 12 May",
+      date: "Mon, 8 Jun",
       shift: "Mid-day",
       role: "Waiter",
       location: "Restaurant",

@@ -27,7 +27,7 @@ export function PlanLimitsTab() {
             <div className="font-mono text-2xl font-bold">
               £89 <span className="text-xs font-normal text-muted-foreground">/ month</span>
             </div>
-            <div className="text-[10px] text-muted-foreground">Renews 18 May 2026</div>
+            <div className="text-[10px] text-muted-foreground">Renews 8 Jul 2026</div>
           </div>
         </div>
       </div>

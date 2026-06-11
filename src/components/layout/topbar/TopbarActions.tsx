@@ -107,7 +107,9 @@ export function TopbarActions({
               type="button"
               onClick={() => {
                 setUserOpen(false);
-                toast.info("Profile settings", { description: "Manage your profile from Settings → General for now." });
+                toast.info("Profile settings", {
+                  description: "Manage your profile from Settings → General for now.",
+                });
               }}
               className="menu-item"
             >
@@ -119,7 +121,9 @@ export function TopbarActions({
               type="button"
               onClick={() => {
                 setUserOpen(false);
-                toast.info("Account settings", { description: "Account management arrives in a later update." });
+                toast.info("Account settings", {
+                  description: "Account management arrives in a later update.",
+                });
               }}
               className="menu-item"
             >
@@ -131,7 +135,9 @@ export function TopbarActions({
               type="button"
               onClick={() => {
                 setUserOpen(false);
-                toast.info("Help & feedback", { description: "Email support@docklist.app — we read everything." });
+                toast.info("Help & feedback", {
+                  description: "Email support@docklist.app — we read everything.",
+                });
               }}
               className="menu-item"
             >
@@ -161,7 +167,9 @@ export function TopbarActions({
               type="button"
               onClick={() => {
                 setUserOpen(false);
-                toast.info("Signed in as Alex Thompson", { description: "Sign-out is disabled in this demo workspace." });
+                toast.info("Signed in as Alex Thompson", {
+                  description: "Sign-out is disabled in this demo workspace.",
+                });
               }}
               className="menu-item danger"
             >

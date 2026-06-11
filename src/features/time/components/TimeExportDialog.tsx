@@ -58,7 +58,7 @@ export function TimeExportDialog({ open, onOpenChange }: Props) {
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { label: "Rows", value: "38 rows" },
-          { label: "Period", value: "12 – 18 May 2026" },
+          { label: "Period", value: "1 – 7 Jun 2026" },
           { label: "Format", value: "CSV · standard" },
         ].map((stat, idx) => (
           <div key={idx} className="rounded-2xl border border-border bg-muted/20 p-3 text-left">

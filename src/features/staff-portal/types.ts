@@ -7,7 +7,7 @@ export type ShiftStatus = "confirmed" | "open" | "changed";
 export interface PortalShift {
   id: string;
   date: string; // ISO date (YYYY-MM-DD)
-  dayLabel: string; // e.g. "Mon 12 May"
+  dayLabel: string; // e.g. "Thu 11 Jun"
   start: string; // "16:00"
   end: string; // "23:30"
   hours: number;

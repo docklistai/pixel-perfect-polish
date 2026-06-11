@@ -31,7 +31,7 @@ export const priyaPatel: StaffProfile = buildProfile({
     "Next action: discuss rest-day planning with Priya.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "06:00 – 14:00",
     dept: "Kitchen",
     role: "Head Chef",
@@ -39,21 +39,21 @@ export const priyaPatel: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "06:00 – 14:00",
       dept: "Kitchen",
       role: "Head Chef",
       status: "Confirmed",
     },
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "06:00 – 14:00",
       dept: "Kitchen",
       role: "Head Chef",
       status: "Confirmed",
     },
     {
-      date: "Wed, 20 May 2026",
+      date: "Tue, 16 Jun 2026",
       time: "06:00 – 14:00",
       dept: "Kitchen",
       role: "Head Chef",
@@ -62,7 +62,7 @@ export const priyaPatel: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "06:00 – 14:00",
       dept: "Kitchen",
       role: "Head Chef",
@@ -70,7 +70,7 @@ export const priyaPatel: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "06:00 – 14:00",
       dept: "Kitchen",
       role: "Head Chef",
@@ -78,7 +78,7 @@ export const priyaPatel: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Wed, 13 May 2026",
+      date: "Tue, 9 Jun 2026",
       time: "06:00 – 14:00",
       dept: "Kitchen",
       role: "Head Chef",
@@ -87,8 +87,8 @@ export const priyaPatel: StaffProfile = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "9 May 2026", type: "Document", note: "Allergens certificate uploaded" },
-    { date: "1 May 2026", type: "Availability", note: "Availability updated for May" },
+    { date: "5 Jun 2026", type: "Document", note: "Allergens certificate uploaded" },
+    { date: "28 May 2026", type: "Availability", note: "Availability updated for June" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
@@ -99,7 +99,7 @@ export const priyaPatel: StaffProfile = buildProfile({
   ],
   notes: [
     {
-      date: "6 May 2026",
+      date: "2 Jun 2026",
       author: "Alex Thompson",
       type: "Scheduling",
       text: "Priya happy to lead Sunday brunch service while the new demi chef ramps up.",
@@ -107,7 +107,7 @@ export const priyaPatel: StaffProfile = buildProfile({
     },
   ],
   availability: {
-    updated: "1 May 2026",
+    updated: "28 May 2026",
     conflicts: 0,
     lateChanges: 0,
     usuallyAvailable: "Mon–Sun, mornings",
@@ -126,12 +126,12 @@ export const priyaPatel: StaffProfile = buildProfile({
     overtimeTrend: "+6h this month",
   },
   timeStats: { hoursThisWeek: 48, avgWeeklyHours: 42, hoursThisMonth: 168, overtimeThisMonth: 6 },
-  portalAccess: { status: "Active", lastLogin: "14 May 2026, 06:10" },
+  portalAccess: { status: "Active", lastLogin: "10 Jun 2026, 06:10" },
   breakSummary: { averageBreak: "30 min", missedBreaks: 2, complianceStatus: "Review breaks" },
   weeklyHours: [8, 8, 8, 0, 8, 8, 8],
   timeEntries: [
     {
-      date: "Wed, 13 May",
+      date: "Tue, 9 Jun",
       shift: "Morning",
       role: "Head Chef",
       location: "Main Kitchen",
@@ -141,7 +141,7 @@ export const priyaPatel: StaffProfile = buildProfile({
       total: "7h 40m",
     },
     {
-      date: "Tue, 12 May",
+      date: "Mon, 8 Jun",
       shift: "Morning",
       role: "Head Chef",
       location: "Main Kitchen",
@@ -151,7 +151,7 @@ export const priyaPatel: StaffProfile = buildProfile({
       total: "7h 30m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Morning",
       role: "Head Chef",
       location: "Main Kitchen",
@@ -202,7 +202,7 @@ export const noahWilliams: StaffProfile = buildProfile({
     "Next action: confirm Right to Work document and book probation review.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "08:00 – 16:00",
     dept: "Kitchen",
     role: "Demi Chef",
@@ -210,14 +210,14 @@ export const noahWilliams: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Kitchen",
       role: "Demi Chef",
       status: "Confirmed",
     },
     {
-      date: "Wed, 20 May 2026",
+      date: "Tue, 16 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Kitchen",
       role: "Demi Chef",
@@ -226,7 +226,7 @@ export const noahWilliams: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Kitchen",
       role: "Demi Chef",
@@ -234,7 +234,7 @@ export const noahWilliams: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Wed, 13 May 2026",
+      date: "Tue, 9 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Kitchen",
       role: "Demi Chef",
@@ -267,7 +267,7 @@ export const noahWilliams: StaffProfile = buildProfile({
   weeklyHours: [8, 0, 8, 0, 0, 0, 0],
   timeEntries: [
     {
-      date: "Wed, 13 May",
+      date: "Tue, 9 Jun",
       shift: "Morning",
       role: "Demi Chef",
       location: "Main Kitchen",
@@ -277,7 +277,7 @@ export const noahWilliams: StaffProfile = buildProfile({
       total: "7h 25m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Morning",
       role: "Demi Chef",
       location: "Main Kitchen",

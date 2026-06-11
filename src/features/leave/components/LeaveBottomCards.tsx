@@ -13,18 +13,18 @@ function initials(name: string): string {
 const outThisWeek = [
   {
     name: "Isabella Martin",
-    dates: "12 – 16 May",
+    dates: "8 – 12 Jun",
     type: "Annual",
     tone: "av-c1",
     badge: "purple" as const,
   },
-  { name: "Priya Patel", dates: "14 May only", type: "Sick", tone: "av-c4", badge: "red" as const },
+  { name: "Priya Patel", dates: "11 Jun only", type: "Sick", tone: "av-c4", badge: "red" as const },
 ];
 
 const publicHolidays = [
-  { d: "26 May", name: "Spring bank holiday", flag: true },
-  { d: "25 Aug", name: "Summer bank holiday" },
+  { d: "31 Aug", name: "Summer bank holiday", flag: true },
   { d: "25 Dec", name: "Christmas Day" },
+  { d: "28 Dec", name: "Boxing Day (substitute)" },
 ];
 
 const balances: { name: string; tone: string; used: number; total: number }[] = [

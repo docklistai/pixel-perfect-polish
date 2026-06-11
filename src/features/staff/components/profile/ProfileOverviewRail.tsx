@@ -143,7 +143,7 @@ export function LeaveAbsenceCard({ profile }: { profile: StaffProfile }) {
             className="text-xs font-semibold leading-snug"
             style={{ color: "var(--accent-purple, #8b5cf6)" }}
           >
-            Next leave · 31 May – 2 Jun
+            Next leave · 21 – 23 Jun
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5">
             Annual leave · approved · medium coverage impact

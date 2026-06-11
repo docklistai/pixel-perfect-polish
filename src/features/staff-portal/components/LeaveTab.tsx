@@ -135,7 +135,7 @@ export function LeaveTab() {
           >
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
-          <div className="text-xs text-foreground font-medium">18 – 24 May 2026</div>
+          <div className="text-xs text-foreground font-medium">8 – 14 Jun 2026</div>
           <button type="button" aria-label="Next week" className="p-1 rounded-md hover:bg-muted/60">
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>

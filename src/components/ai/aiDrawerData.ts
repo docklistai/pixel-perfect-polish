@@ -41,17 +41,17 @@ export type Phase = "idle" | "running" | "answered";
 
 export const QUICK_PROMPTS: { icon: LucideIcon; label: string }[] = [
   { icon: AlertTriangle, label: "Anything I should review before publishing this week's rota?" },
-  { icon: Plane, label: "Summarise leave impact for week of 19 May" },
+  { icon: Plane, label: "Summarise leave impact for week of 15 Jun" },
   { icon: PoundSterling, label: "Why is labour up 6% vs last week?" },
   { icon: Users, label: "Who's been picking up the most extra shifts this month?" },
   { icon: Megaphone, label: "Draft an announcement about Monday's deep clean" },
 ];
 
 export const HISTORY = [
-  { when: "Today, 13:40", q: "Rota review for week 12–18 May" },
+  { when: "Today, 13:40", q: "Rota review for week 8–14 Jun" },
   { when: "Today, 09:12", q: "Draft a polite reminder about uniform standards" },
-  { when: "Yesterday", q: "Leave impact summary — 31 May" },
-  { when: "9 May", q: "Coverage gaps in Housekeeping" },
+  { when: "Yesterday", q: "Leave impact summary — 21 Jun" },
+  { when: "30 May", q: "Coverage gaps in Housekeeping" },
 ];
 
 /** Resolves a prompt to a simulated answer — exact key first, then intent patterns. */
@@ -86,14 +86,14 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
     summary: "Coverage looks solid (98%), but I'd resolve these before you send it to staff.",
     bullets: [
       {
-        title: "Conflict — Liam, Wed 14 May",
+        title: "Conflict — Liam, Wed 10 Jun",
         body: "Liam is on Bar 16:00 – 00:00 but also on the Events list. One needs to drop.",
         tone: "red",
         icon: AlertTriangle,
       },
       {
         title: "Priya's leave clashes with Sat cover",
-        body: "Approving 31 May–2 Jun leaves Housekeeping at 50% on Sunday.",
+        body: "Approving 21–23 Jun leaves Housekeeping at 50% on Sunday.",
         tone: "purple",
         icon: Plane,
       },
@@ -109,8 +109,8 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
       { label: "Show leave", icon: Plane },
     ],
   },
-  "Summarise leave impact for week of 19 May": {
-    title: "Week of 19 May — leave impact",
+  "Summarise leave impact for week of 15 Jun": {
+    title: "Week of 15 Jun — leave impact",
     summary:
       "Four staff are off across the week. Coverage stays above 90% except Sunday in Housekeeping.",
     bullets: [
@@ -239,13 +239,13 @@ export const ANSWERS: Record<string, SimulatedAnswer> = {
     bullets: [
       {
         title: "Subject",
-        body: "Deep clean on Monday 19 May — what to expect",
+        body: "Deep clean on Monday 15 Jun — what to expect",
         tone: "blue",
         icon: FileText,
       },
       {
         title: "Body",
-        body: "Hi everyone — we're running our quarterly deep clean on Monday 19 May, 06:00 – 10:00. Bar and Kitchen will be closed during this window; please use the staff entrance only. Daniel will hand over to housekeeping at 10:00. Thanks for your flexibility — bring trainers, no chef whites until 11:00.",
+        body: "Hi everyone — we're running our quarterly deep clean on Monday 15 Jun, 06:00 – 10:00. Bar and Kitchen will be closed during this window; please use the staff entrance only. Daniel will hand over to housekeeping at 10:00. Thanks for your flexibility — bring trainers, no chef whites until 11:00.",
         tone: "blue",
         icon: FileText,
       },

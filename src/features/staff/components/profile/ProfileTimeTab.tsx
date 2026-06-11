@@ -13,16 +13,16 @@ const MAX_HOURS = 10;
 
 function buildDemoTimesheets(profile: StaffProfile) {
   const days = [
-    "Sun 11 May",
-    "Sat 10 May",
-    "Fri 9 May",
-    "Thu 8 May",
-    "Wed 7 May",
-    "Tue 6 May",
-    "Mon 5 May",
-    "Sun 4 May",
-    "Sat 3 May",
-    "Fri 2 May",
+    "Sun 7 Jun",
+    "Sat 6 Jun",
+    "Fri 5 Jun",
+    "Thu 4 Jun",
+    "Wed 3 Jun",
+    "Tue 2 Jun",
+    "Mon 1 Jun",
+    "Sun 31 May",
+    "Sat 30 May",
+    "Fri 29 May",
   ];
   const seed = profile.id.charCodeAt(0) || 1;
   return days.map((d, i) => {
@@ -119,7 +119,7 @@ export function ProfileTimeTab({ profile }: Props) {
           <div className="text-[11px] text-muted-foreground mt-1.5">Last 30 days</div>
         </ProfileCard>
 
-        <ProfileCard title="Pay period · May 2026">
+        <ProfileCard title="Pay period · Jun 2026">
           <div className="grid grid-cols-3 gap-3 mb-4">
             {[
               { label: "Approved hours", value: `${approvedHours}h` },

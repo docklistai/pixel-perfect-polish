@@ -1,6 +1,6 @@
 import type { LeaveRequest, LeaveCalEntry } from "../types";
 
-// Calendar covers Mon 18 May – Sun 31 May 2026 (two full weeks)
+// Calendar covers Mon 8 Jun – Sun 21 Jun 2026 (two full weeks)
 // Index 0 = Mon 18, Index 13 = Sun 31
 export const CAL_DAYS = ["M", "T", "W", "T", "F", "S", "S", "M", "T", "W", "T", "F", "S", "S"];
 export const CAL_DATES = [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
@@ -11,7 +11,7 @@ export const requests: LeaveRequest[] = [
     n: "Sophie Carter",
     role: "Manager",
     dept: "Front of House",
-    date: "18 – 20 May 2025",
+    date: "8 – 10 Jun 2026",
     days: 3,
     type: "Annual leave",
     impact: "Low",
@@ -21,7 +21,7 @@ export const requests: LeaveRequest[] = [
     reason: "Friend's wedding in Manchester.",
     img: 5,
     balance: "11 / 28 days",
-    submitted: "12 May 2025, 09:14 (Europe/London)",
+    submitted: "2 Jun 2026, 09:14 (Europe/London)",
     coverNote: "Front of House is covered by Daniel and James for these dates.",
   },
   {
@@ -29,7 +29,7 @@ export const requests: LeaveRequest[] = [
     n: "Daniel Mitchell",
     role: "Senior Chef",
     dept: "Kitchen",
-    date: "26 – 27 May 2025",
+    date: "16 – 17 Jun 2026",
     days: 2,
     type: "Annual leave",
     impact: "Medium",
@@ -39,15 +39,15 @@ export const requests: LeaveRequest[] = [
     reason: "Long weekend with family.",
     img: 12,
     balance: "11 / 28 days",
-    submitted: "14 May 2025, 11:30 (Europe/London)",
-    coverNote: "Kitchen may need additional cover on Tue 26 May.",
+    submitted: "4 Jun 2026, 11:30 (Europe/London)",
+    coverNote: "Kitchen may need additional cover on Tue 16 Jun.",
   },
   {
     id: "l3",
     n: "Priya Patel",
     role: "Housekeeping Attendant",
     dept: "Housekeeping",
-    date: "31 May – 02 Jun 2025",
+    date: "21 – 23 Jun 2026",
     days: 3,
     type: "Annual leave",
     impact: "High",
@@ -57,7 +57,7 @@ export const requests: LeaveRequest[] = [
     reason: "Pre-booked holiday — confirmed flights.",
     img: 47,
     balance: "11 / 28 days",
-    submitted: "15 May 2025, 14:05 (Europe/London)",
+    submitted: "5 Jun 2026, 14:05 (Europe/London)",
     coverNote: "Kitchen is short on Sat 30 and Sun 31. Cover needed before approving.",
   },
   {
@@ -65,7 +65,7 @@ export const requests: LeaveRequest[] = [
     n: "Liam O'Connor",
     role: "Bartender",
     dept: "Bar",
-    date: "5 – 11 May 2025",
+    date: "15 – 21 Jun 2026",
     days: 7,
     type: "Annual leave",
     impact: "Medium",
@@ -75,7 +75,7 @@ export const requests: LeaveRequest[] = [
     reason: "Trip to visit family.",
     img: 13,
     balance: "11 / 28 days",
-    submitted: "16 May 2025, 08:00 (Europe/London)",
+    submitted: "6 Jun 2026, 08:00 (Europe/London)",
     coverNote: "Bar will need cover across the bank holiday weekend.",
   },
 ];

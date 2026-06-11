@@ -31,8 +31,8 @@ export const mockProfile: PortalProfile = {
 
 export const mockNextShift: PortalShift = {
   id: "sh-001",
-  date: "2026-05-11",
-  dayLabel: "Today · Fri 10 May",
+  date: "2026-06-11",
+  dayLabel: "Today · Thu 11 Jun",
   start: "08:30",
   end: "16:30",
   hours: 8,
@@ -62,8 +62,8 @@ export const mockWeekShifts: PortalShift[] = [
   mockNextShift,
   {
     id: "sh-002",
-    date: "2026-05-11",
-    dayLabel: "Sat 11 May",
+    date: "2026-06-12",
+    dayLabel: "Fri 12 Jun",
     start: "17:00",
     end: "22:00",
     hours: 5,
@@ -75,8 +75,8 @@ export const mockWeekShifts: PortalShift[] = [
   },
   {
     id: "sh-003",
-    date: "2026-05-12",
-    dayLabel: "Sun 12 May",
+    date: "2026-06-13",
+    dayLabel: "Sat 13 Jun",
     start: "11:00",
     end: "16:00",
     hours: 5,
@@ -87,8 +87,8 @@ export const mockWeekShifts: PortalShift[] = [
   },
   {
     id: "sh-004",
-    date: "2026-05-13",
-    dayLabel: "Mon 13 May",
+    date: "2026-06-14",
+    dayLabel: "Sun 14 Jun",
     start: "12:00",
     end: "20:00",
     hours: 8,
@@ -99,8 +99,8 @@ export const mockWeekShifts: PortalShift[] = [
   },
   {
     id: "sh-005",
-    date: "2026-05-14",
-    dayLabel: "Tue 14 May",
+    date: "2026-06-15",
+    dayLabel: "Mon 15 Jun",
     start: "18:00",
     end: "22:00",
     hours: 4,
@@ -114,8 +114,8 @@ export const mockWeekShifts: PortalShift[] = [
 export const mockOpenShifts: PortalShift[] = [
   {
     id: "open-1",
-    date: "2026-05-11",
-    dayLabel: "Sat 11 May",
+    date: "2026-06-13",
+    dayLabel: "Sat 13 Jun",
     start: "17:00",
     end: "22:00",
     hours: 5,
@@ -126,8 +126,8 @@ export const mockOpenShifts: PortalShift[] = [
   },
   {
     id: "open-2",
-    date: "2026-05-12",
-    dayLabel: "Sun 12 May",
+    date: "2026-06-14",
+    dayLabel: "Sun 14 Jun",
     start: "11:00",
     end: "16:00",
     hours: 5,
@@ -141,8 +141,8 @@ export const mockOpenShifts: PortalShift[] = [
 export const mockPastShifts: PortalShift[] = [
   {
     id: "past-1",
-    date: "2026-05-04",
-    dayLabel: "Sat 4 May",
+    date: "2026-06-06",
+    dayLabel: "Sat 6 Jun",
     start: "12:00",
     end: "20:00",
     hours: 8,
@@ -153,8 +153,8 @@ export const mockPastShifts: PortalShift[] = [
   },
   {
     id: "past-2",
-    date: "2026-05-02",
-    dayLabel: "Thu 2 May",
+    date: "2026-06-04",
+    dayLabel: "Thu 4 Jun",
     start: "17:00",
     end: "23:00",
     hours: 6,
@@ -174,7 +174,7 @@ export const mockWeeklySummary: WeeklySummary = {
 export const mockClockEntries: ClockEntry[] = [
   {
     id: "ce-001",
-    dayLabel: "Sat 9 May",
+    dayLabel: "Sat 6 Jun",
     clockIn: "11:58",
     clockOut: "23:34",
     breakMinutes: 60,
@@ -182,7 +182,7 @@ export const mockClockEntries: ClockEntry[] = [
   },
   {
     id: "ce-002",
-    dayLabel: "Fri 8 May",
+    dayLabel: "Fri 5 Jun",
     clockIn: "17:02",
     clockOut: "00:18",
     breakMinutes: 30,
@@ -190,7 +190,7 @@ export const mockClockEntries: ClockEntry[] = [
   },
   {
     id: "ce-003",
-    dayLabel: "Wed 6 May",
+    dayLabel: "Wed 3 Jun",
     clockIn: "16:55",
     clockOut: null,
     breakMinutes: 0,
@@ -203,26 +203,26 @@ export const mockRequests: PortalRequest[] = [
   {
     id: "rq-001",
     kind: "time-off",
-    title: "Time off · 22–24 May",
+    title: "Time off · 19–21 Jun",
     detail: "3 days, family wedding.",
-    submitted: "Submitted 2 May",
+    submitted: "Submitted 9 Jun",
     status: "pending",
   },
   {
     id: "rq-002",
     kind: "availability",
     title: "Availability · No Mondays",
-    detail: "Cannot work Monday evenings from June.",
-    submitted: "Submitted 28 Apr",
+    detail: "Cannot work Monday evenings from July.",
+    submitted: "Submitted 26 May",
     status: "approved",
     managerResponse: "Approved. Please check the rota when it is republished.",
   },
   {
     id: "rq-003",
     kind: "shift-question",
-    title: "Shift question · 15 May",
+    title: "Shift question · 5 Jun",
     detail: "Asked to confirm garden bar cover.",
-    submitted: "Submitted 1 May",
+    submitted: "Submitted 8 Jun",
     status: "declined",
     managerResponse: "Thanks. Please check the published rota and follow up if needed.",
   },
@@ -250,8 +250,8 @@ export const mockNotices: PortalNotice[] = [
   },
   {
     id: "no-003",
-    title: "Bank holiday rota published",
-    body: "Late May bank holiday rota is live. Please check your shifts.",
+    title: "Next week's rota published",
+    body: "The rota for week commencing 15 Jun is live. Please check your shifts.",
     postedBy: "Sophie Martin",
     postedAt: "Posted 3 days ago",
     acknowledged: true,
@@ -267,20 +267,20 @@ export const mockLeaveBalances: LeaveBalance[] = [
 export const mockApprovedLeave: ApprovedLeave[] = [
   {
     id: "al-1",
-    rangeLabel: "Mon 27 May – Fri 31 May",
+    rangeLabel: "Mon 22 Jun – Fri 26 Jun",
     type: "Annual leave",
     days: 5,
   },
 ];
 
 export const mockAvailability: AvailabilityDay[] = [
-  { shortLabel: "Mon", date: "13", status: "available" },
-  { shortLabel: "Tue", date: "14", status: "available" },
-  { shortLabel: "Wed", date: "15", status: "limited" },
-  { shortLabel: "Thu", date: "16", status: "available" },
-  { shortLabel: "Fri", date: "17", status: "off" },
-  { shortLabel: "Sat", date: "18", status: "available" },
-  { shortLabel: "Sun", date: "19", status: "available" },
+  { shortLabel: "Mon", date: "15", status: "available" },
+  { shortLabel: "Tue", date: "16", status: "available" },
+  { shortLabel: "Wed", date: "17", status: "limited" },
+  { shortLabel: "Thu", date: "18", status: "available" },
+  { shortLabel: "Fri", date: "19", status: "off" },
+  { shortLabel: "Sat", date: "20", status: "available" },
+  { shortLabel: "Sun", date: "21", status: "available" },
 ];
 
 export const mockNotifications: PortalNotification[] = [
@@ -288,7 +288,7 @@ export const mockNotifications: PortalNotification[] = [
     id: "nt-1",
     kind: "shift-changed",
     title: "Your shift has been changed",
-    body: "Your Saturday 11 May shift is now 17:00 – 22:00 at The Harbor View.",
+    body: "Your Friday 12 Jun shift is now 17:00 – 22:00 at The Harbor View.",
     postedAt: "Today, 08:42",
     badge: { tone: "warning", label: "Changed" },
     unread: true,
@@ -298,7 +298,7 @@ export const mockNotifications: PortalNotification[] = [
     id: "nt-2",
     kind: "leave-approved",
     title: "Leave approved",
-    body: "Your annual leave request for 27 – 31 May has been approved.",
+    body: "Your annual leave request for 22 – 26 Jun has been approved.",
     postedAt: "Today, 07:15",
     badge: { tone: "success", label: "Approved" },
     unread: true,
@@ -342,7 +342,7 @@ export const mockDocuments: PortalDocument[] = [
     id: "doc-3",
     title: "Food Safety Certificate",
     category: "Certificates",
-    meta: "PDF · 512 KB · Expires 10 May 2025",
+    meta: "PDF · 512 KB · Expires 10 May 2027",
     status: "Valid",
   },
   {

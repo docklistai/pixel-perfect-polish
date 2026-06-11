@@ -1,6 +1,6 @@
 import type { TimesheetRow, MissedClockIn, TimeQuery } from "../types";
 
-// Week of Mon 18 – Sun 24 May 2026
+// Week of Mon 8 – Sun 14 Jun 2026
 export const rows: TimesheetRow[] = [
   {
     id: "sophie-carter",
@@ -155,7 +155,7 @@ export const timeQueries: TimeQuery[] = [
   {
     id: "liam-oconnor",
     n: "Liam O'Connor",
-    t: "Overtime — Mon 18 May 2026",
+    t: "Overtime — Mon 8 Jun 2026",
     st: "Open",
     stTone: "danger",
     img: 13,
@@ -163,7 +163,7 @@ export const timeQueries: TimeQuery[] = [
   {
     id: "amelia-stone",
     n: "Amelia Stone",
-    t: "Missed break — Tue 19 May 2026",
+    t: "Missed break — Tue 9 Jun 2026",
     st: "Under review",
     stTone: "info",
     img: 23,

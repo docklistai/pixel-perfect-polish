@@ -22,14 +22,14 @@ const ellaTurner = buildProfile({
   employmentType: "Part-time permanent",
   emergencyContact: "Mia Turner — +44 7700 567 890",
   skills: ["Guest Welcome", "Table Seating", "Service Recovery", "Reservation Desk"],
-  flags: ["Weekend cover requested for late May"],
+  flags: ["Weekend cover requested for late June"],
   managerSnapshot: [
     "Strong front-of-house presence on busy nights.",
     "Good fit for receptions and private dining arrivals.",
     "Watch: two late Friday covers back to back.",
   ],
   nextShift: {
-    date: "Tue, 19 May 2026",
+    date: "Mon, 15 Jun 2026",
     time: "10:00 – 18:00",
     dept: "Front of House",
     role: "Host",
@@ -37,21 +37,21 @@ const ellaTurner = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "10:00 – 18:00",
       dept: "Front of House",
       role: "Host",
       status: "Confirmed",
     },
     {
-      date: "Thu, 21 May 2026",
+      date: "Wed, 17 Jun 2026",
       time: "14:00 – 22:00",
       dept: "Front of House",
       role: "Host",
       status: "Confirmed",
     },
     {
-      date: "Sat, 23 May 2026",
+      date: "Fri, 19 Jun 2026",
       time: "12:00 – 20:00",
       dept: "Front of House",
       role: "Host",
@@ -60,7 +60,7 @@ const ellaTurner = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "10:00 – 18:00",
       dept: "Front of House",
       role: "Host",
@@ -68,7 +68,7 @@ const ellaTurner = buildProfile({
       status: "Completed",
     },
     {
-      date: "Thu, 14 May 2026",
+      date: "Wed, 10 Jun 2026",
       time: "14:00 – 22:00",
       dept: "Front of House",
       role: "Host",
@@ -77,25 +77,25 @@ const ellaTurner = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "11 May 2026", type: "Availability", note: "Updated weekend cover preferences" },
-    { date: "8 May 2026", type: "Document", note: "Food hygiene certificate uploaded" },
+    { date: "7 Jun 2026", type: "Availability", note: "Updated weekend cover preferences" },
+    { date: "4 Jun 2026", type: "Document", note: "Food hygiene certificate uploaded" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
     { name: "Food Hygiene Level 2", type: "Certificate", expiry: "Aug 2026", status: "expiring" },
     { name: "Contract", type: "HR", status: "valid" },
-    { name: "Emergency Contact", type: "HR", expiry: "Updated May 2026", status: "valid" },
+    { name: "Emergency Contact", type: "HR", expiry: "Updated Jun 2026", status: "valid" },
   ],
   notes: [
     {
-      date: "13 May 2026",
+      date: "9 Jun 2026",
       author: "Alex Thompson",
       type: "Availability",
       text: "Happy to cover busy arrivals and weekend reception support.",
       visibleToStaff: false,
     },
     {
-      date: "3 May 2026",
+      date: "30 May 2026",
       author: "Alex Thompson",
       type: "Handover",
       text: "Keep the lobby handover short and clear when closing.",
@@ -103,7 +103,7 @@ const ellaTurner = buildProfile({
     },
   ],
   availability: {
-    updated: "12 May 2026",
+    updated: "8 Jun 2026",
     conflicts: 0,
     lateChanges: 0,
     usuallyAvailable: "Tue–Sat, mid and evening",
@@ -122,12 +122,12 @@ const ellaTurner = buildProfile({
     overtimeTrend: "0h",
   },
   timeStats: { hoursThisWeek: 24, avgWeeklyHours: 23, hoursThisMonth: 96, overtimeThisMonth: 0 },
-  portalAccess: { status: "Active", lastLogin: "15 May 2026, 09:12" },
+  portalAccess: { status: "Active", lastLogin: "11 Jun 2026, 09:12" },
   breakSummary: { averageBreak: "30 min", missedBreaks: 0, complianceStatus: "Compliant" },
   weeklyHours: [0, 6, 6, 0, 6, 6, 0],
   timeEntries: [
     {
-      date: "Thu, 14 May",
+      date: "Wed, 10 Jun",
       shift: "Evening",
       role: "Host",
       location: "Lobby",
@@ -178,14 +178,14 @@ const graceWard = buildProfile({
   employmentType: "Part-time permanent",
   emergencyContact: "Nina Ward — +44 7700 678 901",
   skills: ["Room Turndown", "Laundry", "Stock Rotation"],
-  flags: ["On leave until 27 May", "Emergency cover set"],
+  flags: ["On leave until 23 Jun", "Emergency cover set"],
   managerSnapshot: [
     "Leave approved for the current rota cycle.",
     "Handed over key cupboards and linen stock.",
     "Watch: return shift needs reconfirming.",
   ],
   nextShift: {
-    date: "Mon, 26 May 2026",
+    date: "Mon, 22 Jun 2026",
     time: "07:00 – 15:00",
     dept: "Housekeeping",
     role: "Housekeeper",
@@ -193,14 +193,14 @@ const graceWard = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 26 May 2026",
+      date: "Mon, 22 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Housekeeping",
       role: "Housekeeper",
       status: "Tentative",
     },
     {
-      date: "Wed, 28 May 2026",
+      date: "Wed, 24 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Housekeeping",
       role: "Housekeeper",
@@ -209,7 +209,7 @@ const graceWard = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Tue, 6 May 2026",
+      date: "Tue, 2 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Housekeeping",
       role: "Housekeeper",
@@ -218,24 +218,24 @@ const graceWard = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "11 May 2026", type: "Leave", note: "Annual leave approved for late May" },
+    { date: "7 Jun 2026", type: "Leave", note: "Annual leave approved for late May" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
     { name: "Contract", type: "HR", status: "valid" },
-    { name: "Emergency Contact", type: "HR", expiry: "Updated May 2026", status: "valid" },
+    { name: "Emergency Contact", type: "HR", expiry: "Updated Jun 2026", status: "valid" },
     { name: "Cleaning Standards", type: "Policy", expiry: "Jun 2026", status: "expiring" },
   ],
   notes: [
     {
-      date: "12 May 2026",
+      date: "8 Jun 2026",
       author: "Alex Thompson",
       type: "Leave",
       text: "Approved return-to-work handover after the May rota window.",
       visibleToStaff: false,
     },
     {
-      date: "3 May 2026",
+      date: "30 May 2026",
       author: "Alex Thompson",
       type: "Coverage",
       text: "Emergency cover arranged for weekend housekeeping slots.",
@@ -243,7 +243,7 @@ const graceWard = buildProfile({
     },
   ],
   availability: {
-    updated: "11 May 2026",
+    updated: "7 Jun 2026",
     conflicts: 1,
     lateChanges: 0,
     usuallyAvailable: "Weekdays, early starts",
@@ -262,12 +262,12 @@ const graceWard = buildProfile({
     overtimeTrend: "-1h",
   },
   timeStats: { hoursThisWeek: 0, avgWeeklyHours: 19, hoursThisMonth: 76, overtimeThisMonth: 0 },
-  portalAccess: { status: "Active", lastLogin: "2 May 2026, 18:40" },
+  portalAccess: { status: "Active", lastLogin: "29 May 2026, 18:40" },
   breakSummary: { averageBreak: "35 min", missedBreaks: 0, complianceStatus: "Compliant" },
   weeklyHours: [6, 6, 4, 3, 0, 0, 0],
   timeEntries: [
     {
-      date: "Tue, 6 May",
+      date: "Tue, 2 Jun",
       shift: "Early",
       role: "Housekeeper",
       location: "Rooms",
@@ -279,7 +279,7 @@ const graceWard = buildProfile({
   ],
   upcomingLeave: [
     {
-      range: "17 May – 27 May 2026",
+      range: "13 Jun – 23 Jun 2026",
       type: "Annual leave",
       duration: "10 days",
       status: "Approved",
@@ -330,7 +330,7 @@ const joshCarter = buildProfile({
     "Watch: rota coverage on Sundays.",
   ],
   nextShift: {
-    date: "Wed, 20 May 2026",
+    date: "Tue, 16 Jun 2026",
     time: "11:00 – 19:00",
     dept: "Kitchen",
     role: "Commis Chef",
@@ -338,21 +338,21 @@ const joshCarter = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Wed, 20 May 2026",
+      date: "Tue, 16 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Kitchen",
       role: "Commis Chef",
       status: "Confirmed",
     },
     {
-      date: "Fri, 22 May 2026",
+      date: "Thu, 18 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Kitchen",
       role: "Commis Chef",
       status: "Confirmed",
     },
     {
-      date: "Sun, 24 May 2026",
+      date: "Sat, 20 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Kitchen",
       role: "Commis Chef",
@@ -361,7 +361,7 @@ const joshCarter = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Kitchen",
       role: "Commis Chef",
@@ -369,7 +369,7 @@ const joshCarter = buildProfile({
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "11:00 – 19:00",
       dept: "Kitchen",
       role: "Commis Chef",
@@ -378,8 +378,8 @@ const joshCarter = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "13 May 2026", type: "Training", note: "Allergen refresher booked" },
-    { date: "10 May 2026", type: "Shift", note: "Supported weekend prep service" },
+    { date: "9 Jun 2026", type: "Training", note: "Allergen refresher booked" },
+    { date: "6 Jun 2026", type: "Shift", note: "Supported weekend prep service" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
@@ -389,14 +389,14 @@ const joshCarter = buildProfile({
   ],
   notes: [
     {
-      date: "14 May 2026",
+      date: "10 Jun 2026",
       author: "Alex Thompson",
       type: "Probation",
       text: "Positive progress but needs a clearer Sunday coverage pattern.",
       visibleToStaff: false,
     },
     {
-      date: "6 May 2026",
+      date: "2 Jun 2026",
       author: "Alex Thompson",
       type: "Training",
       text: "Book allergen refresher before the next service window.",
@@ -404,7 +404,7 @@ const joshCarter = buildProfile({
     },
   ],
   availability: {
-    updated: "13 May 2026",
+    updated: "9 Jun 2026",
     conflicts: 0,
     lateChanges: 1,
     usuallyAvailable: "Tue–Sat, day and evening",
@@ -428,7 +428,7 @@ const joshCarter = buildProfile({
   weeklyHours: [0, 8, 8, 8, 8, 4, 0],
   timeEntries: [
     {
-      date: "Tue, 12 May",
+      date: "Mon, 8 Jun",
       shift: "Service",
       role: "Commis Chef",
       location: "Main Kitchen",

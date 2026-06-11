@@ -11,7 +11,7 @@ export function LeaveRiskDrawer({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       title="Coverage risk — Bar"
-      description="Sat 23 May 2026"
+      description="Sat 13 Jun 2026"
       meta={<StatusBadge tone="danger">High risk</StatusBadge>}
       footer={<ActionButton onClick={() => onOpenChange(false)}>Close</ActionButton>}
     >

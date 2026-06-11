@@ -15,26 +15,25 @@ type CalendarCell = { d: number; outside: boolean };
 type LeaveBand = { who: string; start: number; end: number; state: "approved" | "pending" };
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const TODAY = 12;
+const TODAY = 11;
 
-/** May 2025 — 1 May falls on Thursday, so the grid starts on Mon 28 Apr. */
+/** June 2026 — 1 Jun falls on Monday, so the grid starts on the 1st. */
 function buildCells(): CalendarCell[] {
   const cells: CalendarCell[] = [];
-  for (let d = 28; d <= 30; d++) cells.push({ d, outside: true });
-  for (let d = 1; d <= 31; d++) cells.push({ d, outside: false });
-  while (cells.length < 35) cells.push({ d: cells.length - 33, outside: true });
+  for (let d = 1; d <= 30; d++) cells.push({ d, outside: false });
+  while (cells.length < 35) cells.push({ d: cells.length - 29, outside: true });
   return cells;
 }
 
 /** Derives calendar bands from live request state (declined requests drop off). */
 function buildBands(requests: LeaveRequest[]): LeaveBand[] {
   const ranges: Record<string, { start: number; end: number }> = {
-    l1: { start: 18, end: 20 },
-    l2: { start: 26, end: 27 },
-    l3: { start: 31, end: 31 },
-    l4: { start: 5, end: 11 },
+    l1: { start: 8, end: 10 },
+    l2: { start: 16, end: 17 },
+    l3: { start: 21, end: 23 },
+    l4: { start: 15, end: 21 },
   };
-  const bands: LeaveBand[] = [{ who: "Isabella Martin", start: 5, end: 11, state: "approved" }];
+  const bands: LeaveBand[] = [{ who: "Isabella Martin", start: 8, end: 12, state: "approved" }];
   for (const r of requests) {
     const range = ranges[r.id];
     if (!range || r.state === "declined") continue;
@@ -62,7 +61,7 @@ export function LeaveCalendarDrawer({ open, onOpenChange, onNewRequest, requests
       open={open}
       onOpenChange={onOpenChange}
       title="Leave calendar"
-      description="May 2025 · Approved & pending"
+      description="June 2026 · Approved & pending"
       width="xl"
       footer={
         <>

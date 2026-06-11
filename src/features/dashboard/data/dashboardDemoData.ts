@@ -1,4 +1,4 @@
-// Demo period: week of Mon 18 – Sun 24 May 2026 (current), next rota: Mon 25 May 2026
+// Demo period: week of Mon 8 – Sun 14 Jun 2026 (current), next rota: Mon 15 Jun 2026
 import {
   Users,
   Star,
@@ -134,49 +134,49 @@ export const attentionItems: AttentionItem[] = [
   },
   {
     t: "1 leave request — high coverage impact",
-    s: "Priya · 31 May – 2 Jun",
+    s: "Priya · 21 – 23 Jun",
     icon: Plane,
     tone: "purple",
   },
 ];
 
-// Open shifts this week (18–24 May 2026) — days of week confirmed
+// Open shifts this week (8–14 Jun 2026) — days of week confirmed
 export const openShiftItems: OpenShiftItem[] = [
-  { label: "Bar — Evening", date: "Thu 21 May · 17:00–23:00", filled: "1 of 2 filled" },
-  { label: "Kitchen — Lunch", date: "Fri 22 May · 12:00–20:00", filled: "2 of 3 filled" },
-  { label: "Front of House", date: "Sat 23 May · 09:00–17:00", filled: "3 of 4 filled" },
+  { label: "Bar — Evening", date: "Thu 11 Jun · 17:00–23:00", filled: "1 of 2 filled" },
+  { label: "Kitchen — Lunch", date: "Fri 12 Jun · 12:00–20:00", filled: "2 of 3 filled" },
+  { label: "Front of House", date: "Sat 13 Jun · 09:00–17:00", filled: "3 of 4 filled" },
 ];
 
 // Pending leave — future dates, consistent with leave feature demo data
 export const leaveItems: LeaveItem[] = [
   {
     n: "Sophie Carter",
-    d: "27 – 29 May 2026  (3 days)",
+    d: "8 – 10 Jun 2026  (3 days)",
     img: 5,
     impact: "Low",
     impactTone: "success",
   },
   {
     n: "Daniel Mitchell",
-    d: "26 – 27 May 2026  (2 days)",
+    d: "16 – 17 Jun 2026  (2 days)",
     img: 12,
     impact: "Moderate",
     impactTone: "warning",
   },
   {
     n: "Priya Patel",
-    d: "31 May – 2 Jun 2026  (3 days)",
+    d: "21 – 23 Jun 2026  (3 days)",
     img: 47,
     impact: "High",
     impactTone: "danger",
   },
 ];
 
-// Timesheets — previous week Mon 11 – Sun 17 May 2026
+// Timesheets — previous week Mon 1 – Sun 7 Jun 2026
 export const timesheetItems: TimesheetItem[] = [
-  { n: "Emma Johnson", d: "11 – 17 May 2026", late: "2 days late", img: 9, lateTone: "danger" },
-  { n: "Liam O'Connor", d: "11 – 17 May 2026", late: "1 day late", img: 13, lateTone: "warning" },
-  { n: "Olivia Bennett", d: "11 – 17 May 2026", late: "1 day late", img: 16, lateTone: "warning" },
+  { n: "Emma Johnson", d: "1 – 7 Jun 2026", late: "2 days late", img: 9, lateTone: "danger" },
+  { n: "Liam O'Connor", d: "1 – 7 Jun 2026", late: "1 day late", img: 13, lateTone: "warning" },
+  { n: "Olivia Bennett", d: "1 – 7 Jun 2026", late: "1 day late", img: 16, lateTone: "warning" },
 ];
 
 export const staffDeptItems: StaffDeptItem[] = [
@@ -186,7 +186,7 @@ export const staffDeptItems: StaffDeptItem[] = [
   { dept: "Bar", count: 3, tone: "danger" },
 ];
 
-// Announcements — relative dates anchored to Wed 20 May 2026
+// Announcements — relative dates anchored to Thu 11 Jun 2026
 export const announcementItems: AnnouncementItem[] = [
   {
     t: "Summer Menu Launch",

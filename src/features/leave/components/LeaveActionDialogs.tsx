@@ -62,7 +62,7 @@ export function LeaveActionDialogs({
       n: selectedStaff.name,
       role: selectedStaff.role,
       dept: selectedStaff.dept,
-      date: "22 – 24 May 2025",
+      date: "12 – 14 Jun 2026",
       days: safeDays,
       type: "Annual leave",
       impact: "Low",
@@ -239,14 +239,14 @@ export function LeaveActionDialogs({
             <label htmlFor="leave-from">From</label>
             <div className="input-group">
               <CalendarDays className="ico h-3.5 w-3.5" aria-hidden />
-              <input id="leave-from" className="mono" defaultValue="22 May 2025" />
+              <input id="leave-from" className="mono" defaultValue="12 Jun 2026" />
             </div>
           </div>
           <div className="field">
             <label htmlFor="leave-to">To</label>
             <div className="input-group">
               <CalendarDays className="ico h-3.5 w-3.5" aria-hidden />
-              <input id="leave-to" className="mono" defaultValue="24 May 2025" />
+              <input id="leave-to" className="mono" defaultValue="14 Jun 2026" />
             </div>
           </div>
           <div className="field sm:col-span-2">

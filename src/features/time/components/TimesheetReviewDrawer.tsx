@@ -60,7 +60,7 @@ export function TimesheetReviewDrawer({
     <DrawerShell
       open={!!row}
       onOpenChange={(o) => !o && onClose()}
-      title={`${row.n} — Week of 18 May 2026`}
+      title={`${row.n} — Week of 8 Jun 2026`}
       description={`${row.role} · Harbour View Hotel`}
       meta={
         <span className="inline-flex items-center gap-1.5">

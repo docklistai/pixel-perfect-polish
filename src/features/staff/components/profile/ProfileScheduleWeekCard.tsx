@@ -22,32 +22,24 @@ type WeekShift = {
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 const WEEK_LABELS_MAP: Record<number, string[]> = {
-  [-1]: [
-    "Mon 5 May",
-    "Tue 6 May",
-    "Wed 7 May",
-    "Thu 8 May",
-    "Fri 9 May",
-    "Sat 10 May",
-    "Sun 11 May",
-  ],
+  [-1]: ["Mon 1 Jun", "Tue 2 Jun", "Wed 3 Jun", "Thu 4 Jun", "Fri 5 Jun", "Sat 6 Jun", "Sun 7 Jun"],
   [0]: [
-    "Mon 12 May",
-    "Tue 13 May",
-    "Wed 14 May",
-    "Thu 15 May",
-    "Fri 16 May",
-    "Sat 17 May",
-    "Sun 18 May",
+    "Mon 8 Jun",
+    "Tue 9 Jun",
+    "Wed 10 Jun",
+    "Thu 11 Jun",
+    "Fri 12 Jun",
+    "Sat 13 Jun",
+    "Sun 14 Jun",
   ],
   [1]: [
-    "Mon 19 May",
-    "Tue 20 May",
-    "Wed 21 May",
-    "Thu 22 May",
-    "Fri 23 May",
-    "Sat 24 May",
-    "Sun 25 May",
+    "Mon 15 Jun",
+    "Tue 16 Jun",
+    "Wed 17 Jun",
+    "Thu 18 Jun",
+    "Fri 19 Jun",
+    "Sat 20 Jun",
+    "Sun 21 Jun",
   ],
 };
 const BLOCKS = [
@@ -109,10 +101,10 @@ export function ProfileScheduleWeekCard({ profile }: Props) {
   const weekly = profile.weeklyHours ?? [7.5, 8, 7, 0, 8, 6.5, 0];
   const weekTitle =
     weekOffset === 0
-      ? "This week · 12–18 May"
+      ? "This week · 8–14 Jun"
       : weekOffset < 0
-        ? "Last week · 5–11 May"
-        : "Next week · 19–25 May";
+        ? "Last week · 1–7 Jun"
+        : "Next week · 15–21 Jun";
 
   return (
     <div className="space-y-4 min-w-0">

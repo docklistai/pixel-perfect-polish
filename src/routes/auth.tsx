@@ -139,7 +139,8 @@ function StaffAuthForm({ onBack }: { onBack: () => void }) {
           </Tooltip>
         </TooltipProvider>
         <p className="text-center text-xs text-muted-foreground">
-          Staff sign-in opens with the staff app rollout. Ask your manager if you need your rota in the meantime.
+          Staff sign-in opens with the staff app rollout. Ask your manager if you need your rota in
+          the meantime.
         </p>
 
         <Button

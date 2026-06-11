@@ -37,9 +37,9 @@ export const Route = createFileRoute("/time")({
 });
 
 const PERIOD_OPTIONS = [
-  "This week (18 – 24 May)",
-  "Last week (11 – 17 May)",
-  "Pay period (May)",
+  "This week (8 – 14 Jun)",
+  "Last week (1 – 7 Jun)",
+  "Pay period (Jun)",
   "Custom range…",
 ];
 

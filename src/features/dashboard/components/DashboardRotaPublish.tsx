@@ -3,7 +3,7 @@ import { Calendar, Send } from "lucide-react";
 import { Card, StatusBadge } from "@/components/dl";
 import { toast } from "sonner";
 
-// Next rota: week of Mon 25 May 2026. Due by Fri 22 May 12:00 (2 days from Wed 20 May).
+// Next rota: week of Mon 15 Jun 2026. Due by Fri 12 Jun 12:00 (2 days from Wed 10 Jun).
 // Counts consistent with /rota mock data: 1 conflict, 2 open shifts, 98% coverage.
 export function DashboardRotaPublish() {
   return (
@@ -19,13 +19,13 @@ export function DashboardRotaPublish() {
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Week commencing</div>
-            <div className="text-[22px] font-semibold tracking-tight">25 May 2026</div>
+            <div className="text-[22px] font-semibold tracking-tight">15 Jun 2026</div>
           </div>
         </div>
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Due by Fri, 22 May 12:00</span>
-            <span className="font-semibold text-warning">2d remaining</span>
+            <span className="text-muted-foreground">Due by Fri, 12 Jun 12:00</span>
+            <span className="font-semibold text-warning">1d remaining</span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
             <div className="h-full w-2/3 rounded-full bg-warning" />

@@ -66,7 +66,7 @@ export function LeaveRightRail({ onOpenAssistant }: Props = {}) {
         </div>
         <div className="mt-1 text-xs space-y-1">
           <div className="flex justify-between">
-            <span>24 – 26 May 2026</span>
+            <span>14 – 16 Jun 2026</span>
             <span className="text-muted-foreground">Personal</span>
           </div>
           <div className="flex justify-between">
@@ -87,13 +87,13 @@ export function LeaveRightRail({ onOpenAssistant }: Props = {}) {
           {
             l: "!",
             t: "Rota clash",
-            s: "Kitchen has limited coverage on 26 May 2026.",
+            s: "Kitchen has limited coverage on 16 Jun 2026.",
             tone: "warning",
           },
           {
             l: "♥",
             t: "High leave period",
-            s: "18% of team on leave 24 – 31 May 2026.",
+            s: "18% of team on leave 14 – 21 Jun 2026.",
             tone: "purple",
           },
         ].map((a) => (

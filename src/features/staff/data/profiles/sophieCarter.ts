@@ -32,17 +32,17 @@ export const sophieCarter: StaffProfile = {
     "Next action: confirm availability for next week.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Fri, 12 Jun 2026",
     time: "08:00 – 16:00",
     dept: "Front of House",
     role: "Manager",
     location: "Main Floor",
   },
   recentActivity: [
-    { date: "12 May 2026", type: "Absence", note: "Short-notice absence recorded" },
-    { date: "8 May 2026", type: "Document", note: "Food Hygiene certificate uploaded" },
-    { date: "5 May 2026", type: "Leave", note: "Leave request approved (2 days)" },
-    { date: "2 May 2026", type: "Availability", note: "Availability updated for next week" },
+    { date: "8 Jun 2026", type: "Absence", note: "Short-notice absence recorded" },
+    { date: "4 Jun 2026", type: "Document", note: "Food Hygiene certificate uploaded" },
+    { date: "1 Jun 2026", type: "Leave", note: "Leave request approved (2 days)" },
+    { date: "29 May 2026", type: "Availability", note: "Availability updated for next week" },
   ],
   documentsSummary: { total: 6, expiringSoon: 2, missing: 0 },
   documents: [
@@ -54,7 +54,7 @@ export const sophieCarter: StaffProfile = {
     { name: "Contract", type: "HR", status: "valid" },
   ],
   availability: {
-    updated: "2 May 2026",
+    updated: "29 May 2026",
     conflicts: 1,
     lateChanges: 2,
     usuallyAvailable: "Mon–Fri, mornings and afternoons",
@@ -88,7 +88,7 @@ export const sophieCarter: StaffProfile = {
     hoursThisMonth: 120,
     overtimeThisMonth: 1.5,
   },
-  portalAccess: { status: "Active", lastLogin: "12 May 2026, 08:15" },
+  portalAccess: { status: "Active", lastLogin: "8 Jun 2026, 08:15" },
   roleCoverage: [
     { label: "Front of House", value: 95 },
     { label: "Manager cover", value: 88 },
@@ -98,7 +98,7 @@ export const sophieCarter: StaffProfile = {
   breakSummary: { averageBreak: "38 min", missedBreaks: 0, complianceStatus: "Compliant" },
   notes: [
     {
-      date: "10 May 2026",
+      date: "6 Jun 2026",
       author: "Alex Thompson",
       type: "Absence",
       text: "Spoke to Sophie about Monday's absence. Bad cold, all fine now.",
@@ -121,7 +121,7 @@ export const sophieCarter: StaffProfile = {
   ],
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Manager",
@@ -129,7 +129,7 @@ export const sophieCarter: StaffProfile = {
       status: "Confirmed",
     },
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Manager",
@@ -137,7 +137,7 @@ export const sophieCarter: StaffProfile = {
       status: "Confirmed",
     },
     {
-      date: "Wed, 20 May 2026",
+      date: "Tue, 16 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Front of House",
       role: "Manager",
@@ -147,7 +147,7 @@ export const sophieCarter: StaffProfile = {
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Manager",
@@ -155,14 +155,14 @@ export const sophieCarter: StaffProfile = {
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "Sick absence",
       dept: "—",
       role: "—",
       status: "Absent",
     },
     {
-      date: "Wed, 13 May 2026",
+      date: "Tue, 9 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Manager",
@@ -170,7 +170,7 @@ export const sophieCarter: StaffProfile = {
       status: "Completed",
     },
     {
-      date: "Thu, 14 May 2026",
+      date: "Wed, 10 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Manager",
@@ -181,7 +181,7 @@ export const sophieCarter: StaffProfile = {
   weeklyHours: [8, 0, 8, 8, 8, 0, 0],
   timeEntries: [
     {
-      date: "Thu, 14 May",
+      date: "Wed, 10 Jun",
       shift: "Morning",
       role: "Manager",
       location: "Main Floor",
@@ -191,7 +191,7 @@ export const sophieCarter: StaffProfile = {
       total: "7h 25m",
     },
     {
-      date: "Wed, 13 May",
+      date: "Tue, 9 Jun",
       shift: "Morning",
       role: "Manager",
       location: "Main Floor",
@@ -201,7 +201,7 @@ export const sophieCarter: StaffProfile = {
       total: "7h 32m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Morning",
       role: "Manager",
       location: "Main Floor",
@@ -216,7 +216,7 @@ export const sophieCarter: StaffProfile = {
   ],
   absenceHistory: [
     {
-      date: "12 May 2026",
+      date: "8 Jun 2026",
       type: "Sick",
       duration: "1 day",
       reason: "Illness",

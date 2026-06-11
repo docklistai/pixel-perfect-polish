@@ -147,7 +147,7 @@ export function StaffProfileActionDialogs({
             <div>
               <div className="text-sm font-semibold">3 shifts will be unassigned</div>
               <div className="mt-1 text-xs text-muted-foreground">
-                Tue 13, Wed 14, and Thu 15 May. The rota will be marked as draft and require
+                Tue 13, Wed 14, and Thu 11 Jun. The rota will be marked as draft and require
                 re-publishing.
               </div>
             </div>

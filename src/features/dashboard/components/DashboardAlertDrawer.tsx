@@ -38,21 +38,21 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
         list: [
           {
             icon: Calendar,
-            title: "Fri 16 May · 18:00 – 00:00",
+            title: "Sat 6 Jun · 18:00 – 00:00",
             sub: "Bar · open shift",
             value: "2 interested",
             tagTone: "success" as const,
           },
           {
             icon: Calendar,
-            title: "Sat 17 May · 18:00 – 00:00",
+            title: "Sun 7 Jun · 18:00 – 00:00",
             sub: "Bar · open shift",
             value: "1 interested",
             tagTone: "warning" as const,
           },
           {
             icon: Calendar,
-            title: "Sun 18 May · 16:00 – 22:00",
+            title: "Mon 8 Jun · 16:00 – 22:00",
             sub: "Bar · open shift",
             value: "No takers",
             tagTone: "danger" as const,
@@ -80,14 +80,14 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
           {
             isStaff: true,
             title: "Liam O'Connor",
-            sub: "Bar · Week of 5 May",
+            sub: "Bar · Week of 26 May",
             value: "Late in",
             tagTone: "warning" as const,
           },
           {
             isStaff: true,
             title: "James Walker",
-            sub: "FOH · Week of 5 May",
+            sub: "FOH · Week of 26 May",
             value: "Missing in",
             tagTone: "danger" as const,
           },
@@ -97,7 +97,7 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
     },
     {
       title: "1 leave request — high coverage impact",
-      sub: "Priya · 31 May – 2 Jun",
+      sub: "Priya · 21 – 23 Jun",
       tag: "Decision needed",
       tone: "purple" as const,
       icon: Plane,
@@ -109,21 +109,21 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
         list: [
           {
             icon: AlertTriangle,
-            title: "Sat 31 May",
+            title: "Sun 21 Jun",
             sub: "Housekeeping coverage",
             value: "60%",
             tagTone: "warning" as const,
           },
           {
             icon: AlertTriangle,
-            title: "Sun 1 Jun",
+            title: "Mon 1 Jun",
             sub: "Housekeeping coverage",
             value: "50%",
             tagTone: "danger" as const,
           },
           {
             icon: AlertTriangle,
-            title: "Mon 2 Jun",
+            title: "Tue 2 Jun",
             sub: "Housekeeping coverage",
             value: "66%",
             tagTone: "warning" as const,
@@ -132,7 +132,7 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
         ai: {
           title: "Could ask Ava to swap her Sunday off",
           body: "Ava is on holiday on Tuesday — moving her day off there would close the Sunday gap.",
-          prompt: "Help me cover housekeeping if I approve Priya's leave 31 May – 2 Jun",
+          prompt: "Help me cover housekeeping if I approve Priya's leave 21 – 23 Jun",
         },
       },
     },

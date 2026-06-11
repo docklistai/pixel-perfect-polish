@@ -80,7 +80,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         <div className="mt-3 grid grid-cols-7 gap-1.5">
           {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
             const active = i < 5;
-            const day = [12, 13, 14, 15, 16, 17, 18][i];
+            const day = [8, 9, 10, 11, 12, 13, 14][i];
             return (
               <div
                 key={d}
@@ -131,7 +131,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             </div>
             <div className="min-w-0 flex-1">
               <div className="text-sm font-semibold">Food safety refresher due</div>
-              <div className="text-[11px] text-muted-foreground">By 31 May</div>
+              <div className="text-[11px] text-muted-foreground">By 21 Jun</div>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </div>

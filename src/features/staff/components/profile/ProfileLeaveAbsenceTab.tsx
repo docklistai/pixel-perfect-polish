@@ -25,7 +25,7 @@ function buildLeaveRecords(profile: StaffProfile): LeaveRecord[] {
   return [
     {
       type: "Annual",
-      range: upcoming?.range ?? "31 May – 2 Jun 2026",
+      range: upcoming?.range ?? "21 – 23 Jun 2026",
       days: upcoming ? Number.parseInt(upcoming.duration, 10) || 2 : 2,
       status: upcoming?.status?.toLowerCase() === "requested" ? "requested" : "approved",
       approver: upcoming?.status?.toLowerCase() === "requested" ? "Pending" : "Alex Thompson",

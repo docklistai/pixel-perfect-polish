@@ -22,7 +22,7 @@ export const ameliaStone: StaffProfile = buildProfile({
     "Next action: confirm summer holiday cover.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "09:00 – 17:00",
     dept: "Housekeeping",
     role: "Housekeeper",
@@ -30,21 +30,21 @@ export const ameliaStone: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Housekeeping",
       role: "Housekeeper",
       status: "Confirmed",
     },
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Housekeeping",
       role: "Housekeeper",
       status: "Confirmed",
     },
     {
-      date: "Wed, 20 May 2026",
+      date: "Tue, 16 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Housekeeping",
       role: "Housekeeper",
@@ -53,7 +53,7 @@ export const ameliaStone: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Housekeeping",
       role: "Housekeeper",
@@ -61,7 +61,7 @@ export const ameliaStone: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Housekeeping",
       role: "Housekeeper",
@@ -69,7 +69,7 @@ export const ameliaStone: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Wed, 13 May 2026",
+      date: "Tue, 9 Jun 2026",
       time: "09:00 – 17:00",
       dept: "Housekeeping",
       role: "Housekeeper",
@@ -77,7 +77,7 @@ export const ameliaStone: StaffProfile = buildProfile({
       status: "Completed",
     },
   ],
-  recentActivity: [{ date: "1 May 2026", type: "Document", note: "COSHH refresher completed" }],
+  recentActivity: [{ date: "28 May 2026", type: "Document", note: "COSHH refresher completed" }],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
     { name: "Manual Handling", type: "Certificate", expiry: "Mar 2027", status: "valid" },
@@ -85,7 +85,7 @@ export const ameliaStone: StaffProfile = buildProfile({
     { name: "Contract", type: "HR", status: "valid" },
   ],
   availability: {
-    updated: "1 May 2026",
+    updated: "28 May 2026",
     conflicts: 0,
     lateChanges: 0,
     usuallyAvailable: "Mon–Sat, daytime",
@@ -99,11 +99,11 @@ export const ameliaStone: StaffProfile = buildProfile({
     overtimeTrend: "+8h this month",
   },
   timeStats: { hoursThisWeek: 48, avgWeeklyHours: 36, hoursThisMonth: 144, overtimeThisMonth: 8 },
-  portalAccess: { status: "Active", lastLogin: "13 May 2026, 09:00" },
+  portalAccess: { status: "Active", lastLogin: "9 Jun 2026, 09:00" },
   weeklyHours: [8, 8, 8, 8, 0, 8, 8],
   timeEntries: [
     {
-      date: "Wed, 13 May",
+      date: "Tue, 9 Jun",
       shift: "Day",
       role: "Housekeeper",
       location: "Floors 1–3",
@@ -113,7 +113,7 @@ export const ameliaStone: StaffProfile = buildProfile({
       total: "7h 35m",
     },
     {
-      date: "Tue, 12 May",
+      date: "Mon, 8 Jun",
       shift: "Day",
       role: "Housekeeper",
       location: "Floors 1–3",
@@ -123,7 +123,7 @@ export const ameliaStone: StaffProfile = buildProfile({
       total: "7h 35m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Day",
       role: "Housekeeper",
       location: "Floors 1–3",
@@ -171,7 +171,7 @@ export const noahEvans: StaffProfile = buildProfile({
     "Next action: confirm summer availability.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "07:00 – 15:00",
     dept: "Maintenance",
     role: "Porter",
@@ -179,14 +179,14 @@ export const noahEvans: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Maintenance",
       role: "Porter",
       status: "Confirmed",
     },
     {
-      date: "Tue, 19 May 2026",
+      date: "Mon, 15 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Maintenance",
       role: "Porter",
@@ -195,7 +195,7 @@ export const noahEvans: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Maintenance",
       role: "Porter",
@@ -203,7 +203,7 @@ export const noahEvans: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Tue, 12 May 2026",
+      date: "Mon, 8 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Maintenance",
       role: "Porter",
@@ -236,7 +236,7 @@ export const noahEvans: StaffProfile = buildProfile({
   weeklyHours: [8, 8, 0, 0, 0, 0, 0],
   timeEntries: [
     {
-      date: "Tue, 12 May",
+      date: "Mon, 8 Jun",
       shift: "Morning",
       role: "Porter",
       location: "Service Yard",
@@ -246,7 +246,7 @@ export const noahEvans: StaffProfile = buildProfile({
       total: "7h 25m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Morning",
       role: "Porter",
       location: "Service Yard",

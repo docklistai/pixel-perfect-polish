@@ -82,7 +82,7 @@ export function ProfileScheduleSidebar() {
             <div>
               <div className="text-sm font-semibold">1 coverage gap remaining</div>
               <div className="text-xs text-muted-foreground">
-                Fri 16 May · Bar evening, 17:00 – 23:00
+                Fri 12 Jun · Bar evening, 17:00 – 23:00
               </div>
             </div>
           </div>

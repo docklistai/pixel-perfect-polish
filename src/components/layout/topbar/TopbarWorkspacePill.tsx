@@ -56,7 +56,9 @@ export function TopbarWorkspacePill() {
             type="button"
             onClick={() => {
               setWorkspaceOpen(false);
-              toast.info("The Anchor Inn", { description: "Workspace switching unlocks when this venue is set up." });
+              toast.info("The Anchor Inn", {
+                description: "Workspace switching unlocks when this venue is set up.",
+              });
             }}
             className="menu-item"
             style={{ color: "var(--ink-500)" }}
@@ -68,7 +70,9 @@ export function TopbarWorkspacePill() {
             type="button"
             onClick={() => {
               setWorkspaceOpen(false);
-              toast.info("Riverside Brasserie", { description: "Workspace switching unlocks when this venue is set up." });
+              toast.info("Riverside Brasserie", {
+                description: "Workspace switching unlocks when this venue is set up.",
+              });
             }}
             className="menu-item"
             style={{ color: "var(--ink-500)" }}

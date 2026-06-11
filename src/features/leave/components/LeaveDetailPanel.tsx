@@ -21,14 +21,14 @@ function initials(name: string): string {
 }
 
 const coverageRows = [
-  { label: "Sat 31 May", value: 60, tone: "warning" as const },
-  { label: "Sun 01 Jun", value: 50, tone: "danger" as const },
-  { label: "Mon 02 Jun", value: 66, tone: "warning" as const },
+  { label: "Sun 21 Jun", value: 50, tone: "danger" as const },
+  { label: "Mon 22 Jun", value: 60, tone: "warning" as const },
+  { label: "Tue 23 Jun", value: 66, tone: "warning" as const },
 ];
 
 const otherRequests = [
-  { name: "Daniel Mitchell", dates: "26 – 27 May" },
-  { name: "Sophie Carter", dates: "18 – 20 May" },
+  { name: "Daniel Mitchell", dates: "16 – 17 Jun" },
+  { name: "Sophie Carter", dates: "8 – 10 Jun" },
 ];
 
 export function LeaveDetailPanel({ request, onApprove, onDecline, onReopen, onOpenRisk }: Props) {

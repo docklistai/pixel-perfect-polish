@@ -25,7 +25,7 @@ export const liamOconnor: StaffProfile = buildProfile({
     "Next action: book DBS refresh appointment.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "16:00 – 00:00",
     dept: "Bar",
     role: "Bartender",
@@ -33,21 +33,21 @@ export const liamOconnor: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "16:00 – 00:00",
       dept: "Bar",
       role: "Bartender",
       status: "Confirmed",
     },
     {
-      date: "Sat, 23 May 2026",
+      date: "Fri, 19 Jun 2026",
       time: "16:00 – 00:00",
       dept: "Bar",
       role: "Bartender",
       status: "Confirmed",
     },
     {
-      date: "Sun, 24 May 2026",
+      date: "Sat, 20 Jun 2026",
       time: "16:00 – 00:00",
       dept: "Bar",
       role: "Bartender",
@@ -56,7 +56,7 @@ export const liamOconnor: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "16:00 – 00:00",
       dept: "Bar",
       role: "Bartender",
@@ -64,7 +64,7 @@ export const liamOconnor: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Sat, 9 May 2026",
+      date: "Fri, 5 Jun 2026",
       time: "16:00 – 00:00",
       dept: "Bar",
       role: "Bartender",
@@ -72,7 +72,7 @@ export const liamOconnor: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Sun, 10 May 2026",
+      date: "Sat, 6 Jun 2026",
       time: "16:00 – 00:00",
       dept: "Bar",
       role: "Bartender",
@@ -80,7 +80,7 @@ export const liamOconnor: StaffProfile = buildProfile({
       status: "Completed",
     },
   ],
-  recentActivity: [{ date: "5 May 2026", type: "Document", note: "Personal licence verified" }],
+  recentActivity: [{ date: "1 Jun 2026", type: "Document", note: "Personal licence verified" }],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
     { name: "Personal Licence", type: "Certificate", expiry: "Apr 2028", status: "valid" },
@@ -88,7 +88,7 @@ export const liamOconnor: StaffProfile = buildProfile({
     { name: "Contract", type: "HR", status: "valid" },
   ],
   availability: {
-    updated: "1 May 2026",
+    updated: "28 May 2026",
     conflicts: 0,
     lateChanges: 1,
     usuallyAvailable: "Late nights, weekends",
@@ -111,7 +111,7 @@ export const liamOconnor: StaffProfile = buildProfile({
   weeklyHours: [8, 0, 0, 0, 0, 8, 8],
   timeEntries: [
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Evening",
       role: "Bartender",
       location: "Main Bar",
@@ -121,7 +121,7 @@ export const liamOconnor: StaffProfile = buildProfile({
       total: "7h 40m",
     },
     {
-      date: "Sun, 10 May",
+      date: "Sat, 6 Jun",
       shift: "Evening",
       role: "Bartender",
       location: "Main Bar",
@@ -131,7 +131,7 @@ export const liamOconnor: StaffProfile = buildProfile({
       total: "7h 30m",
     },
     {
-      date: "Sat, 9 May",
+      date: "Fri, 5 Jun",
       shift: "Evening",
       role: "Bartender",
       location: "Main Bar",
@@ -181,7 +181,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
     "Next action: cross-train on weekend brunch sittings.",
   ],
   nextShift: {
-    date: "Mon, 18 May 2026",
+    date: "Sun, 14 Jun 2026",
     time: "07:00 – 15:00",
     dept: "Front of House",
     role: "Barista",
@@ -189,21 +189,21 @@ export const oliviaBennett: StaffProfile = buildProfile({
   },
   upcomingShifts: [
     {
-      date: "Mon, 18 May 2026",
+      date: "Sun, 14 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Front of House",
       role: "Barista",
       status: "Confirmed",
     },
     {
-      date: "Wed, 20 May 2026",
+      date: "Tue, 16 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Front of House",
       role: "Barista",
       status: "Confirmed",
     },
     {
-      date: "Sat, 23 May 2026",
+      date: "Fri, 19 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Barista",
@@ -212,7 +212,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
   ],
   recentShifts: [
     {
-      date: "Mon, 11 May 2026",
+      date: "Sun, 7 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Front of House",
       role: "Barista",
@@ -220,7 +220,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Wed, 13 May 2026",
+      date: "Tue, 9 Jun 2026",
       time: "07:00 – 15:00",
       dept: "Front of House",
       role: "Barista",
@@ -228,7 +228,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
       status: "Completed",
     },
     {
-      date: "Sat, 9 May 2026",
+      date: "Fri, 5 Jun 2026",
       time: "08:00 – 16:00",
       dept: "Front of House",
       role: "Barista",
@@ -237,7 +237,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
     },
   ],
   recentActivity: [
-    { date: "3 May 2026", type: "Availability", note: "Added Saturday morning availability" },
+    { date: "30 May 2026", type: "Availability", note: "Added Saturday morning availability" },
   ],
   documents: [
     { name: "Right to Work", type: "Compliance", expiry: "N/A", status: "valid" },
@@ -246,7 +246,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
     { name: "Contract", type: "HR", status: "valid" },
   ],
   availability: {
-    updated: "3 May 2026",
+    updated: "30 May 2026",
     conflicts: 0,
     lateChanges: 0,
     usuallyAvailable: "Weekdays mornings, Sat morning",
@@ -265,11 +265,11 @@ export const oliviaBennett: StaffProfile = buildProfile({
     overtimeTrend: "+1h this month",
   },
   timeStats: { hoursThisWeek: 24, avgWeeklyHours: 22, hoursThisMonth: 88, overtimeThisMonth: 1 },
-  portalAccess: { status: "Active", lastLogin: "13 May 2026, 07:08" },
+  portalAccess: { status: "Active", lastLogin: "9 Jun 2026, 07:08" },
   weeklyHours: [8, 0, 8, 0, 0, 8, 0],
   timeEntries: [
     {
-      date: "Wed, 13 May",
+      date: "Tue, 9 Jun",
       shift: "Morning",
       role: "Barista",
       location: "Coffee House",
@@ -279,7 +279,7 @@ export const oliviaBennett: StaffProfile = buildProfile({
       total: "7h 32m",
     },
     {
-      date: "Mon, 11 May",
+      date: "Sun, 7 Jun",
       shift: "Morning",
       role: "Barista",
       location: "Coffee House",

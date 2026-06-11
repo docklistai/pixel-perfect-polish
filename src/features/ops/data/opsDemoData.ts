@@ -135,7 +135,7 @@ export const opsHandoverNotes: HandoverNote[] = [
   {
     from: "Morning shift",
     to: "Afternoon shift",
-    who: "Sophie Carter · 20 May 2026, 07:00",
+    who: "Sophie Carter · 11 Jun 2026, 07:00",
     note: "Busy check-in period expected. VIP arrival at 14:00. Maintenance team aware of AC issues on 4th floor.",
     tag: "High priority",
     tone: "danger",
@@ -143,7 +143,7 @@ export const opsHandoverNotes: HandoverNote[] = [
   {
     from: "Afternoon shift",
     to: "Evening shift",
-    who: "Daniel Mitchell · 20 May 2026, 14:45",
+    who: "Daniel Mitchell · 11 Jun 2026, 14:45",
     note: "Lobby is busier than usual. One maintenance job pending. Please follow up on minibar restock.",
     tag: "Medium priority",
     tone: "warning",

@@ -28,7 +28,7 @@ export function LeaveMetricCards({ pendingCount }: Props) {
         tone="danger"
         label="Coverage at risk"
         value="1"
-        sub="31 May · Housekeeping"
+        sub="21 Jun · Housekeeping"
       />
     </div>
   );
