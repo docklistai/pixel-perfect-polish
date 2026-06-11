@@ -81,15 +81,17 @@ export function AIManagerSupportTab({ onDirty }: { onDirty: () => void }) {
         <div className="space-y-3">
           <ToggleRow
             label="Allow AI to publish staff updates automatically"
-            description="Off by default. Recommended OFF."
+            description="Off by default — every staff-facing update needs a manager's click."
             ariaLabel="Allow AI to publish staff updates automatically"
             onDirty={onDirty}
+            defaultOn={false}
           />
           <ToggleRow
             label="Include pay information in AI context"
             description="Hourly rates available for cost summaries."
             ariaLabel="Include pay information in AI context"
             onDirty={onDirty}
+            defaultOn={false}
           />
           <ToggleRow
             label="Train on this workspace's data"

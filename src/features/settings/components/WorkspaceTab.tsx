@@ -1,6 +1,7 @@
 import * as React from "react";
+import { toast } from "sonner";
 import { SectionCard, FieldLabel, TextField, SelectField } from "./SettingsPrimitives";
-import { Upload, HelpCircle } from "lucide-react";
+import { Upload } from "lucide-react";
 
 export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
   return (
@@ -21,7 +22,11 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
             <button
               type="button"
               className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50"
-              onClick={() => alert("Upload logo preview only")}
+              onClick={() =>
+                toast.info("Logo upload", {
+                  description: "Workspace branding opens up with the next plan update.",
+                })
+              }
             >
               <Upload className="h-3.5 w-3.5" />
               Upload logo
@@ -82,7 +87,11 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
           <button
             type="button"
             className="rounded-xl border border-border bg-card px-2.5 py-1 text-xs font-semibold hover:bg-muted/50"
-            onClick={() => alert("Owner transfer is preview-only in this build")}
+            onClick={() =>
+              toast.info("Transfer ownership", {
+                description: "Contact Docklist support to transfer the workspace owner.",
+              })
+            }
           >
             Transfer
           </button>

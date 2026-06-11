@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StatusBadge } from "@/components/dl";
+import { toast } from "sonner";
 import {
   DensityButton,
   FieldLabel,
@@ -33,6 +33,7 @@ export function GeneralTab({ onDirty }: { onDirty: () => void }) {
             active={theme === "light"}
             onClick={() => {
               setTheme("light");
+              toast.success("Switched to light mode");
               onDirty();
             }}
           />
@@ -41,6 +42,7 @@ export function GeneralTab({ onDirty }: { onDirty: () => void }) {
             active={theme === "dark"}
             onClick={() => {
               setTheme("dark");
+              toast.success("Switched to dark mode");
               onDirty();
             }}
           />
@@ -60,22 +62,6 @@ export function GeneralTab({ onDirty }: { onDirty: () => void }) {
               }}
             />
           ))}
-        </div>
-        <div className="mt-4 rounded-2xl border border-border bg-muted/15 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="text-sm font-medium">Preview row</div>
-              <div className="text-xs text-muted-foreground">
-                A small sample of how lists will breathe.
-              </div>
-            </div>
-            <StatusBadge tone="info">{density}</StatusBadge>
-          </div>
-          <div className="mt-3 space-y-2">
-            <div className="h-2.5 rounded-full bg-muted" />
-            <div className="h-2.5 w-4/5 rounded-full bg-muted" />
-            <div className="h-2.5 w-2/3 rounded-full bg-muted" />
-          </div>
         </div>
       </SectionCard>
 

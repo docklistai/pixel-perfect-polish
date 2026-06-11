@@ -1,5 +1,6 @@
 import * as React from "react";
-import { SectionCard, ToggleRow, SelectField } from "./SettingsPrimitives";
+import { toast } from "sonner";
+import { SectionCard, ToggleRow, SelectField, PreviewTag } from "./SettingsPrimitives";
 import { Info, Check, X } from "lucide-react";
 
 function NotifMatrixRow({
@@ -135,8 +136,8 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
         <div className="mt-4 flex gap-2.5 rounded-2xl border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
           <Info className="h-4 w-4 shrink-0 mt-0.5" />
           <p className="leading-relaxed">
-            Staff app and phone reminders are preview-only — no messages are delivered to staff in
-            this prototype. Manager reminders appear in-app.
+            Staff app and phone reminders are being rolled out — nothing is sent to staff until you
+            enable delivery. Manager reminders appear in-app today.
           </p>
         </div>
       </SectionCard>
@@ -166,6 +167,7 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
 
       <SectionCard
         title="People moments"
+        badge={<PreviewTag>Manager-only</PreviewTag>}
         description="Private reminders that appear on the Team page (visible to managers only)."
       >
         <div className="space-y-3">
@@ -192,7 +194,8 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
 
       <SectionCard
         title="Training reminders"
-        description="Manager reminders for required training certificates."
+        badge={<PreviewTag>Manager-only</PreviewTag>}
+        description="Manager reminders for required training certificates. Docklist tracks records — it is not a training provider."
       >
         <div className="space-y-3">
           <ToggleRow
@@ -230,7 +233,11 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
               </span>
               <button
                 type="button"
-                onClick={() => alert("Manage training requirements is preview-only")}
+                onClick={() =>
+                  toast.info("Training requirements", {
+                    description: "Requirement management arrives with the training rollout.",
+                  })
+                }
                 className="w-full flex items-center justify-between rounded-xl border border-border bg-card px-3 py-2 text-sm font-medium hover:bg-muted/50"
               >
                 <span>Manage training requirements</span>
@@ -242,6 +249,23 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
           </div>
         </div>
       </SectionCard>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="flex gap-2.5 rounded-2xl border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
+          <Info className="h-4 w-4 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong className="text-foreground">Quiet hours.</strong> Overnight reminders queue and
+            arrive from 7:00 so nobody is woken by a rota change.
+          </p>
+        </div>
+        <div className="flex gap-2.5 rounded-2xl border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
+          <Info className="h-4 w-4 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong className="text-foreground">One place to review.</strong> Everything that needs
+            a decision also appears in the notification drawer, whatever the channel.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

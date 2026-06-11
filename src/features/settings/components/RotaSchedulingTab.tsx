@@ -1,6 +1,54 @@
 import * as React from "react";
-import { SectionCard, FieldLabel, TextField, SelectField, ToggleRow } from "./SettingsPrimitives";
-import { Info, HelpCircle } from "lucide-react";
+import {
+  SectionCard,
+  FieldLabel,
+  TextField,
+  SelectField,
+  ToggleRow,
+  PreviewTag,
+} from "./SettingsPrimitives";
+import { SettingsToggle } from "./SettingsToggle";
+import { Info } from "lucide-react";
+
+function ConflictRuleRow({
+  label,
+  tone,
+  badge,
+  onDirty,
+}: {
+  label: string;
+  tone: string;
+  badge: string;
+  onDirty: () => void;
+}) {
+  const [on, setOn] = React.useState(true);
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border bg-card/50 p-3">
+      <div className="flex items-center gap-3">
+        <span
+          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+            tone === "danger"
+              ? "bg-danger-soft text-danger"
+              : tone === "warning"
+                ? "bg-warning-soft text-warning"
+                : "bg-info-soft text-info"
+          }`}
+        >
+          {badge}
+        </span>
+        <span className="text-sm font-medium">{label}</span>
+      </div>
+      <SettingsToggle
+        aria-label={`${label} rule`}
+        on={on}
+        onClick={() => {
+          setOn((prev) => !prev);
+          onDirty();
+        }}
+      />
+    </div>
+  );
+}
 
 export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
   return (
@@ -89,21 +137,24 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
           />
           <ToggleRow
             label="Staff app update on publish"
-            description="Prepares a staff-facing rota update in the app for review."
+            description="Prepares a staff-facing rota update in the app for review before anything is sent."
             ariaLabel="Staff app update on publish"
             onDirty={onDirty}
+            preview
           />
           <ToggleRow
             label="Approve overtime automatically"
             description="Overtime over 4 hours/week still requires approval."
             ariaLabel="Approve overtime automatically"
             onDirty={onDirty}
+            defaultOn={false}
           />
         </div>
       </SectionCard>
 
       <SectionCard
         title="Labour targets"
+        badge={<PreviewTag>Used by Rota &amp; Home</PreviewTag>}
         description="Set the weekly budget and labour % target to drive budget warnings on the Rota and Dashboard."
       >
         <div className="grid gap-3 md:grid-cols-3">
@@ -191,29 +242,8 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
             { label: "Below contracted hours", tone: "info", badge: "Info" },
             { label: "Missing certification for role", tone: "danger", badge: "Block" },
             { label: "Double-booked shift", tone: "danger", badge: "Block" },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between rounded-xl border border-border bg-card/50 p-3"
-            >
-              <div className="flex items-center gap-3">
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                    item.tone === "danger"
-                      ? "bg-danger-soft text-danger"
-                      : item.tone === "warning"
-                        ? "bg-warning-soft text-warning"
-                        : "bg-info-soft text-info"
-                  }`}
-                >
-                  {item.badge}
-                </span>
-                <span className="text-sm font-medium">{item.label}</span>
-              </div>
-              <div className="h-5 w-9 cursor-pointer rounded-full bg-brand p-0.5 transition-colors">
-                <div className="h-4 w-4 translate-x-4 rounded-full bg-white transition-transform" />
-              </div>
-            </div>
+          ].map((item) => (
+            <ConflictRuleRow key={item.label} {...item} onDirty={onDirty} />
           ))}
         </div>
       </SectionCard>

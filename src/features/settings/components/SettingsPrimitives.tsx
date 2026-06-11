@@ -56,22 +56,35 @@ export function useThemePreference(): readonly [ThemeMode, (theme: ThemeMode) =>
 export function SectionCard({
   title,
   description,
+  badge,
   children,
   className,
 }: {
   title: string;
   description?: string;
+  badge?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
     <Card className={cn(settingCardClass, className)}>
       <div className="mb-4 space-y-1">
-        <div className="text-sm font-semibold">{title}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-sm font-semibold">{title}</div>
+          {badge}
+        </div>
         {description && <p className="text-xs leading-5 text-muted-foreground">{description}</p>}
       </div>
       {children}
     </Card>
+  );
+}
+
+export function PreviewTag({ children = "Preview" }: { children?: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+      {children}
+    </span>
   );
 }
 
@@ -181,19 +194,34 @@ export function ToggleRow({
   description,
   ariaLabel,
   onDirty,
+  defaultOn = true,
+  preview = false,
 }: {
   label: string;
   description: string;
   ariaLabel: string;
   onDirty: () => void;
+  defaultOn?: boolean;
+  preview?: boolean;
 }) {
+  const [on, setOn] = React.useState(defaultOn);
   return (
-    <div className="flex items-center gap-3">
-      <SettingsToggle aria-label={ariaLabel} onClick={onDirty} />
-      <div>
-        <div className="text-sm font-medium">{label}</div>
+    <div className="flex items-center justify-between gap-4 border-b border-border/60 pb-3 last:border-0 last:pb-0">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          {label}
+          {preview && <PreviewTag />}
+        </div>
         <div className="text-xs text-muted-foreground">{description}</div>
       </div>
+      <SettingsToggle
+        aria-label={ariaLabel}
+        on={on}
+        onClick={() => {
+          setOn((prev) => !prev);
+          onDirty();
+        }}
+      />
     </div>
   );
 }

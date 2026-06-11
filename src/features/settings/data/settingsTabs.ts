@@ -22,7 +22,7 @@ export const settingsTabs: SettingsTab[] = [
   { t: "Notifications", s: "Email and app notifications", icon: Bell, group: "Operations" },
   { t: "AI manager support", s: "AI assistant preferences", icon: Sparkles, group: "Platform" },
   { t: "Data & privacy", s: "Security and data exports", icon: Lock, group: "Platform" },
-  { t: "Plan & limits", s: "Plan usage and limits", icon: Tag, group: "Platform" },
+  { t: "Plan & limits", s: "Plan usage and limits", icon: Tag, group: "Platform", preview: true },
 ];
 
 export const SETTINGS_GROUPS: ReadonlyArray<{

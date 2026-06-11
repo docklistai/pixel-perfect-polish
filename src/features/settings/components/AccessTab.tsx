@@ -1,6 +1,8 @@
 import * as React from "react";
+import { toast } from "sonner";
+import { ActionButton, DialogShell } from "@/components/dl";
 import { SectionCard, ToggleRow } from "./SettingsPrimitives";
-import { Shield, ChevronRight, X, Check, Info } from "lucide-react";
+import { Shield, ChevronRight, Check, Info } from "lucide-react";
 
 interface RoleDef {
   id: string;
@@ -159,6 +161,7 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
             description="In-app directory only — does not affect HR records."
             ariaLabel="Allow staff to see phone numbers toggle"
             onDirty={onDirty}
+            defaultOn={false}
           />
           <ToggleRow
             label="Require manager approval for all swaps"
@@ -169,33 +172,49 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
         </div>
       </SectionCard>
 
-      {/* Role details Drawer/Modal */}
-      {selectedRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setSelectedRole(null)}
-              className="absolute right-4 top-4 rounded-xl p-1.5 text-muted-foreground hover:bg-muted"
+      <DialogShell
+        open={selectedRole !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedRole(null);
+        }}
+        title={selectedRole ? `${selectedRole.name} permissions` : ""}
+        description={selectedRole ? `${selectedRole.scope} · ${selectedRole.people} people` : ""}
+        icon={Shield}
+        footer={
+          <>
+            <ActionButton variant="ghost" onClick={() => setSelectedRole(null)}>
+              Close
+            </ActionButton>
+            <ActionButton
+              variant="secondary"
+              onClick={() => {
+                toast.success("Role duplicated", {
+                  description: selectedRole
+                    ? `"${selectedRole.name} (copy)" added as a custom role.`
+                    : undefined,
+                });
+                setSelectedRole(null);
+              }}
             >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
-                <Shield className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-foreground">
-                  {selectedRole.name} permissions
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {selectedRole.scope} · {selectedRole.people} people
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-1.5">
+              Duplicate role
+            </ActionButton>
+            <ActionButton
+              onClick={() => {
+                onDirty();
+                toast.success("Role updated", {
+                  description: "Permission changes apply to everyone in this role.",
+                });
+                setSelectedRole(null);
+              }}
+            >
+              Save role
+            </ActionButton>
+          </>
+        }
+      >
+        {selectedRole && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-1.5">
               {selectedRole.tags.map((tag, idx) => (
                 <span
                   key={idx}
@@ -214,7 +233,7 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
               ))}
             </div>
 
-            <div className="mt-4 rounded-2xl border border-border bg-muted/15 p-4 space-y-2 max-h-[300px] overflow-y-auto">
+            <div className="rounded-2xl border border-border bg-muted/15 p-4 space-y-2 max-h-[300px] overflow-y-auto">
               <div className="dock-section-eyebrow mb-1">Capabilities</div>
               {selectedRole.capabilities.map(([cap, allowed], idx) => (
                 <div
@@ -241,23 +260,13 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
               ))}
             </div>
 
-            <div className="mt-4 flex gap-2 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
+            <div className="flex gap-2 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
               <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              <span>Permissions are previewed — changes here apply to everyone in this role.</span>
-            </div>
-
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setSelectedRole(null)}
-                className="rounded-xl border border-border px-4 py-2 text-xs font-semibold hover:bg-muted/50"
-              >
-                Close
-              </button>
+              <span>Changes here apply to everyone in this role.</span>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </DialogShell>
     </div>
   );
 }

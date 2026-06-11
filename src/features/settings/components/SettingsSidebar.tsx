@@ -64,8 +64,15 @@ export function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps
                             className={`h-4 w-4 ${active ? "text-brand" : "text-muted-foreground"}`}
                           />
                           <div>
-                            <div className={`text-sm font-medium ${active ? "text-brand" : ""}`}>
+                            <div
+                              className={`flex items-center gap-2 text-sm font-medium ${active ? "text-brand" : ""}`}
+                            >
                               {t.t}
+                              {t.preview && (
+                                <span className="inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                  Preview
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-muted-foreground">{t.s}</div>
                           </div>

@@ -5,4 +5,5 @@ export interface SettingsTab {
   s: string;
   icon: LucideIcon;
   group: "Workspace" | "Operations" | "Platform";
+  preview?: boolean;
 }
