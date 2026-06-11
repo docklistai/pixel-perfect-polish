@@ -1,24 +1,126 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import { RowActionMenu } from "@/components/RowActionMenu";
 import { useOverlays } from "@/components/AppShortcuts";
-import { AlertTriangle, Info, Plus, FileText, MoreHorizontal, Sparkles } from "lucide-react";
+import {
+  Check,
+  Download,
+  FileText,
+  Filter,
+  Info,
+  ListChecks,
+  MoreHorizontal,
+  Plus,
+  Settings,
+  Sparkles,
+} from "lucide-react";
+import { toast } from "sonner";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
 import { OpsRightRail } from "@/features/ops/components/OpsRightRail";
-import { OpsDrawer } from "@/features/ops/components/OpsDrawer";
+import { OpsLogEntryModal } from "@/features/ops/components/OpsLogEntryModal";
+import { OpsHandoverModal } from "@/features/ops/components/OpsHandoverModal";
 import { OpsDetailDrawer } from "@/features/ops/components/OpsDetailDrawer";
-import type { DrawerMode, TimelineEntry } from "@/features/ops/types";
+import { opsTimeline } from "@/features/ops/data/opsDemoData";
+import type { OpsEntry } from "@/features/ops/types";
 
 export const Route = createFileRoute("/ops")({
   head: () => ({ meta: [{ title: "Operations — Docklist" }] }),
   component: OpsPage,
 });
 
+const STATUS_TONE: Record<string, OpsEntry["stTone"]> = {
+  Open: "warning",
+  "In progress": "info",
+  Done: "success",
+  Closed: "info",
+};
+
+const FILTER_SCOPES = ["All entries", "Open only", "High priority only", "Assigned to me"];
+const FILTER_RANGES = ["Today", "Yesterday", "Last 7 days"];
+
 function OpsPage() {
   const { openAiDrawer } = useOverlays();
-  const [openDrawer, setOpenDrawer] = React.useState<DrawerMode>(null);
-  const [selectedEntry, setSelectedEntry] = React.useState<TimelineEntry | null>(null);
+  const navigate = useNavigate();
+  const [entries, setEntries] = React.useState<OpsEntry[]>(() =>
+    opsTimeline.map((e, i) => ({ ...e, id: `op-${i}` })),
+  );
+  const [logEntryOpen, setLogEntryOpen] = React.useState(false);
+  const [handoverOpen, setHandoverOpen] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [filterScope, setFilterScope] = React.useState(FILTER_SCOPES[0]);
+  const [filterRange, setFilterRange] = React.useState(FILTER_RANGES[0]);
+
+  const selectedEntry = entries.find((e) => e.id === selectedId) ?? null;
+
+  const handleAddEntry = ({
+    title,
+    severity,
+  }: {
+    title: string;
+    type: string;
+    severity: string;
+  }) => {
+    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const entry: OpsEntry = {
+      id: `new-${Date.now()}`,
+      t: now,
+      title,
+      area: "Logged just now",
+      st: "Open",
+      stTone: "warning",
+      dot: "info",
+      icon: ListChecks,
+      ...(severity !== "Low" && {
+        prio: severity,
+        prioTone: severity === "Medium" ? "warning" : "danger",
+      }),
+    };
+    setEntries((es) => [entry, ...es]);
+    toast.success("Entry logged", { description: "Added to the operations timeline" });
+  };
+
+  const handleChangeStatus = (id: string, status: string, options: { close?: boolean } = {}) => {
+    const target = entries.find((e) => e.id === id);
+    if (!target) return;
+    const prev = { st: target.st, stTone: target.stTone };
+    setEntries((es) =>
+      es.map((e) =>
+        e.id === id ? { ...e, st: status, stTone: STATUS_TONE[status] ?? "info" } : e,
+      ),
+    );
+    if (options.close && status === "Done") {
+      toast.success("Marked done", {
+        description: `${target.title} closed out`,
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setEntries((es) => es.map((e) => (e.id === id ? { ...e, ...prev } : e)));
+            toast.info("Undone", { description: "Status restored" });
+          },
+        },
+      });
+    } else {
+      toast.info("Status updated", { description: `${target.title} → ${status}` });
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    const removed = entries.find((e) => e.id === id);
+    if (!removed) return;
+    setEntries((es) => es.filter((e) => e.id !== id));
+    toast.warning("Deleted", {
+      description: removed.title,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          setEntries((es) => [removed, ...es]);
+          toast.info("Restored", { description: `${removed.title} restored` });
+        },
+      },
+    });
+  };
 
   return (
     <AppShell>
@@ -27,23 +129,56 @@ function OpsPage() {
         subtitle="Today's handover, incidents, tasks, and maintenance — in one operational log."
         actions={
           <>
+            <RowActionMenu
+              triggerLabel="Filter entries"
+              trigger={
+                <button type="button" className="btn secondary">
+                  <Filter className="h-3.5 w-3.5" aria-hidden /> Filters
+                </button>
+              }
+              items={[
+                { kind: "label", text: "Filter" },
+                ...FILTER_SCOPES.map((s) => ({
+                  label: s,
+                  icon: filterScope === s ? Check : undefined,
+                  onSelect: () => setFilterScope(s),
+                })),
+                { kind: "separator" },
+                ...FILTER_RANGES.map((r) => ({
+                  label: r,
+                  icon: filterRange === r ? Check : undefined,
+                  onSelect: () => setFilterRange(r),
+                })),
+              ]}
+            />
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Ask assistant
+              Open risks
             </ActionButton>
-            <ActionButton icon={AlertTriangle} onClick={() => setOpenDrawer("incident")}>
-              Log incident
+            <ActionButton variant="secondary" icon={FileText} onClick={() => setHandoverOpen(true)}>
+              Handover note
             </ActionButton>
-            <ActionButton variant="secondary" icon={Plus} onClick={() => setOpenDrawer("task")}>
-              Add task
+            <ActionButton icon={Plus} onClick={() => setLogEntryOpen(true)}>
+              Log entry
             </ActionButton>
-            <ActionButton
-              variant="secondary"
-              icon={FileText}
-              onClick={() => setOpenDrawer("handover")}
-            >
-              Add handover note
-            </ActionButton>
-            <IconButton icon={MoreHorizontal} label="More actions" />
+            <RowActionMenu
+              triggerLabel="More actions"
+              trigger={<IconButton icon={MoreHorizontal} label="More actions" />}
+              items={[
+                {
+                  label: "Export today's log",
+                  icon: Download,
+                  onSelect: () =>
+                    toast.info("Export ready", { description: "ops_today.pdf — preview ready" }),
+                },
+                { label: "Print briefing", icon: FileText, onSelect: () => {} },
+                { kind: "separator" },
+                {
+                  label: "Settings",
+                  icon: Settings,
+                  onSelect: () => navigate({ to: "/settings" }),
+                },
+              ]}
+            />
           </>
         }
       />
@@ -56,14 +191,26 @@ function OpsPage() {
       <OpsStatCards />
 
       <div className="grid grid-cols-12 gap-5">
-        <OpsTimeline onOpenEntry={setSelectedEntry} />
+        <OpsTimeline
+          entries={entries}
+          onOpenEntry={(e) => setSelectedId(e.id)}
+          onMarkDone={(id) => handleChangeStatus(id, "Done", { close: true })}
+          onDelete={handleDelete}
+        />
         <OpsRightRail onOpenAssistant={openAiDrawer} />
       </div>
 
-      <OpsDrawer mode={openDrawer} onClose={() => setOpenDrawer(null)} />
+      <OpsLogEntryModal
+        open={logEntryOpen}
+        onClose={() => setLogEntryOpen(false)}
+        onSave={handleAddEntry}
+      />
+      <OpsHandoverModal open={handoverOpen} onClose={() => setHandoverOpen(false)} />
       <OpsDetailDrawer
         entry={selectedEntry}
-        onOpenChange={(open) => !open && setSelectedEntry(null)}
+        onOpenChange={(open) => !open && setSelectedId(null)}
+        onChangeStatus={handleChangeStatus}
+        onDelete={handleDelete}
       />
     </AppShell>
   );

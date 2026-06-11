@@ -1,9 +1,11 @@
 import {
   ListChecks,
   AlertTriangle,
-  AlertCircle,
+  Briefcase,
+  CheckCircle2,
   FileText,
   Phone,
+  ShieldCheck,
   Wrench,
   FileQuestion,
 } from "lucide-react";
@@ -17,17 +19,18 @@ export const toneBg: Record<string, string> = {
 };
 
 export const opsStats: OpsStatCard[] = [
-  { l: "Open tasks", v: "18", s: "6 due today", icon: ListChecks, tone: "info" },
+  { l: "Active shifts", v: "3", s: "48 staff on duty", icon: Briefcase, tone: "info" },
+  { l: "Tasks completed", v: "14", s: "Today", icon: CheckCircle2, tone: "brand" },
   {
-    l: "Incidents",
-    v: "3",
-    s: "1 high priority",
+    l: "Open incidents",
+    v: "5",
+    s: "2 high priority",
     icon: AlertTriangle,
     tone: "warning",
     danger: true,
   },
-  { l: "Follow-ups", v: "7", s: "3 due today", icon: AlertCircle, tone: "info" },
-  { l: "Handover notes", v: "2", s: "Updated this shift", icon: FileText, tone: "purple" },
+  { l: "Briefings posted", v: "2", s: "Today", icon: FileText, tone: "purple" },
+  { l: "Checklists", v: "98%", s: "Completed today", icon: ShieldCheck, tone: "success" },
 ];
 
 export const opsTimeline: TimelineEntry[] = [

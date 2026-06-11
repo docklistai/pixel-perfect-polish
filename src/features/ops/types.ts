@@ -1,12 +1,11 @@
 import type * as React from "react";
-
-export type DrawerMode = "incident" | "task" | "handover" | null;
+import type { LucideIcon } from "lucide-react";
 
 export interface OpsStatCard {
   l: string;
   v: string;
   s: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: LucideIcon;
   tone: string;
   danger?: boolean;
 }
@@ -24,6 +23,24 @@ export interface TimelineEntry {
   dot: string;
   icon: React.ComponentType<{ className?: string }>;
   highlight?: boolean;
+}
+
+/** Timeline entry held in route state so status/delete/add actions can mutate it. */
+export interface OpsEntry extends TimelineEntry {
+  id: string;
+}
+
+export interface OpsFollowUpItem {
+  title: string;
+  done: boolean;
+}
+
+export interface OpsEntryDetails {
+  description: string;
+  location: string;
+  severity?: string;
+  notes?: string;
+  followups: OpsFollowUpItem[];
 }
 
 export interface HandoverNote {
