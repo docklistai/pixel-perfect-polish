@@ -6,7 +6,7 @@
  * mock-only data with realistic hospitality copy. None of the buttons here
  * trigger any real backend behaviour.
  */
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import * as React from "react";
 import {
   AppShell,
@@ -64,6 +64,12 @@ export const Route = createFileRoute("/ui-kit")({
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
+  beforeLoad: () => {
+    // Dev-only reference page; hidden from production builds.
+    if (!import.meta.env.DEV) {
+      throw notFound();
+    }
+  },
   component: UIKitPage,
 });
 

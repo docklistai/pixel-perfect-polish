@@ -83,7 +83,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             const day = [8, 9, 10, 11, 12, 13, 14][i];
             return (
               <div
-                key={d}
+                key={day}
                 className={`rounded-2xl border px-0 py-3 text-center ${active ? "border-brand/20 bg-brand-soft/70" : "border-border bg-muted/60"}`}
               >
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

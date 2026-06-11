@@ -36,7 +36,7 @@ export function LabourTargetChart() {
       </div>
 
       <svg
-        viewBox={`0 0 ${width} ${height + 22}`}
+        viewBox={`-20 0 ${width + 40} ${height + 22}`}
         width="100%"
         className="block"
         role="img"
@@ -95,7 +95,7 @@ export function LabourTargetChart() {
             strokeWidth="2"
           />
         ))}
-        {["W14", "W15", "W16", "W17", "W18", "W19", "W20", "W21", "W22", "W23", "W24", "W25"].map(
+        {["W13", "W14", "W15", "W16", "W17", "W18", "W19", "W20", "W21", "W22", "W23", "W24"].map(
           (week, index) => (
             <text
               key={week}

@@ -100,7 +100,7 @@ export function TimesheetTable({
   return (
     <div className="card overflow-hidden">
       <div className="card-section flex flex-wrap items-center gap-3">
-        <div className="dl-tabs flex-1 min-w-0" style={{ borderBottom: "none" }}>
+        <div className="dl-tabs flex-1 min-w-0 flex-wrap" style={{ borderBottom: "none" }}>
           {tabs.map((t) => {
             const count = counts[t.countKey];
             return (
@@ -138,7 +138,7 @@ export function TimesheetTable({
         role="region"
         aria-label="Weekly timesheet, scroll horizontally to see all columns"
       >
-        <table className="tbl min-w-[1100px] w-full">
+        <table className="tbl min-w-[900px] w-full">
           <thead>
             <tr>
               <th style={{ width: 36 }}>
