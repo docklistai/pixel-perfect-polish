@@ -9,6 +9,7 @@ import {
   Plus,
   Send,
   Settings as SettingsIcon,
+  Smartphone,
   Sparkles,
   UserPlus,
   Users,
@@ -25,7 +26,8 @@ export type NavTarget =
   | "/team"
   | "/ops"
   | "/reports"
-  | "/settings";
+  | "/settings"
+  | "/portal";
 
 export interface CommandNavItem {
   label: string;
@@ -105,4 +107,10 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   },
   { label: "Open timesheets", hint: "Review clocked hours", icon: Clock, to: "/time" },
   { label: "Open settings", hint: "Workspace settings", icon: SettingsIcon, to: "/settings" },
+  {
+    label: "Preview staff portal",
+    hint: "See exactly what staff see — published snapshots only",
+    icon: Smartphone,
+    to: "/portal",
+  },
 ];

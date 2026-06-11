@@ -1,15 +1,12 @@
 import { Calendar, Clock, MapPin, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
 import { DashboardCard, StatusBadge } from "@/components/dl";
-import { mockNotices, mockProfile } from "../data/mockPortalData";
-import {
-  portalPublishedNextShift,
-  portalPublishedWeekShifts,
-} from "../data/publishedRotaPortalData";
+import { mockProfile } from "../data/mockPortalData";
+import { usePortalRota } from "../hooks/usePortalRota";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
-  const nextShift = portalPublishedNextShift;
-  const publishedDates = new Set(portalPublishedWeekShifts.map((shift) => shift.date));
+  const { nextShift, upcoming } = usePortalRota();
+  const publishedDates = new Set(upcoming.map((shift) => shift.date));
 
   return (
     <div className="space-y-4">

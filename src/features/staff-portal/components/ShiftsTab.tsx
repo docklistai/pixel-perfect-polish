@@ -2,10 +2,7 @@ import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
 import { mockPastShifts, mockRequests } from "../data/mockPortalData";
-import {
-  portalPublishedRotaSnapshot,
-  portalPublishedWeekShifts,
-} from "../data/publishedRotaPortalData";
+import { usePortalRota } from "../hooks/usePortalRota";
 import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
@@ -28,6 +25,7 @@ const SUB_TABS: { id: ShiftsSubTab; label: string }[] = [
 ];
 
 export function ShiftsTab() {
+  const { upcoming, hasPublished } = usePortalRota();
   const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
   const [selected, setSelected] = React.useState<PortalShift | null>(null);
   const [acknowledgedShiftIds, setAcknowledgedShiftIds] = React.useState<Set<string>>(new Set());
@@ -41,11 +39,7 @@ export function ShiftsTab() {
       <SegmentedTabs value={sub} onChange={setSub} />
 
       {sub === "upcoming" && (
-        <ShiftList
-          shifts={portalPublishedWeekShifts}
-          hasPublishedSnapshot={Boolean(portalPublishedRotaSnapshot)}
-          onOpen={setSelected}
-        />
+        <ShiftList shifts={upcoming} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
       )}
       {sub === "requests" && <RequestsList />}
       {sub === "history" && <ShiftList shifts={mockPastShifts} onOpen={setSelected} />}

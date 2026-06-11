@@ -7,7 +7,7 @@ import { TimeTab } from "@/features/staff-portal/components/TimeTab";
 import { LeaveTab } from "@/features/staff-portal/components/LeaveTab";
 import { MoreTab } from "@/features/staff-portal/components/MoreTab";
 import { NotificationDrawer } from "@/features/staff-portal/components/NotificationDrawer";
-import { mockNotifications } from "@/features/staff-portal/data/mockPortalData";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import type { PortalTab } from "@/features/staff-portal/types";
 
 export const Route = createFileRoute("/portal")({
@@ -27,7 +27,8 @@ export const Route = createFileRoute("/portal")({
 function PortalPage() {
   const [tab, setTab] = React.useState<PortalTab>("home");
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
-  const unread = mockNotifications.filter((n) => n.unread).length;
+  const notifications = useWorkspaceSelector((state) => state.portalNotifications);
+  const unread = notifications.filter((n) => n.unread).length;
 
   return (
     <>

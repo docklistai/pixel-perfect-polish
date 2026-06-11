@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, Card, ConfirmDialog, FeedbackBanner } from "@/components/dl";
@@ -53,6 +53,7 @@ function publishStateLabel(state: PublishState): string {
 
 function RotaPage() {
   const rota = useRotaDraftController();
+  const navigate = useNavigate();
   const { askAssistant } = useOverlays();
   const [addOpen, setAddOpen] = React.useState(false);
   const [publishOpen, setPublishOpen] = React.useState(false);
@@ -91,6 +92,10 @@ function RotaPage() {
       description: prepareStaffUpdate
         ? "Published snapshot ready. Staff-app update prepared for review."
         : "Staff see the published snapshot the next time they open the app.",
+      action: {
+        label: "Preview staff app",
+        onClick: () => navigate({ to: "/portal" }),
+      },
     });
   };
   const confirmationTone =

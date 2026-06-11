@@ -99,7 +99,9 @@ export interface AvailabilityDay {
 
 export type NotificationKind =
   | "shift-changed"
+  | "rota-published"
   | "leave-approved"
+  | "leave-declined"
   | "announcement"
   | "timesheet-reminder";
 

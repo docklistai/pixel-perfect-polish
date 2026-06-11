@@ -1,6 +1,10 @@
 export const DEMO_WORLD = {
   todayIso: "2026-06-11",
   todayLabel: "Thu 11 Jun 2026",
+  todayShortLabel: "Thu 11 Jun",
+  /** Frozen demo time of day — mid-afternoon, inside Olivia's 07:00–15:00 shift. */
+  nowLabel: "13:00",
+  nowMinutes: 13 * 60,
   workspace: { id: "harbour-view", name: "Harbour View Hotel", location: "Brighton" },
   manager: {
     id: "alex-thompson",

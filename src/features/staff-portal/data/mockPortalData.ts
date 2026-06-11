@@ -29,115 +29,6 @@ export const mockProfile: PortalProfile = {
   },
 };
 
-export const mockNextShift: PortalShift = {
-  id: "sh-001",
-  date: "2026-06-11",
-  dayLabel: "Today · Thu 11 Jun",
-  start: "07:00",
-  end: "15:00",
-  hours: 8,
-  role: "Barista",
-  station: "Harbour View Hotel",
-  breakMinutes: 30,
-  status: "confirmed",
-  shiftNote: "Please arrive 10 minutes early and check in with the duty manager.",
-  managerName: "Alex Thompson",
-  tasks: [
-    { id: "t1", label: "Review specials & menu updates", done: true },
-    { id: "t2", label: "Check opening sidework list", done: true },
-    { id: "t3", label: "Set up patio station", done: true },
-    { id: "t4", label: "Stock water & glassware", done: true },
-    { id: "t5", label: "Team brief at 08:15", done: false },
-  ],
-  teammates: [
-    { id: "tm1", name: "Alex Thompson", initials: "AT", role: "Manager" },
-    { id: "tm2", name: "Sophie Carter", initials: "SC", role: "FOH Supervisor" },
-    { id: "tm3", name: "Priya Patel", initials: "PP", role: "Head Chef" },
-    { id: "tm4", name: "James Walker", initials: "JW", role: "Waiter" },
-    { id: "tm5", name: "Noah Evans", initials: "NE", role: "Porter" },
-  ],
-};
-
-export const mockWeekShifts: PortalShift[] = [
-  mockNextShift,
-  {
-    id: "sh-002",
-    date: "2026-06-12",
-    dayLabel: "Fri 12 Jun",
-    start: "17:00",
-    end: "22:00",
-    hours: 5,
-    role: "Barista",
-    station: "Harbour View Hotel",
-    breakMinutes: 30,
-    status: "changed",
-    shiftNote: "Start moved 30 minutes later.",
-  },
-  {
-    id: "sh-003",
-    date: "2026-06-13",
-    dayLabel: "Sat 13 Jun",
-    start: "11:00",
-    end: "16:00",
-    hours: 5,
-    role: "Barista",
-    station: "Harbour View Hotel",
-    breakMinutes: 30,
-    status: "confirmed",
-  },
-  {
-    id: "sh-004",
-    date: "2026-06-14",
-    dayLabel: "Sun 14 Jun",
-    start: "12:00",
-    end: "20:00",
-    hours: 8,
-    role: "Barista",
-    station: "Harbour View Hotel",
-    breakMinutes: 30,
-    status: "confirmed",
-  },
-  {
-    id: "sh-005",
-    date: "2026-06-15",
-    dayLabel: "Mon 15 Jun",
-    start: "18:00",
-    end: "22:00",
-    hours: 4,
-    role: "Barista",
-    station: "Harbour View Hotel",
-    breakMinutes: 15,
-    status: "confirmed",
-  },
-];
-
-export const mockOpenShifts: PortalShift[] = [
-  {
-    id: "open-1",
-    date: "2026-06-13",
-    dayLabel: "Sat 13 Jun",
-    start: "17:00",
-    end: "22:00",
-    hours: 5,
-    role: "Bartender",
-    station: "Harbour View Hotel",
-    breakMinutes: 30,
-    status: "open",
-  },
-  {
-    id: "open-2",
-    date: "2026-06-14",
-    dayLabel: "Sun 14 Jun",
-    start: "11:00",
-    end: "16:00",
-    hours: 5,
-    role: "Porter",
-    station: "Harbour View Hotel",
-    breakMinutes: 30,
-    status: "open",
-  },
-];
-
 export const mockPastShifts: PortalShift[] = [
   {
     id: "past-1",
@@ -164,12 +55,6 @@ export const mockPastShifts: PortalShift[] = [
     status: "confirmed",
   },
 ];
-
-export const mockWeeklySummary: WeeklySummary = {
-  shifts: 3,
-  hours: 24,
-  openShifts: 0,
-};
 
 export const mockClockEntries: ClockEntry[] = [
   {
@@ -351,51 +236,5 @@ export const mockDocuments: PortalDocument[] = [
     category: "Training",
     meta: "PDF · 1.1 MB · Updated 5 Apr 2024",
     status: "Up to date",
-  },
-];
-
-export const mockTeamOnDuty: TeamOnDuty[] = [
-  {
-    id: "td-1",
-    name: "Alex Thompson",
-    initials: "AT",
-    role: "Manager",
-    shiftLabel: "08:00 – 16:00",
-    isManagerOnDuty: true,
-  },
-  {
-    id: "td-2",
-    name: "Sophie Carter",
-    initials: "SC",
-    role: "FOH Supervisor",
-    shiftLabel: "08:00 – 16:00",
-  },
-  {
-    id: "td-3",
-    name: "Priya Patel",
-    initials: "PP",
-    role: "Head Chef",
-    shiftLabel: "06:00 – 14:00",
-  },
-  {
-    id: "td-4",
-    name: "James Walker",
-    initials: "JW",
-    role: "Waiter",
-    shiftLabel: "11:00 – 16:00",
-  },
-  {
-    id: "td-5",
-    name: "Amelia Stone",
-    initials: "AS",
-    role: "Housekeeper",
-    shiftLabel: "09:00 – 17:00",
-  },
-  {
-    id: "td-6",
-    name: "Noah Evans",
-    initials: "NE",
-    role: "Porter",
-    shiftLabel: "07:00 – 15:00",
   },
 ];

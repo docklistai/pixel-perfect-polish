@@ -25,8 +25,10 @@ import {
   FormSection,
   StatusBadge,
 } from "@/components/dl";
-import { mockDocuments, mockNotices, mockProfile, mockTeamOnDuty } from "../data/mockPortalData";
-import type { MoreSection, PortalTab } from "../types";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { mockDocuments, mockNotices, mockProfile } from "../data/mockPortalData";
+import { teamOnDutyToday } from "../lib/portalRota";
+import type { MoreSection, PortalTab, TeamOnDuty } from "../types";
 
 const APP_VERSION = "2.4.1 (138)";
 
@@ -194,9 +196,22 @@ function ProfileDrawer({ open, onClose }: { open: boolean; onClose: () => void }
 }
 
 /* ---------- Team ---------- */
+const MANAGER_ON_DUTY: TeamOnDuty = {
+  id: "alex-thompson",
+  name: "Alex Thompson",
+  initials: "AT",
+  role: "Manager",
+  shiftLabel: "08:00 – 16:00",
+  isManagerOnDuty: true,
+};
+
 function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const manager = mockTeamOnDuty.find((m) => m.isManagerOnDuty);
-  const others = mockTeamOnDuty.filter((m) => !m.isManagerOnDuty);
+  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
+  const manager = MANAGER_ON_DUTY;
+  const others = React.useMemo(
+    () => teamOnDutyToday(weekDrafts, mockProfile.staffId),
+    [weekDrafts],
+  );
   const noticeboard = mockNotices.find((n) => n.pinned);
 
   return (
@@ -216,25 +231,29 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
       }
     >
       <div className="space-y-4">
-        {manager && (
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
-              MANAGER ON DUTY
-            </div>
-            <TeamRow member={manager} />
+        <div>
+          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
+            MANAGER ON DUTY
           </div>
-        )}
+          <TeamRow member={manager} />
+        </div>
         <div>
           <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
             TEAM ON SHIFT
           </div>
-          <ul className="space-y-2">
-            {others.map((m) => (
-              <li key={m.id}>
-                <TeamRow member={m} />
-              </li>
-            ))}
-          </ul>
+          {others.length === 0 ? (
+            <DashboardCard className="p-4 text-xs text-muted-foreground">
+              No one else is on the published rota today.
+            </DashboardCard>
+          ) : (
+            <ul className="space-y-2">
+              {others.map((m) => (
+                <li key={`${m.id}-${m.shiftLabel}`}>
+                  <TeamRow member={m} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         {noticeboard && (
           <div>
@@ -258,7 +277,7 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   );
 }
 
-function TeamRow({ member }: { member: (typeof mockTeamOnDuty)[number] }) {
+function TeamRow({ member }: { member: TeamOnDuty }) {
   return (
     <DashboardCard className="p-3">
       <div className="flex items-center gap-3">

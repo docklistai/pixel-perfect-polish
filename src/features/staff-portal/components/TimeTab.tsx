@@ -7,9 +7,14 @@ import {
   FeedbackBanner,
   StatusBadge,
 } from "@/components/dl";
-import { mockClockEntries } from "../data/mockPortalData";
-import { portalPublishedNextShift } from "../data/publishedRotaPortalData";
+import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import {
+  portalClockIn,
+  portalClockOut,
+  portalToggleBreak,
+} from "@/features/demo/store/workspaceActions";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
+import { usePortalRota } from "../hooks/usePortalRota";
 
 function formatElapsed(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -20,45 +25,33 @@ function formatElapsed(ms: number) {
 }
 
 export function TimeTab() {
-  const [clockedIn, setClockedIn] = React.useState(false);
-  const [onBreak, setOnBreak] = React.useState(false);
-  const [startedAt, setStartedAt] = React.useState<number | null>(null);
+  const store = useWorkspaceStore();
+  const clock = useWorkspaceSelector((state) => state.portalClock);
+  const entries = useWorkspaceSelector((state) => state.portalClockEntries);
+  const { nextShift, activeShift } = usePortalRota();
   const [now, setNow] = React.useState(() => Date.now());
 
   React.useEffect(() => {
-    if (!clockedIn) return;
+    if (!clock.clockedIn) return;
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
-  }, [clockedIn]);
+  }, [clock.clockedIn]);
 
-  const elapsed = clockedIn && startedAt ? now - startedAt : 0;
-  const currentShift = portalPublishedNextShift;
-  const currentMinutes = 16 * 60;
-  const startMinutes = currentShift
-    ? Number(currentShift.start.slice(0, 2)) * 60 + Number(currentShift.start.slice(3))
-    : 0;
-  const endMinutes = currentShift
-    ? Number(currentShift.end.slice(0, 2)) * 60 + Number(currentShift.end.slice(3))
-    : 0;
-  const clockInAvailable =
-    currentShift?.date === DEMO_WORLD.todayIso &&
-    currentMinutes >= startMinutes &&
-    currentMinutes < endMinutes;
-  const sinceLabel = startedAt
-    ? new Date(startedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-    : null;
-  const entries = mockClockEntries;
+  const elapsed = clock.clockedIn && clock.startedAtMs ? now - clock.startedAtMs : 0;
+  // Clock in only against today's active shift; otherwise show the next one.
+  const displayShift = activeShift ?? nextShift;
+  const clockInAvailable = activeShift !== null;
+  // The demo world's clock is frozen; the session timer alone is live.
+  const sinceLabel = clock.startedAtMs ? DEMO_WORLD.nowLabel : null;
   const hasMissing = entries.some((e) => e.flag === "missing-clock-out");
 
   const onToggle = () => {
-    if (!currentShift || (!clockInAvailable && !clockedIn)) return;
-    if (clockedIn) {
-      setClockedIn(false);
-      setOnBreak(false);
-      setStartedAt(null);
-    } else {
-      setClockedIn(true);
-      setStartedAt(Date.now());
+    if (clock.clockedIn) {
+      portalClockOut(store);
+      setNow(Date.now());
+    } else if (clockInAvailable) {
+      portalClockIn(store);
+      setNow(Date.now());
     }
   };
 
@@ -67,24 +60,24 @@ export function TimeTab() {
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            NEXT PUBLISHED SHIFT
+            {activeShift ? "CURRENT SHIFT" : "NEXT PUBLISHED SHIFT"}
           </div>
-          <StatusBadge tone={clockedIn ? "success" : "muted"}>
-            {clockedIn ? "Clocked in" : "Not active"}
+          <StatusBadge tone={clock.clockedIn ? "success" : "muted"}>
+            {clock.clockedIn ? "Clocked in" : "Not active"}
           </StatusBadge>
         </div>
-        {currentShift ? (
+        {displayShift ? (
           <>
-            <div className="mt-2 text-[13px] text-muted-foreground">{currentShift.dayLabel}</div>
+            <div className="mt-2 text-[13px] text-muted-foreground">{displayShift.dayLabel}</div>
             <div className="mt-1 text-[28px] font-bold tracking-tight leading-none">
-              {currentShift.start} – {currentShift.end}
+              {displayShift.start} – {displayShift.end}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
               <span className="inline-flex items-center gap-1.5 text-foreground">
-                <Clock className="h-4 w-4 text-muted-foreground" /> {currentShift.role}
+                <Clock className="h-4 w-4 text-muted-foreground" /> {displayShift.role}
               </span>
               <span className="inline-flex items-center gap-1.5 text-foreground">
-                <MapPin className="h-4 w-4 text-muted-foreground" /> {currentShift.station}
+                <MapPin className="h-4 w-4 text-muted-foreground" /> {displayShift.station}
               </span>
             </div>
           </>
@@ -96,37 +89,41 @@ export function TimeTab() {
       <DashboardCard className="p-5">
         <div className="flex flex-col items-center">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            {clockedIn ? "YOU ARE CLOCKED IN" : "NOT ON SHIFT"}
+            {clock.clockedIn
+              ? "YOU ARE CLOCKED IN"
+              : clockInAvailable
+                ? "ON SHIFT NOW"
+                : "NOT ON SHIFT"}
           </div>
           <div className="mt-3 flex items-center justify-center">
             <button
               type="button"
               onClick={onToggle}
-              disabled={!clockInAvailable && !clockedIn}
+              disabled={!clockInAvailable && !clock.clockedIn}
               className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
-                clockedIn
+                clock.clockedIn
                   ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
                   : "bg-[linear-gradient(135deg,#0B7A78_0%,#0EA5A2_100%)]"
               }`}
             >
               <span className="absolute inset-[-12px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,162,.18),_transparent_70%)]" />
               <span className="relative flex flex-col items-center gap-2">
-                {clockedIn ? (
+                {clock.clockedIn ? (
                   <StopCircle className="h-9 w-9" />
                 ) : (
                   <PlayCircle className="h-9 w-9" />
                 )}
                 <span className="text-[22px] font-bold leading-none">
-                  {!currentShift
+                  {!displayShift
                     ? "No shift"
-                    : clockedIn
+                    : clock.clockedIn
                       ? "Clock out"
                       : clockInAvailable
                         ? "Clock in"
                         : "Not available"}
                 </span>
                 <span className="text-[11px] font-medium text-white/85">
-                  {clockedIn
+                  {clock.clockedIn
                     ? sinceLabel
                       ? `since ${sinceLabel}`
                       : "End your shift"
@@ -140,13 +137,13 @@ export function TimeTab() {
           <div className="mt-4 w-full rounded-2xl border border-border bg-muted/40 px-4 py-3">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Worked</span>
-              <span>{clockedIn ? formatElapsed(elapsed) : "00:00:00"}</span>
+              <span>{clock.clockedIn ? formatElapsed(elapsed) : "00:00:00"}</span>
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-border/70">
               <div
                 className="h-full rounded-full bg-brand"
                 style={{
-                  width: clockedIn
+                  width: clock.clockedIn
                     ? `${Math.min((elapsed / (8 * 60 * 60 * 1000)) * 100, 100)}%`
                     : "0%",
                 }}
@@ -156,14 +153,14 @@ export function TimeTab() {
         </div>
 
         <div className="mt-5 space-y-2">
-          {clockedIn && (
+          {clock.clockedIn && (
             <ActionButton
               variant="secondary"
               icon={Coffee}
-              onClick={() => setOnBreak((b) => !b)}
+              onClick={() => portalToggleBreak(store)}
               className="w-full justify-center"
             >
-              {onBreak ? "End break" : "Start break"}
+              {clock.onBreak ? "End break" : "Start break"}
             </ActionButton>
           )}
         </div>
@@ -176,7 +173,7 @@ export function TimeTab() {
               Scheduled
             </div>
             <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
-              {currentShift ? `${currentShift.hours}h` : "0h"}
+              {displayShift ? `${displayShift.hours}h` : "0h"}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">Shift length</div>
           </div>
@@ -185,7 +182,7 @@ export function TimeTab() {
               Worked
             </div>
             <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
-              {clockedIn ? formatElapsed(elapsed).slice(0, 5) : "0h 00m"}
+              {clock.clockedIn ? formatElapsed(elapsed).slice(0, 5) : "0h 00m"}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">This session</div>
           </div>

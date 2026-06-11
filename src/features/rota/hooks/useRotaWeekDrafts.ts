@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
-import { selectRotaWeek } from "@/features/demo/store/workspaceActions";
+import { publishRotaWeek, selectRotaWeek } from "@/features/demo/store/workspaceActions";
 import { initialDraftShifts, staff } from "../data/mockData";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
 import type { OpenShiftSuggestion } from "../lib/rotaSuggestions";
@@ -11,7 +11,6 @@ import {
   makeDraftShift,
 } from "../lib/draftRota";
 import { copyShiftToNextDay, duplicateDraftShiftAsOpen } from "../lib/draftActions";
-import { buildPublishedRotaSnapshot } from "../lib/publishedSnapshot";
 import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
 import { getWeekLabel } from "../lib/weekHelpers";
 
@@ -184,18 +183,7 @@ export function useRotaWeekDrafts() {
   };
 
   const handlePublish = () => {
-    setCurrentDraft((draft) => ({
-      ...draft,
-      published: true,
-      hasUnpublishedChanges: false,
-      publishedSnapshot: buildPublishedRotaSnapshot({
-        shifts: draft.shifts,
-        staff,
-        weekOffset,
-        weekLabel: getWeekLabel(weekOffset),
-        previousSnapshot: draft.publishedSnapshot,
-      }),
-    }));
+    publishRotaWeek(store);
   };
 
   return {

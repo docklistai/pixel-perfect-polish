@@ -1,4 +1,5 @@
 import { createWeekDraft } from "@/features/rota/lib/weekDraftState";
+import { mockClockEntries, mockNotifications } from "@/features/staff-portal/data/mockPortalData";
 import type { WorkspaceState } from "./workspaceStoreTypes";
 
 /**
@@ -13,5 +14,8 @@ export function seedWorkspaceState(): WorkspaceState {
       "0": createWeekDraft(0),
       "1": createWeekDraft(1),
     },
+    portalClock: { clockedIn: false, onBreak: false, startedAtMs: null },
+    portalClockEntries: mockClockEntries,
+    portalNotifications: mockNotifications,
   };
 }

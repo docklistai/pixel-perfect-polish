@@ -1,7 +1,8 @@
 import * as React from "react";
 import { Bell } from "lucide-react";
 import { DrawerShell, EmptyState, StatusBadge } from "@/components/dl";
-import { mockNotifications } from "../data/mockPortalData";
+import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import { markAllPortalNotificationsRead } from "@/features/demo/store/workspaceActions";
 import type { NotificationCategory, PortalNotification } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -12,8 +13,9 @@ const TABS: { id: NotificationCategory; label: string }[] = [
 ];
 
 export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const store = useWorkspaceStore();
+  const items = useWorkspaceSelector((state) => state.portalNotifications);
   const [tab, setTab] = React.useState<NotificationCategory>("all");
-  const [items, setItems] = React.useState<PortalNotification[]>(mockNotifications);
 
   const filtered = items.filter((n) => {
     if (tab === "unread") return n.unread;
@@ -21,7 +23,7 @@ export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: 
     return true;
   });
 
-  const markAllRead = () => setItems((prev) => prev.map((n) => ({ ...n, unread: false })));
+  const markAllRead = () => markAllPortalNotificationsRead(store);
 
   return (
     <DrawerShell
@@ -105,7 +107,10 @@ function kindLabel(k: PortalNotification["kind"]) {
   switch (k) {
     case "shift-changed":
       return "Shift change";
+    case "rota-published":
+      return "Rota";
     case "leave-approved":
+    case "leave-declined":
       return "Leave";
     case "announcement":
       return "Announcement";
