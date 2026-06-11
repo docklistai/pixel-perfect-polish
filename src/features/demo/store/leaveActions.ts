@@ -1,8 +1,8 @@
 import type { LeaveRequest } from "@/features/leave/types";
 import type { PortalNotification } from "@/features/staff-portal/types";
+import type { MockNotification } from "@/components/notificationData";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import type { WorkspaceStore } from "./createWorkspaceStore";
-import { CalendarOff } from "lucide-react";
 
 const PORTAL_STAFF_ID = "olivia-bennett";
 
@@ -70,29 +70,21 @@ export function setLeaveRequestState(
   });
 }
 
+/**
+ * Adds a leave request to the review queue. Callers that should alert the
+ * manager inbox (e.g. portal submissions) pass a prebuilt notification —
+ * icon choice stays in the UI layer.
+ */
 export function createLeaveRequest(
   store: WorkspaceStore,
   request: LeaveRequest,
-  notifyManager = false,
+  managerNotification?: MockNotification,
 ): void {
   store.setState((current) => ({
     ...current,
     leaveRequests: [request, ...current.leaveRequests],
-    managerNotifications: notifyManager
-      ? [
-          {
-            id: `manager-leave-${request.id}`,
-            icon: CalendarOff,
-            tone: request.impact === "High" ? "red" : "purple",
-            title: `${request.n} requested leave`,
-            body: `${request.date} · ${request.impact} coverage impact.`,
-            action: "Review",
-            time: DEMO_WORLD.nowLabel,
-            read: false,
-            to: "/leave",
-          },
-          ...current.managerNotifications,
-        ]
+    managerNotifications: managerNotification
+      ? [managerNotification, ...current.managerNotifications]
       : current.managerNotifications,
   }));
 }

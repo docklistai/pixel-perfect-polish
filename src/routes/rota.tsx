@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { toast } from "sonner";
-import { AppShell, Card, ConfirmDialog, FeedbackBanner } from "@/components/dl";
+import { AppShell, Card, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { useOverlays } from "@/components/AppShortcuts";
@@ -16,15 +16,8 @@ import { IssuesToResolveCard } from "@/features/rota/components/IssuesToResolveC
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
 import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
 import { LegendCard } from "@/features/rota/components/LegendCard";
-import { AddShiftDrawer } from "@/features/rota/components/AddShiftDrawer";
-import { ConflictDrawer } from "@/features/rota/components/ConflictDrawer";
-import { GenerateRotaDialog } from "@/features/rota/components/GenerateRotaDialog";
-import { ShiftDetailDrawer } from "@/features/rota/components/ShiftDetailDrawer";
-import { RotaFiltersDrawer } from "@/features/rota/components/RotaFiltersDrawer";
-import { TemplatesDialog } from "@/features/rota/components/TemplatesDialog";
-import { CoverageDetailsDrawer } from "@/features/rota/components/CoverageDetailsDrawer";
-import { WorkingTimeDetailsDrawer } from "@/features/rota/components/WorkingTimeDetailsDrawer";
-import { PublishRotaDialog } from "@/features/rota/components/PublishRotaDialog";
+import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
+import { useRotaOverlays } from "@/features/rota/hooks/useRotaOverlays";
 
 export const Route = createFileRoute("/rota")({
   head: () => ({ meta: [{ title: "Rota — Docklist" }] }),
@@ -55,19 +48,13 @@ function RotaPage() {
   const rota = useRotaDraftController();
   const navigate = useNavigate();
   const { askAssistant } = useOverlays();
-  const [addOpen, setAddOpen] = React.useState(false);
-  const [publishOpen, setPublishOpen] = React.useState(false);
-  const [conflictOpen, setConflictOpen] = React.useState(false);
-  const [generateOpen, setGenerateOpen] = React.useState(false);
-  const [filtersOpen, setFiltersOpen] = React.useState(false);
-  const [templatesOpen, setTemplatesOpen] = React.useState(false);
-  const [coverageDetailsOpen, setCoverageDetailsOpen] = React.useState(false);
-  const [workingTimeOpen, setWorkingTimeOpen] = React.useState(false);
+  const overlays = useRotaOverlays();
+  const { openOverlay } = overlays;
   const [fillSummary, setFillSummary] = React.useState<string | null>(null);
 
-  useIntentHandler("rota.publish", () => setPublishOpen(true));
-  useIntentHandler("rota.generate", () => setGenerateOpen(true));
-  useIntentHandler("rota.addShift", () => setAddOpen(true));
+  useIntentHandler("rota.publish", () => openOverlay("publish"));
+  useIntentHandler("rota.generate", () => openOverlay("generate"));
+  useIntentHandler("rota.addShift", () => openOverlay("addShift"));
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
   const readinessIssueCount = rota.openShiftCount + rota.conflictCount + workingTimeAlertCount;
@@ -81,13 +68,9 @@ function RotaPage() {
     : hasReadinessIssues
       ? "draft"
       : "ready";
-  const reviewConflictShift = (shiftId: string) => {
-    rota.setSelectedShiftId(shiftId);
-    setConflictOpen(false);
-  };
   const handlePublish = (prepareStaffUpdate: boolean) => {
     rota.handlePublish();
-    setPublishOpen(false);
+    overlays.setOverlay("publish", false);
     toast.success("Rota published", {
       description: prepareStaffUpdate
         ? "Published snapshot ready. Staff-app update prepared for review."
@@ -98,10 +81,6 @@ function RotaPage() {
       },
     });
   };
-  const confirmationTone =
-    rota.confirmation?.kind === "remove" || rota.confirmation?.kind === "clear"
-      ? "danger"
-      : "brand";
   const headerStatusTone =
     publishState === "published" || publishState === "ready" ? "success" : "warning";
   const headerStatusLabel = publishStateLabel(publishState);
@@ -244,13 +223,13 @@ function RotaPage() {
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
           canPublish={!rota.published || rota.hasUnpublishedChanges}
-          onTemplates={() => setTemplatesOpen(true)}
+          onTemplates={() => openOverlay("templates")}
           onPrintRota={() => window.print()}
           onClearWeek={rota.requestClearWeek}
           onCopyLastWeek={handleCopyLastWeek}
-          onGenerateRota={() => setGenerateOpen(true)}
+          onGenerateRota={() => openOverlay("generate")}
           onAskAssistant={askAssistant}
-          onPublish={() => setPublishOpen(true)}
+          onPublish={() => openOverlay("publish")}
         />
 
         <RotaStatusBanner
@@ -263,8 +242,8 @@ function RotaPage() {
           coveragePct={rota.coveragePct}
           weekLabel={rota.weekLabel}
           staff={rota.staff}
-          onPublish={() => setPublishOpen(true)}
-          onViewConflicts={() => setConflictOpen(true)}
+          onPublish={() => openOverlay("publish")}
+          onViewConflicts={() => openOverlay("conflicts")}
         />
 
         {fillSummary && (
@@ -284,11 +263,11 @@ function RotaPage() {
               openShiftCount={rota.openShiftCount}
               workingTimeAlertCount={workingTimeAlertCount}
               coveragePct={rota.coveragePct}
-              onFilter={() => setFiltersOpen(true)}
-              onGenerateRota={() => setGenerateOpen(true)}
-              onAddShift={() => setAddOpen(true)}
-              onViewConflicts={() => setConflictOpen(true)}
-              onViewWorkingTime={() => setWorkingTimeOpen(true)}
+              onFilter={() => openOverlay("filters")}
+              onGenerateRota={() => openOverlay("generate")}
+              onAddShift={() => openOverlay("addShift")}
+              onViewConflicts={() => openOverlay("conflicts")}
+              onViewWorkingTime={() => openOverlay("workingTime")}
               onCopyLastWeek={handleCopyLastWeek}
             />
             <RotaGrid
@@ -323,7 +302,7 @@ function RotaPage() {
               scheduledHours={rota.scheduledHours}
               targetHours={rota.targetHours}
               coveragePct={rota.coveragePct}
-              onViewCoverageDetails={() => setCoverageDetailsOpen(true)}
+              onViewCoverageDetails={() => openOverlay("coverageDetails")}
             />
             <LegendCard shifts={rota.draftShifts} />
             <IssuesToResolveCard
@@ -342,94 +321,19 @@ function RotaPage() {
               assignedShiftCount={rota.assignedShiftCount}
               plannedShiftCount={rota.plannedShiftCount}
               coveragePct={rota.coveragePct}
-              onPublish={() => setPublishOpen(true)}
+              onPublish={() => openOverlay("publish")}
             />
             <RoleCoverageCard roleCoverage={rota.roleCoverage} />
           </div>
         </div>
       </div>
 
-      <AddShiftDrawer
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        days={rota.days}
-        staff={rota.staff}
-        roles={rota.roleOptions}
-        onSubmit={rota.addShift}
-      />
-      <ConflictDrawer
-        open={conflictOpen}
-        onOpenChange={setConflictOpen}
-        conflicts={rota.conflictSummaries}
-        onReviewShift={reviewConflictShift}
-      />
-      <PublishRotaDialog
-        open={publishOpen}
-        onOpenChange={setPublishOpen}
-        weekLabel={rota.weekLabel}
-        staffCount={rota.staff.length}
-        assignedShiftCount={rota.assignedShiftCount}
-        plannedShiftCount={rota.plannedShiftCount}
-        coveragePct={rota.coveragePct}
-        conflictCount={rota.conflictCount}
-        openShiftCount={rota.openShiftCount}
-        workingTimeAlertCount={workingTimeAlertCount}
-        onConfirm={handlePublish}
-      />
-      <GenerateRotaDialog
-        open={generateOpen}
-        onOpenChange={setGenerateOpen}
-        weekLabel={rota.weekLabel}
-        days={rota.days}
-        shifts={rota.draftShifts}
-        staff={rota.staff}
+      <RotaOverlays
+        rota={rota}
+        overlays={overlays}
+        onPublishConfirm={handlePublish}
         onApplySuggestions={handleApplySuggestions}
-      />
-      <RotaFiltersDrawer
-        open={filtersOpen}
-        onOpenChange={setFiltersOpen}
-        filters={rota.filters}
-        roleOptions={rota.roleOptions}
-        onFiltersChange={rota.setFilters}
-      />
-      <TemplatesDialog
-        open={templatesOpen}
-        onOpenChange={setTemplatesOpen}
-        onApplyStandardTemplate={rota.requestApplyStandardTemplate}
-      />
-      <CoverageDetailsDrawer
-        open={coverageDetailsOpen}
-        onOpenChange={setCoverageDetailsOpen}
-        staffCount={rota.staff.length}
-        openShiftCount={rota.openShiftCount}
-        conflictCount={rota.conflictCount}
-        coveragePct={rota.coveragePct}
-        roleCoverage={rota.roleCoverage}
-      />
-      <WorkingTimeDetailsDrawer
-        open={workingTimeOpen}
-        onOpenChange={setWorkingTimeOpen}
-        alerts={rota.workingTimeAlertList}
-      />
-      <ShiftDetailDrawer
-        key={rota.selectedShiftId ?? "none"}
-        shift={rota.selectedShift}
-        staff={rota.staff}
-        days={rota.days}
-        onClose={rota.closeShiftDetail}
-        onUpdate={rota.updateShift}
-        onRemove={rota.requestRemoveShift}
-        onMarkOpen={handleMarkShiftOpen}
-      />
-      <ConfirmDialog
-        open={Boolean(rota.confirmation)}
-        onOpenChange={(open) => !open && rota.clearConfirmation()}
-        title={rota.confirmation?.title ?? ""}
-        description={rota.confirmation?.description ?? ""}
-        confirmLabel={rota.confirmation?.confirmLabel ?? "Confirm"}
-        cancelLabel="Cancel"
-        tone={confirmationTone}
-        onConfirm={rota.confirmPendingAction}
+        onMarkShiftOpen={handleMarkShiftOpen}
       />
     </AppShell>
   );

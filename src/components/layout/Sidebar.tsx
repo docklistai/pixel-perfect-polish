@@ -68,16 +68,19 @@ const NAV_GROUPS: ReadonlyArray<{
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const workspace = useWorkspaceSelector((state) => state);
+  const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
+  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
+  const timeRows = useWorkspaceSelector((state) => state.timeRows);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
   const badges = useMemo(() => {
-    const draft = workspace.weekDrafts[String(workspace.weekOffset)] ?? workspace.weekDrafts["0"];
+    const draft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"];
     const rotaShifts = draft
       ? withApprovedLeaveConflictStatus(
           withLocalConflictStatus(draft.shifts),
-          workspace.leaveRequests,
-          workspace.weekOffset,
+          leaveRequests,
+          weekOffset,
         )
       : [];
     return {
@@ -87,15 +90,15 @@ export function Sidebar() {
         kind: "amber" as const,
       },
       "/time": {
-        count: workspace.timeRows.filter((row) => row.status !== "approved" || row.flagged).length,
+        count: timeRows.filter((row) => row.status !== "approved" || row.flagged).length,
         kind: "red" as const,
       },
       "/leave": {
-        count: workspace.leaveRequests.filter((request) => request.state === "pending").length,
+        count: leaveRequests.filter((request) => request.state === "pending").length,
         kind: "amber" as const,
       },
     };
-  }, [workspace]);
+  }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
 
   useEffect(() => {
     if (!workspaceOpen) return;

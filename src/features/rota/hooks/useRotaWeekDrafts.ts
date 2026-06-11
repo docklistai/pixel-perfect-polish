@@ -13,11 +13,7 @@ import {
 import { copyShiftToNextDay, duplicateDraftShiftAsOpen } from "../lib/draftActions";
 import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
 import { getWeekLabel } from "../lib/weekHelpers";
-
-type Confirmation =
-  | { kind: "template"; title: string; description: string; confirmLabel: string }
-  | { kind: "clear"; title: string; description: string; confirmLabel: string }
-  | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string };
+import { useRotaConfirmations } from "./useRotaConfirmations";
 
 /**
  * Rota week drafts live in the workspace store so edits and published
@@ -29,7 +25,6 @@ export function useRotaWeekDrafts() {
   const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
   const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
   const [selectedShiftId, setSelectedShiftId] = React.useState<ShiftId | null>(null);
-  const [confirmation, setConfirmation] = React.useState<Confirmation | null>(null);
 
   const currentDraft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"]!;
 
@@ -133,54 +128,21 @@ export function useRotaWeekDrafts() {
     if (selectedShiftId === id) setSelectedShiftId(null);
   };
 
-  const requestRemoveShift = (id: ShiftId) => {
-    setConfirmation({
-      kind: "remove",
-      shiftId: id,
-      title: "Remove this shift?",
-      description: "This removes the shift from this week's draft.",
-      confirmLabel: "Remove shift",
-    });
+  const clearWeek = () => {
+    setCurrentDraft((draft) => ({
+      ...draft,
+      shifts: [],
+      hasUnpublishedChanges: true,
+    }));
+    setSelectedShiftId(null);
   };
 
-  const requestApplyStandardTemplate = () => {
-    if (!currentDraft.hasUnpublishedChanges && !currentDraft.published) {
-      applyStandardTemplate();
-      return;
-    }
-    setConfirmation({
-      kind: "template",
-      title: "Apply standard cover?",
-      description: "This replaces this week's draft with the standard pattern.",
-      confirmLabel: "Apply template",
-    });
-  };
-
-  // Generate dialog already shows a preview-and-confirm step,
-  // so it can apply directly without a second ConfirmDialog.
-
-  const requestClearWeek = () => {
-    setConfirmation({
-      kind: "clear",
-      title: "Clear this week?",
-      description: "This removes every shift from the current week only.",
-      confirmLabel: "Clear week",
-    });
-  };
-
-  const confirmPendingAction = () => {
-    if (confirmation?.kind === "template") applyStandardTemplate();
-    if (confirmation?.kind === "clear") {
-      setCurrentDraft((draft) => ({
-        ...draft,
-        shifts: [],
-        hasUnpublishedChanges: true,
-      }));
-      setSelectedShiftId(null);
-    }
-    if (confirmation?.kind === "remove") removeShiftNow(confirmation.shiftId);
-    setConfirmation(null);
-  };
+  const confirmations = useRotaConfirmations({
+    draftIsPristine: !currentDraft.hasUnpublishedChanges && !currentDraft.published,
+    applyStandardTemplate,
+    clearWeek,
+    removeShiftNow,
+  });
 
   const handlePublish = () => {
     publishRotaWeek(store);
@@ -205,14 +167,9 @@ export function useRotaWeekDrafts() {
     updateShift,
     markShiftOpen: (id: ShiftId) =>
       updateShift(id, { staffId: null, status: "open", tone: "open" }),
-    requestRemoveShift,
-    requestApplyStandardTemplate,
     copyPreviousWeek,
     applyOpenShiftSuggestions,
-    requestClearWeek,
     handlePublish,
-    confirmation,
-    confirmPendingAction,
-    clearConfirmation: () => setConfirmation(null),
+    ...confirmations,
   };
 }

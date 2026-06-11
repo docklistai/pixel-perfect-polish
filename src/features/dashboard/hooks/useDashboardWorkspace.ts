@@ -11,13 +11,16 @@ import { kpiItems, todayKpiItems } from "../data/dashboardDemoData";
 import type { AttentionItem, LeaveItem, TimesheetItem } from "../types";
 
 export function useDashboardWorkspace() {
-  const workspace = useWorkspaceSelector((state) => state);
+  const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
+  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
+  const timeRows = useWorkspaceSelector((state) => state.timeRows);
   return React.useMemo(() => {
-    const draft = workspace.weekDrafts[String(workspace.weekOffset)] ?? workspace.weekDrafts["0"]!;
-    const nextDraft = workspace.weekDrafts["1"] ?? draft;
+    const draft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"]!;
+    const nextDraft = weekDrafts["1"] ?? draft;
     const openShifts = countOpenShifts(nextDraft.shifts);
-    const pendingTime = workspace.timeRows.filter((row) => row.status !== "approved");
-    const pendingLeave = workspace.leaveRequests.filter((request) => request.state === "pending");
+    const pendingTime = timeRows.filter((row) => row.status !== "approved");
+    const pendingLeave = leaveRequests.filter((request) => request.state === "pending");
     const highLeave = pendingLeave.find((request) => request.impact === "High");
     const leaveItems: LeaveItem[] = pendingLeave.map((request) => ({
       n: request.n,
@@ -79,5 +82,5 @@ export function useDashboardWorkspace() {
       weeklyKpis,
       todayKpis,
     };
-  }, [workspace]);
+  }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
 }

@@ -20,8 +20,8 @@ import {
   Plane,
   Plus,
 } from "lucide-react";
-import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
-import { createLeaveRequest, setLeaveRequestState } from "@/features/demo/store/leaveActions";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { useLeaveActions } from "@/features/leave/hooks/useLeaveActions";
 import { LeaveMetricCards } from "@/features/leave/components/LeaveMetricCards";
 import { LeaveRequestInbox } from "@/features/leave/components/LeaveRequestInbox";
 import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPanel";
@@ -68,7 +68,6 @@ function matchesLeaveFilter(request: LeaveRequest, filter: LeaveFilter): boolean
 function LeavePage() {
   const navigate = useNavigate();
   const { askAssistant } = useOverlays();
-  const store = useWorkspaceStore();
   const requests = useWorkspaceSelector((state) => state.leaveRequests);
   const [activeId, setActiveId] = React.useState("l3");
   const [filter, setFilter] = React.useState<LeaveFilter>("all");
@@ -96,54 +95,12 @@ function LeavePage() {
     setDecisionType(null);
   };
 
-  const updateState = (id: string, state: LeaveRequest["state"], reason: string) => {
-    setLeaveRequestState(store, id, state, reason);
-    setActiveId(id);
-  };
-
-  const handleApprove = (id: string, reason: string) => {
-    updateState(id, "approved", reason);
-    closeDecision();
-    toast.success("Leave approved", {
-      description: `${decisionRequest?.n ?? "The team member"}'s request is approved and rota checks were updated.`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          updateState(id, "pending", "Approval undone by manager.");
-          toast.info("Reverted", { description: "Request returned to pending." });
-        },
-      },
-    });
-  };
-
-  const handleDecline = (id: string, reason: string) => {
-    updateState(id, "declined", reason);
-    closeDecision();
-    toast.warning("Request declined", {
-      description: `${decisionRequest?.n ?? "The team member"}'s request is declined and the reason is saved to the record.`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          updateState(id, "pending", "Decline decision undone by manager.");
-          toast.info("Reverted", { description: "Request returned to pending review." });
-        },
-      },
-    });
-  };
-
-  const handleReopen = (id: string) => {
-    updateState(id, "pending", "Reopened for manager review.");
-    toast.info("Reopened", { description: "Request returned to review queue" });
-  };
-
-  const handleCreateRequest = (request: LeaveRequest) => {
-    createLeaveRequest(store, request);
-    setActiveId(request.id);
-    setNewRequestOpen(false);
-    toast.success("Request created", {
-      description: "Added to the pending review queue",
-    });
-  };
+  const actions = useLeaveActions({
+    decisionRequest,
+    onSelectRequest: setActiveId,
+    onCloseDecision: closeDecision,
+    onCloseNewRequest: () => setNewRequestOpen(false),
+  });
 
   return (
     <AppShell>
@@ -215,7 +172,7 @@ function LeavePage() {
           }
           onApprove={(request) => openDecision(request, "approve")}
           onDecline={(request) => openDecision(request, "decline")}
-          onReopen={handleReopen}
+          onReopen={actions.reopen}
           onSelect={setActiveId}
         />
         {activeRequest && (
@@ -225,7 +182,7 @@ function LeavePage() {
               requests={requests}
               onApprove={(request) => openDecision(request, "approve")}
               onDecline={(request) => openDecision(request, "decline")}
-              onReopen={handleReopen}
+              onReopen={actions.reopen}
               onOpenRisk={() => setRiskOpen(true)}
             />
             {activeRequest.state === "pending" && (
@@ -261,9 +218,9 @@ function LeavePage() {
           if (!open) closeDecision();
         }}
         onNewRequestOpenChange={setNewRequestOpen}
-        onApprove={handleApprove}
-        onDecline={handleDecline}
-        onCreateRequest={handleCreateRequest}
+        onApprove={actions.approve}
+        onDecline={actions.decline}
+        onCreateRequest={actions.createRequest}
       />
     </AppShell>
   );

@@ -1,4 +1,6 @@
+import { CalendarOff } from "lucide-react";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
+import type { MockNotification } from "@/components/notificationData";
 import type { LeaveRequest } from "../types";
 import { formatLeaveRange, leaveDaysInclusive } from "./leaveDates";
 
@@ -50,5 +52,23 @@ export function buildLeaveRequest({
       source === "manager"
         ? "Added by Alex Thompson for review."
         : "Submitted from the staff portal for manager review.",
+  };
+}
+
+/**
+ * Manager inbox notification for a staff-submitted leave request. Lives in
+ * the feature layer (not the store actions) because it picks the icon.
+ */
+export function buildLeaveManagerNotification(request: LeaveRequest): MockNotification {
+  return {
+    id: `manager-leave-${request.id}`,
+    icon: CalendarOff,
+    tone: request.impact === "High" ? "red" : "purple",
+    title: `${request.n} requested leave`,
+    body: `${request.date} · ${request.impact} coverage impact.`,
+    action: "Review",
+    time: DEMO_WORLD.nowLabel,
+    read: false,
+    to: "/leave",
   };
 }

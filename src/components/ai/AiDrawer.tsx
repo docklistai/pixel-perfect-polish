@@ -21,19 +21,20 @@ export function AiDrawer({
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [answer, setAnswer] = React.useState<SimulatedAnswer | null>(null);
   const timeoutRef = React.useRef<number | null>(null);
-  const workspace = useWorkspaceSelector((state) => state);
+  const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
+  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
+  const timeRows = useWorkspaceSelector((state) => state.timeRows);
   const context = React.useMemo<AiWorkspaceContext>(() => {
-    const draft = workspace.weekDrafts[String(workspace.weekOffset)] ?? workspace.weekDrafts["0"];
+    const draft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"];
     return {
-      pendingLeaveCount: workspace.leaveRequests.filter((request) => request.state === "pending")
-        .length,
-      approvedLeaveCount: workspace.leaveRequests.filter((request) => request.state === "approved")
-        .length,
-      pendingTimeCount: workspace.timeRows.filter((row) => row.status !== "approved").length,
-      approvedTimeCount: workspace.timeRows.filter((row) => row.status === "approved").length,
+      pendingLeaveCount: leaveRequests.filter((request) => request.state === "pending").length,
+      approvedLeaveCount: leaveRequests.filter((request) => request.state === "approved").length,
+      pendingTimeCount: timeRows.filter((row) => row.status !== "approved").length,
+      approvedTimeCount: timeRows.filter((row) => row.status === "approved").length,
       openShiftCount: draft?.shifts.filter((shift) => shift.status === "open").length ?? 0,
     };
-  }, [workspace]);
+  }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
 
   React.useEffect(() => {
     if (!open) {

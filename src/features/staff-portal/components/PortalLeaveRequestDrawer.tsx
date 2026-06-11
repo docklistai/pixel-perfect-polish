@@ -3,7 +3,11 @@ import { toast } from "sonner";
 import { ActionButton, DrawerShell, FormRow, FormSection } from "@/components/dl";
 import { createLeaveRequest } from "@/features/demo/store/leaveActions";
 import { useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
-import { buildLeaveRequest, type LeaveStaffOption } from "@/features/leave/lib/leaveRequests";
+import {
+  buildLeaveManagerNotification,
+  buildLeaveRequest,
+  type LeaveStaffOption,
+} from "@/features/leave/lib/leaveRequests";
 import { mockProfile } from "../data/mockPortalData";
 
 const PORTAL_STAFF: LeaveStaffOption = {
@@ -28,18 +32,15 @@ export function PortalLeaveRequestDrawer({
   const [reason, setReason] = React.useState("");
 
   const submit = () => {
-    createLeaveRequest(
-      store,
-      buildLeaveRequest({
-        staff: PORTAL_STAFF,
-        startIso,
-        endIso,
-        type: leaveType,
-        reason,
-        source: "portal",
-      }),
-      true,
-    );
+    const request = buildLeaveRequest({
+      staff: PORTAL_STAFF,
+      startIso,
+      endIso,
+      type: leaveType,
+      reason,
+      source: "portal",
+    });
+    createLeaveRequest(store, request, buildLeaveManagerNotification(request));
     onOpenChange(false);
     setReason("");
     toast.success("Leave request submitted", {
