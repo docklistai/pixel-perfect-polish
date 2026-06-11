@@ -1,4 +1,6 @@
 import * as React from "react";
+import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import { selectRotaWeek } from "@/features/demo/store/workspaceActions";
 import { initialDraftShifts, staff } from "../data/mockData";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
 import type { OpenShiftSuggestion } from "../lib/rotaSuggestions";
@@ -18,25 +20,29 @@ type Confirmation =
   | { kind: "clear"; title: string; description: string; confirmLabel: string }
   | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string };
 
+/**
+ * Rota week drafts live in the workspace store so edits and published
+ * snapshots survive navigation and feed the staff portal. Only transient UI
+ * state (selection, confirm dialogs) stays local to the route.
+ */
 export function useRotaWeekDrafts() {
-  const [weekOffset, setWeekOffsetState] = React.useState(0);
-  const [weekDrafts, setWeekDrafts] = React.useState<Record<string, WeekDraftState>>(() => ({
-    "0": createWeekDraft(0),
-  }));
+  const store = useWorkspaceStore();
+  const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
+  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
   const [selectedShiftId, setSelectedShiftId] = React.useState<ShiftId | null>(null);
   const [confirmation, setConfirmation] = React.useState<Confirmation | null>(null);
 
-  const weekKey = String(weekOffset);
-  const currentDraft = weekDrafts[weekKey] ?? weekDrafts["0"]!;
+  const currentDraft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"]!;
 
   const setCurrentDraft = React.useCallback(
     (updater: (draft: WeekDraftState) => WeekDraftState) => {
-      setWeekDrafts((current) => {
-        const draft = current[weekKey] ?? createWeekDraft(weekOffset);
-        return { ...current, [weekKey]: updater(draft) };
+      store.setState((state) => {
+        const key = String(state.weekOffset);
+        const draft = state.weekDrafts[key] ?? createWeekDraft(state.weekOffset);
+        return { ...state, weekDrafts: { ...state.weekDrafts, [key]: updater(draft) } };
       });
     },
-    [weekKey, weekOffset],
+    [store],
   );
 
   const mutateShifts = React.useCallback(
@@ -50,26 +56,19 @@ export function useRotaWeekDrafts() {
     [setCurrentDraft],
   );
 
-  const setWeekOffset = React.useCallback((next: number | ((current: number) => number)) => {
-    setWeekOffsetState((currentOffset) => {
-      const resolved = typeof next === "function" ? next(currentOffset) : next;
-      const key = String(resolved);
-      setWeekDrafts((current) =>
-        current[key] ? current : { ...current, [key]: createWeekDraft(resolved) },
-      );
+  const setWeekOffset = React.useCallback(
+    (next: number | ((current: number) => number)) => {
+      selectRotaWeek(store, next);
       setSelectedShiftId(null);
-      return resolved;
-    });
-  }, []);
+    },
+    [store],
+  );
 
+  // Deselect the shift drawer when the week changes from anywhere (e.g. the
+  // topbar week pill, which writes to the same store).
   React.useEffect(() => {
-    const handleWeekChange = (event: Event) => {
-      const nextOffset = (event as CustomEvent<number>).detail;
-      if (Number.isInteger(nextOffset)) setWeekOffset(nextOffset);
-    };
-    window.addEventListener("docklist:week-change", handleWeekChange);
-    return () => window.removeEventListener("docklist:week-change", handleWeekChange);
-  }, [setWeekOffset]);
+    setSelectedShiftId(null);
+  }, [weekOffset]);
 
   const addShift = (input: DraftShiftInput) => {
     mutateShifts((current) => [...current, makeDraftShift(input)]);
@@ -108,7 +107,7 @@ export function useRotaWeekDrafts() {
   };
 
   const copyPreviousWeek = () => {
-    const previousShifts = weekDrafts[String(weekOffset - 1)]?.shifts;
+    const previousShifts = store.getState().weekDrafts[String(weekOffset - 1)]?.shifts;
     const shifts = previousShifts
       ? previousShifts.map(({ id: _id, ...shift }) => makeDraftShift(shift))
       : createInitialDraftShifts(initialDraftShifts);

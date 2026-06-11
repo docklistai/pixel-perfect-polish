@@ -1,7 +1,8 @@
-import { initialDraftShifts } from "../data/mockData";
-import { demoPublishedRotaSnapshot } from "../data/publishedRotaSnapshot";
+import { initialDraftShifts, staff } from "../data/mockData";
 import type { DraftShift, PublishedRotaSnapshot } from "../types";
 import { createInitialDraftShifts } from "./draftRota";
+import { buildPublishedRotaSnapshot } from "./publishedSnapshot";
+import { getWeekLabel } from "./weekHelpers";
 
 export type WeekDraftState = {
   shifts: DraftShift[];
@@ -10,7 +11,10 @@ export type WeekDraftState = {
   publishedSnapshot: PublishedRotaSnapshot | null;
 };
 
-function createPublishedCurrentWeek(): WeekDraftState {
+/** Demo anchor: the current week's rota went out on Monday afternoon. */
+const CURRENT_WEEK_PUBLISHED_AT = "2026-06-08T16:42:00.000Z";
+
+function createPublishedWeek(weekOffset: number): WeekDraftState {
   const shifts = createInitialDraftShifts(initialDraftShifts)
     .filter(
       (shift) =>
@@ -38,12 +42,21 @@ function createPublishedCurrentWeek(): WeekDraftState {
     shifts,
     published: true,
     hasUnpublishedChanges: false,
-    publishedSnapshot: demoPublishedRotaSnapshot,
+    // The staff-safe snapshot is derived from the same shifts the manager
+    // grid shows, so the portal and rota can never contradict each other.
+    publishedSnapshot: buildPublishedRotaSnapshot({
+      shifts,
+      staff,
+      weekOffset,
+      weekLabel: getWeekLabel(weekOffset),
+      previousSnapshot: null,
+      publishedAt: CURRENT_WEEK_PUBLISHED_AT,
+    }),
   };
 }
 
 export function createWeekDraft(weekOffset = 0): WeekDraftState {
-  if (weekOffset <= 0) return createPublishedCurrentWeek();
+  if (weekOffset <= 0) return createPublishedWeek(weekOffset);
   return {
     shifts: createInitialDraftShifts(initialDraftShifts),
     published: false,

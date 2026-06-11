@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShortcuts } from "@/components/AppShortcuts";
+import { WorkspaceStoreProvider } from "@/features/demo/store/WorkspaceStoreProvider";
 import { SkipToContent, RouteAnnouncer, RouteFocusManager } from "@/components/RouteAnnouncer";
 
 import appCss from "../styles.css?url";
@@ -143,9 +144,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <SkipToContent />
-      <AppShortcuts>
-        <Outlet />
-      </AppShortcuts>
+      <WorkspaceStoreProvider>
+        <AppShortcuts>
+          <Outlet />
+        </AppShortcuts>
+      </WorkspaceStoreProvider>
       <RouteFocusManager />
       <RouteAnnouncer />
       <Toaster />

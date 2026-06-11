@@ -1,20 +1,18 @@
-import * as React from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import { selectRotaWeek } from "@/features/demo/store/workspaceActions";
 import { getWeekLabelForOffset, getWeekSubtitle } from "./topbarUtils";
 
 export function TopbarWeekPill() {
-  const [weekOffset, setWeekOffset] = React.useState(0);
+  const store = useWorkspaceStore();
+  const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
   const weekLabel = getWeekLabelForOffset(weekOffset);
-  const changeWeek = (offset: number) => {
-    setWeekOffset(offset);
-    window.dispatchEvent(new CustomEvent("docklist:week-change", { detail: offset }));
-  };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => changeWeek(weekOffset - 1)}
+        onClick={() => selectRotaWeek(store, weekOffset - 1)}
         className="topbar-arrow hidden md:grid"
         title="Previous week"
         aria-label="Previous week"
@@ -34,7 +32,7 @@ export function TopbarWeekPill() {
 
       <button
         type="button"
-        onClick={() => changeWeek(weekOffset + 1)}
+        onClick={() => selectRotaWeek(store, weekOffset + 1)}
         className="topbar-arrow hidden md:grid"
         title="Next week"
         aria-label="Next week"
