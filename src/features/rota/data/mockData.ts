@@ -146,16 +146,6 @@ export const initialDraftShifts: SeedShift[] = [
   sched(null, 4, "Porter", "07:00", "15:00", "open", "open"),
 ];
 
-export const toneStyles: Record<string, string> = {
-  info: "bg-info-soft/70 text-foreground border-info/20",
-  warning: "bg-warning-soft/70 text-foreground border-warning/20",
-  danger: "bg-danger-soft/70 text-foreground border-danger/20",
-  purple: "bg-accent-purple-soft/70 text-foreground border-accent-purple/20",
-  success: "bg-success-soft/70 text-foreground border-success/20",
-  open: "bg-warning-soft/70 text-warning-700 border-dashed border-warning/60",
-  off: "bg-transparent text-muted-foreground border-transparent",
-};
-
 export const roleLegend = [
   { label: "Management / FOH", preset: "blue" },
   { label: "Kitchen", preset: "amber" },
