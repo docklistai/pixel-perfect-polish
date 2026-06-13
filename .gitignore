@@ -39,3 +39,10 @@ audit-*.png
 smoke-*.png
 verify-*.png
 .claude/skills/**/.temp-execution-*.js
+
+# Supabase CLI local metadata (regenerated on demand, contains project ref — do not commit)
+supabase/.branches/
+supabase/.temp/
+
+# Agent working plans (ephemeral task state — outcomes captured in memory/)
+.claude/plans/
