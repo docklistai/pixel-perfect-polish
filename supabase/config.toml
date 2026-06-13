@@ -1,0 +1,8 @@
+# Minimal local-stack config. Everything not listed uses Supabase CLI defaults.
+project_id = "pixel-perfect-polish"
+
+[auth]
+# Staff portal access codes (Phase 6) bind an anonymous-auth identity to a
+# workspace membership via rpc_claim_staff_portal_access. The remote project
+# must enable anonymous sign-ins before the portal claim flow can work there.
+enable_anonymous_sign_ins = true

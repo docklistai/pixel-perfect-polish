@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import {
   ActionButton,
   DashboardCard,
@@ -25,6 +26,8 @@ import {
   FormSection,
   StatusBadge,
 } from "@/components/dl";
+import { clearAuthStateCache } from "@/features/auth";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { mockDocuments, mockNotices, mockProfile } from "../data/mockPortalData";
 import { teamOnDutyToday } from "../lib/portalRota";
@@ -34,6 +37,21 @@ const APP_VERSION = "2.4.1 (138)";
 
 export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const [section, setSection] = React.useState<MoreSection>(null);
+  const navigate = useNavigate();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await getSupabaseBrowserClient().auth.signOut();
+      if (error) throw error;
+    } catch {
+      toast.error("Sign-out failed", { description: "Please try again." });
+      return;
+    }
+    clearAuthStateCache();
+    await router.invalidate();
+    await navigate({ to: "/portal/access" });
+  };
 
   return (
     <div className="space-y-4">
@@ -79,12 +97,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
 
       <DashboardCard className="rounded-2xl p-2.5">
         <ul className="divide-y divide-border">
-          <Row
-            icon={LogOut}
-            label="Sign out"
-            tone="danger"
-            onClick={() => toast.message("Signed out")}
-          />
+          <Row icon={LogOut} label="Sign out" tone="danger" onClick={() => void handleSignOut()} />
         </ul>
       </DashboardCard>
 

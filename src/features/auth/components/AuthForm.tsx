@@ -10,9 +10,21 @@ import { PasswordChecklist } from "./PasswordChecklist";
 import { AuthModeToggle } from "./AuthModeToggle";
 import { AuthNextStepNotice } from "./AuthNextStepNotice";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
+import { clearAuthStateCache } from "../authStateCache";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PASSWORD_HINT = "At least 8 characters, one uppercase letter, and one number.";
+
+function describeSignInError(message: string): string {
+  if (/invalid login credentials/i.test(message)) {
+    return "That email and password combination doesn't match. Check the details and try again.";
+  }
+  if (/email not confirmed/i.test(message)) {
+    return "Confirm your email first — check your inbox for the verification link.";
+  }
+  return message;
+}
 
 interface AuthFormProps {
   onBackToHome: () => void;
@@ -38,21 +50,13 @@ export function AuthForm({
   const [statusMessage, setStatusMessage] = useState("");
   const [authError, setAuthError] = useState("");
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setAuthError("");
     setStatusMessage("");
 
     if (!isSignUp && (!email.trim() || !password)) {
-      setAuthError("Enter the demo manager email and password to continue.");
-      return;
-    }
-    if (
-      !isSignUp &&
-      (email.trim().toLowerCase() !== DEMO_WORLD.manager.email ||
-        password !== DEMO_WORLD.manager.password)
-    ) {
-      setAuthError("Those demo manager details do not match. Check the sign-in hint below.");
+      setAuthError("Enter your email and password to continue.");
       return;
     }
     if (isSignUp && !consentAccepted) {
@@ -63,15 +67,49 @@ export function AuthForm({
       setAuthError(PASSWORD_HINT);
       return;
     }
+
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const supabase = getSupabaseBrowserClient();
+
       if (!isSignUp) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (error) {
+          setAuthError(describeSignInError(error.message));
+          return;
+        }
+        clearAuthStateCache();
         onValidSignIn?.();
         return;
       }
-      setAuthError("Sign up is not available yet. Please check back soon.");
-    }, 600);
+
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: { data: { display_name: displayName.trim() } },
+      });
+      if (error) {
+        setAuthError(error.message);
+        return;
+      }
+      if (!data.session) {
+        setStatusMessage("Check your inbox — confirm your email to finish creating your account.");
+        return;
+      }
+      clearAuthStateCache();
+      onValidSignIn?.();
+    } catch (cause) {
+      setAuthError(
+        cause instanceof Error && /not configured/i.test(cause.message)
+          ? "Sign-in isn't available in this environment yet."
+          : "Something went wrong on our end. Please try again.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleResetPassword = () => {
@@ -200,7 +238,8 @@ export function AuthForm({
         </Button>
 
         {!isSignUp && <AuthNextStepNotice />}
-        {!isSignUp && (
+        {/* Seeded local credentials — dev builds only, never shipped to prod. */}
+        {!isSignUp && import.meta.env.DEV && (
           <p className="text-center text-xs text-muted-foreground">
             Demo manager: <strong>{DEMO_WORLD.manager.email}</strong> · password{" "}
             <strong>{DEMO_WORLD.manager.password}</strong>

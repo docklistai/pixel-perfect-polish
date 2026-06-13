@@ -27,8 +27,10 @@ import { TimeQueryDrawer } from "@/features/time/components/TimeQueryDrawer";
 import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { useTimeActions } from "@/features/time/hooks/useTimeActions";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/time")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Time & Attendance — Docklist" }] }),
   component: TimePage,
 });

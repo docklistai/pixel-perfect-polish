@@ -9,8 +9,10 @@ import { MoreTab } from "@/features/staff-portal/components/MoreTab";
 import { NotificationDrawer } from "@/features/staff-portal/components/NotificationDrawer";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import type { PortalTab } from "@/features/staff-portal/types";
+import { requireStaffPortalAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/portal")({
+  beforeLoad: ({ context }) => requireStaffPortalAccess(context.auth),
   head: () => ({
     meta: [
       { title: "Staff portal — Docklist" },

@@ -6,8 +6,10 @@ import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import type { SettingsContentTab } from "@/features/settings/components/SettingsContent";
 import { SettingsSidebar } from "@/features/settings/components/SettingsSidebar";
 import { SettingsContent } from "@/features/settings/components/SettingsContent";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/settings")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Settings — Docklist" }] }),
   component: SettingsPage,
 });

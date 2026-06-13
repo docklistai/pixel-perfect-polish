@@ -34,8 +34,10 @@ import { useOverlays } from "@/components/AppShortcuts";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
 import { useIntentHandler } from "@/lib/interactionIntents";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/leave")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Leave — Docklist" }] }),
   component: LeavePage,
 });

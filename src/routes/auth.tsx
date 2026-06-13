@@ -1,14 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
-import { AuthValuePanel, AuthForm } from "@/features/auth";
+import { AuthValuePanel, AuthForm, redirectActiveMembers } from "@/features/auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import heroBg from "@/assets/hero-cafe-minimal.jpg";
-import { Shield, Users, Coffee } from "lucide-react";
+import { Shield, Users, Coffee, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
+  beforeLoad: ({ context }) => redirectActiveMembers(context.auth),
   head: () => ({
     meta: [
       { title: "Sign In — Docklist" },
@@ -60,98 +58,31 @@ function RoleSelector({
   );
 }
 
-function StaffAuthForm({ onBack }: { onBack: () => void }) {
-  const [workspaceName, setWorkspaceName] = React.useState("");
-  const [accessCode, setAccessCode] = React.useState("");
-  const [error, setError] = React.useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!workspaceName.trim()) {
-      setError("Please enter your workspace name");
-      return;
-    }
-    if (accessCode.length < 6) {
-      setError("Please enter your 6-digit access code");
-      return;
-    }
-  };
-
+function StaffAuthPanel({ onBack }: { onBack: () => void }) {
   return (
     <div className="space-y-5">
       <div className="text-center">
-        <h2 className="text-xl font-semibold tracking-tight">Staff sign in</h2>
+        <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-brand/10 bg-brand-soft text-brand">
+          <KeyRound className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <h2 className="mt-4 text-xl font-semibold tracking-tight">Staff sign in</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Enter your workspace name and 6-digit access code
+          Use the workspace code and personal access code your manager gave you.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="staff-workspace">Workspace name</Label>
-          <Input
-            id="staff-workspace"
-            type="text"
-            placeholder="e.g., Harbour View Hotel"
-            value={workspaceName}
-            onChange={(e) => {
-              setWorkspaceName(e.target.value);
-              setError("");
-            }}
-            autoComplete="organization"
-          />
-        </div>
+      <Button asChild size="lg" className="w-full bg-brand text-brand-foreground hover:bg-brand/90">
+        <Link to="/portal/access">Enter my access codes</Link>
+      </Button>
 
-        <div className="space-y-2">
-          <Label htmlFor="staff-code">Access code</Label>
-          <Input
-            id="staff-code"
-            type="text"
-            inputMode="numeric"
-            maxLength={6}
-            placeholder="000000"
-            value={accessCode}
-            onChange={(e) => {
-              setAccessCode(e.target.value.replace(/\D/g, ""));
-              setError("");
-            }}
-            className="text-center font-mono text-xl tracking-widest"
-            autoComplete="one-time-code"
-          />
-          {error && <p className="text-xs text-danger">{error}</p>}
-        </div>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="block w-full">
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full bg-brand text-brand-foreground hover:bg-brand/90"
-                  disabled
-                >
-                  Sign in
-                </Button>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>Staff sign-in opens with the staff app rollout</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <p className="text-center text-xs text-muted-foreground">
-          Staff sign-in opens with the staff app rollout. Ask your manager if you need your rota in
-          the meantime.
-        </p>
-
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={onBack}
-          className="w-full text-muted-foreground hover:text-foreground"
-        >
-          ← Back to role selection
-        </Button>
-      </form>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onBack}
+        className="w-full text-muted-foreground hover:text-foreground"
+      >
+        ← Back to role selection
+      </Button>
 
       <p className="text-center text-xs text-muted-foreground">
         Contact your manager if you've lost your access code
@@ -273,7 +204,7 @@ function AuthPage() {
                   />
                 )}
 
-                {loginMode === "staff" && <StaffAuthForm onBack={handleBackToRoleSelect} />}
+                {loginMode === "staff" && <StaffAuthPanel onBack={handleBackToRoleSelect} />}
               </div>
 
               <div className="mt-4 text-center">

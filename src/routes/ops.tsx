@@ -24,8 +24,10 @@ import { OpsHandoverModal } from "@/features/ops/components/OpsHandoverModal";
 import { OpsDetailDrawer } from "@/features/ops/components/OpsDetailDrawer";
 import { opsTimeline } from "@/features/ops/data/opsDemoData";
 import type { OpsEntry } from "@/features/ops/types";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/ops")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Operations — Docklist" }] }),
   component: OpsPage,
 });

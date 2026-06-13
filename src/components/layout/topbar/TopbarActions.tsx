@@ -11,7 +11,10 @@ import {
   User,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useOverlays } from "@/components/AppShortcuts";
+import { clearAuthStateCache } from "@/features/auth";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import type { ThemeMode } from "./topbarUtils";
 
 export function TopbarActions({
@@ -22,8 +25,23 @@ export function TopbarActions({
   toggleTheme: () => void;
 }) {
   const { openAiDrawer, openNotifications, unreadCount } = useOverlays();
+  const navigate = useNavigate();
+  const router = useRouter();
   const [userOpen, setUserOpen] = React.useState(false);
   const userRef = React.useRef<HTMLDivElement>(null);
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await getSupabaseBrowserClient().auth.signOut();
+      if (error) throw error;
+    } catch {
+      toast.error("Sign-out failed", { description: "Please try again." });
+      return;
+    }
+    clearAuthStateCache();
+    await router.invalidate();
+    await navigate({ to: "/auth" });
+  };
 
   React.useEffect(() => {
     if (!userOpen) return;
@@ -167,9 +185,7 @@ export function TopbarActions({
               type="button"
               onClick={() => {
                 setUserOpen(false);
-                toast.info("Signed in as Alex Thompson", {
-                  description: "Sign-out is disabled in this demo workspace.",
-                });
+                void handleSignOut();
               }}
               className="menu-item danger"
             >

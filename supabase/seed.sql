@@ -274,4 +274,90 @@ values
   ('20000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '13000000-0000-4000-8000-000000000001', 'leave.approved', 'leave_request', '19000000-0000-4000-8000-000000000002', '2026-05-29T09:10:00+01:00', '{}'::jsonb),
   ('20000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001', '13000000-0000-4000-8000-000000000001', 'time_entry.approved', 'time_entry', '1b000000-0000-4000-8000-000000000001', '2026-06-09T09:00:00+01:00', '{}'::jsonb);
 
+-- ---------------------------------------------------------------------------
+-- Phase 6 local-only auth fixtures. The demo manager gets a real GoTrue user
+-- so /auth sign-in works against the local stack, on a NEW membership row:
+-- the original seeded memberships stay unclaimed because the Phase 4/5 test
+-- suites bind their own identities to them and a claimed membership can never
+-- be rewritten.
+--
+-- Local demo credentials (never used remotely):
+--   manager sign-in:  alex@harbourview.co.uk / Docklist2026
+--   portal claim:     workspace code HARBOUR-VIEW + Olivia code OLIVIA-2026
+-- ---------------------------------------------------------------------------
+
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new
+)
+values (
+  '00000000-0000-0000-0000-000000000000',
+  'ab000000-0000-4000-8000-000000000001',
+  'authenticated',
+  'authenticated',
+  'alex@harbourview.co.uk',
+  extensions.crypt('Docklist2026', extensions.gen_salt('bf')),
+  '2026-06-01T08:00:00Z',
+  '{"provider": "email", "providers": ["email"]}'::jsonb,
+  '{"display_name": "Alex Thompson"}'::jsonb,
+  '2026-06-01T08:00:00Z',
+  '2026-06-01T08:00:00Z',
+  '', '', '', ''
+);
+
+insert into auth.identities (
+  id, user_id, identity_data, provider, provider_id,
+  last_sign_in_at, created_at, updated_at
+)
+values (
+  'ac000000-0000-4000-8000-000000000001',
+  'ab000000-0000-4000-8000-000000000001',
+  '{"sub": "ab000000-0000-4000-8000-000000000001", "email": "alex@harbourview.co.uk", "email_verified": true}'::jsonb,
+  'email',
+  'ab000000-0000-4000-8000-000000000001',
+  '2026-06-01T08:00:00Z',
+  '2026-06-01T08:00:00Z',
+  '2026-06-01T08:00:00Z'
+);
+
+insert into public.workspace_memberships (
+  id, workspace_id, user_id, role, status, invited_at, joined_at, created_at, updated_at
+)
+values (
+  '13000000-0000-4000-8000-000000000011',
+  '10000000-0000-4000-8000-000000000001',
+  'ab000000-0000-4000-8000-000000000001',
+  'manager',
+  'active',
+  '2026-06-01T08:00:00Z',
+  '2026-06-01T09:00:00Z',
+  '2026-06-01T08:00:00Z',
+  '2026-06-01T09:00:00Z'
+);
+
+-- Known demo portal codes (digests only; plaintext documented above). The
+-- workspace code lives in the definer-only workspace_portal_access_codes table,
+-- never on public.workspaces.
+insert into public.workspace_portal_access_codes (
+  workspace_id, code_digest, issued_by_membership_id
+)
+values (
+  '10000000-0000-4000-8000-000000000001',
+  extensions.digest('HARBOURVIEW', 'sha256'),
+  '13000000-0000-4000-8000-000000000011'
+);
+
+insert into public.staff_portal_access_codes (
+  id, workspace_id, staff_member_id, code_digest, issued_by_membership_id, issued_at
+)
+values (
+  '2a000000-0000-4000-8000-000000000001',
+  '10000000-0000-4000-8000-000000000001',
+  '14000000-0000-4000-8000-000000000005',
+  extensions.digest('OLIVIA2026', 'sha256'),
+  '13000000-0000-4000-8000-000000000011',
+  '2026-06-11T08:00:00Z'
+);
+
 commit;

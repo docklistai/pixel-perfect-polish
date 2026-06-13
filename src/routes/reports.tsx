@@ -14,8 +14,10 @@ import { ReportsCoverageHeatmapCard } from "@/features/reports/components/Report
 import { ReportsExportDialog } from "@/features/reports/components/ReportsExportDialog";
 import { InsightDetailDrawer } from "@/features/reports/components/InsightDetailDrawer";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/reports")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Reports — Docklist" }] }),
   component: ReportsPage,
 });

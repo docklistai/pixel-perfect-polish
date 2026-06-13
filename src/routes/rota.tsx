@@ -18,8 +18,10 @@ import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
 import { LegendCard } from "@/features/rota/components/LegendCard";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { useRotaOverlays } from "@/features/rota/hooks/useRotaOverlays";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/rota")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Rota — Docklist" }] }),
   component: RotaPage,
 });

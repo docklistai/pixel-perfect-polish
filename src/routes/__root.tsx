@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShortcuts } from "@/components/AppShortcuts";
+import { getAuthState } from "@/features/auth";
 import { WorkspaceStoreProvider } from "@/features/demo/store/WorkspaceStoreProvider";
 import { SkipToContent, RouteAnnouncer, RouteFocusManager } from "@/components/RouteAnnouncer";
 
@@ -72,6 +73,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  beforeLoad: async () => ({ auth: await getAuthState() }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },

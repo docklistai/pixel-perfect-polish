@@ -38,8 +38,10 @@ import {
   quickGroups,
 } from "@/features/team/data/teamDemoData";
 import type { TeamAnnouncement, TeamBirthdayItem, TeamTrainingItem } from "@/features/team/types";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/team")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Team — Docklist" }] }),
   component: TeamPage,
 });

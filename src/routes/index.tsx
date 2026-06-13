@@ -24,8 +24,10 @@ import {
   quickActionItems,
 } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardWorkspace } from "@/features/dashboard/hooks/useDashboardWorkspace";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({
     meta: [
       { title: "Home — Docklist" },

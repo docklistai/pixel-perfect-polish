@@ -18,11 +18,13 @@ import { Route as RotaRouteImport } from './routes/rota'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OpsRouteImport } from './routes/ops'
+import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LeaveRouteImport } from './routes/leave'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffStaffIdRouteImport } from './routes/staff.$staffId'
+import { Route as PortalAccessRouteImport } from './routes/portal_.access'
 
 const UiKitRoute = UiKitRouteImport.update({
   id: '/ui-kit',
@@ -69,6 +71,11 @@ const OpsRoute = OpsRouteImport.update({
   path: '/ops',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NoAccessRoute = NoAccessRouteImport.update({
+  id: '/no-access',
+  path: '/no-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeaveRoute = LeaveRouteImport.update({
   id: '/leave',
   path: '/leave',
@@ -94,12 +101,18 @@ const StaffStaffIdRoute = StaffStaffIdRouteImport.update({
   path: '/$staffId',
   getParentRoute: () => StaffRoute,
 } as any)
+const PortalAccessRoute = PortalAccessRouteImport.update({
+  id: '/portal_/access',
+  path: '/portal/access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/landing': typeof LandingRoute
   '/leave': typeof LeaveRoute
+  '/no-access': typeof NoAccessRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
   '/reports': typeof ReportsRoute
@@ -109,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/portal/access': typeof PortalAccessRoute
   '/staff/$staffId': typeof StaffStaffIdRoute
 }
 export interface FileRoutesByTo {
@@ -116,6 +130,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/landing': typeof LandingRoute
   '/leave': typeof LeaveRoute
+  '/no-access': typeof NoAccessRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
   '/reports': typeof ReportsRoute
@@ -125,6 +140,7 @@ export interface FileRoutesByTo {
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/portal/access': typeof PortalAccessRoute
   '/staff/$staffId': typeof StaffStaffIdRoute
 }
 export interface FileRoutesById {
@@ -133,6 +149,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/landing': typeof LandingRoute
   '/leave': typeof LeaveRoute
+  '/no-access': typeof NoAccessRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
   '/reports': typeof ReportsRoute
@@ -142,6 +159,7 @@ export interface FileRoutesById {
   '/team': typeof TeamRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/portal_/access': typeof PortalAccessRoute
   '/staff/$staffId': typeof StaffStaffIdRoute
 }
 export interface FileRouteTypes {
@@ -151,6 +169,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/landing'
     | '/leave'
+    | '/no-access'
     | '/ops'
     | '/portal'
     | '/reports'
@@ -160,6 +179,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/time'
     | '/ui-kit'
+    | '/portal/access'
     | '/staff/$staffId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -167,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/landing'
     | '/leave'
+    | '/no-access'
     | '/ops'
     | '/portal'
     | '/reports'
@@ -176,6 +197,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/time'
     | '/ui-kit'
+    | '/portal/access'
     | '/staff/$staffId'
   id:
     | '__root__'
@@ -183,6 +205,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/landing'
     | '/leave'
+    | '/no-access'
     | '/ops'
     | '/portal'
     | '/reports'
@@ -192,6 +215,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/time'
     | '/ui-kit'
+    | '/portal_/access'
     | '/staff/$staffId'
   fileRoutesById: FileRoutesById
 }
@@ -200,6 +224,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   LandingRoute: typeof LandingRoute
   LeaveRoute: typeof LeaveRoute
+  NoAccessRoute: typeof NoAccessRoute
   OpsRoute: typeof OpsRoute
   PortalRoute: typeof PortalRoute
   ReportsRoute: typeof ReportsRoute
@@ -209,6 +234,7 @@ export interface RootRouteChildren {
   TeamRoute: typeof TeamRoute
   TimeRoute: typeof TimeRoute
   UiKitRoute: typeof UiKitRoute
+  PortalAccessRoute: typeof PortalAccessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -276,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/no-access': {
+      id: '/no-access'
+      path: '/no-access'
+      fullPath: '/no-access'
+      preLoaderRoute: typeof NoAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/leave': {
       id: '/leave'
       path: '/leave'
@@ -311,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffStaffIdRouteImport
       parentRoute: typeof StaffRoute
     }
+    '/portal_/access': {
+      id: '/portal_/access'
+      path: '/portal/access'
+      fullPath: '/portal/access'
+      preLoaderRoute: typeof PortalAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -329,6 +369,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   LandingRoute: LandingRoute,
   LeaveRoute: LeaveRoute,
+  NoAccessRoute: NoAccessRoute,
   OpsRoute: OpsRoute,
   PortalRoute: PortalRoute,
   ReportsRoute: ReportsRoute,
@@ -338,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeamRoute: TeamRoute,
   TimeRoute: TimeRoute,
   UiKitRoute: UiKitRoute,
+  PortalAccessRoute: PortalAccessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

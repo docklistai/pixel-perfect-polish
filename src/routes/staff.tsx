@@ -25,8 +25,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useIntentHandler } from "@/lib/interactionIntents";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/staff")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Staff — Docklist" }] }),
   component: StaffPage,
 });
