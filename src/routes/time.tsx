@@ -25,8 +25,8 @@ import { TimeExportDialog } from "@/features/time/components/TimeExportDialog";
 import { TimeAdjustDialog } from "@/features/time/components/TimeAdjustDialog";
 import { TimeQueryDrawer } from "@/features/time/components/TimeQueryDrawer";
 import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import { useTimeActions } from "@/features/time/hooks/useTimeActions";
+import { useWorkspaceTime } from "@/features/time/hooks/useWorkspaceTime";
+import { useTimeController } from "@/features/time/hooks/useTimeController";
 import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/time")({
@@ -36,6 +36,8 @@ export const Route = createFileRoute("/time")({
 });
 
 const PERIOD_LABEL = "8 – 14 Jun 2026";
+const PERIOD_START = "2026-06-08";
+const PERIOD_END = "2026-06-14";
 
 const TEAM_OPTIONS = [
   "All teams",
@@ -49,7 +51,10 @@ const TEAM_OPTIONS = [
 function TimePage() {
   const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
-  const allRows = useWorkspaceSelector((state) => state.timeRows);
+  const { auth } = Route.useRouteContext();
+  const { rows: allRows, source: timeSource } = useWorkspaceTime();
+  const liveWorkspaceId =
+    timeSource === "live" && auth.status === "member" ? auth.workspaceId : null;
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
@@ -64,7 +69,7 @@ function TimePage() {
     () => (team === "All teams" ? allRows : allRows.filter((row) => row.department === team)),
     [allRows, team],
   );
-  const time = useTimeActions(allRows, teamRows);
+  const time = useTimeController(allRows, teamRows, timeSource);
 
   const filtered = React.useMemo(() => {
     return teamRows.filter((r) => {
@@ -306,6 +311,9 @@ function TimePage() {
         onOpenChange={setExportOpen}
         rows={teamRows}
         periodLabel={PERIOD_LABEL}
+        liveWorkspaceId={liveWorkspaceId}
+        periodStart={PERIOD_START}
+        periodEnd={PERIOD_END}
       />
     </AppShell>
   );

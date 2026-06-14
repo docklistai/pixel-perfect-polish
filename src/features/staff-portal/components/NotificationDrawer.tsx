@@ -1,8 +1,6 @@
 import * as React from "react";
 import { Bell } from "lucide-react";
 import { DrawerShell, EmptyState, StatusBadge } from "@/components/dl";
-import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
-import { markAllPortalNotificationsRead } from "@/features/demo/store/workspaceActions";
 import type { NotificationCategory, PortalNotification } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -12,9 +10,17 @@ const TABS: { id: NotificationCategory; label: string }[] = [
   { id: "important", label: "Important" },
 ];
 
-export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const store = useWorkspaceStore();
-  const items = useWorkspaceSelector((state) => state.portalNotifications);
+export function NotificationDrawer({
+  open,
+  onClose,
+  items,
+  markAllRead,
+}: {
+  open: boolean;
+  onClose: () => void;
+  items: PortalNotification[];
+  markAllRead: () => void;
+}) {
   const [tab, setTab] = React.useState<NotificationCategory>("all");
 
   const filtered = items.filter((n) => {
@@ -22,8 +28,6 @@ export function NotificationDrawer({ open, onClose }: { open: boolean; onClose: 
     if (tab === "important") return n.important;
     return true;
   });
-
-  const markAllRead = () => markAllPortalNotificationsRead(store);
 
   return (
     <DrawerShell

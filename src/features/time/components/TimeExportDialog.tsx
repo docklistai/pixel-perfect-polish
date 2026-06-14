@@ -3,33 +3,80 @@ import { DialogShell, ActionButton, StatusBadge } from "@/components/dl";
 import { Download, Info } from "lucide-react";
 import { toast } from "sonner";
 import type { StoredTimesheetRow } from "../types";
+import { exportApprovedHoursFn } from "../api/timeLiveData";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   rows: StoredTimesheetRow[];
   periodLabel: string;
+  /** When set, the download uses the server-authoritative, audited export RPC. */
+  liveWorkspaceId?: string | null;
+  periodStart?: string;
+  periodEnd?: string;
 }
 
 function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
-export function TimeExportDialog({ open, onOpenChange, rows, periodLabel }: Props) {
+function triggerCsvDownload(content: string): void {
+  const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "harbour_view_approved_hours_8-14-jun.csv";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+export function TimeExportDialog({
+  open,
+  onOpenChange,
+  rows,
+  periodLabel,
+  liveWorkspaceId,
+  periodStart,
+  periodEnd,
+}: Props) {
   const approvedRows = rows.filter((row) => row.status === "approved");
-  const handleDownload = () => {
+
+  const handleDownload = async () => {
+    // Live: the audited, CSV-injection-safe RPC is the authoritative source.
+    if (liveWorkspaceId && periodStart && periodEnd) {
+      const result = await exportApprovedHoursFn({
+        data: { workspaceId: liveWorkspaceId, startDate: periodStart, endDate: periodEnd },
+      });
+      if (!result.ok) {
+        toast.error("Couldn't export", { description: result.message });
+        return;
+      }
+      const content = [
+        ["Employee ID", "Name", "Approved Hours", "Role", "Department"],
+        ...result.rows.map((row) => [
+          row.staffMemberId,
+          row.displayName,
+          row.approvedHours.toFixed(2),
+          row.roleName,
+          row.departmentName,
+        ]),
+      ]
+        .map((line) => line.map(csvCell).join(","))
+        .join("\n");
+      triggerCsvDownload(content);
+      onOpenChange(false);
+      toast.success("CSV ready", {
+        description: `${result.rows.length} approved staff exported for ${periodLabel}.`,
+      });
+      return;
+    }
+
     const content = [
       ["Employee ID", "Name", "Approved Hours", "Role", "Department"],
       ...approvedRows.map((row) => [row.id, row.n, row.paid, row.role, row.department]),
     ]
       .map((line) => line.map(csvCell).join(","))
       .join("\n");
-    const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "harbour_view_approved_hours_8-14-jun.csv";
-    link.click();
-    URL.revokeObjectURL(url);
+    triggerCsvDownload(content);
     onOpenChange(false);
     toast.success("CSV ready", {
       description: `${approvedRows.length} approved rows exported for ${periodLabel}.`,

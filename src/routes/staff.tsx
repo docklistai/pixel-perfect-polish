@@ -11,6 +11,7 @@ import {
 } from "@/components/dl";
 import { Users, CheckCircle2, UserPlus, AlertTriangle, Plus, Filter } from "lucide-react";
 import { rows } from "@/features/staff/data/mockStaffData";
+import { useWorkspaceStaff } from "@/features/staff/hooks/useWorkspaceStaff";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { StaffTable } from "@/features/staff/components/StaffTable";
 import type { StaffAttentionFilter } from "@/features/staff/components/StaffTable";
@@ -43,7 +44,7 @@ type StatCard = {
   tone: StatTone;
 };
 
-function buildStats(staffRows: typeof rows): StatCard[] {
+function buildStats(staffRows: StaffRow[]): StatCard[] {
   const total = staffRows.length;
   const active = staffRows.filter((r) => r.status === "Active").length;
   const onboarding = staffRows.filter((r) => r.status === "Probation").length;
@@ -97,12 +98,14 @@ function StaffPage() {
 }
 
 function StaffListPage() {
-  const stats = buildStats(rows);
+  const { rows: staffRows } = useWorkspaceStaff();
+  const stats = buildStats(staffRows);
   const [addOpen, setAddOpen] = React.useState(false);
 
   useIntentHandler("staff.add", () => setAddOpen(true));
   const [invitePrepared, setInvitePrepared] = React.useState(false);
-  const [selected, setSelected] = React.useState<StaffRow>(rows[0]);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const selected = staffRows.find((row) => row.id === selectedId) ?? staffRows[0] ?? rows[0];
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();
   const [query, setQuery] = React.useState("");
   const [deptFilter, setDeptFilter] = React.useState("All");
@@ -118,7 +121,7 @@ function StaffListPage() {
   }
 
   function handleSelectMember(row: StaffRow) {
-    setSelected(row);
+    setSelectedId(row.id);
     setIsProfilePanelOpen(true);
   }
 
@@ -188,7 +191,7 @@ function StaffListPage() {
           </div>
 
           <StaffTable
-            rows={rows}
+            rows={staffRows}
             selected={selected}
             query={query}
             onQueryChange={setQuery}

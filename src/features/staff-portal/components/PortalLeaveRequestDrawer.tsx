@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getRouteApi } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { ActionButton, DrawerShell, FormRow, FormSection } from "@/components/dl";
 import { createLeaveRequest } from "@/features/demo/store/leaveActions";
@@ -8,7 +9,9 @@ import {
   buildLeaveRequest,
   type LeaveStaffOption,
 } from "@/features/leave/lib/leaveRequests";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 import { mockProfile } from "../data/mockPortalData";
+import { submitLeaveRequestFn } from "../api/portalActions";
 
 const PORTAL_STAFF: LeaveStaffOption = {
   id: mockProfile.staffId,
@@ -18,6 +21,17 @@ const PORTAL_STAFF: LeaveStaffOption = {
   img: 16,
 };
 
+const portalRouteApi = getRouteApi("/portal");
+
+/** UI leave-type labels → the RPC's `leave_type` enum. */
+const LEAVE_TYPE_TO_RPC: Record<string, "annual_leave" | "personal" | "sick" | "unpaid" | "other"> =
+  {
+    "Annual leave": "annual_leave",
+    "Sick leave": "sick",
+    "Compassionate leave": "personal",
+    "Unpaid leave": "unpaid",
+  };
+
 export function PortalLeaveRequestDrawer({
   open,
   onOpenChange,
@@ -26,12 +40,21 @@ export function PortalLeaveRequestDrawer({
   onOpenChange: (open: boolean) => void;
 }) {
   const store = useWorkspaceStore();
+  const { auth } = portalRouteApi.useRouteContext();
   const [startIso, setStartIso] = React.useState("2026-06-19");
   const [endIso, setEndIso] = React.useState("2026-06-21");
   const [leaveType, setLeaveType] = React.useState("Annual leave");
   const [reason, setReason] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
 
-  const submit = () => {
+  // Live submissions persist through the RPC; the demo path mutates the
+  // WorkspaceStore so the Harbour View playground keeps working offline.
+  const liveWorkspaceId =
+    Boolean(getSupabaseEnv()) && auth.status === "member" && auth.role === "staff"
+      ? auth.workspaceId
+      : null;
+
+  const echoToStore = () => {
     const request = buildLeaveRequest({
       staff: PORTAL_STAFF,
       startIso,
@@ -41,11 +64,59 @@ export function PortalLeaveRequestDrawer({
       source: "portal",
     });
     createLeaveRequest(store, request, buildLeaveManagerNotification(request));
+  };
+
+  const close = () => {
     onOpenChange(false);
     setReason("");
-    toast.success("Leave request submitted", {
-      description: "Your manager can now review it in Docklist.",
-    });
+  };
+
+  const submit = async () => {
+    if (submitting) return;
+
+    if (!liveWorkspaceId) {
+      echoToStore();
+      close();
+      toast.success("Leave request submitted", {
+        description: "Your manager can now review it in Docklist.",
+      });
+      return;
+    }
+
+    if (reason.trim().length === 0) {
+      toast.error("Add a note", { description: "A short reason is required for your request." });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await submitLeaveRequestFn({
+        data: {
+          workspaceId: liveWorkspaceId,
+          leaveType: LEAVE_TYPE_TO_RPC[leaveType] ?? "other",
+          startDate: startIso,
+          endDate: endIso,
+          reason: reason.trim(),
+        },
+      });
+
+      if (!result.ok) {
+        toast.error("Couldn't submit request", { description: result.message });
+        return;
+      }
+
+      // Reflect the persisted request in the local history list immediately.
+      echoToStore();
+      close();
+      toast.success("Leave request submitted", {
+        description: "Your manager can now review it in Docklist.",
+      });
+    } catch (error) {
+      console.error("submitLeaveRequestFn failed:", error);
+      toast.error("Couldn't submit request", { description: "Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -60,7 +131,9 @@ export function PortalLeaveRequestDrawer({
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton onClick={submit}>Submit request</ActionButton>
+          <ActionButton onClick={submit} disabled={submitting}>
+            {submitting ? "Submitting…" : "Submit request"}
+          </ActionButton>
         </>
       }
     >

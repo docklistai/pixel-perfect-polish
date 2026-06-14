@@ -20,8 +20,7 @@ import {
   Plane,
   Plus,
 } from "lucide-react";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import { useLeaveActions } from "@/features/leave/hooks/useLeaveActions";
+import { useLeaveController } from "@/features/leave/hooks/useLeaveController";
 import { LeaveMetricCards } from "@/features/leave/components/LeaveMetricCards";
 import { LeaveRequestInbox } from "@/features/leave/components/LeaveRequestInbox";
 import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPanel";
@@ -70,7 +69,6 @@ function matchesLeaveFilter(request: LeaveRequest, filter: LeaveFilter): boolean
 function LeavePage() {
   const navigate = useNavigate();
   const { askAssistant } = useOverlays();
-  const requests = useWorkspaceSelector((state) => state.leaveRequests);
   const [activeId, setActiveId] = React.useState("l3");
   const [filter, setFilter] = React.useState<LeaveFilter>("all");
   const [calendarOpen, setCalendarOpen] = React.useState(false);
@@ -81,12 +79,6 @@ function LeavePage() {
 
   useIntentHandler("leave.new", () => setNewRequestOpen(true));
 
-  const visibleRequests = React.useMemo(
-    () => requests.filter((request) => matchesLeaveFilter(request, filter)),
-    [requests, filter],
-  );
-  const activeRequest =
-    visibleRequests.find((request) => request.id === activeId) ?? visibleRequests[0] ?? null;
   const openDecision = (request: LeaveRequest, type: "approve" | "decline") => {
     setDecisionRequest(request);
     setDecisionType(type);
@@ -97,12 +89,20 @@ function LeavePage() {
     setDecisionType(null);
   };
 
-  const actions = useLeaveActions({
+  const actions = useLeaveController({
     decisionRequest,
     onSelectRequest: setActiveId,
     onCloseDecision: closeDecision,
     onCloseNewRequest: () => setNewRequestOpen(false),
   });
+  const requests = actions.requests;
+
+  const visibleRequests = React.useMemo(
+    () => requests.filter((request) => matchesLeaveFilter(request, filter)),
+    [requests, filter],
+  );
+  const activeRequest =
+    visibleRequests.find((request) => request.id === activeId) ?? visibleRequests[0] ?? null;
 
   return (
     <AppShell>

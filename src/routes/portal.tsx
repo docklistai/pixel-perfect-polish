@@ -7,7 +7,7 @@ import { TimeTab } from "@/features/staff-portal/components/TimeTab";
 import { LeaveTab } from "@/features/staff-portal/components/LeaveTab";
 import { MoreTab } from "@/features/staff-portal/components/MoreTab";
 import { NotificationDrawer } from "@/features/staff-portal/components/NotificationDrawer";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { usePortalNotifications } from "@/features/staff-portal/hooks/usePortalNotifications";
 import type { PortalTab } from "@/features/staff-portal/types";
 import { requireStaffPortalAccess } from "@/features/auth";
 
@@ -29,8 +29,7 @@ export const Route = createFileRoute("/portal")({
 function PortalPage() {
   const [tab, setTab] = React.useState<PortalTab>("home");
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
-  const notifications = useWorkspaceSelector((state) => state.portalNotifications);
-  const unread = notifications.filter((n) => n.unread).length;
+  const { items: notifications, unreadCount: unread, markAllRead } = usePortalNotifications();
 
   return (
     <>
@@ -46,7 +45,12 @@ function PortalPage() {
         {tab === "leave" && <LeaveTab />}
         {tab === "more" && <MoreTab onNavigate={setTab} />}
       </PortalShell>
-      <NotificationDrawer open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+      <NotificationDrawer
+        open={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        items={notifications}
+        markAllRead={markAllRead}
+      />
     </>
   );
 }

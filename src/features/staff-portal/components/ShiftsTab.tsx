@@ -25,7 +25,7 @@ const SUB_TABS: { id: ShiftsSubTab; label: string }[] = [
 ];
 
 export function ShiftsTab() {
-  const { upcoming, hasPublished } = usePortalRota();
+  const { upcoming, hasPublished, source, isError } = usePortalRota();
   const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
   const [selected, setSelected] = React.useState<PortalShift | null>(null);
   const [acknowledgedShiftIds, setAcknowledgedShiftIds] = React.useState<Set<string>>(new Set());
@@ -39,7 +39,16 @@ export function ShiftsTab() {
       <SegmentedTabs value={sub} onChange={setSub} />
 
       {sub === "upcoming" && (
-        <ShiftList shifts={upcoming} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
+        <>
+          <div className="px-1 text-[11px] text-muted-foreground">
+            {source === "live"
+              ? "Showing your live published rota."
+              : isError
+                ? "Couldn't reach live data — showing the demo rota."
+                : "Showing the demo rota."}
+          </div>
+          <ShiftList shifts={upcoming} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
+        </>
       )}
       {sub === "requests" && <RequestsList />}
       {sub === "history" && <ShiftList shifts={mockPastShifts} onOpen={setSelected} />}
