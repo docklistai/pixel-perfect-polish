@@ -1,17 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import type { StaffRow } from "../types";
 
 /**
  * Manager-side live staff reads. Runs as a server function bound to the
- * caller's session cookie, so workspace RLS (`staff_members_manager_all`)
- * decides what is visible — a manager only ever reads their own workspace's
- * roster. Read-only: this never onboards, edits, or invites. Presentation-only
+ * caller's session cookie. The active manager workspace is resolved server-side
+ * and used for every query; workspace RLS remains backup tenant enforcement.
+ * Read-only: this never onboards, edits, or invites. Presentation-only
  * fields the live schema does not carry (avatar, availability, pay) are filled
  * with neutral, deterministic defaults so the existing table renders unchanged.
  */
-
-const workspaceInput = z.object({ workspaceId: z.string().uuid() });
 
 interface StaffMemberRow {
   id: string;
@@ -71,11 +68,13 @@ function mapStaffRow(row: StaffMemberRow, departmentName: string | null): StaffR
  * The workspace roster for the signed-in manager, name-ordered. Returns mapped
  * StaffRow records the existing Staff table can render directly.
  */
-export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" })
-  .inputValidator((input: unknown) => workspaceInput.parse(input))
-  .handler(async ({ data }): Promise<StaffRow[]> => {
+export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<StaffRow[]> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
+    const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
     const [{ data: staff, error: staffError }, { data: departments, error: deptError }] =
       await Promise.all([
@@ -84,9 +83,9 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" })
           .select(
             "id, display_name, email, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id",
           )
-          .eq("workspace_id", data.workspaceId)
+          .eq("workspace_id", workspaceId)
           .order("display_name", { ascending: true }),
-        supabase.from("departments").select("id, name").eq("workspace_id", data.workspaceId),
+        supabase.from("departments").select("id, name").eq("workspace_id", workspaceId),
       ]);
 
     if (staffError) throw staffError;
@@ -99,4 +98,5 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" })
     return ((staff as StaffMemberRow[] | null) ?? []).map((row) =>
       mapStaffRow(row, row.department_id ? (departmentNames.get(row.department_id) ?? null) : null),
     );
-  });
+  },
+);

@@ -11,6 +11,7 @@ export function PublishReadinessCard({
   assignedShiftCount,
   plannedShiftCount,
   coveragePct,
+  readOnly,
   onPublish,
 }: {
   published: boolean;
@@ -22,6 +23,7 @@ export function PublishReadinessCard({
   assignedShiftCount: number;
   plannedShiftCount: number;
   coveragePct: number;
+  readOnly: boolean;
   onPublish: () => void;
 }) {
   const checks = [
@@ -52,8 +54,9 @@ export function PublishReadinessCard({
 
   const badgeTone =
     publishState === "published" || publishState === "ready" ? "success" : "warning";
-  const badgeLabel =
-    publishState === "published"
+  const badgeLabel = readOnly
+    ? "Read-only"
+    : publishState === "published"
       ? "Published"
       : publishState === "published-issues"
         ? "Published with issues"
@@ -62,15 +65,16 @@ export function PublishReadinessCard({
           : publishState === "ready"
             ? "Ready"
             : "Draft";
-  const buttonLabel =
-    published && !hasUnpublishedChanges
+  const buttonLabel = readOnly
+    ? "Not available in live mode yet"
+    : published && !hasUnpublishedChanges
       ? publishState === "published-issues"
         ? "Published with issues"
         : "Published"
       : openShiftCount > 0 || conflictCount > 0 || workingTimeAlertCount > 0
         ? "Publish with issues"
         : "Publish to staff";
-  const canPublish = !published || hasUnpublishedChanges;
+  const canPublish = !readOnly && (!published || hasUnpublishedChanges);
 
   return (
     <Card className="p-4">

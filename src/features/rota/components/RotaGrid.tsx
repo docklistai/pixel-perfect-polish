@@ -29,6 +29,8 @@ export function RotaGrid({
   scheduleDescId,
   onStaffSearchChange,
   onClearFilters,
+  readOnly,
+  onReadOnlyAttempt,
   onShiftOpen,
   onShiftDuplicate,
   onShiftRemove,
@@ -52,11 +54,15 @@ export function RotaGrid({
   scheduleDescId: string;
   onStaffSearchChange: (value: string) => void;
   onClearFilters: () => void;
+  readOnly: boolean;
+  onReadOnlyAttempt: () => void;
   onShiftAdd?: (input: DraftShiftInput) => void;
   onShiftUpdate?: (shiftId: ShiftId, patch: Partial<DraftShift>) => void;
 } & ShiftActionHandlers) {
   const handlers = React.useMemo<ShiftActionHandlers>(
     () => ({
+      readOnly,
+      onReadOnlyAttempt,
       onShiftOpen,
       onShiftDuplicate,
       onShiftRemove,
@@ -72,6 +78,7 @@ export function RotaGrid({
       onShiftDuplicate,
       onShiftMarkOpen,
       onShiftOpen,
+      onReadOnlyAttempt,
       onShiftRemove,
       onShiftClear,
       onShiftSetDept,
@@ -79,6 +86,7 @@ export function RotaGrid({
       onShiftResetColour,
       onShiftAdd,
       onShiftUpdate,
+      readOnly,
     ],
   );
   const totalOpenShifts = React.useMemo(

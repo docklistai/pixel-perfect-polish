@@ -33,7 +33,7 @@ export function useWorkspaceStaff(): WorkspaceStaff {
 
   const query = useQuery({
     queryKey: ["staff", "workspace-roster", workspaceId],
-    queryFn: () => fetchWorkspaceStaffFn({ data: { workspaceId: workspaceId! } }),
+    queryFn: () => fetchWorkspaceStaffFn(),
     enabled,
     staleTime: 30_000,
   });

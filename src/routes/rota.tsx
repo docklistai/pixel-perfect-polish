@@ -3,6 +3,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, Card, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
+import { useRotaShiftActions } from "@/features/rota/hooks/useRotaShiftActions";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { useOverlays } from "@/components/AppShortcuts";
 
@@ -17,7 +18,7 @@ import { PublishReadinessCard } from "@/features/rota/components/PublishReadines
 import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
 import { LegendCard } from "@/features/rota/components/LegendCard";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
-import { useRotaOverlays } from "@/features/rota/hooks/useRotaOverlays";
+import { useRotaOverlays, type RotaOverlayKey } from "@/features/rota/hooks/useRotaOverlays";
 import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/rota")({
@@ -29,7 +30,11 @@ export const Route = createFileRoute("/rota")({
 const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
+/** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
+const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate", "templates"]);
+
 type PublishState = "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
+type RotaController = ReturnType<typeof useRotaDraftController>;
 
 function publishStateLabel(state: PublishState): string {
   switch (state) {
@@ -51,8 +56,21 @@ function RotaPage() {
   const navigate = useNavigate();
   const { askAssistant } = useOverlays();
   const overlays = useRotaOverlays();
-  const { openOverlay } = overlays;
-  const [fillSummary, setFillSummary] = React.useState<string | null>(null);
+  const actions = useRotaShiftActions(rota);
+  const readOnly = rota.readOnly;
+
+  // In live read-only mode, mutating drawers/dialogs are blocked; read-only
+  // overlays (filters, conflicts, coverage, working time) still open normally.
+  const openOverlay = React.useCallback(
+    (key: RotaOverlayKey) => {
+      if (readOnly && MUTATING_OVERLAYS.has(key)) {
+        actions.block();
+        return;
+      }
+      overlays.openOverlay(key);
+    },
+    [readOnly, actions, overlays],
+  );
 
   useIntentHandler("rota.publish", () => openOverlay("publish"));
   useIntentHandler("rota.generate", () => openOverlay("generate"));
@@ -70,7 +88,12 @@ function RotaPage() {
     : hasReadinessIssues
       ? "draft"
       : "ready";
+
   const handlePublish = (prepareStaffUpdate: boolean) => {
+    if (readOnly) {
+      actions.block();
+      return;
+    }
     rota.handlePublish();
     overlays.setOverlay("publish", false);
     toast.success("Rota published", {
@@ -83,152 +106,87 @@ function RotaPage() {
       },
     });
   };
-  const headerStatusTone =
-    publishState === "published" || publishState === "ready" ? "success" : "warning";
-  const headerStatusLabel = publishStateLabel(publishState);
 
-  const handleApplySuggestions = () => {
-    const suggestions = rota.applyOpenShiftSuggestions();
-    setFillSummary(
-      suggestions.length > 0
-        ? `${suggestions.length} open shift${suggestions.length === 1 ? "" : "s"} filled. Review the assignments before publishing.`
-        : "No open shifts could be filled from the current staff list.",
-    );
-  };
-  const handleCopyLastWeek = () => {
-    rota.copyPreviousWeek();
-    toast.success("Pattern copied", {
-      description: "Last week's pattern applied as a draft. Review before publishing.",
-    });
-  };
-
-  const findShift = (shiftId: string) => rota.draftShifts.find((s) => s.id === shiftId);
-  const colourLabel = (presetId: string) =>
-    presetId.charAt(0).toUpperCase() + presetId.slice(1).toLowerCase();
-
-  const handleDuplicateShift = (shiftId: string) => {
-    const newId = rota.duplicateShiftToNextDay(shiftId);
-    if (!newId) return;
-    toast.success("Shift duplicated", {
-      description: "Copied to the next day (draft).",
-      action: {
-        label: "Undo",
-        onClick: () => {
-          rota.removeShiftNow(newId);
-          toast.info("Undone", { description: "Duplicate removed." });
-        },
+  // Block every direct controller mutation in live mode so an edit from a drawer
+  // or the grid can never write to the demo store while live data is on screen.
+  const guardedRota = React.useMemo<RotaController>(() => {
+    if (!readOnly) return rota;
+    const blocked = () => actions.block();
+    return {
+      ...rota,
+      confirmation: null,
+      addShift: blocked,
+      duplicateShiftAsOpen: blocked,
+      duplicateShiftToNextDay: () => {
+        actions.block();
+        return null;
       },
-    });
-  };
-
-  const handleMarkShiftOpen = (shiftId: string) => {
-    const prev = findShift(shiftId);
-    rota.markShiftOpen(shiftId);
-    toast.info("Marked as open", {
-      description: "Shift now needs cover (draft).",
-      ...(prev && prev.staffId
-        ? {
-            action: {
-              label: "Undo",
-              onClick: () => {
-                rota.updateShift(shiftId, {
-                  staffId: prev.staffId,
-                  status: "scheduled",
-                  tone: prev.tone === "open" ? "info" : prev.tone,
-                });
-                toast.info("Reverted", { description: "Shift restored." });
-              },
-            },
-          }
-        : {}),
-    });
-  };
-
-  const handleClearShift = (shiftId: string) => {
-    const prev = findShift(shiftId);
-    if (!prev) return;
-    const restored = {
-      ...prev,
-      status: prev.staffId ? ("scheduled" as const) : ("open" as const),
+      removeShiftNow: blocked,
+      restoreShift: blocked,
+      updateShift: blocked,
+      copyPreviousWeek: blocked,
+      applyOpenShiftSuggestions: () => {
+        actions.block();
+        return [];
+      },
+      handlePublish: blocked,
+      requestRemoveShift: blocked,
+      requestClearWeek: blocked,
+      requestApplyStandardTemplate: blocked,
+      confirmPendingAction: blocked,
+      markShiftOpen: blocked,
     };
-    rota.removeShiftNow(shiftId);
-    toast.warning("Shift cleared", {
-      description: "Removed from this week's draft.",
-      action: {
-        label: "Undo",
-        onClick: () => {
-          rota.restoreShift(restored);
-          toast.success("Restored", { description: "Shift restored." });
-        },
-      },
-    });
-  };
+  }, [readOnly, rota, actions]);
 
-  const handleSetShiftDept = (shiftId: string, dept: string) => {
-    const prev = findShift(shiftId)?.deptOverride;
-    rota.updateShift(shiftId, { deptOverride: dept, edited: true });
-    toast.info("Department changed", {
-      description: `Shift set to ${dept} (draft).`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          rota.updateShift(shiftId, { deptOverride: prev });
-          toast.info("Reverted", { description: "Department change undone." });
-        },
-      },
-    });
-  };
-
-  const handleSetShiftColour = (shiftId: string, presetId: string) => {
-    const prev = findShift(shiftId)?.colourOverride;
-    rota.updateShift(shiftId, { colourOverride: presetId });
-    toast.success("Colour overridden", {
-      description: `Chip now shows in ${colourLabel(presetId)}.`,
-      action: {
-        label: "Undo",
-        onClick: () => {
-          rota.updateShift(shiftId, { colourOverride: prev });
-          toast.info("Colour reset", { description: "Chip back to previous colour." });
-        },
-      },
-    });
-  };
-
-  const handleResetShiftColour = (shiftId: string) => {
-    const prev = findShift(shiftId);
-    rota.updateShift(shiftId, { colourOverride: undefined, deptOverride: undefined });
-    toast.info("Colour reset", {
-      description: "Chip back to department default.",
-      ...(prev
-        ? {
-            action: {
-              label: "Undo",
-              onClick: () => {
-                rota.updateShift(shiftId, {
-                  colourOverride: prev.colourOverride,
-                  deptOverride: prev.deptOverride,
-                });
-                toast.info("Restored", { description: "Override restored." });
-              },
-            },
-          }
-        : {}),
-    });
-  };
+  const headerStatusTone =
+    readOnly && rota.source !== "live"
+      ? "warning"
+      : publishState === "published" || publishState === "ready"
+        ? "success"
+        : "warning";
+  const headerStatusLabel = rota.isLiveError
+    ? "Live unavailable"
+    : rota.isLiveLoading
+      ? "Loading live rota"
+      : readOnly && !rota.hasLiveWeek
+        ? "No saved rota"
+        : publishStateLabel(publishState);
 
   return (
     <AppShell>
       <div className="w-full max-w-full overflow-x-hidden">
+        {readOnly && (
+          <FeedbackBanner
+            tone="info"
+            title="Live rota — read-only"
+            description={
+              rota.isLiveError
+                ? "The live rota couldn't be loaded. Harbour View demo data is shown as a read-only fallback."
+                : rota.isLiveLoading
+                  ? "Loading your workspace rota. Harbour View demo data is shown as a read-only fallback."
+                  : rota.hasLiveWeek
+                    ? "You're viewing your workspace's saved rota. Editing and publishing aren't available in live mode yet."
+                    : "No saved rota for this week yet. Editing and publishing aren't available in live mode yet."
+            }
+            className="mb-4"
+          />
+        )}
+
         <RotaPageHeader
           weekLabel={rota.weekLabel}
+          locationName={
+            rota.source === "live" && rota.liveLocationName
+              ? rota.liveLocationName
+              : "Harbour View Hotel"
+          }
           staffCount={rota.staff.length}
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
-          canPublish={!rota.published || rota.hasUnpublishedChanges}
+          canPublish={!readOnly && (!rota.published || rota.hasUnpublishedChanges)}
           onTemplates={() => openOverlay("templates")}
           onPrintRota={() => window.print()}
-          onClearWeek={rota.requestClearWeek}
-          onCopyLastWeek={handleCopyLastWeek}
+          onClearWeek={guardedRota.requestClearWeek}
+          onCopyLastWeek={actions.handleCopyLastWeek}
           onGenerateRota={() => openOverlay("generate")}
           onAskAssistant={askAssistant}
           onPublish={() => openOverlay("publish")}
@@ -244,17 +202,19 @@ function RotaPage() {
           coveragePct={rota.coveragePct}
           weekLabel={rota.weekLabel}
           staff={rota.staff}
+          readOnly={readOnly}
           onPublish={() => openOverlay("publish")}
+          onCopyLastWeek={actions.handleCopyLastWeek}
           onViewConflicts={() => openOverlay("conflicts")}
         />
 
-        {fillSummary && (
+        {actions.fillSummary && (
           <FeedbackBanner
             tone="info"
             title="Open shifts updated"
-            description={fillSummary}
+            description={actions.fillSummary}
             className="mb-4"
-            onDismiss={() => setFillSummary(null)}
+            onDismiss={() => actions.setFillSummary(null)}
           />
         )}
 
@@ -270,7 +230,7 @@ function RotaPage() {
               onAddShift={() => openOverlay("addShift")}
               onViewConflicts={() => openOverlay("conflicts")}
               onViewWorkingTime={() => openOverlay("workingTime")}
-              onCopyLastWeek={handleCopyLastWeek}
+              onCopyLastWeek={actions.handleCopyLastWeek}
             />
             <RotaGrid
               days={rota.days}
@@ -285,16 +245,18 @@ function RotaPage() {
               scheduleDescId={SCHEDULE_DESC_ID}
               onStaffSearchChange={rota.setStaffSearch}
               onClearFilters={rota.clearFilters}
+              readOnly={readOnly}
+              onReadOnlyAttempt={actions.block}
               onShiftOpen={rota.setSelectedShiftId}
-              onShiftDuplicate={handleDuplicateShift}
-              onShiftRemove={rota.requestRemoveShift}
-              onShiftClear={handleClearShift}
-              onShiftMarkOpen={handleMarkShiftOpen}
-              onShiftSetDept={handleSetShiftDept}
-              onShiftSetColour={handleSetShiftColour}
-              onShiftResetColour={handleResetShiftColour}
-              onShiftAdd={rota.addShift}
-              onShiftUpdate={rota.updateShift}
+              onShiftDuplicate={actions.handleDuplicateShift}
+              onShiftRemove={guardedRota.requestRemoveShift}
+              onShiftClear={actions.handleClearShift}
+              onShiftMarkOpen={actions.handleMarkShiftOpen}
+              onShiftSetDept={actions.handleSetShiftDept}
+              onShiftSetColour={actions.handleSetShiftColour}
+              onShiftResetColour={actions.handleResetShiftColour}
+              onShiftAdd={guardedRota.addShift}
+              onShiftUpdate={guardedRota.updateShift}
             />
             <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
           </Card>
@@ -323,6 +285,7 @@ function RotaPage() {
               assignedShiftCount={rota.assignedShiftCount}
               plannedShiftCount={rota.plannedShiftCount}
               coveragePct={rota.coveragePct}
+              readOnly={readOnly}
               onPublish={() => openOverlay("publish")}
             />
             <RoleCoverageCard roleCoverage={rota.roleCoverage} />
@@ -331,11 +294,11 @@ function RotaPage() {
       </div>
 
       <RotaOverlays
-        rota={rota}
+        rota={guardedRota}
         overlays={overlays}
         onPublishConfirm={handlePublish}
-        onApplySuggestions={handleApplySuggestions}
-        onMarkShiftOpen={handleMarkShiftOpen}
+        onApplySuggestions={actions.handleApplySuggestions}
+        onMarkShiftOpen={actions.handleMarkShiftOpen}
       />
     </AppShell>
   );

@@ -26,7 +26,9 @@ export function RotaStatusBanner({
   coveragePct,
   weekLabel,
   staff,
+  readOnly,
   onPublish,
+  onCopyLastWeek,
   onViewConflicts,
 }: {
   published: boolean;
@@ -38,12 +40,14 @@ export function RotaStatusBanner({
   coveragePct: number;
   weekLabel: string;
   staff: StaffMember[];
+  readOnly: boolean;
   onPublish: () => void;
+  onCopyLastWeek: () => void;
   onViewConflicts: () => void;
 }) {
   const [whoSeenOpen, setWhoSeenOpen] = React.useState(false);
   const isPublishedClean = published && !hasUnpublishedChanges;
-  const canPublish = !published || hasUnpublishedChanges;
+  const canPublish = !readOnly && (!published || hasUnpublishedChanges);
 
   if (isPublishedClean) {
     const viewedCount = Math.max(1, staff.length - 2);
@@ -59,32 +63,36 @@ export function RotaStatusBanner({
                 Published — staff can see this rota
               </div>
               <div className="mt-1 text-xs text-muted-foreground">
-                {viewedCount} of {staff.length} have already viewed the snapshot
-                {publishState === "published-issues"
-                  ? ` · ${openShiftCount + conflictCount + workingTimeAlertCount} issues remain open`
-                  : ""}
-                .
+                {readOnly
+                  ? "Viewing the saved live rota. Editing and publishing aren't available yet."
+                  : `${viewedCount} of ${staff.length} have already viewed the snapshot${
+                      publishState === "published-issues"
+                        ? ` · ${openShiftCount + conflictCount + workingTimeAlertCount} issues remain open`
+                        : ""
+                    }.`}
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <ActionButton variant="ghost" size="sm" onClick={() => setWhoSeenOpen(true)}>
-              Who's seen this
-            </ActionButton>
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              icon={Bell}
-              onClick={() =>
-                toast.info("Reminder prepared", {
-                  description:
-                    "Non-viewers will see a reminder in the app the next time they open it.",
-                })
-              }
-            >
-              Remind non-viewers
-            </ActionButton>
-          </div>
+          {!readOnly && (
+            <div className="flex flex-wrap items-center gap-2">
+              <ActionButton variant="ghost" size="sm" onClick={() => setWhoSeenOpen(true)}>
+                Who's seen this
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                size="sm"
+                icon={Bell}
+                onClick={() =>
+                  toast.info("Reminder prepared", {
+                    description:
+                      "Non-viewers will see a reminder in the app the next time they open it.",
+                  })
+                }
+              >
+                Remind non-viewers
+              </ActionButton>
+            </div>
+          )}
         </div>
         <WhoSeenDrawer
           open={whoSeenOpen}
@@ -168,10 +176,7 @@ export function RotaStatusBanner({
               {
                 label: "Copy last week's pattern",
                 icon: Copy,
-                onSelect: () =>
-                  toast.success("Pattern copied", {
-                    description: "Last week applied — review before publishing.",
-                  }),
+                onSelect: onCopyLastWeek,
               },
             ]}
           />

@@ -29,6 +29,7 @@ const VIEW_BY_OPTIONS = [
 
 export function RotaPageHeader({
   weekLabel,
+  locationName,
   staffCount,
   statusTone,
   statusLabel,
@@ -42,6 +43,7 @@ export function RotaPageHeader({
   onPublish,
 }: {
   weekLabel: string;
+  locationName: string;
   staffCount: number;
   statusTone: StatusTone;
   statusLabel: string;
@@ -68,7 +70,7 @@ export function RotaPageHeader({
           </span>
         </div>
         <p className="rota-page-subtitle">
-          Week of {weekLabel} · Harbour View Hotel · {staffCount} staff
+          Week of {weekLabel} · {locationName} · {staffCount} staff
         </p>
       </div>
       <div className="rota-page-actions flex flex-wrap items-center gap-2 lg:justify-end">

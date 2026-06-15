@@ -128,8 +128,20 @@ export function RotaGridCell({
       : `${firstShift.start} - ${firstShift.end}`
     : "OFF";
 
+  const startEditing = React.useCallback(() => {
+    if (handlers.readOnly) {
+      handlers.onReadOnlyAttempt();
+      return;
+    }
+    setIsEditing(true);
+  }, [handlers]);
+
   const handleCommit = (val: string) => {
     setIsEditing(false);
+    if (handlers.readOnly) {
+      handlers.onReadOnlyAttempt();
+      return;
+    }
     if (val === "off") {
       if (cell.shifts.length > 0) {
         cell.shifts.forEach((s) => handlers.onShiftClear(s.id));
@@ -185,7 +197,7 @@ export function RotaGridCell({
 
   const menuHandlers = React.useMemo<ShiftMenuHandlers>(
     () => ({
-      onEditInline: () => setIsEditing(true),
+      onEditInline: startEditing,
       onOpen: handlers.onShiftOpen,
       onDuplicate: handlers.onShiftDuplicate,
       onMarkOpen: handlers.onShiftMarkOpen,
@@ -194,7 +206,7 @@ export function RotaGridCell({
       onResetColour: handlers.onShiftResetColour,
       onClear: handlers.onShiftClear,
     }),
-    [handlers],
+    [handlers, startEditing],
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -216,22 +228,24 @@ export function RotaGridCell({
     if (e.key === "Enter") {
       e.preventDefault();
       if (firstShift) handlers.onShiftOpen(firstShift.id);
-      else setIsEditing(true);
+      else startEditing();
     }
     if (e.key === "F2") {
       e.preventDefault();
-      setIsEditing(true);
+      startEditing();
     }
     if (e.key === "m" || e.key === "M") {
       e.preventDefault();
       if (firstShift) setOpenMenuShiftId(firstShift.id);
-      else setIsEditing(true);
+      else startEditing();
     }
   };
 
   const cellAriaLabel = firstShift
     ? undefined
-    : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
+    : handlers.readOnly
+      ? `${emptyAriaLabel} — read-only`
+      : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
 
   return (
     <div
@@ -240,7 +254,7 @@ export function RotaGridCell({
       aria-label={cellAriaLabel}
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
-      onDoubleClick={() => setIsEditing(true)}
+      onDoubleClick={startEditing}
       onKeyDown={handleKeyDown}
       className={`border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass

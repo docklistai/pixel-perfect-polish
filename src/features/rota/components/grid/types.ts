@@ -9,6 +9,8 @@ export type RotaGridDay = {
 };
 
 export type ShiftActionHandlers = {
+  readOnly: boolean;
+  onReadOnlyAttempt: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;
   /** Duplicate the shift to the next day (prototype ⌘D behaviour). */
   onShiftDuplicate: (shiftId: ShiftId) => void;
