@@ -32,6 +32,7 @@ const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
 /** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
 const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate", "templates"]);
+const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>(["generate", "templates"]);
 
 type PublishState = "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
 type RotaController = ReturnType<typeof useRotaDraftController>;
@@ -58,18 +59,30 @@ function RotaPage() {
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(rota);
   const readOnly = rota.readOnly;
+  const isLiveEditing = rota.source === "live" && !readOnly;
+  const canPublish =
+    !readOnly &&
+    !rota.liveMutationPending &&
+    !rota.liveMutationFailed &&
+    rota.plannedShiftCount > 0 &&
+    rota.liveWeekStatus !== "archived" &&
+    (!rota.published || rota.hasUnpublishedChanges);
 
-  // In live read-only mode, mutating drawers/dialogs are blocked; read-only
-  // overlays (filters, conflicts, coverage, working time) still open normally.
+  // Loading/error fallback blocks mutations; successful live reads allow only
+  // actions wired to persisted shift rows.
   const openOverlay = React.useCallback(
     (key: RotaOverlayKey) => {
       if (readOnly && MUTATING_OVERLAYS.has(key)) {
         actions.block();
         return;
       }
+      if (isLiveEditing && LIVE_UNSUPPORTED_OVERLAYS.has(key)) {
+        actions.blockDraftOnly();
+        return;
+      }
       overlays.openOverlay(key);
     },
-    [readOnly, actions, overlays],
+    [isLiveEditing, readOnly, actions, overlays],
   );
 
   useIntentHandler("rota.publish", () => openOverlay("publish"));
@@ -89,22 +102,30 @@ function RotaPage() {
       ? "draft"
       : "ready";
 
-  const handlePublish = (prepareStaffUpdate: boolean) => {
+  const handlePublish = async (prepareStaffUpdate: boolean) => {
     if (readOnly) {
       actions.block();
       return;
     }
-    rota.handlePublish();
-    overlays.setOverlay("publish", false);
-    toast.success("Rota published", {
-      description: prepareStaffUpdate
-        ? "Published snapshot ready. Staff-app update prepared for review."
-        : "Staff see the published snapshot the next time they open the app.",
-      action: {
-        label: "Preview staff app",
-        onClick: () => navigate({ to: "/portal" }),
-      },
-    });
+    try {
+      await rota.handlePublish();
+      overlays.setOverlay("publish", false);
+      toast.success("Rota published", {
+        description: prepareStaffUpdate
+          ? "Published snapshot ready. Staff-app update prepared for review."
+          : "Staff see the published snapshot the next time they open the app.",
+        action: {
+          label: "Preview staff app",
+          onClick: () => navigate({ to: "/portal" }),
+        },
+      });
+    } catch (error) {
+      if (rota.source !== "live") {
+        toast.error("Rota not published", {
+          description: error instanceof Error ? error.message : "The rota could not be published.",
+        });
+      }
+    }
   };
 
   // Block every direct controller mutation in live mode so an edit from a drawer
@@ -112,6 +133,7 @@ function RotaPage() {
   const guardedRota = React.useMemo<RotaController>(() => {
     if (!readOnly) return rota;
     const blocked = () => actions.block();
+    const blockedAsync = async () => actions.block();
     return {
       ...rota,
       confirmation: null,
@@ -133,7 +155,7 @@ function RotaPage() {
       requestRemoveShift: blocked,
       requestClearWeek: blocked,
       requestApplyStandardTemplate: blocked,
-      confirmPendingAction: blocked,
+      confirmPendingAction: blockedAsync,
       markShiftOpen: blocked,
     };
   }, [readOnly, rota, actions]);
@@ -148,7 +170,7 @@ function RotaPage() {
     ? "Live unavailable"
     : rota.isLiveLoading
       ? "Loading live rota"
-      : readOnly && !rota.hasLiveWeek
+      : rota.source === "live" && !rota.hasLiveWeek
         ? "No saved rota"
         : publishStateLabel(publishState);
 
@@ -182,7 +204,7 @@ function RotaPage() {
           staffCount={rota.staff.length}
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
-          canPublish={!readOnly && (!rota.published || rota.hasUnpublishedChanges)}
+          canPublish={canPublish}
           onTemplates={() => openOverlay("templates")}
           onPrintRota={() => window.print()}
           onClearWeek={guardedRota.requestClearWeek}
@@ -200,9 +222,10 @@ function RotaPage() {
           conflictCount={rota.conflictCount}
           workingTimeAlertCount={workingTimeAlertCount}
           coveragePct={rota.coveragePct}
+          plannedShiftCount={rota.plannedShiftCount}
           weekLabel={rota.weekLabel}
           staff={rota.staff}
-          readOnly={readOnly}
+          readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
           onPublish={() => openOverlay("publish")}
           onCopyLastWeek={actions.handleCopyLastWeek}
           onViewConflicts={() => openOverlay("conflicts")}
@@ -246,6 +269,7 @@ function RotaPage() {
               onStaffSearchChange={rota.setStaffSearch}
               onClearFilters={rota.clearFilters}
               readOnly={readOnly}
+              serverBacked={rota.source === "live"}
               onReadOnlyAttempt={actions.block}
               onShiftOpen={rota.setSelectedShiftId}
               onShiftDuplicate={actions.handleDuplicateShift}
@@ -285,7 +309,7 @@ function RotaPage() {
               assignedShiftCount={rota.assignedShiftCount}
               plannedShiftCount={rota.plannedShiftCount}
               coveragePct={rota.coveragePct}
-              readOnly={readOnly}
+              readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
               onPublish={() => openOverlay("publish")}
             />
             <RoleCoverageCard roleCoverage={rota.roleCoverage} />

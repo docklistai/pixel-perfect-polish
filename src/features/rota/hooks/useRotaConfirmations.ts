@@ -1,6 +1,8 @@
 import * as React from "react";
 import type { ShiftId } from "../types";
 
+type MaybePromise<T> = T | Promise<T>;
+
 export type RotaConfirmation =
   | { kind: "template"; title: string; description: string; confirmLabel: string }
   | { kind: "clear"; title: string; description: string; confirmLabel: string }
@@ -19,9 +21,9 @@ export function useRotaConfirmations({
 }: {
   /** True when the draft has no unpublished edits and has never been published. */
   draftIsPristine: boolean;
-  applyStandardTemplate: () => void;
-  clearWeek: () => void;
-  removeShiftNow: (id: ShiftId) => void;
+  applyStandardTemplate: () => MaybePromise<void>;
+  clearWeek: () => MaybePromise<void>;
+  removeShiftNow: (id: ShiftId) => MaybePromise<void>;
 }) {
   const [confirmation, setConfirmation] = React.useState<RotaConfirmation | null>(null);
 
@@ -60,10 +62,10 @@ export function useRotaConfirmations({
     });
   };
 
-  const confirmPendingAction = () => {
-    if (confirmation?.kind === "template") applyStandardTemplate();
-    if (confirmation?.kind === "clear") clearWeek();
-    if (confirmation?.kind === "remove") removeShiftNow(confirmation.shiftId);
+  const confirmPendingAction = async () => {
+    if (confirmation?.kind === "template") await applyStandardTemplate();
+    if (confirmation?.kind === "clear") await clearWeek();
+    if (confirmation?.kind === "remove") await removeShiftNow(confirmation.shiftId);
     setConfirmation(null);
   };
 

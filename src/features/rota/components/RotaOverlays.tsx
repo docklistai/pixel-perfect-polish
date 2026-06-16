@@ -12,6 +12,7 @@ import { TemplatesDialog } from "./TemplatesDialog";
 import { CoverageDetailsDrawer } from "./CoverageDetailsDrawer";
 import { WorkingTimeDetailsDrawer } from "./WorkingTimeDetailsDrawer";
 import { PublishRotaDialog } from "./PublishRotaDialog";
+import type { MaybePromise } from "./grid";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -29,9 +30,9 @@ export function RotaOverlays({
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
-  onPublishConfirm: (prepareStaffUpdate: boolean) => void;
+  onPublishConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
   onApplySuggestions: () => void;
-  onMarkShiftOpen: (shiftId: ShiftId) => void;
+  onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
 }) {
   const { openOverlays, setOverlay } = overlays;
   const workingTimeAlertCount = rota.workingTimeAlertList.length;

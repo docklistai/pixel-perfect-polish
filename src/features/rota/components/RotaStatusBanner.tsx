@@ -24,6 +24,7 @@ export function RotaStatusBanner({
   conflictCount,
   workingTimeAlertCount,
   coveragePct,
+  plannedShiftCount,
   weekLabel,
   staff,
   readOnly,
@@ -38,6 +39,7 @@ export function RotaStatusBanner({
   conflictCount: number;
   workingTimeAlertCount: number;
   coveragePct: number;
+  plannedShiftCount: number;
   weekLabel: string;
   staff: StaffMember[];
   readOnly: boolean;
@@ -47,7 +49,7 @@ export function RotaStatusBanner({
 }) {
   const [whoSeenOpen, setWhoSeenOpen] = React.useState(false);
   const isPublishedClean = published && !hasUnpublishedChanges;
-  const canPublish = !readOnly && (!published || hasUnpublishedChanges);
+  const canPublish = !readOnly && plannedShiftCount > 0 && (!published || hasUnpublishedChanges);
 
   if (isPublishedClean) {
     const viewedCount = Math.max(1, staff.length - 2);

@@ -1,5 +1,7 @@
 import * as React from "react";
 import { ShiftCell } from "../ShiftCell";
+import { InlineCellEditor } from "./InlineCellEditor";
+import { parseTimeRange } from "./inlineCellParsing";
 import type { RotaGridDay, ShiftActionHandlers, ShiftMenuHandlers } from "./types";
 import type {
   RotaGridCell as RotaGridCellData,
@@ -8,87 +10,6 @@ import type {
   ShiftId,
 } from "../../types";
 import { toast } from "sonner";
-
-interface InlineCellEditorProps {
-  initial: string;
-  onCommit: (val: string) => void;
-  onCancel: () => void;
-}
-
-function InlineCellEditor({ initial, onCommit, onCancel }: InlineCellEditorProps) {
-  const [val, setVal] = React.useState(initial);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-
-  React.useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, []);
-
-  const commit = () => {
-    const trimmed = (val || "").trim();
-    if (!trimmed) onCommit("off");
-    else if (/^off$/i.test(trimmed) || /^day off$/i.test(trimmed)) onCommit("off");
-    else if (/^open/i.test(trimmed) || /^unassigned/i.test(trimmed)) onCommit("open");
-    else onCommit(trimmed);
-  };
-
-  return (
-    <div className="rounded-lg border-2 border-brand bg-card p-1.5 shadow-md">
-      <input
-        ref={inputRef}
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            commit();
-          }
-          if (e.key === "Escape") {
-            e.preventDefault();
-            onCancel();
-          }
-        }}
-        placeholder="09:00 - 17:00 or OFF / Open"
-        className="w-full bg-transparent border-0 outline-none p-0.5 font-mono text-xs font-semibold text-foreground focus:ring-0"
-      />
-      <div className="text-[9px] text-muted-foreground mt-1 px-0.5 flex justify-between">
-        <span>↵ save</span>
-        <span>esc cancel</span>
-      </div>
-    </div>
-  );
-}
-
-function parseTimePart(t: string): string | null {
-  const match = t.trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
-  if (!match) return null;
-  let hour = parseInt(match[1]!, 10);
-  const min = match[2] ? parseInt(match[2], 10) : 0;
-  const ampm = match[3]?.toLowerCase();
-  if (ampm === "pm" && hour < 12) hour += 12;
-  if (ampm === "am" && hour === 12) hour = 0;
-  return `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
-}
-
-function parseTimeRange(input: string): { start: string; end: string } | null {
-  const parts = input.split(/[-–—]|to/i);
-  if (parts.length !== 2) return null;
-  const startStr = parseTimePart(parts[0]!);
-  let endStr = parseTimePart(parts[1]!);
-  if (!startStr || !endStr) return null;
-
-  // Smart heuristic: if start is e.g. "09:00" and end is "05:00", convert end to "17:00" (5pm)
-  const startHr = parseInt(startStr.split(":")[0]!, 10);
-  let endHr = parseInt(endStr.split(":")[0]!, 10);
-  if (endHr < startHr && endHr < 12) {
-    endHr += 12;
-    endStr = `${String(endHr).padStart(2, "0")}:${endStr.split(":")[1]}`;
-  }
-  return { start: startStr, end: endStr };
-}
 
 export function RotaGridCell({
   cell,
@@ -136,62 +57,66 @@ export function RotaGridCell({
     setIsEditing(true);
   }, [handlers]);
 
-  const handleCommit = (val: string) => {
+  const handleCommit = async (val: string) => {
     setIsEditing(false);
     if (handlers.readOnly) {
       handlers.onReadOnlyAttempt();
       return;
     }
-    if (val === "off") {
-      if (cell.shifts.length > 0) {
-        cell.shifts.forEach((s) => handlers.onShiftClear(s.id));
-      }
-    } else if (val === "open") {
-      if (cell.shifts.length > 0) {
-        cell.shifts.forEach((s) => handlers.onShiftMarkOpen(s.id));
+    try {
+      if (val === "off") {
+        for (const shift of cell.shifts) await handlers.onShiftClear(shift.id);
+      } else if (val === "open") {
+        if (cell.shifts.length > 0) {
+          for (const shift of cell.shifts) await handlers.onShiftMarkOpen(shift.id);
+        } else {
+          await handlers.onShiftAdd?.({
+            dayIndex: dayIndex as RotaDayIndex,
+            staffId: null,
+            role: staffRole || "FOH",
+            start: "09:00",
+            end: "17:00",
+            status: "open",
+            tone: "open",
+          });
+          if (!handlers.serverBacked) toast.success("Open shift created");
+        }
       } else {
-        handlers.onShiftAdd?.({
-          dayIndex: dayIndex as RotaDayIndex,
-          staffId: null,
-          role: staffRole || "FOH",
-          start: "09:00",
-          end: "17:00",
-          status: "open",
-          tone: "open",
-        });
-        toast.success("Open shift created");
-      }
-    } else {
-      const parsed = parseTimeRange(val);
-      if (!parsed) {
-        toast.error("Invalid format", {
-          description: "Use e.g. 09:00 - 17:00, 9am - 5pm, or 9-5",
-        });
-        return;
-      }
-      if (cell.shifts.length > 0) {
-        cell.shifts.forEach((s) => {
-          handlers.onShiftUpdate?.(s.id, {
+        const parsed = parseTimeRange(val);
+        if (!parsed) {
+          toast.error("Invalid format", {
+            description: "Use e.g. 09:00 - 17:00, 9am - 5pm, or 9-5",
+          });
+          return;
+        }
+        if (cell.shifts.length > 0) {
+          for (const shift of cell.shifts) {
+            await handlers.onShiftUpdate?.(shift.id, {
+              start: parsed.start,
+              end: parsed.end,
+              status: staffId ? "scheduled" : "open",
+              tone: staffId ? "info" : "open",
+              edited: true,
+            });
+          }
+          if (!handlers.serverBacked)
+            toast.success("Shift updated", { description: "Saved to draft" });
+        } else {
+          await handlers.onShiftAdd?.({
+            dayIndex: dayIndex as RotaDayIndex,
+            staffId: staffId || null,
+            role: staffRole || "FOH",
             start: parsed.start,
             end: parsed.end,
             status: staffId ? "scheduled" : "open",
             tone: staffId ? "info" : "open",
-            edited: true,
           });
-        });
-        toast.success("Shift updated", { description: "Saved to draft" });
-      } else {
-        handlers.onShiftAdd?.({
-          dayIndex: dayIndex as RotaDayIndex,
-          staffId: staffId || null,
-          role: staffRole || "FOH",
-          start: parsed.start,
-          end: parsed.end,
-          status: staffId ? "scheduled" : "open",
-          tone: staffId ? "info" : "open",
-        });
-        toast.success("Shift created");
+          if (!handlers.serverBacked) toast.success("Shift created");
+        }
       }
+    } catch {
+      // The server mutation hook owns the failure toast; keep the cell from
+      // reporting a successful edit when persistence fails.
     }
   };
 

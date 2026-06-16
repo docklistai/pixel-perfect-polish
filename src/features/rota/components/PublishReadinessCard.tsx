@@ -66,15 +66,17 @@ export function PublishReadinessCard({
             ? "Ready"
             : "Draft";
   const buttonLabel = readOnly
-    ? "Not available in live mode yet"
-    : published && !hasUnpublishedChanges
-      ? publishState === "published-issues"
-        ? "Published with issues"
-        : "Published"
-      : openShiftCount > 0 || conflictCount > 0 || workingTimeAlertCount > 0
-        ? "Publish with issues"
-        : "Publish to staff";
-  const canPublish = !readOnly && (!published || hasUnpublishedChanges);
+    ? "Publish unavailable"
+    : plannedShiftCount === 0
+      ? "Add shifts before publishing"
+      : published && !hasUnpublishedChanges
+        ? publishState === "published-issues"
+          ? "Published with issues"
+          : "Published"
+        : openShiftCount > 0 || conflictCount > 0 || workingTimeAlertCount > 0
+          ? "Publish with issues"
+          : "Publish to staff";
+  const canPublish = !readOnly && plannedShiftCount > 0 && (!published || hasUnpublishedChanges);
 
   return (
     <Card className="p-4">

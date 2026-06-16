@@ -3,6 +3,7 @@ import { staff } from "../data/mockData";
 import type { RotaFilters } from "../types";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
 import { getCurrentWeekDayIndex, getWeekDayLabels } from "../lib/weekHelpers";
+import { liveCurrentDayIndex, liveWeekDayLabels, liveWeekLabel } from "../lib/liveRotaDates";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
   buildDayStats,
@@ -18,28 +19,14 @@ import {
 } from "../lib/rotaSummaries";
 import { useRotaWeekDrafts } from "./useRotaWeekDrafts";
 import { useRotaLiveData } from "./useRotaLiveData";
+import { useRotaLivePersistence } from "./useRotaLivePersistence";
+import { useRotaConfirmations } from "./useRotaConfirmations";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import type { LeaveRequest } from "@/features/leave/types";
 import {
   buildApprovedLeaveConflictSummaries,
   withApprovedLeaveConflictStatus,
 } from "@/features/leave/lib/leaveRotaConflicts";
-
-const MONTH_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const DEFAULT_ROTA_FILTERS: RotaFilters = {
   department: "all",
@@ -50,50 +37,30 @@ const DEFAULT_ROTA_FILTERS: RotaFilters = {
 /** Stable empty reference: live mode has no leave wiring, so no leave conflicts. */
 const NO_LEAVE_REQUESTS: LeaveRequest[] = [];
 
-function addIsoDays(isoDate: string, days: number): Date {
-  const date = new Date(`${isoDate}T12:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date;
-}
-
-function liveWeekDayLabels(weekStart: string): string[] {
-  return DAY_NAMES.map((day, index) => {
-    const date = addIsoDays(weekStart, index);
-    return `${day} ${date.getUTCDate()} ${MONTH_NAMES[date.getUTCMonth()]}`;
-  });
-}
-
-function liveWeekLabel(weekStart: string): string {
-  const start = addIsoDays(weekStart, 0);
-  const end = addIsoDays(weekStart, 6);
-  if (start.getUTCMonth() === end.getUTCMonth()) {
-    return `${start.getUTCDate()}–${end.getUTCDate()} ${MONTH_NAMES[start.getUTCMonth()]}`;
-  }
-  return `${start.getUTCDate()} ${MONTH_NAMES[start.getUTCMonth()]} – ${end.getUTCDate()} ${MONTH_NAMES[end.getUTCMonth()]}`;
-}
-
-function liveCurrentDayIndex(weekStart: string, today: string): number | null {
-  const start = addIsoDays(weekStart, 0).getTime();
-  const current = addIsoDays(today, 0).getTime();
-  const index = Math.round((current - start) / 86_400_000);
-  return index >= 0 && index <= 6 ? index : null;
-}
-
 export function useRotaDraftController() {
   const weekDraft = useRotaWeekDrafts();
   const live = useRotaLiveData(weekDraft.weekOffset);
+  const livePersistence = useRotaLivePersistence(live, weekDraft.weekOffset);
   const demoLeaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
   const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
   const [staffSearch, setStaffSearch] = React.useState("");
+  const liveConfirmations = useRotaConfirmations({
+    draftIsPristine: !live.hasUnpublishedChanges && !live.hasPublishedSnapshot,
+    applyStandardTemplate: async () => undefined,
+    clearWeek: livePersistence.clearWeek,
+    removeShiftNow: livePersistence.removeShiftNow,
+  });
 
   // Source the roster, shifts, and leave from the live workspace when a manager
   // read succeeds; otherwise stay on the demo store so Harbour View keeps working.
-  // Live-capable manager sessions stay read-only even while a live read is
+  // Live-capable manager sessions stay read-only only while a live read is
   // loading or has failed and the demo fallback is visible.
-  const readOnly = live.enabled;
+  const readOnly = live.enabled && !live.isLive;
   const roster = live.isLive ? live.staff : staff;
   const sourceShifts = live.isLive ? live.shifts : weekDraft.draftShifts;
   const leaveRequests = live.isLive ? NO_LEAVE_REQUESTS : demoLeaveRequests;
+  const liveActions = live.isLive ? livePersistence : null;
+  const confirmations = liveActions ? liveConfirmations : weekDraft;
 
   const displayShifts = React.useMemo(
     () =>
@@ -137,20 +104,41 @@ export function useRotaDraftController() {
 
   return {
     ...weekDraft,
-    // Live read-only mode reflects the saved DB week; demo mode keeps draft flags.
+    // Live mode reflects the saved DB week; demo mode keeps draft flags.
     weekLabel: live.isLive && live.weekStart ? liveWeekLabel(live.weekStart) : weekDraft.weekLabel,
     source: live.source,
     readOnly,
     isLiveLoading: live.isLoading,
     isLiveError: live.isError,
     hasLiveWeek: live.hasWeek,
+    liveRotaWeekId: live.rotaWeekId,
     liveWeekStart: live.weekStart,
+    liveWeekStatus: live.weekStatus,
     liveLocationId: live.locationId,
     liveLocationName: live.locationName,
     liveLocations: live.locations,
     setLiveLocationId: live.setLocationId,
-    published: readOnly ? live.weekStatus === "published" : weekDraft.published,
-    hasUnpublishedChanges: readOnly ? false : weekDraft.hasUnpublishedChanges,
+    liveMutationPending: livePersistence.isMutationPending,
+    liveMutationFailed: livePersistence.lastMutationFailed,
+    published: live.isLive ? live.hasPublishedSnapshot : weekDraft.published,
+    hasUnpublishedChanges: live.isLive
+      ? live.hasUnpublishedChanges
+      : weekDraft.hasUnpublishedChanges,
+    addShift: liveActions?.addShift ?? weekDraft.addShift,
+    updateShift: liveActions?.updateShift ?? weekDraft.updateShift,
+    removeShiftNow: liveActions?.removeShiftNow ?? weekDraft.removeShiftNow,
+    duplicateShiftToNextDay:
+      liveActions?.duplicateShiftToNextDay ?? weekDraft.duplicateShiftToNextDay,
+    markShiftOpen: liveActions?.markShiftOpen ?? weekDraft.markShiftOpen,
+    handlePublish: liveActions?.publish ?? weekDraft.handlePublish,
+    requestRemoveShift: confirmations.requestRemoveShift,
+    requestClearWeek: confirmations.requestClearWeek,
+    requestApplyStandardTemplate: liveActions
+      ? () => undefined
+      : weekDraft.requestApplyStandardTemplate,
+    confirmPendingAction: confirmations.confirmPendingAction,
+    clearConfirmation: confirmations.clearConfirmation,
+    confirmation: confirmations.confirmation,
     days,
     staff: roster,
     roleOptions: Array.from(new Set(roster.map((row) => row.role))),

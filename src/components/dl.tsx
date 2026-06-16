@@ -941,7 +941,7 @@ export interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   tone?: "brand" | "danger";
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
 }
 
 /** Yes/no confirmation built on AlertDialog. Defaults to brand tone. */
@@ -955,6 +955,10 @@ export function ConfirmDialog({
   tone = "brand",
   onConfirm,
 }: ConfirmDialogProps) {
+  const handleConfirm = () => {
+    void Promise.resolve(onConfirm?.()).catch(() => undefined);
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent
@@ -973,7 +977,7 @@ export function ConfirmDialog({
         <AlertDialogFooter className="modal-foot">
           <AlertDialogCancel className="btn secondary sm !mt-0">{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={handleConfirm}
             className={cn("btn sm", tone === "danger" ? "danger" : "primary")}
           >
             {confirmLabel}

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { AlertTriangle, CheckCircle2, Send } from "lucide-react";
 import { ActionButton, DialogShell } from "@/components/dl";
+import type { MaybePromise } from "./grid";
 
 type ReadinessCheck = {
   label: string;
@@ -31,13 +32,28 @@ export function PublishRotaDialog({
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
-  onConfirm: (prepareStaffUpdate: boolean) => void;
+  onConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
 }) {
   const [prepareStaffUpdate, setPrepareStaffUpdate] = React.useState(true);
+  const [publishing, setPublishing] = React.useState(false);
 
   React.useEffect(() => {
-    if (open) setPrepareStaffUpdate(true);
+    if (open) {
+      setPrepareStaffUpdate(true);
+      setPublishing(false);
+    }
   }, [open]);
+
+  const handleConfirm = async () => {
+    setPublishing(true);
+    try {
+      await onConfirm(prepareStaffUpdate);
+    } catch {
+      // Route/persistence handlers own publish failure toasts and keep the dialog open.
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const checks: ReadinessCheck[] = [
     {
@@ -75,10 +91,10 @@ export function PublishRotaDialog({
       icon={Send}
       footer={
         <>
-          <ActionButton variant="ghost" onClick={() => onOpenChange(false)}>
+          <ActionButton variant="ghost" disabled={publishing} onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton icon={Send} onClick={() => onConfirm(prepareStaffUpdate)}>
+          <ActionButton icon={Send} disabled={publishing} onClick={() => void handleConfirm()}>
             Publish to {staffCount} staff
           </ActionButton>
         </>

@@ -3,6 +3,7 @@ import { Trash2, UserMinus, Save } from "lucide-react";
 import { ActionButton, DrawerShell, FormRow, FormSection, StatusBadge } from "@/components/dl";
 import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
+import type { MaybePromise } from "./grid";
 
 type DayEntry = { d: string };
 
@@ -35,16 +36,20 @@ export function ShiftDetailDrawer({
   staff: StaffMember[];
   days: DayEntry[];
   onClose: () => void;
-  onUpdate: (id: ShiftId, patch: Partial<DraftShift>) => void;
-  onRemove: (id: ShiftId) => void;
-  onMarkOpen: (id: ShiftId) => void;
+  onUpdate: (id: ShiftId, patch: Partial<DraftShift>) => MaybePromise<void>;
+  onRemove: (id: ShiftId) => MaybePromise<void>;
+  onMarkOpen: (id: ShiftId) => MaybePromise<void>;
 }) {
   const [form, setForm] = React.useState<FormState>(() =>
     shift ? formStateFromShift(shift) : { role: "", start: "", end: "", assignTo: "" },
   );
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
-    if (shift) setForm(formStateFromShift(shift));
+    if (shift) {
+      setForm(formStateFromShift(shift));
+      setSaving(false);
+    }
   }, [shift]);
 
   if (!shift) {
@@ -75,7 +80,7 @@ export function ShiftDetailDrawer({
     form.start !== shift.start ||
     form.end !== shift.end ||
     form.assignTo !== (shift.staffId ?? "");
-  const canSave = isDirty && form.role.trim() !== "" && timesValid;
+  const canSave = !saving && isDirty && form.role.trim() !== "" && timesValid;
   const timeErrorId = "shift-edit-time-error";
   const roleErrorId = "shift-edit-role-error";
   const saveHint = !isDirty
@@ -86,15 +91,33 @@ export function ShiftDetailDrawer({
         ? "Enter a valid time range to save."
         : "";
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!canSave) return;
     const nextStaffId = form.assignTo === "" ? null : form.assignTo;
-    onUpdate(shift.id, {
-      role: form.role.trim(),
-      start: form.start,
-      end: form.end,
-      staffId: nextStaffId,
-    });
+    setSaving(true);
+    try {
+      await onUpdate(shift.id, {
+        role: form.role.trim(),
+        start: form.start,
+        end: form.end,
+        staffId: nextStaffId,
+      });
+    } catch {
+      // The live persistence hook owns the failure toast; keep the drawer open.
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const runAction = async (action: (id: ShiftId) => MaybePromise<void>) => {
+    setSaving(true);
+    try {
+      await action(shift.id);
+    } catch {
+      // The live persistence hook owns the failure toast; keep the drawer open.
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -109,15 +132,16 @@ export function ShiftDetailDrawer({
           <ActionButton
             variant="ghost"
             icon={Trash2}
-            onClick={() => onRemove(shift.id)}
+            disabled={saving}
+            onClick={() => void runAction(onRemove)}
             className="text-danger hover:bg-danger-soft/30"
           >
             Remove
           </ActionButton>
-          <ActionButton variant="secondary" onClick={onClose}>
+          <ActionButton variant="secondary" disabled={saving} onClick={onClose}>
             Cancel
           </ActionButton>
-          <ActionButton icon={Save} disabled={!canSave} onClick={handleSave}>
+          <ActionButton icon={Save} disabled={!canSave} onClick={() => void handleSave()}>
             Save
           </ActionButton>
         </>
@@ -198,7 +222,8 @@ export function ShiftDetailDrawer({
               variant="secondary"
               size="sm"
               icon={UserMinus}
-              onClick={() => onMarkOpen(shift.id)}
+              disabled={saving}
+              onClick={() => void runAction(onMarkOpen)}
             >
               Mark as open shift
             </ActionButton>

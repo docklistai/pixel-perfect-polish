@@ -1,6 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import type { DraftShift, RotaDayIndex, ShiftTone } from "../types";
+import type { DraftShift, ShiftTone } from "../types";
+import {
+  dateIsoInTimezone,
+  dayIndexFromDates,
+  formatTimeInTimezone,
+  weekStartForOffset,
+} from "../lib/liveRotaDates";
 
 /**
  * Manager-side live rota reads. Runs as a server function bound to the caller's
@@ -25,7 +31,10 @@ export type LiveRotaLocation = { id: string; name: string };
 export type LiveRotaWeek = {
   /** True when a rota_weeks row exists for this workspace + week_start. */
   hasWeek: boolean;
+  rotaWeekId: string | null;
   status: LiveWeekStatus | null;
+  hasPublishedSnapshot: boolean;
+  hasUnpublishedChanges: boolean;
   weekStart: string;
   locationId: string;
   locationName: string;
@@ -47,25 +56,18 @@ interface ShiftRow {
   break_minutes: number;
   role_name: string;
   assignment_status: "scheduled" | "open";
+  created_at: string;
+  updated_at: string;
 }
 
-/** timestamptz → "HH:MM" in the selected location timezone (matches the demo grid). */
-function formatTime(iso: string, timezone: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    timeZone: timezone,
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(iso));
+interface WeekRow {
+  id: string;
+  status: LiveWeekStatus;
+  updated_at: string;
 }
 
-/** Whole-day offset of a shift date from the Monday week start. */
-function dayIndexFromDates(weekStartIso: string, shiftDateIso: string): RotaDayIndex {
-  const start = new Date(`${weekStartIso}T00:00:00Z`).getTime();
-  const day = new Date(`${shiftDateIso}T00:00:00Z`).getTime();
-  const diff = Math.round((day - start) / 86_400_000);
-  if (diff < 0 || diff > 6) throw new Error("Shift date falls outside its rota week");
-  return diff as RotaDayIndex;
+interface SnapshotRow {
+  published_at: string;
 }
 
 function mapShift(row: ShiftRow, weekStartIso: string, timezone: string): DraftShift {
@@ -76,37 +78,37 @@ function mapShift(row: ShiftRow, weekStartIso: string, timezone: string): DraftS
     dayIndex: dayIndexFromDates(weekStartIso, row.shift_date),
     staffId: row.staff_member_id,
     role: row.role_name,
-    start: formatTime(row.starts_at, timezone),
-    end: formatTime(row.ends_at, timezone),
+    start: formatTimeInTimezone(row.starts_at, timezone),
+    end: formatTimeInTimezone(row.ends_at, timezone),
     breakMinutes: row.break_minutes,
     tone,
     status: isOpen ? "open" : "scheduled",
   };
 }
 
-function dateIsoInTimezone(date: Date, timezone: string): string {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value ?? "";
-  return `${value("year")}-${value("month")}-${value("day")}`;
+function latestShiftChangeAt(shifts: ShiftRow[], weekUpdatedAt: string): string {
+  return shifts.reduce((latest, shift) => {
+    const shiftLatest = shift.updated_at > shift.created_at ? shift.updated_at : shift.created_at;
+    return shiftLatest > latest ? shiftLatest : latest;
+  }, weekUpdatedAt);
 }
 
-function addDays(isoDate: string, days: number): string {
-  const date = new Date(`${isoDate}T12:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
+function timestampValue(value: string): number {
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
 }
 
-function weekStartForOffset(timezone: string, weekOffset: number): string {
-  const today = dateIsoInTimezone(new Date(), timezone);
-  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
-  const daysSinceMonday = weekday === 0 ? 6 : weekday - 1;
-  return addDays(today, weekOffset * 7 - daysSinceMonday);
+function hasDraftChangedSincePublish(
+  week: WeekRow,
+  shifts: ShiftRow[],
+  latestSnapshot: SnapshotRow | null,
+): boolean {
+  if (!latestSnapshot) return false;
+  if (week.status !== "published") return true;
+  return (
+    timestampValue(latestShiftChangeAt(shifts, week.updated_at)) >
+    timestampValue(latestSnapshot.published_at)
+  );
 }
 
 /**
@@ -142,7 +144,7 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
 
     const { data: week, error: weekError } = await supabase
       .from("rota_weeks")
-      .select("id, status")
+      .select("id, status, updated_at")
       .eq("workspace_id", workspaceId)
       .eq("location_id", location.id)
       .eq("week_start", weekStart)
@@ -157,26 +159,53 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       locations: locations.map(({ id, name }) => ({ id, name })),
       today: dateIsoInTimezone(new Date(), location.timezone),
     };
-    if (!week) return { ...resultBase, hasWeek: false, status: null, shifts: [] };
+    if (!week) {
+      return {
+        ...resultBase,
+        hasWeek: false,
+        rotaWeekId: null,
+        status: null,
+        hasPublishedSnapshot: false,
+        hasUnpublishedChanges: false,
+        shifts: [],
+      };
+    }
 
-    const { data: shifts, error: shiftsError } = await supabase
-      .from("shifts")
-      .select(
-        "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status",
-      )
-      .eq("workspace_id", workspaceId)
-      .eq("rota_week_id", week.id)
-      .order("shift_date", { ascending: true })
-      .order("starts_at", { ascending: true });
+    const [{ data: shifts, error: shiftsError }, { data: latestSnapshot, error: snapshotError }] =
+      await Promise.all([
+        supabase
+          .from("shifts")
+          .select(
+            "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, created_at, updated_at",
+          )
+          .eq("workspace_id", workspaceId)
+          .eq("rota_week_id", week.id)
+          .order("shift_date", { ascending: true })
+          .order("starts_at", { ascending: true }),
+        supabase
+          .from("published_rota_snapshots")
+          .select("published_at")
+          .eq("workspace_id", workspaceId)
+          .eq("rota_week_id", week.id)
+          .order("version", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
     if (shiftsError) throw shiftsError;
+    if (snapshotError) throw snapshotError;
+
+    const shiftRows = (shifts as ShiftRow[] | null) ?? [];
+    const weekRow = week as WeekRow;
+    const snapshotRow = (latestSnapshot as SnapshotRow | null) ?? null;
 
     return {
       ...resultBase,
       hasWeek: true,
-      status: week.status as LiveWeekStatus,
-      shifts: ((shifts as ShiftRow[] | null) ?? []).map((row) =>
-        mapShift(row, weekStart, location.timezone),
-      ),
+      rotaWeekId: weekRow.id,
+      status: weekRow.status,
+      hasPublishedSnapshot: Boolean(snapshotRow),
+      hasUnpublishedChanges: hasDraftChangedSincePublish(weekRow, shiftRows, snapshotRow),
+      shifts: shiftRows.map((row) => mapShift(row, weekStart, location.timezone)),
     };
   });

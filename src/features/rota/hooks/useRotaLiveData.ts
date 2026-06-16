@@ -14,6 +14,7 @@ import type { DraftShift, ShiftTone, StaffMember } from "../types";
 const rotaRouteApi = getRouteApi("/rota");
 
 export type RotaLiveData = {
+  workspaceId: string | null;
   /** Whether this authenticated route should attempt live manager reads. */
   enabled: boolean;
   /** True only when env + a manager session are present AND both live reads succeed. */
@@ -23,31 +24,40 @@ export type RotaLiveData = {
   isError: boolean;
   /** Whether a saved rota week exists for the selected week (live mode only). */
   hasWeek: boolean;
+  rotaWeekId: string | null;
   weekStatus: LiveWeekStatus | null;
+  hasPublishedSnapshot: boolean;
+  hasUnpublishedChanges: boolean;
   weekStart: string | null;
   locationId: string | null;
   locationName: string | null;
   locations: LiveRotaLocation[];
   today: string | null;
   setLocationId: (locationId: string) => void;
+  refetchWeek: () => Promise<void>;
   staff: StaffMember[];
   shifts: DraftShift[];
 };
 
 const DEMO: RotaLiveData = {
+  workspaceId: null,
   enabled: false,
   isLive: false,
   source: "demo",
   isLoading: false,
   isError: false,
   hasWeek: false,
+  rotaWeekId: null,
   weekStatus: null,
+  hasPublishedSnapshot: false,
+  hasUnpublishedChanges: false,
   weekStart: null,
   locationId: null,
   locationName: null,
   locations: [],
   today: null,
   setLocationId: () => undefined,
+  refetchWeek: async () => undefined,
   staff: [],
   shifts: [],
 };
@@ -113,30 +123,41 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     }
   }, [selectedLocationId, weekQuery.data, weekQuery.isSuccess]);
 
+  const refetchWeek = React.useCallback(async () => {
+    await weekQuery.refetch();
+  }, [weekQuery]);
+
   if (!isLive) {
     return {
       ...DEMO,
+      workspaceId,
       enabled,
       setLocationId: setSelectedLocationId,
+      refetchWeek,
       isLoading: enabled && (staffQuery.isLoading || weekQuery.isLoading),
       isError: enabled && (staffQuery.isError || weekQuery.isError),
     };
   }
 
   return {
+    workspaceId,
     enabled: true,
     isLive: true,
     source: "live",
     isLoading: false,
     isError: false,
     hasWeek: weekQuery.data.hasWeek,
+    rotaWeekId: weekQuery.data.rotaWeekId,
     weekStatus: weekQuery.data.status,
+    hasPublishedSnapshot: weekQuery.data.hasPublishedSnapshot,
+    hasUnpublishedChanges: weekQuery.data.hasUnpublishedChanges,
     weekStart: weekQuery.data.weekStart,
     locationId: weekQuery.data.locationId,
     locationName: weekQuery.data.locationName,
     locations: weekQuery.data.locations,
     today: weekQuery.data.today,
     setLocationId: setSelectedLocationId,
+    refetchWeek,
     staff: (staffQuery.data ?? []).map(toStaffMember),
     shifts: weekQuery.data.shifts,
   };
