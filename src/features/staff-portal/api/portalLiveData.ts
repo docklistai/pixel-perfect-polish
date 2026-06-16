@@ -1,5 +1,5 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
-import type { PortalNotification, PortalShift } from "../types";
+import type { ClockEntry, PortalNotification, PortalShift } from "../types";
 
 /**
  * Browser-side staff-safe reads for the portal. These hit the
@@ -161,4 +161,111 @@ export async function fetchPortalNotifications(workspaceId: string): Promise<Por
   if (error) throw error;
 
   return ((data as NotificationViewRow[] | null) ?? []).map(mapNotification);
+}
+
+/**
+ * A staff-safe time entry plus the raw clock instants the live clock needs.
+ * Extends the display-ready {@link ClockEntry} with epoch-ms clock times so the
+ * portal can both render history and derive the open entry / timer origin from
+ * persisted state rather than session memory.
+ */
+export interface PortalTimeEntry extends ClockEntry {
+  clockedInAtMs: number | null;
+  clockedOutAtMs: number | null;
+}
+
+interface TimeEntryViewRow {
+  time_entry_id: string;
+  staff_member_id: string;
+  work_date: string;
+  clocked_in_at: string | null;
+  clocked_out_at: string | null;
+  break_minutes: number;
+}
+
+function mapPortalTimeEntry(row: TimeEntryViewRow): PortalTimeEntry {
+  const clockedInAtMs = row.clocked_in_at ? Date.parse(row.clocked_in_at) : null;
+  const clockedOutAtMs = row.clocked_out_at ? Date.parse(row.clocked_out_at) : null;
+  const workedHours =
+    clockedInAtMs !== null && clockedOutAtMs !== null
+      ? Math.max(0, (clockedOutAtMs - clockedInAtMs) / 3_600_000 - row.break_minutes / 60)
+      : null;
+  return {
+    id: row.time_entry_id,
+    dayLabel: formatDayLabel(row.work_date),
+    clockIn: row.clocked_in_at ? formatTime(row.clocked_in_at) : "—",
+    clockOut: row.clocked_out_at ? formatTime(row.clocked_out_at) : null,
+    breakMinutes: row.break_minutes,
+    totalHours: workedHours !== null ? Math.round(workedHours * 10) / 10 : null,
+    // A past entry with a clock-in but no clock-out is genuinely missing one;
+    // the live caller excludes the active open entry before reading this flag.
+    flag: clockedInAtMs !== null && clockedOutAtMs === null ? "missing-clock-out" : null,
+    clockedInAtMs,
+    clockedOutAtMs,
+  };
+}
+
+/**
+ * The signed-in staff member's own time entries from the staff-safe
+ * `staff_portal_time_entries` view, newest first.
+ */
+export async function fetchPortalTimeEntries(
+  workspaceId: string,
+  staffMemberId: string,
+): Promise<PortalTimeEntry[]> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("staff_portal_time_entries")
+    .select(
+      "time_entry_id, staff_member_id, work_date, clocked_in_at, clocked_out_at, break_minutes",
+    )
+    .eq("workspace_id", workspaceId)
+    .eq("staff_member_id", staffMemberId)
+    .order("work_date", { ascending: false })
+    .order("clocked_in_at", { ascending: false, nullsFirst: false });
+
+  if (error) throw error;
+
+  return ((data as TimeEntryViewRow[] | null) ?? []).map(mapPortalTimeEntry);
+}
+
+export type PortalClockEventType = "clock_in" | "clock_out" | "break_start" | "break_end";
+
+export interface PortalClockEvent {
+  timeEntryId: string;
+  eventType: PortalClockEventType;
+  occurredAtMs: number;
+}
+
+interface ClockEventViewRow {
+  time_entry_id: string;
+  event_type: PortalClockEventType;
+  occurred_at: string;
+}
+
+/**
+ * The signed-in staff member's own recent clock events from the staff-safe
+ * `staff_portal_clock_events` view, newest first. Used to derive break state
+ * for the open entry; bounded so the read stays cheap.
+ */
+export async function fetchPortalClockEvents(
+  workspaceId: string,
+  staffMemberId: string,
+): Promise<PortalClockEvent[]> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("staff_portal_clock_events")
+    .select("time_entry_id, event_type, occurred_at")
+    .eq("workspace_id", workspaceId)
+    .eq("staff_member_id", staffMemberId)
+    .order("occurred_at", { ascending: false })
+    .limit(200);
+
+  if (error) throw error;
+
+  return ((data as ClockEventViewRow[] | null) ?? []).map((row) => ({
+    timeEntryId: row.time_entry_id,
+    eventType: row.event_type,
+    occurredAtMs: Date.parse(row.occurred_at),
+  }));
 }

@@ -7,14 +7,8 @@ import {
   FeedbackBanner,
   StatusBadge,
 } from "@/components/dl";
-import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
-import {
-  portalClockIn,
-  portalClockOut,
-  portalToggleBreak,
-} from "@/features/demo/store/workspaceActions";
-import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import { usePortalRota } from "../hooks/usePortalRota";
+import { usePortalClock } from "../hooks/usePortalClock";
 
 function formatElapsed(ms: number) {
   const total = Math.floor(ms / 1000);
@@ -25,32 +19,29 @@ function formatElapsed(ms: number) {
 }
 
 export function TimeTab() {
-  const store = useWorkspaceStore();
-  const clock = useWorkspaceSelector((state) => state.portalClock);
-  const entries = useWorkspaceSelector((state) => state.portalClockEntries);
+  const { clockedIn, onBreak, startedAtMs, sinceLabel, entries, clockIn, clockOut, toggleBreak } =
+    usePortalClock();
   const { nextShift, activeShift } = usePortalRota();
   const [now, setNow] = React.useState(() => Date.now());
 
   React.useEffect(() => {
-    if (!clock.clockedIn) return;
+    if (!clockedIn) return;
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
-  }, [clock.clockedIn]);
+  }, [clockedIn]);
 
-  const elapsed = clock.clockedIn && clock.startedAtMs ? now - clock.startedAtMs : 0;
+  const elapsed = clockedIn && startedAtMs ? now - startedAtMs : 0;
   // Clock in only against today's active shift; otherwise show the next one.
   const displayShift = activeShift ?? nextShift;
   const clockInAvailable = activeShift !== null;
-  // The demo world's clock is frozen; the session timer alone is live.
-  const sinceLabel = clock.startedAtMs ? DEMO_WORLD.nowLabel : null;
-  const hasMissing = entries.some((e) => e.flag === "missing-clock-out");
+  const missingEntry = entries.find((e) => e.flag === "missing-clock-out");
 
   const onToggle = () => {
-    if (clock.clockedIn) {
-      portalClockOut(store);
+    if (clockedIn) {
+      clockOut();
       setNow(Date.now());
     } else if (clockInAvailable) {
-      portalClockIn(store);
+      clockIn();
       setNow(Date.now());
     }
   };
@@ -62,8 +53,8 @@ export function TimeTab() {
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
             {activeShift ? "CURRENT SHIFT" : "NEXT PUBLISHED SHIFT"}
           </div>
-          <StatusBadge tone={clock.clockedIn ? "success" : "muted"}>
-            {clock.clockedIn ? "Clocked in" : "Not active"}
+          <StatusBadge tone={clockedIn ? "success" : "muted"}>
+            {clockedIn ? "Clocked in" : "Not active"}
           </StatusBadge>
         </div>
         {displayShift ? (
@@ -89,26 +80,22 @@ export function TimeTab() {
       <DashboardCard className="p-5">
         <div className="flex flex-col items-center">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
-            {clock.clockedIn
-              ? "YOU ARE CLOCKED IN"
-              : clockInAvailable
-                ? "ON SHIFT NOW"
-                : "NOT ON SHIFT"}
+            {clockedIn ? "YOU ARE CLOCKED IN" : clockInAvailable ? "ON SHIFT NOW" : "NOT ON SHIFT"}
           </div>
           <div className="mt-3 flex items-center justify-center">
             <button
               type="button"
               onClick={onToggle}
-              disabled={!clockInAvailable && !clock.clockedIn}
+              disabled={!clockInAvailable && !clockedIn}
               className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
-                clock.clockedIn
+                clockedIn
                   ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
                   : "bg-[linear-gradient(135deg,#0B7A78_0%,#0EA5A2_100%)]"
               }`}
             >
               <span className="absolute inset-[-12px] rounded-full bg-[radial-gradient(circle,_rgba(14,165,162,.18),_transparent_70%)]" />
               <span className="relative flex flex-col items-center gap-2">
-                {clock.clockedIn ? (
+                {clockedIn ? (
                   <StopCircle className="h-9 w-9" />
                 ) : (
                   <PlayCircle className="h-9 w-9" />
@@ -116,14 +103,14 @@ export function TimeTab() {
                 <span className="text-[22px] font-bold leading-none">
                   {!displayShift
                     ? "No shift"
-                    : clock.clockedIn
+                    : clockedIn
                       ? "Clock out"
                       : clockInAvailable
                         ? "Clock in"
                         : "Not available"}
                 </span>
                 <span className="text-[11px] font-medium text-white/85">
-                  {clock.clockedIn
+                  {clockedIn
                     ? sinceLabel
                       ? `since ${sinceLabel}`
                       : "End your shift"
@@ -137,13 +124,13 @@ export function TimeTab() {
           <div className="mt-4 w-full rounded-2xl border border-border bg-muted/40 px-4 py-3">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Worked</span>
-              <span>{clock.clockedIn ? formatElapsed(elapsed) : "00:00:00"}</span>
+              <span>{clockedIn ? formatElapsed(elapsed) : "00:00:00"}</span>
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-border/70">
               <div
                 className="h-full rounded-full bg-brand"
                 style={{
-                  width: clock.clockedIn
+                  width: clockedIn
                     ? `${Math.min((elapsed / (8 * 60 * 60 * 1000)) * 100, 100)}%`
                     : "0%",
                 }}
@@ -153,14 +140,14 @@ export function TimeTab() {
         </div>
 
         <div className="mt-5 space-y-2">
-          {clock.clockedIn && (
+          {clockedIn && (
             <ActionButton
               variant="secondary"
               icon={Coffee}
-              onClick={() => portalToggleBreak(store)}
+              onClick={toggleBreak}
               className="w-full justify-center"
             >
-              {clock.onBreak ? "End break" : "Start break"}
+              {onBreak ? "End break" : "Start break"}
             </ActionButton>
           )}
         </div>
@@ -182,17 +169,17 @@ export function TimeTab() {
               Worked
             </div>
             <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
-              {clock.clockedIn ? formatElapsed(elapsed).slice(0, 5) : "0h 00m"}
+              {clockedIn ? formatElapsed(elapsed).slice(0, 5) : "0h 00m"}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">This session</div>
           </div>
         </div>
       </DashboardCard>
 
-      {hasMissing && (
+      {missingEntry && (
         <FeedbackBanner
           tone="warning"
-          title="Missing clock-out on Wed 3 Jun"
+          title={`Missing clock-out on ${missingEntry.dayLabel}`}
           description="Please add the missing clock-out so your hours are accurate."
         />
       )}

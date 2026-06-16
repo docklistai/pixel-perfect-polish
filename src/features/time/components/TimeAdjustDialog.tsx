@@ -1,6 +1,7 @@
 import * as React from "react";
 import { DialogShell, ActionButton, FormRow } from "@/components/dl";
 import { Check, Edit3 } from "lucide-react";
+import { BREAK_OPTIONS, breakValueToOption } from "../lib/adjustTime";
 import type { StoredTimesheetRow, TimeAdjustment } from "../types";
 
 interface Props {
@@ -20,7 +21,8 @@ export function TimeAdjustDialog({ row, onClose, onSave }: Props) {
     if (!row) return;
     setClockIn(row.in === "—" ? "08:00" : row.in);
     setClockOut(row.out);
-    setBreakTime(row.brk);
+    // Live rows carry "<n>m"; snap to a dialog option so the select shows it.
+    setBreakTime(breakValueToOption(row.brk));
     setNote("");
   }, [row]);
 
@@ -74,7 +76,7 @@ export function TimeAdjustDialog({ row, onClose, onSave }: Props) {
             value={breakTime}
             onChange={(event) => setBreakTime(event.target.value)}
           >
-            {["0:00", "0:15", "0:30", "0:45", "1:00"].map((b) => (
+            {BREAK_OPTIONS.map((b) => (
               <option key={b}>{b}</option>
             ))}
           </select>

@@ -68,7 +68,9 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
   const [notifs, setNotifs] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
   const [aiPrompt, setAiPrompt] = React.useState<string | null>(null);
-  const [unreadCount, setUnreadCount] = React.useState(3);
+  // Starts at 0 so the badge reflects the actual notification inbox the drawer
+  // reports (via onUnreadCountChange) instead of flashing a hardcoded count.
+  const [unreadCount, setUnreadCount] = React.useState(0);
   const navigate = useNavigate();
   const gPending = React.useRef<number | null>(null);
 

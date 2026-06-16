@@ -121,6 +121,7 @@ function mapTimeRow(row: TimeEntryRow, staff: StaffLite | undefined): StoredTime
     status: STATUS_MAP[row.approval_status],
     flagged: false,
     auditTrail: [],
+    workDate: row.work_date,
   };
 }
 

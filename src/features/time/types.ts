@@ -30,6 +30,11 @@ export interface StoredTimesheetRow extends TimesheetRow {
   status: TimesheetStatus;
   flagged: boolean;
   auditTrail: TimeAuditEntry[];
+  /**
+   * The entry's work date (YYYY-MM-DD), present on live rows only. Required to
+   * build exact timestamptz values for a live adjustment; demo rows omit it.
+   */
+  workDate?: string;
 }
 
 export interface TimeAdjustment {

@@ -82,3 +82,50 @@ export const markPortalNotificationsReadFn = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+export type ClockEventResult = { ok: true } | { ok: false; message: string };
+
+const clockEventSchema = z.object({
+  workspaceId: z.string().uuid(),
+  eventType: z.enum(["clock_in", "clock_out", "break_start", "break_end"]),
+  timeEntryId: z.string().uuid().nullable().optional(),
+});
+
+function describeClockError(sqlState: string | null): string {
+  switch (sqlState) {
+    case "42501":
+      return "The staff clock is only available to staff-role members.";
+    case "P0002":
+      return "We couldn't find an open shift entry for that action.";
+    case "55000":
+    case "22023":
+      return "That clock action isn't valid right now.";
+    default:
+      return "We couldn't record your clock action. Please try again.";
+  }
+}
+
+/**
+ * Records a clock-in / clock-out / break-start / break-end for the signed-in
+ * staff member via `rpc_staff_clock_event`. The RPC opens a new entry on
+ * clock-in and enforces break pairing on the open (or owned) entry; identity,
+ * role, and workspace are re-derived server-side from the caller's session.
+ */
+export const staffClockEventFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => clockEventSchema.parse(input))
+  .handler(async ({ data }): Promise<ClockEventResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const supabase = getSupabaseServerClient();
+
+    const { error } = await supabase.rpc("rpc_staff_clock_event", {
+      p_workspace_id: data.workspaceId,
+      p_event_type: data.eventType,
+      p_time_entry_id: data.timeEntryId ?? null,
+    });
+
+    if (error) {
+      return { ok: false, message: describeClockError(error.code ?? null) };
+    }
+
+    return { ok: true };
+  });

@@ -2,10 +2,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { batchApproveTimeFn } from "../api/timeLiveData";
+import { adjustTimeEntryFn, batchApproveTimeFn } from "../api/timeLiveData";
+import { parseBreakMinutes, parseClockField, workspaceWallTimeToIso } from "../lib/adjustTime";
 import { useTimeActions } from "./useTimeActions";
 import { TIME_QUERY_KEY } from "./useWorkspaceTime";
-import type { StoredTimesheetRow } from "../types";
+import type { StoredTimesheetRow, TimeAdjustment } from "../types";
 
 const timeRouteApi = getRouteApi("/time");
 
@@ -14,11 +15,11 @@ const timeRouteApi = getRouteApi("/time");
  * and the demo path, and — when the page is showing live data — overrides the
  * persisted approval actions to route through `rpc_batch_approve_time_entries`.
  *
- * Adjustments and flagging have no usable live path: the adjust dialog yields
- * clock times without a date (so the timestamptz the adjust RPC requires can't
- * be built from the rendered row), and there is no flag column or RPC. In live
- * mode they are surfaced as "not available yet" rather than silently mutating
- * the unused demo store and showing a false success.
+ * Adjustments route through `rpc_adjust_time_entry`: the live row carries its
+ * `workDate`, so the dialog's wall-clock fields resolve to exact timestamptz
+ * values in the workspace timezone. A row without that date context is blocked
+ * with a clear message rather than faking success. Flagging still has no flag
+ * column or RPC, so it stays "not available yet" in live mode.
  */
 export function useTimeController(
   allRows: StoredTimesheetRow[],
@@ -56,6 +57,65 @@ export function useTimeController(
     toast.info("Not available in live mode yet", {
       description: "This action isn't wired to the live workspace yet.",
     });
+
+  const saveAdjustment = async (row: StoredTimesheetRow, adjustment: TimeAdjustment) => {
+    if (!row.workDate) {
+      toast.error("Can't adjust this entry", {
+        description: "This timesheet is missing the date needed to set exact clock times.",
+      });
+      return;
+    }
+
+    const inField = parseClockField(adjustment.clockIn);
+    const outField = parseClockField(adjustment.clockOut);
+    const inBlank = adjustment.clockIn.trim() === "" || adjustment.clockIn.trim() === "—";
+    const outBlank = adjustment.clockOut.trim() === "" || adjustment.clockOut.trim() === "—";
+    const breakMinutes = parseBreakMinutes(adjustment.breakTime);
+
+    if ((!inBlank && inField === null) || (!outBlank && outField === null)) {
+      toast.error("Check the clock times", { description: "Enter times as HH:MM." });
+      return;
+    }
+    if (breakMinutes === null) {
+      toast.error("Check the break length", { description: "Enter the break as H:MM." });
+      return;
+    }
+    if (outField !== null && inField === null) {
+      toast.error("Clock-out needs a clock-in", {
+        description: "Add a clock-in time before setting a clock-out.",
+      });
+      return;
+    }
+
+    const clockedInAt = inField
+      ? workspaceWallTimeToIso(row.workDate, inField.hours, inField.minutes)
+      : null;
+    const clockedOutAt = outField
+      ? workspaceWallTimeToIso(row.workDate, outField.hours, outField.minutes)
+      : null;
+    const reason = adjustment.note.trim()
+      ? `${adjustment.reason} — ${adjustment.note.trim()}`
+      : adjustment.reason;
+
+    const result = await adjustTimeEntryFn({
+      data: {
+        workspaceId: workspaceId!,
+        timeEntryId: row.id,
+        clockedInAt,
+        clockedOutAt,
+        breakMinutes,
+        reason,
+      },
+    });
+    if (!result.ok) {
+      toast.error("Couldn't save adjustment", { description: result.message });
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["time", TIME_QUERY_KEY, workspaceId] });
+    toast.success("Adjustment saved", {
+      description: `${row.n}'s timesheet was updated and reset to pending.`,
+    });
+  };
 
   const setApproval = (row: StoredTimesheetRow) => {
     const next = row.status === "approved" ? "pending" : "approved";
@@ -95,8 +155,9 @@ export function useTimeController(
         "Bulk approved",
         "All pending timesheets approved.",
       ),
-    // No live primitive for these — do not mutate the demo store or fake success.
-    saveAdjustment: notLiveYet,
+    saveAdjustment: (row: StoredTimesheetRow, adjustment: TimeAdjustment) =>
+      void saveAdjustment(row, adjustment),
+    // Flagging has no flag column or RPC — do not fake success.
     toggleFlag: notLiveYet,
     flagSelection: notLiveYet,
   };
