@@ -8,11 +8,9 @@ import {
   DialogShell,
   StatusBadge,
 } from "@/components/dl";
-import { useOverlays } from "@/components/AppShortcuts";
 import {
   Megaphone,
   MoreHorizontal,
-  Sparkles,
   Gift,
   Users,
   User,
@@ -47,7 +45,6 @@ export const Route = createFileRoute("/team")({
 });
 
 function TeamPage() {
-  const { openAiDrawer } = useOverlays();
   const [composeOpen, setComposeOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<TeamAnnouncement | null>(null);
   const [selectedBirthday, setSelectedBirthday] = React.useState<TeamBirthdayItem | null>(null);
@@ -59,10 +56,9 @@ function TeamPage() {
 
     switch (action) {
       case "note":
-        openAiDrawer();
-        // Set a small timeout to let the AI drawer open and then populate details
-        toast.info("AI assistant opened", {
-          description: `Ask it: "Draft a short warm birthday note for ${selectedBirthday.n} from manager Alex"`,
+        setComposeOpen(true);
+        toast.info("Compose opened", {
+          description: `Draft a note for ${selectedBirthday.n} — review before posting.`,
         });
         break;
       case "update":
@@ -90,9 +86,6 @@ function TeamPage() {
         subtitle="Share updates and briefings with your team — track who's read what."
         actions={
           <>
-            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Draft with AI
-            </ActionButton>
             <ActionButton icon={Megaphone} onClick={() => setComposeOpen(true)}>
               Compose
             </ActionButton>
@@ -112,7 +105,6 @@ function TeamPage() {
             birthdays={birthdayItems}
             events={staffEvents}
             groups={quickGroups}
-            onDraftWithAI={openAiDrawer}
             onSelectBirthday={setSelectedBirthday}
             onSelectTraining={setSelectedTraining}
             onComposeForGroup={() => setComposeOpen(true)}

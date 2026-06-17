@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AlertTriangle, ChevronRight, Clock, Sparkles, type LucideIcon } from "lucide-react";
+import { AlertTriangle, ChevronRight, Clock, ClipboardList, type LucideIcon } from "lucide-react";
 import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileManagerActions } from "./ProfileManagerActions";
 import type { StaffProfile } from "../../types";
@@ -80,11 +80,7 @@ export function ManagerSnapshotCard({ profile, onTabChange, onToast }: OverviewS
       title="Manager snapshot"
       className="p-0 overflow-hidden"
       action={
-        <span
-          className="inline-flex items-center gap-1 text-[11px] font-semibold text-teal-500"
-          style={{ color: "var(--teal-400)" }}
-        >
-          <Sparkles className="h-3 w-3" aria-hidden />
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
           Updated just now
         </span>
       }
@@ -115,9 +111,9 @@ export function ManagerSnapshotCard({ profile, onTabChange, onToast }: OverviewS
       <div className="rounded-xl border border-brand/20 bg-brand-soft p-5 m-4 mt-4">
         <div className="flex items-center gap-2 text-brand mb-3">
           <div className="size-8 rounded-full bg-brand text-white flex items-center justify-center">
-            <Sparkles className="size-4" aria-hidden />
+            <ClipboardList className="size-4" aria-hidden />
           </div>
-          <div className="text-xs font-bold">AI summary</div>
+          <div className="text-xs font-bold">Summary</div>
         </div>
         <p className="text-sm leading-6 text-foreground text-pretty">{summary.join(" ")}</p>
         <div className="mt-4 flex flex-wrap gap-2">

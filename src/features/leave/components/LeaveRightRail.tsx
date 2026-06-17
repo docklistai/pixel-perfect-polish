@@ -1,28 +1,9 @@
 import { Card } from "@/components/dl";
-import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
-import { Plus, Sparkles } from "lucide-react";
+import { Plus } from "lucide-react";
 
-interface Props {
-  onOpenAssistant?: () => void;
-}
-
-export function LeaveRightRail({ onOpenAssistant }: Props = {}) {
+export function LeaveRightRail() {
   return (
     <div className="col-span-12 lg:col-span-3 space-y-4">
-      <AiSuggestionCard
-        tone="teal"
-        title="Three low-impact requests look safe to approve"
-        body="Sophie, Olivia and one other request fall on weeks with full coverage and within balance. Worth a quick review."
-        actions={[
-          {
-            label: "Open assistant",
-            primary: true,
-            icon: <Sparkles className="h-3.5 w-3.5" aria-hidden />,
-            onClick: onOpenAssistant,
-          },
-        ]}
-      />
-
       <Card className="rounded-2xl p-5">
         <div className="text-sm font-semibold mb-1">MANAGER AVAILABILITY</div>
         <p className="mb-3 text-xs text-muted-foreground">

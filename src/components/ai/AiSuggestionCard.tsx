@@ -11,7 +11,7 @@ interface AiAction {
   onClick?: () => void;
 }
 
-/** Small opinionated AI suggestion card. Matches prototype AISuggestionCard. */
+/** Small manager-support card driven by live, deterministic data passed in by the caller. */
 export function AiSuggestionCard({
   title,
   body,

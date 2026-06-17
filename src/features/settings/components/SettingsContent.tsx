@@ -17,7 +17,7 @@ export type SettingsContentTab =
   | "Rota & scheduling"
   | "Time & attendance"
   | "Notifications"
-  | "AI manager support"
+  | "Manager support"
   | "Data & privacy"
   | "Plan & limits";
 
@@ -37,7 +37,7 @@ export function SettingsContent({
       {activeTab === "Rota & scheduling" && <RotaSchedulingTab onDirty={onDirty} />}
       {activeTab === "Time & attendance" && <TimeRulesTab onDirty={onDirty} />}
       {activeTab === "Notifications" && <NotificationsTab onDirty={onDirty} />}
-      {activeTab === "AI manager support" && <AIManagerSupportTab onDirty={onDirty} />}
+      {activeTab === "Manager support" && <AIManagerSupportTab onDirty={onDirty} />}
       {activeTab === "Data & privacy" && <ExportsTab onDirty={onDirty} />}
       {activeTab === "Plan & limits" && <PlanLimitsTab />}
     </div>

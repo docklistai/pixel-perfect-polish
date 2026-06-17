@@ -7,9 +7,9 @@ export function AiDrawerHeader() {
         <Sparkles className="h-3.5 w-3.5" />
       </span>
       <span>
-        <span className="block">Docklist assistant</span>
+        <span className="block">Manager support</span>
         <span className="block text-xs font-normal" style={{ color: "var(--ink-500)" }}>
-          Practical manager support · review before acting
+          Deterministic review aids · review before acting
         </span>
       </span>
     </span>

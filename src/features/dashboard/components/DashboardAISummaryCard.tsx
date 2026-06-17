@@ -28,7 +28,7 @@ export function DashboardAISummaryCard({
       onDismiss={onDismiss}
       actions={[
         {
-          label: "Open assistant",
+          label: "Manager support",
           primary: true,
           icon: <Sparkles className="h-3.5 w-3.5" aria-hidden />,
           onClick: onOpenAssistant,

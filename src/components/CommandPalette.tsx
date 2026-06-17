@@ -132,10 +132,10 @@ export function CommandPalette({
           })}
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Assistant">
-          <CommandItem value="Ask manager assistant" onSelect={runAskAssistant}>
+        <CommandGroup heading="Manager support">
+          <CommandItem value="Open manager support" onSelect={runAskAssistant}>
             <Sparkles className="ico h-4 w-4" aria-hidden />
-            <span>Ask manager assistant</span>
+            <span>Open manager support</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />

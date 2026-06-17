@@ -1,9 +1,8 @@
 import * as React from "react";
-import { ArrowRight, FileText, Send, Sparkles, User } from "lucide-react";
+import { ArrowRight, FileText, FilePlus2, Send, User } from "lucide-react";
 import { toast } from "sonner";
 import { DialogShell, ActionButton, StatusBadge } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
-import { AiChip } from "@/components/ai/AiChip";
 import { handoverRecipients, handoverAiDraft } from "../data/opsOverlayData";
 
 interface OpsHandoverModalProps {
@@ -38,7 +37,7 @@ export function OpsHandoverModal({ open, onClose }: OpsHandoverModalProps) {
             Cancel
           </ActionButton>
           <ActionButton variant="outline" onClick={() => setNotes(handoverAiDraft)}>
-            <Sparkles className="mr-1.5 h-3 w-3" /> Draft with AI
+            <FilePlus2 className="mr-1.5 h-3 w-3" /> Use template
           </ActionButton>
           <ActionButton onClick={handleHandOver}>
             <Send className="mr-1.5 h-3 w-3" /> Hand over to next manager
@@ -96,10 +95,10 @@ export function OpsHandoverModal({ open, onClose }: OpsHandoverModalProps) {
         style={{ background: "var(--st-teal-bg)", borderColor: "var(--st-teal-line)" }}
       >
         <div className="flex items-start gap-3 p-3.5">
-          <AiChip size="sm" />
+          <FilePlus2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden />
           <p className="grow text-[13px] leading-normal text-muted-foreground">
-            I can pull open incidents, follow-ups and tonight's events into a draft. You'll review
-            before anything is shared.
+            “Use template” drops in a standard handover outline you can edit. Nothing is shared
+            until you hand over to the next manager.
           </p>
         </div>
       </div>

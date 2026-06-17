@@ -24,7 +24,6 @@ interface OverlayApi {
   openShortcuts: () => void;
   openNotifications: () => void;
   openAiDrawer: () => void;
-  askAssistant: (prompt: string) => void;
   unreadCount: number;
 }
 
@@ -39,7 +38,6 @@ export function useOverlays(): OverlayApi {
       openShortcuts: () => {},
       openNotifications: () => {},
       openAiDrawer: () => {},
-      askAssistant: () => {},
       unreadCount: 0,
     };
   }
@@ -67,7 +65,6 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
   const [shortcuts, setShortcuts] = React.useState(false);
   const [notifs, setNotifs] = React.useState(false);
   const [aiOpen, setAiOpen] = React.useState(false);
-  const [aiPrompt, setAiPrompt] = React.useState<string | null>(null);
   // Starts at 0 so the badge reflects the actual notification inbox the drawer
   // reports (via onUnreadCountChange) instead of flashing a hardcoded count.
   const [unreadCount, setUnreadCount] = React.useState(0);
@@ -80,11 +77,6 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
       openShortcuts: () => setShortcuts(true),
       openNotifications: () => setNotifs(true),
       openAiDrawer: () => {
-        setAiPrompt(null);
-        setAiOpen(true);
-      },
-      askAssistant: (prompt: string) => {
-        setAiPrompt(prompt);
         setAiOpen(true);
       },
       unreadCount,
@@ -148,7 +140,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
           onOpenChange={setNotifs}
           onUnreadCountChange={setUnreadCount}
         />
-        <AiDrawer open={aiOpen} initialPrompt={aiPrompt} onOpenChange={setAiOpen} />
+        <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
       </OverlayContext.Provider>
     </InteractionIntentProvider>
   );

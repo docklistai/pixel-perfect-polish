@@ -20,7 +20,7 @@ export const settingsTabs: SettingsTab[] = [
   { t: "Rota & scheduling", s: "Rota rules and targets", icon: Calendar, group: "Operations" },
   { t: "Time & attendance", s: "Rules for time tracking", icon: Clock, group: "Operations" },
   { t: "Notifications", s: "Email and app notifications", icon: Bell, group: "Operations" },
-  { t: "AI manager support", s: "AI assistant preferences", icon: Sparkles, group: "Platform" },
+  { t: "Manager support", s: "Deterministic review aids", icon: Sparkles, group: "Platform" },
   { t: "Data & privacy", s: "Security and data exports", icon: Lock, group: "Platform" },
   { t: "Plan & limits", s: "Plan usage and limits", icon: Tag, group: "Platform", preview: true },
 ];

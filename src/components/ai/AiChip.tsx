@@ -1,11 +1,11 @@
 import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** AI brand chip — marks AI-assisted surfaces. Matches prototype .ai-chip. */
+/** Marks deterministic manager-support surfaces. Matches prototype .ai-chip. */
 export function AiChip({
   size = "md",
   subtle = false,
-  label = "AI-assisted",
+  label = "Manager support",
   className,
 }: {
   size?: "sm" | "md";

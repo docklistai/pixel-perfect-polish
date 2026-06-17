@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
-import { useOverlays } from "@/components/AppShortcuts";
 import {
   Check,
   Download,
@@ -13,7 +12,6 @@ import {
   MoreHorizontal,
   Plus,
   Settings,
-  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
@@ -43,7 +41,6 @@ const FILTER_SCOPES = ["All entries", "Open only", "High priority only", "Assign
 const FILTER_RANGES = ["Today", "Yesterday", "Last 7 days"];
 
 function OpsPage() {
-  const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
   const [entries, setEntries] = React.useState<OpsEntry[]>(() =>
     opsTimeline.map((e, i) => ({ ...e, id: `op-${i}` })),
@@ -153,9 +150,6 @@ function OpsPage() {
                 })),
               ]}
             />
-            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Open risks
-            </ActionButton>
             <ActionButton variant="secondary" icon={FileText} onClick={() => setHandoverOpen(true)}>
               Handover note
             </ActionButton>
@@ -187,7 +181,7 @@ function OpsPage() {
 
       <div className="guidance-note mb-4">
         <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Clear open risks before handover — use the AI risk panel to review what needs attention.
+        Clear open risks before handover — review the follow-ups panel for what needs attention.
       </div>
 
       <OpsStatCards />
@@ -199,7 +193,7 @@ function OpsPage() {
           onMarkDone={(id) => handleChangeStatus(id, "Done", { close: true })}
           onDelete={handleDelete}
         />
-        <OpsRightRail onOpenAssistant={openAiDrawer} />
+        <OpsRightRail />
       </div>
 
       <OpsLogEntryModal

@@ -55,7 +55,7 @@ function publishStateLabel(state: PublishState): string {
 function RotaPage() {
   const rota = useRotaDraftController();
   const navigate = useNavigate();
-  const { askAssistant } = useOverlays();
+  const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(rota);
   const readOnly = rota.readOnly;
@@ -210,7 +210,7 @@ function RotaPage() {
           onClearWeek={guardedRota.requestClearWeek}
           onCopyLastWeek={actions.handleCopyLastWeek}
           onGenerateRota={() => openOverlay("generate")}
-          onAskAssistant={askAssistant}
+          onOpenSupport={openAiDrawer}
           onPublish={() => openOverlay("publish")}
         />
 
@@ -297,7 +297,7 @@ function RotaPage() {
               conflicts={rota.conflictSummaries}
               workingTimeAlerts={rota.workingTimeAlertList}
               onReviewShift={rota.setSelectedShiftId}
-              onAskAssistant={askAssistant}
+              onOpenSupport={openAiDrawer}
             />
             <PublishReadinessCard
               published={rota.published}

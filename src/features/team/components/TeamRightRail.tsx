@@ -1,6 +1,5 @@
-import { Users, Edit3, Info } from "lucide-react";
+import { Users, Info } from "lucide-react";
 import { Card } from "@/components/dl";
-import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
 import { toneBg } from "../types";
 import type { TeamTrainingItem, TeamBirthdayItem, TeamEventItem, TeamGroup } from "../types";
 
@@ -9,7 +8,6 @@ interface Props {
   birthdays: TeamBirthdayItem[];
   events: TeamEventItem[];
   groups: TeamGroup[];
-  onDraftWithAI?: () => void;
   onSelectBirthday?: (birthday: TeamBirthdayItem) => void;
   onSelectTraining?: (item: TeamTrainingItem) => void;
   onComposeForGroup?: (label: string) => void;
@@ -20,27 +18,12 @@ export function TeamRightRail({
   birthdays,
   events,
   groups,
-  onDraftWithAI,
   onSelectBirthday,
   onSelectTraining,
   onComposeForGroup,
 }: Props) {
   return (
     <div className="space-y-4">
-      <AiSuggestionCard
-        tone="teal"
-        title="Draft a 'Thanks for Saturday' note"
-        body="Saturday hit 118% coverage and went smoothly. A short note today usually lifts read-rate by ~20%."
-        actions={[
-          {
-            label: "Draft now",
-            primary: true,
-            icon: <Edit3 className="h-3.5 w-3.5" aria-hidden />,
-            onClick: onDraftWithAI,
-          },
-        ]}
-      />
-
       <Card className="p-5">
         <h3 className="text-sm font-semibold mb-3">Upcoming training</h3>
         {training.map((item) => (

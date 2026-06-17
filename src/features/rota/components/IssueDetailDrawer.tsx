@@ -1,4 +1,4 @@
-import { CircleAlert, ExternalLink, Sparkles, TrendingUp } from "lucide-react";
+import { CircleAlert, ExternalLink, Lightbulb, TrendingUp } from "lucide-react";
 import { ActionButton, DrawerShell, StatusBadge } from "@/components/dl";
 import type { RotaIssue } from "../lib/rotaIssues";
 import type { ShiftId } from "../types";
@@ -10,14 +10,12 @@ export function IssueDetailDrawer({
   onClose,
   onMarkReviewed,
   onReviewShift,
-  onAskAssistant,
 }: {
   issue: RotaIssue | null;
   reviewed: boolean;
   onClose: () => void;
   onMarkReviewed: (issue: RotaIssue) => void;
   onReviewShift: (shiftId: ShiftId) => void;
-  onAskAssistant: (prompt: string) => void;
 }) {
   const sections = issue
     ? [
@@ -29,7 +27,7 @@ export function IssueDetailDrawer({
         },
         {
           label: "Suggested fix",
-          icon: Sparkles,
+          icon: Lightbulb,
           bubble: "bg-brand-soft text-brand",
           body: issue.fix,
         },
@@ -105,15 +103,6 @@ export function IssueDetailDrawer({
                 Open affected shift
               </ActionButton>
             )}
-            <ActionButton
-              variant="outline"
-              size="sm"
-              icon={Sparkles}
-              className="w-full justify-start"
-              onClick={() => onAskAssistant(issue.aiPrompt)}
-            >
-              Suggest fix with assistant
-            </ActionButton>
           </div>
         </div>
       )}

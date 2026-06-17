@@ -62,7 +62,7 @@ export const pricingTiers: LandingPricingTier[] = [
       "Everything in Core",
       "Advanced rota review & warnings",
       "Labour & coverage pressure insights",
-      "AI manager support & drafting",
+      "Manager-led AI support & drafting",
     ],
     cta: "Get Pro early access",
     ctaHref: "/auth",

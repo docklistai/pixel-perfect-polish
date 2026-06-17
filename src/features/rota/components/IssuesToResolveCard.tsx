@@ -26,12 +26,12 @@ export function IssuesToResolveCard({
   conflicts,
   workingTimeAlerts,
   onReviewShift,
-  onAskAssistant,
+  onOpenSupport,
 }: {
   conflicts: ConflictSummary[];
   workingTimeAlerts: WorkingTimeAlert[];
   onReviewShift: (shiftId: ShiftId) => void;
-  onAskAssistant: (prompt: string) => void;
+  onOpenSupport: () => void;
 }) {
   const [reviewed, setReviewed] = React.useState<Record<string, boolean>>({});
   const [openIssueId, setOpenIssueId] = React.useState<string | null>(null);
@@ -56,10 +56,10 @@ export function IssuesToResolveCard({
     <Card className="p-4">
       <div className="mb-1 flex items-center justify-between gap-2">
         <div className="text-sm font-semibold">Issues to resolve</div>
-        <AiChip size="sm" />
+        <AiChip size="sm" label="Rota review" />
       </div>
       <div className="mb-3 text-xs text-muted-foreground">
-        Resolve before publishing · based on rota &amp; leave data
+        Resolve before publishing · from this week's rota draft
       </div>
 
       {issues.length === 0 ? (
@@ -140,11 +140,9 @@ export function IssuesToResolveCard({
         size="sm"
         icon={Sparkles}
         className="mt-3 w-full justify-center"
-        onClick={() =>
-          onAskAssistant("Anything I should review before publishing this week's rota?")
-        }
+        onClick={onOpenSupport}
       >
-        Ask assistant about this rota
+        Open manager support
       </ActionButton>
 
       <IssueDetailDrawer
@@ -159,10 +157,6 @@ export function IssuesToResolveCard({
         onReviewShift={(shiftId) => {
           setOpenIssueId(null);
           onReviewShift(shiftId);
-        }}
-        onAskAssistant={(prompt) => {
-          setOpenIssueId(null);
-          onAskAssistant(prompt);
         }}
       />
     </Card>

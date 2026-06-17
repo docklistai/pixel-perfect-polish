@@ -1,7 +1,6 @@
-import * as React from "react";
-import { AlertTriangle, ChevronRight, Clock, Sparkles, Trophy } from "lucide-react";
+import { Clock, ClipboardList, CalendarCheck } from "lucide-react";
 import { ProfileCard } from "./ProfileCard";
-import { PatternMetricCard, SignalRow } from "./ProfilePatternWidgets";
+import { PatternMetricCard } from "./ProfilePatternWidgets";
 import { ProfilePatternTrendCard } from "./ProfilePatternTrendCard";
 import type { StaffProfile } from "../../types";
 
@@ -15,51 +14,26 @@ export function ProfileInsightsTab({ profile }: Props) {
   const avgHours = profile.workloadBalance.avgLast4Weeks || ins.avgWeeklyHours;
   const hoursLabel = `${avgHours.toFixed(1)}h/wk`;
   const weeklyNotes = profile.scheduleStats.preferredShifts.join(" · ");
-  const availabilityCount = profile.availability.conflicts;
 
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-4 min-w-0">
-        <ProfileCard
-          title="Pattern summary"
-          className="p-0 overflow-hidden"
-          action={
-            <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-semibold text-info">
-              AI-assisted
-            </span>
-          }
-        >
+        <ProfileCard title="Pattern summary" className="p-0 overflow-hidden">
           <div className="border-b border-[var(--st-teal-line)] bg-[var(--st-teal-bg)] px-5 py-4">
             <div className="flex items-start gap-3">
               <div className="flex size-8 items-center justify-center rounded-full bg-brand text-white">
-                <Sparkles className="h-4 w-4" aria-hidden />
+                <ClipboardList className="h-4 w-4" aria-hidden />
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-semibold uppercase tracking-wider text-[var(--st-teal-ink)]">
-                  Manager support
+                  Rota pattern
                 </div>
                 <p className="mt-1 text-sm leading-6 text-foreground text-pretty">
                   {firstName} is working a steady {hoursLabel} across the last 8 weeks. The rota
-                  pattern is mostly {weeklyNotes.toLowerCase()}, the rest gap is holding at{" "}
-                  {profile.workloadBalance.restGap}, and there are no short-notice absence spikes to
-                  flag. Documents and availability are the main items to keep in view before the
-                  next publish.
+                  pattern is mostly {weeklyNotes.toLowerCase()}, and the rest gap is holding at{" "}
+                  {profile.workloadBalance.restGap}. Documents and availability are the main items
+                  to keep in view before the next publish.
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-[var(--st-teal-ink)] hover:underline"
-                  >
-                    Open notes <ChevronRight className="h-3 w-3" aria-hidden />
-                  </button>
-                  <span className="text-muted-foreground">·</span>
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 text-[var(--st-teal-ink)] hover:underline"
-                  >
-                    Check documents <ChevronRight className="h-3 w-3" aria-hidden />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -116,86 +90,47 @@ export function ProfileInsightsTab({ profile }: Props) {
               ["Below policy", "0"],
             ]}
           />
-          <PatternMetricCard
-            icon={AlertTriangle}
-            tone="amber"
-            title="Short-notice absence watch"
-            metric={`${ins.shortNoticeAbsenceCount} events`}
-            metricSub="Operational watch only"
-            rows={[
-              ["Last 30 days", `${ins.sickDaysLast30} sick days`],
-              ["Last 90 days", `${ins.sickDaysLast90} sick days`],
-              ["This year", `${ins.sicknessEpisodesThisYear} episodes`],
-            ]}
-          />
-          <PatternMetricCard
-            icon={Sparkles}
-            tone="teal"
-            title="Availability consistency"
-            metric={`${ins.availabilityMatch}`}
-            metricSub="Scheduled within stated availability"
-            rows={[
-              ["Outside availability", `${availabilityCount} shifts`],
-              ["Late changes", `${profile.availability.lateChanges}`],
-              ["Open shift swaps", "1 in last 30 days"],
-            ]}
-          />
         </div>
       </div>
 
       <div className="space-y-4 min-w-0">
-        <ProfileCard title="Best-fit shifts">
+        <ProfileCard title="Schedule preferences">
           <div className="space-y-0">
             {[
-              ["Thu evening", `${profile.insights.departmentFit} · 92% fit`],
-              ["Fri evening", `${profile.insights.preferredShifts} · 91% fit`],
-              ["Sat double", `Coverage fit · ${profile.insights.roleFit.toLowerCase()}`],
-              ["Sun late", `${profile.scheduleStats.avoidIfPossible[0]} · review after publish`],
-            ].map(([label, sub]) => (
+              ["Preferred shifts", profile.scheduleStats.preferredShifts.join(", ") || "—"],
+              ["Preferred days", profile.scheduleStats.preferredDays.join(", ") || "—"],
+              ["Avoid if possible", profile.scheduleStats.avoidIfPossible.join(", ") || "—"],
+            ].map(([label, value]) => (
               <div
                 key={label}
-                className="flex items-start gap-3 border-b border-border/40 py-2.5 last:border-0"
+                className="flex items-start justify-between gap-3 border-b border-border/40 py-2.5 last:border-0"
               >
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold">{label}</div>
-                  <div className="text-xs text-muted-foreground">{sub}</div>
-                </div>
-                <Trophy className="mt-0.5 h-3.5 w-3.5 text-[var(--teal-500)]" aria-hidden />
+                <div className="text-sm font-medium">{label}</div>
+                <div className="text-xs text-right text-muted-foreground">{value}</div>
               </div>
             ))}
           </div>
         </ProfileCard>
 
-        <ProfileCard title="Risk signals">
-          <div className="space-y-2">
-            <SignalRow
-              icon={Clock}
-              tone="green"
-              label="Coverage fit"
-              value={profile.insights.roleFit}
-              sub="Steady match for current rota"
-            />
-            <SignalRow
-              icon={AlertTriangle}
-              tone="green"
-              label="Rest gap"
-              value={profile.workloadBalance.restGap}
-              sub="Healthy between shifts"
-            />
-            <SignalRow
-              icon={Sparkles}
-              tone="green"
-              label="Availability match"
-              value={profile.insights.availabilityMatch}
-              sub="Mostly inside stated windows"
-            />
-            <SignalRow
-              icon={AlertTriangle}
-              tone={availabilityCount > 0 ? "amber" : "green"}
-              label="Manager review"
-              value={availabilityCount > 0 ? "Check next publish" : "Low"}
-              sub="Keep an eye on coverage changes"
-            />
+        <ProfileCard title="Availability">
+          <div className="flex items-start gap-3">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--st-teal-bg)] text-[var(--st-teal-ink)]">
+              <CalendarCheck className="h-4 w-4" aria-hidden />
+            </div>
+            <div className="min-w-0 space-y-2 text-sm">
+              <div>
+                <div className="text-sm font-medium">{profile.availability.usuallyAvailable}</div>
+                <div className="text-xs text-muted-foreground">Usually available</div>
+              </div>
+              <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-2 text-xs">
+                <span className="text-muted-foreground">Late changes</span>
+                <span className="font-medium">{profile.availability.lateChanges}</span>
+              </div>
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="text-muted-foreground">Updated</span>
+                <span className="font-medium">{profile.availability.updated}</span>
+              </div>
+            </div>
           </div>
         </ProfileCard>
       </div>

@@ -152,7 +152,7 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
           />
           <ToggleRow
             label="End-of-day handover"
-            description="Auto-compiled from today's notes, prepared 22:00."
+            description="Reminder at 22:00 to write your handover note for the next manager."
             ariaLabel="End-of-day handover toggle"
             onDirty={onDirty}
           />

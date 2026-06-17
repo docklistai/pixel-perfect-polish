@@ -141,7 +141,7 @@ function TimePage() {
               ]}
             />
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Ask assistant
+              Manager support
             </ActionButton>
             <ActionButton icon={Download} onClick={() => setExportOpen(true)}>
               Export approved hours

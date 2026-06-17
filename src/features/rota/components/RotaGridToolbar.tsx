@@ -107,7 +107,7 @@ export function RotaGridToolbar({
             Copy last week
           </ActionButton>
           <ActionButton variant="outline" size="sm" icon={Sparkles} onClick={onGenerateRota}>
-            Generate draft
+            Fill open shifts
           </ActionButton>
           <IconButton icon={Plus} label="Add shift" onClick={onAddShift} />
         </div>

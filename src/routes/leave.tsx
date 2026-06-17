@@ -29,7 +29,6 @@ import { LeaveBottomCards } from "@/features/leave/components/LeaveBottomCards";
 import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialogs";
 import { LeaveImpactSummaryCard } from "@/features/leave/components/LeaveImpactSummaryCard";
 import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
-import { useOverlays } from "@/components/AppShortcuts";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
 import { useIntentHandler } from "@/lib/interactionIntents";
@@ -68,7 +67,6 @@ function matchesLeaveFilter(request: LeaveRequest, filter: LeaveFilter): boolean
 
 function LeavePage() {
   const navigate = useNavigate();
-  const { askAssistant } = useOverlays();
   const [activeId, setActiveId] = React.useState("l3");
   const [filter, setFilter] = React.useState<LeaveFilter>("all");
   const [calendarOpen, setCalendarOpen] = React.useState(false);
@@ -190,7 +188,6 @@ function LeavePage() {
             {activeRequest.state === "pending" && (
               <LeaveImpactSummaryCard
                 request={activeRequest}
-                onAskAssistant={askAssistant}
                 onCheckRota={() => {
                   navigate({ to: "/rota" });
                   toast.info("Rota opened", {

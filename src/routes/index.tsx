@@ -134,7 +134,7 @@ function Home() {
             ))}
           </div>
           <ActionButton icon={Sparkles} variant="outline" onClick={openAiDrawer}>
-            Ask assistant
+            Manager support
           </ActionButton>
           <div className="relative" ref={quickRef}>
             <ActionButton

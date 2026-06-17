@@ -63,9 +63,14 @@ export function TopbarActions({
 
   return (
     <>
-      <button type="button" onClick={openAiDrawer} className="ai-btn" aria-label="Ask AI assistant">
+      <button
+        type="button"
+        onClick={openAiDrawer}
+        className="ai-btn"
+        aria-label="Open manager support"
+      >
         <Sparkles className="h-3.5 w-3.5" />
-        <span>Ask</span>
+        <span>Support</span>
       </button>
 
       <button

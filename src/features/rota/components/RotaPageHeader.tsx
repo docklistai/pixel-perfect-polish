@@ -11,7 +11,6 @@ import {
   Send,
   SlidersHorizontal,
   Sparkles,
-  TriangleAlert,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -39,7 +38,7 @@ export function RotaPageHeader({
   onClearWeek,
   onCopyLastWeek,
   onGenerateRota,
-  onAskAssistant,
+  onOpenSupport,
   onPublish,
 }: {
   weekLabel: string;
@@ -53,7 +52,7 @@ export function RotaPageHeader({
   onClearWeek: () => void;
   onCopyLastWeek: () => void;
   onGenerateRota: () => void;
-  onAskAssistant: (prompt: string) => void;
+  onOpenSupport: () => void;
   onPublish: () => void;
 }) {
   const [viewMode, setViewMode] = React.useState<(typeof VIEW_MODES)[number]>("Week");
@@ -118,29 +117,18 @@ export function RotaPageHeader({
           ]}
         />
         <RowActionMenu
-          triggerLabel="AI rota actions"
+          triggerLabel="Rota tools"
           trigger={
             <button type="button" className="btn outline-teal sm">
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
-              AI
+              Tools
               <ChevronDown className="h-3.5 w-3.5" aria-hidden />
             </button>
           }
           items={[
-            { kind: "label", text: "AI rota actions" },
-            { label: "Generate draft", icon: Sparkles, onSelect: onGenerateRota },
-            {
-              label: "Suggest fix",
-              icon: TriangleAlert,
-              onSelect: () =>
-                onAskAssistant("Suggest a fix for the current rota conflicts and alerts"),
-            },
-            {
-              label: "Summarise issues",
-              icon: List,
-              onSelect: () =>
-                onAskAssistant("Summarise the open issues in this rota before I publish"),
-            },
+            { kind: "label", text: "Rota tools" },
+            { label: "Suggest open-shift fills", icon: Sparkles, onSelect: onGenerateRota },
+            { label: "Manager support", icon: List, onSelect: onOpenSupport },
           ]}
         />
         {canPublish && (

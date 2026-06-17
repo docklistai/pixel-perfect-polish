@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Plus, Plane, Bell, Clock, Upload, Sparkles, type LucideIcon } from "lucide-react";
-import { useOverlays } from "@/components/AppShortcuts";
+import { Plus, Plane, Bell, Clock, Upload, type LucideIcon } from "lucide-react";
 import { useIntents } from "@/lib/interactionIntents";
 
 interface ActionTileProps {
@@ -37,7 +36,6 @@ interface ProfileManagerActionsProps {
 
 export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActionsProps) {
   const navigate = useNavigate();
-  const { openAiDrawer } = useOverlays();
   const { requestIntent } = useIntents();
   const openRouteIntent = (to: "/rota" | "/leave", intent: "rota.addShift" | "leave.new") => {
     navigate({ to });
@@ -79,13 +77,6 @@ export function ProfileManagerActions({ firstName, onToast }: ProfileManagerActi
       title: "Upload document",
       sub: "Add to record",
       onClick: () => onToast("Document upload arrives with the staff records rollout"),
-    },
-    {
-      icon: Sparkles,
-      iconClassName: "bg-brand text-white",
-      title: "Ask the assistant",
-      sub: `Anything about ${firstName}`,
-      onClick: openAiDrawer,
     },
   ];
 

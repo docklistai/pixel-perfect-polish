@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton } from "@/components/dl";
-import { useOverlays } from "@/components/AppShortcuts";
-import { CalendarDays, Download, Info, Sparkles, Plus, BarChart2 } from "lucide-react";
+import { CalendarDays, Download, Info, Plus, BarChart2 } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
@@ -23,7 +22,6 @@ export const Route = createFileRoute("/reports")({
 });
 
 function ReportsPage() {
-  const { openAiDrawer } = useOverlays();
   const [exportOpen, setExportOpen] = React.useState(false);
   const timeRows = useWorkspaceSelector((state) => state.timeRows);
   const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
@@ -45,9 +43,6 @@ function ReportsPage() {
               <CalendarDays className="h-3.5 w-3.5" aria-hidden />
               Last 4 weeks
             </span>
-            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              AI review
-            </ActionButton>
             <ActionButton variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
               Export
             </ActionButton>
@@ -66,7 +61,7 @@ function ReportsPage() {
 
       <div className="guidance-note mb-4">
         <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Use AI review points to spot rota issues — click each point to mark as reviewed.
+        Use the review points below to spot rota issues — click each point to mark as reviewed.
       </div>
 
       <ReportsKpiCards timeRows={timeRows} leaveRequests={leaveRequests} />

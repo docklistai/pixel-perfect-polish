@@ -1,15 +1,5 @@
-import { DrawerShell, ActionButton, FormSection, DetailRow, StatusBadge } from "@/components/dl";
-import {
-  AlertTriangle,
-  Clock,
-  Plane,
-  Sparkles,
-  Calendar,
-  ArrowRight,
-  User,
-  BellOff,
-} from "lucide-react";
-import { useOverlays } from "@/components/AppShortcuts";
+import { DrawerShell, ActionButton, FormSection, StatusBadge } from "@/components/dl";
+import { AlertTriangle, Clock, Plane, Calendar, ArrowRight, BellOff } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
 interface Props {
@@ -19,7 +9,6 @@ interface Props {
 }
 
 export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Props) {
-  const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
 
   // Selected details
@@ -51,11 +40,6 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
             tagTone: "warning" as const,
           },
         ],
-        ai: {
-          title: "Two of these could be filled by Liam and James",
-          body: "Both are eligible, under their contracted hours, and have picked up Saturday Bar before. You can assign with one click.",
-          prompt: "Help me review the two open shifts in next week's draft",
-        },
       },
     },
     {
@@ -85,7 +69,6 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
             tagTone: "danger" as const,
           },
         ],
-        ai: null,
       },
     },
     {
@@ -104,29 +87,24 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
             icon: AlertTriangle,
             title: "Sun 21 Jun",
             sub: "Kitchen coverage",
-            value: "60%",
+            value: "Check cover",
             tagTone: "warning" as const,
           },
           {
             icon: AlertTriangle,
             title: "Mon 22 Jun",
             sub: "Kitchen coverage",
-            value: "50%",
+            value: "Check cover",
             tagTone: "danger" as const,
           },
           {
             icon: AlertTriangle,
             title: "Tue 23 Jun",
             sub: "Kitchen coverage",
-            value: "66%",
+            value: "Check cover",
             tagTone: "warning" as const,
           },
         ],
-        ai: {
-          title: "Could ask Ava to swap her Sunday off",
-          body: "Ava is on holiday on Tuesday — moving her day off there would close the Sunday gap.",
-          prompt: "Help me cover housekeeping if I approve Priya's leave 21 – 23 Jun",
-        },
       },
     },
   ];
@@ -217,33 +195,6 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
           ))}
         </div>
       </FormSection>
-
-      {activeAlert.detail.ai && (
-        <div className="mt-4 rounded-2xl border border-teal-500/20 bg-teal-500/5 p-4 space-y-3">
-          <div className="flex items-start gap-2.5">
-            <Sparkles className="h-4 w-4 shrink-0 mt-0.5 text-teal-600 dark:text-teal-400" />
-            <div className="space-y-1">
-              <div className="text-xs font-semibold text-teal-950 dark:text-teal-50">
-                {activeAlert.detail.ai.title}
-              </div>
-              <p className="text-[11px] text-teal-800 dark:text-teal-200 leading-relaxed">
-                {activeAlert.detail.ai.body}
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              onOpenChange(false);
-              openAiDrawer();
-            }}
-            className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 text-xs font-semibold"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Open in assistant
-          </button>
-        </div>
-      )}
     </DrawerShell>
   );
 }

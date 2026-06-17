@@ -35,7 +35,7 @@ export function ReportsInsightsPanel({ onOpenDetail }: ReportsInsightsPanelProps
         ))}
       </div>
       <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span>AI suggestions only</span>
+        <span>Review points only</span>
         <span>·</span>
         <span>You decide what to action</span>
       </div>
