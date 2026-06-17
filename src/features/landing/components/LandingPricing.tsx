@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { pricingNotes } from "../data/landingContent";
+import { betaAccessMailto, pricingNotes } from "../data/landingContent";
 
 const proFeatures = [
   "Pre-publish checks and leave clash review",
@@ -14,7 +14,7 @@ const supportPlans = [
     price: "£39",
     meta: "Up to 25 staff · workspace pricing",
     body: "A focused rota workspace with checks, leave context, approved hours, and handover notes.",
-    cta: "Join early access",
+    cta: "Request beta access",
     highlights: ["Pre-publish checks", "Leave clash review", "Approved hours export"],
   },
   {
@@ -22,7 +22,7 @@ const supportPlans = [
     price: "£0",
     meta: "Up to 5 staff · workspace pricing",
     body: "Basic weekly rota planning for small teams getting started.",
-    cta: "Join early access",
+    cta: "Request beta access",
     highlights: ["Weekly rota build", "Manager publish", "Staff sees confirmed"],
   },
 ] as const;
@@ -53,13 +53,13 @@ export function LandingPricing() {
           <div>
             <span className="landing-section-eyebrow">Pricing</span>
             <h2 className="landing-section-title max-w-[380px]">
-              Start with Pro,
+              Workspace pricing,
               <br />
-              then choose <span className="landing-it">what fits.</span>
+              built to <span className="landing-it">fit your team.</span>
             </h2>
             <p className="max-w-[360px] text-pretty text-[15px] leading-[1.6] text-[var(--landing-ink-600)] sm:text-[16px]">
-              A 14-day full Pro trial gives managers the complete rota workspace before choosing the
-              right early-access path.
+              DocklistAI is in private beta. We set up each manager&apos;s workspace manually — the
+              plans below show where pricing will land.
             </p>
             <div className="landing-mono mt-6 grid gap-2.5 text-[10.5px] uppercase text-[var(--landing-teal-deep)]">
               {pricingNotes.map((note) => (
@@ -120,13 +120,13 @@ export function LandingPricing() {
 
                 <div className="relative mt-7">
                   <a
-                    href="/auth"
+                    href={betaAccessMailto}
                     className="inline-flex w-full justify-center rounded-xl bg-[#c9954d] px-6 py-4 text-[14px] font-extrabold text-[#111714] transition duration-200 hover:-translate-y-0.5 hover:bg-[#d6a865] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                   >
-                    Get Pro early access
+                    Request beta access
                   </a>
                   <p className="mt-3 text-center text-[12px] text-white/52">
-                    14-day full Pro trial. No live billing implied.
+                    Private beta — billing is not active. Access is arranged with our team.
                   </p>
                 </div>
               </article>
@@ -162,7 +162,7 @@ export function LandingPricing() {
                         </p>
                       </div>
                       <a
-                        href="/auth"
+                        href={betaAccessMailto}
                         className="shrink-0 rounded-full border border-[var(--landing-border)] bg-white px-3.5 py-2 text-[12px] font-bold text-[var(--landing-ink-900)] shadow-[0_1px_0_rgba(255,255,255,.9)_inset,0_6px_14px_-10px_rgba(17,23,20,.18)] transition hover:-translate-y-0.5 hover:border-[var(--landing-teal)] hover:text-[var(--landing-teal-deep)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--landing-teal)]"
                       >
                         {plan.cta}

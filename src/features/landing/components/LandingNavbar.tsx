@@ -62,13 +62,13 @@ export function LandingNavbar() {
             to="/auth"
             className="hidden text-[var(--landing-cream)]/72 transition-colors hover:text-[var(--landing-cream)] sm:inline-flex"
           >
-            Sign in
+            Manager sign in
           </Link>
           <a
             href="#pricing"
             className="group inline-flex items-center gap-2 rounded-[10px] bg-[#c9954d] px-3.5 py-2.5 text-[13px] font-semibold text-[#111714] shadow-[0_1px_0_rgba(255,255,255,.2)_inset,0_1px_2px_rgba(0,0,0,.10)] transition hover:-translate-y-px hover:bg-[#d6a865] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5] sm:px-[17px] sm:py-[11px] sm:text-[13.5px]"
           >
-            Get Pro access
+            Request beta access
             <ArrowRight
               className="size-3.5 transition group-hover:translate-x-0.5"
               aria-hidden="true"

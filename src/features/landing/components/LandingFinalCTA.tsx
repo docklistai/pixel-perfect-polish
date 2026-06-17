@@ -72,7 +72,7 @@ export function LandingFinalCTA() {
                 href="#pricing"
                 className="group inline-flex items-center gap-2 rounded-[10px] bg-[#c9954d] px-5 py-3 text-[14px] font-semibold text-[#111714] shadow-[0_1px_0_rgba(255,255,255,.18)_inset] transition hover:-translate-y-px hover:bg-[#d6a865] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5]"
               >
-                Get Pro early access
+                Request beta access
                 <svg
                   className="size-3.5 transition group-hover:translate-x-0.5"
                   viewBox="0 0 24 24"

@@ -14,7 +14,7 @@ const valuePillars = [
   {
     icon: Users,
     title: "Team onboarding",
-    description: "Bring your team in without messy setup.",
+    description: "Invite staff with manager-issued access codes.",
   },
 ];
 

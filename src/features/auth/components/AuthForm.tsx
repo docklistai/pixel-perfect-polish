@@ -16,6 +16,13 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PASSWORD_HINT = "At least 8 characters, one uppercase letter, and one number.";
 
+/**
+ * Private beta: DocklistAI managers are provisioned manually, so public
+ * self-serve sign-up is disabled. The sign-up logic below is preserved (not
+ * deleted) — flip this to `true` to restore public manager sign-up later.
+ */
+const MANAGER_SIGNUP_ENABLED = false;
+
 function describeSignInError(message: string): string {
   if (/invalid login credentials/i.test(message)) {
     return "That email and password combination doesn't match. Check the details and try again.";
@@ -247,11 +254,13 @@ export function AuthForm({
         )}
       </form>
 
-      <div className="border-t border-border/60 pt-4 text-center">
-        <Button variant="ghost" onClick={switchMode} className="text-sm">
-          {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
-        </Button>
-      </div>
+      {MANAGER_SIGNUP_ENABLED && (
+        <div className="border-t border-border/60 pt-4 text-center">
+          <Button variant="ghost" onClick={switchMode} className="text-sm">
+            {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 
@@ -261,18 +270,20 @@ export function AuthForm({
         {!hideHeader && (
           <div className="space-y-1 text-center">
             <h2 className="text-xl font-semibold tracking-tight">
-              {isSignUp ? "Start your team setup" : "Welcome back"}
+              {isSignUp ? "Private beta access" : "Welcome back"}
             </h2>
             <p className="text-sm text-muted-foreground">
               {isSignUp
-                ? "Create your account and move directly into workspace setup."
+                ? "DocklistAI is invite-only — your workspace is set up for you by our team."
                 : "Use your workspace email and password to continue."}
             </p>
           </div>
         )}
-        <div className="flex justify-center">
-          <AuthModeToggle isSignUp={isSignUp} onSwitchMode={switchMode} />
-        </div>
+        {MANAGER_SIGNUP_ENABLED && (
+          <div className="flex justify-center">
+            <AuthModeToggle isSignUp={isSignUp} onSwitchMode={switchMode} />
+          </div>
+        )}
         <Button
           variant="ghost"
           size="sm"
@@ -306,11 +317,11 @@ export function AuthForm({
               Secure workspace access
             </p>
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-              {isSignUp ? "Start your team setup" : "Welcome back"}
+              {isSignUp ? "Private beta access" : "Welcome back"}
             </h1>
             <p className="mx-auto max-w-sm text-pretty text-sm leading-6 text-muted-foreground">
               {isSignUp
-                ? "Create your account and move directly into workspace setup."
+                ? "DocklistAI is invite-only — your workspace is set up for you by our team."
                 : "Pick up where you left off and get back into rota, team, and operations work."}
             </p>
           </div>
@@ -318,12 +329,14 @@ export function AuthForm({
       </div>
       <Card className="overflow-hidden rounded-2xl border-border/70 shadow-[0_20px_60px_color-mix(in_oklch,var(--foreground)_10%,transparent)]">
         <CardHeader className="space-y-4 border-b border-border/60 bg-background/70 pb-5 text-center">
-          <div className="flex justify-center">
-            <AuthModeToggle isSignUp={isSignUp} onSwitchMode={switchMode} />
-          </div>
+          {MANAGER_SIGNUP_ENABLED && (
+            <div className="flex justify-center">
+              <AuthModeToggle isSignUp={isSignUp} onSwitchMode={switchMode} />
+            </div>
+          )}
           <p className="text-sm leading-6 text-muted-foreground">
             {isSignUp
-              ? "Set up your access once, then finish onboarding from the live product."
+              ? "Private beta access is arranged directly with the DocklistAI team."
               : "Use your workspace email and password to continue."}
           </p>
         </CardHeader>
@@ -332,7 +345,7 @@ export function AuthForm({
       </Card>
 
       <div className="space-y-2 text-center text-sm text-muted-foreground">
-        <p>No credit card required. Start building your rota straight away.</p>
+        <p>Private beta access is arranged directly with the DocklistAI team.</p>
         {isSignUp && (
           <p className="text-xs">
             You&apos;ll receive an email to verify your account after signing up.

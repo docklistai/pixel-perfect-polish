@@ -92,7 +92,7 @@ export function LandingHero() {
                 href="#pricing"
                 className="group inline-flex items-center gap-2.5 rounded-xl bg-[#c9954d] px-6 py-3.5 text-[14px] font-bold text-[#111714] shadow-[0_1px_0_rgba(255,255,255,.32)_inset,0_20px_40px_-16px_rgba(201,149,77,.45)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#d6a865] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5]"
               >
-                Get Pro early access
+                Request beta access
                 <svg
                   className="size-4 transition-transform duration-200 group-hover:translate-x-1"
                   viewBox="0 0 24 24"

@@ -1,7 +1,7 @@
 import landingBecauseHospitality from "@/assets/landing/landing-because-hospitality.jpg";
 import landingHeroHospitality from "@/assets/landing/landing-hero-hospitality.jpg";
 import landingMomentsHospitality from "@/assets/landing/landing-moments-hospitality.jpg";
-import type { LandingNavLink, LandingPricingTier } from "../types";
+import type { LandingNavLink } from "../types";
 
 export const landingImages = {
   hero: landingHeroHospitality,
@@ -12,6 +12,13 @@ export const landingImages = {
 export const managerPreviewUrl =
   "https://claude.ai/design/p/019e039e-3365-74db-a43a-b362a5ef4e8e?file=Prototype.html";
 
+/**
+ * Private beta: managers are onboarded manually. "Request beta access" CTAs
+ * open an email to the DocklistAI team rather than a self-serve sign-up.
+ */
+export const betaAccessMailto =
+  "mailto:support@docklist.app?subject=DocklistAI%20private%20beta%20access";
+
 export const navLinks: LandingNavLink[] = [
   { label: "Weekly rhythm", href: "#rhythm" },
   { label: "Workspace", href: "#product" },
@@ -19,60 +26,8 @@ export const navLinks: LandingNavLink[] = [
   { label: "Pricing", href: "#pricing" },
 ];
 
-export const pricingTiers: LandingPricingTier[] = [
-  {
-    id: "free",
-    name: "Free",
-    price: "£0",
-    period: "/mo",
-    staffCap: "Up to 5 staff",
-    description: "",
-    features: [
-      "Basic rota-focused workspace",
-      "Week planning & publishing",
-      "Open shifts & basic checks",
-    ],
-    cta: "Start free",
-    ctaHref: "/auth",
-  },
-  {
-    id: "core",
-    name: "Core",
-    price: "£39",
-    period: "/mo",
-    staffCap: "Up to 25 staff",
-    description: "",
-    features: [
-      "Everything in Free",
-      "Pre-publish checks & coverage",
-      "Leave, approved hours & staff records",
-      "Handover notes & team updates",
-    ],
-    cta: "Choose Core",
-    ctaHref: "/auth",
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    price: "£79",
-    period: "/mo",
-    staffCap: "Up to 50 staff",
-    description: "",
-    features: [
-      "Everything in Core",
-      "Advanced rota review & warnings",
-      "Labour & coverage pressure insights",
-      "Manager-led AI support & drafting",
-    ],
-    cta: "Get Pro early access",
-    ctaHref: "/auth",
-    recommended: true,
-    badge: "★ Recommended",
-  },
-];
-
 export const pricingNotes = [
-  "14-day full Pro trial",
-  "Upgrade or fall back to Free",
+  "Private beta · invitation only",
+  "Workspaces onboarded by our team",
   "No per-seat pricing",
 ] as const;
