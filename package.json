@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "quality": "bash scripts/quality-greps.sh",
-    "test:sql": "bash scripts/sql-tests.sh"
+    "test:sql": "bash scripts/sql-tests.sh",
+    "predeploy": "npm run typecheck && npm run lint && npm run build && npm run quality && npm run test"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
