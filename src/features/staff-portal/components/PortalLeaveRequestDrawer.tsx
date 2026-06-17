@@ -10,16 +10,8 @@ import {
   type LeaveStaffOption,
 } from "@/features/leave/lib/leaveRequests";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { mockProfile } from "../data/mockPortalData";
+import { usePortalProfile } from "../hooks/usePortalProfile";
 import { submitLeaveRequestFn } from "../api/portalActions";
-
-const PORTAL_STAFF: LeaveStaffOption = {
-  id: mockProfile.staffId,
-  name: mockProfile.name,
-  role: mockProfile.role,
-  dept: "Front of House",
-  img: 16,
-};
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -54,9 +46,27 @@ export function PortalLeaveRequestDrawer({
       ? auth.workspaceId
       : null;
 
+  const { data: profile } = usePortalProfile();
+
+  const portalStaff: LeaveStaffOption = profile
+    ? {
+        id: profile.staffId,
+        name: profile.name,
+        role: profile.role,
+        dept: profile.department,
+        img: 16,
+      }
+    : {
+        id: "olivia-bennett",
+        name: "Demo User",
+        role: "Staff",
+        dept: "Front of House",
+        img: 16,
+      };
+
   const echoToStore = () => {
     const request = buildLeaveRequest({
-      staff: PORTAL_STAFF,
+      staff: portalStaff,
       startIso,
       endIso,
       type: leaveType,

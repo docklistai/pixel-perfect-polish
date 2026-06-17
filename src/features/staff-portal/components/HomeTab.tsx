@@ -1,11 +1,12 @@
 import { Calendar, Clock, MapPin, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
 import { DashboardCard, StatusBadge } from "@/components/dl";
-import { mockProfile } from "../data/mockPortalData";
 import { usePortalRota } from "../hooks/usePortalRota";
+import { usePortalProfile } from "../hooks/usePortalProfile";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const { nextShift, upcoming } = usePortalRota();
+  const { data: profile } = usePortalProfile();
   const publishedDates = new Set(upcoming.map((shift) => shift.date));
 
   return (
@@ -105,37 +106,12 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
           <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             Latest from your team
           </div>
-          <button
-            type="button"
-            onClick={() => onNavigate("more")}
-            className="text-[11px] font-semibold text-brand hover:underline"
-          >
-            See all
-          </button>
         </div>
-        <DashboardCard className="p-3.5">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-accent-purple-soft text-accent-purple flex items-center justify-center">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold">Summer menu launches Monday</div>
-              <div className="text-[11px] text-muted-foreground">From Alex · needs ack</div>
-            </div>
-            <StatusBadge tone="warning">New</StatusBadge>
-          </div>
-        </DashboardCard>
-        <DashboardCard className="p-3.5">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-warning-soft text-warning flex items-center justify-center">
-              <MessageSquare className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold">Food safety refresher due</div>
-              <div className="text-[11px] text-muted-foreground">By 21 Jun</div>
-            </div>
-            <ArrowRight className="h-4 w-4 text-muted-foreground" />
-          </div>
+        <DashboardCard className="p-5 text-center">
+          <div className="text-sm font-semibold">Nothing here yet</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Team announcements and documents will appear here.
+          </p>
         </DashboardCard>
       </div>
 
@@ -161,7 +137,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             },
             {
               title: "Contact manager",
-              description: mockProfile.manager.name,
+              description: profile?.manager.name ?? "Manager",
               icon: MessageSquare,
               tone: "success",
               tab: "more" as PortalTab,

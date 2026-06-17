@@ -29,9 +29,9 @@ import {
 import { clearAuthStateCache } from "@/features/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import { mockDocuments, mockNotices, mockProfile } from "../data/mockPortalData";
+import { usePortalProfile } from "../hooks/usePortalProfile";
 import { teamOnDutyToday } from "../lib/portalRota";
-import type { MoreSection, PortalTab, TeamOnDuty } from "../types";
+import type { MoreSection, PortalTab, TeamOnDuty, PortalProfile } from "../types";
 
 const APP_VERSION = "2.4.1 (138)";
 
@@ -53,6 +53,8 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
     await navigate({ to: "/portal/access" });
   };
 
+  const { data: profile } = usePortalProfile();
+
   return (
     <div className="space-y-4">
       {/* Profile header */}
@@ -62,14 +64,12 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             aria-hidden
             className="h-12 w-12 rounded-full bg-brand-soft text-brand flex items-center justify-center text-base font-semibold shadow-[var(--shadow-card)]"
           >
-            {mockProfile.initials}
+            {profile?.initials}
           </div>
           <div className="min-w-0">
-            <div className="text-base font-semibold truncate">{mockProfile.name}</div>
-            <div className="text-xs text-muted-foreground truncate">{mockProfile.role}</div>
-            <div className="text-[11px] text-muted-foreground truncate">
-              {mockProfile.department}
-            </div>
+            <div className="text-base font-semibold truncate">{profile?.name}</div>
+            <div className="text-xs text-muted-foreground truncate">{profile?.role}</div>
+            <div className="text-[11px] text-muted-foreground truncate">{profile?.department}</div>
           </div>
         </div>
       </DashboardCard>
@@ -104,11 +104,15 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       <div className="text-center text-[11px] text-muted-foreground">Docklist · v{APP_VERSION}</div>
 
       {/* Section drawers */}
-      <ProfileDrawer open={section === "profile"} onClose={() => setSection(null)} />
-      <TeamDrawer open={section === "team"} onClose={() => setSection(null)} />
+      <ProfileDrawer
+        open={section === "profile"}
+        onClose={() => setSection(null)}
+        profile={profile}
+      />
+      <TeamDrawer open={section === "team"} onClose={() => setSection(null)} profile={profile} />
       <DocumentsDrawer open={section === "documents"} onClose={() => setSection(null)} />
       <SettingsDrawer open={section === "settings"} onClose={() => setSection(null)} />
-      <HelpDrawer open={section === "help"} onClose={() => setSection(null)} />
+      <HelpDrawer open={section === "help"} onClose={() => setSection(null)} profile={profile} />
     </div>
   );
 }
@@ -145,8 +149,17 @@ function Row({
 }
 
 /* ---------- Profile ---------- */
-function ProfileDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const p = mockProfile;
+function ProfileDrawer({
+  open,
+  onClose,
+  profile,
+}: {
+  open: boolean;
+  onClose: () => void;
+  profile: PortalProfile | null | undefined;
+}) {
+  if (!profile) return null;
+  const p = profile;
   return (
     <DrawerShell
       open={open}
@@ -218,14 +231,20 @@ const MANAGER_ON_DUTY: TeamOnDuty = {
   isManagerOnDuty: true,
 };
 
-function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+function TeamDrawer({
+  open,
+  onClose,
+  profile,
+}: {
+  open: boolean;
+  onClose: () => void;
+  profile: PortalProfile | null | undefined;
+}) {
   const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
-  const manager = MANAGER_ON_DUTY;
   const others = React.useMemo(
-    () => teamOnDutyToday(weekDrafts, mockProfile.staffId),
-    [weekDrafts],
+    () => (profile ? teamOnDutyToday(weekDrafts, profile.staffId) : []),
+    [weekDrafts, profile],
   );
-  const noticeboard = mockNotices.find((n) => n.pinned);
 
   return (
     <DrawerShell
@@ -246,12 +265,6 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
       <div className="space-y-4">
         <div>
           <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
-            MANAGER ON DUTY
-          </div>
-          <TeamRow member={manager} />
-        </div>
-        <div>
-          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
             TEAM ON SHIFT
           </div>
           {others.length === 0 ? (
@@ -268,23 +281,6 @@ function TeamDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
             </ul>
           )}
         </div>
-        {noticeboard && (
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
-              NOTICEBOARD
-            </div>
-            <DashboardCard className="p-4">
-              <StatusBadge tone="brand" className="mb-2">
-                Pinned
-              </StatusBadge>
-              <div className="text-sm font-semibold">{noticeboard.title}</div>
-              <div className="mt-1 text-xs text-foreground">{noticeboard.body}</div>
-              <div className="mt-2 text-[11px] text-muted-foreground">
-                {noticeboard.postedBy} · {noticeboard.postedAt}
-              </div>
-            </DashboardCard>
-          </div>
-        )}
       </div>
     </DrawerShell>
   );
@@ -309,8 +305,6 @@ function TeamRow({ member }: { member: TeamOnDuty }) {
 
 /* ---------- Documents ---------- */
 function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [tab, setTab] = React.useState<"All" | "Required" | "Certificates" | "Training">("All");
-  const docs = tab === "All" ? mockDocuments : mockDocuments.filter((d) => d.category === tab);
   return (
     <DrawerShell
       open={open}
@@ -320,44 +314,12 @@ function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void
       width="lg"
     >
       <div className="space-y-4">
-        <div className="rounded-xl bg-muted p-1 grid grid-cols-4 text-[11px] font-medium">
-          {(["All", "Required", "Certificates", "Training"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTab(t)}
-              className={
-                t === tab
-                  ? "py-1.5 rounded-lg bg-card text-foreground shadow-[var(--shadow-card)]"
-                  : "py-1.5 rounded-lg text-muted-foreground"
-              }
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-        <ul className="space-y-2">
-          {docs.map((d) => (
-            <li key={d.id}>
-              <DashboardCard className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-brand-soft text-brand flex items-center justify-center">
-                    <FileText className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-semibold truncate">{d.title}</div>
-                      <StatusBadge tone={d.status === "Expires soon" ? "warning" : "success"}>
-                        {d.status}
-                      </StatusBadge>
-                    </div>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">{d.meta}</div>
-                  </div>
-                </div>
-              </DashboardCard>
-            </li>
-          ))}
-        </ul>
+        <DashboardCard className="p-5 text-center">
+          <div className="text-sm font-semibold">No documents yet</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Your required documents and certificates will appear here once uploaded by a manager.
+          </p>
+        </DashboardCard>
       </div>
     </DrawerShell>
   );
@@ -437,7 +399,15 @@ function SettingRow({
 }
 
 /* ---------- Help ---------- */
-function HelpDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+function HelpDrawer({
+  open,
+  onClose,
+  profile,
+}: {
+  open: boolean;
+  onClose: () => void;
+  profile: PortalProfile | null | undefined;
+}) {
   return (
     <DrawerShell
       open={open}
@@ -456,7 +426,8 @@ function HelpDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
         <DashboardCard className="p-4">
           <div className="text-sm font-semibold">Contact your manager</div>
           <p className="text-xs text-muted-foreground mt-1">
-            {mockProfile.manager.name} · {mockProfile.manager.email}
+            {profile?.manager.name ?? "Manager"}{" "}
+            {profile?.manager.email ? `· ${profile.manager.email}` : ""}
           </p>
         </DashboardCard>
         <div className="text-center text-[11px] text-muted-foreground">

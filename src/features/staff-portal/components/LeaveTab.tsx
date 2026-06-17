@@ -10,7 +10,6 @@ import {
 } from "@/components/dl";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import type { LeaveRequest } from "@/features/leave/types";
-import { mockAvailability, mockLeaveBalances, mockRequests } from "../data/mockPortalData";
 import type { PortalRequest, RequestKind, RequestStatus } from "../types";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
 
@@ -35,13 +34,10 @@ const availabilityTone = {
 export function LeaveTab() {
   const [open, setOpen] = React.useState(false);
   const [detail, setDetail] = React.useState<PortalRequest | null>(null);
-  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
-  const myLeave = leaveRequests.filter((request) => request.staffId === "olivia-bennett");
-  const approvedLeave = myLeave.filter((request) => request.state === "approved");
-  const requestHistory = [
-    ...myLeave.map(toPortalRequest),
-    ...mockRequests.filter((request) => request.kind !== "time-off"),
-  ];
+
+  // Phase 13 will connect these to live data.
+  const approvedLeave: LeaveRequest[] = [];
+  const requestHistory: PortalRequest[] = [];
 
   return (
     <div className="space-y-4">
@@ -54,25 +50,22 @@ export function LeaveTab() {
           <span className="text-[11px] text-muted-foreground">As of today</span>
         </div>
         <dl className="mt-3 grid grid-cols-1 gap-2.5 text-center sm:grid-cols-3">
-          {mockLeaveBalances.map((b) => (
-            <div key={b.label} className="rounded-2xl border border-border bg-muted/40 py-3 px-2">
-              <dt className="text-[11px] text-muted-foreground">{b.label}</dt>
-              <dd className="mt-1 text-xl font-bold tabular-nums">{b.days.toFixed(1)}</dd>
-              <div className="text-[10px] text-muted-foreground">{b.unit}</div>
-            </div>
-          ))}
+          <div className="rounded-2xl border border-border bg-muted/40 py-3 px-2">
+            <dt className="text-[11px] text-muted-foreground">Balances</dt>
+            <dd className="mt-1 text-sm font-semibold text-muted-foreground">Not available yet</dd>
+          </div>
         </dl>
         <div className="mt-3 text-center text-xs text-muted-foreground">
-          Balances shown as of today
+          Live leave balances will appear here in a future update
         </div>
       </DashboardCard>
 
       <ActionButton
         icon={CalendarDays}
-        className="w-full justify-center"
-        onClick={() => setOpen(true)}
+        className="w-full justify-center opacity-50 cursor-not-allowed"
+        onClick={() => {}}
       >
-        Request time off
+        Request time off (Coming soon)
       </ActionButton>
 
       {/* Upcoming approved leave */}
@@ -132,24 +125,8 @@ export function LeaveTab() {
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
-        <div className="mt-3 grid grid-cols-7 gap-1.5">
-          {mockAvailability.map((d) => {
-            const t = availabilityTone[d.status];
-            return (
-              <div key={d.shortLabel} className="flex flex-col items-center gap-1">
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                  {d.shortLabel}
-                </div>
-                <div className="text-xs font-semibold">{d.date}</div>
-                <StatusBadge tone={t.tone} className="text-[9px] px-1.5 py-0">
-                  {t.label}
-                </StatusBadge>
-              </div>
-            );
-          })}
-        </div>
         <div className="mt-3 text-[11px] text-muted-foreground">
-          Default hours: Weekdays · 09:00 – 23:00
+          Availability editing will be available in a future update
         </div>
       </DashboardCard>
 
@@ -158,25 +135,9 @@ export function LeaveTab() {
         <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
           REQUEST HISTORY
         </div>
-        <ul className="space-y-2">
-          {requestHistory.map((r) => (
-            <li key={r.id}>
-              <button type="button" onClick={() => setDetail(r)} className="w-full text-left">
-                <DashboardCard className="p-4 hover:bg-muted/30 transition-colors">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold truncate">{r.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{r.submitted}</div>
-                    </div>
-                    <StatusBadge tone={statusTone[r.status]}>
-                      {r.status[0].toUpperCase() + r.status.slice(1)}
-                    </StatusBadge>
-                  </div>
-                </DashboardCard>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <DashboardCard className="p-4 text-center">
+          <div className="text-sm font-semibold text-muted-foreground">No requests yet</div>
+        </DashboardCard>
       </div>
 
       <PortalLeaveRequestDrawer open={open} onOpenChange={setOpen} />

@@ -1,9 +1,8 @@
 import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
-import { mockPastShifts, mockRequests } from "../data/mockPortalData";
 import { usePortalRota } from "../hooks/usePortalRota";
-import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
+import type { PortalRequest, PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
 const statusTone: Record<ShiftStatus, "success" | "warning" | "info"> = {
@@ -51,7 +50,7 @@ export function ShiftsTab() {
         </>
       )}
       {sub === "requests" && <RequestsList />}
-      {sub === "history" && <ShiftList shifts={mockPastShifts} onOpen={setSelected} />}
+      {sub === "history" && <ShiftList shifts={[]} onOpen={setSelected} />}
 
       <ShiftDetailDrawer
         shift={selected}
@@ -163,7 +162,8 @@ function ShiftList({
 }
 
 function RequestsList() {
-  if (mockRequests.length === 0) {
+  const requests: PortalRequest[] = [];
+  if (requests.length === 0) {
     return (
       <DashboardCard className="p-6">
         <EmptyState
@@ -176,7 +176,7 @@ function RequestsList() {
   }
   return (
     <ul className="space-y-2">
-      {mockRequests.map((r) => (
+      {requests.map((r) => (
         <li key={r.id}>
           <DashboardCard className="p-4 rounded-2xl">
             <div className="flex items-start justify-between gap-3">

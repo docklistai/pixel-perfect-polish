@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import { mockProfile } from "../data/mockPortalData";
 import {
   clockInShift,
   portalShiftsForStaff,
@@ -53,7 +52,7 @@ export function usePortalRota(): PortalRota {
       return { ...buildRota(live.data ?? []), source: "live", isLoading: false, isError: false };
     }
 
-    const demoShifts = portalShiftsForStaff(weekDrafts, mockProfile.staffId);
+    const demoShifts = portalShiftsForStaff(weekDrafts, "olivia-bennett");
     return {
       ...buildRota(demoShifts),
       // Demo keeps the original "any published week exists" semantics.

@@ -3,7 +3,7 @@ import { Bell, Calendar, Clock, Home, MoreHorizontal, Plane } from "lucide-react
 import { FeedbackBanner } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import type { PortalTab } from "../types";
-import { mockProfile } from "../data/mockPortalData";
+import { usePortalProfile } from "../hooks/usePortalProfile";
 
 const TABS: Array<{
   id: PortalTab;
@@ -47,8 +47,13 @@ export function PortalShell({
   onOpenNotifications: () => void;
   children: React.ReactNode;
 }) {
+  const { data: profile, isLoading } = usePortalProfile();
   const greeting = getGreeting();
   const isHome = activeTab === "home";
+
+  if (isLoading || !profile) {
+    return <div className="min-h-[100dvh] bg-[oklch(0.96_0.008_240)]" />;
+  }
 
   return (
     <div className="min-h-[100dvh] bg-[oklch(0.96_0.008_240)] text-foreground flex">
@@ -62,12 +67,10 @@ export function PortalShell({
         </div>
         <div className="px-6 pb-5">
           <div className="flex items-center gap-3">
-            <Avatar initials={mockProfile.initials} dark />
+            <Avatar initials={profile.initials} dark />
             <div className="min-w-0">
-              <div className="text-sm font-semibold truncate text-white">{mockProfile.name}</div>
-              <div className="text-[11px] text-[var(--sidebar-muted)] truncate">
-                {mockProfile.role}
-              </div>
+              <div className="text-sm font-semibold truncate text-white">{profile.name}</div>
+              <div className="text-[11px] text-[var(--sidebar-muted)] truncate">{profile.role}</div>
             </div>
           </div>
         </div>
@@ -118,10 +121,10 @@ export function PortalShell({
           {isHome && (
             <div className="px-4 pb-4">
               <div className="text-[1.15rem] font-bold leading-tight text-balance">
-                {greeting}, {mockProfile.name.split(" ")[0]}
+                {greeting}, {profile.name.split(" ")[0]}
               </div>
               <div className="mt-0.5 text-[11px] leading-5 text-white/70">
-                {mockProfile.role} · {mockProfile.department.split(" · ")[0]}
+                {profile.role} · {profile.department.split(" · ")[0]}
               </div>
             </div>
           )}
@@ -132,7 +135,7 @@ export function PortalShell({
           <div>
             <div className="text-[11px] text-muted-foreground">{greeting}</div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              {isHome ? mockProfile.name : TITLES[activeTab]}
+              {isHome ? profile.name : TITLES[activeTab]}
             </h1>
           </div>
           <NotificationBell count={unreadNotifications} onClick={onOpenNotifications} />
