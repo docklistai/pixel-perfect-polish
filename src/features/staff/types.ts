@@ -1,3 +1,9 @@
+/**
+ * Result of issuing a workspace or staff portal code. The plaintext `code` is
+ * returned exactly once on success and is never validated client-side.
+ */
+export type IssuePortalCodeResult = { ok: true; code: string } | { ok: false; message: string };
+
 export interface StaffRow {
   id: string;
   name: string;
