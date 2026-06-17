@@ -7,6 +7,7 @@ interface StaffPanelOverviewProps {
   profile: StaffProfile | null;
   employeeId: string;
   payRate: string;
+  reportsTo: string;
 }
 
 export function StaffPanelOverview({
@@ -14,12 +15,13 @@ export function StaffPanelOverview({
   profile,
   employeeId,
   payRate,
+  reportsTo,
 }: StaffPanelOverviewProps) {
   const fields: [string, string][] = [
     ["Employee ID", employeeId],
     ["Start date", profile?.startDate ?? "—"],
     ["Department", member.dept],
-    ["Reports to", "Alex Thompson"],
+    ["Reports to", reportsTo],
     [
       "Contract",
       `${profile?.employmentType ?? member.contract} · ${profile?.contractedHours ?? "—"}`,

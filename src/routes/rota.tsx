@@ -199,7 +199,7 @@ function RotaPage() {
           locationName={
             rota.source === "live" && rota.liveLocationName
               ? rota.liveLocationName
-              : "Harbour View Hotel"
+              : "Your workspace"
           }
           staffCount={rota.staff.length}
           statusTone={headerStatusTone}

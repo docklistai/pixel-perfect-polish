@@ -18,7 +18,11 @@ import { mockStaffProfiles } from "../data/mockStaffProfiles";
 interface StaffProfilePanelProps {
   member: StaffRow;
   onClose: () => void;
+  /** Live roster members have no demo profile; suppress fabricated identity. */
+  source: "live" | "demo";
 }
+
+const NOT_SET = "Not set yet"; // neutral, beta-safe placeholder for non-live details
 
 const STATUS_CLS: Record<string, string> = {
   Active: "bg-success-soft text-success",
@@ -55,7 +59,7 @@ function useToast() {
   return { msg, show };
 }
 
-export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
+export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanelProps) {
   const profile = mockStaffProfiles[member.id] ?? null;
   const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
   const { msg: toastMsg, show: showToast } = useToast();
@@ -63,6 +67,14 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
   const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
   const docs = profile?.documents ?? [];
   const notes = profile?.notes ?? [];
+
+  // Demo pay/ID/manager/phone are fixtures keyed to the demo roster; a live
+  // member has none of them in the schema, so show neutral placeholders.
+  const isLive = source === "live";
+  const phone = isLive ? NOT_SET : (profile?.phone ?? "+44 7700 900 123");
+  const employeeId = isLive ? NOT_SET : demoEmployeeId(member.id);
+  const payRate = isLive ? NOT_SET : demoPayRate(member.role);
+  const reportsTo = isLive ? NOT_SET : "Alex Thompson";
 
   return (
     <Card className="rounded-2xl overflow-hidden p-0">
@@ -107,7 +119,7 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
 
         <div className="mb-3 space-y-0.5 font-mono text-[11px] text-muted-foreground">
           <div>{member.e}</div>
-          <div>{profile?.phone ?? "+44 7700 900 123"}</div>
+          <div>{phone}</div>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -174,8 +186,9 @@ export function StaffProfilePanel({ member, onClose }: StaffProfilePanelProps) {
           <StaffPanelOverview
             member={member}
             profile={profile}
-            employeeId={demoEmployeeId(member.id)}
-            payRate={demoPayRate(member.role)}
+            employeeId={employeeId}
+            payRate={payRate}
+            reportsTo={reportsTo}
           />
         )}
 

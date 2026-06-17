@@ -191,7 +191,11 @@ function StaffListPage() {
 
         {isProfilePanelOpen && (
           <div className="col-span-12 lg:col-span-3 space-y-4 self-start lg:sticky lg:top-[88px]">
-            <StaffProfilePanel member={selected} onClose={() => setIsProfilePanelOpen(false)} />
+            <StaffProfilePanel
+              member={selected}
+              source={source}
+              onClose={() => setIsProfilePanelOpen(false)}
+            />
           </div>
         )}
       </div>
