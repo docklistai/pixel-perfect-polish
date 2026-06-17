@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Briefcase, ChevronDown } from "lucide-react";
-import { toast } from "sonner";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
 export function TopbarWorkspacePill() {
+  const { workspaceName } = useManagerIdentity();
   const [workspaceOpen, setWorkspaceOpen] = React.useState(false);
   const workspaceRef = React.useRef<HTMLDivElement>(null);
 
@@ -37,49 +38,24 @@ export function TopbarWorkspacePill() {
         aria-expanded={workspaceOpen}
       >
         <Briefcase className="ico h-4 w-4" aria-hidden />
-        <span className="font-medium truncate">Harbour View Hotel</span>
+        <span className="font-medium truncate">{workspaceName}</span>
         <ChevronDown className="ml-auto h-3.5 w-3.5 text-[var(--ink-400)]" />
       </button>
 
       {workspaceOpen && (
         <div className="popover absolute top-[44px] left-0 z-50 w-56 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="menu-label">Workspaces</div>
+          <div className="menu-label">Workspace</div>
           <div className="menu-sep" />
           <div className="menu-item" style={{ background: "var(--bg-hover)" }}>
-            <span>Harbour View Hotel</span>
+            <span className="truncate">{workspaceName}</span>
             <span
               className="ml-auto h-2 w-2 rounded-full"
               style={{ background: "var(--teal-500)" }}
             />
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setWorkspaceOpen(false);
-              toast.info("The Anchor Inn", {
-                description: "Workspace switching unlocks when this venue is set up.",
-              });
-            }}
-            className="menu-item"
-            style={{ color: "var(--ink-500)" }}
-          >
-            <span>The Anchor Inn</span>
-            <span className="tag-future soon ml-auto">Soon</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setWorkspaceOpen(false);
-              toast.info("Riverside Brasserie", {
-                description: "Workspace switching unlocks when this venue is set up.",
-              });
-            }}
-            className="menu-item"
-            style={{ color: "var(--ink-500)" }}
-          >
-            <span>Riverside Brasserie</span>
-            <span className="tag-future soon ml-auto">Soon</span>
-          </button>
+          <div className="px-2.5 py-2 text-[11px]" style={{ color: "var(--ink-400)" }}>
+            Switching between workspaces comes later.
+          </div>
         </div>
       )}
     </div>

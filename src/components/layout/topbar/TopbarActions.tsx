@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useOverlays } from "@/components/AppShortcuts";
 import { clearAuthStateCache } from "@/features/auth";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import type { ThemeMode } from "./topbarUtils";
 
@@ -25,6 +26,8 @@ export function TopbarActions({
   toggleTheme: () => void;
 }) {
   const { openAiDrawer, openNotifications, unreadCount } = useOverlays();
+  const { email, roleLabel, initials } = useManagerIdentity();
+  const displayName = email ?? "Your account";
   const navigate = useNavigate();
   const router = useRouter();
   const [userOpen, setUserOpen] = React.useState(false);
@@ -109,20 +112,23 @@ export function TopbarActions({
           aria-expanded={userOpen}
         >
           <span className="av sm av-c1" aria-hidden>
-            AT
+            {initials}
           </span>
-          <span className="info hidden 2xl:flex">
-            <strong>Alex Thompson</strong>
-            <small>General Manager</small>
+          <span className="info hidden 2xl:flex min-w-0">
+            <strong className="truncate max-w-[180px]">{displayName}</strong>
+            <small>{roleLabel}</small>
           </span>
           <ChevronDown className="chev h-3.5 w-3.5 hidden 2xl:block" />
         </button>
 
         {userOpen && (
           <div className="popover absolute top-[44px] right-0 z-50 w-56 animate-in fade-in slide-in-from-top-2 duration-150">
-            <div className="menu-label">General Manager</div>
-            <div className="px-2.5 pb-1 text-xs font-semibold" style={{ color: "var(--ink-900)" }}>
-              Alex Thompson
+            <div className="menu-label">{roleLabel}</div>
+            <div
+              className="px-2.5 pb-1 text-xs font-semibold truncate"
+              style={{ color: "var(--ink-900)" }}
+            >
+              {displayName}
             </div>
             <div className="menu-sep" />
 
@@ -159,7 +165,7 @@ export function TopbarActions({
               onClick={() => {
                 setUserOpen(false);
                 toast.info("Help & feedback", {
-                  description: "Email support@docklist.app — we read everything.",
+                  description: "Email docklistai@gmail.com — we read everything.",
                 });
               }}
               className="menu-item"

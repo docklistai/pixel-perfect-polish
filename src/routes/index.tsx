@@ -25,6 +25,7 @@ import {
 } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardWorkspace } from "@/features/dashboard/hooks/useDashboardWorkspace";
 import { requireManagerAccess } from "@/features/auth";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
 export const Route = createFileRoute("/")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
@@ -51,6 +52,7 @@ function Home() {
   const quickRef = React.useRef<HTMLDivElement>(null);
   const moreRef = React.useRef<HTMLDivElement>(null);
   const dashboard = useDashboardWorkspace();
+  const { workspaceName } = useManagerIdentity();
 
   const runQuickAction = React.useCallback(
     (to: "/" | "/rota" | "/staff" | "/leave" | "/team" | "/ops", intent?: IntentName) => {
@@ -98,9 +100,9 @@ function Home() {
       {/* Header — prototype: title + actions row */}
       <div className="page-head flex-col lg:flex-row">
         <div className="min-w-0">
-          <h1>Good morning, Alex</h1>
+          <h1>Good morning</h1>
           <p>
-            Here&apos;s what needs your attention across Harbour View Hotel{" "}
+            Here&apos;s what needs your attention across {workspaceName}{" "}
             {filter === "today" ? "today" : "this week"}.
           </p>
         </div>
@@ -162,7 +164,7 @@ function Home() {
                   className="menu-item"
                   onClick={() => runQuickAction("/staff", "staff.add")}
                 >
-                  Add team member…
+                  Issue access codes…
                 </button>
                 <button
                   type="button"
@@ -276,7 +278,7 @@ function Home() {
 
       {/* Secondary row: labour watch · rota countdown · leave queue */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} />
+        <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} demo />
         <DashboardRotaPublish />
         <DashboardPendingLeave items={dashboard.leaveItems} />
       </div>

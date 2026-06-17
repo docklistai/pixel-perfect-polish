@@ -15,6 +15,13 @@ import {
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { withLocalConflictStatus } from "@/features/rota/lib/localConflicts";
 import { withApprovedLeaveConflictStatus } from "@/features/leave/lib/leaveRotaConflicts";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+
+function workspaceMonogram(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const letters = words.length >= 2 ? words[0][0] + words[1][0] : name.slice(0, 2);
+  return letters.toUpperCase() || "—";
+}
 
 interface NavItem {
   to: string;
@@ -22,6 +29,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   group: "workspace" | "communication" | "admin";
   flagship?: boolean;
+  preview?: boolean; // demo-only surface for the private beta — labelled, not yet live
   badge?: {
     count: number;
     kind: "amber" | "neutral" | "red";
@@ -50,10 +58,10 @@ const navItems: readonly NavItem[] = [
     icon: Plane,
     group: "workspace",
   },
-  { to: "/team", label: "Team", icon: MessageSquare, group: "communication" },
-  { to: "/ops", label: "Ops", icon: Briefcase, group: "communication" },
-  { to: "/reports", label: "Reports", icon: BarChart3, group: "communication" },
-  { to: "/settings", label: "Settings", icon: Settings, group: "admin" },
+  { to: "/team", label: "Team", icon: MessageSquare, group: "communication", preview: true },
+  { to: "/ops", label: "Ops", icon: Briefcase, group: "communication", preview: true },
+  { to: "/reports", label: "Reports", icon: BarChart3, group: "communication", preview: true },
+  { to: "/settings", label: "Settings", icon: Settings, group: "admin", preview: true },
 ];
 
 const NAV_GROUPS: ReadonlyArray<{
@@ -68,6 +76,7 @@ const NAV_GROUPS: ReadonlyArray<{
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { workspaceName } = useManagerIdentity();
   const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
   const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
   const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
@@ -161,6 +170,11 @@ export function Sidebar() {
                           Core
                         </span>
                       )}
+                      {item.preview && (
+                        <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.08em] text-white/40">
+                          Demo
+                        </span>
+                      )}
                       {badge && badge.count > 0 && (
                         <span
                           className="count"
@@ -197,10 +211,10 @@ export function Sidebar() {
           aria-haspopup="listbox"
           aria-expanded={workspaceOpen}
         >
-          <span className="icon">HV</span>
+          <span className="icon">{workspaceMonogram(workspaceName)}</span>
           <span className="meta min-w-0">
-            <span className="name truncate block">Harbour View Hotel</span>
-            <span className="sub truncate block">Main Workspace</span>
+            <span className="name truncate block">{workspaceName}</span>
+            <span className="sub truncate block">Active workspace</span>
           </span>
           <ChevronDown className="chev h-3.5 w-3.5 shrink-0" />
         </button>
@@ -211,32 +225,21 @@ export function Sidebar() {
             style={{ background: "var(--sidebar-bg)", borderColor: "rgba(255,255,255,0.10)" }}
           >
             <div className="menu-label" style={{ color: "var(--sidebar-dim)" }}>
-              Workspaces
+              Workspace
             </div>
             <div className="menu-sep" />
             <div
               className="menu-item"
               style={{ color: "#fff", background: "rgba(255,255,255,0.06)" }}
             >
-              <span>Harbour View Hotel</span>
+              <span className="truncate">{workspaceName}</span>
               <span
                 className="ml-auto h-2 w-2 rounded-full"
                 style={{ background: "var(--teal-500)" }}
               />
             </div>
-            <div
-              className="menu-item"
-              style={{ color: "rgba(255,255,255,0.4)", cursor: "not-allowed" }}
-            >
-              <span>The Anchor Inn</span>
-              <span className="tag-future soon ml-auto">Soon</span>
-            </div>
-            <div
-              className="menu-item"
-              style={{ color: "rgba(255,255,255,0.4)", cursor: "not-allowed" }}
-            >
-              <span>Riverside Brasserie</span>
-              <span className="tag-future soon ml-auto">Soon</span>
+            <div className="px-2.5 py-2 text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>
+              Switching between workspaces comes later.
             </div>
           </div>
         )}
