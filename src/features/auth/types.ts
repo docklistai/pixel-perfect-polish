@@ -37,4 +37,11 @@ export type AuthState =
       staffMemberId: string | null;
     };
 
+/**
+ * Reasons the claim RPC can return in its `{ ok:false, reason }` jsonb result.
+ * `locked` is the per-workspace brute-force lockout (Phase 7). Unknown/missing
+ * reasons fall back to the generic "couldn't match those codes" copy.
+ */
+export type ClaimFailureReason = "invalid" | "expired" | "claimed" | "already_member" | "locked";
+
 export type ClaimPortalAccessResult = { ok: true } | { ok: false; message: string };

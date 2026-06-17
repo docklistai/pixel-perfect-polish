@@ -146,6 +146,10 @@ begin
   -- lowercase + separators must normalize to the stored digest
   result := public.rpc_claim_staff_portal_access(lower(ws1_code), replace(lower(sophie_code), '-', ' '));
 
+  if (result ->> 'ok')::boolean is not true then
+    raise exception 'FAIL: happy-path claim did not return ok: %', result;
+  end if;
+
   if (result ->> 'membership_id')::uuid <> '13000000-0000-4000-8000-000000000002' then
     raise exception 'FAIL: claim bound the wrong membership: %', result;
   end if;
@@ -164,7 +168,8 @@ begin
 
   -- idempotent re-claim by the same identity
   result := public.rpc_claim_staff_portal_access(ws1_code, sophie_code);
-  if (result ->> 'staff_member_id')::uuid <> '14000000-0000-4000-8000-000000000001' then
+  if (result ->> 'ok')::boolean is not true
+     or (result ->> 'staff_member_id')::uuid <> '14000000-0000-4000-8000-000000000001' then
     raise exception 'FAIL: idempotent re-claim returned %', result;
   end if;
 
@@ -196,31 +201,33 @@ do $$
 declare
   ws1_code text;
   sophie_code text;
+  result jsonb;
 begin
   select code into ws1_code from phase6_codes where label = 'ws1';
   select code into sophie_code from phase6_codes where label = 'sophie';
 
-  begin
-    perform public.rpc_claim_staff_portal_access(ws1_code, sophie_code);
-    raise exception 'FAIL: second identity took over a claimed code';
-  exception when sqlstate '55000' then
-    raise notice 'PASS: claimed code cannot be taken over by another identity';
-  end;
+  -- Non-raising contract: a claimed code returns { ok:false, reason:'claimed' }.
+  result := public.rpc_claim_staff_portal_access(ws1_code, sophie_code);
+  if (result ->> 'ok')::boolean is not false or result ->> 'reason' <> 'claimed' then
+    raise exception 'FAIL: second identity took over a claimed code: %', result;
+  end if;
+  raise notice 'PASS: claimed code cannot be taken over by another identity';
 
-  begin
-    perform public.rpc_claim_staff_portal_access(ws1_code, 'WRNG-CODE');
-    raise exception 'FAIL: wrong staff code accepted';
-  exception when sqlstate '42501' then
-    raise notice 'PASS: unknown staff code rejected without enumeration detail';
-  end;
+  -- Unknown staff code in a valid workspace: enumeration-safe 'invalid'.
+  result := public.rpc_claim_staff_portal_access(ws1_code, 'WRNG-CODE');
+  if (result ->> 'ok')::boolean is not false or result ->> 'reason' <> 'invalid' then
+    raise exception 'FAIL: wrong staff code not rejected as invalid: %', result;
+  end if;
+  raise notice 'PASS: unknown staff code rejected without enumeration detail';
 
-  begin
-    perform public.rpc_claim_staff_portal_access('WRNG-CODE', sophie_code);
-    raise exception 'FAIL: wrong workspace code accepted';
-  exception when sqlstate '42501' then
-    raise notice 'PASS: unknown workspace code rejected without enumeration detail';
-  end;
+  -- Unknown workspace code: same enumeration-safe 'invalid'.
+  result := public.rpc_claim_staff_portal_access('WRNG-CODE', sophie_code);
+  if (result ->> 'ok')::boolean is not false or result ->> 'reason' <> 'invalid' then
+    raise exception 'FAIL: wrong workspace code not rejected as invalid: %', result;
+  end if;
+  raise notice 'PASS: unknown workspace code rejected without enumeration detail';
 
+  -- Empty input is still a hard 22023 raise (not a brute-force vector).
   begin
     perform public.rpc_claim_staff_portal_access(ws1_code, '  --  ');
     raise exception 'FAIL: empty staff code accepted';
@@ -278,7 +285,8 @@ begin
   select code into james_code from phase6_codes where label = 'james';
 
   result := public.rpc_claim_staff_portal_access(ws1_code, james_code);
-  if (result ->> 'membership_id')::uuid <> '13000000-0000-4000-8000-000000000007' then
+  if (result ->> 'ok')::boolean is not true
+     or (result ->> 'membership_id')::uuid <> '13000000-0000-4000-8000-000000000007' then
     raise exception 'FAIL: James claim bound the wrong membership: %', result;
   end if;
 
@@ -305,6 +313,7 @@ do $$
 declare
   ws1_code text;
   daniel_code text;
+  result jsonb;
 begin
   select code into ws1_code from phase6_codes where label = 'ws1';
   select code into daniel_code from phase6_codes where label = 'daniel';
@@ -323,12 +332,12 @@ begin
     raise notice 'PASS: staff cannot rotate the workspace code';
   end;
 
-  begin
-    perform public.rpc_claim_staff_portal_access(ws1_code, daniel_code);
-    raise exception 'FAIL: one identity claimed two memberships in a workspace';
-  exception when sqlstate '55000' then
-    raise notice 'PASS: an identity cannot hold two memberships in one workspace';
-  end;
+  -- Caller already holds a membership here: non-raising 'already_member'.
+  result := public.rpc_claim_staff_portal_access(ws1_code, daniel_code);
+  if (result ->> 'ok')::boolean is not false or result ->> 'reason' <> 'already_member' then
+    raise exception 'FAIL: one identity claimed two memberships in a workspace: %', result;
+  end if;
+  raise notice 'PASS: an identity cannot hold two memberships in one workspace';
 end $$;
 
 -- --------------------------------------------------------------------------
@@ -372,16 +381,17 @@ do $$
 declare
   ws2_code text;
   james_code text;
+  result jsonb;
 begin
   select code into ws2_code from phase6_codes where label = 'ws2';
   select code into james_code from phase6_codes where label = 'james';
 
-  begin
-    perform public.rpc_claim_staff_portal_access(ws2_code, james_code);
-    raise exception 'FAIL: staff code resolved across workspaces';
-  exception when sqlstate '42501' then
-    raise notice 'PASS: staff codes are workspace-scoped';
-  end;
+  -- ws1 staff code does not resolve inside ws2: enumeration-safe 'invalid'.
+  result := public.rpc_claim_staff_portal_access(ws2_code, james_code);
+  if (result ->> 'ok')::boolean is not false or result ->> 'reason' <> 'invalid' then
+    raise exception 'FAIL: staff code resolved across workspaces: %', result;
+  end if;
+  raise notice 'PASS: staff codes are workspace-scoped';
 end $$;
 
 -- --------------------------------------------------------------------------

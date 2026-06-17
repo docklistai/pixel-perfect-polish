@@ -45,17 +45,18 @@ do $$
 declare
   ws_code text;
   priya_code text;
+  result jsonb;
   bound_user uuid;
 begin
   select code into ws_code from phase6_expiry_codes where label = 'ws';
   select code into priya_code from phase6_expiry_codes where label = 'priya';
 
-  begin
-    perform public.rpc_claim_staff_portal_access(ws_code, priya_code);
-    raise exception 'FAIL: an expired staff code was accepted';
-  exception when sqlstate '55000' then
-    raise notice 'PASS: expired staff code is rejected at claim time';
-  end;
+  -- Non-raising contract: an expired code returns { ok:false, reason:'expired' }.
+  result := public.rpc_claim_staff_portal_access(ws_code, priya_code);
+  if (result ->> 'ok')::boolean is not false or result ->> 'reason' <> 'expired' then
+    raise exception 'FAIL: an expired staff code was accepted: %', result;
+  end if;
+  raise notice 'PASS: expired staff code is rejected at claim time';
 
   select user_id into bound_user
   from public.workspace_memberships
