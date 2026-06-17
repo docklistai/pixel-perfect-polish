@@ -1,7 +1,6 @@
 import { LandingProductProofRota } from "./LandingProductProofRota";
 import { LandingProductProofRotaMobile } from "./LandingProductProofRotaMobile";
 import { LandingProductProofSidebar } from "./LandingProductProofSidebar";
-import { managerPreviewUrl } from "../data/landingContent";
 
 const proofAnnotations = [
   {
@@ -135,24 +134,6 @@ export function LandingProductProof() {
                     </li>
                   ))}
                 </ul>
-                <a
-                  href={managerPreviewUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-5 inline-flex items-center gap-2 text-[13px] font-bold text-[var(--landing-teal-400)] transition hover:text-[var(--landing-cream)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--landing-teal-400)]"
-                >
-                  Preview manager app
-                  <svg
-                    className="size-3.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                  </svg>
-                </a>
               </aside>
               <div className="relative flex flex-col gap-3">
                 <LandingProductProofRota />

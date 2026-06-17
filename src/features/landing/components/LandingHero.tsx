@@ -1,6 +1,4 @@
 import landingHeroManagerWriting from "@/assets/landing/landing-hero-manager-writing.png";
-import { managerPreviewUrl } from "../data/landingContent";
-
 const heroCues = ["Draft stays private", "Manager confirms", "Staff see published rota"] as const;
 
 export function LandingHero() {
@@ -103,29 +101,6 @@ export function LandingHero() {
                 >
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
-              </a>
-              <a
-                href={managerPreviewUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2.5 rounded-xl border px-6 py-3.5 text-[14px] font-semibold text-[var(--landing-cream)] backdrop-blur-sm transition duration-200 hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5]"
-                style={{
-                  borderColor: "rgba(255,255,255,.24)",
-                  background: "rgba(255,255,255,.05)",
-                }}
-              >
-                <svg
-                  className="size-4 text-[#d9ad70]"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M10 8l6 4-6 4z" fill="currentColor" stroke="none" />
-                </svg>
-                Preview manager app
               </a>
             </div>
 

@@ -30,17 +30,3 @@ export interface LandingFooterColumn {
   links: LandingNavLink[];
   comingSoon?: boolean;
 }
-
-export interface LandingPricingTier {
-  id: string;
-  name: string;
-  price: string;
-  period?: string;
-  staffCap: string;
-  description: string;
-  features: string[];
-  cta: string;
-  ctaHref: string;
-  recommended?: boolean;
-  badge?: string;
-}

@@ -9,9 +9,6 @@ export const landingImages = {
   moments: landingMomentsHospitality,
 };
 
-export const managerPreviewUrl =
-  "https://claude.ai/design/p/019e039e-3365-74db-a43a-b362a5ef4e8e?file=Prototype.html";
-
 /**
  * Private beta: managers are onboarded manually. "Request beta access" CTAs
  * open an email to the DocklistAI team rather than a self-serve sign-up.

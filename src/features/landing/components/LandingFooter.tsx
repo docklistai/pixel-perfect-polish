@@ -1,5 +1,3 @@
-import { managerPreviewUrl } from "../data/landingContent";
-
 const footerGroups = [
   {
     title: "Product",
@@ -20,10 +18,7 @@ const footerGroups = [
   },
   {
     title: "Get started",
-    links: [
-      { label: "Early access", href: "#pricing" },
-      { label: "Preview the manager app", href: managerPreviewUrl, external: true },
-    ],
+    links: [{ label: "Early access", href: "#pricing" }],
   },
 ] as const;
 

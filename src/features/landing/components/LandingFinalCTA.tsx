@@ -1,4 +1,4 @@
-import { landingImages, managerPreviewUrl } from "../data/landingContent";
+import { landingImages } from "../data/landingContent";
 
 export function LandingFinalCTA() {
   return (
@@ -83,29 +83,6 @@ export function LandingFinalCTA() {
                 >
                   <path d="M5 12h14M13 5l7 7-7 7" />
                 </svg>
-              </a>
-              <a
-                href={managerPreviewUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-[10px] px-5 py-3 text-[14px] font-semibold text-[var(--landing-cream)] transition hover:-translate-y-px hover:bg-white/9 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f3eee5]"
-                style={{
-                  border: "1px solid rgba(255,255,255,.18)",
-                  background: "rgba(255,255,255,.04)",
-                }}
-              >
-                <svg
-                  className="size-3.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M10 8l6 4-6 4z" fill="currentColor" stroke="none" />
-                </svg>
-                Preview the manager app
               </a>
             </div>
           </div>
