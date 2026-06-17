@@ -42,6 +42,19 @@ function shiftHours(startIso: string, endIso: string): number {
   return Math.round((ms / 3_600_000) * 100) / 100;
 }
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function dayMonth(isoDate: string): string {
+  const [, m, d] = isoDate.split("-").map(Number);
+  return `${d} ${MONTHS[(m ?? 1) - 1]}`;
+}
+
+function inclusiveDays(startIso: string, endIso: string): number {
+  const ms =
+    new Date(`${endIso}T00:00:00Z`).getTime() - new Date(`${startIso}T00:00:00Z`).getTime();
+  return Math.max(1, Math.round(ms / 86_400_000) + 1);
+}
+
 interface PublishedShiftViewRow {
   published_shift_id: string;
   staff_member_id: string | null;
@@ -161,6 +174,79 @@ export async function fetchPortalNotifications(workspaceId: string): Promise<Por
   if (error) throw error;
 
   return ((data as NotificationViewRow[] | null) ?? []).map(mapNotification);
+}
+
+export interface PortalLeaveRequest {
+  id: string;
+  type: string;
+  date: string;
+  startIso: string;
+  endIso: string;
+  days: number;
+  reason: string;
+  status: "pending" | "approved" | "declined";
+  submittedAt: string;
+  decisionReason?: string;
+}
+
+interface LeaveRequestViewRow {
+  leave_request_id: string;
+  staff_member_id: string;
+  leave_type: string;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status: "pending" | "approved" | "declined" | "cancelled";
+  submitted_at: string;
+  decided_at: string | null;
+  decision_reason: string | null;
+}
+
+const LEAVE_TYPE_LABEL: Record<string, string> = {
+  annual_leave: "Annual leave",
+  personal: "Personal leave",
+  sick: "Sick leave",
+  unpaid: "Unpaid leave",
+  other: "Other",
+};
+
+function mapLeaveRequest(row: LeaveRequestViewRow): PortalLeaveRequest {
+  const status = row.status === "cancelled" ? "declined" : row.status;
+  return {
+    id: row.leave_request_id,
+    type: LEAVE_TYPE_LABEL[row.leave_type] ?? "Leave",
+    date: `${dayMonth(row.start_date)} – ${dayMonth(row.end_date)}`,
+    startIso: row.start_date,
+    endIso: row.end_date,
+    days: inclusiveDays(row.start_date, row.end_date),
+    reason: row.reason,
+    status,
+    submittedAt: dayMonth(row.submitted_at.slice(0, 10)),
+    decisionReason: row.decision_reason ?? undefined,
+  };
+}
+
+/**
+ * The signed-in staff member's own leave requests from the staff-safe
+ * `staff_portal_leave_requests` view, newest first.
+ */
+export async function fetchPortalLeaveRequests(
+  workspaceId: string,
+  staffMemberId: string,
+): Promise<PortalLeaveRequest[]> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("staff_portal_leave_requests")
+    .select(
+      "leave_request_id, staff_member_id, leave_type, start_date, end_date, reason, status, submitted_at, decided_at, decision_reason",
+    )
+    .eq("workspace_id", workspaceId)
+    .eq("staff_member_id", staffMemberId)
+    .order("submitted_at", { ascending: false });
+
+  if (error) throw error;
+
+  return ((data as LeaveRequestViewRow[] | null) ?? []).map(mapLeaveRequest);
 }
 
 /**

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { getRouteApi } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ActionButton, DrawerShell, FormRow, FormSection } from "@/components/dl";
 import { createLeaveRequest } from "@/features/demo/store/leaveActions";
@@ -33,6 +34,7 @@ export function PortalLeaveRequestDrawer({
 }) {
   const store = useWorkspaceStore();
   const { auth } = portalRouteApi.useRouteContext();
+  const queryClient = useQueryClient();
   const [startIso, setStartIso] = React.useState("2026-06-19");
   const [endIso, setEndIso] = React.useState("2026-06-21");
   const [leaveType, setLeaveType] = React.useState("Annual leave");
@@ -117,6 +119,7 @@ export function PortalLeaveRequestDrawer({
 
       // Reflect the persisted request in the local history list immediately.
       echoToStore();
+      void queryClient.invalidateQueries({ queryKey: ["portal", "leave-requests"] });
       close();
       toast.success("Leave request submitted", {
         description: "Your manager can now review it in Docklist.",

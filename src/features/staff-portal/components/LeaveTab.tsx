@@ -9,9 +9,10 @@ import {
   StatusBadge,
 } from "@/components/dl";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import type { LeaveRequest } from "@/features/leave/types";
 import type { PortalRequest, RequestKind, RequestStatus } from "../types";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
+import type { PortalLeaveRequest } from "../api/portalLiveData";
+import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 
 const statusTone: Record<RequestStatus, "warning" | "success" | "danger"> = {
   pending: "warning",
@@ -35,9 +36,15 @@ export function LeaveTab() {
   const [open, setOpen] = React.useState(false);
   const [detail, setDetail] = React.useState<PortalRequest | null>(null);
 
-  // Phase 13 will connect these to live data.
-  const approvedLeave: LeaveRequest[] = [];
-  const requestHistory: PortalRequest[] = [];
+  const {
+    isLive,
+    approvedLeave: liveApproved,
+    requestHistory: liveHistory,
+  } = usePortalLeaveRequests();
+
+  // Phase 13 connects these to live data.
+  const approvedLeave = isLive ? liveApproved : [];
+  const requestHistory = (isLive ? liveHistory : []).map(toPortalRequest);
 
   return (
     <div className="space-y-4">
@@ -62,10 +69,14 @@ export function LeaveTab() {
 
       <ActionButton
         icon={CalendarDays}
-        className="w-full justify-center opacity-50 cursor-not-allowed"
-        onClick={() => {}}
+        className={
+          isLive ? "w-full justify-center" : "w-full justify-center opacity-50 cursor-not-allowed"
+        }
+        onClick={() => {
+          if (isLive) setOpen(true);
+        }}
       >
-        Request time off (Coming soon)
+        {isLive ? "Request time off" : "Request time off (Coming soon)"}
       </ActionButton>
 
       {/* Upcoming approved leave */}
@@ -130,14 +141,40 @@ export function LeaveTab() {
         </div>
       </DashboardCard>
 
-      {/* Request history */}
       <div>
         <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
           REQUEST HISTORY
         </div>
-        <DashboardCard className="p-4 text-center">
-          <div className="text-sm font-semibold text-muted-foreground">No requests yet</div>
-        </DashboardCard>
+        {requestHistory.length === 0 ? (
+          <DashboardCard className="p-4 text-center">
+            <div className="text-sm font-semibold text-muted-foreground">No requests yet</div>
+          </DashboardCard>
+        ) : (
+          <ul className="space-y-2">
+            {requestHistory.map((req) => (
+              <li key={req.id}>
+                <button
+                  type="button"
+                  onClick={() => setDetail(req)}
+                  className="w-full text-left rounded-2xl border border-border bg-card p-4 hover:bg-muted/40 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold truncate">{req.title}</div>
+                      <div className="text-xs text-muted-foreground truncate">{req.detail}</div>
+                    </div>
+                    <StatusBadge tone={statusTone[req.status]}>
+                      {req.status[0].toUpperCase() + req.status.slice(1)}
+                    </StatusBadge>
+                  </div>
+                  <div className="mt-2 text-[11px] text-muted-foreground">
+                    Submitted {req.submitted}
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <PortalLeaveRequestDrawer open={open} onOpenChange={setOpen} />
@@ -173,15 +210,14 @@ export function LeaveTab() {
   );
 }
 
-function toPortalRequest(request: LeaveRequest): PortalRequest {
-  const latestDecision = request.decisionHistory?.at(-1);
+function toPortalRequest(request: PortalLeaveRequest): PortalRequest {
   return {
     id: request.id,
     kind: "time-off",
     title: `${request.type} · ${request.date}`,
     detail: request.reason,
-    submitted: request.submitted,
-    status: request.state,
-    managerResponse: latestDecision?.reason,
+    submitted: request.submittedAt,
+    status: request.status,
+    managerResponse: request.decisionReason,
   };
 }
