@@ -17,7 +17,7 @@ export const managerPreviewUrl =
  * open an email to the DocklistAI team rather than a self-serve sign-up.
  */
 export const betaAccessMailto =
-  "mailto:support@docklist.app?subject=DocklistAI%20private%20beta%20access";
+  "mailto:docklistai@gmail.com?subject=DocklistAI%20private%20beta%20access";
 
 export const navLinks: LandingNavLink[] = [
   { label: "Weekly rhythm", href: "#rhythm" },
