@@ -12,8 +12,6 @@ Skill paths shown are `.claude/skills/...`. Codex agents resolve the same skill 
 **Skills:**
 
 - `docklist-agent-discipline`
-- `docklist-context-driven-development`
-- `docklist-filesystem-context`
 - `docklist-proactive-maintenance-guard` (classify findings before recommending action)
 
 ---
@@ -35,7 +33,6 @@ Classify every finding into Fix Now / Scope Allows / Report / Risk Log / Forbidd
 **Skills:**
 
 - `docklist-agent-discipline`
-- `docklist-context-driven-development`
 
 No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
 
@@ -53,16 +50,24 @@ No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
 
 ## Frontend page or component work
 
-**Also check:** `docs/skills/frontend-anti-slop/FRONTEND_SKILL_GUARDRAILS.md`
+**Also check:** `docs/ai/FRONTEND_GUARDRAILS.md`
 **Skills:**
 
+- `docklist-tanstack-start`
 - `docklist-frontend-dev-guidelines`
-- `docklist-react-ui-patterns`
 - `docklist-tailwind-design-system`
 - `docklist-baseline-ui`
 - `docklist-ui-visual-validator`
 - `docklist-fixing-accessibility`
-- `docklist-react-component-performance` (when render complexity, repeated components, heavy JSX, or interaction state is involved)
+
+---
+
+## Query / cache / mutation state
+
+**When:** managing server state, local state overrides, API fetching
+**Skills:**
+
+- `docklist-tanstack-query`
 
 ---
 
@@ -73,7 +78,7 @@ No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
 - `docklist-frontend-dev-guidelines`
 - `docklist-baseline-ui`
 - `docklist-fixing-accessibility`
-- `docklist-code-review-checklist`
+- `docklist-differential-review`
 - `docklist-vibe-code-auditor`
 
 ---
@@ -82,10 +87,10 @@ No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
 
 **Skills:**
 
-- `docklist-react-ui-patterns`
+- `docklist-tanstack-start`
+- `docklist-tanstack-query`
 - `docklist-code-refactoring`
 - `docklist-clean-code`
-- `docklist-react-component-performance`
 - `docklist-testing-patterns`
 
 ---
@@ -107,20 +112,28 @@ Rules in `guardrails.md` (mock data section): no inline JSX mocks, typed against
 **Skills:**
 
 - `docklist-security-audit`
-- `docklist-database-design`
 - `docklist-postgresql`
 - `docklist-saas-multi-tenant`
 - `docklist-supabase`
 
 ---
 
-## Edge function / API work
+## Edge function / API / Cloudflare work
 
 **Skills:**
 
+- `docklist-cloudflare-edge`
 - `docklist-security-audit`
 - `docklist-api-security`
 - `docklist-testing-patterns`
+
+---
+
+## Installability / PWA / Staff mobile access
+
+**Skills:**
+
+- `docklist-pwa-installability`
 
 ---
 
@@ -129,7 +142,6 @@ Rules in `guardrails.md` (mock data section): no inline JSX mocks, typed against
 **Skills:**
 
 - `docklist-codebase-audit-pre-push`
-- `docklist-code-review-checklist`
 - `docklist-differential-review`
 - `docklist-verification-before-completion`
 
@@ -161,40 +173,6 @@ Outcome: ADR document in `docs/adr/` + decision summary. Reference the relevant 
 **Skills:**
 
 - `docklist-docs-architect`
-- `docklist-context-driven-development`
-
----
-
-## Worktree / branch / sync work
-
-**Skills:**
-
-- `docklist-using-git-worktrees`
-
-Run `docs/ai/snippets/worktree-precheck.md` first.
-
----
-
-## Large implementation / decomposition / batch refactor
-
-**Skills:**
-
-- `docklist-orchestrate-batch-refactor`
-- `docklist-architecture-patterns`
-- `docklist-clean-code`
-
----
-
-## Planning that persists across turns or agents / context transfer
-
-**When:** multi-step work, handoff to another agent, planning that must survive context resets, transferring context from old session/branch/PR
-**Skills:**
-
-- `docklist-planning-with-files`
-- `docklist-filesystem-context`
-- `docklist-context-driven-development`
-
-Plan file lives in `.claude/plans/` or `docs/ai/`.
 
 ---
 
@@ -202,8 +180,7 @@ Plan file lives in `.claude/plans/` or `docs/ai/`.
 
 **Skills:**
 
-- `docklist-architecture-patterns`
-- `docklist-filesystem-context`
-- `docklist-orchestrate-batch-refactor`
+- `docklist-software-architecture`
+- `docklist-clean-code`
 
 Compare against `docs/ai/guardrails.md`.
