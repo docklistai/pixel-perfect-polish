@@ -7,6 +7,7 @@ import type { SettingsContentTab } from "@/features/settings/components/Settings
 import { SettingsSidebar } from "@/features/settings/components/SettingsSidebar";
 import { SettingsContent } from "@/features/settings/components/SettingsContent";
 import { requireManagerAccess } from "@/features/auth";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
@@ -20,6 +21,7 @@ function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState("General");
   // Bumping this key remounts the active tab, resetting its local field state.
   const [resetKey, setResetKey] = React.useState(0);
+  const { workspaceName } = useManagerIdentity();
 
   const markDirty = React.useCallback(() => setDirty(true), []);
 
@@ -30,7 +32,7 @@ function SettingsPage() {
       setSaving(false);
       setDirty(false);
       toast.success("Settings saved", {
-        description: "Changes apply to Harbour View Hotel.",
+        description: `Changes apply to ${workspaceName}.`,
       });
     }, 600);
   };
@@ -56,7 +58,7 @@ function SettingsPage() {
         actions={
           <>
             <span className="guidance-note" style={{ marginRight: 4 }}>
-              Changes apply to <strong>Harbour View Hotel</strong>
+              Changes apply to <strong>{workspaceName}</strong>
             </span>
             <ActionButton variant="ghost" onClick={handleDiscard}>
               Discard

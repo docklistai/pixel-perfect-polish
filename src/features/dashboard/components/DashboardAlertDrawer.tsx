@@ -14,7 +14,7 @@ export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Prop
   // Selected details
   const alerts = [
     {
-      title: "Next week has 2 open shifts",
+      title: "Next week has open shifts",
       sub: "Resolve before Friday 16:00 to publish on time",
       tag: "Action needed",
       tone: "warning" as const,

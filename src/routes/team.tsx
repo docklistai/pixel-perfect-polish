@@ -7,6 +7,7 @@ import {
   IconButton,
   DialogShell,
   StatusBadge,
+  FeedbackBanner,
 } from "@/components/dl";
 import {
   Megaphone,
@@ -92,6 +93,13 @@ function TeamPage() {
             <IconButton icon={MoreHorizontal} label="More actions" />
           </>
         }
+      />
+
+      <FeedbackBanner
+        tone="info"
+        title="Preview Mode"
+        description="Team hub is populated with demo data for private beta. This is not a live operational report."
+        className="mb-5"
       />
 
       <div className="grid grid-cols-12 gap-5">

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton, IconButton, FeedbackBanner } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import {
   Check,
@@ -183,6 +183,13 @@ function OpsPage() {
         <Info className="h-3 w-3 shrink-0" aria-hidden />
         Clear open risks before handover — review the follow-ups panel for what needs attention.
       </div>
+
+      <FeedbackBanner
+        tone="info"
+        title="Preview Mode"
+        description="Operations log is populated with demo data for private beta. This is not a live operational report."
+        className="mb-4"
+      />
 
       <OpsStatCards />
 

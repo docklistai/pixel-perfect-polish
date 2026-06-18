@@ -257,7 +257,7 @@ function UIKitPage() {
         <Block name="RightPanel" description="Inline right-side inspector card.">
           <RightPanel title="Sophie Carter" onClose={() => undefined}>
             <p className="text-xs text-muted-foreground">
-              Front of House Supervisor · Harbour View Hotel
+              Front of House Supervisor · Example Hotel
             </p>
           </RightPanel>
         </Block>
@@ -416,7 +416,7 @@ function UIKitPage() {
                 <DetailRow label="Department" value="Front of House" />
                 <DetailRow label="Contract" value="Full-time (40h/week)" />
                 <DetailRow label="Pay rate" value="£13.50 per hour" />
-                <DetailRow label="Location" value="Harbour View Hotel" />
+                <DetailRow label="Location" value="Example Hotel" />
               </dl>
             </FormSection>
           </div>
