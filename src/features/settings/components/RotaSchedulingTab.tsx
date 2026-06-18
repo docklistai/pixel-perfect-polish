@@ -9,6 +9,7 @@ import {
 } from "./SettingsPrimitives";
 import { SettingsToggle } from "./SettingsToggle";
 import { Info } from "lucide-react";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
 function ConflictRuleRow({
   label,
@@ -51,6 +52,7 @@ function ConflictRuleRow({
 }
 
 export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
+  const { workspaceName } = useManagerIdentity();
   return (
     <div className="space-y-4">
       <div>
@@ -212,10 +214,8 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
           </label>
           <label className="space-y-1.5">
             <FieldLabel>Apply to</FieldLabel>
-            <SelectField defaultValue="all" onChange={onDirty}>
-              <option value="all">Harbour View Hotel</option>
-              <option value="brighton">Harbour View only</option>
-              <option value="hove">The Anchor Inn only</option>
+            <SelectField key={workspaceName} defaultValue="primary" onChange={onDirty}>
+              <option value="primary">{workspaceName}</option>
             </SelectField>
           </label>
         </div>

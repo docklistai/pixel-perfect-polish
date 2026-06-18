@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { SectionCard } from "./SettingsPrimitives";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
 const COLOUR_PRESETS: { tone: Tone; label: string }[] = [
   { tone: "brand", label: "Teal" },
@@ -38,10 +39,11 @@ const SHIFT_TEMPLATES = [
 
 export function TeamsTab({ onDirty }: { onDirty: () => void }) {
   const [deptTones, setDeptTones] = React.useState(DEFAULT_DEPT_TONES);
+  const { workspaceName } = useManagerIdentity();
 
   const locations = [
     {
-      location: "Harbour View Hotel",
+      location: workspaceName,
       team: "All departments",
       status: "Active",
       coverage: "Full week",

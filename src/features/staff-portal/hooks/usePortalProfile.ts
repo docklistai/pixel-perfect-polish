@@ -12,6 +12,8 @@ export type PortalProfileState = {
   isError: boolean;
   isSuccess: boolean;
   data: PortalProfile | null;
+  /** Re-run the live profile read (used by the portal's error retry). */
+  refetch: () => void;
 };
 
 export function usePortalProfile(): PortalProfileState {
@@ -38,5 +40,8 @@ export function usePortalProfile(): PortalProfileState {
     isError: query.isError,
     isSuccess: query.isSuccess,
     data: query.data ?? null,
+    refetch: () => {
+      void query.refetch();
+    },
   };
 }

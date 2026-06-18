@@ -1,5 +1,14 @@
 import * as React from "react";
-import { Bell, Calendar, Clock, Home, MoreHorizontal, Plane } from "lucide-react";
+import {
+  AlertCircle,
+  Bell,
+  Calendar,
+  Clock,
+  Home,
+  MoreHorizontal,
+  Plane,
+  RefreshCw,
+} from "lucide-react";
 import { FeedbackBanner } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import type { PortalTab } from "../types";
@@ -47,12 +56,19 @@ export function PortalShell({
   onOpenNotifications: () => void;
   children: React.ReactNode;
 }) {
-  const { data: profile, isLoading } = usePortalProfile();
+  const { data: profile, isLoading, isError, refetch } = usePortalProfile();
   const greeting = getGreeting();
   const isHome = activeTab === "home";
 
-  if (isLoading || !profile) {
+  // Brief loading skeleton while the live profile read is in flight.
+  if (isLoading) {
     return <div className="min-h-[100dvh] bg-[oklch(0.96_0.008_240)]" />;
+  }
+
+  // Honest error/empty state — never fall back to demo identity or a blank
+  // screen if the live profile can't be loaded.
+  if (isError || !profile) {
+    return <PortalLoadError onRetry={refetch} />;
   }
 
   return (
@@ -223,6 +239,33 @@ function NotificationBell({
         </span>
       )}
     </button>
+  );
+}
+
+function PortalLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="min-h-[100dvh] bg-[oklch(0.96_0.008_240)] flex items-center justify-center px-6">
+      <div className="w-full max-w-[360px] rounded-2xl bg-card p-6 text-center shadow-[var(--shadow-card)]">
+        <div
+          aria-hidden
+          className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft text-warning"
+        >
+          <AlertCircle className="h-6 w-6" />
+        </div>
+        <h1 className="mt-4 text-base font-semibold">We couldn&apos;t load your portal</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Check your connection and try again. Your shifts and details are safe.
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Try again
+        </button>
+      </div>
+    </div>
   );
 }
 

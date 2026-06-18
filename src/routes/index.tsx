@@ -265,6 +265,7 @@ function Home() {
           items={filter === "today" ? dashboard.todayKpis : dashboard.weeklyKpis}
           title={filter === "today" ? "Today's snapshot" : "Weekly overview"}
           onKpiClick={setSelectedKpi}
+          demo
         />
         <DashboardAttentionPanel
           items={dashboard.attentionItems}

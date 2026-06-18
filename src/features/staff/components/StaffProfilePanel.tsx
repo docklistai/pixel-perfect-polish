@@ -235,14 +235,22 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
       </div>
 
       <div className="px-4 pb-4">
-        <Link
-          to="/staff/$staffId"
-          params={{ staffId: member.id }}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-        >
-          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-          Open full profile
-        </Link>
+        {isLive ? (
+          // Live members have no detailed-profile surface yet; don't route them
+          // to an empty "coming soon" page — say so inline instead.
+          <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-2.5 text-xs font-semibold text-muted-foreground">
+            Full profiles coming soon
+          </div>
+        ) : (
+          <Link
+            to="/staff/$staffId"
+            params={{ staffId: member.id }}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+            Open full profile
+          </Link>
+        )}
       </div>
     </Card>
   );

@@ -25,10 +25,10 @@ const EXPORT_CARDS = [
 ] as const;
 
 const AUDIT_EVENTS = [
-  { event: "Rota published — week of 8 Jun", who: "Alex Thompson", when: "Mon 8 Jun, 16:42" },
-  { event: "Timesheet approved — Priya Patel", who: "Alex Thompson", when: "Mon 8 Jun, 09:15" },
-  { event: "Leave approved — Sophie Carter", who: "Alex Thompson", when: "Sun 7 Jun, 18:03" },
-  { event: "Role updated — FOH Supervisor", who: "Alex Thompson", when: "Fri 5 Jun, 11:27" },
+  { event: "Rota published — week of 8 Jun", who: "Workspace manager", when: "Mon 8 Jun, 16:42" },
+  { event: "Timesheet approved", who: "Workspace manager", when: "Mon 8 Jun, 09:15" },
+  { event: "Leave approved", who: "Workspace manager", when: "Sun 7 Jun, 18:03" },
+  { event: "Role updated — FOH Supervisor", who: "Workspace manager", when: "Fri 5 Jun, 11:27" },
 ] as const;
 
 export function ExportsTab({ onDirty }: { onDirty: () => void }) {
@@ -137,8 +137,8 @@ export function ExportsTab({ onDirty }: { onDirty: () => void }) {
 
       <SectionCard
         title="Audit log"
-        badge={<PreviewTag>Manager-only</PreviewTag>}
-        description="Recent workspace changes, newest first."
+        badge={<PreviewTag>Demo data</PreviewTag>}
+        description="Sample entries — the live workspace audit log arrives in a later update."
       >
         <div className="space-y-2">
           {AUDIT_EVENTS.map((entry) => (

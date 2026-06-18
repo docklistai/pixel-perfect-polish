@@ -1,9 +1,17 @@
 import * as React from "react";
 import { toast } from "sonner";
-import { SectionCard, FieldLabel, TextField, SelectField } from "./SettingsPrimitives";
+import { SectionCard, FieldLabel, TextField, SelectField, PreviewTag } from "./SettingsPrimitives";
 import { Upload } from "lucide-react";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+
+function monogram(name: string): string {
+  const parts = name.split(/\s+/).filter(Boolean);
+  const letters = parts.slice(0, 2).map((p) => p[0]);
+  return (letters.join("") || "WS").toUpperCase();
+}
 
 export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
+  const { workspaceName, email, roleLabel, initials } = useManagerIdentity();
   return (
     <div className="space-y-4">
       <div>
@@ -16,7 +24,7 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
       <SectionCard title="Workspace identity" description="Name, logo, and time-zone defaults.">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-xl font-bold text-teal-600 dark:text-teal-400">
-            HV
+            {monogram(workspaceName)}
           </div>
           <div className="space-y-1">
             <button
@@ -35,16 +43,15 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
           </div>
           <div className="flex-1 space-y-1.5 sm:ml-4">
             <FieldLabel>Workspace name</FieldLabel>
-            <TextField defaultValue="Harbour View Hotel" onChange={onDirty} />
+            <TextField key={workspaceName} defaultValue={workspaceName} onChange={onDirty} />
           </div>
         </div>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <label className="space-y-1.5">
             <FieldLabel>Default location</FieldLabel>
-            <SelectField defaultValue="brighton" onChange={onDirty}>
-              <option value="brighton">Harbour View — Brighton</option>
-              <option value="hove">The Anchor Inn — Hove</option>
+            <SelectField key={workspaceName} defaultValue="primary" onChange={onDirty}>
+              <option value="primary">{workspaceName}</option>
             </SelectField>
           </label>
           <label className="space-y-1.5">
@@ -73,15 +80,19 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Workspace owner" description="Primary contact and billing owner.">
+      <SectionCard
+        title="Workspace owner"
+        badge={<PreviewTag>Demo</PreviewTag>}
+        description="Primary contact for this workspace."
+      >
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/20 p-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white">
-            AT
+            {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold">Alex Thompson</div>
+            <div className="text-sm font-semibold">{roleLabel}</div>
             <div className="truncate text-xs text-muted-foreground font-mono">
-              alex.thompson@docklist.co.uk
+              {email ?? "Not set yet"}
             </div>
           </div>
           <button
