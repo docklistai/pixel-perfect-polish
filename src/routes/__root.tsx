@@ -93,6 +93,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Docklist" },
+      { name: "description", content: "Smart scheduling for hospitality" },
+      { property: "og:description", content: "Smart scheduling for hospitality" },
+      { name: "twitter:description", content: "Smart scheduling for hospitality" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91427390-4a5f-4dd1-832b-ac3afd5f6f5e/id-preview-26c658da--fc821881-5f55-4948-8357-044805330730.lovable.app-1781725495668.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91427390-4a5f-4dd1-832b-ac3afd5f6f5e/id-preview-26c658da--fc821881-5f55-4948-8357-044805330730.lovable.app-1781725495668.png" },
     ],
     links: [
       {
