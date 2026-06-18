@@ -8,6 +8,7 @@ The single source of truth for how every agent (Claude Code, Codex, others) work
 2. `docs/ai/skill-router.md` — task → skill map.
 3. `docs/ai/guardrails.md` — file-size and worktree rules.
 4. `docs/ai/snippets/` — declaration, completion report, prechecks, non-negotiables.
+5. `docs/ai/FRONTEND_GUARDRAILS.md`
 
 `AGENTS.md`, `CLAUDE.md`, and `CODEX.md` are thin entry points; their job is to send the agent here.
 
@@ -23,11 +24,16 @@ Files: <list or "TBD by audit">.
 Follow DOCKLIST_OPERATING_SYSTEM.md.
 ```
 
+## Tech stack
+
+- DocklistAI uses TanStack Start, TanStack Query, TanStack Router, Vite, Cloudflare/Wrangler, Supabase, and Lovable TanStack config.
+- Agents must not introduce Next.js/App Router patterns.
+- Agents must not replace Supabase with Cloudflare D1/KV/R2.
+- Agents must not edit deployment/runtime config unless the task explicitly requires it.
+
 ## Product boundaries
 
-- Scheduling is the core product. HR is lightweight. AI is limited and supporting.
-- 50/30/20 split (scheduling / HR / AI). See `docs/adr/0001`.
-- No generic AI SaaS UI. No feature bloat. No backend/product-scope drift. No broad refactors unless clearly necessary.
+- See `docs/ai/snippets/non-negotiables.md` for the strict 50/30/20 product split and forbidden scopes.
 - Lovable owns frontend design direction unless told otherwise.
 - Scope expansion into forbidden areas requires an ADR and product-boundary update first. A user prompt alone is not enough.
 
