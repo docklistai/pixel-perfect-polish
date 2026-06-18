@@ -46,7 +46,16 @@ export function usePortalNotifications(): PortalNotifications {
 
   const isLive = enabled && query.isSuccess;
 
-  if (!isLive) {
+  if (enabled && !isLive) {
+    return {
+      items: [],
+      unreadCount: 0,
+      source: "live",
+      markAllRead: () => undefined,
+    };
+  }
+
+  if (!enabled) {
     return {
       items: demoItems,
       unreadCount: demoItems.filter((n) => n.unread).length,

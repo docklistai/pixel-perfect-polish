@@ -52,14 +52,24 @@ export function usePortalRota(): PortalRota {
       return { ...buildRota(live.data ?? []), source: "live", isLoading: false, isError: false };
     }
 
+    if (live.enabled) {
+      return {
+        ...buildRota([]),
+        hasPublished: false,
+        source: "live",
+        isLoading: live.isLoading,
+        isError: live.isError,
+      };
+    }
+
     const demoShifts = portalShiftsForStaff(weekDrafts, "olivia-bennett");
     return {
       ...buildRota(demoShifts),
       // Demo keeps the original "any published week exists" semantics.
       hasPublished: publishedSnapshots(weekDrafts).length > 0,
       source: "demo",
-      isLoading: live.enabled && live.isLoading,
-      isError: live.enabled && live.isError,
+      isLoading: false,
+      isError: false,
     };
   }, [weekDrafts, live.enabled, live.isSuccess, live.isLoading, live.isError, live.data]);
 }

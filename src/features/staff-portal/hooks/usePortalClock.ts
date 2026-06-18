@@ -82,7 +82,21 @@ export function usePortalClock(): PortalClock {
 
   const isLive = enabled && entriesQuery.isSuccess && eventsQuery.isSuccess;
 
-  if (!isLive) {
+  if (enabled && !isLive) {
+    return {
+      source: "live",
+      clockedIn: false,
+      onBreak: false,
+      startedAtMs: null,
+      sinceLabel: null,
+      entries: [],
+      clockIn: () => undefined,
+      clockOut: () => undefined,
+      toggleBreak: () => undefined,
+    };
+  }
+
+  if (!enabled) {
     return {
       source: "demo",
       clockedIn: demoClock.clockedIn,

@@ -50,7 +50,7 @@ export function PortalLeaveRequestDrawer({
 
   const { data: profile } = usePortalProfile();
 
-  const portalStaff: LeaveStaffOption = profile
+  const portalStaff: LeaveStaffOption | null = profile
     ? {
         id: profile.staffId,
         name: profile.name,
@@ -58,15 +58,18 @@ export function PortalLeaveRequestDrawer({
         dept: profile.department,
         img: 16,
       }
-    : {
-        id: "olivia-bennett",
-        name: "Demo User",
-        role: "Staff",
-        dept: "Front of House",
-        img: 16,
-      };
+    : liveWorkspaceId
+      ? null
+      : {
+          id: "olivia-bennett",
+          name: "Demo User",
+          role: "Staff",
+          dept: "Front of House",
+          img: 16,
+        };
 
   const echoToStore = () => {
+    if (!portalStaff) return;
     const request = buildLeaveRequest({
       staff: portalStaff,
       startIso,
@@ -97,6 +100,11 @@ export function PortalLeaveRequestDrawer({
 
     if (reason.trim().length === 0) {
       toast.error("Add a note", { description: "A short reason is required for your request." });
+      return;
+    }
+
+    if (!profile) {
+      toast.error("Profile not loaded", { description: "Please wait a moment and try again." });
       return;
     }
 
