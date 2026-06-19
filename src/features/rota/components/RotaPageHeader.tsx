@@ -74,7 +74,7 @@ export function RotaPageHeader({
       </div>
       <div className="rota-page-actions flex flex-wrap items-center gap-2 lg:justify-end">
         <div
-          className="inline-flex items-center gap-0.5 rounded-[9px] border border-border bg-muted/40 p-[3px]"
+          className="rota-view-modes inline-flex items-center gap-0.5 rounded-[9px] border border-border bg-muted/40 p-[3px]"
           role="group"
           aria-label="Rota view"
         >
@@ -97,7 +97,7 @@ export function RotaPageHeader({
         <RowActionMenu
           triggerLabel="Group rota by"
           trigger={
-            <button type="button" className="btn secondary sm">
+            <button type="button" className="rota-view-by btn secondary sm">
               View: {viewBy}
               <ChevronDown className="h-3.5 w-3.5" aria-hidden />
             </button>
@@ -119,7 +119,7 @@ export function RotaPageHeader({
         <RowActionMenu
           triggerLabel="Rota tools"
           trigger={
-            <button type="button" className="btn outline-teal sm">
+            <button type="button" className="rota-tools btn outline-teal sm">
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
               Tools
               <ChevronDown className="h-3.5 w-3.5" aria-hidden />
@@ -132,12 +132,13 @@ export function RotaPageHeader({
           ]}
         />
         {canPublish && (
-          <ActionButton size="sm" icon={Send} onClick={onPublish}>
+          <ActionButton className="rota-publish" size="sm" icon={Send} onClick={onPublish}>
             Publish
           </ActionButton>
         )}
         <RowActionMenu
           triggerLabel="More rota actions"
+          className="rota-more"
           items={[
             { kind: "label", text: "Planning" },
             { label: "Copy last week", icon: Copy, onSelect: onCopyLastWeek },

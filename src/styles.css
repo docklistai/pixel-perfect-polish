@@ -3302,3 +3302,153 @@
 .user-pill .info small { font-size: 10.5px; color: var(--ink-500); }
 .user-pill .chev { color: var(--ink-400); }
 .spacer { flex: 1; }
+
+/* Manager shell responsive states follow the locked prototype: full, rail, then mobile nav. */
+@media (max-width: 1180px) {
+  :root { --sidebar-w: 210px; }
+  .topbar { gap: 6px; padding-inline: 14px; }
+  .topbar-pill { min-width: 170px; }
+  .topbar-pill.date { min-width: 180px; }
+  .search-input {
+    flex: 0 0 34px;
+    width: 34px;
+    padding: 8px;
+    overflow: hidden;
+  }
+  .search-input input,
+  .search-input kbd { display: none; }
+  .user-pill .info,
+  .user-pill .chev { display: none; }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  :root { --sidebar-w: 68px; }
+  .sidebar { padding: 18px 10px 14px; }
+  .sidebar .brand { justify-content: center; padding: 2px 0 18px; }
+  .sidebar .brand > span:not(.brand-glyph),
+  .sidebar .nav-section,
+  .sidebar .nav-item > span,
+  .sidebar .workspace-pill .meta,
+  .sidebar .workspace-pill .chev { display: none; }
+  .sidebar .nav-item { justify-content: center; padding: 10px; }
+  .sidebar .workspace-pill { justify-content: center; padding-inline: 8px; }
+  .sidebar .footer .popover {
+    right: auto;
+    left: 48px;
+    bottom: 0;
+    width: 224px;
+  }
+  .topbar-pill { min-width: 150px; }
+  .topbar-pill.date { min-width: 160px; }
+  .topbar-pill.date .stack small { display: none; }
+}
+
+@media (max-width: 900px) {
+  .topbar { gap: 5px; padding-inline: 10px; }
+  .topbar-workspace .topbar-pill {
+    min-width: 34px;
+    width: 34px;
+    padding: 8px;
+  }
+  .topbar-workspace .topbar-pill span,
+  .topbar-workspace .topbar-pill svg:last-child { display: none; }
+  .topbar .ai-btn span { display: none; }
+  .topbar .ai-btn { min-width: 34px; padding-inline: 9px; }
+  .topbar .theme-btn { display: none; }
+  .rota-toolbar-statuses > :nth-child(n + 3) { display: none; }
+}
+
+@media (max-width: 767px) {
+  :root { --sidebar-w: 0px; --topbar-h: 56px; }
+  .app { grid-template-columns: minmax(0, 1fr); min-height: 100dvh; }
+  .main {
+    width: 100%;
+    min-width: 0;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+  .sidebar {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 40;
+    width: 100%;
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border-faint);
+    border-right: 0;
+    overflow: hidden;
+  }
+  .sidebar .brand,
+  .sidebar .nav-section,
+  .sidebar .footer,
+  .sidebar [data-nav-group]:not([data-nav-group="workspace"]) { display: none; }
+  .sidebar > .flex,
+  .sidebar [data-nav-group="workspace"] {
+    width: 100%;
+    padding: 0;
+    overflow: visible;
+  }
+  .sidebar .nav {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 2px;
+  }
+  .sidebar .nav-item {
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 5px 4px;
+    font-size: 9px;
+  }
+  .sidebar .nav-item > span { display: block; max-width: 100%; }
+  .sidebar .nav-item .count,
+  .sidebar .nav-item > span[style] { display: none; }
+  .sidebar .nav-item.active::before {
+    inset: -6px 12px auto;
+    width: auto;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+  }
+  .topbar { width: 100%; overflow: hidden; }
+  .topbar-pill.date { display: none; }
+  .topbar .spacer { min-width: 0; }
+  .rota-page-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto auto auto;
+    gap: 6px;
+  }
+  .rota-view-modes { grid-column: 1 / -1; width: 100%; }
+  .rota-view-modes > button { flex: 1; }
+  .rota-view-by {
+    width: 100%;
+    min-width: 0;
+    justify-content: space-between;
+  }
+  .rota-tools,
+  .rota-publish,
+  .rota-more { white-space: nowrap; }
+}
+
+@media (max-width: 640px) {
+  .rota-toolbar-copy { display: none; }
+  .rota-grid-toolbar { padding-inline: 12px; }
+  .rota-toolbar-actions { gap: 6px; }
+}
+
+@media (max-width: 430px) {
+  .topbar { padding-inline: 8px; }
+  .topbar-workspace,
+  .search-input { display: none; }
+  .topbar-arrow,
+  .bell,
+  .theme-btn,
+  .user-pill { width: 32px; height: 32px; }
+  .topbar .ai-btn { min-width: 32px; height: 32px; padding: 8px; }
+  .rota-page-title { font-size: 27px; }
+  .rota-page-subtitle { font-size: 12px; }
+  .rota-page-actions { grid-template-columns: minmax(0, 1fr) auto auto auto; }
+  .rota-view-by { padding-inline: 9px; }
+}

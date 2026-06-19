@@ -8,7 +8,7 @@ export function TopbarSearch({ searchPlaceholder }: { searchPlaceholder: string 
     <button
       type="button"
       onClick={openPalette}
-      className="search-input hidden md:flex"
+      className="search-input"
       aria-label="Search Docklist (Ctrl or Cmd K)"
     >
       <SearchField

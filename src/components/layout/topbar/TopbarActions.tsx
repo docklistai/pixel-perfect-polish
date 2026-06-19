@@ -89,7 +89,7 @@ export function TopbarActions({
       <button
         type="button"
         onClick={openNotifications}
-        className="bell hidden md:grid"
+        className="bell"
         aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : "Notifications"}
       >
         <Bell className="h-4 w-4" aria-hidden />
@@ -100,7 +100,7 @@ export function TopbarActions({
         )}
       </button>
 
-      <div className="relative hidden md:block" ref={userRef}>
+      <div className="relative" ref={userRef}>
         <button
           type="button"
           onClick={(e) => {

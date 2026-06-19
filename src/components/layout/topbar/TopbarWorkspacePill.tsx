@@ -26,7 +26,7 @@ export function TopbarWorkspacePill() {
   }, [workspaceOpen]);
 
   return (
-    <div className="relative" ref={workspaceRef}>
+    <div className="topbar-workspace relative" ref={workspaceRef}>
       <button
         type="button"
         onClick={(e) => {

@@ -103,7 +103,13 @@ export function RotaGridToolbar({
         </div>
 
         <div className="rota-toolbar-actions ml-auto flex flex-wrap items-center gap-2">
-          <ActionButton variant="secondary" size="sm" icon={Copy} onClick={onCopyLastWeek}>
+          <ActionButton
+            className="rota-toolbar-copy"
+            variant="secondary"
+            size="sm"
+            icon={Copy}
+            onClick={onCopyLastWeek}
+          >
             Copy last week
           </ActionButton>
           <ActionButton variant="outline" size="sm" icon={Sparkles} onClick={onGenerateRota}>

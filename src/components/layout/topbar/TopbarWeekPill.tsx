@@ -13,7 +13,7 @@ export function TopbarWeekPill() {
       <button
         type="button"
         onClick={() => selectRotaWeek(store, weekOffset - 1)}
-        className="topbar-arrow hidden md:grid"
+        className="topbar-arrow"
         title="Previous week"
         aria-label="Previous week"
       >
@@ -33,7 +33,7 @@ export function TopbarWeekPill() {
       <button
         type="button"
         onClick={() => selectRotaWeek(store, weekOffset + 1)}
-        className="topbar-arrow hidden md:grid"
+        className="topbar-arrow"
         title="Next week"
         aria-label="Next week"
       >

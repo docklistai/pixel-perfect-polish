@@ -128,8 +128,7 @@ export function Sidebar() {
   }, [workspaceOpen]);
 
   return (
-    <aside className="sidebar hidden md:flex select-none">
-      {/* Brand */}
+    <aside className="sidebar select-none" aria-label="Manager navigation">
       <div className="brand">
         <span className="brand-glyph">D</span>
         <span>Docklist</span>
@@ -137,7 +136,7 @@ export function Sidebar() {
 
       <div className="flex flex-col gap-1 overflow-y-auto pr-1 flex-1">
         {NAV_GROUPS.map((group) => (
-          <div key={group.key}>
+          <div key={group.key} data-nav-group={group.key}>
             <div className="nav-section">{group.label}</div>
             <nav className="nav" aria-label={group.ariaLabel}>
               {navItems
@@ -151,6 +150,7 @@ export function Sidebar() {
                       key={item.to}
                       to={item.to}
                       aria-current={active ? "page" : undefined}
+                      title={item.label}
                       className={`nav-item ${active ? "active" : ""}`}
                     >
                       <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />

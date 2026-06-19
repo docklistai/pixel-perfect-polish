@@ -93,13 +93,6 @@ export function AppShell({
       <Sidebar />
       <div className="main">
         <Topbar searchPlaceholder={searchPlaceholder} />
-        <div className="md:hidden px-4 pt-4">
-          <FeedbackBanner
-            tone="warning"
-            title="Optimised for desktop"
-            description="Docklist manager is optimised for desktop. Please use a larger screen."
-          />
-        </div>
         <main id="main-content" tabIndex={-1} className="dl-page-in focus:outline-none">
           {children}
         </main>
