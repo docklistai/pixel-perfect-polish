@@ -27,12 +27,14 @@ export function RotaOverlays({
   onPublishConfirm,
   onApplySuggestions,
   onMarkShiftOpen,
+  onRepeatShift,
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
   onPublishConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
   onApplySuggestions: () => void;
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
+  onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => MaybePromise<void>;
 }) {
   const { openOverlays, setOverlay } = overlays;
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
@@ -119,6 +121,7 @@ export function RotaOverlays({
         onUpdate={rota.updateShift}
         onRemove={rota.requestRemoveShift}
         onMarkOpen={onMarkShiftOpen}
+        onRepeat={onRepeatShift}
       />
       <ConfirmDialog
         open={Boolean(rota.confirmation)}

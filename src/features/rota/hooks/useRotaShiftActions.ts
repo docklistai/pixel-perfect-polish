@@ -59,6 +59,55 @@ export function useRotaShiftActions(rota: RotaController) {
     toastDuplicateDraft(rota, newId);
   };
 
+  const handleRepeatShift = async (shiftId: string, dayIndexes: number[]) => {
+    if (readOnly) return block();
+    const sourceShift = findShift(shiftId);
+    if (!sourceShift) return;
+
+    let successCount = 0;
+    let skipCount = 0;
+
+    for (const dayIndex of dayIndexes) {
+      if (sourceShift.dayIndex === dayIndex) continue;
+
+      const hasShift =
+        sourceShift.staffId !== null &&
+        rota.draftShifts.some((s) => s.staffId === sourceShift.staffId && s.dayIndex === dayIndex);
+
+      if (hasShift) {
+        skipCount++;
+        continue;
+      }
+
+      const patch = {
+        dayIndex: dayIndex as 0 | 1 | 2 | 3 | 4 | 5 | 6,
+        staffId: sourceShift.staffId,
+        role: sourceShift.role,
+        start: sourceShift.start,
+        end: sourceShift.end,
+        breakMinutes: sourceShift.breakMinutes,
+        status: sourceShift.status,
+        tone: sourceShift.tone,
+      };
+
+      try {
+        await rota.addShift(patch);
+        successCount++;
+      } catch {
+        // live mutation error is handled internally by runMutation
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`Shift repeated on ${successCount} day${successCount === 1 ? "" : "s"}`);
+    }
+    if (skipCount > 0) {
+      toast.warning(`Skipped ${skipCount} day${skipCount === 1 ? "" : "s"}`, {
+        description: "Staff already has a shift on those days.",
+      });
+    }
+  };
+
   const handleMarkShiftOpen = async (shiftId: string) => {
     if (readOnly) return block();
     const prev = findShift(shiftId);
@@ -120,6 +169,7 @@ export function useRotaShiftActions(rota: RotaController) {
     handleApplySuggestions,
     handleCopyLastWeek,
     handleDuplicateShift,
+    handleRepeatShift,
     handleMarkShiftOpen: handleMarkShiftOpen as (shiftId: ShiftId) => Promise<void>,
     handleClearShift,
     handleSetShiftDept,

@@ -205,7 +205,6 @@ function RotaPage() {
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
           canPublish={canPublish}
-          onTemplates={() => openOverlay("templates")}
           onPrintRota={() => window.print()}
           onClearWeek={guardedRota.requestClearWeek}
           onCopyLastWeek={actions.handleCopyLastWeek}
@@ -339,6 +338,7 @@ function RotaPage() {
         onPublishConfirm={handlePublish}
         onApplySuggestions={actions.handleApplySuggestions}
         onMarkShiftOpen={actions.handleMarkShiftOpen}
+        onRepeatShift={actions.handleRepeatShift}
       />
     </AppShell>
   );

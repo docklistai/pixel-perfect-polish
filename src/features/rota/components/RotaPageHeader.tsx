@@ -12,7 +12,6 @@ export function RotaPageHeader({
   statusTone,
   statusLabel,
   canPublish,
-  onTemplates,
   onPrintRota,
   onClearWeek,
   onCopyLastWeek,
@@ -26,7 +25,6 @@ export function RotaPageHeader({
   statusTone: StatusTone;
   statusLabel: string;
   canPublish: boolean;
-  onTemplates: () => void;
   onPrintRota: () => void;
   onClearWeek: () => void;
   onCopyLastWeek: () => void;
@@ -65,7 +63,6 @@ export function RotaPageHeader({
           className="rota-more"
           items={[
             { kind: "label", text: "Planning" },
-            { label: "Templates", icon: SlidersHorizontal, onSelect: onTemplates },
             { label: "Print rota", icon: Printer, onSelect: onPrintRota },
 
             { kind: "separator" },
