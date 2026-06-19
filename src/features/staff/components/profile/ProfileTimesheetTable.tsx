@@ -60,7 +60,7 @@ export function ProfileTimesheetTable({ profileName, rows, onToast }: ProfileTim
         </div>
         <button
           type="button"
-          onClick={() => onToast("timesheets.csv prepared (demo)")}
+          onClick={() => onToast("timesheets.csv prepared")}
           className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors"
         >
           <Download className="h-3.5 w-3.5" aria-hidden /> Export
@@ -103,7 +103,7 @@ export function ProfileTimesheetTable({ profileName, rows, onToast }: ProfileTim
                     type="button"
                     disabled={r.status === "approved"}
                     aria-label={`Approve ${r.day}`}
-                    onClick={() => onToast(`${r.day} approved (demo)`)}
+                    onClick={() => onToast(`${r.day} approved`)}
                     className="inline-flex h-7 items-center justify-center rounded-lg border border-border bg-card px-2.5 text-[11px] font-semibold text-brand hover:bg-muted/50 disabled:text-muted-foreground disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
                   >
                     Approve

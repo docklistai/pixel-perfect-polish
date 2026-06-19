@@ -150,8 +150,8 @@ export function LeaveActionDialogs({
         {decisionRequest && !isApprove && (
           <>
             <p className="muted txt-sm mb-3">
-              {decisionRequest.n} will see your reason in their staff app preview. They can request
-              again with a new date.
+              {decisionRequest.n} will see your reason in their staff app. They can request again
+              with a new date.
             </p>
             <div className="field">
               <label htmlFor="leave-decline-reason">Reason for decline</label>

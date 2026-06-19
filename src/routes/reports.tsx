@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, FeedbackBanner } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton } from "@/components/dl";
 import { CalendarDays, Download, Info, Plus, BarChart2 } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
@@ -64,12 +64,9 @@ function ReportsPage() {
         Use the review points below to spot rota issues — click each point to mark as reviewed.
       </div>
 
-      <FeedbackBanner
-        tone="info"
-        title="Preview Mode"
-        description="Reports are populated with demo data for private beta. This is not a live operational report."
-        className="mb-4"
-      />
+      <p className="mb-4 text-xs text-muted-foreground">
+        Some figures may be based on sample data.
+      </p>
 
       <ReportsKpiCards timeRows={timeRows} leaveRequests={leaveRequests} />
 

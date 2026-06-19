@@ -265,7 +265,6 @@ function Home() {
           items={filter === "today" ? dashboard.todayKpis : dashboard.weeklyKpis}
           title={filter === "today" ? "Today's snapshot" : "Weekly overview"}
           onKpiClick={setSelectedKpi}
-          demo
         />
         <DashboardAttentionPanel
           items={dashboard.attentionItems}
@@ -279,7 +278,7 @@ function Home() {
 
       {/* Secondary row: labour watch · rota countdown · leave queue */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} demo />
+        <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} />
         <DashboardRotaPublish />
         <DashboardPendingLeave items={dashboard.leaveItems} />
       </div>

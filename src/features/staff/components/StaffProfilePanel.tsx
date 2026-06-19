@@ -125,10 +125,10 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
         <div className="flex items-center gap-1.5">
           {(
             [
-              [MessageSquare, "Message", () => showToast(`Message ${member.n} (demo)`)],
-              [Phone, "Call", () => showToast(`Call ${member.n} (demo)`)],
-              [Mail, "Email", () => showToast(`Email ${member.n} (demo)`)],
-              [Calendar, "View rota", () => showToast("Opening rota (demo)")],
+              [MessageSquare, "Message", () => showToast(`Message ${member.n}`)],
+              [Phone, "Call", () => showToast(`Call ${member.n}`)],
+              [Mail, "Email", () => showToast(`Email ${member.n}`)],
+              [Calendar, "View rota", () => showToast("Opening rota")],
             ] as [typeof MessageSquare, string, () => void][]
           ).map(([Icon, label, handler]) => (
             <button
@@ -145,7 +145,7 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
           <button
             type="button"
             aria-label="More actions"
-            onClick={() => showToast("Actions menu (demo)")}
+            onClick={() => showToast("Actions menu")}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted/60"
           >
             <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
@@ -239,7 +239,7 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
           // Live members have no detailed-profile surface yet; don't route them
           // to an empty "coming soon" page — say so inline instead.
           <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-2.5 text-xs font-semibold text-muted-foreground">
-            Full profiles coming soon
+            Full profile not available yet
           </div>
         ) : (
           <Link

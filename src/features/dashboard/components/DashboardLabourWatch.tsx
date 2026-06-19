@@ -7,8 +7,6 @@ interface Props {
   projectedSales: string;
   labourPct: number;
   targetPct?: number;
-  /** Flags the figures as illustrative demo data, not a live labour feed. */
-  demo?: boolean;
 }
 
 function formatPct(value: number) {
@@ -56,7 +54,6 @@ export function DashboardLabourWatch({
   projectedSales,
   labourPct,
   targetPct = 30,
-  demo = false,
 }: Props) {
   const isHealthy = labourPct <= targetPct;
   const barClass = isHealthy ? "bg-brand" : "bg-warning";
@@ -68,11 +65,6 @@ export function DashboardLabourWatch({
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="dock-section-eyebrow">Labour watch</div>
-            {demo && (
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                Demo
-              </span>
-            )}
           </div>
           <span className="text-xs text-muted-foreground">vs {targetPct}% target</span>
         </div>

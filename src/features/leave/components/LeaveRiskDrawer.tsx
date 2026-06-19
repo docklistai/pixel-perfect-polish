@@ -46,8 +46,8 @@ export function LeaveRiskDrawer({ open, onOpenChange }: Props) {
         </ul>
       </FormSection>
       <p className="text-[11px] text-muted-foreground">
-        Not enough data here for a coverage figure — open the rota to confirm. Preview only; no rota
-        change is applied.
+        Not enough data here for a coverage figure — open the rota to confirm. No rota change is
+        applied.
       </p>
     </DrawerShell>
   );

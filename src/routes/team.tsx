@@ -7,7 +7,6 @@ import {
   IconButton,
   DialogShell,
   StatusBadge,
-  FeedbackBanner,
 } from "@/components/dl";
 import {
   Megaphone,
@@ -69,7 +68,7 @@ function TeamPage() {
         break;
       case "profile":
         toast.info("Opening profile", {
-          description: `Opening ${selectedBirthday.n}'s profile (demo)`,
+          description: `Opening ${selectedBirthday.n}'s profile`,
         });
         break;
       case "hide":
@@ -95,12 +94,9 @@ function TeamPage() {
         }
       />
 
-      <FeedbackBanner
-        tone="info"
-        title="Preview Mode"
-        description="Team hub is populated with demo data for private beta. This is not a live operational report."
-        className="mb-5"
-      />
+      <p className="mb-5 text-xs text-muted-foreground">
+        Some figures may be based on sample data.
+      </p>
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">

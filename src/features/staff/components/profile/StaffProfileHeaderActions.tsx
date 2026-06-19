@@ -53,15 +53,23 @@ export function StaffProfileHeaderActions({ profile, onToast }: StaffProfileHead
       label: "Log leave",
       action: () => openRouteIntent("/leave", "leave.new"),
     },
-    { icon: Clock, label: "Adjust timesheet", action: () => onToast("Adjustment modal (demo)") },
+    {
+      icon: Clock,
+      label: "Adjust timesheet",
+      action: () => onToast("Timesheet adjustment isn't available here yet"),
+    },
     null,
     { icon: Edit2, label: "Edit details", action: () => setEditOpen(true) },
-    { icon: Key, label: "Reset mobile PIN", action: () => onToast("New PIN sent by SMS (demo)") },
+    {
+      icon: Key,
+      label: "Reset mobile PIN",
+      action: () => onToast("PIN reset isn't available here yet"),
+    },
     null,
     {
       icon: Download,
       label: "Export profile",
-      action: () => onToast("profile.pdf prepared (demo)"),
+      action: () => onToast("profile.pdf prepared"),
     },
     { icon: Lock, label: "Suspend", danger: true, action: () => setSuspendOpen(true) },
   ] as const;

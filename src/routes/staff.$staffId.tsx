@@ -46,7 +46,7 @@ function StaffProfilePage() {
       <AppShell>
         <div className="flex flex-col items-center justify-center py-24 gap-4 text-center">
           <h1 className="text-xl font-semibold">
-            {liveWorkspace ? "Full profiles are coming soon" : "Staff member not found"}
+            {liveWorkspace ? "Full profile not available yet" : "Staff member not found"}
           </h1>
           <p className="max-w-md text-sm text-muted-foreground">
             {liveWorkspace

@@ -141,9 +141,6 @@ function AuthPage() {
                     Rota management for modern hospitality teams
                   </p>
                 </div>
-                <span className="rounded-full border border-brand/20 bg-brand-soft px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand">
-                  BETA
-                </span>
               </div>
             </div>
           </div>

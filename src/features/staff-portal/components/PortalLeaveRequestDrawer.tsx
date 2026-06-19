@@ -62,7 +62,7 @@ export function PortalLeaveRequestDrawer({
       ? null
       : {
           id: "olivia-bennett",
-          name: "Demo User",
+          name: "Team member",
           role: "Staff",
           dept: "Front of House",
           img: 16,

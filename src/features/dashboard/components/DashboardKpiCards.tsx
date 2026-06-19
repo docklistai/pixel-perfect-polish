@@ -7,25 +7,16 @@ interface Props {
   items: KpiItem[];
   title: string;
   onKpiClick?: (item: KpiItem) => void;
-  /** Flags the strip as illustrative demo data, not a live workspace feed. */
-  demo?: boolean;
 }
 
-export function DashboardKpiCards({ items, title, onKpiClick, demo = false }: Props) {
+export function DashboardKpiCards({ items, title, onKpiClick }: Props) {
   return (
     <Card className="p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="dock-section-eyebrow">{title}</div>
-          {demo && (
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              Demo
-            </span>
-          )}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {demo ? "Preview data" : "Vs last week"}
-        </div>
+        <div className="text-xs text-muted-foreground">Vs last week</div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {items.map((m) => (

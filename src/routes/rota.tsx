@@ -115,7 +115,7 @@ function RotaPage() {
           ? "Published snapshot ready. Staff-app update prepared for review."
           : "Staff see the published snapshot the next time they open the app.",
         action: {
-          label: "Preview staff app",
+          label: "Open staff view",
           onClick: () => navigate({ to: "/portal" }),
         },
       });
@@ -183,9 +183,9 @@ function RotaPage() {
             title="Live rota — read-only"
             description={
               rota.isLiveError
-                ? "The live rota couldn't be loaded. Harbour View demo data is shown as a read-only fallback."
+                ? "The live rota couldn't be loaded. A sample rota is shown as a read-only fallback."
                 : rota.isLiveLoading
-                  ? "Loading your workspace rota. Harbour View demo data is shown as a read-only fallback."
+                  ? "Loading your workspace rota. A sample rota is shown as a read-only fallback."
                   : rota.hasLiveWeek
                     ? "You're viewing your workspace's saved rota. Editing and publishing aren't available in live mode yet."
                     : "No saved rota for this week yet. Editing and publishing aren't available in live mode yet."

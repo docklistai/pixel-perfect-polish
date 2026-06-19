@@ -47,7 +47,7 @@ function buildStats(staffRows: StaffRow[]): StatCard[] {
       icon: Users,
       label: "Total staff",
       value: String(total),
-      sub: "Canonical demo team",
+      sub: "Across your team",
       tone: "info",
     },
     {

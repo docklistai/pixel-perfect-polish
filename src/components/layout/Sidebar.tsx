@@ -170,11 +170,6 @@ export function Sidebar() {
                           Core
                         </span>
                       )}
-                      {item.preview && (
-                        <span className="ml-auto text-[9px] font-bold uppercase tracking-[0.08em] text-white/40">
-                          Demo
-                        </span>
-                      )}
                       {badge && badge.count > 0 && (
                         <span
                           className="count"

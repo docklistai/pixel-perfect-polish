@@ -43,8 +43,8 @@ export function ShiftsTab() {
             {source === "live"
               ? "Showing your live published rota."
               : isError
-                ? "Couldn't reach live data — showing the demo rota."
-                : "Showing the demo rota."}
+                ? "Couldn't reach live data — showing sample shifts."
+                : "Showing sample shifts."}
           </div>
           <ShiftList shifts={upcoming} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
         </>

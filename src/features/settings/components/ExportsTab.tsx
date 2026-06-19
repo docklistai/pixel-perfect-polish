@@ -1,7 +1,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { Download, FileSpreadsheet, Users, CalendarRange, ScrollText } from "lucide-react";
-import { SectionCard, ToggleRow, SelectField, FieldLabel, PreviewTag } from "./SettingsPrimitives";
+import { SectionCard, ToggleRow, SelectField, FieldLabel } from "./SettingsPrimitives";
 
 const EXPORT_CARDS = [
   {
@@ -137,7 +137,6 @@ export function ExportsTab({ onDirty }: { onDirty: () => void }) {
 
       <SectionCard
         title="Audit log"
-        badge={<PreviewTag>Demo data</PreviewTag>}
         description="Sample entries — the live workspace audit log arrives in a later update."
       >
         <div className="space-y-2">

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Calendar, Send } from "lucide-react";
-import { Card, StatusBadge } from "@/components/dl";
+import { Card } from "@/components/dl";
 import { toast } from "sonner";
 
 // Next rota: week of Mon 15 Jun 2026. Due by Fri 12 Jun 16:00.
@@ -10,7 +10,6 @@ export function DashboardRotaPublish() {
       <div className="px-5 pb-4 pt-5">
         <div className="flex items-center justify-between gap-2">
           <div className="dock-section-eyebrow">Next publish</div>
-          <StatusBadge tone="warning">Demo preview</StatusBadge>
         </div>
         <div className="mt-4 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-brand-soft text-brand">
@@ -29,9 +28,6 @@ export function DashboardRotaPublish() {
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
             <div className="h-full w-2/3 rounded-full bg-warning" />
           </div>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          <StatusBadge tone="muted">Stats disabled in preview</StatusBadge>
         </div>
       </div>
       <div className="flex items-center gap-2 border-t border-border px-5 py-3">

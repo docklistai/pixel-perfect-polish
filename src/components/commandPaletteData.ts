@@ -108,7 +108,7 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   { label: "Open timesheets", hint: "Review clocked hours", icon: Clock, to: "/time" },
   { label: "Open settings", hint: "Workspace settings", icon: SettingsIcon, to: "/settings" },
   {
-    label: "Preview staff portal",
+    label: "Open staff portal",
     hint: "See exactly what staff see — published snapshots only",
     icon: Smartphone,
     to: "/portal",

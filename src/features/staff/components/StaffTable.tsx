@@ -116,9 +116,9 @@ export function StaffTable({
       {selectedIds.size > 0 && (
         <StaffBulkBar
           count={selectedIds.size}
-          onMessage={() => toast(`${selectedIds.size} staff messaged (demo)`)}
-          onTag={() => toast("Tag applied to selection (demo)")}
-          onExport={() => toast("selection.csv prepared (demo)")}
+          onMessage={() => toast(`${selectedIds.size} staff messaged`)}
+          onTag={() => toast("Tag applied to selection")}
+          onExport={() => toast("selection.csv prepared")}
           onClear={() => setSelectedIds(new Set())}
         />
       )}

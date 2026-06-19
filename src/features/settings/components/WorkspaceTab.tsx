@@ -1,6 +1,6 @@
 import * as React from "react";
 import { toast } from "sonner";
-import { SectionCard, FieldLabel, TextField, SelectField, PreviewTag } from "./SettingsPrimitives";
+import { SectionCard, FieldLabel, TextField, SelectField } from "./SettingsPrimitives";
 import { Upload } from "lucide-react";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
@@ -80,11 +80,7 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
         </div>
       </SectionCard>
 
-      <SectionCard
-        title="Workspace owner"
-        badge={<PreviewTag>Demo</PreviewTag>}
-        description="Primary contact for this workspace."
-      >
+      <SectionCard title="Workspace owner" description="Primary contact for this workspace.">
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/20 p-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-xs font-semibold text-white">
             {initials}

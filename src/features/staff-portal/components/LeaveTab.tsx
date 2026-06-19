@@ -76,7 +76,7 @@ export function LeaveTab() {
           if (isLive) setOpen(true);
         }}
       >
-        {isLive ? "Request time off" : "Request time off (Coming soon)"}
+        {isLive ? "Request time off" : "Request time off (not available here)"}
       </ActionButton>
 
       {/* Upcoming approved leave */}

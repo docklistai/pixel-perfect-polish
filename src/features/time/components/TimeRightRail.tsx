@@ -51,9 +51,6 @@ export function TimeRightRail({
         <div className="flex items-center justify-between mb-3">
           <span className="flex items-center gap-2">
             <span className="text-sm font-semibold">Attendance this week</span>
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              Demo
-            </span>
           </span>
           <span className="text-xs text-muted-foreground">vs last week</span>
         </div>
@@ -160,9 +157,6 @@ export function TimeRightRail({
         <div className="card-section flex items-center justify-between">
           <span className="flex items-center gap-2">
             <span className="text-sm font-semibold">Hours queries</span>
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              Demo
-            </span>
           </span>
           <span className="badge">{timeQueries.length}</span>
         </div>

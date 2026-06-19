@@ -136,7 +136,7 @@ export function TimesheetReviewDrawer({
             })}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">Audit trail not available in beta</p>
+          <p className="text-xs text-muted-foreground">Audit trail not available yet</p>
         )}
       </FormSection>
 
