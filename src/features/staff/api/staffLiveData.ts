@@ -14,6 +14,7 @@ interface StaffMemberRow {
   id: string;
   display_name: string;
   email: string | null;
+  phone: string | null;
   role_name: string;
   employment_status: "active" | "inactive" | "left";
   contract_type: "full_time" | "part_time" | "casual" | "fixed_term" | null;
@@ -61,6 +62,12 @@ function mapStaffRow(row: StaffMemberRow, departmentName: string | null): StaffR
     img: avatarIndex(row.id),
     active: row.employment_status === "active",
     portalStatus: row.membership_id ? "Claimed" : "Not invited",
+    // Raw values for Edit Staff prefill (presentation fields above stay unchanged).
+    phone: row.phone ?? undefined,
+    departmentId: row.department_id,
+    contractType: row.contract_type,
+    contractedMinutesPerWeek: row.contracted_minutes_per_week,
+    employmentStatus: row.employment_status,
   };
 }
 
@@ -81,7 +88,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         supabase
           .from("staff_members")
           .select(
-            "id, display_name, email, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id",
+            "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id",
           )
           .eq("workspace_id", workspaceId)
           .order("display_name", { ascending: true }),

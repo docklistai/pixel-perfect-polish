@@ -142,7 +142,9 @@ export function describeStaffWriteError(sqlState: string | null): string {
       return "Some details aren't valid. Check the contracted hours and try again.";
     case "42501": // insufficient_privilege — RLS denied
       return "You don't have permission to add staff to this workspace.";
+    case "PGRST116": // no row returned — update target not in this workspace
+      return "That staff member could not be found in this workspace.";
     default:
-      return "We couldn't add this staff member. Please try again.";
+      return "We couldn't save this staff member. Please try again.";
   }
 }

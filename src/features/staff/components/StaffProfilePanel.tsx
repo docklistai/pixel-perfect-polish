@@ -8,10 +8,12 @@ import {
   Calendar,
   ArrowUpRight,
   MoreHorizontal,
+  Pencil,
 } from "lucide-react";
 import { Card } from "@/components/dl";
 import { StaffMonogram } from "./StaffMonogram";
 import { StaffPanelOverview } from "./StaffPanelOverview";
+import { EditStaffDialog } from "./EditStaffDialog";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
 import { buildLiveStaffProfile } from "../data/liveStaffProfile";
@@ -66,6 +68,7 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
   const profile =
     mockStaffProfiles[member.id] ?? (source === "live" ? buildLiveStaffProfile(member) : null);
   const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
+  const [editOpen, setEditOpen] = React.useState(false);
   const { msg: toastMsg, show: showToast } = useToast();
 
   const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
@@ -238,7 +241,17 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
         )}
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="space-y-2 px-4 pb-4">
+        {isLive && (
+          <button
+            type="button"
+            onClick={() => setEditOpen(true)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-xs font-semibold transition-colors hover:bg-muted/50"
+          >
+            <Pencil className="h-3.5 w-3.5" aria-hidden />
+            Edit details
+          </button>
+        )}
         <Link
           to="/staff/$staffId"
           params={{ staffId: member.id }}
@@ -248,6 +261,8 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
           Open full profile
         </Link>
       </div>
+
+      {isLive && <EditStaffDialog open={editOpen} onOpenChange={setEditOpen} member={member} />}
     </Card>
   );
 }

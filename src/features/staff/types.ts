@@ -7,6 +7,9 @@ export type IssuePortalCodeResult = { ok: true; code: string } | { ok: false; me
 /** Live contract types the `staff_members` schema accepts. */
 export type StaffContractType = "full_time" | "part_time" | "casual" | "fixed_term";
 
+/** Live employment statuses the `staff_members` schema accepts. */
+export type StaffEmploymentStatus = "active" | "inactive" | "left";
+
 /** A workspace department option for the Add Staff department picker. */
 export interface WorkspaceDepartment {
   id: string;
@@ -15,6 +18,9 @@ export interface WorkspaceDepartment {
 
 /** Result of creating a live staff member. `id` is the new row's uuid. */
 export type CreateStaffMemberResult = { ok: true; id: string } | { ok: false; message: string };
+
+/** Result of updating a live staff member. `id` echoes the updated row's uuid. */
+export type UpdateStaffMemberResult = { ok: true; id: string } | { ok: false; message: string };
 
 export interface StaffRow {
   id: string;
@@ -33,6 +39,13 @@ export interface StaffRow {
   active?: boolean;
   statusTone?: "info" | "purple";
   portalStatus?: "Claimed" | "Pending" | "Not invited";
+  // Raw live-schema values carried on live rows so Edit Staff can prefill them
+  // accurately. Demo rows omit these (their editing stays demo-only).
+  phone?: string;
+  departmentId?: string | null;
+  contractType?: StaffContractType | null;
+  contractedMinutesPerWeek?: number | null;
+  employmentStatus?: StaffEmploymentStatus;
 }
 
 // Extended manager-only profile data — never exposed to staff portal

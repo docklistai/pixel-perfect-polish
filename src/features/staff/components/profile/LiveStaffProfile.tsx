@@ -1,8 +1,18 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, Mail, Briefcase, Calendar, Clock, Plane, Activity } from "lucide-react";
+import {
+  ChevronLeft,
+  Mail,
+  Briefcase,
+  Calendar,
+  Clock,
+  Plane,
+  Activity,
+  Pencil,
+} from "lucide-react";
 import { AppShell, Card, StatusBadge, type Tone } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
+import { EditStaffDialog } from "../EditStaffDialog";
 import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileDocumentsTab } from "./ProfileDocumentsTab";
 import { ProfileNotesTab } from "./ProfileNotesTab";
@@ -112,6 +122,7 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
   const profile = React.useMemo(() => buildLiveStaffProfile(member), [member]);
   const [activeTab, setActiveTab] = React.useState<ProfileTab>("overview");
   const [notes, setNotes] = React.useState<StaffProfileNote[]>([]);
+  const [editOpen, setEditOpen] = React.useState(false);
   const firstName = member.n.split(" ")[0] || member.n;
 
   React.useEffect(() => {
@@ -174,9 +185,19 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
                 </span>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setEditOpen(true)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold transition-colors hover:bg-muted/50"
+            >
+              <Pencil className="h-3.5 w-3.5" aria-hidden />
+              Edit details
+            </button>
           </div>
         </Card>
       </div>
+
+      <EditStaffDialog open={editOpen} onOpenChange={setEditOpen} member={member} />
 
       <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} />
 

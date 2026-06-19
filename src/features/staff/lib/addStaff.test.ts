@@ -106,7 +106,7 @@ describe("describeStaffWriteError", () => {
   });
 
   it("falls back to a generic message for unknown codes", () => {
-    expect(describeStaffWriteError(null)).toMatch(/couldn't add/i);
-    expect(describeStaffWriteError("99999")).toMatch(/couldn't add/i);
+    expect(describeStaffWriteError(null)).toMatch(/couldn't save/i);
+    expect(describeStaffWriteError("99999")).toMatch(/couldn't save/i);
   });
 });
