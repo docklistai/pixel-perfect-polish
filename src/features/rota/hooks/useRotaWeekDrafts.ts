@@ -92,14 +92,6 @@ export function useRotaWeekDrafts() {
     );
   };
 
-  const applyStandardTemplate = () => {
-    setCurrentDraft((draft) => ({
-      ...draft,
-      shifts: createInitialDraftShifts(initialDraftShifts),
-      hasUnpublishedChanges: true,
-    }));
-  };
-
   const copyPreviousWeek = () => {
     const previousShifts = store.getState().weekDrafts[String(weekOffset - 1)]?.shifts;
     const shifts = previousShifts
@@ -138,8 +130,6 @@ export function useRotaWeekDrafts() {
   };
 
   const confirmations = useRotaConfirmations({
-    draftIsPristine: !currentDraft.hasUnpublishedChanges && !currentDraft.published,
-    applyStandardTemplate,
     clearWeek,
     removeShiftNow,
   });

@@ -1,9 +1,11 @@
 import * as React from "react";
-import { Trash2, UserMinus, Save, Copy } from "lucide-react";
+import { Trash2, UserMinus, Save } from "lucide-react";
 import { ActionButton, DrawerShell, FormRow, FormSection, StatusBadge } from "@/components/dl";
 import { isValidShiftTimeRange } from "../lib/draftRota";
+import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
 import type { MaybePromise } from "./grid";
+import { RepeatShiftControls } from "./RepeatShiftControls";
 
 type DayEntry = { d: string };
 
@@ -40,21 +42,19 @@ export function ShiftDetailDrawer({
   onUpdate: (id: ShiftId, patch: Partial<DraftShift>) => MaybePromise<void>;
   onRemove: (id: ShiftId) => MaybePromise<void>;
   onMarkOpen: (id: ShiftId) => MaybePromise<void>;
-  onRepeat: (id: ShiftId, dayIndexes: number[]) => MaybePromise<void>;
+  onRepeat: (id: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
 }) {
   const [form, setForm] = React.useState<FormState>(() =>
     shift ? formStateFromShift(shift) : { role: "", start: "", end: "", assignTo: "" },
   );
   const [saving, setSaving] = React.useState(false);
-  const [repeatMode, setRepeatMode] = React.useState(false);
-  const [repeatDays, setRepeatDays] = React.useState<Set<number>>(new Set());
+  const [repeatActive, setRepeatActive] = React.useState(false);
 
   React.useEffect(() => {
     if (shift) {
       setForm(formStateFromShift(shift));
       setSaving(false);
-      setRepeatMode(false);
-      setRepeatDays(new Set());
+      setRepeatActive(false);
     }
   }, [shift]);
 
@@ -123,29 +123,6 @@ export function ShiftDetailDrawer({
       // The live persistence hook owns the failure toast; keep the drawer open.
     } finally {
       setSaving(false);
-    }
-  };
-
-  const toggleRepeatDay = (idx: number) => {
-    setRepeatDays((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
-      return next;
-    });
-  };
-
-  const handleRepeatSubmit = async () => {
-    if (repeatDays.size === 0) return;
-    setSaving(true);
-    try {
-      await onRepeat(shift.id, Array.from(repeatDays));
-    } catch {
-      //
-    } finally {
-      setSaving(false);
-      setRepeatMode(false);
-      onClose();
     }
   };
 
@@ -251,80 +228,27 @@ export function ShiftDetailDrawer({
               variant="secondary"
               size="sm"
               icon={UserMinus}
-              disabled={saving || repeatMode}
+              disabled={saving || repeatActive}
               onClick={() => void runAction(onMarkOpen)}
             >
               Mark as open shift
             </ActionButton>
           )}
-          <ActionButton
-            variant="secondary"
-            size="sm"
-            icon={Copy}
-            disabled={saving || repeatMode}
-            onClick={() => setRepeatMode(true)}
-          >
-            Repeat shift...
-          </ActionButton>
+          <RepeatShiftControls
+            sourceDayIndex={shift.dayIndex}
+            days={days}
+            disabled={saving}
+            onActiveChange={setRepeatActive}
+            onBusyChange={setSaving}
+            onRepeat={(dayIndexes) => onRepeat(shift.id, dayIndexes)}
+            onSuccess={onClose}
+          />
         </div>
-        {!isOpen && !repeatMode && (
+        {!isOpen && !repeatActive && (
           <p className="mt-2 text-[11px] text-muted-foreground">
             To reassign or open up, pick the staff member above and save. Changes stay in the draft
             until published.
           </p>
-        )}
-
-        {repeatMode && (
-          <div className="mt-3 rounded-xl border border-border bg-muted/20 p-3">
-            <div className="mb-2 text-sm font-semibold text-foreground">Repeat this shift on:</div>
-            <div className="flex flex-wrap gap-2">
-              {days.map((day, idx) => {
-                const isSource = shift.dayIndex === idx;
-                const isSelected = repeatDays.has(idx);
-                return (
-                  <label
-                    key={idx}
-                    className={`flex cursor-pointer items-center gap-2 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors ${
-                      isSource
-                        ? "border-transparent text-muted-foreground cursor-not-allowed opacity-50"
-                        : isSelected
-                          ? "border-brand bg-brand/5 text-brand"
-                          : "border-border bg-background hover:border-brand/30 text-foreground"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className="sr-only"
-                      disabled={isSource || saving}
-                      checked={isSource || isSelected}
-                      onChange={() => toggleRepeatDay(idx)}
-                    />
-                    {day.d}
-                  </label>
-                );
-              })}
-            </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <ActionButton
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setRepeatMode(false);
-                  setRepeatDays(new Set());
-                }}
-                disabled={saving}
-              >
-                Cancel
-              </ActionButton>
-              <ActionButton
-                size="sm"
-                disabled={repeatDays.size === 0 || saving}
-                onClick={() => void handleRepeatSubmit()}
-              >
-                Confirm repeat
-              </ActionButton>
-            </div>
-          </div>
         )}
       </FormSection>
     </DrawerShell>

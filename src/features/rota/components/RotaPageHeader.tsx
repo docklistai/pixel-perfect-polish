@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronDown, Eraser, Printer, Send, SlidersHorizontal } from "lucide-react";
+import { Eraser, Printer, Send } from "lucide-react";
 import { ActionButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 
@@ -14,9 +14,6 @@ export function RotaPageHeader({
   canPublish,
   onPrintRota,
   onClearWeek,
-  onCopyLastWeek,
-  onGenerateRota,
-  onOpenSupport,
   onPublish,
 }: {
   weekLabel: string;
@@ -27,9 +24,6 @@ export function RotaPageHeader({
   canPublish: boolean;
   onPrintRota: () => void;
   onClearWeek: () => void;
-  onCopyLastWeek: () => void;
-  onGenerateRota: () => void;
-  onOpenSupport: () => void;
   onPublish: () => void;
 }) {
   return (

@@ -1,6 +1,8 @@
 import { ConfirmDialog } from "@/components/dl";
 import type { useRotaDraftController } from "../hooks/useRotaDraftController";
 import type { RotaOverlaysState } from "../hooks/useRotaOverlays";
+import type { RepeatShiftResult } from "../lib/repeatShift";
+import type { RotaPublishEligibility } from "../lib/publishEligibility";
 import type { ShiftId } from "../types";
 
 import { AddShiftDrawer } from "./AddShiftDrawer";
@@ -8,7 +10,6 @@ import { ConflictDrawer } from "./ConflictDrawer";
 import { GenerateRotaDialog } from "./GenerateRotaDialog";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 import { RotaFiltersDrawer } from "./RotaFiltersDrawer";
-import { TemplatesDialog } from "./TemplatesDialog";
 import { CoverageDetailsDrawer } from "./CoverageDetailsDrawer";
 import { WorkingTimeDetailsDrawer } from "./WorkingTimeDetailsDrawer";
 import { PublishRotaDialog } from "./PublishRotaDialog";
@@ -28,13 +29,15 @@ export function RotaOverlays({
   onApplySuggestions,
   onMarkShiftOpen,
   onRepeatShift,
+  publishEligibility,
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
   onPublishConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
   onApplySuggestions: () => void;
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
-  onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => MaybePromise<void>;
+  onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
+  publishEligibility: RotaPublishEligibility;
 }) {
   const { openOverlays, setOverlay } = overlays;
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
@@ -75,6 +78,8 @@ export function RotaOverlays({
         conflictCount={rota.conflictCount}
         openShiftCount={rota.openShiftCount}
         workingTimeAlertCount={workingTimeAlertCount}
+        canPublish={publishEligibility.canPublish}
+        publishBlockedReason={publishEligibility.blockedReason}
         onConfirm={onPublishConfirm}
       />
       <GenerateRotaDialog
@@ -92,11 +97,6 @@ export function RotaOverlays({
         filters={rota.filters}
         roleOptions={rota.roleOptions}
         onFiltersChange={rota.setFilters}
-      />
-      <TemplatesDialog
-        open={openOverlays.templates}
-        onOpenChange={(open) => setOverlay("templates", open)}
-        onApplyStandardTemplate={rota.requestApplyStandardTemplate}
       />
       <CoverageDetailsDrawer
         open={openOverlays.coverageDetails}

@@ -74,6 +74,10 @@ export type DraftShiftInput = {
   breakMinutes?: number;
   tone?: ShiftTone;
   status?: DraftShiftStatus;
+  /** Draft-only department label override. Ignored by live persistence schemas. */
+  deptOverride?: string;
+  /** Draft-only chip colour override. Ignored by live persistence schemas. */
+  colourOverride?: string;
 };
 
 export type RotaGridCell = {

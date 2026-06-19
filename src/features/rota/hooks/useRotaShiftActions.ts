@@ -10,6 +10,12 @@ import {
   toastMarkedOpenDraft,
   toastResetColourDraft,
 } from "../lib/rotaActionToasts";
+import {
+  buildRepeatShiftFeedback,
+  executeRepeatShiftPlan,
+  planRepeatShift,
+  type RepeatShiftResult,
+} from "../lib/repeatShift";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -59,53 +65,27 @@ export function useRotaShiftActions(rota: RotaController) {
     toastDuplicateDraft(rota, newId);
   };
 
-  const handleRepeatShift = async (shiftId: string, dayIndexes: number[]) => {
-    if (readOnly) return block();
+  const handleRepeatShift = async (
+    shiftId: string,
+    dayIndexes: number[],
+  ): Promise<RepeatShiftResult | null> => {
+    if (readOnly) {
+      block();
+      return null;
+    }
     const sourceShift = findShift(shiftId);
-    if (!sourceShift) return;
-
-    let successCount = 0;
-    let skipCount = 0;
-
-    for (const dayIndex of dayIndexes) {
-      if (sourceShift.dayIndex === dayIndex) continue;
-
-      const hasShift =
-        sourceShift.staffId !== null &&
-        rota.draftShifts.some((s) => s.staffId === sourceShift.staffId && s.dayIndex === dayIndex);
-
-      if (hasShift) {
-        skipCount++;
-        continue;
-      }
-
-      const patch = {
-        dayIndex: dayIndex as 0 | 1 | 2 | 3 | 4 | 5 | 6,
-        staffId: sourceShift.staffId,
-        role: sourceShift.role,
-        start: sourceShift.start,
-        end: sourceShift.end,
-        breakMinutes: sourceShift.breakMinutes,
-        status: sourceShift.status,
-        tone: sourceShift.tone,
-      };
-
-      try {
-        await rota.addShift(patch);
-        successCount++;
-      } catch {
-        // live mutation error is handled internally by runMutation
-      }
-    }
-
-    if (successCount > 0) {
-      toast.success(`Shift repeated on ${successCount} day${successCount === 1 ? "" : "s"}`);
-    }
-    if (skipCount > 0) {
-      toast.warning(`Skipped ${skipCount} day${skipCount === 1 ? "" : "s"}`, {
-        description: "Staff already has a shift on those days.",
+    if (!sourceShift) {
+      toast.error("Shift repeat failed", {
+        description: "The source shift is no longer available.",
       });
+      return null;
     }
+
+    const plan = planRepeatShift(sourceShift, dayIndexes, rota.draftShifts);
+    const result = await executeRepeatShiftPlan(plan, rota.addShift);
+    const feedback = buildRepeatShiftFeedback(result);
+    toast[feedback.tone](feedback.title, { description: feedback.description });
+    return result;
   };
 
   const handleMarkShiftOpen = async (shiftId: string) => {

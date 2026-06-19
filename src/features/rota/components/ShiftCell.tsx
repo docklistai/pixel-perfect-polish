@@ -119,6 +119,7 @@ function ShiftPill({
         <button
           type="button"
           onClick={() => handlers.onOpen(shift.id)}
+          onDoubleClick={(event) => event.stopPropagation()}
           onContextMenu={(e) => {
             e.preventDefault();
             onMenuOpenChange(shift.id, true);
@@ -154,6 +155,7 @@ function ShiftPill({
       <button
         type="button"
         onClick={() => handlers.onOpen(shift.id)}
+        onDoubleClick={(event) => event.stopPropagation()}
         onContextMenu={(e) => {
           e.preventDefault();
           onMenuOpenChange(shift.id, true);

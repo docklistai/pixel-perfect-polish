@@ -5,10 +5,10 @@ import { getWeekLabelForOffset, getWeekSubtitle } from "./topbarUtils";
 import { WeekPickerDialog } from "@/features/rota/components/WeekPickerDialog";
 import * as React from "react";
 
-export function TopbarWeekPill() {
+export function TopbarWeekPill({ displayedWeekLabel }: { displayedWeekLabel?: string }) {
   const store = useWorkspaceStore();
   const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
-  const weekLabel = getWeekLabelForOffset(weekOffset);
+  const weekLabel = displayedWeekLabel ?? getWeekLabelForOffset(weekOffset);
   const [pickerOpen, setPickerOpen] = React.useState(false);
 
   return (
@@ -35,6 +35,16 @@ export function TopbarWeekPill() {
           </div>
           <small>{getWeekSubtitle(weekOffset)}</small>
         </div>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        className="topbar-arrow md:hidden"
+        title="Choose rota week"
+        aria-label="Choose rota week"
+      >
+        <Calendar className="h-4 w-4" aria-hidden />
       </button>
 
       <WeekPickerDialog

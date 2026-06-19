@@ -17,14 +17,13 @@ const rotaRouteApi = getRouteApi("/rota");
 
 export type RotaLiveData = {
   workspaceId: string | null;
-  /** Whether this authenticated route should attempt live manager reads. */
   enabled: boolean;
-  /** True only when env + a manager session are present AND both live reads succeed. */
   isLive: boolean;
   source: "live" | "demo";
   isLoading: boolean;
   isError: boolean;
-  /** Whether a saved rota week exists for the selected week (live mode only). */
+  isLeaveLoading: boolean;
+  isLeaveError: boolean;
   hasWeek: boolean;
   rotaWeekId: string | null;
   weekStatus: LiveWeekStatus | null;
@@ -49,6 +48,8 @@ const DEMO: RotaLiveData = {
   source: "demo",
   isLoading: false,
   isError: false,
+  isLeaveLoading: false,
+  isLeaveError: false,
   hasWeek: false,
   rotaWeekId: null,
   weekStatus: null,
@@ -99,7 +100,6 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     (auth.role === "owner" || auth.role === "manager");
 
   const staffQuery = useQuery({
-    // Same key as useWorkspaceStaff so the roster read is shared, not duplicated.
     queryKey: ["staff", "workspace-roster", workspaceId],
     queryFn: () => fetchWorkspaceStaffFn(),
     enabled,
@@ -126,7 +126,7 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     staleTime: 15_000,
   });
 
-  const isLive = enabled && staffQuery.isSuccess && weekQuery.isSuccess && leaveQuery.isSuccess;
+  const isLive = enabled && staffQuery.isSuccess && weekQuery.isSuccess;
 
   React.useEffect(() => {
     if (weekQuery.isSuccess && weekQuery.data.locationId !== selectedLocationId) {
@@ -145,8 +145,10 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
       enabled,
       setLocationId: setSelectedLocationId,
       refetchWeek,
-      isLoading: enabled && (staffQuery.isLoading || weekQuery.isLoading || leaveQuery.isLoading),
-      isError: enabled && (staffQuery.isError || weekQuery.isError || leaveQuery.isError),
+      isLoading: enabled && (staffQuery.isLoading || weekQuery.isLoading),
+      isError: enabled && (staffQuery.isError || weekQuery.isError),
+      isLeaveLoading: enabled && leaveQuery.isLoading,
+      isLeaveError: enabled && leaveQuery.isError,
     };
   }
 
@@ -157,6 +159,8 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     source: "live",
     isLoading: false,
     isError: false,
+    isLeaveLoading: leaveQuery.isLoading,
+    isLeaveError: leaveQuery.isError,
     hasWeek: weekQuery.data.hasWeek,
     rotaWeekId: weekQuery.data.rotaWeekId,
     weekStatus: weekQuery.data.status,

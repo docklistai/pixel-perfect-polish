@@ -47,8 +47,6 @@ export function useRotaDraftController() {
   const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
   const [staffSearch, setStaffSearch] = React.useState("");
   const liveConfirmations = useRotaConfirmations({
-    draftIsPristine: !live.hasUnpublishedChanges && !live.hasPublishedSnapshot,
-    applyStandardTemplate: async () => undefined,
     clearWeek: livePersistence.clearWeek,
     removeShiftNow: livePersistence.removeShiftNow,
   });
@@ -64,24 +62,24 @@ export function useRotaDraftController() {
   const liveActions = live.isLive ? livePersistence : null;
   const confirmations = liveActions ? liveConfirmations : weekDraft;
 
-  const displayShifts = React.useMemo(
-    () =>
-      withApprovedLeaveConflictStatus(
-        withLocalConflictStatus(sourceShifts),
-        leaveRequests,
-        weekDraft.weekOffset,
-      ),
-    [leaveRequests, sourceShifts, weekDraft.weekOffset],
-  );
-  const dayLabels = React.useMemo(() => {
-    if (live.isLive && live.weekStart) return liveWeekDayLabels(live.weekStart);
-    return getWeekDayLabels(weekDraft.weekOffset);
-  }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
   const dayIsoDates = React.useMemo(() => {
     if (live.isLive && live.weekStart) {
       return Array.from({ length: 7 }, (_, i) => addIsoDays(live.weekStart!, i));
     }
     return getWeekDateIsoLabels(weekDraft.weekOffset);
+  }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
+  const displayShifts = React.useMemo(
+    () =>
+      withApprovedLeaveConflictStatus(
+        withLocalConflictStatus(sourceShifts),
+        leaveRequests,
+        dayIsoDates,
+      ),
+    [dayIsoDates, leaveRequests, sourceShifts],
+  );
+  const dayLabels = React.useMemo(() => {
+    if (live.isLive && live.weekStart) return liveWeekDayLabels(live.weekStart);
+    return getWeekDayLabels(weekDraft.weekOffset);
   }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
   const days = React.useMemo(() => {
     const stats = buildDayStats(displayShifts);
@@ -101,7 +99,7 @@ export function useRotaDraftController() {
     ...buildApprovedLeaveConflictSummaries(
       displayShifts,
       leaveRequests,
-      weekDraft.weekOffset,
+      dayIsoDates,
       roster,
       dayLabels,
     ),
@@ -118,6 +116,8 @@ export function useRotaDraftController() {
     readOnly,
     isLiveLoading: live.isLoading,
     isLiveError: live.isError,
+    isLiveLeaveLoading: live.isLeaveLoading,
+    isLiveLeaveError: live.isLeaveError,
     hasLiveWeek: live.hasWeek,
     liveRotaWeekId: live.rotaWeekId,
     liveWeekStart: live.weekStart,
@@ -141,9 +141,6 @@ export function useRotaDraftController() {
     handlePublish: liveActions?.publish ?? weekDraft.handlePublish,
     requestRemoveShift: confirmations.requestRemoveShift,
     requestClearWeek: confirmations.requestClearWeek,
-    requestApplyStandardTemplate: liveActions
-      ? () => undefined
-      : weekDraft.requestApplyStandardTemplate,
     confirmPendingAction: confirmations.confirmPendingAction,
     clearConfirmation: confirmations.clearConfirmation,
     confirmation: confirmations.confirmation,

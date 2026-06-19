@@ -66,7 +66,7 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   },
   {
     label: "Generate rota draft",
-    hint: "Draft next week from templates",
+    hint: "Generate next week's rota draft and fill open shifts",
     icon: Sparkles,
     to: "/rota",
     intent: "rota.generate",

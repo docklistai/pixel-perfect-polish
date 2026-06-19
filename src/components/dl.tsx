@@ -84,15 +84,17 @@ export { Sidebar, Topbar };
 export function AppShell({
   children,
   searchPlaceholder,
+  topbarWeekLabel,
 }: {
   children: React.ReactNode;
   searchPlaceholder?: string;
+  topbarWeekLabel?: string;
 }) {
   return (
     <div className="app">
       <Sidebar />
       <div className="main">
-        <Topbar searchPlaceholder={searchPlaceholder} />
+        <Topbar searchPlaceholder={searchPlaceholder} displayedWeekLabel={topbarWeekLabel} />
         <main id="main-content" tabIndex={-1} className="dl-page-in focus:outline-none">
           {children}
         </main>

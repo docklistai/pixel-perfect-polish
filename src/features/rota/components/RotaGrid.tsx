@@ -130,8 +130,8 @@ export function RotaGrid({
         days off.
       </p>
 
-      <div className="w-full max-w-full min-w-0 overflow-hidden [contain:layout_paint]">
-        <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden overscroll-x-contain">
+      <div className="w-full max-w-full min-w-0">
+        <div className="max-h-[70dvh] w-full max-w-full min-w-0 overflow-auto overscroll-contain">
           <div
             data-rota-grid
             className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]"

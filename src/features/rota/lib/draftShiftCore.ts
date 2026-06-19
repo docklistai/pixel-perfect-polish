@@ -38,6 +38,8 @@ export function makeDraftShift(input: DraftShiftInput): DraftShift {
     breakMinutes: input.breakMinutes ?? 30,
     tone,
     status,
+    deptOverride: input.deptOverride,
+    colourOverride: input.colourOverride,
   };
 }
 

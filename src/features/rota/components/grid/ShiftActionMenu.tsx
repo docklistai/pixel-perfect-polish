@@ -66,6 +66,7 @@ export function ShiftActionMenu({
           aria-label={`Actions for ${shift.role} shift (M)`}
           className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition group-hover:opacity-80 hover:bg-background/80 hover:text-foreground focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           onClick={(event) => event.stopPropagation()}
+          onDoubleClick={(event) => event.stopPropagation()}
         >
           <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
         </button>

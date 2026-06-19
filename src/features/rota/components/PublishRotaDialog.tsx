@@ -20,6 +20,8 @@ export function PublishRotaDialog({
   conflictCount,
   openShiftCount,
   workingTimeAlertCount,
+  canPublish,
+  publishBlockedReason,
   onConfirm,
 }: {
   open: boolean;
@@ -32,6 +34,8 @@ export function PublishRotaDialog({
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
+  canPublish: boolean;
+  publishBlockedReason: string | null;
   onConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
 }) {
   const [prepareStaffUpdate, setPrepareStaffUpdate] = React.useState(true);
@@ -45,6 +49,7 @@ export function PublishRotaDialog({
   }, [open]);
 
   const handleConfirm = async () => {
+    if (!canPublish) return;
     setPublishing(true);
     try {
       await onConfirm(prepareStaffUpdate);
@@ -94,7 +99,11 @@ export function PublishRotaDialog({
           <ActionButton variant="ghost" disabled={publishing} onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton icon={Send} disabled={publishing} onClick={() => void handleConfirm()}>
+          <ActionButton
+            icon={Send}
+            disabled={publishing || !canPublish}
+            onClick={() => void handleConfirm()}
+          >
             Publish to {staffCount} staff
           </ActionButton>
         </>
@@ -104,6 +113,10 @@ export function PublishRotaDialog({
         Staff see only the published snapshot in the Docklist mobile portal. Any draft edits made
         after publishing stay manager-only until you publish again.
       </p>
+
+      {!canPublish && publishBlockedReason && (
+        <p className="mt-3 text-sm font-medium text-warning">{publishBlockedReason}</p>
+      )}
 
       <div className="card mt-3 p-3" style={{ background: "var(--bg-raised)" }}>
         {checks.map((check) => (

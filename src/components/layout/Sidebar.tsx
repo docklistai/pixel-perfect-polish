@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { withLocalConflictStatus } from "@/features/rota/lib/localConflicts";
+import { getWeekDateIsoLabels } from "@/features/rota/lib/weekHelpers";
 import { withApprovedLeaveConflictStatus } from "@/features/leave/lib/leaveRotaConflicts";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { MobileMoreMenu } from "./MobileMoreMenu";
@@ -75,8 +76,6 @@ const NAV_GROUPS: ReadonlyArray<{
   { key: "admin", label: "Admin", ariaLabel: "Admin" },
 ];
 
-// Routes hidden from the phone bottom nav (everything outside the Workspace
-// group). Surfaced there via the MobileMoreMenu overflow control.
 const overflowNavItems = navItems.filter((item) => item.group !== "workspace");
 
 export function Sidebar() {
@@ -94,7 +93,7 @@ export function Sidebar() {
       ? withApprovedLeaveConflictStatus(
           withLocalConflictStatus(draft.shifts),
           leaveRequests,
-          weekOffset,
+          getWeekDateIsoLabels(weekOffset),
         )
       : [];
     return {

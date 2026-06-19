@@ -13,11 +13,18 @@ import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
+import { RotaLeaveDataWarning } from "@/features/rota/components/RotaLeaveDataWarning";
 import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
 import { IssuesToResolveCard } from "@/features/rota/components/IssuesToResolveCard";
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { useRotaOverlays, type RotaOverlayKey } from "@/features/rota/hooks/useRotaOverlays";
+import { useRotaPublishIntent } from "@/features/rota/hooks/useRotaPublishIntent";
+import {
+  getPublishState,
+  getRotaPublishEligibility,
+  publishStateLabel,
+} from "@/features/rota/lib/publishEligibility";
 import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/rota")({
@@ -30,26 +37,10 @@ const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
 /** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
-const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate", "templates"]);
-const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>(["generate", "templates"]);
+const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate"]);
+const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>(["generate"]);
 
-type PublishState = "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
 type RotaController = ReturnType<typeof useRotaDraftController>;
-
-function publishStateLabel(state: PublishState): string {
-  switch (state) {
-    case "draft":
-      return "Draft";
-    case "unpublished-changes":
-      return "Unpublished changes";
-    case "ready":
-      return "Ready to publish";
-    case "published":
-      return "Published";
-    case "published-issues":
-      return "Published with issues";
-  }
-}
 
 function RotaPage() {
   const rota = useRotaDraftController();
@@ -60,13 +51,15 @@ function RotaPage() {
   const [showInsights, setShowInsights] = React.useState(true);
   const readOnly = rota.readOnly;
   const isLiveEditing = rota.source === "live" && !readOnly;
-  const canPublish =
-    !readOnly &&
-    !rota.liveMutationPending &&
-    !rota.liveMutationFailed &&
-    rota.plannedShiftCount > 0 &&
-    rota.liveWeekStatus !== "archived" &&
-    (!rota.published || rota.hasUnpublishedChanges);
+  const publishEligibility = getRotaPublishEligibility({
+    readOnly,
+    mutationPending: rota.liveMutationPending,
+    mutationFailed: rota.liveMutationFailed,
+    plannedShiftCount: rota.plannedShiftCount,
+    weekStatus: rota.liveWeekStatus,
+    published: rota.published,
+    hasUnpublishedChanges: rota.hasUnpublishedChanges,
+  });
 
   // Loading/error fallback blocks mutations; successful live reads allow only
   // actions wired to persisted shift rows.
@@ -85,26 +78,30 @@ function RotaPage() {
     [isLiveEditing, readOnly, actions, overlays],
   );
 
-  useIntentHandler("rota.publish", () => openOverlay("publish"));
+  const requestPublish = useRotaPublishIntent({
+    isLoading: rota.isLiveLoading,
+    eligibility: publishEligibility,
+    openOverlay,
+  }).requestPublish;
+
+  useIntentHandler("rota.publish", requestPublish);
   useIntentHandler("rota.generate", () => openOverlay("generate"));
   useIntentHandler("rota.addShift", () => openOverlay("addShift"));
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
   const readinessIssueCount = rota.openShiftCount + rota.conflictCount + workingTimeAlertCount;
   const hasReadinessIssues = readinessIssueCount > 0;
-  const publishState: PublishState = rota.published
-    ? rota.hasUnpublishedChanges
-      ? "unpublished-changes"
-      : hasReadinessIssues
-        ? "published-issues"
-        : "published"
-    : hasReadinessIssues
-      ? "draft"
-      : "ready";
+  const publishState = getPublishState({
+    published: rota.published,
+    hasUnpublishedChanges: rota.hasUnpublishedChanges,
+    hasReadinessIssues,
+  });
 
   const handlePublish = async (prepareStaffUpdate: boolean) => {
-    if (readOnly) {
-      actions.block();
+    if (!publishEligibility.canPublish) {
+      toast.info("Publish unavailable", {
+        description: publishEligibility.blockedReason ?? "Publishing is unavailable.",
+      });
       return;
     }
     try {
@@ -154,7 +151,6 @@ function RotaPage() {
       handlePublish: blocked,
       requestRemoveShift: blocked,
       requestClearWeek: blocked,
-      requestApplyStandardTemplate: blocked,
       confirmPendingAction: blockedAsync,
       markShiftOpen: blocked,
     };
@@ -175,7 +171,7 @@ function RotaPage() {
         : publishStateLabel(publishState);
 
   return (
-    <AppShell>
+    <AppShell topbarWeekLabel={rota.weekLabel}>
       <div className="w-full max-w-full overflow-x-hidden">
         {readOnly && (
           <FeedbackBanner
@@ -193,6 +189,12 @@ function RotaPage() {
             className="mb-4"
           />
         )}
+        {rota.source === "live" && (
+          <RotaLeaveDataWarning
+            isLoading={rota.isLiveLeaveLoading}
+            isError={rota.isLiveLeaveError}
+          />
+        )}
 
         <RotaPageHeader
           weekLabel={rota.weekLabel}
@@ -204,13 +206,10 @@ function RotaPage() {
           staffCount={rota.staff.length}
           statusTone={headerStatusTone}
           statusLabel={headerStatusLabel}
-          canPublish={canPublish}
+          canPublish={publishEligibility.canPublish}
           onPrintRota={() => window.print()}
           onClearWeek={guardedRota.requestClearWeek}
-          onCopyLastWeek={actions.handleCopyLastWeek}
-          onGenerateRota={() => openOverlay("generate")}
-          onOpenSupport={openAiDrawer}
-          onPublish={() => openOverlay("publish")}
+          onPublish={requestPublish}
         />
 
         {actions.fillSummary && (
@@ -314,7 +313,8 @@ function RotaPage() {
                 plannedShiftCount={rota.plannedShiftCount}
                 coveragePct={rota.coveragePct}
                 readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
-                onPublish={() => openOverlay("publish")}
+                canPublish={publishEligibility.canPublish}
+                onPublish={requestPublish}
               />
             </div>
           ) : (
@@ -339,6 +339,7 @@ function RotaPage() {
         onApplySuggestions={actions.handleApplySuggestions}
         onMarkShiftOpen={actions.handleMarkShiftOpen}
         onRepeatShift={actions.handleRepeatShift}
+        publishEligibility={publishEligibility}
       />
     </AppShell>
   );

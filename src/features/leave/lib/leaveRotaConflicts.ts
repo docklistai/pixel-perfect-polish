@@ -1,14 +1,13 @@
-import { getWeekDateIsoLabels } from "@/features/rota/lib/weekHelpers";
 import type { ConflictSummary, DraftShift, StaffMember } from "@/features/rota/types";
 import type { LeaveRequest } from "../types";
 
 function approvedLeaveForShift(
   shift: DraftShift,
   requests: LeaveRequest[],
-  weekOffset: number,
+  dayIsoDates: string[],
 ): LeaveRequest | null {
   if (shift.staffId === null) return null;
-  const shiftDate = getWeekDateIsoLabels(weekOffset)[shift.dayIndex];
+  const shiftDate = dayIsoDates[shift.dayIndex];
   if (!shiftDate) return null;
   return (
     requests.find(
@@ -24,10 +23,10 @@ function approvedLeaveForShift(
 export function withApprovedLeaveConflictStatus(
   shifts: DraftShift[],
   requests: LeaveRequest[],
-  weekOffset: number,
+  dayIsoDates: string[],
 ): DraftShift[] {
   return shifts.map((shift) =>
-    approvedLeaveForShift(shift, requests, weekOffset)
+    approvedLeaveForShift(shift, requests, dayIsoDates)
       ? { ...shift, status: "conflict", tone: "danger" }
       : shift,
   );
@@ -36,12 +35,12 @@ export function withApprovedLeaveConflictStatus(
 export function buildApprovedLeaveConflictSummaries(
   shifts: DraftShift[],
   requests: LeaveRequest[],
-  weekOffset: number,
+  dayIsoDates: string[],
   staff: StaffMember[],
   dayLabels: string[],
 ): ConflictSummary[] {
   return shifts.flatMap((shift) => {
-    const request = approvedLeaveForShift(shift, requests, weekOffset);
+    const request = approvedLeaveForShift(shift, requests, dayIsoDates);
     if (!request) return [];
     const staffName = staff.find((member) => member.id === shift.staffId)?.name ?? request.n;
     return [

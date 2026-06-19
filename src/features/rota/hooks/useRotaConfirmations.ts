@@ -4,7 +4,6 @@ import type { ShiftId } from "../types";
 type MaybePromise<T> = T | Promise<T>;
 
 export type RotaConfirmation =
-  | { kind: "template"; title: string; description: string; confirmLabel: string }
   | { kind: "clear"; title: string; description: string; confirmLabel: string }
   | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string };
 
@@ -14,14 +13,9 @@ export type RotaConfirmation =
  * mutations themselves stay in useRotaWeekDrafts.
  */
 export function useRotaConfirmations({
-  draftIsPristine,
-  applyStandardTemplate,
   clearWeek,
   removeShiftNow,
 }: {
-  /** True when the draft has no unpublished edits and has never been published. */
-  draftIsPristine: boolean;
-  applyStandardTemplate: () => MaybePromise<void>;
   clearWeek: () => MaybePromise<void>;
   removeShiftNow: (id: ShiftId) => MaybePromise<void>;
 }) {
@@ -37,22 +31,6 @@ export function useRotaConfirmations({
     });
   };
 
-  const requestApplyStandardTemplate = () => {
-    if (draftIsPristine) {
-      applyStandardTemplate();
-      return;
-    }
-    setConfirmation({
-      kind: "template",
-      title: "Apply standard cover?",
-      description: "This replaces this week's draft with the standard pattern.",
-      confirmLabel: "Apply template",
-    });
-  };
-
-  // Generate dialog already shows a preview-and-confirm step,
-  // so it can apply directly without a second ConfirmDialog.
-
   const requestClearWeek = () => {
     setConfirmation({
       kind: "clear",
@@ -63,7 +41,6 @@ export function useRotaConfirmations({
   };
 
   const confirmPendingAction = async () => {
-    if (confirmation?.kind === "template") await applyStandardTemplate();
     if (confirmation?.kind === "clear") await clearWeek();
     if (confirmation?.kind === "remove") await removeShiftNow(confirmation.shiftId);
     setConfirmation(null);
@@ -72,7 +49,6 @@ export function useRotaConfirmations({
   return {
     confirmation,
     requestRemoveShift,
-    requestApplyStandardTemplate,
     requestClearWeek,
     confirmPendingAction,
     clearConfirmation: () => setConfirmation(null),

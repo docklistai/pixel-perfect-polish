@@ -6,7 +6,6 @@ export type RotaOverlayKey =
   | "conflicts"
   | "generate"
   | "filters"
-  | "templates"
   | "coverageDetails"
   | "workingTime";
 
@@ -16,7 +15,6 @@ const CLOSED_OVERLAYS: Record<RotaOverlayKey, boolean> = {
   conflicts: false,
   generate: false,
   filters: false,
-  templates: false,
   coverageDetails: false,
   workingTime: false,
 };
