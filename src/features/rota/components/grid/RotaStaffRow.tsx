@@ -16,7 +16,7 @@ export function RotaStaffRow({
 }) {
   return (
     <React.Fragment>
-      <div className="flex items-center gap-2.5 border-b border-border px-3 py-3">
+      <div className="flex items-center gap-2.5 border-b border-border px-3 py-3 sticky left-0 z-10 bg-background">
         <img
           src={`https://i.pravatar.cc/64?img=${row.staff.img}`}
           alt=""

@@ -6,17 +6,16 @@ import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftContro
 import { useRotaShiftActions } from "@/features/rota/hooks/useRotaShiftActions";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { useOverlays } from "@/components/AppShortcuts";
+import { Eye, EyeOff } from "lucide-react";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
-import { RotaStatusBanner } from "@/features/rota/components/RotaStatusBanner";
+
 import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
 import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
 import { IssuesToResolveCard } from "@/features/rota/components/IssuesToResolveCard";
 import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
-import { RoleCoverageCard } from "@/features/rota/components/RoleCoverageCard";
-import { LegendCard } from "@/features/rota/components/LegendCard";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { useRotaOverlays, type RotaOverlayKey } from "@/features/rota/hooks/useRotaOverlays";
 import { requireManagerAccess } from "@/features/auth";
@@ -58,6 +57,7 @@ function RotaPage() {
   const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(rota);
+  const [showInsights, setShowInsights] = React.useState(true);
   const readOnly = rota.readOnly;
   const isLiveEditing = rota.source === "live" && !readOnly;
   const canPublish =
@@ -214,23 +214,6 @@ function RotaPage() {
           onPublish={() => openOverlay("publish")}
         />
 
-        <RotaStatusBanner
-          published={rota.published}
-          hasUnpublishedChanges={rota.hasUnpublishedChanges}
-          publishState={publishState}
-          openShiftCount={rota.openShiftCount}
-          conflictCount={rota.conflictCount}
-          workingTimeAlertCount={workingTimeAlertCount}
-          coveragePct={rota.coveragePct}
-          plannedShiftCount={rota.plannedShiftCount}
-          weekLabel={rota.weekLabel}
-          staff={rota.staff}
-          readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
-          onPublish={() => openOverlay("publish")}
-          onCopyLastWeek={actions.handleCopyLastWeek}
-          onViewConflicts={() => openOverlay("conflicts")}
-        />
-
         {actions.fillSummary && (
           <FeedbackBanner
             tone="info"
@@ -241,7 +224,9 @@ function RotaPage() {
           />
         )}
 
-        <div className="grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_300px]">
+        <div
+          className={`grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden ${showInsights ? "xl:grid-cols-[minmax(0,1fr)_300px]" : "xl:grid-cols-1"}`}
+        >
           <Card className="min-w-0 overflow-hidden p-0">
             <RotaGridToolbar
               conflictCount={rota.conflictCount}
@@ -285,35 +270,66 @@ function RotaPage() {
             <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
           </Card>
 
-          <div className="space-y-3">
-            <LabourSummaryCard
-              scheduledHours={rota.scheduledHours}
-              targetHours={rota.targetHours}
-              coveragePct={rota.coveragePct}
-              onViewCoverageDetails={() => openOverlay("coverageDetails")}
-            />
-            <LegendCard shifts={rota.draftShifts} />
-            <IssuesToResolveCard
-              conflicts={rota.conflictSummaries}
-              workingTimeAlerts={rota.workingTimeAlertList}
-              onReviewShift={rota.setSelectedShiftId}
-              onOpenSupport={openAiDrawer}
-            />
-            <PublishReadinessCard
-              published={rota.published}
-              hasUnpublishedChanges={rota.hasUnpublishedChanges}
-              publishState={publishState}
-              conflictCount={rota.conflictCount}
-              openShiftCount={rota.openShiftCount}
-              workingTimeAlertCount={workingTimeAlertCount}
-              assignedShiftCount={rota.assignedShiftCount}
-              plannedShiftCount={rota.plannedShiftCount}
-              coveragePct={rota.coveragePct}
-              readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
-              onPublish={() => openOverlay("publish")}
-            />
-            <RoleCoverageCard roleCoverage={rota.roleCoverage} />
-          </div>
+          {showInsights ? (
+            <div className="space-y-3">
+              <div className="flex justify-end xl:hidden mb-[-4px]">
+                <button
+                  type="button"
+                  onClick={() => setShowInsights(false)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <EyeOff className="h-3.5 w-3.5" aria-hidden />
+                  Hide insights
+                </button>
+              </div>
+              <div className="hidden xl:flex justify-end mb-[-4px]">
+                <button
+                  type="button"
+                  onClick={() => setShowInsights(false)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <EyeOff className="h-3.5 w-3.5" aria-hidden />
+                  Hide insights
+                </button>
+              </div>
+              <LabourSummaryCard
+                scheduledHours={rota.scheduledHours}
+                targetHours={rota.targetHours}
+                coveragePct={rota.coveragePct}
+                onViewCoverageDetails={() => openOverlay("coverageDetails")}
+              />
+              <IssuesToResolveCard
+                conflicts={rota.conflictSummaries}
+                workingTimeAlerts={rota.workingTimeAlertList}
+                onReviewShift={rota.setSelectedShiftId}
+                onOpenSupport={openAiDrawer}
+              />
+              <PublishReadinessCard
+                published={rota.published}
+                hasUnpublishedChanges={rota.hasUnpublishedChanges}
+                publishState={publishState}
+                conflictCount={rota.conflictCount}
+                openShiftCount={rota.openShiftCount}
+                workingTimeAlertCount={workingTimeAlertCount}
+                assignedShiftCount={rota.assignedShiftCount}
+                plannedShiftCount={rota.plannedShiftCount}
+                coveragePct={rota.coveragePct}
+                readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
+                onPublish={() => openOverlay("publish")}
+              />
+            </div>
+          ) : (
+            <div className="flex justify-center xl:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowInsights(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                <Eye className="h-3.5 w-3.5" aria-hidden />
+                Show insights
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

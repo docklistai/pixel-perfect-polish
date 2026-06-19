@@ -3,7 +3,7 @@ import type { RotaGridDay } from "./types";
 export function RotaGridFooter({ days }: { days: RotaGridDay[] }) {
   return (
     <>
-      <div className="border-b border-border px-3 py-3">
+      <div className="border-b border-border px-3 py-3 sticky left-0 z-10 bg-background">
         <div className="text-[11px] text-muted-foreground/70">
           Breaks: 30 min unpaid for shifts ≥ 6h
         </div>

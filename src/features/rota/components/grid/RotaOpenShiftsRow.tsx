@@ -18,7 +18,7 @@ export function RotaOpenShiftsRow({
 }) {
   return (
     <>
-      <div className="flex items-center gap-3 border-b border-border bg-warning-soft/20 px-4 py-3.5">
+      <div className="flex items-center gap-3 border-b border-border bg-background px-4 py-3.5 sticky left-0 z-10">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning">
           <AlertTriangle className="h-4 w-4" aria-hidden />
         </div>

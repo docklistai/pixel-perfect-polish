@@ -42,7 +42,7 @@ function StaffSearchHeader({
   onStaffSearchChange: (value: string) => void;
 }) {
   return (
-    <div className="rota-staff-header border-b border-border px-4 py-3">
+    <div className="rota-staff-header sticky left-0 z-10 bg-background border-b border-border px-4 py-3">
       <div className="text-xs font-semibold uppercase text-muted-foreground">
         Staff{" "}
         <span className="font-mono font-normal tabular-nums">

@@ -156,6 +156,7 @@ export function RotaGrid({
               ))
             ) : (
               <RotaEmptyState
+                staffCount={staffCount}
                 staffSearch={staffSearch}
                 hasActiveFilters={hasActiveFilters}
                 onClearFilters={onClearFilters}
