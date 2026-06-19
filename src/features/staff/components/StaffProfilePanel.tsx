@@ -14,6 +14,7 @@ import { StaffMonogram } from "./StaffMonogram";
 import { StaffPanelOverview } from "./StaffPanelOverview";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
+import { buildLiveStaffProfile } from "../data/liveStaffProfile";
 
 interface StaffProfilePanelProps {
   member: StaffRow;
@@ -22,7 +23,7 @@ interface StaffProfilePanelProps {
   source: "live" | "demo";
 }
 
-const NOT_SET = "Not set yet"; // neutral, beta-safe placeholder for non-live details
+const NOT_SET = "Not recorded"; // honest placeholder for details the live schema does not carry
 
 const STATUS_CLS: Record<string, string> = {
   Active: "bg-success-soft text-success",
@@ -60,7 +61,10 @@ function useToast() {
 }
 
 export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanelProps) {
-  const profile = mockStaffProfiles[member.id] ?? null;
+  // Demo rows have a rich fixture profile; live rows get a sparse, honest
+  // profile (real role/department/contract/hours, empty everything else).
+  const profile =
+    mockStaffProfiles[member.id] ?? (source === "live" ? buildLiveStaffProfile(member) : null);
   const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
   const { msg: toastMsg, show: showToast } = useToast();
 
@@ -235,22 +239,14 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
       </div>
 
       <div className="px-4 pb-4">
-        {isLive ? (
-          // Live members have no detailed-profile surface yet; don't route them
-          // to an empty "coming soon" page — say so inline instead.
-          <div className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-2.5 text-xs font-semibold text-muted-foreground">
-            Full profile not available yet
-          </div>
-        ) : (
-          <Link
-            to="/staff/$staffId"
-            params={{ staffId: member.id }}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-          >
-            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-            Open full profile
-          </Link>
-        )}
+        <Link
+          to="/staff/$staffId"
+          params={{ staffId: member.id }}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+        >
+          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+          Open full profile
+        </Link>
       </div>
     </Card>
   );
