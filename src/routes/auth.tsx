@@ -134,7 +134,7 @@ function AuthPage() {
                   <div className="flex items-center gap-2">
                     <Coffee className="h-5 w-5 text-brand" aria-hidden="true" />
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
-                      Docklist
+                      DocklistAI
                     </p>
                   </div>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
@@ -157,7 +157,7 @@ function AuthPage() {
                     <div className="text-center">
                       <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
                       <p className="mt-2 text-sm text-muted-foreground">
-                        Sign in to your Docklist account
+                        Sign in to your DocklistAI account
                       </p>
                     </div>
 
@@ -177,7 +177,7 @@ function AuthPage() {
                       </div>
                       <div className="relative flex justify-center text-xs">
                         <span className="bg-background px-2 text-muted-foreground">
-                          New to Docklist?
+                          New to DocklistAI?
                         </span>
                       </div>
                     </div>
@@ -187,7 +187,7 @@ function AuthPage() {
                       onClick={() => navigate({ to: "/" })}
                       className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
                     >
-                      Learn more about Docklist →
+                      Learn more about DocklistAI →
                     </button>
                   </div>
                 )}

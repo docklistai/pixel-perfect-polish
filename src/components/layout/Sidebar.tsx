@@ -16,6 +16,7 @@ import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { withLocalConflictStatus } from "@/features/rota/lib/localConflicts";
 import { withApprovedLeaveConflictStatus } from "@/features/leave/lib/leaveRotaConflicts";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { MobileMoreMenu } from "./MobileMoreMenu";
 
 function workspaceMonogram(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -73,6 +74,10 @@ const NAV_GROUPS: ReadonlyArray<{
   { key: "communication", label: "Communication", ariaLabel: "Communication" },
   { key: "admin", label: "Admin", ariaLabel: "Admin" },
 ];
+
+// Routes hidden from the phone bottom nav (everything outside the Workspace
+// group). Surfaced there via the MobileMoreMenu overflow control.
+const overflowNavItems = navItems.filter((item) => item.group !== "workspace");
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -193,6 +198,7 @@ export function Sidebar() {
                     </Link>
                   );
                 })}
+              {group.key === "workspace" && <MobileMoreMenu items={overflowNavItems} />}
             </nav>
           </div>
         ))}

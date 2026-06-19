@@ -3358,6 +3358,19 @@
   .rota-toolbar-statuses > :nth-child(n + 3) { display: none; }
 }
 
+/* Mobile "More" overflow control — hidden on desktop/tablet, where the full
+   sidebar already exposes every route. Shown only in the phone bottom nav. */
+.sidebar .nav-item-more {
+  display: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--sidebar-muted);
+}
+.mobile-more-scrim,
+.mobile-more-sheet { display: none; }
+
 @media (max-width: 767px) {
   :root { --sidebar-w: 0px; --topbar-h: 56px; }
   .app { grid-template-columns: minmax(0, 1fr); min-height: 100dvh; }
@@ -3410,6 +3423,27 @@
     width: auto;
     height: 2px;
     border-radius: 0 0 2px 2px;
+  }
+  .sidebar .nav-item-more { display: flex; }
+  .mobile-more-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: var(--bg-scrim);
+    backdrop-filter: blur(2px);
+  }
+  .mobile-more-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(64px + env(safe-area-inset-bottom) + 8px);
+    z-index: 50;
+    max-height: 60dvh;
+    overflow-y: auto;
   }
   .topbar { width: 100%; overflow: hidden; }
   .topbar-pill.date { display: none; }

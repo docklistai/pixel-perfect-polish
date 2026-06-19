@@ -32,7 +32,7 @@ export function AuthValuePanel() {
           Bring your rota, team, and time back under control.
         </h2>
         <p className="max-w-xl text-pretty text-base leading-7 text-muted-foreground md:text-lg">
-          Docklist keeps shift planning fast and clear, with the visibility your team needs.
+          DocklistAI keeps shift planning fast and clear, with the visibility your team needs.
         </p>
       </div>
 
