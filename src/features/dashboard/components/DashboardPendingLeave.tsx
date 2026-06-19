@@ -28,7 +28,11 @@ export function DashboardPendingLeave({ items }: Props) {
       </div>
       <div className="divide-y divide-border">
         {items.map((p) => (
-          <div key={p.n} className="flex items-center gap-3 px-5 py-3">
+          <Link
+            key={p.n}
+            to="/leave"
+            className="flex items-center gap-3 px-5 py-3 transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
             <div className="bubble teal text-[11px] font-semibold uppercase tracking-tight">
               {initials(p.n)}
             </div>
@@ -40,7 +44,7 @@ export function DashboardPendingLeave({ items }: Props) {
               <StatusBadge tone={p.impactTone as Tone}>{p.impact}</StatusBadge>
             )}
             <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-          </div>
+          </Link>
         ))}
       </div>
       <div className="border-t border-border px-5 py-3">

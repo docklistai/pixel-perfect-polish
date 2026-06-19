@@ -8,9 +8,10 @@ interface Props {
   items: AttentionItem[];
   total: number;
   onAlertClick: (index: number) => void;
+  onViewAll?: () => void;
 }
 
-export function DashboardAttentionPanel({ items, total, onAlertClick }: Props) {
+export function DashboardAttentionPanel({ items, total, onAlertClick, onViewAll }: Props) {
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
@@ -47,8 +48,8 @@ export function DashboardAttentionPanel({ items, total, onAlertClick }: Props) {
       </div>
       <button
         type="button"
-        onClick={() => onAlertClick(0)}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+        onClick={onViewAll ?? (() => onAlertClick(0))}
+        className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand transition hover:text-brand/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded px-1 -ml-1"
       >
         View all alerts ({total}) <ArrowRight className="h-3 w-3" aria-hidden />
       </button>

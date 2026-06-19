@@ -1,10 +1,12 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Calendar, Send } from "lucide-react";
 import { Card } from "@/components/dl";
-import { toast } from "sonner";
+import { useIntents } from "@/lib/interactionIntents";
 
 // Next rota: week of Mon 15 Jun 2026. Due by Fri 12 Jun 16:00.
 export function DashboardRotaPublish() {
+  const navigate = useNavigate();
+  const { requestIntent } = useIntents();
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 pb-4 pt-5">
@@ -39,15 +41,14 @@ export function DashboardRotaPublish() {
         </Link>
         <button
           type="button"
-          onClick={() =>
-            toast.info("Rota publish", {
-              description: "Go to the Rota page to review and publish.",
-            })
-          }
+          onClick={() => {
+            navigate({ to: "/rota" });
+            requestIntent("rota.publish");
+          }}
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
           <Send className="h-3 w-3" aria-hidden />
-          Publish
+          Review & publish
         </button>
       </div>
     </Card>

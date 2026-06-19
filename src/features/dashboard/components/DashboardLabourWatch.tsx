@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Settings } from "lucide-react";
 import { Card } from "@/components/dl";
 
 interface Props {
@@ -66,7 +66,14 @@ export function DashboardLabourWatch({
           <div className="flex items-center gap-2">
             <div className="dock-section-eyebrow">Labour watch</div>
           </div>
-          <span className="text-xs text-muted-foreground">vs {targetPct}% target</span>
+          <Link
+            to="/settings"
+            title="Configure labour target"
+            className="group flex items-center gap-1 rounded-[4px] px-1.5 py-0.5 text-xs text-muted-foreground transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            <Settings className="h-3 w-3 opacity-70 transition group-hover:opacity-100" />
+            <span>vs {targetPct}% target</span>
+          </Link>
         </div>
         <div className="mt-3 flex items-center gap-5">
           <LabourGauge value={labourPct} targetPct={targetPct} />

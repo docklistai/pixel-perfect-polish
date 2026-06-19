@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const navigate = useNavigate();
-  const { openAiDrawer } = useOverlays();
+  const { openAiDrawer, openNotifications } = useOverlays();
   const { requestIntent } = useIntents();
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [selectedAlertIdx, setSelectedAlertIdx] = React.useState(0);
@@ -206,24 +206,10 @@ function Home() {
                   className="menu-item"
                   onClick={() => {
                     setMoreOpen(false);
-                    toast.info("Customise dashboard", {
-                      description: "Dashboard layout customisation arrives in a later update.",
-                    });
+                    navigate({ to: "/reports" });
                   }}
                 >
-                  Customise dashboard…
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => {
-                    setMoreOpen(false);
-                    toast.info("Export snapshot", {
-                      description: "Preparing weekly snapshot export…",
-                    });
-                  }}
-                >
-                  Export snapshot…
+                  View reports…
                 </button>
                 <button
                   type="button"
@@ -273,6 +259,7 @@ function Home() {
             setSelectedAlertIdx(idx);
             setAlertOpen(true);
           }}
+          onViewAll={() => openNotifications()}
         />
       </div>
 
