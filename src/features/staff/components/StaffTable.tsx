@@ -1,17 +1,19 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card, EmptyState } from "@/components/dl";
+import { ChevronLeft, ChevronRight, UserPlus, Users } from "lucide-react";
+import { ActionButton, Card, EmptyState } from "@/components/dl";
 import { StaffFilterBar } from "./StaffFilterBar";
 import { StaffBulkBar } from "./StaffBulkBar";
 import { StaffTableRow } from "./StaffTableRow";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
+import { resolveStaffEmptyState } from "../lib/staffEmptyState";
 import type { StaffRow } from "../types";
 
 export type StaffAttentionFilter = "all" | "missing-documents" | "outside-availability";
 
 interface StaffTableProps {
   rows: StaffRow[];
-  selected: StaffRow;
+  /** The previewed member, or null when nothing is selected (e.g. empty roster). */
+  selected: StaffRow | null;
   query: string;
   onQueryChange: (q: string) => void;
   deptFilter: string;
@@ -20,6 +22,8 @@ interface StaffTableProps {
   onStatusChange: (s: string) => void;
   attentionFilter: StaffAttentionFilter;
   onSelectMember: (row: StaffRow) => void;
+  /** Opens the Add Staff dialog from the first-staff empty state. */
+  onAddStaff: () => void;
   /** Hides the availability column while the profile panel narrows the table. */
   compact?: boolean;
 }
@@ -37,6 +41,7 @@ export function StaffTable({
   onStatusChange,
   attentionFilter,
   onSelectMember,
+  onAddStaff,
   compact = false,
 }: StaffTableProps) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
@@ -150,7 +155,7 @@ export function StaffTable({
               <StaffTableRow
                 key={r.id}
                 row={r}
-                isSelected={selected.id === r.id}
+                isSelected={selected?.id === r.id}
                 isChecked={selectedIds.has(r.id)}
                 onSelect={() => onSelectMember(r)}
                 onCheck={() => toggleRow(r.id)}
@@ -161,11 +166,35 @@ export function StaffTable({
         </table>
       </div>
 
-      {filteredRows.length === 0 && (
-        <div className="px-4 pb-4">
-          <EmptyState title="No staff found" description="Try adjusting your search or filters." />
-        </div>
-      )}
+      {filteredRows.length === 0 &&
+        (resolveStaffEmptyState({
+          totalRows: rows.length,
+          filteredRows: filteredRows.length,
+          query,
+          deptFilter,
+          statusFilter,
+          attentionFilter,
+        }) === "first-staff" ? (
+          <div className="px-4 pb-4">
+            <EmptyState
+              icon={Users}
+              title="Add your first team member"
+              description="You need staff before you can build a rota. Add someone to get started."
+              action={
+                <ActionButton icon={UserPlus} onClick={onAddStaff}>
+                  Add staff
+                </ActionButton>
+              }
+            />
+          </div>
+        ) : (
+          <div className="px-4 pb-4">
+            <EmptyState
+              title="No staff found"
+              description="Try adjusting your search or filters."
+            />
+          </div>
+        ))}
 
       <div className="flex items-center gap-3 px-4 py-3 border-t border-border/60">
         <span className="text-xs text-muted-foreground">

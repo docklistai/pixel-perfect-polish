@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { StaffRow } from "../types";
+import type { StaffRow, WorkspaceDepartment } from "../types";
 
 /**
  * Manager-side live staff reads. Runs as a server function bound to the
@@ -98,5 +98,30 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
     return ((staff as StaffMemberRow[] | null) ?? []).map((row) =>
       mapStaffRow(row, row.department_id ? (departmentNames.get(row.department_id) ?? null) : null),
     );
+  },
+);
+
+/**
+ * The active workspace's departments, name-ordered. Read-only — used to populate
+ * the optional department picker on Add Staff. Workspace is resolved server-side;
+ * department RLS remains backup tenant enforcement.
+ */
+export const fetchWorkspaceDepartmentsFn = createServerFn({ method: "GET" }).handler(
+  async (): Promise<WorkspaceDepartment[]> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
+    const supabase = getSupabaseServerClient();
+    const workspaceId = await requireActiveManagerWorkspaceId(supabase);
+
+    const { data, error } = await supabase
+      .from("departments")
+      .select("id, name")
+      .eq("workspace_id", workspaceId)
+      .eq("status", "active")
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+    return (data as WorkspaceDepartment[] | null) ?? [];
   },
 );

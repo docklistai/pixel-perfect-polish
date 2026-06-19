@@ -4,6 +4,18 @@
  */
 export type IssuePortalCodeResult = { ok: true; code: string } | { ok: false; message: string };
 
+/** Live contract types the `staff_members` schema accepts. */
+export type StaffContractType = "full_time" | "part_time" | "casual" | "fixed_term";
+
+/** A workspace department option for the Add Staff department picker. */
+export interface WorkspaceDepartment {
+  id: string;
+  name: string;
+}
+
+/** Result of creating a live staff member. `id` is the new row's uuid. */
+export type CreateStaffMemberResult = { ok: true; id: string } | { ok: false; message: string };
+
 export interface StaffRow {
   id: string;
   name: string;

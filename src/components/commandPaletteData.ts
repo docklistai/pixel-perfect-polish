@@ -87,7 +87,7 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   },
   {
     label: "Add team member",
-    hint: "Invite someone to the workspace",
+    hint: "Add someone to your team",
     icon: UserPlus,
     to: "/staff",
     intent: "staff.add",

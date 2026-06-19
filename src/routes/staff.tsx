@@ -2,10 +2,11 @@ import { createFileRoute, Outlet, useChildMatches } from "@tanstack/react-router
 import * as React from "react";
 import { AppShell, Card, PageHeader, ActionButton } from "@/components/dl";
 import { Users, CheckCircle2, UserPlus, AlertTriangle, KeyRound, Filter } from "lucide-react";
-import { rows } from "@/features/staff/data/mockStaffData";
 import { useWorkspaceStaff } from "@/features/staff/hooks/useWorkspaceStaff";
+import { useWorkspaceDepartments } from "@/features/staff/hooks/useWorkspaceDepartments";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { AccessCodesDialog } from "@/features/staff/components/AccessCodesDialog";
+import { AddStaffDialog } from "@/features/staff/components/AddStaffDialog";
 import { StaffTable } from "@/features/staff/components/StaffTable";
 import type { StaffAttentionFilter } from "@/features/staff/components/StaffTable";
 import { useStaffPanelState } from "@/features/staff/hooks/useStaffPanelState";
@@ -93,11 +94,17 @@ function StaffPage() {
 function StaffListPage() {
   const { rows: staffRows, source } = useWorkspaceStaff();
   const stats = buildStats(staffRows);
-  const [addOpen, setAddOpen] = React.useState(false);
+  const [addStaffOpen, setAddStaffOpen] = React.useState(false);
+  const [accessCodesOpen, setAccessCodesOpen] = React.useState(false);
+  // Departments back the optional Add Staff picker; only fetched once the dialog
+  // is opened against a live roster.
+  const { departments } = useWorkspaceDepartments({ enabled: source === "live" && addStaffOpen });
 
-  useIntentHandler("staff.add", () => setAddOpen(true));
+  useIntentHandler("staff.add", () => setAddStaffOpen(true));
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const selected = staffRows.find((row) => row.id === selectedId) ?? staffRows[0] ?? rows[0];
+  // No demo fallback: an empty live roster has no member to preview, so the
+  // panel stays closed rather than surfacing seed data.
+  const selectedMember = staffRows.find((row) => row.id === selectedId) ?? null;
   const [isProfilePanelOpen, setIsProfilePanelOpen] = useStaffPanelState();
   const [query, setQuery] = React.useState("");
   const [deptFilter, setDeptFilter] = React.useState("All");
@@ -146,8 +153,15 @@ function StaffListPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <ActionButton icon={KeyRound} onClick={() => setAddOpen(true)}>
+            <ActionButton
+              variant="secondary"
+              icon={KeyRound}
+              onClick={() => setAccessCodesOpen(true)}
+            >
               Access codes
+            </ActionButton>
+            <ActionButton icon={UserPlus} onClick={() => setAddStaffOpen(true)}>
+              Add staff
             </ActionButton>
           </div>
         }
@@ -176,7 +190,7 @@ function StaffListPage() {
 
           <StaffTable
             rows={staffRows}
-            selected={selected}
+            selected={selectedMember}
             query={query}
             onQueryChange={setQuery}
             deptFilter={deptFilter}
@@ -185,14 +199,15 @@ function StaffListPage() {
             onStatusChange={setStatusFilter}
             attentionFilter={attentionFilter}
             onSelectMember={handleSelectMember}
+            onAddStaff={() => setAddStaffOpen(true)}
             compact={isProfilePanelOpen}
           />
         </div>
 
-        {isProfilePanelOpen && (
+        {isProfilePanelOpen && selectedMember && (
           <div className="col-span-12 lg:col-span-3 space-y-4 self-start lg:sticky lg:top-[88px]">
             <StaffProfilePanel
-              member={selected}
+              member={selectedMember}
               source={source}
               onClose={() => setIsProfilePanelOpen(false)}
             />
@@ -200,9 +215,16 @@ function StaffListPage() {
         )}
       </div>
 
+      <AddStaffDialog
+        open={addStaffOpen}
+        onOpenChange={setAddStaffOpen}
+        source={source}
+        departments={departments}
+      />
+
       <AccessCodesDialog
-        open={addOpen}
-        onOpenChange={setAddOpen}
+        open={accessCodesOpen}
+        onOpenChange={setAccessCodesOpen}
         staff={staffRows}
         source={source}
       />

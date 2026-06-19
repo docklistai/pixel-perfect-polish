@@ -164,7 +164,7 @@ function Home() {
                   className="menu-item"
                   onClick={() => runQuickAction("/staff", "staff.add")}
                 >
-                  Issue access codes…
+                  Add team member…
                 </button>
                 <button
                   type="button"
