@@ -1,76 +1,130 @@
-import { AlertTriangle } from "lucide-react";
-import { Card } from "@/components/dl";
-import { opsHandoverNotes, opsFollowUps, opsQuickRef } from "../data/opsDemoData";
+import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { Card, StatusBadge } from "@/components/dl";
+import { cn } from "@/lib/utils";
+import { opsBriefings, opsChecklists, opsDepartmentCoverage } from "../data/opsDemoData";
 
 export function OpsRightRail() {
+  const navigate = useNavigate();
+
   return (
-    <div className="col-span-12 lg:col-span-3 space-y-4">
-      <Card className="rounded-2xl p-5">
-        <h2 className="text-sm font-semibold mb-3">Shift handover</h2>
-        {opsHandoverNotes.map((h, i) => (
-          <div key={i} className="border-l-2 pl-3 py-2 border-brand">
-            <div className="text-xs font-semibold">
-              {h.from} → {h.to}
-            </div>
-            <div className="text-[11px] text-muted-foreground">{h.who}</div>
-            <p className="text-xs mt-1">{h.note}</p>
-            <span
-              className={`mt-2 inline-block rounded-md px-2 py-0.5 text-[11px] font-medium ${h.tone === "danger" ? "bg-danger-soft text-danger" : "bg-warning-soft text-warning"}`}
-            >
-              {h.tag}
-            </span>
+    <aside className="space-y-3">
+      <Card className="p-4">
+        <div className="flex items-center">
+          <h2 className="text-sm font-semibold">On shift now</h2>
+          <span className="ml-auto font-mono text-[10px] text-muted-foreground">09:17 PM</span>
+        </div>
+        <div className="mt-3 flex items-end gap-4">
+          <div>
+            <div className="text-[28px] font-bold leading-none tracking-tight">48</div>
+            <div className="mt-1 text-[11px] text-muted-foreground">Staff on duty</div>
           </div>
-        ))}
-      </Card>
-
-      <Card className="rounded-2xl p-5">
-        <h2 className="text-sm font-semibold mb-3">
-          Urgent follow-ups{" "}
-          <span className="ml-1 rounded bg-warning-soft text-warning text-[11px] px-1">
-            {opsFollowUps.length}
-          </span>
-        </h2>
-        {opsFollowUps.map((f) => (
-          <div key={f.t} className="flex gap-3 py-2 border-t first:border-t-0 border-border">
-            <AlertTriangle
-              className={`h-4 w-4 mt-0.5 shrink-0 ${f.tone === "danger" ? "text-danger" : "text-warning"}`}
-              aria-hidden="true"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-medium">{f.t}</div>
-              <div className="text-[11px] text-muted-foreground">{f.w}</div>
-            </div>
-            <span
-              className={`text-[11px] font-semibold shrink-0 ${f.tone === "danger" ? "text-danger" : "text-warning"}`}
-            >
-              {f.p}
-            </span>
+          <CoverageRing percentage={96} />
+          <div>
+            <div className="text-sm font-semibold text-success">96%</div>
+            <div className="text-[11px] text-muted-foreground">Coverage</div>
           </div>
-        ))}
-      </Card>
-
-      <Card className="rounded-2xl p-5">
-        <h2 className="text-sm font-semibold mb-3">Quick reference</h2>
-        <div className="grid grid-cols-2 gap-2">
-          {opsQuickRef.map((q) => (
+        </div>
+        <div className="my-3 h-px bg-border" />
+        <div className="space-y-1">
+          {opsDepartmentCoverage.map((item) => (
             <button
+              key={item.department}
               type="button"
-              key={q.t}
-              onClick={() =>
-                toast.info(q.t, { description: "Reference preview opened for Harbour View Hotel." })
-              }
-              className="flex items-center gap-2 rounded-xl border border-border px-2 py-1.5 text-xs"
+              onClick={() => navigate({ to: "/rota" })}
+              className="flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-xs transition-colors hover:bg-muted/40"
             >
-              <q.icon
-                className={`h-3.5 w-3.5 shrink-0 ${q.tone === "danger" ? "text-danger" : "text-brand"}`}
-                aria-hidden="true"
-              />{" "}
-              {q.t}
+              <span className="size-1.5 rounded-full" style={{ background: item.color }} />
+              <span className="min-w-0 flex-1">{item.department}</span>
+              <strong>{item.count}</strong>
             </button>
           ))}
         </div>
       </Card>
-    </div>
+
+      <Card className="overflow-hidden p-0">
+        <div className="flex items-center px-4 py-3">
+          <h2 className="text-sm font-semibold">Today&apos;s briefings</h2>
+          <StatusBadge tone="purple" className="ml-auto">
+            2 posted
+          </StatusBadge>
+        </div>
+        {opsBriefings.map((briefing) => (
+          <button
+            key={briefing.title}
+            type="button"
+            onClick={() => toast.info("Briefing", { description: `${briefing.title} opened` })}
+            className="w-full border-t border-border px-4 py-3 text-left transition-colors hover:bg-muted/40"
+          >
+            <div className="text-xs font-semibold">{briefing.title}</div>
+            <div className="text-[10px] text-muted-foreground">{briefing.by}</div>
+            <p className="mt-1.5 text-[11px] leading-4 text-muted-foreground">{briefing.body}</p>
+            <StatusBadge tone={briefing.tone} className="mt-2">
+              Read {briefing.read}
+            </StatusBadge>
+          </button>
+        ))}
+      </Card>
+
+      <Card className="p-4">
+        <h2 className="mb-3 text-sm font-semibold">Checklists</h2>
+        <div className="space-y-3">
+          {opsChecklists.map((checklist) => (
+            <button
+              key={checklist.name}
+              type="button"
+              onClick={() => toast.info("Checklist", { description: `${checklist.name} opened` })}
+              className="block w-full text-left"
+            >
+              <div className="flex items-center gap-2">
+                <span className="min-w-0 flex-1 truncate text-xs font-semibold">
+                  {checklist.name}
+                </span>
+                <StatusBadge tone={checklist.tone}>{checklist.status}</StatusBadge>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn(
+                    "h-full rounded-full",
+                    checklist.tone === "success"
+                      ? "bg-success"
+                      : checklist.tone === "warning"
+                        ? "bg-warning"
+                        : "bg-muted-foreground/30",
+                  )}
+                  style={{ width: `${checklist.progress}%` }}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+      </Card>
+    </aside>
+  );
+}
+
+function CoverageRing({ percentage }: { percentage: number }) {
+  const radius = 20;
+  const circumference = 2 * Math.PI * radius;
+  const dash = (percentage / 100) * circumference;
+
+  return (
+    <svg width="52" height="52" viewBox="0 0 52 52" aria-label={`${percentage}% coverage`}>
+      <circle cx="26" cy="26" r={radius} stroke="var(--border)" strokeWidth="5" fill="none" />
+      <circle
+        cx="26"
+        cy="26"
+        r={radius}
+        stroke="var(--teal-500)"
+        strokeWidth="5"
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray={`${dash} ${circumference}`}
+        transform="rotate(-90 26 26)"
+      />
+      <text x="26" y="30" textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--ink-900)">
+        {percentage}%
+      </text>
+    </svg>
   );
 }

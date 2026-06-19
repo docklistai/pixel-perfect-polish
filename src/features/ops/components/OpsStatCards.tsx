@@ -4,7 +4,7 @@ import { opsStats } from "../data/opsDemoData";
 
 export function OpsStatCards() {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-5">
+    <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
       {opsStats.map((s) => (
         <MetricCard
           key={s.l}
@@ -13,6 +13,7 @@ export function OpsStatCards() {
           value={s.v}
           tone={s.tone as Tone}
           sub={s.danger ? <span className="text-warning">{s.s}</span> : s.s}
+          className="min-h-[116px]"
         />
       ))}
     </div>

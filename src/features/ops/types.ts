@@ -64,3 +64,34 @@ export interface QuickRefItem {
   icon: React.ComponentType<{ className?: string }>;
   tone: string;
 }
+
+export type OpsLogTab = "timeline" | "briefings" | "tasks" | "incidents" | "checks";
+
+export interface OpsRiskItem {
+  title: string;
+  body: string;
+  tone: "danger" | "warning" | "info";
+  entryTitle?: string;
+  actionLabel: string;
+}
+
+export interface OpsBriefing {
+  title: string;
+  by: string;
+  body: string;
+  read: string;
+  tone: "brand" | "warning";
+}
+
+export interface OpsChecklist {
+  name: string;
+  progress: number;
+  status: "Complete" | "In progress" | "Pending";
+  tone: "success" | "warning" | "muted";
+}
+
+export interface OpsDepartmentCoverage {
+  department: string;
+  count: number;
+  color: string;
+}

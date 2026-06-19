@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, IconButton, FeedbackBanner } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
+import { useOverlays } from "@/components/AppShortcuts";
 import {
   Check,
   Download,
@@ -12,9 +13,11 @@ import {
   MoreHorizontal,
   Plus,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
+import { OpsRiskPanel } from "@/features/ops/components/OpsRiskPanel";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
 import { OpsRightRail } from "@/features/ops/components/OpsRightRail";
 import { OpsLogEntryModal } from "@/features/ops/components/OpsLogEntryModal";
@@ -42,6 +45,7 @@ const FILTER_RANGES = ["Today", "Yesterday", "Last 7 days"];
 
 function OpsPage() {
   const navigate = useNavigate();
+  const { openAiDrawer } = useOverlays();
   const [entries, setEntries] = React.useState<OpsEntry[]>(() =>
     opsTimeline.map((e, i) => ({ ...e, id: `op-${i}` })),
   );
@@ -150,6 +154,9 @@ function OpsPage() {
                 })),
               ]}
             />
+            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
+              Open risks
+            </ActionButton>
             <ActionButton variant="secondary" icon={FileText} onClick={() => setHandoverOpen(true)}>
               Handover note
             </ActionButton>
@@ -181,25 +188,32 @@ function OpsPage() {
 
       <div className="guidance-note mb-4">
         <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Clear open risks before handover — review the follow-ups panel for what needs attention.
+        Clear open risks before handover — use the AI risk panel to review what needs attention.
       </div>
-
-      <FeedbackBanner
-        tone="info"
-        title="Preview Mode"
-        description="Operations log is populated with demo data for private beta. This is not a live operational report."
-        className="mb-4"
-      />
 
       <OpsStatCards />
 
-      <div className="grid grid-cols-12 gap-5">
-        <OpsTimeline
-          entries={entries}
-          onOpenEntry={(e) => setSelectedId(e.id)}
-          onMarkDone={(id) => handleChangeStatus(id, "Done", { close: true })}
-          onDelete={handleDelete}
-        />
+      <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0 space-y-3">
+          <OpsRiskPanel
+            entries={entries}
+            onOpenEntry={(entry) => setSelectedId(entry.id)}
+            onOpenBriefing={() =>
+              toast.info("Wedding reception briefing", {
+                description: "Posted by Olivia · FOH all-hands 17:30",
+              })
+            }
+            onUseInHandover={() => setHandoverOpen(true)}
+            onOpenAssistant={openAiDrawer}
+          />
+          <OpsTimeline
+            entries={entries}
+            onOpenEntry={(entry) => setSelectedId(entry.id)}
+            onMarkDone={(id) => handleChangeStatus(id, "Done", { close: true })}
+            onDelete={handleDelete}
+            onOpenLogEntry={() => setLogEntryOpen(true)}
+          />
+        </div>
         <OpsRightRail />
       </div>
 

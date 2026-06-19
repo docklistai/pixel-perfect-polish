@@ -37,7 +37,7 @@ export function OpsHandoverModal({ open, onClose }: OpsHandoverModalProps) {
             Cancel
           </ActionButton>
           <ActionButton variant="outline" onClick={() => setNotes(handoverAiDraft)}>
-            <FilePlus2 className="mr-1.5 h-3 w-3" /> Use template
+            <FilePlus2 className="mr-1.5 h-3 w-3" /> Draft with AI
           </ActionButton>
           <ActionButton onClick={handleHandOver}>
             <Send className="mr-1.5 h-3 w-3" /> Hand over to next manager
@@ -97,8 +97,8 @@ export function OpsHandoverModal({ open, onClose }: OpsHandoverModalProps) {
         <div className="flex items-start gap-3 p-3.5">
           <FilePlus2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden />
           <p className="grow text-[13px] leading-normal text-muted-foreground">
-            “Use template” drops in a standard handover outline you can edit. Nothing is shared
-            until you hand over to the next manager.
+            I can pull open incidents, follow-ups and tonight&apos;s events into a draft.
+            You&apos;ll review before anything is shared.
           </p>
         </div>
       </div>

@@ -9,7 +9,17 @@ import {
   Wrench,
   FileQuestion,
 } from "lucide-react";
-import type { OpsStatCard, TimelineEntry, HandoverNote, FollowUp, QuickRefItem } from "../types";
+import type {
+  OpsBriefing,
+  OpsChecklist,
+  OpsDepartmentCoverage,
+  OpsRiskItem,
+  OpsStatCard,
+  TimelineEntry,
+  HandoverNote,
+  FollowUp,
+  QuickRefItem,
+} from "../types";
 
 export const toneBg: Record<string, string> = {
   info: "bg-info-soft text-info",
@@ -19,7 +29,7 @@ export const toneBg: Record<string, string> = {
 };
 
 export const opsStats: OpsStatCard[] = [
-  { l: "Active shifts", v: "6", s: "6 staff scheduled today", icon: Briefcase, tone: "info" },
+  { l: "Active shifts", v: "3", s: "48 staff on duty", icon: Briefcase, tone: "info" },
   { l: "Tasks completed", v: "14", s: "Today", icon: CheckCircle2, tone: "brand" },
   {
     l: "Open incidents",
@@ -176,4 +186,58 @@ export const opsQuickRef: QuickRefItem[] = [
   { t: "Maintenance log", icon: Wrench, tone: "info" },
   { t: "Property information", icon: FileText, tone: "info" },
   { t: "Lost & found", icon: FileQuestion, tone: "info" },
+];
+
+export const opsRisks: OpsRiskItem[] = [
+  {
+    title: "Lobby slip — follow-up call due",
+    body: "Guest is expecting a call before 18:00. Sophie owns this.",
+    tone: "danger",
+    entryTitle: "Incident report – Guest slip in lobby",
+    actionLabel: "Open entry",
+  },
+  {
+    title: "Room 205 tap — plumber due Thursday",
+    body: "Move guest if not fixed by 14:00 Thursday.",
+    tone: "warning",
+    entryTitle: "Maintenance – Leaking tap",
+    actionLabel: "Open entry",
+  },
+  {
+    title: "Wedding reception at 18:30",
+    body: "FOH all-hands at 17:30. Briefing posted by Olivia.",
+    tone: "info",
+    actionLabel: "Open briefing",
+  },
+];
+
+export const opsDepartmentCoverage: OpsDepartmentCoverage[] = [
+  { department: "Front of House", count: 12, color: "var(--blue-500)" },
+  { department: "Kitchen", count: 9, color: "var(--amber-500)" },
+  { department: "Housekeeping", count: 4, color: "var(--green-500)" },
+  { department: "Bar", count: 3, color: "var(--red-500)" },
+];
+
+export const opsBriefings: OpsBriefing[] = [
+  {
+    title: "Friday lunch — VIPs",
+    by: "Alex Thompson · 08:00",
+    body: "2 VIP tables at 12:30. Allergen briefing in kitchen at 10:00.",
+    read: "18/24",
+    tone: "brand",
+  },
+  {
+    title: "Evening event — Wedding party",
+    by: "Olivia Bennett · 09:30",
+    body: "120-person reception at 18:30. FOH all-hands at 17:30.",
+    read: "9/24",
+    tone: "warning",
+  },
+];
+
+export const opsChecklists: OpsChecklist[] = [
+  { name: "AM open — FOH", progress: 100, status: "Complete", tone: "success" },
+  { name: "Kitchen safety", progress: 80, status: "In progress", tone: "warning" },
+  { name: "Housekeeping AM", progress: 100, status: "Complete", tone: "success" },
+  { name: "PM close — Bar", progress: 0, status: "Pending", tone: "muted" },
 ];
