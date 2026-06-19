@@ -184,6 +184,9 @@ export function RotaGridCell({
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
       onDoubleClick={startEditing}
+      onClick={() => {
+        if (!firstShift) startEditing();
+      }}
       onKeyDown={handleKeyDown}
       className={`relative border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass
