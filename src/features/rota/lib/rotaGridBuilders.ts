@@ -6,6 +6,7 @@ import type {
   StaffId,
   StaffMember,
 } from "../types";
+import type { LeaveRequest } from "@/features/leave/types";
 import { DAY_COUNT } from "./draftShiftCore";
 
 function emptyCells(): RotaGridCell[] {
@@ -36,13 +37,31 @@ function partitionByStaffAndDay(shifts: DraftShift[]): {
 export function buildStaffRows(
   staff: StaffMember[],
   draftShifts: DraftShift[],
+  leaveRequests: LeaveRequest[] = [],
+  dayIsoDates: string[] = [],
 ): RotaGridStaffRow[] {
   const { byStaff } = partitionByStaffAndDay(draftShifts);
-  return staff.map((member) => ({
-    kind: "staff",
-    staff: member,
-    cells: byStaff.get(member.id) ?? emptyCells(),
-  }));
+  return staff.map((member) => {
+    const rawCells = byStaff.get(member.id) ?? emptyCells();
+    const cells = rawCells.map((cell, index) => {
+      const isoDate = dayIsoDates[index];
+      if (!isoDate) return cell;
+      const hasLeave = leaveRequests.some(
+        (req) =>
+          req.staffId === member.id &&
+          req.state === "approved" &&
+          req.startIso <= isoDate &&
+          req.endIso >= isoDate,
+      );
+      return hasLeave ? { ...cell, hasLeave: true } : cell;
+    });
+
+    return {
+      kind: "staff",
+      staff: member,
+      cells,
+    };
+  });
 }
 
 export function buildOpenRow(draftShifts: DraftShift[]): RotaGridOpenRow {

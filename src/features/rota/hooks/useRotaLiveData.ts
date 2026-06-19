@@ -10,6 +10,8 @@ import {
   type LiveWeekStatus,
 } from "../api/rotaLiveData";
 import type { DraftShift, ShiftTone, StaffMember } from "../types";
+import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
+import type { LeaveRequest } from "@/features/leave/types";
 
 const rotaRouteApi = getRouteApi("/rota");
 
@@ -37,6 +39,7 @@ export type RotaLiveData = {
   refetchWeek: () => Promise<void>;
   staff: StaffMember[];
   shifts: DraftShift[];
+  leaveRequests: LeaveRequest[];
 };
 
 const DEMO: RotaLiveData = {
@@ -60,6 +63,7 @@ const DEMO: RotaLiveData = {
   refetchWeek: async () => undefined,
   staff: [],
   shifts: [],
+  leaveRequests: [],
 };
 
 /** Deterministic chip tones for the roster (cosmetic only — colour is not data). */
@@ -115,7 +119,14 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     staleTime: 15_000,
   });
 
-  const isLive = enabled && staffQuery.isSuccess && weekQuery.isSuccess;
+  const leaveQuery = useQuery({
+    queryKey: ["leave", "workspace-requests", workspaceId],
+    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
+    enabled,
+    staleTime: 15_000,
+  });
+
+  const isLive = enabled && staffQuery.isSuccess && weekQuery.isSuccess && leaveQuery.isSuccess;
 
   React.useEffect(() => {
     if (weekQuery.isSuccess && weekQuery.data.locationId !== selectedLocationId) {
@@ -134,8 +145,8 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
       enabled,
       setLocationId: setSelectedLocationId,
       refetchWeek,
-      isLoading: enabled && (staffQuery.isLoading || weekQuery.isLoading),
-      isError: enabled && (staffQuery.isError || weekQuery.isError),
+      isLoading: enabled && (staffQuery.isLoading || weekQuery.isLoading || leaveQuery.isLoading),
+      isError: enabled && (staffQuery.isError || weekQuery.isError || leaveQuery.isError),
     };
   }
 
@@ -160,5 +171,6 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     refetchWeek,
     staff: (staffQuery.data ?? []).map(toStaffMember),
     shifts: weekQuery.data.shifts,
+    leaveRequests: leaveQuery.data ?? [],
   };
 }

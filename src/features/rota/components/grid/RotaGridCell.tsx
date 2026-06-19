@@ -41,6 +41,7 @@ export function RotaGridCell({
     ? "border-brand/20 bg-warning-soft/20"
     : "border-brand/20 bg-brand-soft/10";
   const defaultClass = openRow ? "border-border bg-warning-soft/10" : "border-border";
+  const leaveClass = cell.hasLeave && !openRow ? "bg-muted/20" : "";
 
   const firstShift = cell.shifts[0];
   const initialValue = firstShift
@@ -170,21 +171,31 @@ export function RotaGridCell({
     ? undefined
     : handlers.readOnly
       ? `${emptyAriaLabel} — read-only`
-      : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
+      : cell.hasLeave
+        ? `${emptyAriaLabel} — Approved leave, press Enter to add a shift, F2 to edit`
+        : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
 
   return (
     <div
       tabIndex={0}
       role="gridcell"
       aria-label={cellAriaLabel}
+      title={cell.hasLeave && !firstShift ? "Approved leave" : undefined}
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
       onDoubleClick={startEditing}
       onKeyDown={handleKeyDown}
-      className={`border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
+      className={`relative border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass
-      }`}
+      } ${leaveClass}`}
     >
+      {cell.hasLeave && !firstShift && !isEditing && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/40 uppercase">
+            Leave
+          </span>
+        </div>
+      )}
       {isEditing ? (
         <InlineCellEditor
           initial={initialValue}

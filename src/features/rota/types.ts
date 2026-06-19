@@ -78,6 +78,8 @@ export type DraftShiftInput = {
 
 export type RotaGridCell = {
   shifts: DraftShift[];
+  /** True if the staff member has approved leave on this day. */
+  hasLeave?: boolean;
 };
 
 export type RotaGridStaffRow = {

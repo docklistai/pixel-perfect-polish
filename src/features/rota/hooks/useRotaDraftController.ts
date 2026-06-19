@@ -2,8 +2,13 @@ import * as React from "react";
 import { staff } from "../data/mockData";
 import type { RotaFilters } from "../types";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
-import { getCurrentWeekDayIndex, getWeekDayLabels } from "../lib/weekHelpers";
-import { liveCurrentDayIndex, liveWeekDayLabels, liveWeekLabel } from "../lib/liveRotaDates";
+import { getCurrentWeekDayIndex, getWeekDayLabels, getWeekDateIsoLabels } from "../lib/weekHelpers";
+import {
+  liveCurrentDayIndex,
+  liveWeekDayLabels,
+  liveWeekLabel,
+  addIsoDays,
+} from "../lib/liveRotaDates";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
   buildDayStats,
@@ -34,9 +39,6 @@ const DEFAULT_ROTA_FILTERS: RotaFilters = {
   warningType: "all",
 };
 
-/** Stable empty reference: live mode has no leave wiring, so no leave conflicts. */
-const NO_LEAVE_REQUESTS: LeaveRequest[] = [];
-
 export function useRotaDraftController() {
   const weekDraft = useRotaWeekDrafts();
   const live = useRotaLiveData(weekDraft.weekOffset);
@@ -58,7 +60,7 @@ export function useRotaDraftController() {
   const readOnly = live.enabled && !live.isLive;
   const roster = live.isLive ? live.staff : staff;
   const sourceShifts = live.isLive ? live.shifts : weekDraft.draftShifts;
-  const leaveRequests = live.isLive ? NO_LEAVE_REQUESTS : demoLeaveRequests;
+  const leaveRequests = live.isLive ? live.leaveRequests : demoLeaveRequests;
   const liveActions = live.isLive ? livePersistence : null;
   const confirmations = liveActions ? liveConfirmations : weekDraft;
 
@@ -74,6 +76,12 @@ export function useRotaDraftController() {
   const dayLabels = React.useMemo(() => {
     if (live.isLive && live.weekStart) return liveWeekDayLabels(live.weekStart);
     return getWeekDayLabels(weekDraft.weekOffset);
+  }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
+  const dayIsoDates = React.useMemo(() => {
+    if (live.isLive && live.weekStart) {
+      return Array.from({ length: 7 }, (_, i) => addIsoDays(live.weekStart!, i));
+    }
+    return getWeekDateIsoLabels(weekDraft.weekOffset);
   }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
   const days = React.useMemo(() => {
     const stats = buildDayStats(displayShifts);
@@ -147,7 +155,7 @@ export function useRotaDraftController() {
     staffSearch,
     setStaffSearch,
     draftShifts: displayShifts,
-    staffRows: buildStaffRows(visibleStaff, displayShifts),
+    staffRows: buildStaffRows(visibleStaff, displayShifts, leaveRequests, dayIsoDates),
     openRow: buildOpenRow(displayShifts),
     visibleStaff,
     hasActiveFilters:
