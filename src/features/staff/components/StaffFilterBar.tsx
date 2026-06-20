@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Search, X, ChevronDown, Check } from "lucide-react";
+import { STAFF_STATUS_FILTERS } from "../lib/staffListPresentation";
 
 const DEPARTMENTS = ["All", "Front of House", "Kitchen", "Bar", "Housekeeping", "Maintenance"];
-const STATUSES = ["All", "Active", "Probation", "On Leave"];
 
 interface FilterDropdownProps {
   value: string;
@@ -145,7 +145,7 @@ export function StaffFilterBar({
 
       <FilterDropdown
         value={statusFilter}
-        options={STATUSES}
+        options={[...STAFF_STATUS_FILTERS]}
         allLabel="Any status"
         onChange={onStatusChange}
         ariaLabel="Filter by employment status"

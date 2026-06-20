@@ -9,7 +9,6 @@ function input(overrides: Partial<StaffEmptyStateInput> = {}): StaffEmptyStateIn
     query: "",
     deptFilter: "All",
     statusFilter: "All",
-    attentionFilter: "all",
     ...overrides,
   };
 }
@@ -38,14 +37,6 @@ describe("resolveStaffEmptyState", () => {
   it("treats an empty roster with an active filter as filtered, not first-staff", () => {
     expect(
       resolveStaffEmptyState(input({ totalRows: 0, filteredRows: 0, statusFilter: "Active" })),
-    ).toBe("filtered");
-  });
-
-  it("treats an active attention filter as filtered", () => {
-    expect(
-      resolveStaffEmptyState(
-        input({ totalRows: 4, filteredRows: 0, attentionFilter: "missing-documents" }),
-      ),
     ).toBe("filtered");
   });
 });

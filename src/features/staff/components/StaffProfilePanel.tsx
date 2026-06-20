@@ -1,18 +1,10 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  X,
-  MessageSquare,
-  Phone,
-  Mail,
-  Calendar,
-  ArrowUpRight,
-  MoreHorizontal,
-  Pencil,
-} from "lucide-react";
+import { X, ArrowUpRight, Pencil } from "lucide-react";
 import { Card } from "@/components/dl";
 import { StaffMonogram } from "./StaffMonogram";
 import { StaffPanelOverview } from "./StaffPanelOverview";
+import { StaffProfileQuickActions } from "./StaffProfileQuickActions";
 import { EditStaffDialog } from "./EditStaffDialog";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
@@ -29,6 +21,8 @@ const NOT_SET = "Not recorded"; // honest placeholder for details the live schem
 
 const STATUS_CLS: Record<string, string> = {
   Active: "bg-success-soft text-success",
+  Inactive: "bg-muted text-muted-foreground",
+  Left: "bg-muted text-muted-foreground",
   "On Leave": "bg-accent-purple-soft text-accent-purple",
   Probation: "bg-info-soft text-info",
 };
@@ -53,15 +47,6 @@ function demoEmployeeId(id: string): string {
   return `DKL-${id.toUpperCase().replace(/-/g, "").slice(0, 6)}-2024`;
 }
 
-function useToast() {
-  const [msg, setMsg] = React.useState<string | null>(null);
-  function show(text: string) {
-    setMsg(text);
-    setTimeout(() => setMsg(null), 2000);
-  }
-  return { msg, show };
-}
-
 export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanelProps) {
   // Demo rows have a rich fixture profile; live rows get a sparse, honest
   // profile (real role/department/contract/hours, empty everything else).
@@ -69,28 +54,21 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
     mockStaffProfiles[member.id] ?? (source === "live" ? buildLiveStaffProfile(member) : null);
   const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
   const [editOpen, setEditOpen] = React.useState(false);
-  const { msg: toastMsg, show: showToast } = useToast();
 
   const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
   const docs = profile?.documents ?? [];
   const notes = profile?.notes ?? [];
 
-  // Demo pay/ID/manager/phone are fixtures keyed to the demo roster; a live
-  // member has none of them in the schema, so show neutral placeholders.
+  // Demo pay/ID/manager/phone are fixtures keyed to the demo roster. Live
+  // contact details use the real row values; unsupported fields stay neutral.
   const isLive = source === "live";
-  const phone = isLive ? NOT_SET : (profile?.phone ?? "+44 7700 900 123");
+  const phone = isLive ? member.phone?.trim() || NOT_SET : (profile?.phone ?? "+44 7700 900 123");
   const employeeId = isLive ? NOT_SET : demoEmployeeId(member.id);
   const payRate = isLive ? NOT_SET : demoPayRate(member.role);
   const reportsTo = isLive ? NOT_SET : "Alex Thompson";
 
   return (
     <Card className="rounded-2xl overflow-hidden p-0">
-      {toastMsg && (
-        <div className="mx-4 mt-4 rounded-xl bg-info-soft text-info text-xs font-medium px-3 py-2">
-          {toastMsg}
-        </div>
-      )}
-
       <div className="flex items-center justify-between border-b border-border/60 px-4 pt-4 pb-3">
         <span className="text-sm font-semibold">{member.n}</span>
         <button
@@ -129,35 +107,7 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
           <div>{phone}</div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          {(
-            [
-              [MessageSquare, "Message", () => showToast(`Message ${member.n}`)],
-              [Phone, "Call", () => showToast(`Call ${member.n}`)],
-              [Mail, "Email", () => showToast(`Email ${member.n}`)],
-              [Calendar, "View rota", () => showToast("Opening rota")],
-            ] as [typeof MessageSquare, string, () => void][]
-          ).map(([Icon, label, handler]) => (
-            <button
-              key={label}
-              type="button"
-              aria-label={label}
-              onClick={handler}
-              title={label}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted/60"
-            >
-              <Icon className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          ))}
-          <button
-            type="button"
-            aria-label="More actions"
-            onClick={() => showToast("Actions menu")}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted/60"
-          >
-            <MoreHorizontal className="h-3.5 w-3.5" aria-hidden />
-          </button>
-        </div>
+        <StaffProfileQuickActions member={member} source={source} />
       </div>
 
       <div
@@ -246,7 +196,7 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
           <button
             type="button"
             onClick={() => setEditOpen(true)}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border py-2.5 text-xs font-semibold transition-colors hover:bg-muted/50"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
           >
             <Pencil className="h-3.5 w-3.5" aria-hidden />
             Edit details
@@ -255,7 +205,11 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
         <Link
           to="/staff/$staffId"
           params={{ staffId: member.id }}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          className={`flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold transition-colors ${
+            isLive
+              ? "border border-border hover:bg-muted/50"
+              : "bg-brand text-white transition-opacity hover:opacity-90"
+          }`}
         >
           <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
           Open full profile

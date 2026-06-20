@@ -15,17 +15,11 @@ export interface StaffEmptyStateInput {
   query: string;
   deptFilter: string;
   statusFilter: string;
-  attentionFilter: string;
 }
 
 /** True when any search term or non-default filter is narrowing the roster. */
 export function hasActiveStaffFilters(input: StaffEmptyStateInput): boolean {
-  return (
-    input.query.trim() !== "" ||
-    input.deptFilter !== "All" ||
-    input.statusFilter !== "All" ||
-    input.attentionFilter !== "all"
-  );
+  return input.query.trim() !== "" || input.deptFilter !== "All" || input.statusFilter !== "All";
 }
 
 /**

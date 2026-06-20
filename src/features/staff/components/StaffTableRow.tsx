@@ -19,6 +19,8 @@ interface StaffTableRowProps {
 
 const STATUS_CLS: Record<string, string> = {
   Active: "bg-success-soft text-success",
+  Inactive: "bg-muted text-muted-foreground",
+  Left: "bg-muted text-muted-foreground",
   Probation: "bg-warning-soft text-warning",
   "On Leave": "bg-accent-purple-soft text-accent-purple",
 };
