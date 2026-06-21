@@ -23,7 +23,9 @@ import {
   insertShift,
   loadShiftContext,
   markWeekDraft,
+  resolveActiveStaffAssignment,
 } from "./rotaLiveShiftMapping";
+import { executeLiveRotaShiftDuplicate } from "./duplicateLiveRotaShift";
 
 export const createLiveRotaShiftFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => liveWeekInput.extend({ shift: draftShiftInput }).parse(input))
@@ -97,36 +99,43 @@ export const duplicateLiveRotaShiftFn = createServerFn({ method: "POST" })
     const supabase = getSupabaseServerClient();
     const workspaceId = await resolveWorkspace(supabase);
     const { shift, week, location } = await loadShiftContext(supabase, workspaceId, data.shiftId);
-    const nextDay = addIsoDays(shift.shift_date, 1);
-    const weekEnd = addIsoDays(week.week_start, 6);
-    const nextDate = nextDay > weekEnd ? weekEnd : nextDay;
-    const range = buildShiftDateTimeRange({
-      weekStart: week.week_start,
-      dayIndex: dayIndexFromDates(week.week_start, nextDate),
-      start: formatTimeInTimezone(shift.starts_at, location.timezone),
-      end: formatTimeInTimezone(shift.ends_at, location.timezone),
-      timezone: location.timezone,
+    const shiftId = await executeLiveRotaShiftDuplicate({
+      shift,
+      validateAssignment: (staffId) => resolveActiveStaffAssignment(supabase, workspaceId, staffId),
+      insertCopy: async (source) => {
+        const nextDay = addIsoDays(source.shift_date, 1);
+        const weekEnd = addIsoDays(week.week_start, 6);
+        const nextDate = nextDay > weekEnd ? weekEnd : nextDay;
+        const range = buildShiftDateTimeRange({
+          weekStart: week.week_start,
+          dayIndex: dayIndexFromDates(week.week_start, nextDate),
+          start: formatTimeInTimezone(source.starts_at, location.timezone),
+          end: formatTimeInTimezone(source.ends_at, location.timezone),
+          timezone: location.timezone,
+        });
+        const { data: inserted, error } = await supabase
+          .from("shifts")
+          .insert({
+            workspace_id: workspaceId,
+            rota_week_id: week.id,
+            location_id: source.location_id,
+            department_id: source.department_id,
+            staff_member_id: source.staff_member_id,
+            shift_date: range.shiftDate,
+            starts_at: range.startsAt,
+            ends_at: range.endsAt,
+            break_minutes: source.break_minutes,
+            role_name: source.role_name,
+            assignment_status: source.assignment_status,
+          })
+          .select("id")
+          .single();
+        if (error) throw error;
+        return (inserted as { id: string }).id;
+      },
     });
-    const { data: inserted, error } = await supabase
-      .from("shifts")
-      .insert({
-        workspace_id: workspaceId,
-        rota_week_id: week.id,
-        location_id: shift.location_id,
-        department_id: shift.department_id,
-        staff_member_id: shift.staff_member_id,
-        shift_date: range.shiftDate,
-        starts_at: range.startsAt,
-        ends_at: range.endsAt,
-        break_minutes: shift.break_minutes,
-        role_name: shift.role_name,
-        assignment_status: shift.assignment_status,
-      })
-      .select("id")
-      .single();
-    if (error) throw error;
     await markWeekDraft(supabase, workspaceId, week.id);
-    return { rotaWeekId: week.id, shiftId: (inserted as { id: string }).id };
+    return { rotaWeekId: week.id, shiftId };
   });
 
 export const clearLiveRotaWeekFn = createServerFn({ method: "POST" })

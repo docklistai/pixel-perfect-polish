@@ -14,12 +14,9 @@ import { AppShell, Card, StatusBadge, type Tone } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
 import { EditStaffDialog } from "../EditStaffDialog";
 import { ProfileCard, Pair } from "./ProfileCard";
-import { ProfileDocumentsTab } from "./ProfileDocumentsTab";
-import { ProfileNotesTab } from "./ProfileNotesTab";
 import { ProfileEmptyPanel } from "./ProfileEmptyPanel";
 import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
-import { buildLiveStaffProfile } from "../../data/liveStaffProfile";
-import type { StaffProfileNote, StaffRow } from "../../types";
+import type { StaffRow } from "../../types";
 
 const NOT_RECORDED = "Not recorded";
 
@@ -64,6 +61,18 @@ function emptyPanel(tab: ProfileTab, firstName: string) {
         title: "Not enough data yet",
         description: `Work-pattern insights appear once ${firstName} has rota and time history.`,
       };
+    case "documents":
+      return {
+        icon: Briefcase,
+        title: "Documents are not connected",
+        description: "Document storage and uploads are not available for live staff profiles.",
+      };
+    case "notes":
+      return {
+        icon: Activity,
+        title: "Manager notes are not connected",
+        description: "Live manager notes are not saved yet, so note editing is unavailable.",
+      };
     default:
       return null;
   }
@@ -98,8 +107,8 @@ function LiveOverviewPanel({ member }: { member: StaffRow }) {
       <aside className="min-w-0">
         <ProfileCard title="Profile detail">
           <p className="text-xs leading-relaxed text-muted-foreground">
-            This member is managed from your live workspace. Pay, documents, skills, schedule, time,
-            and leave history fill in here as they are recorded — nothing is shown until it exists.
+            This member is managed from your live workspace. Scheduling, time, and leave history
+            appear here only when live data is available.
           </p>
         </ProfileCard>
       </aside>
@@ -112,26 +121,13 @@ interface LiveStaffProfileProps {
 }
 
 /**
- * Honest full-profile surface for a live workspace staff member. Reuses the
- * shared tab structure and the genuinely-empty-safe Documents and Notes tabs;
- * the data-driven tabs render honest empty states instead of the demo roster's
- * generated figures. No shifts, timesheets, pay, leave, or identity fields are
- * fabricated.
+ * Honest full-profile surface for a live workspace staff member. Unsupported
+ * tabs render explicit empty states rather than demo figures or fake editors.
  */
 export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
-  const profile = React.useMemo(() => buildLiveStaffProfile(member), [member]);
   const [activeTab, setActiveTab] = React.useState<ProfileTab>("overview");
-  const [notes, setNotes] = React.useState<StaffProfileNote[]>([]);
   const [editOpen, setEditOpen] = React.useState(false);
   const firstName = member.n.split(" ")[0] || member.n;
-
-  React.useEffect(() => {
-    setNotes([]);
-  }, [member.id]);
-
-  const handleSaveNote = React.useCallback((note: StaffProfileNote) => {
-    setNotes((prev) => [note, ...prev]);
-  }, []);
 
   const empty = emptyPanel(activeTab, firstName);
 
@@ -207,8 +203,6 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
         aria-labelledby={`staff-profile-tab-${activeTab}`}
       >
         {activeTab === "overview" && <LiveOverviewPanel member={member} />}
-        {activeTab === "documents" && <ProfileDocumentsTab profile={profile} />}
-        {activeTab === "notes" && <ProfileNotesTab notes={notes} onSaveNote={handleSaveNote} />}
         {empty && (
           <ProfileEmptyPanel
             icon={empty.icon}

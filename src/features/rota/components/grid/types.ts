@@ -13,6 +13,7 @@ export type RotaGridDay = {
 export type ShiftActionHandlers = {
   readOnly: boolean;
   serverBacked: boolean;
+  canCopyShiftAssignment: (shift: Pick<DraftShift, "staffId">) => boolean;
   onReadOnlyAttempt: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;
   /** Duplicate the shift to the next day (prototype ⌘D behaviour). */
@@ -31,6 +32,7 @@ export type ShiftActionHandlers = {
 
 /** Per-shift menu callbacks passed from the grid cell into pills and the action menu. */
 export type ShiftMenuHandlers = {
+  canCopyShiftAssignment: ShiftActionHandlers["canCopyShiftAssignment"];
   onEditInline: () => void;
   onOpen: (shiftId: ShiftId) => void;
   onDuplicate: (shiftId: ShiftId) => MaybePromise<void>;

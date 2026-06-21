@@ -1,7 +1,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import type { useRotaDraftController } from "./useRotaDraftController";
-import type { ShiftId } from "../types";
+import type { DraftShift, ShiftId } from "../types";
 import {
   toastClearedDraft,
   toastColourDraft,
@@ -10,12 +10,9 @@ import {
   toastMarkedOpenDraft,
   toastResetColourDraft,
 } from "../lib/rotaActionToasts";
-import {
-  buildRepeatShiftFeedback,
-  executeRepeatShiftPlan,
-  planRepeatShift,
-  type RepeatShiftResult,
-} from "../lib/repeatShift";
+import { buildRepeatShiftFeedback, type RepeatShiftResult } from "../lib/repeatShift";
+import { isShiftCopyAssignable } from "../lib/assignableStaff";
+import { executeDuplicateShiftCopy, executeRepeatShiftCopy } from "../lib/shiftCopyActions";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -59,10 +56,19 @@ export function useRotaShiftActions(rota: RotaController) {
 
   const handleDuplicateShift = async (shiftId: string) => {
     if (readOnly) return block();
-    const newId = await Promise.resolve(rota.duplicateShiftToNextDay(shiftId)).catch(() => null);
-    if (!newId) return;
+    const outcome = await executeDuplicateShiftCopy(
+      findShift(shiftId),
+      rota.assignableStaff,
+      rota.duplicateShiftToNextDay,
+    ).catch(() => null);
+    if (!outcome) return;
+    if (outcome.status === "blocked") {
+      toast.info("Shift not duplicated", { description: outcome.reason });
+      return;
+    }
+    if (!outcome.shiftId) return;
     if (isLive) return;
-    toastDuplicateDraft(rota, newId);
+    toastDuplicateDraft(rota, outcome.shiftId);
   };
 
   const handleRepeatShift = async (
@@ -73,16 +79,18 @@ export function useRotaShiftActions(rota: RotaController) {
       block();
       return null;
     }
-    const sourceShift = findShift(shiftId);
-    if (!sourceShift) {
-      toast.error("Shift repeat failed", {
-        description: "The source shift is no longer available.",
-      });
+    const outcome = await executeRepeatShiftCopy({
+      source: findShift(shiftId),
+      dayIndexes,
+      shifts: rota.draftShifts,
+      assignableStaff: rota.assignableStaff,
+      addShift: rota.addShift,
+    });
+    if (outcome.status === "blocked") {
+      toast.info("Shift not repeated", { description: outcome.reason });
       return null;
     }
-
-    const plan = planRepeatShift(sourceShift, dayIndexes, rota.draftShifts);
-    const result = await executeRepeatShiftPlan(plan, rota.addShift);
+    const result = outcome.result;
     const feedback = buildRepeatShiftFeedback(result);
     toast[feedback.tone](feedback.title, { description: feedback.description });
     return result;
@@ -146,6 +154,8 @@ export function useRotaShiftActions(rota: RotaController) {
     setFillSummary,
     block,
     blockDraftOnly,
+    canCopyShiftAssignment: (shift: Pick<DraftShift, "staffId">) =>
+      isShiftCopyAssignable(shift, rota.assignableStaff),
     handleApplySuggestions,
     handleCopyLastWeek,
     handleDuplicateShift,

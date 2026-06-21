@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DEPT_COLOUR_PRESETS } from "../../lib/deptColours";
+import { COPY_ASSIGNMENT_BLOCKED_REASON } from "../../lib/assignableStaff";
 import type { DraftShift } from "../../types";
 import type { ShiftMenuHandlers } from "./types";
 
@@ -57,6 +58,7 @@ export function ShiftActionMenu({
 }) {
   const isOpen = shift.staffId === null;
   const hasOverride = Boolean(shift.colourOverride || shift.deptOverride);
+  const canDuplicate = handlers.canCopyShiftAssignment(shift);
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
@@ -82,10 +84,21 @@ export function ShiftActionMenu({
           <ExternalLink className="h-4 w-4" aria-hidden />
           Open details
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => handlers.onDuplicate(shift.id)}>
+        <DropdownMenuItem
+          disabled={!canDuplicate}
+          className="items-start"
+          onSelect={() => handlers.onDuplicate(shift.id)}
+        >
           <Copy className="h-4 w-4" aria-hidden />
-          Duplicate to next day
-          <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span>Duplicate to next day</span>
+            {!canDuplicate && (
+              <span className="whitespace-normal text-[11px] text-muted-foreground">
+                {COPY_ASSIGNMENT_BLOCKED_REASON}
+              </span>
+            )}
+          </span>
+          {canDuplicate && <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {!isOpen && (

@@ -6,10 +6,12 @@ import { StaffBulkBar } from "./StaffBulkBar";
 import { StaffTableRow } from "./StaffTableRow";
 import { filterStaffRows } from "../lib/staffListPresentation";
 import { resolveStaffEmptyState } from "../lib/staffEmptyState";
+import { getStaffSurfaceCapabilities } from "../lib/staffSurfaceCapabilities";
 import type { StaffRow } from "../types";
 
 interface StaffTableProps {
   rows: StaffRow[];
+  source: "live" | "demo";
   /** The previewed member, or null when nothing is selected (e.g. empty roster). */
   selected: StaffRow | null;
   query: string;
@@ -29,6 +31,7 @@ const PAGE_SIZE = 10;
 
 export function StaffTable({
   rows,
+  source,
   selected,
   query,
   onQueryChange,
@@ -43,6 +46,7 @@ export function StaffTable({
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [page, setPage] = React.useState(1);
   const [actionToast, setActionToast] = React.useState<string | null>(null);
+  const { showDemoBulkActions, showDemoRowActions } = getStaffSurfaceCapabilities(source);
 
   const filteredRows = React.useMemo(
     () =>
@@ -100,7 +104,7 @@ export function StaffTable({
         />
       </div>
 
-      {selectedIds.size > 0 && (
+      {showDemoBulkActions && selectedIds.size > 0 && (
         <StaffBulkBar
           count={selectedIds.size}
           onMessage={() => toast(`${selectedIds.size} staff messaged`)}
@@ -114,15 +118,17 @@ export function StaffTable({
         <table className={`${compact ? "min-w-[700px]" : "min-w-[860px]"} w-full text-sm`}>
           <thead>
             <tr className="border-y border-border text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-              <th className="py-2.5 px-3 w-9">
-                <input
-                  type="checkbox"
-                  aria-label="Select all"
-                  checked={filteredRows.length > 0 && selectedIds.size === filteredRows.length}
-                  onChange={toggleAll}
-                  className="rounded"
-                />
-              </th>
+              {showDemoBulkActions && (
+                <th className="py-2.5 px-3 w-9">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all"
+                    checked={filteredRows.length > 0 && selectedIds.size === filteredRows.length}
+                    onChange={toggleAll}
+                    className="rounded"
+                  />
+                </th>
+              )}
               <th className="text-left py-2.5 px-2">Staff member</th>
               <th className="text-left py-2.5">Role</th>
               <th className="text-left py-2.5">Department</th>
@@ -137,6 +143,8 @@ export function StaffTable({
               <StaffTableRow
                 key={r.id}
                 row={r}
+                showSelection={showDemoBulkActions}
+                showDemoActions={showDemoRowActions}
                 isSelected={selected?.id === r.id}
                 isChecked={selectedIds.has(r.id)}
                 onSelect={() => onSelectMember(r)}

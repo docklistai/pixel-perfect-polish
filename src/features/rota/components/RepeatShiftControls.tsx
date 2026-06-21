@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Copy } from "lucide-react";
 import { ActionButton } from "@/components/dl";
+import { COPY_ASSIGNMENT_BLOCKED_REASON } from "../lib/assignableStaff";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 
 type DayEntry = { d: string };
@@ -9,6 +10,7 @@ export function RepeatShiftControls({
   sourceDayIndex,
   days,
   disabled,
+  copyAllowed,
   onActiveChange,
   onBusyChange,
   onRepeat,
@@ -17,6 +19,7 @@ export function RepeatShiftControls({
   sourceDayIndex: number;
   days: DayEntry[];
   disabled: boolean;
+  copyAllowed: boolean;
   onActiveChange: (active: boolean) => void;
   onBusyChange: (busy: boolean) => void;
   onRepeat: (dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
@@ -46,7 +49,7 @@ export function RepeatShiftControls({
   };
 
   const submit = async () => {
-    if (selectedDays.size === 0) return;
+    if (selectedDays.size === 0 || !copyAllowed) return;
     onBusyChange(true);
     let shouldClose = false;
     try {
@@ -70,15 +73,22 @@ export function RepeatShiftControls({
 
   if (!active) {
     return (
-      <ActionButton
-        variant="secondary"
-        size="sm"
-        icon={Copy}
-        disabled={disabled}
-        onClick={() => setRepeatActive(true)}
-      >
-        Repeat shift...
-      </ActionButton>
+      <>
+        <ActionButton
+          variant="secondary"
+          size="sm"
+          icon={Copy}
+          disabled={disabled || !copyAllowed}
+          onClick={() => setRepeatActive(true)}
+        >
+          Repeat shift...
+        </ActionButton>
+        {!copyAllowed && (
+          <p className="w-full text-[11px] text-muted-foreground">
+            {COPY_ASSIGNMENT_BLOCKED_REASON}
+          </p>
+        )}
+      </>
     );
   }
 

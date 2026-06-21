@@ -33,6 +33,11 @@ interface DepartmentRow {
   name: string;
 }
 
+interface ActiveStaffAssignment {
+  id: string;
+  departmentId: string | null;
+}
+
 function normalise(value: string): string {
   return value
     .toLowerCase()
@@ -56,23 +61,35 @@ function roleMatchesDepartment(role: string, departmentName: string): boolean {
   );
 }
 
+export async function resolveActiveStaffAssignment(
+  supabase: SupabaseClient,
+  workspaceId: string,
+  staffId: string,
+): Promise<ActiveStaffAssignment> {
+  const { data, error } = await supabase
+    .from("staff_members")
+    .select("id, department_id, employment_status")
+    .eq("workspace_id", workspaceId)
+    .eq("id", staffId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data || data.employment_status !== "active") {
+    throw new Error("Assigned staff member is not active in this workspace");
+  }
+  return {
+    id: data.id as string,
+    departmentId: (data.department_id as string | null) ?? null,
+  };
+}
+
 async function resolveDepartmentId(
   supabase: SupabaseClient,
   workspaceId: string,
   input: { staffId: string | null; role: string; fallbackDepartmentId?: string },
 ): Promise<string> {
   if (input.staffId) {
-    const { data, error } = await supabase
-      .from("staff_members")
-      .select("id, department_id, employment_status")
-      .eq("workspace_id", workspaceId)
-      .eq("id", input.staffId)
-      .maybeSingle();
-    if (error) throw error;
-    if (!data || data.employment_status !== "active") {
-      throw new Error("Assigned staff member is not active in this workspace");
-    }
-    if (data.department_id) return data.department_id as string;
+    const assignment = await resolveActiveStaffAssignment(supabase, workspaceId, input.staffId);
+    if (assignment.departmentId) return assignment.departmentId;
   }
 
   if (input.fallbackDepartmentId) return input.fallbackDepartmentId;

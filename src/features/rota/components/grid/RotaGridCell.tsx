@@ -123,6 +123,7 @@ export function RotaGridCell({
 
   const menuHandlers = React.useMemo<ShiftMenuHandlers>(
     () => ({
+      canCopyShiftAssignment: handlers.canCopyShiftAssignment,
       onEditInline: startEditing,
       onOpen: handlers.onShiftOpen,
       onDuplicate: handlers.onShiftDuplicate,

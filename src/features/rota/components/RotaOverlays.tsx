@@ -57,7 +57,7 @@ export function RotaOverlays({
         open={openOverlays.addShift}
         onOpenChange={(open) => setOverlay("addShift", open)}
         days={rota.days}
-        staff={rota.staff}
+        staff={rota.assignableStaff}
         roles={rota.roleOptions}
         onSubmit={rota.addShift}
       />
@@ -88,7 +88,7 @@ export function RotaOverlays({
         weekLabel={rota.weekLabel}
         days={rota.days}
         shifts={rota.draftShifts}
-        staff={rota.staff}
+        staff={rota.assignableStaff}
         onApplySuggestions={onApplySuggestions}
       />
       <RotaFiltersDrawer
@@ -116,6 +116,7 @@ export function RotaOverlays({
         key={rota.selectedShiftId ?? "none"}
         shift={rota.selectedShift}
         staff={rota.staff}
+        assignableStaff={rota.assignableStaff}
         days={rota.days}
         onClose={rota.closeShiftDetail}
         onUpdate={rota.updateShift}

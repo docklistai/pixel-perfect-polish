@@ -1,7 +1,16 @@
 import { createFileRoute, Outlet, useChildMatches } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, Card, PageHeader, ActionButton } from "@/components/dl";
-import { Users, CheckCircle2, UserPlus, KeyRound, CirclePause, UserRoundX } from "lucide-react";
+import {
+  Users,
+  CheckCircle2,
+  UserPlus,
+  KeyRound,
+  CirclePause,
+  UserRoundX,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 import { useWorkspaceStaff } from "@/features/staff/hooks/useWorkspaceStaff";
 import { useWorkspaceDepartments } from "@/features/staff/hooks/useWorkspaceDepartments";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
@@ -42,7 +51,7 @@ function StaffPage() {
 }
 
 function StaffListPage() {
-  const { rows: staffRows, source } = useWorkspaceStaff();
+  const { rows: staffRows, source, state } = useWorkspaceStaff();
   const stats = buildStaffStats(staffRows);
   const [addStaffOpen, setAddStaffOpen] = React.useState(false);
   const [accessCodesOpen, setAccessCodesOpen] = React.useState(false);
@@ -86,55 +95,78 @@ function StaffListPage() {
         }
       />
 
-      <div className="grid grid-cols-12 gap-5">
-        <div className={`col-span-12 ${isProfilePanelOpen ? "lg:col-span-9" : ""} space-y-5`}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map((s) => (
-              <Card key={s.label} className="rounded-2xl p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${toneBg[s.tone]}`}
-                  >
-                    {React.createElement(statIcons[s.key], {
-                      className: "h-5 w-5",
-                      "aria-hidden": true,
-                    })}
+      {state === "ready" ? (
+        <div className="grid grid-cols-12 gap-5">
+          <div className={`col-span-12 ${isProfilePanelOpen ? "lg:col-span-9" : ""} space-y-5`}>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {stats.map((s) => (
+                <Card key={s.label} className="rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${toneBg[s.tone]}`}
+                    >
+                      {React.createElement(statIcons[s.key], {
+                        className: "h-5 w-5",
+                        "aria-hidden": true,
+                      })}
+                    </div>
+                    <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-tight">
+                      {s.label}
+                    </div>
                   </div>
-                  <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground leading-tight">
-                    {s.label}
-                  </div>
-                </div>
-                <div className="text-3xl font-bold tabular-nums">{s.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{s.sub}</div>
-              </Card>
-            ))}
-          </div>
+                  <div className="text-3xl font-bold tabular-nums">{s.value}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{s.sub}</div>
+                </Card>
+              ))}
+            </div>
 
-          <StaffTable
-            rows={staffRows}
-            selected={selectedMember}
-            query={query}
-            onQueryChange={setQuery}
-            deptFilter={deptFilter}
-            onDeptChange={setDeptFilter}
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-            onSelectMember={handleSelectMember}
-            onAddStaff={() => setAddStaffOpen(true)}
-            compact={isProfilePanelOpen}
-          />
-        </div>
-
-        {isProfilePanelOpen && selectedMember && (
-          <div className="col-span-12 lg:col-span-3 space-y-4 self-start lg:sticky lg:top-[88px]">
-            <StaffProfilePanel
-              member={selectedMember}
+            <StaffTable
+              rows={staffRows}
               source={source}
-              onClose={() => setIsProfilePanelOpen(false)}
+              selected={selectedMember}
+              query={query}
+              onQueryChange={setQuery}
+              deptFilter={deptFilter}
+              onDeptChange={setDeptFilter}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              onSelectMember={handleSelectMember}
+              onAddStaff={() => setAddStaffOpen(true)}
+              compact={isProfilePanelOpen}
             />
           </div>
-        )}
-      </div>
+
+          {isProfilePanelOpen && selectedMember && (
+            <div className="col-span-12 lg:col-span-3 space-y-4 self-start lg:sticky lg:top-[88px]">
+              <StaffProfilePanel
+                member={selectedMember}
+                source={source}
+                onClose={() => setIsProfilePanelOpen(false)}
+              />
+            </div>
+          )}
+        </div>
+      ) : (
+        <Card className="rounded-2xl p-8">
+          <div className="flex flex-col items-center gap-3 text-center">
+            {state === "loading" ? (
+              <Loader2 className="size-6 animate-spin text-brand" aria-hidden />
+            ) : (
+              <AlertTriangle className="size-6 text-warning" aria-hidden />
+            )}
+            <div>
+              <h2 className="text-base font-semibold">
+                {state === "loading" ? "Loading staff" : "Staff could not be loaded"}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {state === "loading"
+                  ? "Fetching your workspace roster."
+                  : "Refresh the page to try loading your workspace roster again."}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <AddStaffDialog
         open={addStaffOpen}

@@ -51,12 +51,10 @@ export function useRotaDraftController() {
     removeShiftNow: livePersistence.removeShiftNow,
   });
 
-  // Source the roster, shifts, and leave from the live workspace when a manager
-  // read succeeds; otherwise stay on the demo store so Harbour View keeps working.
-  // Live-capable manager sessions stay read-only only while a live read is
-  // loading or has failed and the demo fallback is visible.
+  // Live-capable sessions stay read-only while live data loads or has failed.
   const readOnly = live.enabled && !live.isLive;
   const roster = live.isLive ? live.staff : staff;
+  const assignableStaff = live.isLive ? live.assignableStaff : staff;
   const sourceShifts = live.isLive ? live.shifts : weekDraft.draftShifts;
   const leaveRequests = live.isLive ? live.leaveRequests : demoLeaveRequests;
   const liveActions = live.isLive ? livePersistence : null;
@@ -146,6 +144,7 @@ export function useRotaDraftController() {
     confirmation: confirmations.confirmation,
     days,
     staff: roster,
+    assignableStaff,
     roleOptions: Array.from(new Set(roster.map((row) => row.role))),
     filters,
     setFilters,

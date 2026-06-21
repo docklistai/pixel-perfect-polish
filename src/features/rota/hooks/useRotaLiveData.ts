@@ -4,6 +4,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceStaffFn } from "@/features/staff/api/staffLiveData";
 import type { StaffRow } from "@/features/staff/types";
+import { getAssignableStaffRows } from "../lib/assignableStaff";
 import {
   fetchWorkspaceRotaWeekFn,
   type LiveRotaLocation,
@@ -37,6 +38,7 @@ export type RotaLiveData = {
   setLocationId: (locationId: string) => void;
   refetchWeek: () => Promise<void>;
   staff: StaffMember[];
+  assignableStaff: StaffMember[];
   shifts: DraftShift[];
   leaveRequests: LeaveRequest[];
 };
@@ -63,14 +65,13 @@ const DEMO: RotaLiveData = {
   setLocationId: () => undefined,
   refetchWeek: async () => undefined,
   staff: [],
+  assignableStaff: [],
   shifts: [],
   leaveRequests: [],
 };
 
-/** Deterministic chip tones for the roster (cosmetic only — colour is not data). */
 const TONE_CYCLE: ShiftTone[] = ["info", "warning", "purple", "success", "danger"];
 
-/** StaffRow (the /staff live shape) → the rota grid's StaffMember shape. */
 function toStaffMember(row: StaffRow, index: number): StaffMember {
   return {
     id: row.id,
@@ -85,10 +86,8 @@ function toStaffMember(row: StaffRow, index: number): StaffMember {
 /**
  * Live, manager-scoped rota source for /rota. Shares the /staff roster read (same
  * query key) so the grid roster and live shift assignments resolve against the
- * same staff ids. `isLive` is true only when both the roster and the week read
- * succeed, so the grid never mixes live shifts with the demo roster (or vice
- * versa). Manager sessions fall back to demo while loading or on a failed read.
- * Signed-out users are redirected by the route guard.
+ * same staff ids. Live mode starts only after both reads succeed, so live shifts
+ * never mix with the demo roster.
  */
 export function useRotaLiveData(weekOffset: number): RotaLiveData {
   const { auth } = rotaRouteApi.useRouteContext();
@@ -174,6 +173,7 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     setLocationId: setSelectedLocationId,
     refetchWeek,
     staff: (staffQuery.data ?? []).map(toStaffMember),
+    assignableStaff: getAssignableStaffRows(staffQuery.data ?? []).map(toStaffMember),
     shifts: weekQuery.data.shifts,
     leaveRequests: leaveQuery.data ?? [],
   };

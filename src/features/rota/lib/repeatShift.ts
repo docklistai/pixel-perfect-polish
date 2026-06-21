@@ -1,4 +1,5 @@
-import type { DraftShift, DraftShiftInput, RotaDayIndex } from "../types";
+import type { DraftShift, DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
+import { isShiftCopyAssignable } from "./assignableStaff";
 import { getShiftDurationMinutes, parseHHMMToMinutes } from "./draftRota";
 
 export interface RepeatShiftPlan {
@@ -88,6 +89,16 @@ export function planRepeatShift(
   }
 
   return { inputs, skippedCount };
+}
+
+export function planAssignableRepeatShift(
+  source: DraftShift,
+  dayIndexes: number[],
+  shifts: DraftShift[],
+  assignableStaff: StaffMember[],
+): RepeatShiftPlan | null {
+  if (!isShiftCopyAssignable(source, assignableStaff)) return null;
+  return planRepeatShift(source, dayIndexes, shifts);
 }
 
 export async function executeRepeatShiftPlan(

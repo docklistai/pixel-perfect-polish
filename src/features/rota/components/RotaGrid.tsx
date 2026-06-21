@@ -30,6 +30,7 @@ export function RotaGrid({
   onStaffSearchChange,
   onClearFilters,
   readOnly,
+  canCopyShiftAssignment,
   onReadOnlyAttempt,
   onShiftOpen,
   onShiftDuplicate,
@@ -65,6 +66,7 @@ export function RotaGrid({
     () => ({
       readOnly,
       serverBacked,
+      canCopyShiftAssignment,
       onReadOnlyAttempt,
       onShiftOpen,
       onShiftDuplicate,
@@ -91,6 +93,7 @@ export function RotaGrid({
       onShiftUpdate,
       readOnly,
       serverBacked,
+      canCopyShiftAssignment,
     ],
   );
   const totalOpenShifts = React.useMemo(

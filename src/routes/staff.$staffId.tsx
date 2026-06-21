@@ -30,31 +30,41 @@ function StaffProfilePage() {
 
   // The live roster resolves real workspace members so they reach a full (if
   // sparse) profile instead of a dead-end. Demo ids never need it.
-  const { rows, source, isLoading } = useWorkspaceStaff();
+  const { rows, source, state } = useWorkspaceStaff();
 
-  if (demoProfile) {
+  if (source === "demo" && demoProfile) {
     return <DemoStaffProfilePage profile={demoProfile} />;
   }
+
+  if (state !== "ready") return <StaffProfileMissing state={state} />;
 
   const liveMember = source === "live" ? (rows.find((row) => row.id === staffId) ?? null) : null;
   if (liveMember) {
     return <LiveStaffProfile member={liveMember} />;
   }
 
-  return <StaffProfileMissing loading={isLoading} />;
+  return <StaffProfileMissing state={state} />;
 }
 
-function StaffProfileMissing({ loading }: { loading: boolean }) {
+function StaffProfileMissing({ state }: { state: "loading" | "error" | "ready" }) {
+  const loading = state === "loading";
+  const errored = state === "error";
   return (
     <AppShell>
       <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
         <h1 className="text-xl font-semibold">
-          {loading ? "Loading profile…" : "Staff member not found"}
+          {loading
+            ? "Loading profile…"
+            : errored
+              ? "Profile could not be loaded"
+              : "Staff member not found"}
         </h1>
         <p className="max-w-md text-sm text-muted-foreground">
           {loading
             ? "Fetching this team member from your workspace."
-            : "This staff profile could not be found. They may have been removed from the workspace."}
+            : errored
+              ? "Refresh the page to try loading this workspace profile again."
+              : "This staff profile could not be found. They may have been removed from the workspace."}
         </p>
         <Link
           to="/staff"

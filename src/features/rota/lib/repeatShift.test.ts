@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { withApprovedLeaveConflictStatus } from "@/features/leave/lib/leaveRotaConflicts";
 import type { LeaveRequest } from "@/features/leave/types";
-import type { DraftShift } from "../types";
+import type { DraftShift, StaffMember } from "../types";
 import { makeDraftShift } from "./draftRota";
-import { buildRepeatShiftFeedback, executeRepeatShiftPlan, planRepeatShift } from "./repeatShift";
+import {
+  buildRepeatShiftFeedback,
+  executeRepeatShiftPlan,
+  planAssignableRepeatShift,
+  planRepeatShift,
+} from "./repeatShift";
 
 const source: DraftShift = {
   id: "shift-1",
@@ -18,6 +23,38 @@ const source: DraftShift = {
   deptOverride: "Kitchen",
   colourOverride: "amber",
 };
+
+const activeStaff: StaffMember[] = [
+  {
+    id: "staff-1",
+    name: "Sam Rivers",
+    role: "Chef",
+    hrs: "40h",
+    img: 1,
+    tone: "info",
+  },
+];
+
+describe("planAssignableRepeatShift", () => {
+  it("does not produce repeat work for a non-assignable source", () => {
+    expect(planAssignableRepeatShift(source, [1], [source], [])).toBeNull();
+  });
+
+  it("allows an active assigned source to repeat", () => {
+    expect(planAssignableRepeatShift(source, [1], [source], activeStaff)?.inputs).toHaveLength(1);
+  });
+
+  it("allows an open source to repeat", () => {
+    const openSource: DraftShift = {
+      ...source,
+      staffId: null,
+      status: "open",
+      tone: "open",
+    };
+
+    expect(planAssignableRepeatShift(openSource, [1], [openSource], [])?.inputs).toHaveLength(1);
+  });
+});
 
 describe("planRepeatShift", () => {
   it("preserves local department and colour overrides in repeat inputs", () => {

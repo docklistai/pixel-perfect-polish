@@ -3,12 +3,15 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { CalendarDays, Eye, Plane, ShieldOff, UserMinus } from "lucide-react";
 import { RowActionMenu } from "@/components/RowActionMenu";
+import type { RowActionItem } from "@/components/RowActionMenu";
 import { useIntents } from "@/lib/interactionIntents";
 import { StaffMonogram } from "./StaffMonogram";
 import type { StaffRow } from "../types";
 
 interface StaffTableRowProps {
   row: StaffRow;
+  showSelection: boolean;
+  showDemoActions: boolean;
   isSelected: boolean;
   isChecked: boolean;
   onSelect: () => void;
@@ -33,6 +36,8 @@ const AVAIL_BAR: Record<string, string> = {
 
 export function StaffTableRow({
   row: r,
+  showSelection,
+  showDemoActions,
   isSelected,
   isChecked,
   onSelect,
@@ -43,7 +48,7 @@ export function StaffTableRow({
   const { requestIntent } = useIntents();
   const pct = parseInt(r.avail, 10) || 0;
 
-  const actions = [
+  const actions: RowActionItem[] = [
     {
       label: "View profile",
       icon: Eye,
@@ -65,25 +70,29 @@ export function StaffTableRow({
         requestIntent("leave.new");
       },
     },
-    { kind: "separator" as const },
-    {
-      label: "Suspend access",
-      icon: ShieldOff,
-      onSelect: () =>
-        toast.info(`Suspend access for ${r.n}`, {
-          description: "Suspending pauses shifts and sign-in until you reactivate them.",
-        }),
-    },
-    {
-      label: "Remove from team",
-      icon: UserMinus,
-      danger: true,
-      onSelect: () =>
-        toast.warning(`Remove ${r.n}`, {
-          description: "Removing a team member is permanent — contact support to proceed.",
-        }),
-    },
   ];
+  if (showDemoActions) {
+    actions.push(
+      { kind: "separator" },
+      {
+        label: "Suspend access",
+        icon: ShieldOff,
+        onSelect: () =>
+          toast.info(`Suspend access for ${r.n}`, {
+            description: "Demo action only — no live access is changed.",
+          }),
+      },
+      {
+        label: "Remove from team",
+        icon: UserMinus,
+        danger: true,
+        onSelect: () =>
+          toast.warning(`Remove ${r.n}`, {
+            description: "Demo action only — no team member is removed.",
+          }),
+      },
+    );
+  }
 
   return (
     <tr
@@ -100,15 +109,17 @@ export function StaffTableRow({
         isSelected ? "bg-[rgba(14,165,162,0.10)]" : "hover:bg-muted/40"
       }`}
     >
-      <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
-        <input
-          type="checkbox"
-          aria-label={`Select ${r.n}`}
-          checked={isChecked}
-          onChange={onCheck}
-          className="rounded border-border"
-        />
-      </td>
+      {showSelection && (
+        <td className="py-3 px-3" onClick={(e) => e.stopPropagation()}>
+          <input
+            type="checkbox"
+            aria-label={`Select ${r.n}`}
+            checked={isChecked}
+            onChange={onCheck}
+            className="rounded border-border"
+          />
+        </td>
+      )}
       <td className="py-3 px-2">
         <div className="flex items-center gap-2.5">
           <StaffMonogram name={r.n} />

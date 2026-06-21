@@ -9,6 +9,7 @@ import { EditStaffDialog } from "./EditStaffDialog";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
 import { buildLiveStaffProfile } from "../data/liveStaffProfile";
+import { getCompactLiveProfileEmptyCopy } from "../lib/staffSurfaceCapabilities";
 
 interface StaffProfilePanelProps {
   member: StaffRow;
@@ -51,7 +52,7 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
   // Demo rows have a rich fixture profile; live rows get a sparse, honest
   // profile (real role/department/contract/hours, empty everything else).
   const profile =
-    mockStaffProfiles[member.id] ?? (source === "live" ? buildLiveStaffProfile(member) : null);
+    source === "live" ? buildLiveStaffProfile(member) : (mockStaffProfiles[member.id] ?? null);
   const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
   const [editOpen, setEditOpen] = React.useState(false);
 
@@ -152,7 +153,9 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
         {activeTab === "Documents" && (
           <div className="space-y-0">
             {docs.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No documents on record.</p>
+              <p className="text-xs text-muted-foreground">
+                {isLive ? getCompactLiveProfileEmptyCopy("documents") : "No documents on record."}
+              </p>
             ) : (
               docs.map((d) => {
                 const { label, cls } = docStatusLabel(d.status);
@@ -173,7 +176,9 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
         {activeTab === "Notes" && (
           <div className="space-y-2">
             {notes.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No manager notes recorded.</p>
+              <p className="text-xs text-muted-foreground">
+                {isLive ? getCompactLiveProfileEmptyCopy("notes") : "No manager notes recorded."}
+              </p>
             ) : (
               notes.slice(0, 4).map((n, i) => (
                 <div key={i} className="pb-2 border-b border-border/40 last:border-0 last:pb-0">

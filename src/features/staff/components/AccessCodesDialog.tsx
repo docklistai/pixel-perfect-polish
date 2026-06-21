@@ -2,6 +2,7 @@ import * as React from "react";
 import { Check, Copy, KeyRound, Loader2 } from "lucide-react";
 import { ActionButton, DialogShell, FormRow, FormSection } from "@/components/dl";
 import { issueStaffPortalCodeFn, issueWorkspacePortalCodeFn } from "../api/issuePortalCode";
+import { getStaffSurfaceCapabilities } from "../lib/staffSurfaceCapabilities";
 import type { IssuePortalCodeResult, StaffRow } from "../types";
 
 interface AccessCodesDialogProps {
@@ -65,6 +66,7 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
   const [staffId, setStaffId] = React.useState("");
   const [staffLoading, setStaffLoading] = React.useState(false);
   const [staffResult, setStaffResult] = React.useState<IssuePortalCodeResult | null>(null);
+  const { canIssueAccessCodes } = getStaffSurfaceCapabilities(source);
 
   React.useEffect(() => {
     if (!open) {
@@ -75,6 +77,7 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
   }, [open]);
 
   const issueWorkspace = async () => {
+    if (!canIssueAccessCodes) return;
     setWsLoading(true);
     setWsResult(null);
     try {
@@ -87,7 +90,7 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
   };
 
   const issueStaff = async () => {
-    if (!staffId) return;
+    if (!canIssueAccessCodes || !staffId) return;
     setStaffLoading(true);
     setStaffResult(null);
     try {
@@ -125,7 +128,11 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
             One shared code for the whole workspace. Every staff member enters it alongside their
             own personal code.
           </p>
-          <ActionButton icon={KeyRound} onClick={issueWorkspace} disabled={wsLoading}>
+          <ActionButton
+            icon={KeyRound}
+            onClick={issueWorkspace}
+            disabled={!canIssueAccessCodes || wsLoading}
+          >
             {wsLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : wsResult?.ok ? (
@@ -161,7 +168,11 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
               ))}
             </select>
           </FormRow>
-          <ActionButton icon={KeyRound} onClick={issueStaff} disabled={staffLoading || !staffId}>
+          <ActionButton
+            icon={KeyRound}
+            onClick={issueStaff}
+            disabled={!canIssueAccessCodes || staffLoading || !staffId}
+          >
             {staffLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (

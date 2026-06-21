@@ -28,6 +28,7 @@ function formStateFromShift(shift: DraftShift): FormState {
 export function ShiftDetailDrawer({
   shift,
   staff,
+  assignableStaff,
   days,
   onClose,
   onUpdate,
@@ -37,6 +38,7 @@ export function ShiftDetailDrawer({
 }: {
   shift: DraftShift | null;
   staff: StaffMember[];
+  assignableStaff: StaffMember[];
   days: DayEntry[];
   onClose: () => void;
   onUpdate: (id: ShiftId, patch: Partial<DraftShift>) => MaybePromise<void>;
@@ -72,6 +74,9 @@ export function ShiftDetailDrawer({
   const staffName = isOpen
     ? "Open shift"
     : (staff.find((s) => s.id === shift.staffId)?.name ?? "Unknown");
+  const currentStaff = staff.find((member) => member.id === shift.staffId);
+  const currentAssignmentIsAssignable =
+    shift.staffId === null || assignableStaff.some((member) => member.id === shift.staffId);
   const meta = isConflict ? (
     <StatusBadge tone="warning">Conflict</StatusBadge>
   ) : isOpen ? (
@@ -86,7 +91,9 @@ export function ShiftDetailDrawer({
     form.start !== shift.start ||
     form.end !== shift.end ||
     form.assignTo !== (shift.staffId ?? "");
-  const canSave = !saving && isDirty && form.role.trim() !== "" && timesValid;
+  const hasValidAssignment =
+    form.assignTo === "" || assignableStaff.some((member) => member.id === form.assignTo);
+  const canSave = !saving && isDirty && form.role.trim() !== "" && timesValid && hasValidAssignment;
   const timeErrorId = "shift-edit-time-error";
   const roleErrorId = "shift-edit-role-error";
   const saveHint = !isDirty
@@ -211,13 +218,23 @@ export function ShiftDetailDrawer({
             className="w-full h-9 rounded-lg border border-border bg-background px-2 text-sm"
           >
             <option value="">Open shift (unassigned)</option>
-            {staff.map((s) => (
+            {!currentAssignmentIsAssignable && currentStaff && (
+              <option value={currentStaff.id} disabled>
+                {currentStaff.name} · inactive — reassign or mark open
+              </option>
+            )}
+            {assignableStaff.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {s.role}
               </option>
             ))}
           </select>
         </FormRow>
+        {!currentAssignmentIsAssignable && form.assignTo === shift.staffId && (
+          <p className="text-[11px] text-warning">
+            This staff member is no longer active. Reassign the shift or mark it open before saving.
+          </p>
+        )}
         {saveHint && <p className="text-[11px] text-muted-foreground">{saveHint}</p>}
       </FormSection>
 
@@ -238,6 +255,7 @@ export function ShiftDetailDrawer({
             sourceDayIndex={shift.dayIndex}
             days={days}
             disabled={saving}
+            copyAllowed={currentAssignmentIsAssignable}
             onActiveChange={setRepeatActive}
             onBusyChange={setSaving}
             onRepeat={(dayIndexes) => onRepeat(shift.id, dayIndexes)}
