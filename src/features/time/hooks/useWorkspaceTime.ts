@@ -3,6 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { fetchWorkspaceTimeFn } from "../api/timeLiveData";
+import { resolveTimeView, type TimeViewState } from "../lib/timeView";
 import type { StoredTimesheetRow } from "../types";
 
 const timeRouteApi = getRouteApi("/time");
@@ -15,6 +16,8 @@ export type WorkspaceTime = {
   source: "live" | "demo";
   isLoading: boolean;
   isError: boolean;
+  /** Honest render state — drives loading/error/empty surfaces, never demo blending. */
+  state: TimeViewState;
 };
 
 /**
@@ -40,12 +43,12 @@ export function useWorkspaceTime(): WorkspaceTime {
     staleTime: 15_000,
   });
 
-  const isLive = enabled && query.isSuccess;
-
-  return {
-    rows: isLive ? (query.data ?? []) : demoRows,
-    source: isLive ? "live" : "demo",
-    isLoading: enabled && query.isLoading,
-    isError: enabled && query.isError,
-  };
+  return resolveTimeView({
+    enabled,
+    isSuccess: query.isSuccess,
+    isLoading: query.isLoading,
+    isError: query.isError,
+    liveRows: query.data,
+    demoRows,
+  });
 }

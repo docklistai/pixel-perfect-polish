@@ -1,7 +1,8 @@
-import { Check, Edit3, X } from "lucide-react";
+import { Check, Edit3, Undo2, X } from "lucide-react";
 import { DrawerShell, FormSection, FormRow, StatusBadge, ActionButton } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import * as React from "react";
+import { approvalEligibility, REASON_LABEL } from "../lib/approvalEligibility";
 import type { StoredTimesheetRow } from "../types";
 import type { TimesheetStatus } from "./TimesheetTable";
 
@@ -10,6 +11,7 @@ interface Props {
   statusOf: (row: StoredTimesheetRow) => TimesheetStatus;
   onApprove: (row: StoredTimesheetRow, note: string) => void;
   onRevert: (row: StoredTimesheetRow) => void;
+  onReject: (row: StoredTimesheetRow) => void;
   onAdjust: (row: StoredTimesheetRow) => void;
   onClose: () => void;
 }
@@ -22,6 +24,7 @@ export function TimesheetReviewDrawer({
   statusOf,
   onApprove,
   onRevert,
+  onReject,
   onAdjust,
   onClose,
 }: Props) {
@@ -32,6 +35,8 @@ export function TimesheetReviewDrawer({
   if (!row) return null;
 
   const status = statusOf(row);
+  const reason = approvalEligibility(row);
+  const canApprove = reason === "ok";
   const badgeTone =
     status === "approved"
       ? ("success" as const)
@@ -42,6 +47,9 @@ export function TimesheetReviewDrawer({
     status === "approved" ? "Approved" : status === "unapproved" ? "Unapproved" : "Pending";
 
   const clockedRows = [
+    ...(row.workDate
+      ? [{ label: "Work date", value: row.workDate, cls: "text-muted-foreground" }]
+      : []),
     { label: "Scheduled", value: row.sched, cls: "text-muted-foreground" },
     { label: "Clocked in", value: `${row.in} (${row.inN})`, cls: deltaTone(row.inTone) },
     { label: "Clocked out", value: `${row.out} (${row.outN})`, cls: deltaTone(row.outTone) },
@@ -77,14 +85,29 @@ export function TimesheetReviewDrawer({
             <Edit3 className="mr-1.5 h-3.5 w-3.5" /> Adjust
           </ActionButton>
           {status !== "approved" ? (
-            <ActionButton
-              onClick={() => {
-                onApprove(row, managerNote);
-                onClose();
-              }}
-            >
-              <Check className="mr-1.5 h-3.5 w-3.5" /> Approve
-            </ActionButton>
+            <>
+              {status !== "unapproved" && (
+                <ActionButton
+                  variant="secondary"
+                  onClick={() => {
+                    onReject(row);
+                    onClose();
+                  }}
+                >
+                  <Undo2 className="mr-1.5 h-3.5 w-3.5" /> Return for correction
+                </ActionButton>
+              )}
+              <ActionButton
+                disabled={!canApprove}
+                title={reason === "ok" ? undefined : `Can't approve — ${REASON_LABEL[reason]}.`}
+                onClick={() => {
+                  onApprove(row, managerNote);
+                  onClose();
+                }}
+              >
+                <Check className="mr-1.5 h-3.5 w-3.5" /> Approve
+              </ActionButton>
+            </>
           ) : (
             <ActionButton
               variant="secondary"

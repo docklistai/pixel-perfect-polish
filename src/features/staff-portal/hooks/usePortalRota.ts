@@ -2,9 +2,12 @@ import * as React from "react";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import {
   clockInShift,
+  DEMO_NOW,
+  londonPortalNow,
   portalShiftsForStaff,
   publishedSnapshots,
   upcomingPortalShifts,
+  type PortalNow,
 } from "../lib/portalRota";
 import type { PortalShift } from "../types";
 import { usePortalLiveShifts } from "./usePortalLiveShifts";
@@ -26,13 +29,16 @@ export type PortalRota = {
   isError: boolean;
 };
 
-function buildRota(shifts: PortalShift[]): Omit<PortalRota, "source" | "isLoading" | "isError"> {
-  const upcoming = upcomingPortalShifts(shifts);
+function buildRota(
+  shifts: PortalShift[],
+  now: PortalNow,
+): Omit<PortalRota, "source" | "isLoading" | "isError"> {
+  const upcoming = upcomingPortalShifts(shifts, now);
   return {
     hasPublished: shifts.length > 0,
     upcoming,
     nextShift: upcoming[0] ?? null,
-    activeShift: clockInShift(shifts),
+    activeShift: clockInShift(shifts, now),
   };
 }
 
@@ -49,12 +55,19 @@ export function usePortalRota(): PortalRota {
 
   return React.useMemo(() => {
     if (live.enabled && live.isSuccess) {
-      return { ...buildRota(live.data ?? []), source: "live", isLoading: false, isError: false };
+      // Live rota uses real wall-clock time, never the frozen demo clock.
+      const liveNow = londonPortalNow();
+      return {
+        ...buildRota(live.data ?? [], liveNow),
+        source: "live",
+        isLoading: false,
+        isError: false,
+      };
     }
 
     if (live.enabled) {
       return {
-        ...buildRota([]),
+        ...buildRota([], londonPortalNow()),
         hasPublished: false,
         source: "live",
         isLoading: live.isLoading,
@@ -64,7 +77,7 @@ export function usePortalRota(): PortalRota {
 
     const demoShifts = portalShiftsForStaff(weekDrafts, "olivia-bennett");
     return {
-      ...buildRota(demoShifts),
+      ...buildRota(demoShifts, DEMO_NOW),
       // Demo keeps the original "any published week exists" semantics.
       hasPublished: publishedSnapshots(weekDrafts).length > 0,
       source: "demo",

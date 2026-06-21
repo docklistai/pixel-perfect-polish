@@ -6,6 +6,14 @@ import {
   setTimesheetStatus,
 } from "@/features/demo/store/timeActions";
 import { useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import {
+  approvalEligibility,
+  describeBulkApproval,
+  isApprovable,
+  partitionForApproval,
+  REASON_LABEL,
+  suggestedApprovals,
+} from "../lib/approvalEligibility";
 import type { StoredTimesheetRow, TimeAdjustment, TimesheetStatus } from "../types";
 
 export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: StoredTimesheetRow[]) {
@@ -17,9 +25,17 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
     [allRows],
   );
 
+  const blockIneligible = (row: StoredTimesheetRow): boolean => {
+    const reason = approvalEligibility(row);
+    if (reason === "ok") return false;
+    toast.error("Can't approve this entry", { description: `It is ${REASON_LABEL[reason]}.` });
+    return true;
+  };
+
   const toggleApprove = (row: StoredTimesheetRow) => {
     const previous = row.status;
     const next = previous === "approved" ? "pending" : "approved";
+    if (next === "approved" && blockIneligible(row)) return;
     setTimesheetStatus(
       store,
       [row.id],
@@ -39,10 +55,18 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
   };
 
   const approve = (row: StoredTimesheetRow, note = "") => {
-    if (row.status === "approved") return;
+    if (row.status === "approved" || blockIneligible(row)) return;
     setTimesheetStatus(store, [row.id], "approved", note || "Approved by Alex Thompson.");
     toast.success("Approved", {
       description: `${row.n}'s entry is ready to export as approved hours.`,
+    });
+  };
+
+  const reject = (row: StoredTimesheetRow) => {
+    if (row.status === "unapproved") return;
+    setTimesheetStatus(store, [row.id], "unapproved", "Returned for correction by Alex Thompson.");
+    toast.info("Returned for correction", {
+      description: `${row.n}'s entry was returned and is no longer pending approval.`,
     });
   };
 
@@ -60,13 +84,24 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
   };
 
   const bulkApprove = (ids: string[], label: string) => {
-    const previous = allRows
-      .filter((row) => ids.includes(row.id))
-      .map((row) => [row.id, row.status] as const);
-    if (previous.length === 0) return;
-    setTimesheetStatus(store, ids, "approved", "Bulk approved by Alex Thompson.");
+    const requested = new Set(ids);
+    const { eligible, excluded } = partitionForApproval(
+      allRows.filter((row) => requested.has(row.id)),
+    );
+    const outcome = describeBulkApproval(eligible, excluded);
+    if (outcome.empty) {
+      toast.info("Nothing approved", { description: outcome.description });
+      return;
+    }
+    const previous = eligible.map((row) => [row.id, row.status] as const);
+    setTimesheetStatus(
+      store,
+      eligible.map((row) => row.id),
+      "approved",
+      "Bulk approved by Alex Thompson.",
+    );
     toast.success(label, {
-      description: `${ids.length} timesheet${ids.length === 1 ? "" : "s"} approved.`,
+      description: outcome.description,
       action: {
         label: "Undo",
         onClick: () =>
@@ -119,11 +154,12 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
     selectedIds,
     flaggedIds,
     statusOf,
-    suggestedRows: scopedRows
-      .filter((row) => row.exc === "—" && row.status !== "approved")
-      .slice(0, 3),
+    isSubmitting: false,
+    suggestedRows: suggestedApprovals(scopedRows),
+    isApprovable: (row: StoredTimesheetRow) => isApprovable(row),
     toggleApprove,
     approve,
+    reject,
     revert: toggleApprove,
     toggleFlag,
     approveSelection,

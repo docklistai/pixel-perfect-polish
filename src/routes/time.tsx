@@ -1,22 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { toast } from "sonner";
-import { AppShell, PageHeader, ActionButton, ConfirmDialog } from "@/components/dl";
-import { RowActionMenu } from "@/components/RowActionMenu";
+import { AppShell, PageHeader, ConfirmDialog } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import {
-  Bell,
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  Download,
-  Info,
-  AlertTriangle,
-  Calendar,
-  Users,
-  Settings2,
-  Sparkles,
-} from "lucide-react";
+import { Check, Info, AlertTriangle } from "lucide-react";
 import { TimeMetricCards } from "@/features/time/components/TimeMetricCards";
 import { TimesheetTable, type TimesheetTab } from "@/features/time/components/TimesheetTable";
 import { TimeRightRail } from "@/features/time/components/TimeRightRail";
@@ -24,9 +11,15 @@ import { TimesheetReviewDrawer } from "@/features/time/components/TimesheetRevie
 import { TimeExportDialog } from "@/features/time/components/TimeExportDialog";
 import { TimeAdjustDialog } from "@/features/time/components/TimeAdjustDialog";
 import { TimeQueryDrawer } from "@/features/time/components/TimeQueryDrawer";
+import {
+  TimeHeaderActions,
+  TEAM_OPTIONS,
+  defaultPeriod,
+} from "@/features/time/components/TimeHeaderActions";
 import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
 import { useWorkspaceTime } from "@/features/time/hooks/useWorkspaceTime";
 import { useTimeController } from "@/features/time/hooks/useTimeController";
+import { isWithinPeriod, type ReviewPeriod } from "@/features/time/lib/reviewPeriod";
 import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/time")({
@@ -35,26 +28,14 @@ export const Route = createFileRoute("/time")({
   component: TimePage,
 });
 
-const PERIOD_LABEL = "8 – 14 Jun 2026";
-const PERIOD_START = "2026-06-08";
-const PERIOD_END = "2026-06-14";
-
-const TEAM_OPTIONS = [
-  "All teams",
-  "Front of House",
-  "Kitchen",
-  "Bar",
-  "Housekeeping",
-  "Maintenance",
-];
-
 function TimePage() {
   const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
   const { auth } = Route.useRouteContext();
-  const { rows: allRows, source: timeSource } = useWorkspaceTime();
+  const { rows: rawRows, source: timeSource, state: timeState } = useWorkspaceTime();
   const liveWorkspaceId =
     timeSource === "live" && auth.status === "member" ? auth.workspaceId : null;
+  const [period, setPeriod] = React.useState<ReviewPeriod>(() => defaultPeriod(timeSource));
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
@@ -65,11 +46,21 @@ function TimePage() {
   const [query, setQuery] = React.useState("");
   const [team, setTeam] = React.useState(TEAM_OPTIONS[0]!);
 
-  const teamRows = React.useMemo(
-    () => (team === "All teams" ? allRows : allRows.filter((row) => row.department === team)),
-    [allRows, team],
+  // Live rows carry a work date and are scoped to the selected period; demo rows
+  // have no date and represent a single coherent week, so they pass through.
+  const periodRows = React.useMemo(
+    () =>
+      timeSource === "live"
+        ? rawRows.filter((row) => !row.workDate || isWithinPeriod(row.workDate, period))
+        : rawRows,
+    [rawRows, timeSource, period],
   );
-  const time = useTimeController(allRows, teamRows, timeSource);
+
+  const teamRows = React.useMemo(
+    () => (team === "All teams" ? periodRows : periodRows.filter((row) => row.department === team)),
+    [periodRows, team],
+  );
+  const time = useTimeController(periodRows, teamRows, timeSource);
 
   const filtered = React.useMemo(() => {
     return teamRows.filter((r) => {
@@ -114,66 +105,16 @@ function TimePage() {
         title="Time & attendance"
         subtitle="Review clocked hours, approve, and export approved hours."
         actions={
-          <>
-            <span className="btn secondary sm" aria-label={`Current period ${PERIOD_LABEL}`}>
-              <Calendar className="h-3.5 w-3.5" aria-hidden />
-              {PERIOD_LABEL}
-            </span>
-            <RowActionMenu
-              triggerLabel="Filter by team"
-              trigger={
-                <button type="button" className="btn secondary sm">
-                  <Users className="h-3.5 w-3.5" aria-hidden />
-                  {team}
-                  <ChevronDown className="h-3 w-3" aria-hidden />
-                </button>
-              }
-              items={[
-                { kind: "label", text: "Department" },
-                ...TEAM_OPTIONS.map((t) => ({
-                  label: t,
-                  icon: t === team ? Check : undefined,
-                  onSelect: () => {
-                    setTeam(t);
-                    toast.info("Team filter", { description: `Showing ${t.toLowerCase()}.` });
-                  },
-                })),
-              ]}
-            />
-            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Manager support
-            </ActionButton>
-            <ActionButton icon={Download} onClick={() => setExportOpen(true)}>
-              Export approved hours
-            </ActionButton>
-            <RowActionMenu
-              triggerLabel="More actions"
-              items={[
-                {
-                  label: "Approve all pending",
-                  icon: CheckCircle2,
-                  onSelect: time.approveAllPending,
-                },
-                {
-                  label: "Prepare reminders for missing clock-ins",
-                  icon: Bell,
-                  onSelect: () =>
-                    toast.info("Reminder prepared", {
-                      description: "Review before sending from the staff update flow.",
-                    }),
-                },
-                { kind: "separator" },
-                {
-                  label: "Column settings",
-                  icon: Settings2,
-                  onSelect: () =>
-                    toast.info("Column settings", {
-                      description: "Column customisation arrives in a later update.",
-                    }),
-                },
-              ]}
-            />
-          </>
+          <TimeHeaderActions
+            period={period}
+            setPeriod={setPeriod}
+            source={timeSource}
+            team={team}
+            setTeam={setTeam}
+            onOpenAssistant={openAiDrawer}
+            onExport={() => setExportOpen(true)}
+            onApproveAllPending={time.approveAllPending}
+          />
         }
       />
 
@@ -198,7 +139,12 @@ function TimePage() {
                 {time.selectedIds.size} selected
               </span>
               <div className="flex-1" />
-              <button type="button" className="btn primary sm" onClick={time.approveSelection}>
+              <button
+                type="button"
+                className="btn primary sm"
+                onClick={time.approveSelection}
+                disabled={time.isSubmitting}
+              >
                 <Check className="h-3.5 w-3.5" aria-hidden /> Approve {time.selectedIds.size}
               </button>
               <button type="button" className="btn secondary sm" onClick={time.flagSelection}>
@@ -213,6 +159,8 @@ function TimePage() {
           <TimesheetTable
             rows={filtered}
             totalRows={teamRows.length}
+            viewState={timeState}
+            periodLabel={period.label}
             statusOf={time.statusOf}
             flaggedIds={time.flaggedIds}
             selectedIds={time.selectedIds}
@@ -234,6 +182,7 @@ function TimePage() {
         </div>
 
         <TimeRightRail
+          source={timeSource}
           onApproveSuggested={() => setApproveSuggestedOpen(true)}
           onOpenAssistant={openAiDrawer}
           onPrepareReminder={setReminderFor}
@@ -247,6 +196,7 @@ function TimePage() {
         statusOf={time.statusOf}
         onApprove={time.approve}
         onRevert={time.revert}
+        onReject={time.reject}
         onAdjust={setAdjustRow}
         onClose={() => setReviewRow(null)}
       />
@@ -259,13 +209,13 @@ function TimePage() {
         query={queryRow}
         onClose={() => setQueryRow(null)}
         onOpenTimesheet={() => {
-          const match = queryRow ? allRows.find((r) => r.n === queryRow.n) : null;
+          const match = queryRow ? periodRows.find((r) => r.n === queryRow.n) : null;
           setQueryRow(null);
           if (match) setReviewRow(match);
           else toast.info("Timesheet", { description: "Entry not in this period." });
         }}
         onAddAdjustment={() => {
-          const match = queryRow ? allRows.find((r) => r.n === queryRow.n) : null;
+          const match = queryRow ? periodRows.find((r) => r.n === queryRow.n) : null;
           setQueryRow(null);
           if (match) setAdjustRow(match);
           else toast.info("Adjustment", { description: "Entry not in this period." });
@@ -310,10 +260,9 @@ function TimePage() {
         open={exportOpen}
         onOpenChange={setExportOpen}
         rows={teamRows}
-        periodLabel={PERIOD_LABEL}
+        period={period}
+        source={timeSource}
         liveWorkspaceId={liveWorkspaceId}
-        periodStart={PERIOD_START}
-        periodEnd={PERIOD_END}
       />
     </AppShell>
   );

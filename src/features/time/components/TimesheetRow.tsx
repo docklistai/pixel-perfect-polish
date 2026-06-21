@@ -85,7 +85,10 @@ export function TimesheetRow({
           />
           <div>
             <div className="text-sm font-medium">{row.n}</div>
-            <div className="text-[11px] text-muted-foreground">{row.role}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {row.role}
+              {row.workDate ? ` · ${row.workDate}` : ""}
+            </div>
           </div>
         </div>
       </td>

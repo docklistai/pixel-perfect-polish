@@ -7,6 +7,41 @@ import type { PortalShift, ShiftStatus, TeamOnDuty } from "../types";
 /** Staff may clock in up to 15 minutes before their scheduled start. */
 const CLOCK_IN_GRACE_MINUTES = 15;
 
+const WORKSPACE_TZ = "Europe/London";
+
+/** The "now" boundary used to decide which shifts are current/upcoming. */
+export interface PortalNow {
+  /** Today's date, `YYYY-MM-DD`, in the workspace timezone. */
+  todayIso: string;
+  /** Minutes since local midnight in the workspace timezone. */
+  nowMinutes: number;
+}
+
+/** Real wall-clock "now" in the workspace timezone — used in live mode. */
+export function londonPortalNow(now: Date = new Date()): PortalNow {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: WORKSPACE_TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)!.value;
+  const hour = get("hour") === "24" ? "00" : get("hour");
+  return {
+    todayIso: `${get("year")}-${get("month")}-${get("day")}`,
+    nowMinutes: Number(hour) * 60 + Number(get("minute")),
+  };
+}
+
+/** The frozen demo "now" — keeps the Harbour View playground coherent offline. */
+export const DEMO_NOW: PortalNow = {
+  todayIso: DEMO_WORLD.todayIso,
+  nowMinutes: DEMO_WORLD.nowMinutes,
+};
+
 function portalStatus(status: PublishedShiftSnapshot["status"]): ShiftStatus {
   return status === "changed" ? "changed" : "confirmed";
 }
@@ -57,8 +92,11 @@ export function portalShiftsForStaff(
 }
 
 /** Today's and future shifts (today's shift stays visible until it ends). */
-export function upcomingPortalShifts(shifts: PortalShift[]): PortalShift[] {
-  const { todayIso, nowMinutes } = DEMO_WORLD;
+export function upcomingPortalShifts(
+  shifts: PortalShift[],
+  now: PortalNow = DEMO_NOW,
+): PortalShift[] {
+  const { todayIso, nowMinutes } = now;
   return shifts.filter((shift) => {
     if (shift.date > todayIso) return true;
     if (shift.date < todayIso) return false;
@@ -95,8 +133,8 @@ export function teamOnDutyToday(
 }
 
 /** The shift the staff member can clock in for right now, if any. */
-export function clockInShift(shifts: PortalShift[]): PortalShift | null {
-  const { todayIso, nowMinutes } = DEMO_WORLD;
+export function clockInShift(shifts: PortalShift[], now: PortalNow = DEMO_NOW): PortalShift | null {
+  const { todayIso, nowMinutes } = now;
   return (
     shifts.find((shift) => {
       if (shift.date !== todayIso) return false;

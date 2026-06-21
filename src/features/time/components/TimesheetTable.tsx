@@ -1,8 +1,9 @@
 import * as React from "react";
-import { Search } from "lucide-react";
+import { AlertTriangle, Loader2, Search } from "lucide-react";
 import { StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import type { StoredTimesheetRow, TimesheetStatus } from "../types";
+import type { TimeViewState } from "../lib/timeView";
 import { TimesheetRow } from "./TimesheetRow";
 
 export type TimesheetTab = "all" | "pending" | "unapproved" | "exceptions" | "approved";
@@ -19,6 +20,8 @@ interface TabCounts {
 interface Props {
   rows: StoredTimesheetRow[];
   totalRows: number;
+  viewState: TimeViewState;
+  periodLabel: string;
   statusOf: (row: StoredTimesheetRow) => TimesheetStatus;
   flaggedIds: Set<string>;
   selectedIds: Set<string>;
@@ -54,6 +57,8 @@ const tabs: Array<{
 export function TimesheetTable({
   rows,
   totalRows,
+  viewState,
+  periodLabel,
   statusOf,
   flaggedIds,
   selectedIds,
@@ -109,82 +114,111 @@ export function TimesheetTable({
         </div>
       </div>
 
-      <div
-        className="overflow-x-auto"
-        tabIndex={0}
-        role="region"
-        aria-label="Weekly timesheet, scroll horizontally to see all columns"
-      >
-        <table className="tbl min-w-[900px] w-full">
-          <thead>
-            <tr>
-              <th style={{ width: 36 }}>
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={onToggleAll}
-                  aria-label="Select all visible timesheets"
-                />
-              </th>
-              <th>Staff</th>
-              <th>Scheduled</th>
-              <th>Clock in</th>
-              <th>Clock out</th>
-              <th>Break</th>
-              <th>Paid</th>
-              <th>Exceptions</th>
-              <th>Status</th>
-              <th style={{ width: 36 }} />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => {
-              const status = statusOf(r);
-              return (
-                <TimesheetRow
-                  key={r.id}
-                  row={r}
-                  status={status}
-                  flagged={flaggedIds.has(r.id)}
-                  selected={selectedIds.has(r.id)}
-                  onToggleSelect={onToggleSelect}
-                  onReview={onReview}
-                  onAdjust={onAdjust}
-                  onToggleApprove={onToggleApprove}
-                  onToggleFlag={onToggleFlag}
-                  onPrepareReminder={onPrepareReminder}
-                  onViewRota={onViewRota}
-                />
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {rows.length === 0 && (
+      {viewState === "live-loading" ? (
         <div className="empty">
           <div className="ill" aria-hidden>
-            <Search className="h-5 w-5" />
+            <Loader2 className="h-5 w-5 animate-spin" />
           </div>
-          <h4>
-            {tab === "pending"
-              ? "No pending approvals"
-              : tab === "unapproved"
-                ? "No unapproved entries"
-                : tab === "exceptions"
-                  ? "No exceptions"
-                  : tab === "approved"
-                    ? "No approved entries yet"
-                    : "Nothing to review"}
-          </h4>
-          <p>
-            {tab === "pending"
-              ? "All entries have been reviewed."
-              : tab === "exceptions"
-                ? "Staff clocked in and out as scheduled this period."
-                : "You're all caught up on this view."}
-          </p>
+          <h4>Loading timesheets…</h4>
+          <p>Fetching live clocked hours for {periodLabel}.</p>
         </div>
+      ) : viewState === "live-error" ? (
+        <div className="empty">
+          <div className="ill" aria-hidden>
+            <AlertTriangle className="h-5 w-5 text-danger" />
+          </div>
+          <h4>Couldn&apos;t load live timesheets</h4>
+          <p>We didn&apos;t show demo data instead. Refresh to try the live read again.</p>
+        </div>
+      ) : (
+        <>
+          <div
+            className="overflow-x-auto"
+            tabIndex={0}
+            role="region"
+            aria-label="Weekly timesheet, scroll horizontally to see all columns"
+          >
+            <table className="tbl min-w-[900px] w-full">
+              <thead>
+                <tr>
+                  <th style={{ width: 36 }}>
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={onToggleAll}
+                      aria-label="Select all visible timesheets"
+                    />
+                  </th>
+                  <th>Staff</th>
+                  <th>Scheduled</th>
+                  <th>Clock in</th>
+                  <th>Clock out</th>
+                  <th>Break</th>
+                  <th>Paid</th>
+                  <th>Exceptions</th>
+                  <th>Status</th>
+                  <th style={{ width: 36 }} />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => {
+                  const status = statusOf(r);
+                  return (
+                    <TimesheetRow
+                      key={r.id}
+                      row={r}
+                      status={status}
+                      flagged={flaggedIds.has(r.id)}
+                      selected={selectedIds.has(r.id)}
+                      onToggleSelect={onToggleSelect}
+                      onReview={onReview}
+                      onAdjust={onAdjust}
+                      onToggleApprove={onToggleApprove}
+                      onToggleFlag={onToggleFlag}
+                      onPrepareReminder={onPrepareReminder}
+                      onViewRota={onViewRota}
+                    />
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {rows.length === 0 && (
+            <div className="empty">
+              <div className="ill" aria-hidden>
+                <Search className="h-5 w-5" />
+              </div>
+              {viewState === "live-ready" && totalRows === 0 ? (
+                <>
+                  <h4>No time entries this period</h4>
+                  <p>Nothing was clocked for {periodLabel}. Try another review period.</p>
+                </>
+              ) : (
+                <>
+                  <h4>
+                    {tab === "pending"
+                      ? "No pending approvals"
+                      : tab === "unapproved"
+                        ? "No unapproved entries"
+                        : tab === "exceptions"
+                          ? "No exceptions"
+                          : tab === "approved"
+                            ? "No approved entries yet"
+                            : "Nothing to review"}
+                  </h4>
+                  <p>
+                    {tab === "pending"
+                      ? "All entries have been reviewed."
+                      : tab === "exceptions"
+                        ? "Staff clocked in and out as scheduled this period."
+                        : "You're all caught up on this view."}
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       <div className="card-foot flex flex-wrap items-center gap-3">

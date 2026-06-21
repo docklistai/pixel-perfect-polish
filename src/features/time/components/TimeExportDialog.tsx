@@ -1,30 +1,29 @@
-import * as React from "react";
-import { DialogShell, ActionButton, StatusBadge } from "@/components/dl";
+import { DialogShell, ActionButton } from "@/components/dl";
 import { Download, Info } from "lucide-react";
 import { toast } from "sonner";
 import type { StoredTimesheetRow } from "../types";
 import { exportApprovedHoursFn } from "../api/timeLiveData";
+import { periodFilename, type ReviewPeriod } from "../lib/reviewPeriod";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   rows: StoredTimesheetRow[];
-  periodLabel: string;
+  period: ReviewPeriod;
+  source: "live" | "demo";
   /** When set, the download uses the server-authoritative, audited export RPC. */
   liveWorkspaceId?: string | null;
-  periodStart?: string;
-  periodEnd?: string;
 }
 
 function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
-function triggerCsvDownload(content: string): void {
+function triggerCsvDownload(content: string, filename: string): void {
   const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
   link.href = url;
-  link.download = "harbour_view_approved_hours_8-14-jun.csv";
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -33,18 +32,27 @@ export function TimeExportDialog({
   open,
   onOpenChange,
   rows,
-  periodLabel,
+  period,
+  source,
   liveWorkspaceId,
-  periodStart,
-  periodEnd,
 }: Props) {
   const approvedRows = rows.filter((row) => row.status === "approved");
+  const periodLabel = period.label;
+  const filename = periodFilename(period);
+  const isLive = source === "live";
+  const nothingApproved = approvedRows.length === 0;
 
   const handleDownload = async () => {
+    if (nothingApproved) {
+      toast.info("Nothing to export", {
+        description: `No approved hours in ${periodLabel} yet.`,
+      });
+      return;
+    }
     // Live: the audited, CSV-injection-safe RPC is the authoritative source.
-    if (liveWorkspaceId && periodStart && periodEnd) {
+    if (liveWorkspaceId) {
       const result = await exportApprovedHoursFn({
-        data: { workspaceId: liveWorkspaceId, startDate: periodStart, endDate: periodEnd },
+        data: { workspaceId: liveWorkspaceId, startDate: period.startIso, endDate: period.endIso },
       });
       if (!result.ok) {
         toast.error("Couldn't export", { description: result.message });
@@ -62,7 +70,7 @@ export function TimeExportDialog({
       ]
         .map((line) => line.map(csvCell).join(","))
         .join("\n");
-      triggerCsvDownload(content);
+      triggerCsvDownload(content, filename);
       onOpenChange(false);
       toast.success("CSV ready", {
         description: `${result.rows.length} approved staff exported for ${periodLabel}.`,
@@ -76,7 +84,7 @@ export function TimeExportDialog({
     ]
       .map((line) => line.map(csvCell).join(","))
       .join("\n");
-    triggerCsvDownload(content);
+    triggerCsvDownload(content, filename);
     onOpenChange(false);
     toast.success("CSV ready", {
       description: `${approvedRows.length} approved rows exported for ${periodLabel}.`,
@@ -96,7 +104,7 @@ export function TimeExportDialog({
           <ActionButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton size="sm" onClick={handleDownload}>
+          <ActionButton size="sm" onClick={handleDownload} disabled={nothingApproved}>
             <Download className="mr-1.5 h-3.5 w-3.5" /> Download CSV
           </ActionButton>
         </>
@@ -145,10 +153,19 @@ export function TimeExportDialog({
         </div>
       </div>
 
+      {nothingApproved && (
+        <div className="mt-4 rounded-xl border border-warning/40 bg-warning-soft p-2.5 text-[11px] text-warning">
+          No approved hours in {periodLabel} yet — approve entries before exporting.
+        </div>
+      )}
+
       <div className="mt-4 flex gap-2.5 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
         <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
         <span>
-          Only approved entries are included. This export contains approved hours and staff roles.
+          Only approved entries are included — this is an approved-hours CSV, not a payroll export.
+          {isLive
+            ? " Live totals are recalculated on the server for the whole workspace and may differ from this preview."
+            : ""}
         </span>
       </div>
     </DialogShell>

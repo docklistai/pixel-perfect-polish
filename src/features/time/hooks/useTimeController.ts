@@ -1,9 +1,17 @@
+import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { adjustTimeEntryFn, batchApproveTimeFn } from "../api/timeLiveData";
-import { parseBreakMinutes, parseClockField, workspaceWallTimeToIso } from "../lib/adjustTime";
+import {
+  approvalEligibility,
+  describeBulkApproval,
+  isApprovable,
+  partitionForApproval,
+  REASON_LABEL,
+} from "../lib/approvalEligibility";
+import { prepareAdjustment } from "../lib/liveAdjustment";
 import { useTimeActions } from "./useTimeActions";
 import { TIME_QUERY_KEY } from "./useWorkspaceTime";
 import type { StoredTimesheetRow, TimeAdjustment } from "../types";
@@ -12,14 +20,10 @@ const timeRouteApi = getRouteApi("/time");
 
 /**
  * Time-page actions. Reuses {@link useTimeActions} for client selection state
- * and the demo path, and — when the page is showing live data — overrides the
- * persisted approval actions to route through `rpc_batch_approve_time_entries`.
- *
- * Adjustments route through `rpc_adjust_time_entry`: the live row carries its
- * `workDate`, so the dialog's wall-clock fields resolve to exact timestamptz
- * values in the workspace timezone. A row without that date context is blocked
- * with a clear message rather than faking success. Flagging still has no flag
- * column or RPC, so it stays "not available yet" in live mode.
+ * and the demo path; in live mode it overrides approvals to route through
+ * `rpc_batch_approve_time_entries` and adjustments through `rpc_adjust_time_entry`
+ * (payload built by {@link prepareAdjustment}). All approvals pass through the
+ * shared eligibility gate; flagging has no live column/RPC and stays disabled.
  */
 export function useTimeController(
   allRows: StoredTimesheetRow[],
@@ -29,6 +33,7 @@ export function useTimeController(
   const { auth } = timeRouteApi.useRouteContext();
   const queryClient = useQueryClient();
   const demo = useTimeActions(allRows, scopedRows);
+  const [submitting, setSubmitting] = React.useState(false);
 
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const isLive = source === "live" && Boolean(getSupabaseEnv()) && Boolean(workspaceId);
@@ -41,16 +46,37 @@ export function useTimeController(
     successTitle: string,
     successDescription: string,
   ) => {
-    if (ids.length === 0) return;
-    const result = await batchApproveTimeFn({
-      data: { workspaceId: workspaceId!, timeEntryIds: ids, approvalStatus: status },
-    });
-    if (!result.ok) {
-      toast.error("Couldn't update timesheets", { description: result.message });
+    if (ids.length === 0 || submitting) return;
+    setSubmitting(true);
+    try {
+      const result = await batchApproveTimeFn({
+        data: { workspaceId: workspaceId!, timeEntryIds: ids, approvalStatus: status },
+      });
+      if (!result.ok) {
+        toast.error("Couldn't update timesheets", { description: result.message });
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: ["time", TIME_QUERY_KEY, workspaceId] });
+      toast.success(successTitle, { description: successDescription });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /** Approve only the eligible subset of `rows`, surfacing what was skipped. */
+  const approveEligible = (rows: StoredTimesheetRow[], successTitle: string) => {
+    const { eligible, excluded } = partitionForApproval(rows);
+    const outcome = describeBulkApproval(eligible, excluded);
+    if (outcome.empty) {
+      toast.info("Nothing approved", { description: outcome.description });
       return;
     }
-    await queryClient.invalidateQueries({ queryKey: ["time", TIME_QUERY_KEY, workspaceId] });
-    toast.success(successTitle, { description: successDescription });
+    void runApprove(
+      eligible.map((row) => row.id),
+      "approved",
+      successTitle,
+      outcome.description,
+    );
   };
 
   const notLiveYet = () =>
@@ -59,53 +85,13 @@ export function useTimeController(
     });
 
   const saveAdjustment = async (row: StoredTimesheetRow, adjustment: TimeAdjustment) => {
-    if (!row.workDate) {
-      toast.error("Can't adjust this entry", {
-        description: "This timesheet is missing the date needed to set exact clock times.",
-      });
+    const prepared = prepareAdjustment(row, adjustment);
+    if (!prepared.ok) {
+      toast.error("Can't save adjustment", { description: prepared.message });
       return;
     }
-
-    const inField = parseClockField(adjustment.clockIn);
-    const outField = parseClockField(adjustment.clockOut);
-    const inBlank = adjustment.clockIn.trim() === "" || adjustment.clockIn.trim() === "—";
-    const outBlank = adjustment.clockOut.trim() === "" || adjustment.clockOut.trim() === "—";
-    const breakMinutes = parseBreakMinutes(adjustment.breakTime);
-
-    if ((!inBlank && inField === null) || (!outBlank && outField === null)) {
-      toast.error("Check the clock times", { description: "Enter times as HH:MM." });
-      return;
-    }
-    if (breakMinutes === null) {
-      toast.error("Check the break length", { description: "Enter the break as H:MM." });
-      return;
-    }
-    if (outField !== null && inField === null) {
-      toast.error("Clock-out needs a clock-in", {
-        description: "Add a clock-in time before setting a clock-out.",
-      });
-      return;
-    }
-
-    const clockedInAt = inField
-      ? workspaceWallTimeToIso(row.workDate, inField.hours, inField.minutes)
-      : null;
-    const clockedOutAt = outField
-      ? workspaceWallTimeToIso(row.workDate, outField.hours, outField.minutes)
-      : null;
-    const reason = adjustment.note.trim()
-      ? `${adjustment.reason} — ${adjustment.note.trim()}`
-      : adjustment.reason;
-
     const result = await adjustTimeEntryFn({
-      data: {
-        workspaceId: workspaceId!,
-        timeEntryId: row.id,
-        clockedInAt,
-        clockedOutAt,
-        breakMinutes,
-        reason,
-      },
+      data: { workspaceId: workspaceId!, timeEntryId: row.id, ...prepared.payload },
     });
     if (!result.ok) {
       toast.error("Couldn't save adjustment", { description: result.message });
@@ -117,8 +103,16 @@ export function useTimeController(
     });
   };
 
+  const blockIneligible = (row: StoredTimesheetRow): boolean => {
+    const reason = approvalEligibility(row);
+    if (reason === "ok") return false;
+    toast.error("Can't approve this entry", { description: `It is ${REASON_LABEL[reason]}.` });
+    return true;
+  };
+
   const setApproval = (row: StoredTimesheetRow) => {
     const next = row.status === "approved" ? "pending" : "approved";
+    if (next === "approved" && blockIneligible(row)) return;
     void runApprove(
       [row.id],
       next,
@@ -129,31 +123,39 @@ export function useTimeController(
     );
   };
 
+  const rowsByIds = (ids: string[]) => {
+    const wanted = new Set(ids);
+    return allRows.filter((row) => wanted.has(row.id));
+  };
+
   return {
     ...demo,
+    isSubmitting: submitting,
+    isApprovable: (row: StoredTimesheetRow) => isApprovable(row),
     toggleApprove: setApproval,
     revert: setApproval,
     approve: (row: StoredTimesheetRow) => {
-      if (row.status === "approved") return;
+      if (row.status === "approved" || blockIneligible(row)) return;
       void runApprove([row.id], "approved", "Approved", `${row.n}'s entry is ready to export.`);
     },
-    bulkApprove: (ids: string[], label: string) =>
-      void runApprove(ids, "approved", label, `${ids.length} timesheet(s) approved.`),
-    approveSelection: () => {
+    reject: (row: StoredTimesheetRow) => {
+      if (row.status === "unapproved") return;
       void runApprove(
-        [...demo.selectedIds],
-        "approved",
-        "Timesheets approved",
-        `${demo.selectedIds.size} timesheet(s) approved.`,
+        [row.id],
+        "rejected",
+        "Returned for correction",
+        `${row.n}'s entry was returned and is no longer pending approval.`,
       );
+    },
+    bulkApprove: (ids: string[], label: string) => approveEligible(rowsByIds(ids), label),
+    approveSelection: () => {
+      approveEligible(rowsByIds([...demo.selectedIds]), "Timesheets approved");
       demo.clearSelection();
     },
     approveAllPending: () =>
-      void runApprove(
-        scopedRows.filter((row) => row.status === "pending").map((row) => row.id),
-        "approved",
+      approveEligible(
+        scopedRows.filter((row) => row.status === "pending"),
         "Bulk approved",
-        "All pending timesheets approved.",
       ),
     saveAdjustment: (row: StoredTimesheetRow, adjustment: TimeAdjustment) =>
       void saveAdjustment(row, adjustment),

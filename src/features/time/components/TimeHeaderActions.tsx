@@ -1,0 +1,143 @@
+import { toast } from "sonner";
+import {
+  Bell,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  Download,
+  Calendar,
+  Users,
+  Settings2,
+  Sparkles,
+} from "lucide-react";
+import { ActionButton } from "@/components/dl";
+import { RowActionMenu } from "@/components/RowActionMenu";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
+import {
+  currentWeekPeriod,
+  shiftPeriod,
+  weekPeriodOf,
+  type ReviewPeriod,
+} from "../lib/reviewPeriod";
+
+export const TEAM_OPTIONS = [
+  "All teams",
+  "Front of House",
+  "Kitchen",
+  "Bar",
+  "Housekeeping",
+  "Maintenance",
+];
+
+/** The demo dataset is pinned to the frozen demo week; live defaults to now. */
+export function defaultPeriod(source: "live" | "demo"): ReviewPeriod {
+  return source === "demo"
+    ? weekPeriodOf(DEMO_WORLD.weeks.current.startIso)
+    : currentWeekPeriod(new Date());
+}
+
+interface Props {
+  period: ReviewPeriod;
+  setPeriod: React.Dispatch<React.SetStateAction<ReviewPeriod>>;
+  source: "live" | "demo";
+  team: string;
+  setTeam: (team: string) => void;
+  onOpenAssistant: () => void;
+  onExport: () => void;
+  onApproveAllPending: () => void;
+}
+
+export function TimeHeaderActions({
+  period,
+  setPeriod,
+  source,
+  team,
+  setTeam,
+  onOpenAssistant,
+  onExport,
+  onApproveAllPending,
+}: Props) {
+  return (
+    <>
+      <RowActionMenu
+        triggerLabel="Change review period"
+        trigger={
+          <button
+            type="button"
+            className="btn secondary sm"
+            aria-label={`Review period ${period.label}`}
+          >
+            <Calendar className="h-3.5 w-3.5" aria-hidden />
+            {period.label}
+            <ChevronDown className="h-3 w-3" aria-hidden />
+          </button>
+        }
+        items={[
+          { kind: "label", text: "Review period" },
+          { label: "Previous week", onSelect: () => setPeriod((p) => shiftPeriod(p, -1)) },
+          { label: "This week", onSelect: () => setPeriod(defaultPeriod(source)) },
+          { label: "Next week", onSelect: () => setPeriod((p) => shiftPeriod(p, 1)) },
+        ]}
+      />
+      {source === "demo" && (
+        <span className="badge" title="Showing the offline demo dataset">
+          Demo data
+        </span>
+      )}
+      <RowActionMenu
+        triggerLabel="Filter by team"
+        trigger={
+          <button type="button" className="btn secondary sm">
+            <Users className="h-3.5 w-3.5" aria-hidden />
+            {team}
+            <ChevronDown className="h-3 w-3" aria-hidden />
+          </button>
+        }
+        items={[
+          { kind: "label", text: "Department" },
+          ...TEAM_OPTIONS.map((t) => ({
+            label: t,
+            icon: t === team ? Check : undefined,
+            onSelect: () => {
+              setTeam(t);
+              toast.info("Team filter", { description: `Showing ${t.toLowerCase()}.` });
+            },
+          })),
+        ]}
+      />
+      <ActionButton variant="outline" icon={Sparkles} onClick={onOpenAssistant}>
+        Manager support
+      </ActionButton>
+      <ActionButton icon={Download} onClick={onExport}>
+        Export approved hours
+      </ActionButton>
+      <RowActionMenu
+        triggerLabel="More actions"
+        items={[
+          {
+            label: "Approve all eligible pending",
+            icon: CheckCircle2,
+            onSelect: onApproveAllPending,
+          },
+          {
+            label: "Prepare reminders for missing clock-ins",
+            icon: Bell,
+            onSelect: () =>
+              toast.info("Reminder prepared", {
+                description: "Review before sending from the staff update flow.",
+              }),
+          },
+          { kind: "separator" },
+          {
+            label: "Column settings",
+            icon: Settings2,
+            onSelect: () =>
+              toast.info("Column settings", {
+                description: "Column customisation arrives in a later update.",
+              }),
+          },
+        ]}
+      />
+    </>
+  );
+}
