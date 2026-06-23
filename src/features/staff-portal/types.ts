@@ -35,7 +35,7 @@ export interface ClockEntry {
 }
 
 export type RequestKind = "time-off" | "availability" | "shift-question";
-export type RequestStatus = "pending" | "approved" | "declined";
+export type RequestStatus = "pending" | "approved" | "declined" | "cancelled";
 
 export interface PortalRequest {
   id: string;

@@ -184,12 +184,12 @@ export interface PortalLeaveRequest {
   endIso: string;
   days: number;
   reason: string;
-  status: "pending" | "approved" | "declined";
+  status: "pending" | "approved" | "declined" | "cancelled";
   submittedAt: string;
   decisionReason?: string;
 }
 
-interface LeaveRequestViewRow {
+export interface LeaveRequestViewRow {
   leave_request_id: string;
   staff_member_id: string;
   leave_type: string;
@@ -210,8 +210,7 @@ const LEAVE_TYPE_LABEL: Record<string, string> = {
   other: "Other",
 };
 
-function mapLeaveRequest(row: LeaveRequestViewRow): PortalLeaveRequest {
-  const status = row.status === "cancelled" ? "declined" : row.status;
+export function mapLeaveRequest(row: LeaveRequestViewRow): PortalLeaveRequest {
   return {
     id: row.leave_request_id,
     type: LEAVE_TYPE_LABEL[row.leave_type] ?? "Leave",
@@ -220,10 +219,22 @@ function mapLeaveRequest(row: LeaveRequestViewRow): PortalLeaveRequest {
     endIso: row.end_date,
     days: inclusiveDays(row.start_date, row.end_date),
     reason: row.reason,
-    status,
+    status: row.status,
     submittedAt: dayMonth(row.submitted_at.slice(0, 10)),
-    decisionReason: row.decision_reason ?? undefined,
+    decisionReason:
+      row.status === "cancelled"
+        ? (row.decision_reason ?? "Withdrawn by staff")
+        : (row.decision_reason ?? undefined),
   };
+}
+
+export function upcomingApprovedLeaveRequests(
+  requests: PortalLeaveRequest[],
+  todayIso: string,
+): PortalLeaveRequest[] {
+  return requests
+    .filter((request) => request.status === "approved" && request.endIso >= todayIso)
+    .sort((a, b) => a.startIso.localeCompare(b.startIso));
 }
 
 /**

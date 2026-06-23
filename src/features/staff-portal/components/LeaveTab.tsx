@@ -14,10 +14,18 @@ import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
 import type { PortalLeaveRequest } from "../api/portalLiveData";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 
-const statusTone: Record<RequestStatus, "warning" | "success" | "danger"> = {
+const statusTone: Record<RequestStatus, "warning" | "success" | "danger" | "muted"> = {
   pending: "warning",
   approved: "success",
   declined: "danger",
+  cancelled: "muted",
+};
+
+const statusLabel: Record<RequestStatus, string> = {
+  pending: "Pending",
+  approved: "Approved",
+  declined: "Declined",
+  cancelled: "Withdrawn",
 };
 
 const kindLabel: Record<RequestKind, string> = {
@@ -164,7 +172,7 @@ export function LeaveTab() {
                       <div className="text-xs text-muted-foreground truncate">{req.detail}</div>
                     </div>
                     <StatusBadge tone={statusTone[req.status]}>
-                      {req.status[0].toUpperCase() + req.status.slice(1)}
+                      {statusLabel[req.status]}
                     </StatusBadge>
                   </div>
                   <div className="mt-2 text-[11px] text-muted-foreground">
@@ -195,7 +203,7 @@ export function LeaveTab() {
               label="Status"
               value={
                 <StatusBadge tone={statusTone[detail.status]}>
-                  {detail.status[0].toUpperCase() + detail.status.slice(1)}
+                  {statusLabel[detail.status]}
                 </StatusBadge>
               }
             />

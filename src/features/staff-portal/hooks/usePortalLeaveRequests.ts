@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { fetchPortalLeaveRequests } from "../api/portalLiveData";
+import { fetchPortalLeaveRequests, upcomingApprovedLeaveRequests } from "../api/portalLiveData";
 import type { PortalLeaveRequest } from "../api/portalLiveData";
 
 const portalRouteApi = getRouteApi("/portal");
@@ -36,10 +36,7 @@ export function usePortalLeaveRequests(): PortalLeaveRequestsState {
 
   const todayIso = new Date().toISOString().slice(0, 10);
 
-  // Upcoming approved leave: approved and ends on or after today
-  const approvedLeave = data
-    .filter((r) => r.status === "approved" && r.endIso >= todayIso)
-    .sort((a, b) => a.startIso.localeCompare(b.startIso));
+  const approvedLeave = upcomingApprovedLeaveRequests(data, todayIso);
 
   return {
     isLive,
