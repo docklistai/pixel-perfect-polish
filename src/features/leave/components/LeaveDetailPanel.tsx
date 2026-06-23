@@ -1,12 +1,14 @@
 import { Card, ActionButton, DetailRow, StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
-import type { LeaveRequest } from "../types";
+import type { LeaveRequest, LeaveSource } from "../types";
 import { leaveRangesOverlap } from "../lib/leaveDates";
+import { coverageRowsForRequest } from "../lib/leaveCards";
 
 interface Props {
   request: LeaveRequest;
   requests: LeaveRequest[];
+  source: LeaveSource;
   onApprove: (request: LeaveRequest) => void;
   onDecline: (request: LeaveRequest) => void;
   onReopen: (id: string) => void;
@@ -22,33 +24,10 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
-const coverageByRequest: Record<
-  string,
-  { label: string; value: number; tone: "danger" | "warning" }[]
-> = {
-  l1: [
-    { label: "Thu 18 Jun", value: 85, tone: "warning" },
-    { label: "Fri 19 Jun", value: 80, tone: "warning" },
-  ],
-  l2: [
-    { label: "Tue 16 Jun", value: 75, tone: "warning" },
-    { label: "Wed 17 Jun", value: 70, tone: "warning" },
-  ],
-  l3: [
-    { label: "Sun 21 Jun", value: 50, tone: "danger" },
-    { label: "Mon 22 Jun", value: 60, tone: "warning" },
-    { label: "Tue 23 Jun", value: 66, tone: "warning" },
-  ],
-  l4: [
-    { label: "Mon 15 Jun", value: 70, tone: "warning" },
-    { label: "Fri 19 Jun", value: 65, tone: "warning" },
-    { label: "Sun 21 Jun", value: 60, tone: "warning" },
-  ],
-};
-
 export function LeaveDetailPanel({
   request,
   requests,
+  source,
   onApprove,
   onDecline,
   onReopen,
@@ -56,17 +35,15 @@ export function LeaveDetailPanel({
 }: Props) {
   const isApproved = request.state === "approved";
   const isDeclined = request.state === "declined";
-  const coverageRows = coverageByRequest[request.id] ?? [
-    {
-      label: request.date,
-      value: request.impact === "High" ? 50 : request.impact === "Medium" ? 70 : 90,
-      tone: request.impact === "High" ? ("danger" as const) : ("warning" as const),
-    },
-  ];
+  const isCancelled = request.state === "cancelled";
+  // Demo shows illustrative coverage bars; live has no real coverage source, so
+  // it routes the manager to the rota instead of inventing percentages.
+  const coverageRows = coverageRowsForRequest(request, source);
   const otherRequests = requests.filter(
     (item) =>
       item.id !== request.id &&
       item.state !== "declined" &&
+      item.state !== "cancelled" &&
       leaveRangesOverlap(item.startIso, item.endIso, request.startIso, request.endIso),
   );
   const latestDecision = request.decisionHistory?.at(-1);
@@ -114,29 +91,39 @@ export function LeaveDetailPanel({
             View risk
           </button>
         </div>
-        <div className="space-y-3">
-          {coverageRows.map((row) => (
-            <div key={row.label} className="row gap-3 txt-sm" style={{ alignItems: "center" }}>
-              <span className="muted mono" style={{ width: 78 }}>
-                {row.label}
-              </span>
-              <span className="bar" style={{ flex: 1 }}>
-                <i
-                  style={{
-                    width: `${row.value}%`,
-                    background: row.tone === "danger" ? "var(--red-500)" : "var(--amber-500)",
-                  }}
-                />
-              </span>
-              <span
-                className={cn("strong mono", row.tone === "danger" ? "text-red" : "text-amber")}
-                style={{ width: 36, textAlign: "right" }}
-              >
-                {row.value}%
-              </span>
-            </div>
-          ))}
-        </div>
+        {coverageRows ? (
+          <div className="space-y-3">
+            {coverageRows.map((row) => (
+              <div key={row.label} className="row gap-3 txt-sm" style={{ alignItems: "center" }}>
+                <span className="muted mono" style={{ width: 78 }}>
+                  {row.label}
+                </span>
+                <span className="bar" style={{ flex: 1 }}>
+                  <i
+                    style={{
+                      width: `${row.value}%`,
+                      background: row.tone === "danger" ? "var(--red-500)" : "var(--amber-500)",
+                    }}
+                  />
+                </span>
+                <span
+                  className={cn("strong mono", row.tone === "danger" ? "text-red" : "text-amber")}
+                  style={{ width: 36, textAlign: "right" }}
+                >
+                  {row.value}%
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="txt-sm">
+            <div className="muted mono">{request.date}</div>
+            <p className="muted mt-2" style={{ lineHeight: 1.55 }}>
+              Not enough data here for a coverage figure. Open the rota for these dates to confirm
+              who is scheduled before you decide.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="card-section">
@@ -168,6 +155,10 @@ export function LeaveDetailPanel({
         ) : isDeclined ? (
           <StatusBadge tone="danger" className="w-full justify-center">
             <X className="h-3 w-3" aria-hidden /> Declined
+          </StatusBadge>
+        ) : isCancelled ? (
+          <StatusBadge tone="muted" className="w-full justify-center">
+            <X className="h-3 w-3" aria-hidden /> Cancelled by staff
           </StatusBadge>
         ) : (
           <>

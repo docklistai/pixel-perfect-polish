@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import { createLeaveRequest, setLeaveRequestState } from "@/features/demo/store/leaveActions";
-import type { LeaveRequest } from "../types";
+import type { LeaveDecisionState, LeaveRequest } from "../types";
 
 /**
  * Manager-side leave decisions for the Leave page. Wraps the workspace store
@@ -21,7 +21,7 @@ export function useLeaveActions({
 }) {
   const store = useWorkspaceStore();
 
-  const updateState = (id: string, state: LeaveRequest["state"], reason: string) => {
+  const updateState = (id: string, state: LeaveDecisionState, reason: string) => {
     setLeaveRequestState(store, id, state, reason);
     onSelectRequest(id);
   };

@@ -1,17 +1,18 @@
 import { MetricCard } from "@/components/dl";
 import { AlertTriangle, CheckCircle2, Plane, Users } from "lucide-react";
-import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import type { LeaveRequest } from "../types";
 
 interface Props {
   requests: LeaveRequest[];
+  /** Today (YYYY-MM-DD): real workspace date in live, demo date in demo mode. */
+  todayIso: string;
 }
 
-export function LeaveMetricCards({ requests }: Props) {
+export function LeaveMetricCards({ requests, todayIso }: Props) {
   const pending = requests.filter((request) => request.state === "pending");
   const approved = requests.filter((request) => request.state === "approved");
   const outToday = approved.filter(
-    (request) => request.startIso <= DEMO_WORLD.todayIso && request.endIso >= DEMO_WORLD.todayIso,
+    (request) => request.startIso <= todayIso && request.endIso >= todayIso,
   );
   const coverageRisk = pending.filter((request) => request.impact === "High");
   return (
@@ -21,14 +22,14 @@ export function LeaveMetricCards({ requests }: Props) {
         tone="warning"
         label="Pending"
         value={pending.length}
-        sub="Avg wait: 2.1 days"
+        sub={pending.length ? "Awaiting your decision" : "All caught up"}
       />
       <MetricCard
         icon={CheckCircle2}
         tone="success"
-        label="Approved (MTD)"
+        label="Approved"
         value={approved.length}
-        sub="On track"
+        sub="Currently approved"
       />
       <MetricCard
         icon={Plane}

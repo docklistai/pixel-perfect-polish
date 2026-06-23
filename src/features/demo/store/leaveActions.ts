@@ -1,4 +1,4 @@
-import type { LeaveRequest } from "@/features/leave/types";
+import type { LeaveDecisionState, LeaveRequest } from "@/features/leave/types";
 import type { PortalNotification } from "@/features/staff-portal/types";
 import type { MockNotification } from "@/components/notificationData";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
@@ -37,7 +37,7 @@ function decisionNotification(
 export function setLeaveRequestState(
   store: WorkspaceStore,
   id: string,
-  state: LeaveRequest["state"],
+  state: LeaveDecisionState,
   reason: string,
 ): void {
   store.setState((current) => {

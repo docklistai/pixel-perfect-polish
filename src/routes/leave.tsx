@@ -17,9 +17,11 @@ import {
   Filter,
   Heart,
   Info,
+  Loader2,
   Plane,
   Plus,
 } from "lucide-react";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import { useLeaveController } from "@/features/leave/hooks/useLeaveController";
 import { LeaveMetricCards } from "@/features/leave/components/LeaveMetricCards";
 import { LeaveRequestInbox } from "@/features/leave/components/LeaveRequestInbox";
@@ -94,6 +96,11 @@ function LeavePage() {
     onCloseNewRequest: () => setNewRequestOpen(false),
   });
   const requests = actions.requests;
+  const source = actions.source;
+  // Real workspace date drives live "today"/"this week"; demo pins the demo week.
+  const todayIso = source === "live" ? new Date().toISOString().slice(0, 10) : DEMO_WORLD.todayIso;
+  const isLiveLoading = actions.state === "live-loading";
+  const isLiveError = actions.state === "live-error";
 
   const visibleRequests = React.useMemo(
     () => requests.filter((request) => matchesLeaveFilter(request, filter)),
@@ -109,6 +116,11 @@ function LeavePage() {
         subtitle="Review requests, see balances, and plan around upcoming time off."
         actions={
           <>
+            {source === "demo" && (
+              <span className="badge" title="Showing the offline demo dataset">
+                Demo data
+              </span>
+            )}
             <ActionButton
               variant="secondary"
               icon={CalendarDays}
@@ -154,53 +166,74 @@ function LeavePage() {
         }
       />
 
-      <div className="guidance-note mb-4">
-        <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Check coverage impact before deciding — high-impact requests are highlighted.
-      </div>
+      {isLiveLoading ? (
+        <div className="empty">
+          <div className="ill" aria-hidden>
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+          <h4>Loading leave requests…</h4>
+          <p>Fetching live requests for this workspace.</p>
+        </div>
+      ) : isLiveError ? (
+        <div className="empty">
+          <div className="ill" aria-hidden>
+            <AlertTriangle className="h-5 w-5 text-danger" />
+          </div>
+          <h4>Couldn&apos;t load live leave requests</h4>
+          <p>We didn&apos;t show demo data instead. Refresh to try the live read again.</p>
+        </div>
+      ) : (
+        <>
+          <div className="guidance-note mb-4">
+            <Info className="h-3 w-3 shrink-0" aria-hidden />
+            Check coverage impact before deciding — high-impact requests are highlighted.
+          </div>
 
-      <LeaveMetricCards requests={requests} />
+          <LeaveMetricCards requests={requests} todayIso={todayIso} />
 
-      <div className="grid grid-cols-12 gap-5 items-start">
-        <LeaveRequestInbox
-          requests={visibleRequests}
-          activeId={activeRequest?.id ?? ""}
-          onAsk={(request) =>
-            toast.info("Reminder prepared", {
-              description: `Draft prepared asking ${request.n} for more details — review before sending.`,
-            })
-          }
-          onApprove={(request) => openDecision(request, "approve")}
-          onDecline={(request) => openDecision(request, "decline")}
-          onReopen={actions.reopen}
-          onSelect={setActiveId}
-        />
-        {activeRequest && (
-          <div className="col-span-12 space-y-3 self-start lg:sticky lg:top-[88px] lg:col-span-5">
-            <LeaveDetailPanel
-              request={activeRequest}
-              requests={requests}
+          <div className="grid grid-cols-12 gap-5 items-start">
+            <LeaveRequestInbox
+              requests={visibleRequests}
+              activeId={activeRequest?.id ?? ""}
+              onAsk={(request) =>
+                toast.info("Reminder prepared", {
+                  description: `Draft prepared asking ${request.n} for more details — review before sending.`,
+                })
+              }
               onApprove={(request) => openDecision(request, "approve")}
               onDecline={(request) => openDecision(request, "decline")}
               onReopen={actions.reopen}
-              onOpenRisk={() => setRiskOpen(true)}
+              onSelect={setActiveId}
             />
-            {activeRequest.state === "pending" && (
-              <LeaveImpactSummaryCard
-                request={activeRequest}
-                onCheckRota={() => {
-                  navigate({ to: "/rota" });
-                  toast.info("Rota opened", {
-                    description: "Checking coverage for these dates.",
-                  });
-                }}
-              />
+            {activeRequest && (
+              <div className="col-span-12 space-y-3 self-start lg:sticky lg:top-[88px] lg:col-span-5">
+                <LeaveDetailPanel
+                  request={activeRequest}
+                  requests={requests}
+                  source={source}
+                  onApprove={(request) => openDecision(request, "approve")}
+                  onDecline={(request) => openDecision(request, "decline")}
+                  onReopen={actions.reopen}
+                  onOpenRisk={() => setRiskOpen(true)}
+                />
+                {activeRequest.state === "pending" && (
+                  <LeaveImpactSummaryCard
+                    request={activeRequest}
+                    onCheckRota={() => {
+                      navigate({ to: "/rota" });
+                      toast.info("Rota opened", {
+                        description: "Checking coverage for these dates.",
+                      });
+                    }}
+                  />
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
 
-      <LeaveBottomCards requests={requests} />
+          <LeaveBottomCards requests={requests} source={source} todayIso={todayIso} />
+        </>
+      )}
 
       <LeaveCalendarDrawer
         open={calendarOpen}
@@ -208,8 +241,9 @@ function LeavePage() {
         onNewRequest={() => setNewRequestOpen(true)}
         requests={requests}
       />
-      <LeaveRiskDrawer open={riskOpen} onOpenChange={setRiskOpen} />
+      <LeaveRiskDrawer open={riskOpen} onOpenChange={setRiskOpen} request={activeRequest} />
       <LeaveActionDialogs
+        source={source}
         decisionRequest={decisionRequest}
         decisionType={decisionType}
         newRequestOpen={newRequestOpen}

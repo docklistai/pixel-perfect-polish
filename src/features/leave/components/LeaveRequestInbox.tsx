@@ -53,7 +53,7 @@ export function LeaveRequestInbox({
     for (const r of requests) {
       if (r.state === "approved") approved += 1;
       else if (r.state === "declined") declined += 1;
-      else pending += 1;
+      else if (r.state === "pending") pending += 1;
     }
     return { needs: pending, approved, declined, all: requests.length };
   }, [requests]);
@@ -187,6 +187,14 @@ export function LeaveRequestInbox({
                   <button type="button" className="btn ghost sm" onClick={() => onReopen(r.id)}>
                     Undo
                   </button>
+                </div>
+              )}
+
+              {r.state === "cancelled" && (
+                <div className="row gap-2 mt-3">
+                  <StatusBadge tone="muted">
+                    <X className="h-3 w-3" aria-hidden /> Cancelled by staff
+                  </StatusBadge>
                 </div>
               )}
             </div>

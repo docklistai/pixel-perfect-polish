@@ -1,5 +1,15 @@
+/** Where the inbox data came from: the live workspace read or the demo store. */
+export type LeaveSource = "live" | "demo";
+
+/** States a manager decision can move a request to (no cancel — staff-only). */
+export type LeaveDecisionState = "pending" | "approved" | "declined";
+
+/** Every state a request can be in. `cancelled` is staff-withdrawn, distinct
+ * from a manager `declined`. */
+export type LeaveRequestState = LeaveDecisionState | "cancelled";
+
 export interface LeaveDecisionEvent {
-  state: "pending" | "approved" | "declined";
+  state: LeaveDecisionState;
   reason: string;
   at: string;
 }
@@ -19,7 +29,7 @@ export interface LeaveRequest {
   type: string;
   impact: "Low" | "Medium" | "High";
   tone: "success" | "warning" | "danger";
-  state: "pending" | "approved" | "declined";
+  state: LeaveRequestState;
   notice: number;
   reason: string;
   img: number;

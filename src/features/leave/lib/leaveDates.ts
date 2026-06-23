@@ -21,6 +21,18 @@ export function formatLeaveRange(startIso: string, endIso: string): string {
   return `${start.day} ${MONTHS[start.month - 1]} ${start.year} – ${end.day} ${MONTHS[end.month - 1]} ${end.year}`;
 }
 
+/** The Monday–Sunday week (inclusive ISO bounds) containing `todayIso`. */
+export function weekRangeOf(todayIso: string): { startIso: string; endIso: string } {
+  const { year, month, day } = isoParts(todayIso);
+  const base = new Date(Date.UTC(year, month - 1, day));
+  const diffToMonday = (base.getUTCDay() + 6) % 7; // 0=Sun..6=Sat → days since Monday
+  const monday = new Date(base);
+  monday.setUTCDate(base.getUTCDate() - diffToMonday);
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+  return { startIso: monday.toISOString().slice(0, 10), endIso: sunday.toISOString().slice(0, 10) };
+}
+
 export function leaveRangesOverlap(
   firstStart: string,
   firstEnd: string,

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { leaveStateFromStatus } from "../lib/leaveCards";
 import type { LeaveRequest } from "../types";
 
 /**
@@ -79,7 +80,7 @@ function mapLeaveRequest(row: LeaveRequestRow, staff: StaffLite | undefined): Le
   const impact: LeaveRequest["impact"] = days >= 5 ? "High" : days >= 3 ? "Medium" : "Low";
   const tone: LeaveRequest["tone"] =
     impact === "High" ? "danger" : impact === "Medium" ? "warning" : "success";
-  const state: LeaveRequest["state"] = row.status === "cancelled" ? "declined" : row.status;
+  const state: LeaveRequest["state"] = leaveStateFromStatus(row.status);
   return {
     id: row.id,
     staffId: row.staff_member_id,

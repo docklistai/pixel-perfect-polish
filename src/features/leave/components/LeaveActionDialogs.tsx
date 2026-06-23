@@ -1,11 +1,12 @@
 import * as React from "react";
 import { ActionButton, DialogShell, StatusBadge } from "@/components/dl";
-import { CalendarDays, Check, Plane, X } from "lucide-react";
-import type { LeaveRequest } from "../types";
-import { leaveDaysInclusive } from "../lib/leaveDates";
-import { buildLeaveRequest, type LeaveStaffOption } from "../lib/leaveRequests";
+import { Check, X } from "lucide-react";
+import type { LeaveRequest, LeaveSource } from "../types";
+import { approvalDialogRows } from "../lib/leaveActionDialogContent";
+import { LeaveManagerCreateDialog } from "./LeaveManagerCreateDialog";
 
 interface Props {
+  source: LeaveSource;
   decisionRequest: LeaveRequest | null;
   decisionType: "approve" | "decline" | null;
   newRequestOpen: boolean;
@@ -15,12 +16,6 @@ interface Props {
   onDecline: (id: string, reason: string) => void;
   onCreateRequest: (request: LeaveRequest) => void;
 }
-
-const staffOptions: LeaveStaffOption[] = [
-  { id: "james-walker", name: "James Walker", role: "Waiter", dept: "Front of House", img: 14 },
-  { id: "amelia-stone", name: "Amelia Stone", role: "Housekeeper", dept: "Housekeeping", img: 23 },
-  { id: "noah-evans", name: "Noah Evans", role: "Porter", dept: "Maintenance", img: 33 },
-];
 
 function initials(name: string): string {
   return name
@@ -32,6 +27,7 @@ function initials(name: string): string {
 }
 
 export function LeaveActionDialogs({
+  source,
   decisionRequest,
   decisionType,
   newRequestOpen,
@@ -41,31 +37,13 @@ export function LeaveActionDialogs({
   onDecline,
   onCreateRequest,
 }: Props) {
-  const [staffName, setStaffName] = React.useState(staffOptions[0].name);
-  const [startIso, setStartIso] = React.useState("2026-06-12");
-  const [endIso, setEndIso] = React.useState("2026-06-14");
-  const [leaveType, setLeaveType] = React.useState("Annual leave");
-  const [reason, setReason] = React.useState("");
   const [declineReason, setDeclineReason] = React.useState(
     "Coverage on these days is already at risk. Could you suggest the week before or after?",
   );
 
-  const selectedStaff = staffOptions.find((staff) => staff.name === staffName) ?? staffOptions[0];
   const isApprove = decisionType === "approve";
   const decisionOpen = Boolean(decisionRequest && decisionType);
-
-  const handleCreate = () => {
-    onCreateRequest(
-      buildLeaveRequest({
-        staff: selectedStaff,
-        startIso,
-        endIso,
-        type: leaveType,
-        reason,
-        source: "manager",
-      }),
-    );
-  };
+  const approvalRows = decisionRequest ? approvalDialogRows(source, decisionRequest) : [];
 
   return (
     <>
@@ -124,20 +102,18 @@ export function LeaveActionDialogs({
             </div>
             <div className="card" style={{ background: "var(--bg-raised)" }}>
               <div className="card-section space-y-2">
-                <div className="row justify-between">
-                  <span className="muted txt-sm">Coverage impact</span>
-                  <StatusBadge tone={decisionRequest.tone} dot>
-                    {decisionRequest.impact}
-                  </StatusBadge>
-                </div>
-                <div className="row justify-between">
-                  <span className="muted txt-sm">Days remaining after</span>
-                  <span className="strong mono">11 / 28</span>
-                </div>
-                <div className="row justify-between">
-                  <span className="muted txt-sm">Other staff off these days</span>
-                  <span className="strong">2 already approved</span>
-                </div>
+                {approvalRows.map((row) => (
+                  <div key={row.label} className="row justify-between gap-3">
+                    <span className="muted txt-sm">{row.label}</span>
+                    {row.kind === "badge" ? (
+                      <StatusBadge tone={row.tone} dot>
+                        {row.value}
+                      </StatusBadge>
+                    ) : (
+                      <span className="strong text-right">{row.value}</span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
             <p className="muted txt-sm mt-3">
@@ -167,109 +143,12 @@ export function LeaveActionDialogs({
         )}
       </DialogShell>
 
-      <DialogShell
+      <LeaveManagerCreateDialog
+        source={source}
         open={newRequestOpen}
         onOpenChange={onNewRequestOpenChange}
-        title="New leave request"
-        description="On behalf of a team member"
-        icon={Plane}
-        iconTone="purple"
-        size="lg"
-        footer={
-          <>
-            <ActionButton
-              variant="secondary"
-              size="sm"
-              onClick={() => onNewRequestOpenChange(false)}
-            >
-              Cancel
-            </ActionButton>
-            <ActionButton size="sm" onClick={handleCreate}>
-              <Check className="h-3 w-3" aria-hidden /> Create request
-            </ActionButton>
-          </>
-        }
-      >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="field sm:col-span-2">
-            <label htmlFor="leave-staff-member">Staff member</label>
-            <select
-              id="leave-staff-member"
-              className="dl-select"
-              value={staffName}
-              onChange={(event) => setStaffName(event.target.value)}
-            >
-              {staffOptions.map((staff) => (
-                <option key={staff.name}>{staff.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="leave-type">Leave type</label>
-            <select
-              id="leave-type"
-              className="dl-select"
-              value={leaveType}
-              onChange={(event) => setLeaveType(event.target.value)}
-            >
-              <option>Annual leave</option>
-              <option>Sick leave</option>
-              <option>Compassionate</option>
-              <option>Unpaid</option>
-              <option>Maternity / paternity</option>
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="leave-days">Days</label>
-            <input
-              id="leave-days"
-              className="dl-input mono"
-              value={leaveDaysInclusive(startIso, endIso)}
-              readOnly
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="leave-from">From</label>
-            <div className="input-group">
-              <CalendarDays className="ico h-3.5 w-3.5" aria-hidden />
-              <input
-                id="leave-from"
-                className="mono"
-                type="date"
-                value={startIso}
-                onChange={(event) => setStartIso(event.target.value)}
-              />
-            </div>
-          </div>
-          <div className="field">
-            <label htmlFor="leave-to">To</label>
-            <div className="input-group">
-              <CalendarDays className="ico h-3.5 w-3.5" aria-hidden />
-              <input
-                id="leave-to"
-                className="mono"
-                type="date"
-                value={endIso}
-                onChange={(event) => setEndIso(event.target.value)}
-              />
-            </div>
-          </div>
-          <div className="field sm:col-span-2">
-            <label htmlFor="leave-reason">Reason (optional)</label>
-            <textarea
-              id="leave-reason"
-              className="dl-textarea"
-              rows={2}
-              placeholder="Add a note for the team..."
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-            />
-          </div>
-        </div>
-        <p className="muted txt-sm mt-3">
-          The request stays pending until approved; approved dates then appear in rota checks.
-        </p>
-      </DialogShell>
+        onCreateRequest={onCreateRequest}
+      />
     </>
   );
 }

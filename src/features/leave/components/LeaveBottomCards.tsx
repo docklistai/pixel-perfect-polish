@@ -1,7 +1,8 @@
 import { Card } from "@/components/dl";
 import { AlertTriangle } from "lucide-react";
-import type { LeaveRequest } from "../types";
-import { leaveRangesOverlap } from "../lib/leaveDates";
+import type { LeaveRequest, LeaveSource } from "../types";
+import { leaveRangesOverlap, weekRangeOf } from "../lib/leaveDates";
+import { teamLeaveBalances } from "../lib/leaveCards";
 
 function initials(name: string): string {
   return name
@@ -18,19 +19,21 @@ const publicHolidays = [
   { d: "28 Dec", name: "Boxing Day (substitute)" },
 ];
 
-const balances: { name: string; tone: string; used: number; total: number }[] = [
-  { name: "Sophie Carter", tone: "av-c1", used: 13, total: 28 },
-  { name: "Daniel Mitchell", tone: "av-c2", used: 8, total: 28 },
-  { name: "Priya Patel", tone: "av-c3", used: 14, total: 22 },
-  { name: "Liam O'Connor", tone: "av-c4", used: 5, total: 22 },
-];
+interface Props {
+  requests: LeaveRequest[];
+  source: LeaveSource;
+  /** Today (YYYY-MM-DD): real workspace date in live, demo date in demo mode. */
+  todayIso: string;
+}
 
-export function LeaveBottomCards({ requests }: { requests: LeaveRequest[] }) {
+export function LeaveBottomCards({ requests, source, todayIso }: Props) {
+  const { startIso, endIso } = weekRangeOf(todayIso);
   const outThisWeek = requests.filter(
     (request) =>
       request.state === "approved" &&
-      leaveRangesOverlap(request.startIso, request.endIso, "2026-06-08", "2026-06-14"),
+      leaveRangesOverlap(request.startIso, request.endIso, startIso, endIso),
   );
+  const balances = teamLeaveBalances(source);
   return (
     <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
       <Card className="card-pad">
@@ -75,28 +78,38 @@ export function LeaveBottomCards({ requests }: { requests: LeaveRequest[] }) {
 
       <Card className="card-pad">
         <div className="section-label mb-2">Team leave balances</div>
-        <div className="flex flex-col gap-2 mt-2">
-          {balances.map((b) => {
-            const pct = Math.round((b.used / b.total) * 100);
-            return (
-              <div key={b.name} className="row gap-3 txt-sm">
-                <div className={`av ${b.tone} xs`}>{initials(b.name)}</div>
-                <span className="grow truncate">{b.name}</span>
-                <span className="bar" style={{ width: 90 }}>
-                  <i
-                    style={{
-                      width: `${pct}%`,
-                      background: pct > 80 ? "var(--amber-500)" : "var(--teal-500)",
-                    }}
-                  />
-                </span>
-                <span className="mono muted">
-                  {b.used}/{b.total}
-                </span>
-              </div>
-            );
-          })}
-        </div>
+        {balances ? (
+          <div className="flex flex-col gap-2 mt-2">
+            {balances.map((b) => {
+              const pct = Math.round((b.used / b.total) * 100);
+              return (
+                <div key={b.name} className="row gap-3 txt-sm">
+                  <div className={`av ${b.tone} xs`}>{initials(b.name)}</div>
+                  <span className="grow truncate">{b.name}</span>
+                  <span className="bar" style={{ width: 90 }}>
+                    <i
+                      style={{
+                        width: `${pct}%`,
+                        background: pct > 80 ? "var(--amber-500)" : "var(--teal-500)",
+                      }}
+                    />
+                  </span>
+                  <span className="mono muted">
+                    {b.used}/{b.total}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-2 text-sm text-muted-foreground">
+            <div className="strong txt-sm text-foreground">Not available yet</div>
+            <p className="mt-1 txt-xs">
+              Leave entitlements and balances aren&apos;t tracked yet — they&apos;ll appear here in
+              a future update.
+            </p>
+          </div>
+        )}
       </Card>
     </div>
   );

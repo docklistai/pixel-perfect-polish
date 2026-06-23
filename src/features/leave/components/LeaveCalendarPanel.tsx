@@ -31,7 +31,7 @@ function buildBands(requests: LeaveRequest[]): LeaveBand[] {
   const bands: LeaveBand[] = [];
   for (const r of requests) {
     const days = leaveRangeDaysInMonth(r.startIso, r.endIso, 2026, 6);
-    if (days.length === 0 || r.state === "declined") continue;
+    if (days.length === 0 || r.state === "declined" || r.state === "cancelled") continue;
     bands.push({
       who: r.n,
       start: days[0]!,
