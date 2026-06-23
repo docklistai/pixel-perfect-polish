@@ -1,200 +1,60 @@
-import { DrawerShell, ActionButton, FormSection, StatusBadge } from "@/components/dl";
-import { AlertTriangle, Clock, Plane, Calendar, ArrowRight, BellOff } from "lucide-react";
+import { DrawerShell, ActionButton, StatusBadge, toneSoft } from "@/components/dl";
+import type { Tone } from "@/components/dl";
+import { AlertTriangle, ArrowRight } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import type { AttentionItem } from "../types";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  items: AttentionItem[];
   selectedIndex: number;
 }
 
-export function DashboardAlertDrawer({ open, onOpenChange, selectedIndex }: Props) {
+// Driven entirely by the live attention items that opened it, so the drawer
+// can never contradict the dashboard card or show fabricated detail.
+export function DashboardAlertDrawer({ open, onOpenChange, items, selectedIndex }: Props) {
   const navigate = useNavigate();
-
-  // Selected details
-  const alerts = [
-    {
-      title: "Next week has open shifts",
-      sub: "Resolve before Friday 16:00 to publish on time",
-      tag: "Action needed",
-      tone: "warning" as const,
-      icon: AlertTriangle,
-      route: "/rota" as const,
-      cta: "Open rota",
-      detail: {
-        headline: "Two open shifts need cover",
-        body: "The next-week draft has one Bar shift and one Porter shift still unassigned.",
-        list: [
-          {
-            icon: Calendar,
-            title: "Fri 19 Jun · 16:00 – 00:00",
-            sub: "Bar · open shift",
-            value: "2 interested",
-            tagTone: "success" as const,
-          },
-          {
-            icon: Calendar,
-            title: "Fri 19 Jun · 07:00 – 15:00",
-            sub: "Porter · open shift",
-            value: "No takers",
-            tagTone: "warning" as const,
-          },
-        ],
-      },
-    },
-    {
-      title: "4 timesheets need manager review",
-      sub: "3 pending · 1 unapproved · export after review",
-      tag: "Overdue",
-      tone: "danger" as const,
-      icon: Clock,
-      route: "/time" as const,
-      cta: "Review now",
-      detail: {
-        headline: "Four timesheets are waiting for review",
-        body: "Three are pending and James Walker's entry is unapproved because the clock-in is missing.",
-        list: [
-          {
-            isStaff: true,
-            title: "Liam O'Connor",
-            sub: "Bar · Week of 1 Jun",
-            value: "Late in",
-            tagTone: "warning" as const,
-          },
-          {
-            isStaff: true,
-            title: "James Walker",
-            sub: "FOH · Week of 1 Jun",
-            value: "Missing in",
-            tagTone: "danger" as const,
-          },
-        ],
-      },
-    },
-    {
-      title: "1 leave request — high coverage impact",
-      sub: "Priya · 21 – 23 Jun",
-      tag: "Decision needed",
-      tone: "purple" as const,
-      icon: Plane,
-      route: "/leave" as const,
-      cta: "Review",
-      detail: {
-        headline: "Approving leaves Kitchen short on Sunday",
-        body: "Priya has 19 days notice — within policy. Kitchen cover needs review before approval.",
-        list: [
-          {
-            icon: AlertTriangle,
-            title: "Sun 21 Jun",
-            sub: "Kitchen coverage",
-            value: "Check cover",
-            tagTone: "warning" as const,
-          },
-          {
-            icon: AlertTriangle,
-            title: "Mon 22 Jun",
-            sub: "Kitchen coverage",
-            value: "Check cover",
-            tagTone: "danger" as const,
-          },
-          {
-            icon: AlertTriangle,
-            title: "Tue 23 Jun",
-            sub: "Kitchen coverage",
-            value: "Check cover",
-            tagTone: "warning" as const,
-          },
-        ],
-      },
-    },
-  ];
-
-  const activeAlert = alerts[selectedIndex] || alerts[0];
-  const IconComponent = activeAlert.icon;
+  const active = items[selectedIndex] ?? items[0];
+  const Icon = active?.icon ?? AlertTriangle;
+  const tone = (active?.tone ?? "warning") as Tone;
+  const badgeTone: Tone = tone === "purple" ? "info" : tone;
 
   const handleCta = () => {
     onOpenChange(false);
-    navigate({ to: activeAlert.route });
+    if (active?.route) navigate({ to: active.route });
   };
-
-  const handleSnooze = () => {
-    onOpenChange(false);
-    import("sonner").then(({ toast }) =>
-      toast.info("Snoozed", { description: "Reminder set for tomorrow 09:00" }),
-    );
-  };
-
-  const toneIconClass =
-    activeAlert.tone === "danger"
-      ? "bg-danger-soft text-danger"
-      : activeAlert.tone === "purple"
-        ? "bg-accent-purple-soft text-accent-purple"
-        : "bg-warning-soft text-warning";
 
   return (
     <DrawerShell
       open={open}
       onOpenChange={onOpenChange}
-      title={activeAlert.title}
-      description={activeAlert.sub}
-      meta={
-        <StatusBadge tone={activeAlert.tone === "purple" ? "info" : activeAlert.tone}>
-          {activeAlert.tag}
-        </StatusBadge>
-      }
+      title={active?.t ?? "Attention"}
+      description={active?.s}
+      meta={active?.tag ? <StatusBadge tone={badgeTone}>{active.tag}</StatusBadge> : undefined}
       footer={
         <>
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Close
           </ActionButton>
-          <ActionButton variant="ghost" icon={BellOff} onClick={handleSnooze}>
-            Snooze
-          </ActionButton>
-          <ActionButton onClick={handleCta}>
-            {activeAlert.cta} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-          </ActionButton>
+          {active?.cta && active?.route && (
+            <ActionButton onClick={handleCta}>
+              {active.cta} <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+            </ActionButton>
+          )}
         </>
       }
     >
-      <div className="flex gap-4 items-start pb-4 border-b border-border">
+      <div className="flex items-start gap-4">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneIconClass}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneSoft[tone]}`}
         >
-          <IconComponent className="h-5 w-5" />
+          <Icon className="h-5 w-5" aria-hidden />
         </div>
-        <div className="space-y-1">
-          <h4 className="text-sm font-semibold">{activeAlert.detail.headline}</h4>
-          <p className="text-xs text-muted-foreground leading-relaxed">{activeAlert.detail.body}</p>
-        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {active?.detail ?? active?.s}
+        </p>
       </div>
-
-      <FormSection title="Affected details">
-        <div className="space-y-2.5">
-          {activeAlert.detail.list.map((item, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between rounded-xl border border-border bg-card p-3"
-            >
-              <div className="flex items-center gap-3">
-                {"isStaff" in item ? (
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white uppercase">
-                    {item.title.substring(0, 2)}
-                  </div>
-                ) : (
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                    <item.icon className="h-4 w-4" />
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold leading-normal">{item.title}</div>
-                  <div className="text-[10px] text-muted-foreground">{item.sub}</div>
-                </div>
-              </div>
-              <StatusBadge tone={item.tagTone}>{item.value}</StatusBadge>
-            </div>
-          ))}
-        </div>
-      </FormSection>
     </DrawerShell>
   );
 }

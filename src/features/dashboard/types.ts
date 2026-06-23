@@ -15,6 +15,10 @@ export interface AttentionItem {
   s: string;
   icon?: LucideIcon;
   tone?: string;
+  route?: AppRoute;
+  cta?: string;
+  tag?: string;
+  detail?: string;
 }
 
 export interface OpenShiftItem {

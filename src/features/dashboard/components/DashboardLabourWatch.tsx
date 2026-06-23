@@ -7,10 +7,22 @@ interface Props {
   projectedSales: string;
   labourPct: number;
   targetPct?: number;
+  sample?: boolean;
 }
 
 function formatPct(value: number) {
   return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
+}
+
+// Labour cost/sales have no live source yet; mark the card as sample so the
+// figures are never read as live financial data.
+function SampleBadge({ sample }: { sample?: boolean }) {
+  if (!sample) return null;
+  return (
+    <span className="badge" title="Sample data — not wired to live labour costs">
+      Sample
+    </span>
+  );
 }
 
 function LabourGauge({ value, targetPct }: { value: number; targetPct: number }) {
@@ -54,6 +66,7 @@ export function DashboardLabourWatch({
   projectedSales,
   labourPct,
   targetPct = 30,
+  sample,
 }: Props) {
   const isHealthy = labourPct <= targetPct;
   const barClass = isHealthy ? "bg-brand" : "bg-warning";
@@ -65,6 +78,7 @@ export function DashboardLabourWatch({
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <div className="dock-section-eyebrow">Labour watch</div>
+            <SampleBadge sample={sample} />
           </div>
           <Link
             to="/settings"

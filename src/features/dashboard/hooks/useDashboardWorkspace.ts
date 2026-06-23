@@ -36,18 +36,39 @@ export function useDashboardWorkspace() {
       img: row.img,
       lateTone: row.status === "unapproved" ? "danger" : "warning",
     }));
+    const openShiftDetail =
+      openShifts === 0
+        ? "Next week's draft has no open shifts. You're clear to publish."
+        : `Next week's draft has ${openShifts} unassigned shift${openShifts === 1 ? "" : "s"}. Open the rota to assign cover before the publish deadline.`;
+    const timeDetail =
+      pendingTime.length === 0
+        ? "No timesheets are waiting for review."
+        : `${pendingTime.length} timesheet${pendingTime.length === 1 ? "" : "s"} ${pendingTime.length === 1 ? "is" : "are"} waiting for manager review. Approve or query each before exporting hours.`;
+    const leaveDetail = highLeave
+      ? `${highLeave.n}'s request (${highLeave.date}) needs a decision and may affect coverage. Review it against the rota.`
+      : pendingLeave.length === 0
+        ? "No leave requests are pending."
+        : `${pendingLeave.length} leave request${pendingLeave.length === 1 ? "" : "s"} pending. Review each against the rota.`;
     const attentionItems: AttentionItem[] = [
       {
         t: `Next week has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`,
         s: "Resolve before Fri 16:00 to publish on time",
         icon: AlertTriangle,
         tone: "warning",
+        route: "/rota",
+        cta: "Open rota",
+        tag: "Action needed",
+        detail: openShiftDetail,
       },
       {
         t: `${pendingTime.length} timesheet${pendingTime.length === 1 ? "" : "s"} need manager review`,
         s: "Export approved hours after review",
         icon: Clock3,
         tone: "danger",
+        route: "/time",
+        cta: "Review timesheets",
+        tag: "Needs review",
+        detail: timeDetail,
       },
       {
         t: highLeave
@@ -56,6 +77,10 @@ export function useDashboardWorkspace() {
         s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
         icon: Plane,
         tone: "purple",
+        route: "/leave",
+        cta: "Review leave",
+        tag: "Decision needed",
+        detail: leaveDetail,
       },
     ];
     const weeklyKpis = kpiItems.map((item) =>
@@ -81,6 +106,8 @@ export function useDashboardWorkspace() {
       attentionItems,
       weeklyKpis,
       todayKpis,
+      nextPublished: nextDraft.published,
+      nextHasUnpublishedChanges: nextDraft.hasUnpublishedChanges,
     };
   }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
 }

@@ -24,6 +24,7 @@ import {
   quickActionItems,
 } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardWorkspace } from "@/features/dashboard/hooks/useDashboardWorkspace";
+import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 
@@ -265,8 +266,16 @@ function Home() {
 
       {/* Secondary row: labour watch · rota countdown · leave queue */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatch labourCost="£5,291" projectedSales="£18,500" labourPct={28.6} />
-        <DashboardRotaPublish />
+        <DashboardLabourWatch
+          labourCost={`£${DEMO_WORLD.labour.labourCost.toLocaleString("en-GB")}`}
+          projectedSales={`£${DEMO_WORLD.labour.projectedSales.toLocaleString("en-GB")}`}
+          labourPct={DEMO_WORLD.labour.labourPercent}
+          sample
+        />
+        <DashboardRotaPublish
+          published={dashboard.nextPublished}
+          hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
+        />
         <DashboardPendingLeave items={dashboard.leaveItems} />
       </div>
 
@@ -281,6 +290,7 @@ function Home() {
       <DashboardAlertDrawer
         open={alertOpen}
         onOpenChange={setAlertOpen}
+        items={dashboard.attentionItems}
         selectedIndex={selectedAlertIdx}
       />
       <DashboardKpiDetailDrawer

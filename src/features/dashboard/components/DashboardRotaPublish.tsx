@@ -4,11 +4,21 @@ import { Card } from "@/components/dl";
 import { useIntents } from "@/lib/interactionIntents";
 import { getNextPublishWeekLabel } from "../lib/nextPublishWeek";
 
+interface Props {
+  published: boolean;
+  hasUnpublishedChanges: boolean;
+}
+
 // Targets the upcoming rota week, derived from the shared week helper.
-export function DashboardRotaPublish() {
+export function DashboardRotaPublish({ published, hasUnpublishedChanges }: Props) {
   const navigate = useNavigate();
   const { requestIntent } = useIntents();
   const weekCommencing = getNextPublishWeekLabel();
+  const status = published
+    ? hasUnpublishedChanges
+      ? { label: "Changes not published", className: "text-warning" }
+      : { label: "Published", className: "text-success" }
+    : { label: "Not yet published", className: "text-warning" };
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 pb-4 pt-5">
@@ -27,7 +37,7 @@ export function DashboardRotaPublish() {
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">Next week's rota</span>
-            <span className="font-semibold text-warning">Not yet published</span>
+            <span className={`font-semibold ${status.className}`}>{status.label}</span>
           </div>
         </div>
       </div>
