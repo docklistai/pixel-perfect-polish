@@ -2,9 +2,9 @@ import * as React from "react";
 import { ActionButton, DrawerShell, StatusBadge } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import { Check, ChevronDown, Copy, Pencil, Pin, Repeat, Trash2 } from "lucide-react";
-import { toast } from "sonner";
 import { resolveOpsDetails } from "../data/opsDetails";
 import { OpsDetailBody } from "./OpsDetailBody";
+import { notifyOpsPreview } from "../lib/opsPreview";
 import type { OpsEntry } from "../types";
 
 export const OPS_STATUSES = ["Open", "In progress", "Done", "Closed"] as const;
@@ -46,19 +46,17 @@ export function OpsDetailDrawer({
               {
                 label: "Edit entry",
                 icon: Pencil,
-                onSelect: () => toast.info("Edit", { description: "Editor opened" }),
+                onSelect: () => notifyOpsPreview("Editing entries"),
               },
               {
                 label: "Duplicate as task",
                 icon: Copy,
-                onSelect: () =>
-                  toast.info("Duplicated", { description: "New task created in queue" }),
+                onSelect: () => notifyOpsPreview("Duplicating as a task"),
               },
               {
                 label: "Pin to today",
                 icon: Pin,
-                onSelect: () =>
-                  toast.info("Pinned", { description: "Entry pinned to today's view" }),
+                onSelect: () => notifyOpsPreview("Pinning entries"),
               },
               { kind: "separator" },
               {

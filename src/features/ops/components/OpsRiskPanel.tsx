@@ -1,4 +1,4 @@
-import { AlertTriangle, FileText, Info, Sparkles } from "lucide-react";
+import { AlertTriangle, FileText, Info, ShieldAlert, Sparkles } from "lucide-react";
 import { ActionButton, Card } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import { opsRisks } from "../data/opsDemoData";
@@ -26,16 +26,16 @@ export function OpsRiskPanel({
   return (
     <Card className="overflow-hidden p-0">
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <span className="flex size-8 items-center justify-center rounded-[10px] bg-brand-soft text-brand">
-          <Sparkles className="size-4" aria-hidden />
+        <span className="flex size-8 items-center justify-center rounded-[10px] bg-warning-soft text-warning">
+          <ShieldAlert className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold">3 open risks for handover</div>
+          <div className="text-sm font-semibold">{opsRisks.length} sample risks for handover</div>
           <div className="text-[11px] text-muted-foreground">
-            Based on this week&apos;s rota, leave, and labour data · refreshed 2 min ago
+            Illustrative examples — not generated from live rota, leave, or labour data
           </div>
         </div>
-        <span className="badge teal hidden sm:inline-flex">AI-assisted</span>
+        <span className="badge outline hidden sm:inline-flex">Sample</span>
       </div>
 
       {opsRisks.map((risk) => {

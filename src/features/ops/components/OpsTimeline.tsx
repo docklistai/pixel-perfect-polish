@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Check, ChevronDown, FileText } from "lucide-react";
-import { toast } from "sonner";
 import { Card, EmptyState, StatusBadge } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import { cn } from "@/lib/utils";
@@ -8,6 +7,7 @@ import type { Tone } from "@/components/dl";
 import type { OpsEntry, OpsLogTab } from "../types";
 import { BriefingsTab, ChecklistsTab, EntryListTab } from "./OpsLogTabs";
 import { OpsTimelineEntry } from "./OpsTimelineEntry";
+import { notifyOpsPreview } from "../lib/opsPreview";
 
 const SORT_OPTIONS = ["Time (newest)", "Time (oldest)", "Priority", "Status"];
 
@@ -158,9 +158,7 @@ function TimelineTab({
         <button
           type="button"
           className="link text-sm"
-          onClick={() =>
-            toast.info("Timeline", { description: "You're viewing the full log for today" })
-          }
+          onClick={() => notifyOpsPreview("Loading earlier entries")}
         >
           View earlier entries <ChevronDown className="size-3" aria-hidden />
         </button>

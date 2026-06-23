@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { Card, StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import { opsBriefings, opsChecklists, opsDepartmentCoverage } from "../data/opsDemoData";
+import { notifyOpsPreview } from "../lib/opsPreview";
 
 export function OpsRightRail() {
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export function OpsRightRail() {
       <Card className="p-4">
         <div className="flex items-center">
           <h2 className="text-sm font-semibold">On shift now</h2>
-          <span className="ml-auto font-mono text-[10px] text-muted-foreground">09:17 PM</span>
+          <span className="badge outline ml-auto">Sample</span>
         </div>
         <div className="mt-3 flex items-end gap-4">
           <div>
@@ -53,7 +53,7 @@ export function OpsRightRail() {
           <button
             key={briefing.title}
             type="button"
-            onClick={() => toast.info("Briefing", { description: `${briefing.title} opened` })}
+            onClick={() => notifyOpsPreview("Opening briefings")}
             className="w-full border-t border-border px-4 py-3 text-left transition-colors hover:bg-muted/40"
           >
             <div className="text-xs font-semibold">{briefing.title}</div>
@@ -73,7 +73,7 @@ export function OpsRightRail() {
             <button
               key={checklist.name}
               type="button"
-              onClick={() => toast.info("Checklist", { description: `${checklist.name} opened` })}
+              onClick={() => notifyOpsPreview("Opening checklists")}
               className="block w-full text-left"
             >
               <div className="flex items-center gap-2">

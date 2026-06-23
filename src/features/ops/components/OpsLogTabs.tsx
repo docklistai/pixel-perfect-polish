@@ -1,8 +1,8 @@
 import { FileText, Plus } from "lucide-react";
-import { toast } from "sonner";
 import { ActionButton, EmptyState, StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import { opsBriefings, opsChecklists } from "../data/opsDemoData";
+import { notifyOpsPreview } from "../lib/opsPreview";
 import type { OpsEntry } from "../types";
 
 export function BriefingsTab({ onNew }: { onNew: () => void }) {
@@ -20,7 +20,7 @@ export function BriefingsTab({ onNew }: { onNew: () => void }) {
         <button
           key={briefing.title}
           type="button"
-          onClick={() => toast.info("Briefing", { description: `${briefing.title} opened` })}
+          onClick={() => notifyOpsPreview("Opening briefings")}
           className="flex w-full items-start gap-3 border-b border-border px-4 py-4 text-left transition-colors hover:bg-muted/40"
         >
           <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-accent-purple-soft text-accent-purple">
@@ -106,7 +106,7 @@ export function ChecklistsTab() {
         <button
           key={checklist.name}
           type="button"
-          onClick={() => toast.info("Checklist", { description: `${checklist.name} opened` })}
+          onClick={() => notifyOpsPreview("Opening checklists")}
           className="rounded-xl border border-border bg-muted/20 p-4 text-left transition-colors hover:bg-muted/40"
         >
           <div className="flex items-center gap-2">

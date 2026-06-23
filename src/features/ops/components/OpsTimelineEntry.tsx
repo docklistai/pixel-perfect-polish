@@ -1,9 +1,9 @@
 import { CheckCircle2, ExternalLink, Plus, Trash2, User } from "lucide-react";
-import { toast } from "sonner";
 import { StatusBadge, type Tone } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import { cn } from "@/lib/utils";
 import type { OpsEntry } from "../types";
+import { notifyOpsPreview } from "../lib/opsPreview";
 
 export function OpsTimelineEntry({
   entry,
@@ -77,12 +77,12 @@ export function OpsTimelineEntry({
             {
               label: "Reassign…",
               icon: User,
-              onSelect: () => toast.info("Reassign", { description: "Reassign panel opened" }),
+              onSelect: () => notifyOpsPreview("Reassigning entries"),
             },
             {
               label: "Add follow-up",
               icon: Plus,
-              onSelect: () => toast.info("Follow-up", { description: "Follow-up task added" }),
+              onSelect: () => notifyOpsPreview("Adding a follow-up"),
             },
             { kind: "separator" },
             { label: "Mark done", icon: CheckCircle2, onSelect: onMarkDone },

@@ -1,8 +1,8 @@
 import * as React from "react";
 import { ActionButton, StatusBadge } from "@/components/dl";
 import { AlertCircle, AlertTriangle, CheckCircle2, Clock, Globe, Plus, User } from "lucide-react";
-import { toast } from "sonner";
 import type { OpsEntry, OpsEntryDetails, OpsFollowUpItem } from "../types";
+import { notifyOpsPreview } from "../lib/opsPreview";
 
 interface OpsDetailBodyProps {
   entry: OpsEntry;
@@ -25,7 +25,7 @@ export function OpsDetailBody({ entry, details }: OpsDetailBodyProps) {
 
   const handleSaveComment = () => {
     if (!comment.trim()) return;
-    toast.success("Update saved", { description: "Audit log updated" });
+    notifyOpsPreview("Saving comments");
     setComment("");
   };
 
@@ -145,7 +145,7 @@ export function OpsDetailBody({ entry, details }: OpsDetailBodyProps) {
           variant="ghost"
           size="sm"
           icon={Plus}
-          onClick={() => toast.info("Added", { description: "Follow-up added to the queue" })}
+          onClick={() => notifyOpsPreview("Adding a follow-up")}
         >
           Add task
         </ActionButton>

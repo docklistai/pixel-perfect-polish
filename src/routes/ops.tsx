@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, IconButton } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton, IconButton, AlertCard } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import { useOverlays } from "@/components/AppShortcuts";
 import {
@@ -16,6 +16,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  OPS_PREVIEW_BANNER_TITLE,
+  OPS_PREVIEW_BANNER_DESCRIPTION,
+  notifyOpsPreview,
+} from "@/features/ops/lib/opsPreview";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsRiskPanel } from "@/features/ops/components/OpsRiskPanel";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
@@ -170,10 +175,13 @@ function OpsPage() {
                 {
                   label: "Export today's log",
                   icon: Download,
-                  onSelect: () =>
-                    toast.info("Export ready", { description: "ops_today.pdf — preview ready" }),
+                  onSelect: () => notifyOpsPreview("Exporting the log"),
                 },
-                { label: "Print briefing", icon: FileText, onSelect: () => {} },
+                {
+                  label: "Print briefing",
+                  icon: FileText,
+                  onSelect: () => notifyOpsPreview("Printing the briefing"),
+                },
                 { kind: "separator" },
                 {
                   label: "Settings",
@@ -186,9 +194,17 @@ function OpsPage() {
         }
       />
 
+      <AlertCard
+        className="mb-4"
+        tone="warning"
+        title={OPS_PREVIEW_BANNER_TITLE}
+        description={OPS_PREVIEW_BANNER_DESCRIPTION}
+        action={<></>}
+      />
+
       <div className="guidance-note mb-4">
         <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Clear open risks before handover — use the AI risk panel to review what needs attention.
+        Clear open risks before handover — use the risk panel to review what needs attention.
       </div>
 
       <OpsStatCards />
@@ -198,11 +214,7 @@ function OpsPage() {
           <OpsRiskPanel
             entries={entries}
             onOpenEntry={(entry) => setSelectedId(entry.id)}
-            onOpenBriefing={() =>
-              toast.info("Wedding reception briefing", {
-                description: "Posted by Olivia · FOH all-hands 17:30",
-              })
-            }
+            onOpenBriefing={() => notifyOpsPreview("Opening briefings")}
             onUseInHandover={() => setHandoverOpen(true)}
             onOpenAssistant={openAiDrawer}
           />
