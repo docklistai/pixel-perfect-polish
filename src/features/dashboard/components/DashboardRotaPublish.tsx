@@ -2,11 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Calendar, Send } from "lucide-react";
 import { Card } from "@/components/dl";
 import { useIntents } from "@/lib/interactionIntents";
+import { getNextPublishWeekLabel } from "../lib/nextPublishWeek";
 
-// Next rota: week of Mon 15 Jun 2026. Due by Fri 12 Jun 16:00.
+// Targets the upcoming rota week, derived from the shared week helper.
 export function DashboardRotaPublish() {
   const navigate = useNavigate();
   const { requestIntent } = useIntents();
+  const weekCommencing = getNextPublishWeekLabel();
   return (
     <Card className="overflow-hidden p-0">
       <div className="px-5 pb-4 pt-5">
@@ -19,16 +21,13 @@ export function DashboardRotaPublish() {
           </div>
           <div>
             <div className="text-xs text-muted-foreground">Week commencing</div>
-            <div className="text-[22px] font-semibold tracking-tight">15 Jun 2026</div>
+            <div className="text-[22px] font-semibold tracking-tight">{weekCommencing}</div>
           </div>
         </div>
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Due by Fri, 12 Jun 16:00</span>
-            <span className="font-semibold text-warning">1d remaining</span>
-          </div>
-          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-            <div className="h-full w-2/3 rounded-full bg-warning" />
+            <span className="text-muted-foreground">Next week's rota</span>
+            <span className="font-semibold text-warning">Not yet published</span>
           </div>
         </div>
       </div>
