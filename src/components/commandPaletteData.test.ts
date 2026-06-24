@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMMAND_QUICK_ACTIONS } from "./commandPaletteData";
+import { COMMAND_NAV_ITEMS, COMMAND_QUICK_ACTIONS } from "./commandPaletteData";
 
 describe("command palette: Add team member", () => {
   const addTeamMember = COMMAND_QUICK_ACTIONS.find((a) => a.label === "Add team member");
@@ -10,5 +10,13 @@ describe("command palette: Add team member", () => {
     expect(addTeamMember).toBeDefined();
     expect(addTeamMember?.to).toBe("/staff");
     expect(addTeamMember?.intent).toBe("staff.add");
+  });
+});
+
+describe("command palette preview routes", () => {
+  it("labels preview-only manager routes", () => {
+    const previewRoutes = COMMAND_NAV_ITEMS.filter((item) => item.preview).map((item) => item.to);
+
+    expect(previewRoutes).toEqual(["/team", "/ops", "/reports", "/settings"]);
   });
 });

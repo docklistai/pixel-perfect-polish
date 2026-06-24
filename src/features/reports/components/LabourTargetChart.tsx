@@ -16,9 +16,9 @@ export function LabourTargetChart() {
       <div className="mb-3 flex items-center justify-between">
         <div>
           <div id="reports-chart-title" className="text-sm font-semibold">
-            Labour cost vs sales
+            Sample labour cost vs sales
           </div>
-          <div className="text-xs text-muted-foreground">Weekly trend · last 12 weeks</div>
+          <div className="text-xs text-muted-foreground">Sample weekly trend · last 12 weeks</div>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-2">
@@ -31,8 +31,8 @@ export function LabourTargetChart() {
       </div>
 
       <div id="reports-chart-summary" className="sr-only">
-        Labour cost averaged 28.6 percent of sales over the last 12 weeks, with the sharpest
-        increase coming from the busiest weekend periods.
+        Sample chart: labour cost averaged 28.6 percent of sales over the last 12 weeks, with the
+        sharpest increase coming from the busiest weekend periods.
       </div>
 
       <svg

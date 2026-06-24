@@ -20,14 +20,14 @@ export function ReportsKpiCards({
   const pendingLeave = leaveRequests.filter((request) => request.state === "pending").length;
   const kpis = [
     {
-      l: "Labour cost",
+      l: "Sample labour cost",
       v: "£20,840",
       vs: "last 4 weeks",
       icon: PoundSterling,
       tone: "brand" as const,
     },
     {
-      l: "Labour vs sales",
+      l: "Sample labour vs sales",
       v: "28.6%",
       vs: "within 30% target",
       icon: Percent,

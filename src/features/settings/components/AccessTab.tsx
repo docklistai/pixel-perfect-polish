@@ -1,7 +1,7 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { ActionButton, DialogShell } from "@/components/dl";
-import { SectionCard, ToggleRow } from "./SettingsPrimitives";
+import { SectionCard, ToggleRow, PreviewTag } from "./SettingsPrimitives";
 import { Shield, ChevronRight, Check, Info } from "lucide-react";
 
 interface RoleDef {
@@ -101,10 +101,16 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
         <h2 className="text-[28px] font-semibold leading-tight text-foreground">
           Roles & permissions
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">Who can do what across the workspace.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Sample role previews. They do not change auth or live RBAC.
+        </p>
       </div>
 
-      <SectionCard title="System roles" description="Click a role to preview its permissions.">
+      <SectionCard
+        title="System roles"
+        badge={<PreviewTag>Sample</PreviewTag>}
+        description="Click a role to preview its permissions. No role is duplicated or saved."
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           {ROLES.map((role) => (
             <button
@@ -148,13 +154,18 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Access policy" description="Fine-tune general permissions.">
+      <SectionCard
+        title="Access policy"
+        badge={<PreviewTag>Preview</PreviewTag>}
+        description="Fine-tune general permissions in preview only. These toggles do not change auth."
+      >
         <div className="space-y-3">
           <ToggleRow
             label="Hide pay rates from supervisors"
             description="Only GMs and Duty Managers will see hourly rates."
             ariaLabel="Hide pay rates toggle"
             onDirty={onDirty}
+            preview
           />
           <ToggleRow
             label="Allow staff to see colleagues' phone numbers"
@@ -162,12 +173,14 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
             ariaLabel="Allow staff to see phone numbers toggle"
             onDirty={onDirty}
             defaultOn={false}
+            preview
           />
           <ToggleRow
             label="Require manager approval for all swaps"
             description="Even peer-to-peer swaps."
             ariaLabel="Require swap approval toggle"
             onDirty={onDirty}
+            preview
           />
         </div>
       </SectionCard>
@@ -188,26 +201,26 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
             <ActionButton
               variant="secondary"
               onClick={() => {
-                toast.success("Role duplicated", {
+                toast.info("Preview only", {
                   description: selectedRole
-                    ? `"${selectedRole.name} (copy)" added as a custom role.`
+                    ? `"${selectedRole.name}" was not duplicated. Custom roles are not live-wired.`
                     : undefined,
                 });
                 setSelectedRole(null);
               }}
             >
-              Duplicate role
+              Preview duplicate
             </ActionButton>
             <ActionButton
               onClick={() => {
                 onDirty();
-                toast.success("Role updated", {
-                  description: "Permission changes apply to everyone in this role.",
+                toast.info("Preview only", {
+                  description: "No role, permission, auth, or RBAC changes were saved.",
                 });
                 setSelectedRole(null);
               }}
             >
-              Save role
+              Preview save
             </ActionButton>
           </>
         }
@@ -262,7 +275,7 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
 
             <div className="flex gap-2 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
               <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              <span>Changes here apply to everyone in this role.</span>
+              <span>Preview only — no role or RBAC changes are written.</span>
             </div>
           </div>
         )}

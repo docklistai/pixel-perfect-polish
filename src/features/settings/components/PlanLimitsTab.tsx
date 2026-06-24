@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SectionCard } from "./SettingsPrimitives";
+import { PreviewTag, SectionCard } from "./SettingsPrimitives";
 import { Check } from "lucide-react";
 
 export function PlanLimitsTab() {
@@ -7,7 +7,9 @@ export function PlanLimitsTab() {
     <div className="space-y-4">
       <div>
         <h2 className="text-[28px] font-semibold leading-tight text-foreground">Plan & limits</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Your current workspace plan and usage.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Sample plan and usage preview. Billing is not live-wired.
+        </p>
       </div>
 
       <div className="rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-500/5 to-transparent p-5 lg:p-6">
@@ -15,6 +17,7 @@ export function PlanLimitsTab() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <div className="text-lg font-bold">Hospitality · Pro</div>
+              <PreviewTag>Sample plan</PreviewTag>
               <span className="inline-flex items-center rounded-full bg-teal-500/10 px-2.5 py-0.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
                 Current plan
               </span>
@@ -27,12 +30,14 @@ export function PlanLimitsTab() {
             <div className="font-mono text-2xl font-bold">
               £89 <span className="text-xs font-normal text-muted-foreground">/ month</span>
             </div>
-            <div className="text-[10px] text-muted-foreground">Renews 8 Jul 2026</div>
+            <div className="text-[10px] text-muted-foreground">
+              Sample billing date · no billing is active
+            </div>
           </div>
         </div>
       </div>
 
-      <SectionCard title="Usage" description="Your resource consumption for this billing period.">
+      <SectionCard title="Usage" description="Sample usage for this preview period.">
         <div className="space-y-4">
           {[
             { label: "Staff seats", used: 8, total: 50 },
@@ -63,7 +68,10 @@ export function PlanLimitsTab() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Compare plans" description="Choose the scope that fits your operations.">
+      <SectionCard
+        title="Compare plans"
+        description="Sample plan comparison — switching is disabled."
+      >
         <div className="grid gap-4 md:grid-cols-3">
           {[
             {
@@ -130,14 +138,14 @@ export function PlanLimitsTab() {
               </div>
               <button
                 type="button"
-                disabled={plan.current}
+                disabled
                 className={`mt-4 w-full rounded-xl py-1.5 text-xs font-semibold transition ${
                   plan.current
                     ? "bg-teal-500/10 text-teal-600 dark:text-teal-400 cursor-not-allowed opacity-80"
-                    : "bg-muted hover:bg-muted/70 text-foreground"
+                    : "bg-muted text-foreground cursor-not-allowed opacity-70"
                 }`}
               >
-                {plan.current ? "Current plan" : "Switch"}
+                {plan.current ? "Current sample plan" : "Preview only"}
               </button>
             </div>
           ))}

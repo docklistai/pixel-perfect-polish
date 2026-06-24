@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { AppShell, PageHeader, ActionButton } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton, AlertCard } from "@/components/dl";
 import type { SettingsContentTab } from "@/features/settings/components/SettingsContent";
 import { SettingsSidebar } from "@/features/settings/components/SettingsSidebar";
 import { SettingsContent } from "@/features/settings/components/SettingsContent";
@@ -31,8 +31,8 @@ function SettingsPage() {
     window.setTimeout(() => {
       setSaving(false);
       setDirty(false);
-      toast.success("Settings saved", {
-        description: `Changes apply to ${workspaceName}.`,
+      toast.info("Preview only", {
+        description: "Preview only — no workspace settings are persisted.",
       });
     }, 600);
   };
@@ -46,7 +46,7 @@ function SettingsPage() {
     setResetKey((k) => k + 1);
     setDirty(false);
     toast.info("Changes discarded", {
-      description: "Settings restored to their last saved values.",
+      description: "Local preview edits were reset. No saved workspace settings changed.",
     });
   };
 
@@ -58,17 +58,25 @@ function SettingsPage() {
         actions={
           <>
             <span className="guidance-note" style={{ marginRight: 4 }}>
-              Changes apply to <strong>{workspaceName}</strong>
+              Preview changes for <strong>{workspaceName}</strong>
             </span>
             <ActionButton variant="ghost" onClick={handleDiscard}>
               Discard
             </ActionButton>
             <ActionButton onClick={handleSave}>
               {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />}
-              {saving ? "Saving…" : "Save changes"}
+              {saving ? "Checking…" : "Preview save"}
             </ActionButton>
           </>
         }
+      />
+
+      <AlertCard
+        className="mb-4"
+        tone="warning"
+        title="Preview — Settings changes are not live-wired"
+        description="Some settings, permissions, security controls, exports, and plan details are sample previews. Unsupported actions are labelled and do not change auth, billing, integrations, or files."
+        action={<></>}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">

@@ -12,7 +12,7 @@ export function ReportsInsightsPanel({ onOpenDetail }: ReportsInsightsPanelProps
     <Card className="p-4 lg:p-5">
       <div className="flex items-center gap-2 mb-3">
         <Lightbulb className="h-4 w-4 text-warning" />
-        <span className="text-sm font-semibold">3 things to look at in this period</span>
+        <span className="text-sm font-semibold">Sample review points for this period</span>
       </div>
       <div className="space-y-3">
         {insights.map((ins) => (
@@ -35,7 +35,7 @@ export function ReportsInsightsPanel({ onOpenDetail }: ReportsInsightsPanelProps
         ))}
       </div>
       <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span>Review points only</span>
+        <span>Sample coaching signals</span>
         <span>·</span>
         <span>You decide what to action</span>
       </div>

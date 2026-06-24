@@ -12,21 +12,26 @@ export function TeamTrainingDetailDrawer({ item, onOpenChange }: Props) {
   const handlePrepareReminder = () => {
     onOpenChange(false);
     toast.info("Reminder prepared", {
-      description: "Reminder draft ready — post from Announcements composer",
+      description: "Sample training reminder only. Nothing was saved or sent.",
     });
   };
 
   const actions = [
     {
       icon: Users,
-      label: "View assigned staff",
+      label: "Preview assigned staff",
       onClick: () =>
-        toast.info("Assigned staff", { description: item ? `Staff assigned to ${item.t}` : "" }),
+        toast.info("Preview only", {
+          description: item ? `${item.t} uses sample assigned staff.` : "",
+        }),
     },
     {
       icon: ExternalLink,
-      label: "Open training detail",
-      onClick: () => toast.info("Training", { description: item ? `${item.t} detail opened` : "" }),
+      label: "Preview training detail",
+      onClick: () =>
+        toast.info("Preview only", {
+          description: item ? `${item.t} has no live training detail.` : "",
+        }),
     },
     {
       icon: Bell,
@@ -35,16 +40,16 @@ export function TeamTrainingDetailDrawer({ item, onOpenChange }: Props) {
     },
     {
       icon: CheckCircle2,
-      label: "Mark completed",
+      label: "Preview completion",
       onClick: () => {
         onOpenChange(false);
-        toast.success("Marked completed", { description: item?.t });
+        toast.info("Preview only", { description: "No training completion record was updated." });
       },
     },
     {
       icon: Edit3,
-      label: "Add a note",
-      onClick: () => toast.info("Note", { description: "Note added to training record" }),
+      label: "Preview note",
+      onClick: () => toast.info("Preview only", { description: "No training note was saved." }),
     },
   ];
 
@@ -63,7 +68,9 @@ export function TeamTrainingDetailDrawer({ item, onOpenChange }: Props) {
       open={item !== null}
       onOpenChange={onOpenChange}
       title={item?.t ?? ""}
-      description={item ? `${item.d} · Source: ${item.source ?? "—"}` : ""}
+      description={
+        item ? `Sample training reminder · ${item.d} · Source: ${item.source ?? "—"}` : ""
+      }
       meta={
         item ? (
           <StatusBadge tone={item.mandatory ? "danger" : "info"}>
@@ -77,14 +84,16 @@ export function TeamTrainingDetailDrawer({ item, onOpenChange }: Props) {
             Close
           </ActionButton>
           <ActionButton variant="ghost" icon={Bell} onClick={handlePrepareReminder}>
-            Prepare reminder
+            Preview reminder
           </ActionButton>
           <ActionButton
             onClick={() =>
-              toast.info("Training", { description: item ? `${item.t} detail opened` : "" })
+              toast.info("Preview only", {
+                description: item ? `${item.t} has no live training detail in this preview.` : "",
+              })
             }
           >
-            Open detail
+            Preview detail
           </ActionButton>
         </>
       }

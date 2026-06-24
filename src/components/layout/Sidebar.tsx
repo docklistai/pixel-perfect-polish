@@ -37,7 +37,6 @@ interface NavItem {
     kind: "amber" | "neutral" | "red";
   };
 }
-
 const navItems: readonly NavItem[] = [
   { to: "/", label: "Home", icon: Home, group: "workspace" },
   {
@@ -66,15 +65,11 @@ const navItems: readonly NavItem[] = [
   { to: "/settings", label: "Settings", icon: Settings, group: "admin", preview: true },
 ];
 
-const NAV_GROUPS: ReadonlyArray<{
-  key: NavItem["group"];
-  label: string;
-  ariaLabel: string;
-}> = [
+const NAV_GROUPS = [
   { key: "workspace", label: "Workspace", ariaLabel: "Workspace" },
   { key: "communication", label: "Communication", ariaLabel: "Communication" },
   { key: "admin", label: "Admin", ariaLabel: "Admin" },
-];
+] as const;
 
 const overflowNavItems = navItems.filter((item) => item.group !== "workspace");
 
@@ -159,6 +154,11 @@ export function Sidebar() {
                     >
                       <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
                       <span>{item.label}</span>
+                      {item.preview && (
+                        <span className="ml-auto rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white/55">
+                          Preview
+                        </span>
+                      )}
                       {item.flagship && !active && (
                         <span
                           style={{

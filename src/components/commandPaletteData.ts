@@ -34,6 +34,7 @@ export interface CommandNavItem {
   to: NavTarget;
   icon: React.ComponentType<{ className?: string }>;
   shortcut?: string;
+  preview?: boolean;
 }
 
 export interface CommandQuickAction {
@@ -50,10 +51,10 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
   { label: "Staff", to: "/staff", icon: Users, shortcut: "G S" },
   { label: "Time", to: "/time", icon: Clock, shortcut: "G T" },
   { label: "Leave", to: "/leave", icon: CalendarOff, shortcut: "G L" },
-  { label: "Team", to: "/team", icon: MessageSquare },
-  { label: "Ops", to: "/ops", icon: Wrench },
-  { label: "Reports", to: "/reports", icon: BarChart3 },
-  { label: "Settings", to: "/settings", icon: SettingsIcon },
+  { label: "Team", to: "/team", icon: MessageSquare, preview: true },
+  { label: "Ops", to: "/ops", icon: Wrench, preview: true },
+  { label: "Reports", to: "/reports", icon: BarChart3, preview: true },
+  { label: "Settings", to: "/settings", icon: SettingsIcon, preview: true },
 ];
 
 export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [

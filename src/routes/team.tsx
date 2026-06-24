@@ -7,6 +7,7 @@ import {
   IconButton,
   DialogShell,
   StatusBadge,
+  AlertCard,
 } from "@/components/dl";
 import {
   Megaphone,
@@ -58,22 +59,22 @@ function TeamPage() {
       case "note":
         setComposeOpen(true);
         toast.info("Compose opened", {
-          description: `Draft a note for ${selectedBirthday.n} — review before posting.`,
+          description: `Preview a note for ${selectedBirthday.n}. Nothing is saved or sent.`,
         });
         break;
       case "update":
-        toast.info("Staff update draft prepared", {
-          description: "Open the Announcements composer to finish and post",
+        toast.info("Preview only", {
+          description: "Sample staff update opened in the composer. Nothing is saved or posted.",
         });
         break;
       case "profile":
-        toast.info("Opening profile", {
-          description: `Opening ${selectedBirthday.n}'s profile`,
+        toast.info("Preview only", {
+          description: `${selectedBirthday.n}'s profile is not opened from this sample reminder.`,
         });
         break;
       case "hide":
-        toast.info("Reminder hidden", {
-          description: "Won't show again this week",
+        toast.info("Preview only", {
+          description: "Sample reminder visibility is not persisted.",
         });
         break;
     }
@@ -83,7 +84,7 @@ function TeamPage() {
     <AppShell>
       <PageHeader
         title="Team"
-        subtitle="Share updates and briefings with your team — track who's read what."
+        subtitle="Preview manager announcements, briefings, and private reminders without live messaging."
         actions={
           <>
             <ActionButton icon={Megaphone} onClick={() => setComposeOpen(true)}>
@@ -94,9 +95,13 @@ function TeamPage() {
         }
       />
 
-      <p className="mb-5 text-xs text-muted-foreground">
-        Some figures may be based on sample data.
-      </p>
+      <AlertCard
+        className="mb-5"
+        tone="warning"
+        title="Preview — Team uses sample communication content"
+        description="Announcements, read indicators, manager notes, birthdays, events, and training reminders are sample previews. No chat, social feed, monitoring, LMS, or staff delivery is live-wired."
+        action={<></>}
+      />
 
       <div className="grid grid-cols-12 gap-5">
         <div className="col-span-12 lg:col-span-9 space-y-5">
@@ -147,12 +152,12 @@ function TeamPage() {
                 icon={Check}
                 onClick={() => {
                   setSelectedBirthday(null);
-                  toast.success("Reminder cleared", {
-                    description: "Birthday reminder marked as acknowledged",
+                  toast.info("Preview only", {
+                    description: "This sample birthday reminder was not updated.",
                   });
                 }}
               >
-                Mark acknowledged
+                Preview acknowledge
               </ActionButton>
             </div>
           }
@@ -191,28 +196,28 @@ function TeamPage() {
                   icon: Edit3,
                   tone: "brand" as const,
                   title: "Prepare birthday note",
-                  desc: "Draft a personal message — you review before anything is saved",
+                  desc: "Preview a personal note — nothing is saved or sent",
                 },
                 {
                   id: "update" as const,
                   icon: Megaphone,
                   tone: "purple" as const,
                   title: "Create staff update draft",
-                  desc: "Draft a team announcement — you post it manually when ready",
+                  desc: "Preview a team announcement — nothing is posted",
                 },
                 {
                   id: "profile" as const,
                   icon: User,
                   tone: "info" as const,
                   title: "Open profile",
-                  desc: "View staff record, notes, and schedule",
+                  desc: "Preview action only — no profile opens",
                 },
                 {
                   id: "hide" as const,
                   icon: X,
                   tone: "muted" as const,
                   title: "Hide this reminder",
-                  desc: "Won't appear again this week",
+                  desc: "Preview action only — visibility is unchanged",
                 },
               ].map((btn) => (
                 <button

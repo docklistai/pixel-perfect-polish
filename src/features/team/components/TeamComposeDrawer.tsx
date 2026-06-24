@@ -1,6 +1,7 @@
 import { Info } from "lucide-react";
 import { DrawerShell, FormSection, FormRow, ActionButton } from "@/components/dl";
 import { TOTAL_STAFF } from "../data/teamDemoData";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
@@ -12,21 +13,29 @@ export function TeamComposeDrawer({ open, onOpenChange }: Props) {
     <DrawerShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Compose announcement"
-      description="Share an update with your team"
+      title="Compose sample announcement"
+      description="Preview an update without posting to staff"
       width="lg"
       footer={
         <>
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
-            Save draft
+            Close
           </ActionButton>
-          <ActionButton onClick={() => onOpenChange(false)}>Publish</ActionButton>
+          <ActionButton
+            onClick={() =>
+              toast.info("Preview only", {
+                description: "Sample announcements are not saved or published to staff.",
+              })
+            }
+          >
+            Preview publish
+          </ActionButton>
         </>
       }
     >
       <div className="guidance-note mb-4">
         <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Preview before publishing — staff see this update in the app only after you publish it.
+        Preview only — nothing is saved, posted, or delivered to staff from this composer.
       </div>
       <FormSection title="Message">
         <FormRow label="Subject" required>
@@ -69,15 +78,19 @@ export function TeamComposeDrawer({ open, onOpenChange }: Props) {
             <input type="checkbox" defaultChecked className="mt-0.5 rounded" />
             <div>
               <div className="text-sm font-semibold">Require acknowledgement</div>
-              <div className="text-xs text-muted-foreground">Staff confirm they've read this</div>
+              <div className="text-xs text-muted-foreground">
+                Sample read confirmation only — not a live staff record
+              </div>
             </div>
           </label>
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" defaultChecked className="mt-0.5 rounded" />
             <div>
-              <div className="text-sm font-semibold">Highlight in the staff app feed</div>
+              <div className="text-sm font-semibold">
+                Highlight in the preview staff updates list
+              </div>
               <div className="text-xs text-muted-foreground">
-                Appears at the top of the staff feed after publishing
+                Sample placement only — no staff feed is live
               </div>
             </div>
           </label>

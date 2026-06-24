@@ -6,6 +6,7 @@ interface MobileMoreItem {
   to: string;
   label: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  preview?: boolean;
 }
 
 /**
@@ -97,6 +98,11 @@ export function MobileMoreMenu({ items }: { items: ReadonlyArray<MobileMoreItem>
                 >
                   <Icon className="ico h-[17px] w-[17px]" aria-hidden="true" />
                   <span>{item.label}</span>
+                  {item.preview && (
+                    <span className="ml-auto rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase text-muted-foreground">
+                      Preview
+                    </span>
+                  )}
                 </Link>
               );
             })}

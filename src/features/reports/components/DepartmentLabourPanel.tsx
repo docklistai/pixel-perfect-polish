@@ -17,12 +17,18 @@ export function DepartmentLabourPanel() {
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
       <div className="mb-3 flex items-center gap-2">
-        <div className="text-sm font-semibold">Cost by department</div>
+        <div>
+          <div className="text-sm font-semibold">Sample cost by department</div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Sample finance figure
+          </div>
+        </div>
         <div className="grow" />
         <button
           type="button"
-          aria-label="Open cost by department detail"
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60"
+          aria-label="Cost by department detail preview unavailable"
+          disabled
+          className="inline-flex h-7 w-7 cursor-not-allowed items-center justify-center rounded-md text-muted-foreground opacity-50"
         >
           <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
@@ -55,7 +61,7 @@ export function DepartmentLabourPanel() {
         </svg>
         <div className="absolute text-center">
           <div className="font-display text-[22px] font-bold leading-none">£20,840</div>
-          <div className="mt-1 text-xs text-muted-foreground">Total cost</div>
+          <div className="mt-1 text-xs text-muted-foreground">Sample total cost</div>
         </div>
       </div>
 

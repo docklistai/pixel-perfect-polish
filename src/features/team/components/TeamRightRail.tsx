@@ -25,7 +25,7 @@ export function TeamRightRail({
   return (
     <div className="space-y-4">
       <Card className="p-5">
-        <h3 className="text-sm font-semibold mb-3">Upcoming training</h3>
+        <h3 className="text-sm font-semibold mb-3">Sample training reminders</h3>
         {training.map((item) => (
           <button
             key={item.t}
@@ -48,7 +48,7 @@ export function TeamRightRail({
       </Card>
 
       <Card className="p-5">
-        <h3 className="text-sm font-semibold mb-3">Birthdays this week</h3>
+        <h3 className="text-sm font-semibold mb-3">Sample birthday reminders</h3>
         <div className="space-y-0.5">
           {birthdays.map((person) => (
             <button
@@ -77,7 +77,7 @@ export function TeamRightRail({
       </Card>
 
       <Card className="p-5">
-        <h3 className="text-sm font-semibold mb-3">Staff events</h3>
+        <h3 className="text-sm font-semibold mb-3">Sample staff events</h3>
         {events.map((item) => (
           <div
             key={item.t}
@@ -98,7 +98,7 @@ export function TeamRightRail({
       </Card>
 
       <Card className="p-5">
-        <h3 className="text-sm font-semibold mb-3">Quick groups</h3>
+        <h3 className="text-sm font-semibold mb-3">Sample quick groups</h3>
         {groups.map(({ label, members }) => (
           <button
             key={label}

@@ -10,8 +10,10 @@ export function ReportsCoverageHeatmapCard() {
     <Card className="mt-4 p-4 lg:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <div className="text-sm font-semibold">Coverage heatmap</div>
-          <div className="text-xs text-muted-foreground">Scheduled hours by day / shift period</div>
+          <div className="text-sm font-semibold">Sample coverage heatmap</div>
+          <div className="text-xs text-muted-foreground">
+            Sample heatmap · scheduled hours by day / shift period
+          </div>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>Lower</span>

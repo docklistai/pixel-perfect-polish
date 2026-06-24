@@ -28,7 +28,7 @@ const AUDIT_EVENTS = [
   { event: "Rota published — week of 8 Jun", who: "Workspace manager", when: "Mon 8 Jun, 16:42" },
   { event: "Timesheet approved", who: "Workspace manager", when: "Mon 8 Jun, 09:15" },
   { event: "Leave approved", who: "Workspace manager", when: "Sun 7 Jun, 18:03" },
-  { event: "Role updated — FOH Supervisor", who: "Workspace manager", when: "Fri 5 Jun, 11:27" },
+  { event: "Role previewed — FOH Supervisor", who: "Workspace manager", when: "Fri 5 Jun, 11:27" },
 ] as const;
 
 export function ExportsTab({ onDirty }: { onDirty: () => void }) {
@@ -41,17 +41,26 @@ export function ExportsTab({ onDirty }: { onDirty: () => void }) {
         </p>
       </div>
 
-      <SectionCard title="Security" description="Sign-in and session rules for this workspace.">
+      <SectionCard
+        title="Security"
+        badge={
+          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Preview
+          </span>
+        }
+        description="Preview security control settings. These toggles are not wired to auth, 2FA, SSO, or session enforcement yet."
+      >
         <div className="space-y-3">
           <ToggleRow
             label="Require two-factor authentication for managers"
-            description="Managers confirm sign-in with a second device."
+            description="Preview security control — managers do not get live 2FA from this toggle."
             ariaLabel="Require two-factor authentication toggle"
             onDirty={onDirty}
+            preview
           />
           <ToggleRow
             label="Single sign-on (SSO)"
-            description="Sign in through your company identity provider."
+            description="Preview security control — identity-provider sign-in is not live-wired."
             ariaLabel="Single sign-on toggle"
             onDirty={onDirty}
             defaultOn={false}
@@ -59,16 +68,17 @@ export function ExportsTab({ onDirty }: { onDirty: () => void }) {
           />
           <ToggleRow
             label="Sign out inactive sessions"
-            description="Manager sessions end automatically after 12 hours of inactivity."
+            description="Preview security control — session expiry is not changed by this toggle."
             ariaLabel="Sign out inactive sessions toggle"
             onDirty={onDirty}
+            preview
           />
         </div>
       </SectionCard>
 
       <SectionCard
         title="Export data"
-        description="Download workspace data as CSV. Approved records only — exports never include draft rotas."
+        description="Preview export cards. Approved records only — no files are prepared or downloaded here."
       >
         <div className="grid gap-3 lg:grid-cols-3">
           {EXPORT_CARDS.map((card) => (
@@ -89,14 +99,14 @@ export function ExportsTab({ onDirty }: { onDirty: () => void }) {
               <button
                 type="button"
                 onClick={() =>
-                  toast.success(`${card.title} export prepared`, {
-                    description: "Your download will start shortly.",
+                  toast.info("Preview only", {
+                    description: `${card.title} export is not live here. No file was prepared or downloaded.`,
                   })
                 }
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50"
               >
                 <Download className="h-3.5 w-3.5" aria-hidden />
-                Export
+                Preview export
               </button>
             </div>
           ))}

@@ -20,7 +20,7 @@ interface TabSpec {
 const tabs: TabSpec[] = [
   { key: "all", label: "All" },
   { key: "pinned", label: "Pinned", tone: "purple" },
-  { key: "myAck", label: "Need my ack", tone: "warning" },
+  { key: "myAck", label: "Sample ack", tone: "warning" },
 ];
 
 export function TeamAnnouncementList({ announcements, onSelect }: Props) {
@@ -136,7 +136,7 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
                   )}
                   {!a.myAck && (
                     <span className="ml-auto">
-                      <StatusBadge tone="warning">Needs your ack</StatusBadge>
+                      <StatusBadge tone="warning">Sample ack</StatusBadge>
                     </span>
                   )}
                 </div>
@@ -151,7 +151,7 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
               </div>
               <div className="text-right text-xs shrink-0 min-w-[120px]">
                 <div className="font-semibold">
-                  {a.ackDone} / {a.ackTotal} read
+                  {a.ackDone} / {a.ackTotal} sample read
                 </div>
                 <div className="text-muted-foreground">{a.date}</div>
                 <div className="bar mt-2 ml-auto" style={{ width: 110, height: 4 }}>
@@ -170,8 +170,8 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
             Showing {visible.length} of {announcements.length}
           </span>
           <div className="flex-1" />
-          <button type="button" className="btn ghost sm">
-            Load more
+          <button type="button" className="btn ghost sm" disabled>
+            Preview list
           </button>
         </div>
       )}

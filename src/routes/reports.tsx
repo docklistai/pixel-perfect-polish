@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton } from "@/components/dl";
+import { AppShell, PageHeader, ActionButton, AlertCard } from "@/components/dl";
 import { CalendarDays, Download, Info, Plus, BarChart2 } from "lucide-react";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
 import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
@@ -59,14 +59,19 @@ function ReportsPage() {
         }
       />
 
+      <AlertCard
+        className="mb-4"
+        tone="warning"
+        title="Preview — Reports uses sample reporting content"
+        description="Charts, £ figures, saved reports, exports, and insight drawers are sample previews. They are not live BI, payroll, finance, or performance analytics."
+        action={<></>}
+      />
+
       <div className="guidance-note mb-4">
         <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Use the review points below to spot rota issues — click each point to mark as reviewed.
+        Use the sample review points below to spot rota issues — review marks stay local to this
+        preview.
       </div>
-
-      <p className="mb-4 text-xs text-muted-foreground">
-        Some figures may be based on sample data.
-      </p>
 
       <ReportsKpiCards timeRows={timeRows} leaveRequests={leaveRequests} />
 

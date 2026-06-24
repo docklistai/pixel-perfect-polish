@@ -2,11 +2,11 @@ import { Card } from "@/components/dl";
 import { Clock3, Download, Plane, PoundSterling, Trophy, type LucideIcon } from "lucide-react";
 
 const savedReports = [
-  { icon: PoundSterling, name: "Weekly labour summary", sub: "Owned by you" },
-  { icon: Clock3, name: "Attendance — Kitchen", sub: "Last run yesterday" },
-  { icon: Plane, name: "Leave forecast Q3", sub: "Owned by Olivia" },
-  { icon: Trophy, name: "Performance review", sub: "Last run 7d ago" },
-  { icon: Download, name: "Approved hours export", sub: "Last run 2d ago" },
+  { icon: PoundSterling, name: "Weekly labour summary", sub: "Sample saved report" },
+  { icon: Clock3, name: "Attendance — Kitchen", sub: "Sample saved report" },
+  { icon: Plane, name: "Leave forecast Q3", sub: "Sample saved report" },
+  { icon: Trophy, name: "Sample rota review", sub: "Sample saved report" },
+  { icon: Download, name: "Approved hours export", sub: "Sample saved report" },
 ] as const;
 
 interface ReportsSavedReportsCardProps {
@@ -16,7 +16,7 @@ interface ReportsSavedReportsCardProps {
 export function ReportsSavedReportsCard({ onOpenReport }: ReportsSavedReportsCardProps) {
   return (
     <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
-      <div className="mb-3 text-sm font-semibold">Saved reports</div>
+      <div className="mb-3 text-sm font-semibold">Sample saved reports</div>
       <div className="space-y-2">
         {savedReports.map((report) => (
           <button

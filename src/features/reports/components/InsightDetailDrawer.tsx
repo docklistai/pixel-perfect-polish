@@ -41,13 +41,13 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
     if (!report) return null;
     return {
       name: report.name,
-      sub: report.sub ?? "Report owned by you · last refreshed 8 min ago",
-      tag: report.tag ?? "Standard",
+      sub: report.sub ?? "Sample report preview · not refreshed from live reporting",
+      tag: report.tag ?? "Sample",
       icon: report.icon ?? BarChart2,
       numbers: [
-        { key: "Period total", value: "£20,840", delta: "−3.2% vs prev", down: false },
-        { key: "Best week", value: "W20", delta: "£10,640", down: false },
-        { key: "Variance", value: "£1,420", delta: "vs target", down: true },
+        { key: "Sample period total", value: "£20,840", delta: "Illustrative only", down: false },
+        { key: "Sample best week", value: "W20", delta: "£10,640", down: false },
+        { key: "Sample variance", value: "£1,420", delta: "vs sample target", down: true },
       ],
       reviewPoints: [
         {
@@ -82,8 +82,8 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
   if (!report || !reportData) return null;
 
   const handleSave = () => {
-    toast.success("Saved", {
-      description: `${reportData.name} saved to your library`,
+    toast.info("Preview only", {
+      description: "The saved-report library is sample-only; no report was added.",
     });
   };
 
@@ -103,7 +103,7 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
         if (!open) onOpenChange(false);
       }}
       title={reportData.name}
-      description="Last 4 weeks · All departments"
+      description="Sample last 4 weeks · All departments"
       meta={
         <StatusBadge tone={reportData.tag === "Custom" ? "purple" : "brand"}>
           {reportData.tag}
@@ -115,11 +115,11 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
             Close
           </ActionButton>
           <ActionButton variant="secondary" size="sm" icon={Star} onClick={handleSave}>
-            Save
+            Preview save
           </ActionButton>
           {onExport && (
             <ActionButton variant="secondary" size="sm" icon={Download} onClick={onExport}>
-              Export
+              Preview export
             </ActionButton>
           )}
         </div>
@@ -141,7 +141,7 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
         {/* Key Numbers Grid Card */}
         <div className="card p-4 bg-muted/20 border border-border rounded-xl">
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-            Key numbers
+            Sample key numbers
           </div>
           <div className="grid grid-cols-3 gap-4">
             {reportData.numbers.map((n, i) => (
@@ -163,7 +163,7 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp className="h-3.5 w-3.5 text-brand" />
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Review points
+              Sample coaching signals
             </div>
           </div>
           <div className="space-y-2">
@@ -215,7 +215,7 @@ export function InsightDetailDrawer({ report, onOpenChange, onExport }: Props) {
         {/* Department Breakdown Table */}
         <div className="space-y-2">
           <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Breakdown
+            Sample breakdown
           </div>
           <div className="card border border-border/80 rounded-xl overflow-hidden bg-card">
             <table className="tbl w-full text-xs">

@@ -95,28 +95,27 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
       },
     ]);
     setNewComment("");
-    toast.success("Comment saved", {
-      description: "Your comment is visible to managers only",
+    toast.info("Preview only", {
+      description: "Sample manager notes stay local to this drawer and are not saved or sent.",
     });
   };
 
   const handleAcknowledge = () => {
     setAcked(true);
-    toast.success("Acknowledged", {
-      description: "Your acknowledgement is recorded",
+    toast.info("Preview only", {
+      description: "Sample acknowledgement state changed locally; no staff record was updated.",
     });
   };
 
   const handleRemindNonReaders = () => {
     toast.info("Reminder prepared", {
-      description: "Reminder draft ready for staff who haven't acknowledged",
+      description: "Sample reminder preview only. No staff message was prepared or sent.",
     });
   };
 
   const handleExportAcks = () => {
-    const filename = `${announcement.t.split(" ").slice(0, 2).join("-").toLowerCase()}_acks.csv`;
-    toast.success("Exported", {
-      description: `${filename} ready`,
+    toast.info("Preview only", {
+      description: "Sample acknowledgement export is unavailable. No file was prepared.",
     });
   };
 
@@ -126,7 +125,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
         open={announcement !== null}
         onOpenChange={(o) => !o && onOpenChange(false)}
         title={announcement.t}
-        description="Published 2d ago · By Alex Thompson"
+        description="Sample announcement · not sent to staff"
         meta={<StatusBadge tone="brand">Announcement</StatusBadge>}
         footer={
           <div className="flex w-full items-center justify-end gap-2">
@@ -139,10 +138,10 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               icon={Bell}
               onClick={handleRemindNonReaders}
             >
-              Remind non-readers
+              Preview reminder
             </ActionButton>
             <ActionButton size="sm" icon={Check} onClick={handleAcknowledge} disabled={acked}>
-              {acked ? "Acknowledged" : "Acknowledge"}
+              {acked ? "Sample acknowledged" : "Preview ack"}
             </ActionButton>
           </div>
         }
@@ -157,7 +156,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               </div>
               <div>
                 <div className="text-sm font-semibold leading-tight">{announcement.t}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Published 2d ago</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Sample date · not live</div>
               </div>
             </div>
             <p className="text-sm text-foreground/90 leading-relaxed bg-muted/10 p-3.5 border border-border/50 rounded-xl">
@@ -169,7 +168,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
           <div className="card p-4 space-y-3.5 bg-muted/20 border border-border rounded-xl">
             <div className="flex items-center justify-between">
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Read status
+                Sample read indicators
               </div>
               <span className="text-sm font-bold text-foreground">
                 {announcement.ackDone} / {announcement.ackTotal}
@@ -188,7 +187,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
                 icon={Users}
                 onClick={() => setShowAckList(true)}
               >
-                See who
+                Sample list
               </ActionButton>
               <ActionButton
                 variant="secondary"
@@ -204,7 +203,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
           {/* Comments Section */}
           <div className="space-y-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Comments ({comments.length})
+              Sample manager notes ({comments.length})
             </div>
             <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
               {comments.map((c, i) => (
@@ -230,7 +229,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               <input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Reply to all (managers only)..."
+                placeholder="Add a sample manager note..."
                 className="flex-1 bg-transparent border-0 outline-none text-xs px-2 placeholder:text-muted-foreground/60"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSendComment();
@@ -238,6 +237,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               />
               <button
                 type="button"
+                aria-label="Add sample manager note"
                 onClick={handleSendComment}
                 disabled={!newComment.trim()}
                 className="p-1.5 rounded-lg text-brand hover:bg-brand-soft/20 disabled:opacity-40 transition-all shrink-0"
@@ -249,14 +249,14 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
         </div>
       </DrawerShell>
 
-      {/* See Who Modal */}
+      {/* Sample acknowledgement modal */}
       <DialogShell
         open={showAckList}
         onOpenChange={setShowAckList}
         icon={Users}
         iconTone="brand"
-        title="Acknowledgement details"
-        description={`${announcement.ackDone} of ${announcement.ackTotal} staff have acknowledged this announcement.`}
+        title="Sample acknowledgement details"
+        description={`${announcement.ackDone} of ${announcement.ackTotal} sample staff are shown as acknowledged. This is not a read receipt or monitoring record.`}
         size="md"
         footer={
           <ActionButton size="sm" onClick={() => setShowAckList(false)}>
@@ -267,7 +267,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
         <div className="space-y-4">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Acknowledged ({announcement.ackDone})
+              Sample acknowledged ({announcement.ackDone})
             </div>
             <div className="grid grid-cols-2 gap-2">
               {CANONICAL_STAFF.slice(0, announcement.ackDone).map((staff) => (
@@ -287,7 +287,7 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
 
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Pending ({announcement.ackTotal - announcement.ackDone})
+              Sample pending ({announcement.ackTotal - announcement.ackDone})
             </div>
             <div className="grid grid-cols-2 gap-2">
               {CANONICAL_STAFF.slice(announcement.ackDone, announcement.ackTotal).map((staff) => (

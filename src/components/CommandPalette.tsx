@@ -109,6 +109,7 @@ export function CommandPalette({
               >
                 <Icon className="ico h-4 w-4" aria-hidden />
                 <span>{item.label}</span>
+                {item.preview && <span className="meta ml-auto">Preview</span>}
                 {item.shortcut && <CommandShortcut>{item.shortcut}</CommandShortcut>}
               </CommandItem>
             );
