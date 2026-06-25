@@ -2,12 +2,14 @@ import * as React from "react";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import {
   clockInShift,
+  currentWeekStrip,
   DEMO_NOW,
   londonPortalNow,
   portalShiftsForStaff,
   publishedSnapshots,
   upcomingPortalShifts,
   type PortalNow,
+  type PortalWeekDay,
 } from "../lib/portalRota";
 import type { PortalShift } from "../types";
 import { usePortalLiveShifts } from "./usePortalLiveShifts";
@@ -19,6 +21,8 @@ export type PortalRota = {
   upcoming: PortalShift[];
   /** The first upcoming shift (today's shift until it ends, then the next). */
   nextShift: PortalShift | null;
+  /** Mon–Sun of the current week, derived from the active clock. */
+  weekDays: PortalWeekDay[];
   /** The shift Olivia can clock in for right now, or null. */
   activeShift: PortalShift | null;
   /** Where the rota came from: the live DB view or the demo WorkspaceStore. */
@@ -39,6 +43,7 @@ function buildRota(
     upcoming,
     nextShift: upcoming[0] ?? null,
     activeShift: clockInShift(shifts, now),
+    weekDays: currentWeekStrip(now),
   };
 }
 

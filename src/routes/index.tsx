@@ -175,10 +175,10 @@ function Home() {
                   Log a leave request…
                 </button>
                 <button type="button" className="menu-item" onClick={() => runQuickAction("/team")}>
-                  Compose announcement…
+                  Compose announcement… (preview)
                 </button>
                 <button type="button" className="menu-item" onClick={() => runQuickAction("/ops")}>
-                  Log an incident…
+                  Log an incident… (preview)
                 </button>
                 <div className="menu-sep" />
                 <button
@@ -210,7 +210,7 @@ function Home() {
                     navigate({ to: "/reports" });
                   }}
                 >
-                  View reports…
+                  View reports… (preview)
                 </button>
                 <button
                   type="button"

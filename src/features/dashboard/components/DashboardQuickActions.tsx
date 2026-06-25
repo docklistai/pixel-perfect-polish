@@ -24,7 +24,14 @@ export function DashboardQuickActions({ items }: Props) {
               <a.icon className="h-4 w-4" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-medium">{a.t}</div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-medium">{a.t}</span>
+                {a.preview && (
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    Preview
+                  </span>
+                )}
+              </div>
               <div className="text-[11px] text-muted-foreground">{a.s}</div>
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden />

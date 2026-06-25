@@ -92,6 +92,18 @@ export const announcementItems: AnnouncementItem[] = [
 export const quickActionItems: QuickActionItem[] = [
   { t: "Add shift", s: "Open or assigned shift", icon: Calendar, route: "/rota" },
   { t: "New leave request", s: "Annual, sick, compassionate", icon: Plane, route: "/leave" },
-  { t: "Announcement", s: "To a department or everyone", icon: Megaphone, route: "/team" },
-  { t: "Log incident", s: "Incident or maintenance ticket", icon: AlertTriangle, route: "/ops" },
+  {
+    t: "Announcement",
+    s: "To a department or everyone",
+    icon: Megaphone,
+    route: "/team",
+    preview: true,
+  },
+  {
+    t: "Log incident",
+    s: "Incident or maintenance ticket",
+    icon: AlertTriangle,
+    route: "/ops",
+    preview: true,
+  },
 ];

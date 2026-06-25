@@ -49,40 +49,51 @@ export function useDashboardWorkspace() {
       : pendingLeave.length === 0
         ? "No leave requests are pending."
         : `${pendingLeave.length} leave request${pendingLeave.length === 1 ? "" : "s"} pending. Review each against the rota.`;
-    const attentionItems: AttentionItem[] = [
-      {
-        t: `Next week has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`,
-        s: "Resolve before Fri 16:00 to publish on time",
-        icon: AlertTriangle,
-        tone: "warning",
-        route: "/rota",
-        cta: "Open rota",
-        tag: "Action needed",
-        detail: openShiftDetail,
-      },
-      {
-        t: `${pendingTime.length} timesheet${pendingTime.length === 1 ? "" : "s"} need manager review`,
-        s: "Export approved hours after review",
-        icon: Clock3,
-        tone: "danger",
-        route: "/time",
-        cta: "Review timesheets",
-        tag: "Needs review",
-        detail: timeDetail,
-      },
-      {
-        t: highLeave
-          ? "1 leave request — high coverage impact"
-          : `${pendingLeave.length} leave requests pending`,
-        s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
-        icon: Plane,
-        tone: "purple",
-        route: "/leave",
-        cta: "Review leave",
-        tag: "Decision needed",
-        detail: leaveDetail,
-      },
+    // Only surface categories with a real active issue, so the Attention count
+    // reflects what actually needs the manager — never a fixed list of three.
+    const attentionCandidates: (AttentionItem | null)[] = [
+      openShifts > 0
+        ? {
+            t: `Next week has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`,
+            s: "Resolve before Fri 16:00 to publish on time",
+            icon: AlertTriangle,
+            tone: "warning" as const,
+            route: "/rota" as const,
+            cta: "Open rota",
+            tag: "Action needed",
+            detail: openShiftDetail,
+          }
+        : null,
+      pendingTime.length > 0
+        ? {
+            t: `${pendingTime.length} timesheet${pendingTime.length === 1 ? "" : "s"} need manager review`,
+            s: "Export approved hours after review",
+            icon: Clock3,
+            tone: "danger" as const,
+            route: "/time" as const,
+            cta: "Review timesheets",
+            tag: "Needs review",
+            detail: timeDetail,
+          }
+        : null,
+      pendingLeave.length > 0
+        ? {
+            t: highLeave
+              ? "1 leave request — high coverage impact"
+              : `${pendingLeave.length} leave request${pendingLeave.length === 1 ? "" : "s"} pending`,
+            s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
+            icon: Plane,
+            tone: "purple" as const,
+            route: "/leave" as const,
+            cta: "Review leave",
+            tag: "Decision needed",
+            detail: leaveDetail,
+          }
+        : null,
     ];
+    const attentionItems: AttentionItem[] = attentionCandidates.filter(
+      (item): item is AttentionItem => item !== null,
+    );
     const weeklyKpis = kpiItems.map((item) =>
       item.label === "Scheduled hours"
         ? { ...item, value: `${Math.round(totalScheduledHours(draft.shifts))}h` }

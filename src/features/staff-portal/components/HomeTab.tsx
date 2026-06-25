@@ -5,7 +5,7 @@ import { usePortalProfile } from "../hooks/usePortalProfile";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
-  const { nextShift, upcoming } = usePortalRota();
+  const { nextShift, upcoming, weekDays } = usePortalRota();
   const { data: profile } = usePortalProfile();
   const publishedDates = new Set(upcoming.map((shift) => shift.date));
 
@@ -80,19 +80,18 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
           </button>
         </div>
         <div className="mt-3 grid grid-cols-7 gap-1.5">
-          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
-            const day = [8, 9, 10, 11, 12, 13, 14][i];
-            const active = publishedDates.has(`2026-06-${String(day).padStart(2, "0")}`);
+          {weekDays.map((day) => {
+            const active = publishedDates.has(day.iso);
             return (
               <div
-                key={day}
+                key={day.iso}
                 className={`rounded-2xl border px-0 py-3 text-center ${active ? "border-brand/20 bg-brand-soft/70" : "border-border bg-muted/60"}`}
               >
                 <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  {d}
+                  {day.letter}
                 </div>
                 <div className={`mt-1 text-sm font-semibold ${active ? "text-brand" : ""}`}>
-                  {day}
+                  {day.dayNum}
                 </div>
                 {active && <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-brand" />}
               </div>

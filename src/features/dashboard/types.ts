@@ -72,6 +72,8 @@ export interface QuickActionItem {
   s: string;
   icon: LucideIcon;
   route?: AppRoute;
+  /** True when the target route is a preview-only surface (not yet live). */
+  preview?: boolean;
 }
 
 export const toneBg: Record<string, string> = {

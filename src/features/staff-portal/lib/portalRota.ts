@@ -42,6 +42,35 @@ export const DEMO_NOW: PortalNow = {
   nowMinutes: DEMO_WORLD.nowMinutes,
 };
 
+/** A single day in the portal "this week" strip. */
+export interface PortalWeekDay {
+  /** Date as `YYYY-MM-DD`. */
+  iso: string;
+  /** Day of month, 1–31. */
+  dayNum: number;
+  /** Single-letter weekday label (Mon–Sun). */
+  letter: string;
+}
+
+const WEEK_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
+
+/**
+ * Monday–Sunday of the week containing `now`, derived from the same clock the
+ * rota uses (demo clock in demo mode, real wall-clock in live mode). Dates are
+ * computed in UTC to avoid off-by-one drift around timezone boundaries.
+ */
+export function currentWeekStrip(now: PortalNow = DEMO_NOW): PortalWeekDay[] {
+  const base = new Date(`${now.todayIso}T00:00:00Z`);
+  const mondayOffset = (base.getUTCDay() + 6) % 7;
+  const monday = new Date(base);
+  monday.setUTCDate(base.getUTCDate() - mondayOffset);
+  return WEEK_LETTERS.map((letter, i) => {
+    const day = new Date(monday);
+    day.setUTCDate(monday.getUTCDate() + i);
+    return { iso: day.toISOString().slice(0, 10), dayNum: day.getUTCDate(), letter };
+  });
+}
+
 function portalStatus(status: PublishedShiftSnapshot["status"]): ShiftStatus {
   return status === "changed" ? "changed" : "confirmed";
 }

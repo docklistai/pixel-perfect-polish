@@ -43,7 +43,25 @@ function avatarIndex(id: string): number {
   return (hash % 70) + 1;
 }
 
-function mapStaffRow(row: StaffMemberRow, departmentName: string | null): StaffRow {
+/**
+ * Portal access state for a staff member:
+ * - "Not invited" — no workspace membership is linked.
+ * - "Pending"     — a membership exists but has not been claimed (no user_id).
+ * - "Claimed"     — the membership is linked to a real auth user.
+ */
+function portalStatusFor(
+  membershipId: string | null,
+  userIdByMembership: Map<string, string | null>,
+): StaffRow["portalStatus"] {
+  if (!membershipId) return "Not invited";
+  return userIdByMembership.get(membershipId) ? "Claimed" : "Pending";
+}
+
+function mapStaffRow(
+  row: StaffMemberRow,
+  departmentName: string | null,
+  userIdByMembership: Map<string, string | null>,
+): StaffRow {
   const dept = departmentName ?? "Unassigned";
   const hoursPerWeek = row.contracted_minutes_per_week;
   return {
@@ -61,7 +79,7 @@ function mapStaffRow(row: StaffMemberRow, departmentName: string | null): StaffR
     availTone: "off",
     img: avatarIndex(row.id),
     active: row.employment_status === "active",
-    portalStatus: row.membership_id ? "Claimed" : "Not invited",
+    portalStatus: portalStatusFor(row.membership_id, userIdByMembership),
     // Raw values for Edit Staff prefill (presentation fields above stay unchanged).
     phone: row.phone ?? undefined,
     departmentId: row.department_id,
@@ -83,27 +101,43 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
-    const [{ data: staff, error: staffError }, { data: departments, error: deptError }] =
-      await Promise.all([
-        supabase
-          .from("staff_members")
-          .select(
-            "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id",
-          )
-          .eq("workspace_id", workspaceId)
-          .order("display_name", { ascending: true }),
-        supabase.from("departments").select("id, name").eq("workspace_id", workspaceId),
-      ]);
+    const [
+      { data: staff, error: staffError },
+      { data: departments, error: deptError },
+      { data: memberships, error: membershipError },
+    ] = await Promise.all([
+      supabase
+        .from("staff_members")
+        .select(
+          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id",
+        )
+        .eq("workspace_id", workspaceId)
+        .order("display_name", { ascending: true }),
+      supabase.from("departments").select("id, name").eq("workspace_id", workspaceId),
+      // user_id distinguishes a claimed membership from a pending (unclaimed) one.
+      supabase.from("workspace_memberships").select("id, user_id").eq("workspace_id", workspaceId),
+    ]);
 
     if (staffError) throw staffError;
     if (deptError) throw deptError;
+    if (membershipError) throw membershipError;
 
     const departmentNames = new Map(
       ((departments as { id: string; name: string }[] | null) ?? []).map((d) => [d.id, d.name]),
     );
+    const userIdByMembership = new Map(
+      ((memberships as { id: string; user_id: string | null }[] | null) ?? []).map((m) => [
+        m.id,
+        m.user_id,
+      ]),
+    );
 
     return ((staff as StaffMemberRow[] | null) ?? []).map((row) =>
-      mapStaffRow(row, row.department_id ? (departmentNames.get(row.department_id) ?? null) : null),
+      mapStaffRow(
+        row,
+        row.department_id ? (departmentNames.get(row.department_id) ?? null) : null,
+        userIdByMembership,
+      ),
     );
   },
 );

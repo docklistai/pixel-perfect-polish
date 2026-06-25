@@ -13,6 +13,8 @@ function initials(name: string): string {
     .toUpperCase();
 }
 
+// Illustrative UK dates only — not workspace- or region-configured. Shown with a
+// clear "Sample" label so they are never read as live, configured holidays.
 const publicHolidays = [
   { d: "31 Aug", name: "Summer bank holiday", flag: true },
   { d: "25 Dec", name: "Christmas Day" },
@@ -58,7 +60,12 @@ export function LeaveBottomCards({ requests, source, todayIso }: Props) {
       </Card>
 
       <Card className="card-pad">
-        <div className="section-label mb-2">Public holidays</div>
+        <div className="mb-2 flex items-center gap-2">
+          <div className="section-label">Public holidays</div>
+          <span className="badge" title="Illustrative dates — not configured for this workspace">
+            Sample
+          </span>
+        </div>
         <div className="flex flex-col gap-3 mt-2">
           {publicHolidays.map((h) => (
             <div key={h.d} className="row gap-3">
