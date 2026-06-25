@@ -27,9 +27,9 @@ export function DashboardPendingLeave({ items }: Props) {
         </div>
       </div>
       <div className="divide-y divide-border">
-        {items.map((p) => (
+        {items.map((p, i) => (
           <Link
-            key={p.n}
+            key={`${p.n}-${i}`}
             to="/leave"
             className="flex items-center gap-3 px-5 py-3 transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >

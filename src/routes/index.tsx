@@ -23,7 +23,7 @@ import {
   announcementItems,
   quickActionItems,
 } from "@/features/dashboard/data/dashboardDemoData";
-import { useDashboardWorkspace } from "@/features/dashboard/hooks/useDashboardWorkspace";
+import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
@@ -52,7 +52,7 @@ function Home() {
   const [moreOpen, setMoreOpen] = React.useState(false);
   const quickRef = React.useRef<HTMLDivElement>(null);
   const moreRef = React.useRef<HTMLDivElement>(null);
-  const dashboard = useDashboardWorkspace();
+  const dashboard = useDashboardData();
   const { workspaceName } = useManagerIdentity();
 
   const runQuickAction = React.useCallback(
