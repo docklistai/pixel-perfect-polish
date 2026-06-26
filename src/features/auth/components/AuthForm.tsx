@@ -16,12 +16,9 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PASSWORD_HINT = "At least 8 characters, one uppercase letter, and one number.";
 
-/**
- * Private beta: DocklistAI managers are provisioned manually, so public
- * self-serve sign-up is disabled. The sign-up logic below is preserved (not
- * deleted) — flip this to `true` to restore public manager sign-up later.
- */
-const MANAGER_SIGNUP_ENABLED = false;
+// Private beta: manager sign-up is available only when explicitly enabled.
+// This keeps production closed unless VITE_MANAGER_SIGNUP_ENABLED=true is set.
+const MANAGER_SIGNUP_ENABLED = import.meta.env.VITE_MANAGER_SIGNUP_ENABLED === "true";
 
 function describeSignInError(message: string): string {
   if (/invalid login credentials/i.test(message)) {

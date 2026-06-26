@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-r
 import { Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { BootstrapWorkspaceForm } from "@/features/auth/components/BootstrapWorkspaceForm";
 import { clearAuthStateCache, requireNoWorkspaceState } from "@/features/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/no-access")({
 });
 
 function NoAccessPage() {
+  const { auth } = Route.useRouteContext();
   const navigate = useNavigate();
   const router = useRouter();
   const [signingOut, setSigningOut] = React.useState(false);
@@ -31,6 +33,10 @@ function NoAccessPage() {
     await router.invalidate();
     await navigate({ to: "/auth" });
   };
+
+  if (auth.status === "no-workspace") {
+    return <BootstrapWorkspaceForm onSignOut={handleSignOut} signingOut={signingOut} />;
+  }
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
