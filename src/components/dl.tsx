@@ -896,7 +896,7 @@ export function DialogShell({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "modal !block p-0 !overflow-hidden !border !rounded-[16px]",
+          "modal flex max-h-[calc(100dvh-32px)] flex-col p-0 !overflow-hidden !border !rounded-[16px]",
           dialogSizes[size],
         )}
         style={{
@@ -904,7 +904,7 @@ export function DialogShell({
           borderColor: "var(--border)",
         }}
       >
-        <DialogHeader className="modal-head !flex !flex-row !items-start !space-y-0">
+        <DialogHeader className="modal-head shrink-0 !flex !flex-row !items-start !space-y-0">
           {Icon && (
             <div
               className={cn("modal-icon border", toneSoft[iconTone])}
@@ -921,8 +921,8 @@ export function DialogShell({
             </DialogDescription>
           </div>
         </DialogHeader>
-        {children && <div className="modal-body">{children}</div>}
-        {footer && <DialogFooter className="modal-foot">{footer}</DialogFooter>}
+        {children && <div className="modal-body min-h-0 overflow-y-auto">{children}</div>}
+        {footer && <DialogFooter className="modal-foot shrink-0">{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
   );

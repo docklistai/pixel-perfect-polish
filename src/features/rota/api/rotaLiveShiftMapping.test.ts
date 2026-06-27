@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { resolveActiveStaffAssignment, resolveDepartmentId } from "./rotaLiveShiftMapping";
+import {
+  buildShiftUpdate,
+  resolveActiveStaffAssignment,
+  resolveDepartmentId,
+  type ExistingShiftRow,
+} from "./rotaLiveShiftMapping";
+import type { LocationRow, RotaWeekRow } from "./rotaLiveMutationContext";
 
 function staffClient(
   staff: {
@@ -137,5 +143,48 @@ describe("resolveDepartmentId", () => {
         { staffId: null, role: "Bartender" },
       ),
     ).resolves.toBe("bar");
+  });
+});
+
+describe("buildShiftUpdate", () => {
+  const week: RotaWeekRow = {
+    id: "week-1",
+    location_id: "location-1",
+    week_start: "2026-06-22",
+    status: "draft",
+  };
+  const location: LocationRow = { id: "location-1", timezone: "Europe/London" };
+  const openShift: ExistingShiftRow = {
+    id: "shift-1",
+    rota_week_id: "week-1",
+    location_id: "location-1",
+    department_id: "front-of-house",
+    staff_member_id: null,
+    shift_date: "2026-06-22",
+    starts_at: "2026-06-22T08:00:00+00:00",
+    ends_at: "2026-06-22T16:00:00+00:00",
+    break_minutes: 30,
+    role_name: "Waiter",
+    assignment_status: "open",
+  };
+
+  it("persists staff assignment and scheduled status together", async () => {
+    const update = await buildShiftUpdate(
+      departmentClient({
+        staff: { id: "staff-1", department_id: "bar", employment_status: "active" },
+        departments: [{ id: "bar", name: "Bar" }],
+      }),
+      "workspace-1",
+      openShift,
+      week,
+      location,
+      { staffId: "staff-1" },
+    );
+
+    expect(update).toMatchObject({
+      department_id: "bar",
+      staff_member_id: "staff-1",
+      assignment_status: "scheduled",
+    });
   });
 });
