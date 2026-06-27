@@ -9,6 +9,7 @@ import { fetchWorkspaceTimeFn } from "@/features/time/api/timeLiveData";
 import { TIME_QUERY_KEY } from "@/features/time/hooks/useWorkspaceTime";
 import { countOpenShifts, totalScheduledHours } from "@/features/rota/lib/rotaSummaries";
 import { buildDashboardOperational } from "../lib/dashboardOperational";
+import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
 import { useDashboardWorkspace } from "./useDashboardWorkspace";
 import type { KpiItem } from "../types";
 
@@ -67,7 +68,11 @@ export function useDashboardData() {
   });
 
   if (!enabled) {
-    return { ...demo, staffCount: null as number | null };
+    return {
+      ...demo,
+      publishWeekLabel: formatDashboardPublishWeekLabel(null),
+      staffCount: null as number | null,
+    };
   }
 
   const week = weekQuery.data ?? null;
@@ -137,6 +142,7 @@ export function useDashboardData() {
     todayKpis,
     nextPublished: Boolean(week?.hasPublishedSnapshot),
     nextHasUnpublishedChanges: Boolean(week?.hasUnpublishedChanges),
+    publishWeekLabel: formatDashboardPublishWeekLabel(week?.weekStart),
     staffCount,
   };
 }

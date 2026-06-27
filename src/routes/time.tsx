@@ -20,6 +20,7 @@ import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
 import { useWorkspaceTime } from "@/features/time/hooks/useWorkspaceTime";
 import { useTimeController } from "@/features/time/hooks/useTimeController";
 import { isWithinPeriod, type ReviewPeriod } from "@/features/time/lib/reviewPeriod";
+import { canExportApprovedHours } from "@/features/time/lib/timeExport";
 import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/time")({
@@ -61,6 +62,7 @@ function TimePage() {
     [periodRows, team],
   );
   const time = useTimeController(periodRows, teamRows, timeSource);
+  const canExport = canExportApprovedHours(teamRows);
 
   const filtered = React.useMemo(() => {
     return teamRows.filter((r) => {
@@ -113,6 +115,7 @@ function TimePage() {
             setTeam={setTeam}
             onOpenAssistant={openAiDrawer}
             onExport={() => setExportOpen(true)}
+            canExport={canExport}
             onApproveAllPending={time.approveAllPending}
           />
         }

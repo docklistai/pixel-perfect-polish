@@ -3,6 +3,7 @@ import {
   clockInShift,
   DEMO_NOW,
   londonPortalNow,
+  resolvePortalHasPublished,
   upcomingPortalShifts,
   type PortalNow,
 } from "./portalRota";
@@ -67,5 +68,12 @@ describe("londonPortalNow", () => {
       todayIso: "2026-06-12",
       nowMinutes: 30,
     });
+  });
+});
+
+describe("resolvePortalHasPublished", () => {
+  it("distinguishes an empty personal rota from no published rota", () => {
+    expect(resolvePortalHasPublished([], true)).toBe(true);
+    expect(resolvePortalHasPublished([], false)).toBe(false);
   });
 });

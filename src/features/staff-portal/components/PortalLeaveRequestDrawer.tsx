@@ -13,6 +13,7 @@ import {
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { usePortalProfile } from "../hooks/usePortalProfile";
 import { submitLeaveRequestFn } from "../api/portalActions";
+import { validatePortalLeaveDates } from "../lib/portalLeaveValidation";
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -47,6 +48,7 @@ export function PortalLeaveRequestDrawer({
   const [endIso, setEndIso] = React.useState(() => localIsoDate(new Date()));
   const [leaveType, setLeaveType] = React.useState("Annual leave");
   const [reason, setReason] = React.useState("");
+  const [dateError, setDateError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
   // Live submissions persist through the RPC; the demo path mutates the
@@ -92,6 +94,7 @@ export function PortalLeaveRequestDrawer({
   const close = () => {
     onOpenChange(false);
     setReason("");
+    setDateError(null);
   };
 
   const submit = async () => {
@@ -110,6 +113,17 @@ export function PortalLeaveRequestDrawer({
       toast.error("Add a note", { description: "A short reason is required for your request." });
       return;
     }
+
+    const nextDateError = validatePortalLeaveDates({
+      startIso,
+      endIso,
+      todayIso: localIsoDate(new Date()),
+    });
+    if (nextDateError) {
+      setDateError(nextDateError);
+      return;
+    }
+    setDateError(null);
 
     if (!profile) {
       toast.error("Profile not loaded", { description: "Please wait a moment and try again." });
@@ -183,17 +197,32 @@ export function PortalLeaveRequestDrawer({
           <input
             type="date"
             value={startIso}
-            onChange={(event) => setStartIso(event.target.value)}
+            min={localIsoDate(new Date())}
+            onChange={(event) => {
+              setStartIso(event.target.value);
+              setDateError(null);
+            }}
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+            aria-invalid={Boolean(dateError)}
           />
         </FormRow>
         <FormRow label="To">
           <input
             type="date"
             value={endIso}
-            onChange={(event) => setEndIso(event.target.value)}
+            min={startIso || localIsoDate(new Date())}
+            onChange={(event) => {
+              setEndIso(event.target.value);
+              setDateError(null);
+            }}
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+            aria-invalid={Boolean(dateError)}
           />
+          {dateError && (
+            <p role="alert" className="text-[11px] text-danger">
+              {dateError}
+            </p>
+          )}
         </FormRow>
         <FormRow label="Note">
           <textarea

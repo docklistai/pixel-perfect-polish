@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { fetchPortalPublishedShifts } from "../api/portalLiveData";
+import { fetchPortalPublishedRotaState, fetchPortalPublishedShifts } from "../api/portalLiveData";
 import type { PortalShift } from "../types";
 
 const portalRouteApi = getRouteApi("/portal");
@@ -12,7 +12,12 @@ export type PortalLiveShifts = {
   isLoading: boolean;
   isError: boolean;
   isSuccess: boolean;
-  data: PortalShift[] | undefined;
+  data:
+    | {
+        shifts: PortalShift[];
+        hasPublishedRota: boolean;
+      }
+    | undefined;
 };
 
 /**
@@ -35,7 +40,13 @@ export function usePortalLiveShifts(): PortalLiveShifts {
 
   const query = useQuery({
     queryKey: ["portal", "published-shifts", workspaceId, staffMemberId],
-    queryFn: () => fetchPortalPublishedShifts(workspaceId!, staffMemberId!),
+    queryFn: async () => {
+      const [shifts, publishedState] = await Promise.all([
+        fetchPortalPublishedShifts(workspaceId!, staffMemberId!),
+        fetchPortalPublishedRotaState(workspaceId!),
+      ]);
+      return { shifts, hasPublishedRota: publishedState.hasPublished };
+    },
     enabled,
     staleTime: 30_000,
   });

@@ -1,12 +1,12 @@
 import { AlertTriangle, Plane, Clock, type LucideIcon } from "lucide-react";
 
-/** Live counts the support drawer reasons over. All sourced from the workspace store. */
+/** Counts the support drawer reasons over. `null` means a reliable live value is unavailable. */
 export interface AiWorkspaceContext {
   pendingLeaveCount: number;
   approvedLeaveCount: number;
   pendingTimeCount: number;
   approvedTimeCount: number;
-  openShiftCount: number;
+  openShiftCount: number | null;
 }
 
 export type SupportRoute = "/rota" | "/leave" | "/time";
@@ -37,9 +37,11 @@ export function buildSupportTopics(context: AiWorkspaceContext): SupportTopic[] 
       icon: AlertTriangle,
       label: "Rota review",
       note:
-        context.openShiftCount > 0
-          ? `${plural(context.openShiftCount, "open shift")} in this week's draft to assign before publishing.`
-          : "No open shifts in this week's draft. Review the rota before publishing.",
+        context.openShiftCount === null
+          ? "Open shifts are shown on the rota. Review the live rota before publishing."
+          : context.openShiftCount > 0
+            ? `${plural(context.openShiftCount, "open shift")} in this week's draft to assign before publishing.`
+            : "Review the rota before publishing. Open-shift counts are confirmed on the rota page.",
       route: "/rota",
       routeLabel: "Open rota",
     },

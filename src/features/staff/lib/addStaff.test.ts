@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildStaffMemberInsert, describeStaffWriteError } from "./addStaff";
+import { buildStaffMemberInsert, canSubmitAddStaffForm, describeStaffWriteError } from "./addStaff";
 import type { AddStaffFormValues } from "./addStaff";
 
 function values(overrides: Partial<AddStaffFormValues> = {}): AddStaffFormValues {
@@ -108,5 +108,16 @@ describe("describeStaffWriteError", () => {
   it("falls back to a generic message for unknown codes", () => {
     expect(describeStaffWriteError(null)).toMatch(/couldn't save/i);
     expect(describeStaffWriteError("99999")).toMatch(/couldn't save/i);
+  });
+});
+
+describe("canSubmitAddStaffForm", () => {
+  it("waits for live departments before allowing creation", () => {
+    expect(
+      canSubmitAddStaffForm({ source: "live", submitting: false, departmentsLoading: true }),
+    ).toBe(false);
+    expect(
+      canSubmitAddStaffForm({ source: "live", submitting: false, departmentsLoading: false }),
+    ).toBe(true);
   });
 });

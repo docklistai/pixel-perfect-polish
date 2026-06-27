@@ -13,6 +13,10 @@ export function formatPublishWeekLabel(weekStartIso: string): string {
   });
 }
 
+export function formatDashboardPublishWeekLabel(weekStartIso: string | null | undefined): string {
+  return weekStartIso ? formatPublishWeekLabel(weekStartIso) : "Current rota week";
+}
+
 // Derives the week-commencing label for the next rota to publish from the shared
 // week helper, so the dashboard never carries a hardcoded stale date.
 export function getNextPublishWeekLabel(): string {

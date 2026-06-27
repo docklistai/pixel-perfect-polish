@@ -27,7 +27,7 @@ export function AiDrawer({
       approvedLeaveCount: leaveRequests.filter((request) => request.state === "approved").length,
       pendingTimeCount: timeRows.filter((row) => row.status !== "approved").length,
       approvedTimeCount: timeRows.filter((row) => row.status === "approved").length,
-      openShiftCount: draft?.shifts.filter((shift) => shift.status === "open").length ?? 0,
+      openShiftCount: draft ? draft.shifts.filter((shift) => shift.status === "open").length : null,
     });
   }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
 

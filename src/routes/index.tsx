@@ -275,6 +275,7 @@ function Home() {
         <DashboardRotaPublish
           published={dashboard.nextPublished}
           hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
+          weekCommencing={dashboard.publishWeekLabel}
         />
         <DashboardPendingLeave items={dashboard.leaveItems} />
       </div>

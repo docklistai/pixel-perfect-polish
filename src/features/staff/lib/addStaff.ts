@@ -44,6 +44,18 @@ export const STAFF_CONTRACT_OPTIONS: ReadonlyArray<{ value: StaffContractType; l
   { value: "fixed_term", label: "Fixed-term" },
 ];
 
+export function canSubmitAddStaffForm({
+  source,
+  submitting,
+  departmentsLoading,
+}: {
+  source: "live" | "demo";
+  submitting: boolean;
+  departmentsLoading: boolean;
+}): boolean {
+  return source === "live" && !submitting && !departmentsLoading;
+}
+
 const CONTRACT_VALUES = new Set<string>(STAFF_CONTRACT_OPTIONS.map((o) => o.value));
 
 // Schema bounds mirror public.staff_members CHECK constraints so the form never

@@ -110,6 +110,27 @@ export async function fetchPortalPublishedShifts(
   return ((data as PublishedShiftViewRow[] | null) ?? []).map(mapPublishedShift);
 }
 
+interface PublishedRotaStateRow {
+  snapshot_version: number;
+  published_at: string;
+}
+
+export async function fetchPortalPublishedRotaState(
+  workspaceId: string,
+): Promise<{ hasPublished: boolean }> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase
+    .from("staff_portal_published_rota_weeks")
+    .select("snapshot_version, published_at")
+    .eq("workspace_id", workspaceId)
+    .order("published_at", { ascending: false })
+    .limit(1);
+
+  if (error) throw error;
+
+  return { hasPublished: ((data as PublishedRotaStateRow[] | null) ?? []).length > 0 };
+}
+
 const NOTIFICATION_DAY_FMT = new Intl.DateTimeFormat("en-GB", {
   timeZone: WORKSPACE_TZ,
   day: "numeric",

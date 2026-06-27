@@ -5,7 +5,7 @@ import { usePortalProfile } from "../hooks/usePortalProfile";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
-  const { nextShift, upcoming, weekDays } = usePortalRota();
+  const { hasPublished, nextShift, upcoming, weekDays } = usePortalRota();
   const { data: profile } = usePortalProfile();
   const publishedDates = new Set(upcoming.map((shift) => shift.date));
 
@@ -59,9 +59,13 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </DashboardCard>
       ) : (
         <DashboardCard className="p-5">
-          <div className="text-sm font-semibold">No published rota yet.</div>
+          <div className="text-sm font-semibold">
+            {hasPublished ? "No shifts assigned to you yet." : "No published rota yet."}
+          </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Once your manager publishes the rota, your next shift will appear here.
+            {hasPublished
+              ? "Your manager has published the rota, but there are no assigned shifts for you in the published schedule."
+              : "Once your manager publishes the rota, your next shift will appear here."}
           </p>
         </DashboardCard>
       )}

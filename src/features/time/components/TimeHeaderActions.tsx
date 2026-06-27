@@ -44,6 +44,7 @@ interface Props {
   setTeam: (team: string) => void;
   onOpenAssistant: () => void;
   onExport: () => void;
+  canExport: boolean;
   onApproveAllPending: () => void;
 }
 
@@ -55,6 +56,7 @@ export function TimeHeaderActions({
   setTeam,
   onOpenAssistant,
   onExport,
+  canExport,
   onApproveAllPending,
 }: Props) {
   return (
@@ -108,7 +110,12 @@ export function TimeHeaderActions({
       <ActionButton variant="outline" icon={Sparkles} onClick={onOpenAssistant}>
         Manager support
       </ActionButton>
-      <ActionButton icon={Download} onClick={onExport}>
+      <ActionButton
+        icon={Download}
+        onClick={onExport}
+        disabled={!canExport}
+        title={canExport ? "Export approved hours CSV" : "No approved rows ready to export"}
+      >
         Export approved hours
       </ActionButton>
       <RowActionMenu

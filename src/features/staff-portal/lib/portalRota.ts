@@ -136,6 +136,13 @@ export function upcomingPortalShifts(
   });
 }
 
+export function resolvePortalHasPublished(
+  shifts: PortalShift[],
+  workspaceHasPublishedRota?: boolean,
+): boolean {
+  return workspaceHasPublishedRota ?? shifts.length > 0;
+}
+
 /**
  * Colleagues with a published shift today (staff-safe: names, roles, and
  * shift times only), excluding the signed-in staff member.

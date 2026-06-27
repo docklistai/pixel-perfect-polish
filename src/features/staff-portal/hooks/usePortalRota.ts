@@ -7,6 +7,7 @@ import {
   londonPortalNow,
   portalShiftsForStaff,
   publishedSnapshots,
+  resolvePortalHasPublished,
   upcomingPortalShifts,
   type PortalNow,
   type PortalWeekDay,
@@ -62,8 +63,10 @@ export function usePortalRota(): PortalRota {
     if (live.enabled && live.isSuccess) {
       // Live rota uses real wall-clock time, never the frozen demo clock.
       const liveNow = londonPortalNow();
+      const shifts = live.data?.shifts ?? [];
       return {
-        ...buildRota(live.data ?? [], liveNow),
+        ...buildRota(shifts, liveNow),
+        hasPublished: resolvePortalHasPublished(shifts, live.data?.hasPublishedRota),
         source: "live",
         isLoading: false,
         isError: false,

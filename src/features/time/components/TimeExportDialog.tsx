@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import type { StoredTimesheetRow } from "../types";
 import { exportApprovedHoursFn } from "../api/timeLiveData";
 import { periodFilename, type ReviewPeriod } from "../lib/reviewPeriod";
+import { approvedRowsForExport } from "../lib/timeExport";
 
 interface Props {
   open: boolean;
@@ -36,7 +37,7 @@ export function TimeExportDialog({
   source,
   liveWorkspaceId,
 }: Props) {
-  const approvedRows = rows.filter((row) => row.status === "approved");
+  const approvedRows = approvedRowsForExport(rows);
   const periodLabel = period.label;
   const filename = periodFilename(period);
   const isLive = source === "live";

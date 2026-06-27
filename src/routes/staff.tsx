@@ -57,7 +57,9 @@ function StaffListPage() {
   const [accessCodesOpen, setAccessCodesOpen] = React.useState(false);
   // Departments back the optional Add Staff picker; only fetched once the dialog
   // is opened against a live roster.
-  const { departments } = useWorkspaceDepartments({ enabled: source === "live" && addStaffOpen });
+  const { departments, isLoading: departmentsLoading } = useWorkspaceDepartments({
+    enabled: source === "live" && addStaffOpen,
+  });
 
   useIntentHandler("staff.add", () => setAddStaffOpen(true));
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
@@ -173,6 +175,7 @@ function StaffListPage() {
         onOpenChange={setAddStaffOpen}
         source={source}
         departments={departments}
+        departmentsLoading={departmentsLoading}
       />
 
       <AccessCodesDialog

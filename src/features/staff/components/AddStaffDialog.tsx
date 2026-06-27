@@ -6,6 +6,7 @@ import { ActionButton, DialogShell, FormRow, FormSection } from "@/components/dl
 import { createStaffMemberFn } from "../api/createStaffMember";
 import {
   buildStaffMemberInsert,
+  canSubmitAddStaffForm,
   describeStaffWriteError,
   STAFF_CONTRACT_OPTIONS,
   type AddStaffFieldError,
@@ -19,6 +20,7 @@ interface AddStaffDialogProps {
   /** Live roster create is real; the demo seed cannot back a real write. */
   source: "live" | "demo";
   departments: WorkspaceDepartment[];
+  departmentsLoading: boolean;
 }
 
 const EMPTY_VALUES: AddStaffFormValues = {
@@ -30,7 +32,13 @@ const EMPTY_VALUES: AddStaffFormValues = {
   hoursPerWeek: "",
 };
 
-export function AddStaffDialog({ open, onOpenChange, source, departments }: AddStaffDialogProps) {
+export function AddStaffDialog({
+  open,
+  onOpenChange,
+  source,
+  departments,
+  departmentsLoading,
+}: AddStaffDialogProps) {
   const queryClient = useQueryClient();
   const [values, setValues] = React.useState<AddStaffFormValues>(EMPTY_VALUES);
   const [fieldErrors, setFieldErrors] = React.useState<Partial<Record<AddStaffFieldError, string>>>(
@@ -50,6 +58,7 @@ export function AddStaffDialog({ open, onOpenChange, source, departments }: AddS
   }, [open]);
 
   const isDemo = source === "demo";
+  const canSubmit = canSubmitAddStaffForm({ source, submitting, departmentsLoading });
 
   function setField<K extends keyof AddStaffFormValues>(key: K, value: AddStaffFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -57,7 +66,7 @@ export function AddStaffDialog({ open, onOpenChange, source, departments }: AddS
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (isDemo || submitting) return;
+    if (!canSubmit) return;
 
     setFormError(null);
     const built = buildStaffMemberInsert(values);
@@ -98,12 +107,7 @@ export function AddStaffDialog({ open, onOpenChange, source, departments }: AddS
           <ActionButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton
-            size="sm"
-            type="submit"
-            form="add-staff-form"
-            disabled={isDemo || submitting}
-          >
+          <ActionButton size="sm" type="submit" form="add-staff-form" disabled={!canSubmit}>
             {submitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
             {submitting ? "Adding…" : "Add staff member"}
           </ActionButton>
@@ -188,14 +192,22 @@ export function AddStaffDialog({ open, onOpenChange, source, departments }: AddS
               className="dl-select"
               value={values.departmentId}
               onChange={(e) => setField("departmentId", e.target.value)}
+              disabled={departmentsLoading}
             >
-              <option value="">Unassigned</option>
+              <option value="">
+                {departmentsLoading ? "Loading departments..." : "Unassigned"}
+              </option>
               {departments.map((dept) => (
                 <option key={dept.id} value={dept.id}>
                   {dept.name}
                 </option>
               ))}
             </select>
+            {departmentsLoading && (
+              <p className="text-[11px] text-muted-foreground">
+                Loading starter departments before staff can be created.
+              </p>
+            )}
           </FormRow>
 
           <FormRow label="Contract type" htmlFor="add-staff-contract" hint="Optional">
