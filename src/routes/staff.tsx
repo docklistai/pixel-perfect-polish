@@ -10,12 +10,16 @@ import {
   UserRoundX,
   AlertTriangle,
   Loader2,
+  ListPlus,
+  Building2,
 } from "lucide-react";
 import { useWorkspaceStaff } from "@/features/staff/hooks/useWorkspaceStaff";
 import { useWorkspaceDepartments } from "@/features/staff/hooks/useWorkspaceDepartments";
 import { StaffProfilePanel } from "@/features/staff/components/StaffProfilePanel";
 import { AccessCodesDialog } from "@/features/staff/components/AccessCodesDialog";
 import { AddStaffDialog } from "@/features/staff/components/AddStaffDialog";
+import { BulkAddStaffDialog } from "@/features/staff/components/BulkAddStaffDialog";
+import { DepartmentsDialog } from "@/features/staff/components/DepartmentsDialog";
 import { StaffTable } from "@/features/staff/components/StaffTable";
 import { useStaffPanelState } from "@/features/staff/hooks/useStaffPanelState";
 import type { StaffRow } from "@/features/staff/types";
@@ -54,6 +58,8 @@ function StaffListPage() {
   const { rows: staffRows, source, state } = useWorkspaceStaff();
   const stats = buildStaffStats(staffRows);
   const [addStaffOpen, setAddStaffOpen] = React.useState(false);
+  const [bulkAddOpen, setBulkAddOpen] = React.useState(false);
+  const [departmentsOpen, setDepartmentsOpen] = React.useState(false);
   const [accessCodesOpen, setAccessCodesOpen] = React.useState(false);
   // Departments back the optional Add Staff picker; only fetched once the dialog
   // is opened against a live roster.
@@ -85,10 +91,20 @@ function StaffListPage() {
           <div className="flex items-center gap-2">
             <ActionButton
               variant="secondary"
+              icon={Building2}
+              onClick={() => setDepartmentsOpen(true)}
+            >
+              Departments
+            </ActionButton>
+            <ActionButton
+              variant="secondary"
               icon={KeyRound}
               onClick={() => setAccessCodesOpen(true)}
             >
               Access codes
+            </ActionButton>
+            <ActionButton variant="secondary" icon={ListPlus} onClick={() => setBulkAddOpen(true)}>
+              Bulk add
             </ActionButton>
             <ActionButton icon={UserPlus} onClick={() => setAddStaffOpen(true)}>
               Add staff
@@ -177,6 +193,10 @@ function StaffListPage() {
         departments={departments}
         departmentsLoading={departmentsLoading}
       />
+
+      <BulkAddStaffDialog open={bulkAddOpen} onOpenChange={setBulkAddOpen} source={source} />
+
+      <DepartmentsDialog open={departmentsOpen} onOpenChange={setDepartmentsOpen} source={source} />
 
       <AccessCodesDialog
         open={accessCodesOpen}

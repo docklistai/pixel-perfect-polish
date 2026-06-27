@@ -57,6 +57,10 @@ export function StaffTable({
       }),
     [rows, query, deptFilter, statusFilter],
   );
+  const departmentOptions = React.useMemo(
+    () => ["All", ...Array.from(new Set(rows.map((row) => row.dept))).sort((a, b) => a.localeCompare(b))],
+    [rows],
+  );
 
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages);
@@ -99,6 +103,7 @@ export function StaffTable({
           onDeptChange={onDeptChange}
           statusFilter={statusFilter}
           onStatusChange={onStatusChange}
+          departmentOptions={departmentOptions}
           filteredCount={filteredRows.length}
           totalCount={rows.length}
         />

@@ -2,6 +2,7 @@ import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
 import { usePortalRota } from "../hooks/usePortalRota";
+import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalRequest, PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
@@ -46,7 +47,12 @@ export function ShiftsTab() {
                 ? "Couldn't reach live data — showing sample shifts."
                 : "Showing sample shifts."}
           </div>
-          <ShiftList shifts={upcoming} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
+          <ShiftList
+            shifts={upcoming}
+            hasPublishedSnapshot={hasPublished}
+            emptyCopy={noUpcomingShiftsCopy(hasPublished)}
+            onOpen={setSelected}
+          />
         </>
       )}
       {sub === "requests" && <RequestsList />}
@@ -96,26 +102,29 @@ function SegmentedTabs({
 function ShiftList({
   shifts,
   hasPublishedSnapshot = true,
+  emptyCopy,
   onOpen,
 }: {
   shifts: PortalShift[];
   hasPublishedSnapshot?: boolean;
+  /** Optional override for the empty state (e.g. the "no upcoming shifts" copy). */
+  emptyCopy?: { title: string; description: string };
   onOpen: (s: PortalShift) => void;
 }) {
   // Group by month label for visual section headers.
   const groups = groupByMonth(shifts);
   if (shifts.length === 0) {
+    const title =
+      emptyCopy?.title ??
+      (hasPublishedSnapshot ? "No shifts on the published rota" : "No published rota yet");
+    const description =
+      emptyCopy?.description ??
+      (hasPublishedSnapshot
+        ? "You do not have any shifts in the current published rota."
+        : "Once your manager publishes the rota, your shifts will appear here.");
     return (
       <DashboardCard className="p-6">
-        <EmptyState
-          icon={CalendarOff}
-          title={hasPublishedSnapshot ? "No shifts on the published rota" : "No published rota yet"}
-          description={
-            hasPublishedSnapshot
-              ? "You do not have any shifts in the current published rota."
-              : "Once your manager publishes the rota, your shifts will appear here."
-          }
-        />
+        <EmptyState icon={CalendarOff} title={title} description={description} />
       </DashboardCard>
     );
   }

@@ -19,6 +19,31 @@ export interface WorkspaceDepartment {
 /** Result of creating a live staff member. `id` is the new row's uuid. */
 export type CreateStaffMemberResult = { ok: true; id: string } | { ok: false; message: string };
 
+/** Outcome for a single row of a bulk staff import, keyed by source index. */
+export interface BulkStaffRowResult {
+  index: number;
+  ok: boolean;
+  /** Present when `ok` — the new row's uuid. */
+  id?: string;
+  /** Present when not `ok` — honest, non-leaking failure copy. */
+  message?: string;
+}
+
+/** Result of a bulk staff import. Rows are inserted independently. */
+export type BulkCreateStaffResult =
+  | { ok: true; results: BulkStaffRowResult[]; created: number; failed: number }
+  | { ok: false; message: string };
+
+/** A department row for the minimal department manager (includes archive state). */
+export interface ManageableDepartment {
+  id: string;
+  name: string;
+  status: "active" | "inactive";
+}
+
+/** Result of a department create/rename/status write. */
+export type DepartmentWriteResult = { ok: true; id: string } | { ok: false; message: string };
+
 /** Result of updating a live staff member. `id` echoes the updated row's uuid. */
 export type UpdateStaffMemberResult = { ok: true; id: string } | { ok: false; message: string };
 

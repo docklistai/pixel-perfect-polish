@@ -2,12 +2,14 @@ import { Calendar, Clock, MapPin, MessageSquare, ArrowRight, Sparkles } from "lu
 import { DashboardCard, StatusBadge } from "@/components/dl";
 import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalProfile } from "../hooks/usePortalProfile";
+import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalTab } from "../types";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const { hasPublished, nextShift, upcoming, weekDays } = usePortalRota();
   const { data: profile } = usePortalProfile();
   const publishedDates = new Set(upcoming.map((shift) => shift.date));
+  const emptyCopy = noUpcomingShiftsCopy(hasPublished);
 
   return (
     <div className="space-y-4">
@@ -59,14 +61,8 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </DashboardCard>
       ) : (
         <DashboardCard className="p-5">
-          <div className="text-sm font-semibold">
-            {hasPublished ? "No shifts assigned to you yet." : "No published rota yet."}
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {hasPublished
-              ? "Your manager has published the rota, but there are no assigned shifts for you in the published schedule."
-              : "Once your manager publishes the rota, your next shift will appear here."}
-          </p>
+          <div className="text-sm font-semibold">{emptyCopy.title}</div>
+          <p className="mt-1 text-xs text-muted-foreground">{emptyCopy.description}</p>
         </DashboardCard>
       )}
 

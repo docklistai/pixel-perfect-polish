@@ -2,8 +2,6 @@ import * as React from "react";
 import { Search, X, ChevronDown, Check } from "lucide-react";
 import { STAFF_STATUS_FILTERS } from "../lib/staffListPresentation";
 
-const DEPARTMENTS = ["All", "Front of House", "Kitchen", "Bar", "Housekeeping", "Maintenance"];
-
 interface FilterDropdownProps {
   value: string;
   options: string[];
@@ -98,6 +96,7 @@ interface StaffFilterBarProps {
   onDeptChange: (d: string) => void;
   statusFilter: string;
   onStatusChange: (s: string) => void;
+  departmentOptions: string[];
   filteredCount: number;
   totalCount: number;
 }
@@ -109,6 +108,7 @@ export function StaffFilterBar({
   onDeptChange,
   statusFilter,
   onStatusChange,
+  departmentOptions,
   filteredCount,
   totalCount,
 }: StaffFilterBarProps) {
@@ -137,7 +137,7 @@ export function StaffFilterBar({
 
       <FilterDropdown
         value={deptFilter}
-        options={DEPARTMENTS}
+        options={departmentOptions}
         allLabel="All departments"
         onChange={onDeptChange}
         ariaLabel="Filter by department"
