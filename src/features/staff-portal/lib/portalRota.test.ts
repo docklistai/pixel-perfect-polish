@@ -7,6 +7,7 @@ import {
   upcomingPortalShifts,
   type PortalNow,
 } from "./portalRota";
+import { currentWeekRangeLabel } from "./portalWeekLabel";
 import type { PortalShift } from "../types";
 
 function shift(overrides: Partial<PortalShift> = {}): PortalShift {
@@ -75,5 +76,28 @@ describe("resolvePortalHasPublished", () => {
   it("distinguishes an empty personal rota from no published rota", () => {
     expect(resolvePortalHasPublished([], true)).toBe(true);
     expect(resolvePortalHasPublished([], false)).toBe(false);
+  });
+});
+
+describe("currentWeekRangeLabel (D4 — no hardcoded date)", () => {
+  const at = (todayIso: string): PortalNow => ({ todayIso, nowMinutes: 600 });
+
+  it("labels a within-month week from the active clock, not a fixed date", () => {
+    // Wed 24 Jun 2026 → Mon 22 – Sun 28 Jun 2026.
+    expect(currentWeekRangeLabel(at("2026-06-24"))).toBe("22 – 28 Jun 2026");
+  });
+
+  it("never returns the previously hardcoded '8 – 14 Jun 2026' for other weeks", () => {
+    expect(currentWeekRangeLabel(at("2026-06-24"))).not.toBe("8 – 14 Jun 2026");
+  });
+
+  it("spells out both months for a cross-month week", () => {
+    // Tue 30 Jun 2026 → Mon 29 Jun – Sun 5 Jul 2026.
+    expect(currentWeekRangeLabel(at("2026-06-30"))).toBe("29 Jun – 5 Jul 2026");
+  });
+
+  it("spells out both years for a cross-year week", () => {
+    // Wed 31 Dec 2025 → Mon 29 Dec 2025 – Sun 4 Jan 2026.
+    expect(currentWeekRangeLabel(at("2025-12-31"))).toBe("29 Dec 2025 – 4 Jan 2026");
   });
 });

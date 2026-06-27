@@ -26,6 +26,8 @@ export function useDashboardWorkspace() {
 
     const { leaveItems, timesheetItems, attentionItems } = buildDashboardOperational({
       openShifts,
+      // The demo store watches next week's draft (weekDrafts["1"]), so copy says "next week".
+      weekScope: "next",
       pendingLeave,
       pendingTime,
       timesheetPeriodLabel: DEMO_TIMESHEET_PERIOD,
@@ -57,6 +59,7 @@ export function useDashboardWorkspace() {
       todayKpis,
       nextPublished: nextDraft.published,
       nextHasUnpublishedChanges: nextDraft.hasUnpublishedChanges,
+      attentionWeekScope: "next" as const,
     };
   }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
 }

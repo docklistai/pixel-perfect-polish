@@ -12,6 +12,7 @@ import {
   type PortalNow,
   type PortalWeekDay,
 } from "../lib/portalRota";
+import { currentWeekRangeLabel } from "../lib/portalWeekLabel";
 import type { PortalShift } from "../types";
 import { usePortalLiveShifts } from "./usePortalLiveShifts";
 
@@ -24,6 +25,8 @@ export type PortalRota = {
   nextShift: PortalShift | null;
   /** Mon–Sun of the current week, derived from the active clock. */
   weekDays: PortalWeekDay[];
+  /** "8 – 14 Jun 2026"-style label for the current week, from the active clock. */
+  weekLabel: string;
   /** The shift Olivia can clock in for right now, or null. */
   activeShift: PortalShift | null;
   /** Where the rota came from: the live DB view or the demo WorkspaceStore. */
@@ -37,7 +40,7 @@ export type PortalRota = {
 function buildRota(
   shifts: PortalShift[],
   now: PortalNow,
-): Omit<PortalRota, "source" | "isLoading" | "isError"> {
+): Omit<PortalRota, "source" | "isLoading" | "isError" | "weekLabel"> {
   const upcoming = upcomingPortalShifts(shifts, now);
   return {
     hasPublished: shifts.length > 0,
@@ -67,6 +70,7 @@ export function usePortalRota(): PortalRota {
       return {
         ...buildRota(shifts, liveNow),
         hasPublished: resolvePortalHasPublished(shifts, live.data?.hasPublishedRota),
+        weekLabel: currentWeekRangeLabel(liveNow),
         source: "live",
         isLoading: false,
         isError: false,
@@ -74,9 +78,11 @@ export function usePortalRota(): PortalRota {
     }
 
     if (live.enabled) {
+      const liveNow = londonPortalNow();
       return {
-        ...buildRota([], londonPortalNow()),
+        ...buildRota([], liveNow),
         hasPublished: false,
+        weekLabel: currentWeekRangeLabel(liveNow),
         source: "live",
         isLoading: live.isLoading,
         isError: live.isError,
@@ -88,6 +94,7 @@ export function usePortalRota(): PortalRota {
       ...buildRota(demoShifts, DEMO_NOW),
       // Demo keeps the original "any published week exists" semantics.
       hasPublished: publishedSnapshots(weekDrafts).length > 0,
+      weekLabel: currentWeekRangeLabel(DEMO_NOW),
       source: "demo",
       isLoading: false,
       isError: false,

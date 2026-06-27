@@ -84,6 +84,8 @@ export function useDashboardData() {
 
   const { leaveItems, timesheetItems, attentionItems } = buildDashboardOperational({
     openShifts,
+    // Live reads watch the current rota week (weekOffset 0), so copy says "this week".
+    weekScope: "current",
     pendingLeave,
     pendingTime,
     timesheetPeriodLabel: "Awaiting review",
@@ -143,6 +145,7 @@ export function useDashboardData() {
     nextPublished: Boolean(week?.hasPublishedSnapshot),
     nextHasUnpublishedChanges: Boolean(week?.hasUnpublishedChanges),
     publishWeekLabel: formatDashboardPublishWeekLabel(week?.weekStart),
+    attentionWeekScope: "current" as const,
     staffCount,
   };
 }

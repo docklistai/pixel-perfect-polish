@@ -13,6 +13,7 @@ import type { PortalRequest, RequestKind, RequestStatus } from "../types";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
 import type { PortalLeaveRequest } from "../api/portalLiveData";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
+import { usePortalRota } from "../hooks/usePortalRota";
 
 const statusTone: Record<RequestStatus, "warning" | "success" | "danger" | "muted"> = {
   pending: "warning",
@@ -49,6 +50,7 @@ export function LeaveTab() {
     approvedLeave: liveApproved,
     requestHistory: liveHistory,
   } = usePortalLeaveRequests();
+  const { weekLabel } = usePortalRota();
 
   // Phase 13 connects these to live data.
   const approvedLeave = isLive ? liveApproved : [];
@@ -134,7 +136,7 @@ export function LeaveTab() {
           >
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
           </button>
-          <div className="text-xs text-foreground font-medium">8 – 14 Jun 2026</div>
+          <div className="text-xs text-foreground font-medium">{weekLabel}</div>
           <button
             type="button"
             aria-label="Next week"

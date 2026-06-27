@@ -1,5 +1,10 @@
 import { Calendar, Clock3, Sparkles } from "lucide-react";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
+import {
+  dashboardAttentionSummary,
+  dashboardAttentionTitle,
+  type DashboardWeekScope,
+} from "../lib/dashboardOperational";
 
 interface Props {
   onDismiss: () => void;
@@ -9,6 +14,8 @@ interface Props {
   openShiftCount: number;
   pendingTimeCount: number;
   pendingLeaveCount: number;
+  /** Which week the counts describe, so the copy uses "this week" vs "next week". */
+  weekScope: DashboardWeekScope;
 }
 
 export function DashboardAISummaryCard({
@@ -19,12 +26,21 @@ export function DashboardAISummaryCard({
   openShiftCount,
   pendingTimeCount,
   pendingLeaveCount,
+  weekScope,
 }: Props) {
+  const activeCategories = [openShiftCount, pendingTimeCount, pendingLeaveCount].filter(
+    (count) => count > 0,
+  ).length;
   return (
     <AiSuggestionCard
       tone="teal"
-      title={`${[openShiftCount, pendingTimeCount, pendingLeaveCount].filter((count) => count > 0).length} things worth your attention today`}
-      body={`Next week's draft has ${openShiftCount} open shifts. ${pendingTimeCount} timesheets need manager review and ${pendingLeaveCount} leave requests are pending.`}
+      title={dashboardAttentionTitle(activeCategories)}
+      body={dashboardAttentionSummary({
+        weekScope,
+        openShifts: openShiftCount,
+        pendingTime: pendingTimeCount,
+        pendingLeave: pendingLeaveCount,
+      })}
       onDismiss={onDismiss}
       actions={[
         {

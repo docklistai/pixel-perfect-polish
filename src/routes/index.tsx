@@ -242,6 +242,7 @@ function Home() {
             openShiftCount={dashboard.openShifts}
             pendingTimeCount={dashboard.pendingTime.length}
             pendingLeaveCount={dashboard.pendingLeave.length}
+            weekScope={dashboard.attentionWeekScope}
           />
         </div>
       )}

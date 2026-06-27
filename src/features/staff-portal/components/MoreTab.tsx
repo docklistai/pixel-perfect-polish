@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import {
   ActionButton,
+  ConfirmDialog,
   DashboardCard,
   DetailRow,
   DrawerShell,
@@ -37,6 +38,7 @@ const APP_VERSION = "2.4.1 (138)";
 
 export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const [section, setSection] = React.useState<MoreSection>(null);
+  const [confirmSignOut, setConfirmSignOut] = React.useState(false);
   const navigate = useNavigate();
   const router = useRouter();
 
@@ -97,9 +99,25 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
 
       <DashboardCard className="rounded-2xl p-2.5">
         <ul className="divide-y divide-border">
-          <Row icon={LogOut} label="Sign out" tone="danger" onClick={() => void handleSignOut()} />
+          <Row
+            icon={LogOut}
+            label="Sign out"
+            tone="danger"
+            onClick={() => setConfirmSignOut(true)}
+          />
         </ul>
       </DashboardCard>
+
+      <ConfirmDialog
+        open={confirmSignOut}
+        onOpenChange={setConfirmSignOut}
+        tone="danger"
+        title="Sign out of your portal?"
+        description="To sign back in you'll need a new access code from your manager — your single-use code can't be reused. Your shifts and requests stay safe in the meantime."
+        confirmLabel="Sign out"
+        cancelLabel="Stay signed in"
+        onConfirm={handleSignOut}
+      />
 
       <div className="text-center text-[11px] text-muted-foreground">Docklist · v{APP_VERSION}</div>
 

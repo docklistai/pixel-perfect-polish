@@ -1,28 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { describePortalCodeIssueError } from "../lib/issuePortalCode";
 import type { IssuePortalCodeResult } from "../types";
 
 const issueStaffInputSchema = z.object({
   staffMemberId: z.string().uuid(),
 });
-
-/**
- * Maps a Postgres error raised by the issue RPCs to an honest, non-leaking
- * manager-facing message. Codes are never validated or generated in the
- * frontend — the database is the sole authority for who may receive a code.
- */
-function describeIssueError(sqlState: string | null): string {
-  switch (sqlState) {
-    case "42501":
-      return "You don't have permission to issue access codes for this workspace.";
-    case "P0002":
-      return "That staff member isn't in this workspace.";
-    case "55000":
-      return "This staff member can't receive a code yet — they may already have an account, or have no portal membership to bind to. Seed their membership first.";
-    default:
-      return "We couldn't issue a code. Please try again, or check the staff member with your team.";
-  }
-}
 
 /**
  * Issues (or rotates) the workspace portal code for the signed-in manager's
@@ -42,7 +25,7 @@ export const issueWorkspacePortalCodeFn = createServerFn({ method: "POST" }).han
     try {
       workspaceId = await requireActiveManagerWorkspaceId(supabase);
     } catch {
-      return { ok: false, message: describeIssueError("42501") };
+      return { ok: false, message: describePortalCodeIssueError("42501") };
     }
 
     const { data, error } = await supabase.rpc("rpc_issue_workspace_portal_code", {
@@ -50,7 +33,7 @@ export const issueWorkspacePortalCodeFn = createServerFn({ method: "POST" }).han
     });
 
     if (error || typeof data !== "string") {
-      return { ok: false, message: describeIssueError(error?.code ?? null) };
+      return { ok: false, message: describePortalCodeIssueError(error?.code ?? null) };
     }
     return { ok: true, code: data };
   },
@@ -73,7 +56,7 @@ export const issueStaffPortalCodeFn = createServerFn({ method: "POST" })
     try {
       workspaceId = await requireActiveManagerWorkspaceId(supabase);
     } catch {
-      return { ok: false, message: describeIssueError("42501") };
+      return { ok: false, message: describePortalCodeIssueError("42501") };
     }
 
     const { data: code, error } = await supabase.rpc("rpc_issue_staff_portal_code", {
@@ -82,7 +65,7 @@ export const issueStaffPortalCodeFn = createServerFn({ method: "POST" })
     });
 
     if (error || typeof code !== "string") {
-      return { ok: false, message: describeIssueError(error?.code ?? null) };
+      return { ok: false, message: describePortalCodeIssueError(error?.code ?? null) };
     }
     return { ok: true, code };
   });

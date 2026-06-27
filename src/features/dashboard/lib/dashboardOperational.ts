@@ -11,9 +11,44 @@ import type { AttentionItem, LeaveItem, TimesheetItem } from "../types";
  * they are presented. Kept free of React/Supabase so the rules are unit-tested.
  */
 
+/**
+ * Which week the dashboard is watching. Live reads watch the current rota week,
+ * so their copy must say "this week"; the demo store watches next week's draft,
+ * so it keeps "next week". The noun is data-driven, never hardcoded per surface.
+ */
+export type DashboardWeekScope = "current" | "next";
+
+/** Heading noun for the watched week, e.g. "This week has 4 open shifts". */
+export function weekScopeHeading(scope: DashboardWeekScope): string {
+  return scope === "current" ? "This week" : "Next week";
+}
+
+/** Possessive form for the watched week, e.g. "This week's draft". */
+export function weekScopePossessive(scope: DashboardWeekScope): string {
+  return scope === "current" ? "This week's" : "Next week's";
+}
+
+/** Manager-support card title with correct singular/plural for the active count. */
+export function dashboardAttentionTitle(activeCategories: number): string {
+  return `${activeCategories} thing${activeCategories === 1 ? "" : "s"} worth your attention today`;
+}
+
+/** Manager-support card body; the week noun follows the watched week's scope. */
+export function dashboardAttentionSummary(input: {
+  weekScope: DashboardWeekScope;
+  openShifts: number;
+  pendingTime: number;
+  pendingLeave: number;
+}): string {
+  const { weekScope, openShifts, pendingTime, pendingLeave } = input;
+  return `${weekScopePossessive(weekScope)} draft has ${openShifts} open shifts. ${pendingTime} timesheets need manager review and ${pendingLeave} leave requests are pending.`;
+}
+
 export interface DashboardOperationalInput {
   /** Unassigned shifts in the week the dashboard is watching. */
   openShifts: number;
+  /** Which week the surfaced numbers describe, so copy uses the right noun. */
+  weekScope: DashboardWeekScope;
   /** Leave requests already filtered to the pending state. */
   pendingLeave: LeaveRequest[];
   /** Timesheet rows already filtered to a non-approved status. */
@@ -34,7 +69,7 @@ export interface DashboardOperationalOutput {
 export function buildDashboardOperational(
   input: DashboardOperationalInput,
 ): DashboardOperationalOutput {
-  const { openShifts, pendingLeave, pendingTime, timesheetPeriodLabel } = input;
+  const { openShifts, weekScope, pendingLeave, pendingTime, timesheetPeriodLabel } = input;
   const highLeave = pendingLeave.find((request) => request.impact === "High");
 
   const leaveItems: LeaveItem[] = pendingLeave.map((request) => ({
@@ -55,8 +90,8 @@ export function buildDashboardOperational(
 
   const openShiftDetail =
     openShifts === 0
-      ? "Next week's draft has no open shifts. You're clear to publish."
-      : `Next week's draft has ${openShifts} unassigned shift${openShifts === 1 ? "" : "s"}. Open the rota to assign cover before the publish deadline.`;
+      ? `${weekScopePossessive(weekScope)} draft has no open shifts. You're clear to publish.`
+      : `${weekScopePossessive(weekScope)} draft has ${openShifts} unassigned shift${openShifts === 1 ? "" : "s"}. Open the rota to assign cover before you publish.`;
   const timeDetail =
     pendingTime.length === 0
       ? "No timesheets are waiting for review."
@@ -72,8 +107,8 @@ export function buildDashboardOperational(
   const attentionCandidates: (AttentionItem | null)[] = [
     openShifts > 0
       ? {
-          t: `Next week has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`,
-          s: "Resolve before Fri 16:00 to publish on time",
+          t: `${weekScopeHeading(weekScope)} has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`,
+          s: "Resolve open shifts before publishing",
           icon: AlertTriangle,
           tone: "warning" as const,
           route: "/rota" as const,
