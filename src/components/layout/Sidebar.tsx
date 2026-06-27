@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Home,
@@ -12,11 +12,8 @@ import {
   Settings,
   ChevronDown,
 } from "lucide-react";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import { withLocalConflictStatus } from "@/features/rota/lib/localConflicts";
-import { getWeekDateIsoLabels } from "@/features/rota/lib/weekHelpers";
-import { withApprovedLeaveConflictStatus } from "@/features/leave/lib/leaveRotaConflicts";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { useChromeBadges } from "./useChromeBadges";
 import { MobileMoreMenu } from "./MobileMoreMenu";
 
 function workspaceMonogram(name: string): string {
@@ -76,37 +73,19 @@ const overflowNavItems = navItems.filter((item) => item.group !== "workspace");
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { workspaceName } = useManagerIdentity();
-  const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
-  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
-  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
-  const timeRows = useWorkspaceSelector((state) => state.timeRows);
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const footerRef = useRef<HTMLDivElement>(null);
-  const badges = useMemo(() => {
-    const draft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"];
-    const rotaShifts = draft
-      ? withApprovedLeaveConflictStatus(
-          withLocalConflictStatus(draft.shifts),
-          leaveRequests,
-          getWeekDateIsoLabels(weekOffset),
-        )
-      : [];
-    return {
-      "/rota": {
-        count: rotaShifts.filter((shift) => shift.status === "open" || shift.status === "conflict")
-          .length,
-        kind: "amber" as const,
-      },
-      "/time": {
-        count: timeRows.filter((row) => row.status !== "approved" || row.flagged).length,
-        kind: "red" as const,
-      },
-      "/leave": {
-        count: leaveRequests.filter((request) => request.state === "pending").length,
-        kind: "amber" as const,
-      },
-    };
-  }, [weekDrafts, weekOffset, leaveRequests, timeRows]);
+  // Live, workspace-scoped counts. Null (no live source) or an unresolved read
+  // simply hides the badge — the chrome never shows a demo-store count.
+  const liveBadges = useChromeBadges();
+  const badges: Partial<Record<string, { count: number; kind: "amber" | "neutral" | "red" }>> =
+    liveBadges
+      ? {
+          "/rota": { count: liveBadges.rota, kind: "amber" },
+          "/time": { count: liveBadges.time, kind: "red" },
+          "/leave": { count: liveBadges.leave, kind: "amber" },
+        }
+      : {};
 
   useEffect(() => {
     if (!workspaceOpen) return;
@@ -143,7 +122,7 @@ export function Sidebar() {
                 .map((item) => {
                   const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
                   const Icon = item.icon;
-                  const badge = badges[item.to as keyof typeof badges] ?? item.badge;
+                  const badge = badges[item.to] ?? item.badge;
                   return (
                     <Link
                       key={item.to}

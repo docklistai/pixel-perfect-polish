@@ -40,13 +40,17 @@ export function AddShiftDrawer({
   const [form, setForm] = React.useState<AddShiftFormState>(initialForm);
   const [submitted, setSubmitted] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
+  const wasOpenRef = React.useRef(open);
 
   React.useEffect(() => {
-    if (open) {
+    if (open && !wasOpenRef.current) {
       setForm(initialForm);
       setSubmitted(false);
       setSaving(false);
+      setSaveError(null);
     }
+    wasOpenRef.current = open;
   }, [open, initialForm]);
 
   const errors = {
@@ -61,6 +65,7 @@ export function AddShiftDrawer({
   const hasError = Boolean(errors.role || errors.start || errors.end || errors.timeOrder);
   const handleSave = async (keepOpen: boolean) => {
     setSubmitted(true);
+    setSaveError(null);
     if (hasError) return;
     setSaving(true);
     const finalDayIndex = form.repeat ? 6 : form.dayIndex;
@@ -81,8 +86,14 @@ export function AddShiftDrawer({
       } else {
         onOpenChange(false);
       }
-    } catch {
-      // The live persistence hook owns the failure toast; keep the drawer open.
+    } catch (error) {
+      // The live persistence hook also raises a toast, but the drawer stays open
+      // with the entered fields so the manager can read the reason and retry.
+      setSaveError(
+        error instanceof Error && error.message
+          ? error.message
+          : "We couldn't save this shift. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -110,6 +121,14 @@ export function AddShiftDrawer({
         </>
       }
     >
+      {saveError && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
+        >
+          {saveError}
+        </div>
+      )}
       <AddShiftFormFields
         form={form}
         setForm={setForm}

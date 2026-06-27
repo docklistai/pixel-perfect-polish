@@ -16,6 +16,14 @@ import { submitLeaveRequestFn } from "../api/portalActions";
 
 const portalRouteApi = getRouteApi("/portal");
 
+/** Local (workspace-facing) yyyy-mm-dd for sensible, non-past default dates. */
+function localIsoDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 /** UI leave-type labels → the RPC's `leave_type` enum. */
 const LEAVE_TYPE_TO_RPC: Record<string, "annual_leave" | "personal" | "sick" | "unpaid" | "other"> =
   {
@@ -35,8 +43,8 @@ export function PortalLeaveRequestDrawer({
   const store = useWorkspaceStore();
   const { auth } = portalRouteApi.useRouteContext();
   const queryClient = useQueryClient();
-  const [startIso, setStartIso] = React.useState("2026-06-19");
-  const [endIso, setEndIso] = React.useState("2026-06-21");
+  const [startIso, setStartIso] = React.useState(() => localIsoDate(new Date()));
+  const [endIso, setEndIso] = React.useState(() => localIsoDate(new Date()));
   const [leaveType, setLeaveType] = React.useState("Annual leave");
   const [reason, setReason] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);

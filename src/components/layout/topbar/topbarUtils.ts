@@ -17,16 +17,11 @@ export function applyTheme(theme: ThemeMode) {
   }
 }
 
-export function getWeekLabelForOffset(offset: number = 0): string {
-  const londonDate = new Date(2026, 5, 11 + offset * 7);
-  const weekday = londonDate.getDay();
+function weekLabelForAnchor(anchor: Date): string {
+  const weekday = anchor.getDay();
   const diffToMonday = weekday === 0 ? -6 : 1 - weekday;
 
-  const monday = new Date(
-    londonDate.getFullYear(),
-    londonDate.getMonth(),
-    londonDate.getDate() + diffToMonday,
-  );
+  const monday = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate() + diffToMonday);
   const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
 
   const startDay = monday.getDate();
@@ -38,6 +33,19 @@ export function getWeekLabelForOffset(offset: number = 0): string {
     return `${startDay}–${endDay} ${shortMonth(sunday)} ${endYear}`;
   }
   return `${startDay} ${shortMonth(monday)}–${endDay} ${shortMonth(sunday)} ${endYear}`;
+}
+
+/** Demo-playground week label, pinned to the seeded Harbour View week. */
+export function getWeekLabelForOffset(offset: number = 0): string {
+  return weekLabelForAnchor(new Date(2026, 5, 11 + offset * 7));
+}
+
+/** Real current-week label (Mon–Sun containing today), for live workspaces. */
+export function getLiveWeekLabelForOffset(offset: number = 0): string {
+  const today = new Date();
+  return weekLabelForAnchor(
+    new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset * 7),
+  );
 }
 
 export function getWeekSubtitle(offset: number) {

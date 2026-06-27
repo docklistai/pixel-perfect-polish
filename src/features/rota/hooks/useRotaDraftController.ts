@@ -53,12 +53,26 @@ export function useRotaDraftController() {
 
   // Live-capable sessions stay read-only while live data loads or has failed.
   const readOnly = live.enabled && !live.isLive;
-  const roster = live.isLive ? live.staff : staff;
+  const fullRoster = live.isLive ? live.staff : staff;
   const assignableStaff = live.isLive ? live.assignableStaff : staff;
   const sourceShifts = live.isLive ? live.shifts : weekDraft.draftShifts;
   const leaveRequests = live.isLive ? live.leaveRequests : demoLeaveRequests;
   const liveActions = live.isLive ? livePersistence : null;
   const confirmations = liveActions ? liveConfirmations : weekDraft;
+
+  // The live grid hides inactive staff who have no shift this week, so the roster
+  // reflects who can actually be scheduled. Inactive members keep their row only
+  // while they still hold a shift to manage. Demo mode shows its full seed roster.
+  const roster = React.useMemo(() => {
+    if (!live.isLive) return fullRoster;
+    const assignableIds = new Set(assignableStaff.map((member) => member.id));
+    const shiftStaffIds = new Set(
+      sourceShifts.map((shift) => shift.staffId).filter((id): id is string => Boolean(id)),
+    );
+    return fullRoster.filter(
+      (member) => assignableIds.has(member.id) || shiftStaffIds.has(member.id),
+    );
+  }, [live.isLive, fullRoster, assignableStaff, sourceShifts]);
 
   const dayIsoDates = React.useMemo(() => {
     if (live.isLive && live.weekStart) {

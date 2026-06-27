@@ -51,12 +51,14 @@ export function ShiftDetailDrawer({
   );
   const [saving, setSaving] = React.useState(false);
   const [repeatActive, setRepeatActive] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (shift) {
       setForm(formStateFromShift(shift));
       setSaving(false);
       setRepeatActive(false);
+      setSaveError(null);
     }
   }, [shift]);
 
@@ -108,6 +110,7 @@ export function ShiftDetailDrawer({
     if (!canSave) return;
     const nextStaffId = form.assignTo === "" ? null : form.assignTo;
     setSaving(true);
+    setSaveError(null);
     try {
       await onUpdate(shift.id, {
         role: form.role.trim(),
@@ -115,8 +118,14 @@ export function ShiftDetailDrawer({
         end: form.end,
         staffId: nextStaffId,
       });
-    } catch {
-      // The live persistence hook owns the failure toast; keep the drawer open.
+    } catch (error) {
+      // The live persistence hook also raises a toast; keep the drawer open with
+      // the entered fields and show the reason inline so the manager can retry.
+      setSaveError(
+        error instanceof Error && error.message
+          ? error.message
+          : "We couldn't save this shift. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -124,10 +133,15 @@ export function ShiftDetailDrawer({
 
   const runAction = async (action: (id: ShiftId) => MaybePromise<void>) => {
     setSaving(true);
+    setSaveError(null);
     try {
       await action(shift.id);
-    } catch {
-      // The live persistence hook owns the failure toast; keep the drawer open.
+    } catch (error) {
+      setSaveError(
+        error instanceof Error && error.message
+          ? error.message
+          : "We couldn't update this shift. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -161,6 +175,14 @@ export function ShiftDetailDrawer({
       }
     >
       <FormSection title="Edit shift">
+        {saveError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
+          >
+            {saveError}
+          </div>
+        )}
         <FormRow label="Role" required htmlFor="shift-edit-role">
           <input
             id="shift-edit-role"

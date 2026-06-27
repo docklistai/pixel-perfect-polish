@@ -65,6 +65,8 @@ export interface PortalProfile {
   initials: string;
   role: string;
   department: string;
+  /** The workspace/business the staff member belongs to. */
+  workspaceName: string;
   email: string;
   phone: string;
   accessStatus: "active" | "pending" | "suspended";

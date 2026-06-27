@@ -57,7 +57,15 @@ export function LabourSummaryCard({
   return (
     <Card className="p-4">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="text-sm font-semibold">Labour summary</div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">Labour summary</span>
+          <span
+            className="badge"
+            title="Cost and labour % are sample estimates until pay rates and forecast sales are configured. Scheduled hours and coverage are live."
+          >
+            Sample
+          </span>
+        </div>
         <IconButton
           icon={Settings}
           label="Edit labour targets in Settings"
@@ -121,8 +129,8 @@ export function LabourSummaryCard({
         >
           <Info className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
           <span>
-            Labour % is based on forecast sales set in Settings → Rota &amp; scheduling. Edit labour
-            targets →
+            Cost and labour % are sample estimates from a placeholder rate and forecast sales until
+            set in Settings → Rota &amp; scheduling. Edit labour targets →
           </span>
         </Link>
       </div>

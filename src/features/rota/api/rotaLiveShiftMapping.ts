@@ -82,7 +82,7 @@ export async function resolveActiveStaffAssignment(
   };
 }
 
-async function resolveDepartmentId(
+export async function resolveDepartmentId(
   supabase: SupabaseClient,
   workspaceId: string,
   input: { staffId: string | null; role: string; fallbackDepartmentId?: string },
@@ -94,23 +94,31 @@ async function resolveDepartmentId(
 
   if (input.fallbackDepartmentId) return input.fallbackDepartmentId;
 
+  // Created order makes the first row the workspace's starter/default department,
+  // so the fallback below is deterministic.
   const { data: departments, error } = await supabase
     .from("departments")
     .select("id, name")
     .eq("workspace_id", workspaceId)
     .eq("status", "active")
+    .order("created_at", { ascending: true })
     .order("name", { ascending: true });
   if (error) throw error;
 
-  const match = ((departments as DepartmentRow[] | null) ?? []).find((department) =>
-    roleMatchesDepartment(input.role, department.name),
-  );
-  if (!match) {
-    throw new Error(
-      "No department could be resolved for this shift. Assign staff or use a role that matches an active department.",
-    );
+  const active = (departments as DepartmentRow[] | null) ?? [];
+  // A workspace with zero active departments genuinely can't place a shift; this
+  // should not happen after bootstrap seeds the starter departments.
+  if (active.length === 0) {
+    throw new Error("Add a department to this workspace before scheduling shifts.");
   }
-  return match.id;
+  // Assigned active staff with no department still need to be schedulable. Use
+  // the workspace starter/default department rather than fuzzy role matching.
+  if (input.staffId) return active[0]!.id;
+
+  // For open shifts, prefer a department whose name matches the role for
+  // sensible grouping/colour, but never block scheduling.
+  const match = active.find((department) => roleMatchesDepartment(input.role, department.name));
+  return (match ?? active[0]!).id;
 }
 
 export async function markWeekDraft(

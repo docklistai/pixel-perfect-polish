@@ -10,12 +10,18 @@ import type { WorkspaceRole } from "../types";
  * rather than throwing — it never shows another tenant's identity.
  */
 export interface ManagerIdentity {
+  workspaceId: string | null;
   workspaceName: string | null;
   email: string | null;
   role: WorkspaceRole | null;
 }
 
-const NEUTRAL: ManagerIdentity = { workspaceName: null, email: null, role: null };
+const NEUTRAL: ManagerIdentity = {
+  workspaceId: null,
+  workspaceName: null,
+  email: null,
+  role: null,
+};
 
 export const fetchManagerIdentityFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<ManagerIdentity> => {
@@ -42,6 +48,7 @@ export const fetchManagerIdentityFn = createServerFn({ method: "GET" }).handler(
       ]);
 
       return {
+        workspaceId,
         workspaceName: (workspace as { name: string } | null)?.name ?? null,
         email: user?.email ?? null,
         role: ((membership as { role: WorkspaceRole } | null)?.role ??

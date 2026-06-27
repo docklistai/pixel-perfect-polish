@@ -1,14 +1,20 @@
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import { selectRotaWeek } from "@/features/demo/store/workspaceActions";
-import { getWeekLabelForOffset, getWeekSubtitle } from "./topbarUtils";
+import { getLiveWeekLabelForOffset, getWeekLabelForOffset, getWeekSubtitle } from "./topbarUtils";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 import { WeekPickerDialog } from "@/features/rota/components/WeekPickerDialog";
 import * as React from "react";
 
 export function TopbarWeekPill({ displayedWeekLabel }: { displayedWeekLabel?: string }) {
   const store = useWorkspaceStore();
   const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
-  const weekLabel = displayedWeekLabel ?? getWeekLabelForOffset(weekOffset);
+  // A live workspace shows the real current week; the demo playground keeps its
+  // pinned seed week. The Rota route always passes the authoritative live label.
+  const fallbackLabel = getSupabaseEnv()
+    ? getLiveWeekLabelForOffset(weekOffset)
+    : getWeekLabelForOffset(weekOffset);
+  const weekLabel = displayedWeekLabel ?? fallbackLabel;
   const [pickerOpen, setPickerOpen] = React.useState(false);
 
   return (

@@ -18,6 +18,7 @@ export const mockProfile: PortalProfile = {
   initials: "OB",
   role: "Barista",
   department: "Harbour View Hotel · Front of House",
+  workspaceName: "Harbour View Hotel",
   email: "olivia.bennett@harbourview.co.uk",
   phone: "+44 7700 900123",
   accessStatus: "active",

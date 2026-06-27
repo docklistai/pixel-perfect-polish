@@ -10,10 +10,14 @@ const ROLE_LABEL: Record<WorkspaceRole, string> = {
 };
 
 export interface ManagerIdentityView {
+  /** Resolved active workspace id, or null while loading/unresolved. */
+  workspaceId: string | null;
   /** Real workspace name, or a neutral placeholder while loading/unresolved. */
   workspaceName: string;
   /** Manager email, or null when unresolved. */
   email: string | null;
+  /** Raw membership role, or null while loading/unresolved. */
+  role: WorkspaceRole | null;
   /** Human role label, or a neutral placeholder. */
   roleLabel: string;
   /** Up-to-two-letter monogram derived from the email local-part. */
@@ -42,8 +46,10 @@ export function useManagerIdentity(): ManagerIdentityView {
 
   const data = query.data;
   return {
+    workspaceId: data?.workspaceId ?? null,
     workspaceName: data?.workspaceName ?? "Your workspace",
     email: data?.email ?? null,
+    role: data?.role ?? null,
     roleLabel: data?.role ? ROLE_LABEL[data.role] : "Workspace manager",
     initials: initialsFromEmail(data?.email ?? null),
   };

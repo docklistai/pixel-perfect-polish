@@ -76,9 +76,11 @@ export function PortalShell({
       {/* Desktop side rail (kept light, mirrors mobile structure) */}
       <aside className="hidden md:flex w-[260px] shrink-0 flex-col bg-[var(--sidebar)] text-[var(--sidebar-foreground)]">
         <div className="px-6 py-6">
-          <div className="text-base font-semibold tracking-tight text-white">Docklist</div>
+          <div className="text-base font-semibold tracking-tight text-white truncate">
+            {profile.workspaceName}
+          </div>
           <div className="text-[11px] font-semibold tracking-[0.2em] text-[var(--sidebar-muted)] mt-1">
-            STAFF PORTAL
+            STAFF PORTAL · DOCKLIST
           </div>
         </div>
         <div className="px-6 pb-5">
@@ -131,7 +133,10 @@ export function PortalShell({
             >
               <MoreHorizontal className="h-5 w-5" />
             </button>
-            <div className="text-base font-semibold tracking-tight">{TITLES[activeTab]}</div>
+            <div className="min-w-0 text-center">
+              <div className="text-base font-semibold tracking-tight">{TITLES[activeTab]}</div>
+              <div className="text-[10px] text-white/60 truncate">{profile.workspaceName}</div>
+            </div>
             <NotificationBell count={unreadNotifications} onClick={onOpenNotifications} dark />
           </div>
           {isHome && (

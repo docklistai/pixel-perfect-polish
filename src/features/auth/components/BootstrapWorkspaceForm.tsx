@@ -80,8 +80,9 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
             </div>
             <h1 className="mt-5 text-2xl font-semibold tracking-tight">Create your workspace</h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Set up the first workspace for your business. We'll add a starter location and
-              department so rota setup can begin immediately.
+              Set up the first workspace for your business. We'll add a starter location and a set
+              of common departments (Front of house, Kitchen, Bar, Management) so rota setup can
+              begin immediately.
             </p>
           </div>
 

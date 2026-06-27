@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { NotificationItem } from "./NotificationItem";
 import { type MockNotification, type NotificationFilter } from "./notificationData";
 import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 import {
   clearManagerNotifications,
   markAllManagerNotificationsRead,
@@ -28,7 +29,12 @@ export function NotificationDrawer({
 }) {
   const navigate = useNavigate();
   const store = useWorkspaceStore();
-  const items = useWorkspaceSelector((state) => state.managerNotifications);
+  const storeItems = useWorkspaceSelector((state) => state.managerNotifications);
+  // In a live workspace there is no manager-notification feed wired to the bell
+  // yet, so show an honest empty inbox and report a zero count rather than the
+  // demo store's seeded notifications. The demo playground keeps its seed.
+  const isLive = Boolean(getSupabaseEnv());
+  const items = isLive ? [] : storeItems;
   const [filter, setFilter] = React.useState<NotificationFilter>("all");
 
   const unreadCount = items.filter((i) => !i.read).length;
@@ -93,7 +99,7 @@ export function NotificationDrawer({
               {items.length} total
             </span>
           </>
-        ) : (
+        ) : isLive ? null : (
           <>
             <span className="flex-1" />
             <ActionButton variant="ghost" size="sm" onClick={restoreDefaults}>

@@ -372,6 +372,7 @@ interface ProfileViewRow {
   display_name: string;
   role_name: string;
   department_name: string | null;
+  workspace_name: string | null;
   email: string | null;
   phone: string | null;
   employment_status: string;
@@ -382,7 +383,7 @@ export async function fetchPortalProfile(workspaceId: string, staffMemberId: str
   const { data, error } = await supabase
     .from("staff_portal_profile")
     .select(
-      "staff_member_id, display_name, role_name, department_name, email, phone, employment_status",
+      "staff_member_id, display_name, role_name, department_name, workspace_name, email, phone, employment_status",
     )
     .eq("workspace_id", workspaceId)
     .eq("staff_member_id", staffMemberId)
@@ -404,6 +405,7 @@ export async function fetchPortalProfile(workspaceId: string, staffMemberId: str
     initials,
     role: row.role_name,
     department: row.department_name ?? "Unassigned",
+    workspaceName: row.workspace_name ?? "Your workspace",
     email: row.email ?? "",
     phone: row.phone ?? "",
     accessStatus: "active" as const,
