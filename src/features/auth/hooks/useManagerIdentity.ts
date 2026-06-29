@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchManagerIdentityFn } from "../api/managerIdentity";
@@ -31,12 +32,22 @@ function initialsFromEmail(email: string | null): string {
   return letters || "—";
 }
 
+const unresolvedIdentity: ManagerIdentityView = {
+  workspaceId: null,
+  workspaceName: "Your workspace",
+  email: null,
+  role: null,
+  roleLabel: "Workspace manager",
+  initials: initialsFromEmail(null),
+};
+
 /**
  * Live identity for the manager shell (topbar, sidebar, greeting). Falls back to
  * honest placeholders rather than the old hardcoded "Harbour View Hotel" / "Alex
  * Thompson" demo identity. Safe on every manager route; neutral elsewhere.
  */
 export function useManagerIdentity(): ManagerIdentityView {
+  const [hasHydrated, setHasHydrated] = useState(false);
   const query = useQuery({
     queryKey: ["manager-identity"],
     queryFn: () => fetchManagerIdentityFn(),
@@ -44,13 +55,22 @@ export function useManagerIdentity(): ManagerIdentityView {
     staleTime: 60_000,
   });
 
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
+
+  if (!hasHydrated) {
+    return unresolvedIdentity;
+  }
+
   const data = query.data;
   return {
-    workspaceId: data?.workspaceId ?? null,
-    workspaceName: data?.workspaceName ?? "Your workspace",
-    email: data?.email ?? null,
-    role: data?.role ?? null,
-    roleLabel: data?.role ? ROLE_LABEL[data.role] : "Workspace manager",
+    ...unresolvedIdentity,
+    workspaceId: data?.workspaceId ?? unresolvedIdentity.workspaceId,
+    workspaceName: data?.workspaceName ?? unresolvedIdentity.workspaceName,
+    email: data?.email ?? unresolvedIdentity.email,
+    role: data?.role ?? unresolvedIdentity.role,
+    roleLabel: data?.role ? ROLE_LABEL[data.role] : unresolvedIdentity.roleLabel,
     initials: initialsFromEmail(data?.email ?? null),
   };
 }
