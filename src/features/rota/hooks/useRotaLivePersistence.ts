@@ -5,9 +5,11 @@ import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
 import type { RotaLiveData } from "./useRotaLiveData";
 import {
   clearLiveRotaWeekFn,
+  copyPreviousLiveRotaWeekFn,
   createLiveRotaShiftFn,
   duplicateLiveRotaShiftFn,
   markLiveRotaShiftOpenFn,
+  previewCopyPreviousLiveRotaWeekFn,
   publishLiveRotaWeekFn,
   removeLiveRotaShiftFn,
   updateLiveRotaShiftFn,
@@ -128,6 +130,23 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
     toast.success("Week cleared", { description: "Saved to the live draft." });
   }, [liveWeekInput, runMutation]);
 
+  const copyPreviousWeek = React.useCallback(async () => {
+    const result = await runMutation("Previous week not copied", async () =>
+      copyPreviousLiveRotaWeekFn({ data: liveWeekInput() }),
+    );
+    toast.success("Previous week copied", {
+      description: `${result.shiftCount} shifts saved to this live draft. Review before publishing.`,
+    });
+  }, [liveWeekInput, runMutation]);
+
+  const previewCopyPreviousWeek = React.useCallback(
+    () =>
+      runMutation("Previous week not previewed", async () =>
+        previewCopyPreviousLiveRotaWeekFn({ data: liveWeekInput() }),
+      ),
+    [liveWeekInput, runMutation],
+  );
+
   const publish = React.useCallback(async () => {
     const blockPublish = (message: string) => {
       toast.error("Rota not published", { description: message });
@@ -159,6 +178,8 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
     removeShiftNow,
     markShiftOpen,
     duplicateShiftToNextDay,
+    previewCopyPreviousWeek,
+    copyPreviousWeek,
     clearWeek,
     publish,
   };

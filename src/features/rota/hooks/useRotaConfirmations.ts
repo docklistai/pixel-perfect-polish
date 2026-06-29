@@ -1,11 +1,14 @@
 import * as React from "react";
 import type { ShiftId } from "../types";
+import type { LiveCopyPreviousWeekPreview } from "../api/copyPreviousLiveRotaWeek";
+import { buildCopyPreviousWeekConfirmation } from "../lib/copyPreviousWeekAction";
 
 type MaybePromise<T> = T | Promise<T>;
 
 export type RotaConfirmation =
   | { kind: "clear"; title: string; description: string; confirmLabel: string }
-  | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string };
+  | { kind: "remove"; shiftId: ShiftId; title: string; description: string; confirmLabel: string }
+  | { kind: "copyPreviousWeek"; title: string; description: string; confirmLabel: string };
 
 /**
  * Confirm-before-destructive-action flow for the rota week draft. Owns the
@@ -14,9 +17,11 @@ export type RotaConfirmation =
  */
 export function useRotaConfirmations({
   clearWeek,
+  copyPreviousWeek,
   removeShiftNow,
 }: {
   clearWeek: () => MaybePromise<void>;
+  copyPreviousWeek?: () => MaybePromise<void>;
   removeShiftNow: (id: ShiftId) => MaybePromise<void>;
 }) {
   const [confirmation, setConfirmation] = React.useState<RotaConfirmation | null>(null);
@@ -40,8 +45,16 @@ export function useRotaConfirmations({
     });
   };
 
+  const requestCopyPreviousWeek = (preview: LiveCopyPreviousWeekPreview) => {
+    setConfirmation({
+      kind: "copyPreviousWeek",
+      ...buildCopyPreviousWeekConfirmation(preview),
+    });
+  };
+
   const confirmPendingAction = async () => {
     if (confirmation?.kind === "clear") await clearWeek();
+    if (confirmation?.kind === "copyPreviousWeek" && copyPreviousWeek) await copyPreviousWeek();
     if (confirmation?.kind === "remove") await removeShiftNow(confirmation.shiftId);
     setConfirmation(null);
   };
@@ -50,6 +63,7 @@ export function useRotaConfirmations({
     confirmation,
     requestRemoveShift,
     requestClearWeek,
+    requestCopyPreviousWeek,
     confirmPendingAction,
     clearConfirmation: () => setConfirmation(null),
   };

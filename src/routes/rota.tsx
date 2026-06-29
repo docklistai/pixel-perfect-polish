@@ -38,7 +38,7 @@ const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
 /** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
 const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate"]);
-const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>(["generate"]);
+const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>();
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -143,7 +143,12 @@ function RotaPage() {
       removeShiftNow: blocked,
       restoreShift: blocked,
       updateShift: blocked,
+      previewCopyPreviousWeek: async () => {
+        actions.block();
+        throw new Error("Live rota is unavailable.");
+      },
       copyPreviousWeek: blocked,
+      requestCopyPreviousWeek: blocked,
       applyOpenShiftSuggestions: () => {
         actions.block();
         return [];

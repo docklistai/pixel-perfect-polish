@@ -13,6 +13,8 @@ import {
 import { buildRepeatShiftFeedback, type RepeatShiftResult } from "../lib/repeatShift";
 import { isShiftCopyAssignable } from "../lib/assignableStaff";
 import { executeDuplicateShiftCopy, executeRepeatShiftCopy } from "../lib/shiftCopyActions";
+import { applyLiveOpenShiftSuggestions } from "../lib/rotaSuggestions";
+import { requestLiveCopyPreviousWeekConfirmation } from "../lib/copyPreviousWeekAction";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -34,9 +36,23 @@ export function useRotaShiftActions(rota: RotaController) {
 
   const findShift = (shiftId: string) => rota.draftShifts.find((s) => s.id === shiftId);
 
-  const handleApplySuggestions = () => {
+  const handleApplySuggestions = async () => {
     if (readOnly) return block();
-    if (isLive) return blockDraftOnly();
+    if (isLive) {
+      const suggestions = await applyLiveOpenShiftSuggestions({
+        shifts: rota.draftShifts,
+        staff: rota.assignableStaff,
+        leaveRequests: rota.leaveRequests,
+        dayIsoDates: rota.dayIsoDates,
+        updateShift: rota.updateShift,
+      });
+      setFillSummary(
+        suggestions.length > 0
+          ? `${suggestions.length} open shift${suggestions.length === 1 ? "" : "s"} filled in the live draft. Review before publishing.`
+          : "No open shifts could be filled from the current staff list.",
+      );
+      return;
+    }
     const suggestions = rota.applyOpenShiftSuggestions();
     setFillSummary(
       suggestions.length > 0
@@ -45,13 +61,31 @@ export function useRotaShiftActions(rota: RotaController) {
     );
   };
 
-  const handleCopyLastWeek = () => {
+  const handleCopyLastWeek = async () => {
     if (readOnly) return block();
-    if (isLive) return blockDraftOnly();
-    rota.copyPreviousWeek();
-    toast.success("Pattern copied", {
-      description: "Last week's pattern applied as a draft. Review before publishing.",
-    });
+    if (isLive) {
+      if (!rota.previewCopyPreviousWeek) {
+        blockDraftOnly();
+        return;
+      }
+      try {
+        await requestLiveCopyPreviousWeekConfirmation({
+          previewCopyPreviousWeek: rota.previewCopyPreviousWeek,
+          requestCopyPreviousWeek: rota.requestCopyPreviousWeek,
+        });
+      } catch {
+        // Live preview owns the failure toast.
+      }
+      return;
+    }
+    try {
+      await rota.copyPreviousWeek();
+      toast.success("Pattern copied", {
+        description: "Last week's pattern applied as a draft. Review before publishing.",
+      });
+    } catch {
+      // Live persistence owns the failure toast.
+    }
   };
 
   const handleDuplicateShift = async (shiftId: string) => {

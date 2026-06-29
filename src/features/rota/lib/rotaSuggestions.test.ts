@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { fillOpenShiftsWithSuggestions } from "./rotaSuggestions";
+import { describe, it, expect, vi } from "vitest";
+import { applyLiveOpenShiftSuggestions, fillOpenShiftsWithSuggestions } from "./rotaSuggestions";
 import type { DraftShift, RotaDayIndex, StaffMember } from "../types";
 
 function staff(id: string, name: string, role: string): StaffMember {
@@ -40,7 +40,9 @@ describe("fillOpenShiftsWithSuggestions", () => {
       role: "Chef",
       dayIndex: 0,
     });
-    expect(result.suggestions[0].reason).toBe("Role match with fewer assigned shifts this week");
+    expect(result.suggestions[0].reason).toBe(
+      "Role match with fewer assigned shifts and no leave clash this week",
+    );
 
     const filled = result.shifts[0];
     expect(filled.staffId).toBe("a");
@@ -90,5 +92,82 @@ describe("fillOpenShiftsWithSuggestions", () => {
 
     expect(result.suggestions).toHaveLength(0);
     expect(result.shifts[0].staffId).toBe("a");
+  });
+
+  it("does not assign staff with pending or approved leave on that day", () => {
+    const result = fillOpenShiftsWithSuggestions(
+      [shift("s1", 0, "Chef", null)],
+      [staff("a", "Ana", "Chef"), staff("b", "Ben", "Chef")],
+      {
+        dayIsoDates: ["2026-06-08"],
+        leaveRequests: [
+          {
+            id: "leave-1",
+            staffId: "a",
+            n: "Ana",
+            role: "Chef",
+            dept: "Kitchen",
+            date: "8 Jun",
+            startIso: "2026-06-08",
+            endIso: "2026-06-08",
+            days: 1,
+            type: "Annual leave",
+            impact: "Low",
+            tone: "warning",
+            state: "pending",
+            notice: 7,
+            reason: "",
+            img: 1,
+            balance: "",
+            submitted: "",
+            coverNote: "",
+          },
+        ],
+      },
+    );
+
+    expect(result.suggestions[0].staffId).toBe("b");
+  });
+
+  it("applies live fill suggestions with the provided leave context", async () => {
+    const updateShift = vi.fn().mockResolvedValue(undefined);
+
+    const suggestions = await applyLiveOpenShiftSuggestions({
+      shifts: [shift("s1", 0, "Chef", null)],
+      staff: [staff("a", "Ana", "Chef"), staff("b", "Ben", "Chef")],
+      dayIsoDates: ["2026-06-08"],
+      leaveRequests: [
+        {
+          id: "leave-1",
+          staffId: "a",
+          n: "Ana",
+          role: "Chef",
+          dept: "Kitchen",
+          date: "8 Jun",
+          startIso: "2026-06-08",
+          endIso: "2026-06-08",
+          days: 1,
+          type: "Annual leave",
+          impact: "Low",
+          tone: "warning",
+          state: "pending",
+          notice: 7,
+          reason: "",
+          img: 1,
+          balance: "",
+          submitted: "",
+          coverNote: "",
+        },
+      ],
+      updateShift,
+    });
+
+    expect(suggestions[0].staffId).toBe("b");
+    expect(updateShift).toHaveBeenCalledWith("s1", {
+      staffId: "b",
+      status: "scheduled",
+      tone: "info",
+      edited: true,
+    });
   });
 });

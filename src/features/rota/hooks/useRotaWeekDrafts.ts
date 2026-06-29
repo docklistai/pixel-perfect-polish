@@ -12,7 +12,7 @@ import {
 } from "../lib/draftRota";
 import { copyShiftToNextDay, duplicateDraftShiftAsOpen } from "../lib/draftActions";
 import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
-import { getWeekLabel } from "../lib/weekHelpers";
+import { getWeekDateIsoLabels, getWeekLabel } from "../lib/weekHelpers";
 import { useRotaConfirmations } from "./useRotaConfirmations";
 
 /**
@@ -24,6 +24,7 @@ export function useRotaWeekDrafts() {
   const store = useWorkspaceStore();
   const weekOffset = useWorkspaceSelector((state) => state.weekOffset);
   const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
+  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
   const [selectedShiftId, setSelectedShiftId] = React.useState<ShiftId | null>(null);
 
   const currentDraft = weekDrafts[String(weekOffset)] ?? weekDrafts["0"]!;
@@ -106,10 +107,16 @@ export function useRotaWeekDrafts() {
   };
 
   const applyOpenShiftSuggestions = (): OpenShiftSuggestion[] => {
-    const result = fillOpenShiftsWithSuggestions(currentDraft.shifts, staff);
+    const result = fillOpenShiftsWithSuggestions(currentDraft.shifts, staff, {
+      leaveRequests,
+      dayIsoDates: getWeekDateIsoLabels(weekOffset),
+    });
     setCurrentDraft((draft) => ({
       ...draft,
-      shifts: fillOpenShiftsWithSuggestions(draft.shifts, staff).shifts,
+      shifts: fillOpenShiftsWithSuggestions(draft.shifts, staff, {
+        leaveRequests,
+        dayIsoDates: getWeekDateIsoLabels(weekOffset),
+      }).shifts,
       hasUnpublishedChanges: true,
     }));
     return result.suggestions;
@@ -131,6 +138,7 @@ export function useRotaWeekDrafts() {
 
   const confirmations = useRotaConfirmations({
     clearWeek,
+    copyPreviousWeek,
     removeShiftNow,
   });
 

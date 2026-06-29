@@ -78,6 +78,8 @@ export function RotaOverlays({
         conflictCount={rota.conflictCount}
         openShiftCount={rota.openShiftCount}
         workingTimeAlertCount={workingTimeAlertCount}
+        published={rota.published}
+        hasUnpublishedChanges={rota.hasUnpublishedChanges}
         canPublish={publishEligibility.canPublish}
         publishBlockedReason={publishEligibility.blockedReason}
         onConfirm={onPublishConfirm}
@@ -89,6 +91,8 @@ export function RotaOverlays({
         days={rota.days}
         shifts={rota.draftShifts}
         staff={rota.assignableStaff}
+        leaveRequests={rota.leaveRequests}
+        dayIsoDates={rota.dayIsoDates}
         onApplySuggestions={onApplySuggestions}
       />
       <RotaFiltersDrawer

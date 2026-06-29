@@ -27,6 +27,11 @@ import {
 } from "./rotaLiveShiftMapping";
 import { executeLiveRotaShiftDuplicate } from "./duplicateLiveRotaShift";
 
+export {
+  copyPreviousLiveRotaWeekFn,
+  previewCopyPreviousLiveRotaWeekFn,
+} from "./copyPreviousLiveRotaWeekServer";
+
 export const createLiveRotaShiftFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => liveWeekInput.extend({ shift: draftShiftInput }).parse(input))
   .handler(async ({ data }) => {

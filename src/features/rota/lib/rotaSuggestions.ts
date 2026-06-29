@@ -1,4 +1,5 @@
 import type { DraftShift, RotaDayIndex, ShiftId, StaffId, StaffMember } from "../types";
+import type { LeaveRequest } from "@/features/leave/types";
 import { applyShiftPatch } from "./draftShiftCore";
 
 export type OpenShiftSuggestion = {
@@ -13,6 +14,7 @@ export type OpenShiftSuggestion = {
 export function fillOpenShiftsWithSuggestions(
   shifts: DraftShift[],
   staff: StaffMember[],
+  options: { leaveRequests?: LeaveRequest[]; dayIsoDates?: string[] } = {},
 ): { shifts: DraftShift[]; suggestions: OpenShiftSuggestion[] } {
   const assignedCounts = new Map<StaffId, number>();
   const assignedDays = new Map<StaffId, Set<number>>();
@@ -30,6 +32,7 @@ export function fillOpenShiftsWithSuggestions(
 
     const candidate = [...staff]
       .filter((member) => member.role === shift.role)
+      .filter((member) => !hasLeaveOnDay(member.id, shift.dayIndex, options))
       .filter(
         (member) =>
           !(assignedDays.get(member.id)?.has(shift.dayIndex) ?? false) &&
@@ -54,7 +57,7 @@ export function fillOpenShiftsWithSuggestions(
       staffName: candidate.name,
       role: shift.role,
       dayIndex: shift.dayIndex,
-      reason: "Role match with fewer assigned shifts this week",
+      reason: "Role match with fewer assigned shifts and no leave clash this week",
     });
 
     return applyShiftPatch(shift, {
@@ -65,4 +68,45 @@ export function fillOpenShiftsWithSuggestions(
   });
 
   return { shifts: nextShifts, suggestions };
+}
+
+export async function applyLiveOpenShiftSuggestions({
+  shifts,
+  staff,
+  leaveRequests,
+  dayIsoDates,
+  updateShift,
+}: {
+  shifts: DraftShift[];
+  staff: StaffMember[];
+  leaveRequests: LeaveRequest[];
+  dayIsoDates: string[];
+  updateShift: (shiftId: ShiftId, patch: Partial<DraftShift>) => void | Promise<void>;
+}): Promise<OpenShiftSuggestion[]> {
+  const result = fillOpenShiftsWithSuggestions(shifts, staff, { leaveRequests, dayIsoDates });
+  for (const suggestion of result.suggestions) {
+    await updateShift(suggestion.shiftId, {
+      staffId: suggestion.staffId,
+      status: "scheduled",
+      tone: "info",
+      edited: true,
+    });
+  }
+  return result.suggestions;
+}
+
+function hasLeaveOnDay(
+  staffId: StaffId,
+  dayIndex: RotaDayIndex,
+  options: { leaveRequests?: LeaveRequest[]; dayIsoDates?: string[] },
+): boolean {
+  const isoDate = options.dayIsoDates?.[dayIndex];
+  if (!isoDate) return false;
+  return (options.leaveRequests ?? []).some(
+    (request) =>
+      request.staffId === staffId &&
+      (request.state === "approved" || request.state === "pending") &&
+      request.startIso <= isoDate &&
+      request.endIso >= isoDate,
+  );
 }

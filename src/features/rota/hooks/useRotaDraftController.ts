@@ -3,12 +3,7 @@ import { staff } from "../data/mockData";
 import type { RotaFilters } from "../types";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
 import { getCurrentWeekDayIndex, getWeekDayLabels, getWeekDateIsoLabels } from "../lib/weekHelpers";
-import {
-  liveCurrentDayIndex,
-  liveWeekDayLabels,
-  liveWeekLabel,
-  addIsoDays,
-} from "../lib/liveRotaDates";
+import * as liveDates from "../lib/liveRotaDates";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
   buildDayStats,
@@ -27,7 +22,6 @@ import { useRotaLiveData } from "./useRotaLiveData";
 import { useRotaLivePersistence } from "./useRotaLivePersistence";
 import { useRotaConfirmations } from "./useRotaConfirmations";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import type { LeaveRequest } from "@/features/leave/types";
 import {
   buildApprovedLeaveConflictSummaries,
   withApprovedLeaveConflictStatus,
@@ -48,10 +42,10 @@ export function useRotaDraftController() {
   const [staffSearch, setStaffSearch] = React.useState("");
   const liveConfirmations = useRotaConfirmations({
     clearWeek: livePersistence.clearWeek,
+    copyPreviousWeek: livePersistence.copyPreviousWeek,
     removeShiftNow: livePersistence.removeShiftNow,
   });
 
-  // Live-capable sessions stay read-only while live data loads or has failed.
   const readOnly = live.enabled && !live.isLive;
   const fullRoster = live.isLive ? live.staff : staff;
   const assignableStaff = live.isLive ? live.assignableStaff : staff;
@@ -59,10 +53,6 @@ export function useRotaDraftController() {
   const leaveRequests = live.isLive ? live.leaveRequests : demoLeaveRequests;
   const liveActions = live.isLive ? livePersistence : null;
   const confirmations = liveActions ? liveConfirmations : weekDraft;
-
-  // The live grid hides inactive staff who have no shift this week, so the roster
-  // reflects who can actually be scheduled. Inactive members keep their row only
-  // while they still hold a shift to manage. Demo mode shows its full seed roster.
   const roster = React.useMemo(() => {
     if (!live.isLive) return fullRoster;
     const assignableIds = new Set(assignableStaff.map((member) => member.id));
@@ -76,7 +66,7 @@ export function useRotaDraftController() {
 
   const dayIsoDates = React.useMemo(() => {
     if (live.isLive && live.weekStart) {
-      return Array.from({ length: 7 }, (_, i) => addIsoDays(live.weekStart!, i));
+      return Array.from({ length: 7 }, (_, i) => liveDates.addIsoDays(live.weekStart!, i));
     }
     return getWeekDateIsoLabels(weekDraft.weekOffset);
   }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
@@ -90,14 +80,14 @@ export function useRotaDraftController() {
     [dayIsoDates, leaveRequests, sourceShifts],
   );
   const dayLabels = React.useMemo(() => {
-    if (live.isLive && live.weekStart) return liveWeekDayLabels(live.weekStart);
+    if (live.isLive && live.weekStart) return liveDates.liveWeekDayLabels(live.weekStart);
     return getWeekDayLabels(weekDraft.weekOffset);
   }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
   const days = React.useMemo(() => {
     const stats = buildDayStats(displayShifts);
     const currentDayIndex =
       live.isLive && live.weekStart && live.today
-        ? liveCurrentDayIndex(live.weekStart, live.today)
+        ? liveDates.liveCurrentDayIndex(live.weekStart, live.today)
         : getCurrentWeekDayIndex(weekDraft.weekOffset);
     return dayLabels.map((d, index) => ({
       d,
@@ -122,8 +112,8 @@ export function useRotaDraftController() {
 
   return {
     ...weekDraft,
-    // Live mode reflects the saved DB week; demo mode keeps draft flags.
-    weekLabel: live.isLive && live.weekStart ? liveWeekLabel(live.weekStart) : weekDraft.weekLabel,
+    weekLabel:
+      live.isLive && live.weekStart ? liveDates.liveWeekLabel(live.weekStart) : weekDraft.weekLabel,
     source: live.source,
     readOnly,
     isLiveLoading: live.isLoading,
@@ -149,16 +139,21 @@ export function useRotaDraftController() {
     removeShiftNow: liveActions?.removeShiftNow ?? weekDraft.removeShiftNow,
     duplicateShiftToNextDay:
       liveActions?.duplicateShiftToNextDay ?? weekDraft.duplicateShiftToNextDay,
+    previewCopyPreviousWeek: liveActions?.previewCopyPreviousWeek,
+    copyPreviousWeek: liveActions?.copyPreviousWeek ?? weekDraft.copyPreviousWeek,
     markShiftOpen: liveActions?.markShiftOpen ?? weekDraft.markShiftOpen,
     handlePublish: liveActions?.publish ?? weekDraft.handlePublish,
     requestRemoveShift: confirmations.requestRemoveShift,
     requestClearWeek: confirmations.requestClearWeek,
+    requestCopyPreviousWeek: confirmations.requestCopyPreviousWeek,
     confirmPendingAction: confirmations.confirmPendingAction,
     clearConfirmation: confirmations.clearConfirmation,
     confirmation: confirmations.confirmation,
     days,
     staff: roster,
     assignableStaff,
+    leaveRequests,
+    dayIsoDates,
     roleOptions: Array.from(new Set(roster.map((row) => row.role))),
     filters,
     setFilters,

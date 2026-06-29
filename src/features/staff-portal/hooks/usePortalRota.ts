@@ -4,6 +4,7 @@ import {
   clockInShift,
   currentWeekStrip,
   DEMO_NOW,
+  historicalPortalShifts,
   londonPortalNow,
   portalShiftsForStaff,
   publishedSnapshots,
@@ -21,6 +22,8 @@ export type PortalRota = {
   hasPublished: boolean;
   /** Today's and future published shifts for the signed-in staff member. */
   upcoming: PortalShift[];
+  /** Published shifts that have already ended, newest first. */
+  history: PortalShift[];
   /** The first upcoming shift (today's shift until it ends, then the next). */
   nextShift: PortalShift | null;
   /** Mon–Sun of the current week, derived from the active clock. */
@@ -45,6 +48,7 @@ function buildRota(
   return {
     hasPublished: shifts.length > 0,
     upcoming,
+    history: historicalPortalShifts(shifts, now),
     nextShift: upcoming[0] ?? null,
     activeShift: clockInShift(shifts, now),
     weekDays: currentWeekStrip(now),

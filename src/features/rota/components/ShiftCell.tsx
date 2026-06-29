@@ -128,6 +128,9 @@ function ShiftPill({
           className={`rota-shift-pill relative flex w-full flex-col justify-center rounded-lg border px-2 pr-7 text-xs transition hover:bg-warning-soft/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${pillTone} ${minH}`}
         >
           <div className="font-semibold leading-snug text-warning-700">Open shift</div>
+          <div className="font-mono text-xs font-semibold leading-snug text-warning-700">
+            {formatShiftTime(shift.start, shift.end)}
+          </div>
           <div className="flex items-center gap-1 text-[10px] text-warning-700/80">
             <span className="truncate">{roleLabel}</span>
             <Plus className="h-2.5 w-2.5" aria-hidden />

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   clockInShift,
   DEMO_NOW,
+  historicalPortalShifts,
   londonPortalNow,
   resolvePortalHasPublished,
   upcomingPortalShifts,
@@ -47,6 +48,21 @@ describe("upcomingPortalShifts (injected now)", () => {
     const ids = upcomingPortalShifts(shifts, earlyMorning).map((s) => s.id);
     // at 08:00 the 07:00–10:00 shift is still running, so it is still upcoming.
     expect(ids).toEqual(["today-done", "today-active", "future"]);
+  });
+});
+
+describe("historicalPortalShifts", () => {
+  it("keeps ended split shifts visible for the History tab, newest first", () => {
+    const ids = historicalPortalShifts(
+      [
+        shift({ id: "morning", date: "2026-06-24", start: "09:00", end: "12:00" }),
+        shift({ id: "evening", date: "2026-06-24", start: "17:00", end: "22:00" }),
+        shift({ id: "future", date: "2026-06-29", start: "09:00", end: "12:00" }),
+      ],
+      { todayIso: "2026-06-28", nowMinutes: 12 * 60 },
+    ).map((s) => s.id);
+
+    expect(ids).toEqual(["evening", "morning"]);
   });
 });
 

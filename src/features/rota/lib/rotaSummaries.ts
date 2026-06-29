@@ -31,6 +31,19 @@ function staffHasConflict(shifts: DraftShift[], staffId: StaffId): boolean {
   return shifts.some((s) => s.staffId === staffId && s.status === "conflict");
 }
 
+function staffMatchesDepartmentFilter(
+  staff: StaffMember,
+  shifts: DraftShift[],
+  filter: string,
+): boolean {
+  if (filter === "all") return true;
+  if (staff.role === filter) return true;
+  return shifts.some(
+    (shift) =>
+      shift.staffId === staff.id && (shift.deptOverride === filter || shift.role === filter),
+  );
+}
+
 function staffScheduledDayCount(staff: StaffMember, shifts: DraftShift[]): number {
   const days = new Set<number>();
   for (const s of shifts) {
@@ -83,7 +96,7 @@ export function filterStaff(
       !normalized ||
       member.name.toLowerCase().includes(normalized) ||
       member.role.toLowerCase().includes(normalized);
-    const matchesDepartment = filters.department === "all" || member.role === filters.department;
+    const matchesDepartment = staffMatchesDepartmentFilter(member, draftShifts, filters.department);
     const matchesShiftStatus = matchesShiftStatusFilter(
       filters.shiftStatus,
       draftShifts,

@@ -25,7 +25,7 @@ const SUB_TABS: { id: ShiftsSubTab; label: string }[] = [
 ];
 
 export function ShiftsTab() {
-  const { upcoming, hasPublished, source, isError } = usePortalRota();
+  const { upcoming, history, hasPublished, source, isError } = usePortalRota();
   const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
   const [selected, setSelected] = React.useState<PortalShift | null>(null);
   const [acknowledgedShiftIds, setAcknowledgedShiftIds] = React.useState<Set<string>>(new Set());
@@ -56,7 +56,9 @@ export function ShiftsTab() {
         </>
       )}
       {sub === "requests" && <RequestsList />}
-      {sub === "history" && <ShiftList shifts={[]} onOpen={setSelected} />}
+      {sub === "history" && (
+        <ShiftList shifts={history} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
+      )}
 
       <ShiftDetailDrawer
         shift={selected}
@@ -113,6 +115,7 @@ function ShiftList({
 }) {
   // Group by month label for visual section headers.
   const groups = groupByMonth(shifts);
+  const dateCounts = countByDate(shifts);
   if (shifts.length === 0) {
     const title =
       emptyCopy?.title ??
@@ -151,6 +154,11 @@ function ShiftList({
                         <div className="mt-1 text-xs text-muted-foreground truncate">
                           {s.role} · {s.station}
                         </div>
+                        {(dateCounts.get(s.date) ?? 0) > 1 && (
+                          <div className="mt-1 text-[11px] font-medium text-warning">
+                            Multiple shifts this day
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <StatusBadge tone={statusTone[s.status]}>
@@ -215,6 +223,12 @@ function RequestsList() {
       ))}
     </ul>
   );
+}
+
+function countByDate(shifts: PortalShift[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const shift of shifts) counts.set(shift.date, (counts.get(shift.date) ?? 0) + 1);
+  return counts;
 }
 
 function groupByMonth(shifts: PortalShift[]): { label: string; shifts: PortalShift[] }[] {

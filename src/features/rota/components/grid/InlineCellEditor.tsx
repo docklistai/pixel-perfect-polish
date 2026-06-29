@@ -19,10 +19,7 @@ export function InlineCellEditor({ initial, onCommit, onCancel }: InlineCellEdit
 
   const commit = () => {
     const trimmed = (val || "").trim();
-    if (!trimmed) void onCommit("off");
-    else if (/^off$/i.test(trimmed) || /^day off$/i.test(trimmed)) void onCommit("off");
-    else if (/^open/i.test(trimmed) || /^unassigned/i.test(trimmed)) void onCommit("open");
-    else void onCommit(trimmed);
+    void onCommit(trimmed);
   };
 
   return (
@@ -42,7 +39,7 @@ export function InlineCellEditor({ initial, onCommit, onCancel }: InlineCellEdit
             onCancel();
           }
         }}
-        placeholder="09:00 - 17:00 or OFF / Open"
+        placeholder="9-5, open 6-11 bar, clear, or 9-12 / 17-22"
         className="w-full bg-transparent border-0 outline-none p-0.5 font-mono text-xs font-semibold text-foreground focus:ring-0"
       />
       <div className="text-[9px] text-muted-foreground mt-1 px-0.5 flex justify-between">

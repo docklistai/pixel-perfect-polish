@@ -84,6 +84,8 @@ export type RotaGridCell = {
   shifts: DraftShift[];
   /** True if the staff member has approved leave on this day. */
   hasLeave?: boolean;
+  /** Leave visibility for scheduling scanability; only approved leave creates conflicts. */
+  leaveState?: "approved" | "pending";
 };
 
 export type RotaGridStaffRow = {

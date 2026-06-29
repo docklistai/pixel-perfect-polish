@@ -46,14 +46,23 @@ export function buildStaffRows(
     const cells = rawCells.map((cell, index) => {
       const isoDate = dayIsoDates[index];
       if (!isoDate) return cell;
-      const hasLeave = leaveRequests.some(
+      const approvedLeave = leaveRequests.some(
         (req) =>
           req.staffId === member.id &&
           req.state === "approved" &&
           req.startIso <= isoDate &&
           req.endIso >= isoDate,
       );
-      return hasLeave ? { ...cell, hasLeave: true } : cell;
+      if (approvedLeave) return { ...cell, hasLeave: true, leaveState: "approved" as const };
+
+      const pendingLeave = leaveRequests.some(
+        (req) =>
+          req.staffId === member.id &&
+          req.state === "pending" &&
+          req.startIso <= isoDate &&
+          req.endIso >= isoDate,
+      );
+      return pendingLeave ? { ...cell, leaveState: "pending" as const } : cell;
     });
 
     return {

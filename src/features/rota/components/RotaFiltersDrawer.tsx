@@ -1,4 +1,5 @@
 import { ActionButton, DrawerShell, FormRow, FormSection } from "@/components/dl";
+import { ROTA_DEPT_NAMES } from "./grid/ShiftActionMenu";
 import type { RotaFilters } from "../types";
 
 const defaultRotaFilters: RotaFilters = {
@@ -27,6 +28,7 @@ export function RotaFiltersDrawer({
   const resetFilters = () => {
     onFiltersChange(defaultRotaFilters);
   };
+  const filterOptions = Array.from(new Set([...ROTA_DEPT_NAMES, ...roleOptions]));
 
   return (
     <DrawerShell
@@ -47,7 +49,7 @@ export function RotaFiltersDrawer({
         title="Filter view"
         description="Selections update the visible staff rows for this rota."
       >
-        <FormRow label="Department or role" htmlFor="rota-filter-department">
+        <FormRow label="Department / role" htmlFor="rota-filter-department">
           <select
             id="rota-filter-department"
             value={filters.department}
@@ -55,7 +57,7 @@ export function RotaFiltersDrawer({
             className="h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
           >
             <option value="all">All departments</option>
-            {roleOptions.map((role) => (
+            {filterOptions.map((role) => (
               <option key={role} value={role}>
                 {role}
               </option>

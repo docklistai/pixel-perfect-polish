@@ -20,6 +20,8 @@ export function PublishRotaDialog({
   conflictCount,
   openShiftCount,
   workingTimeAlertCount,
+  published,
+  hasUnpublishedChanges,
   canPublish,
   publishBlockedReason,
   onConfirm,
@@ -34,22 +36,29 @@ export function PublishRotaDialog({
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
+  published: boolean;
+  hasUnpublishedChanges: boolean;
   canPublish: boolean;
   publishBlockedReason: string | null;
   onConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
 }) {
   const [prepareStaffUpdate, setPrepareStaffUpdate] = React.useState(true);
+  const [issuesAcknowledged, setIssuesAcknowledged] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
+  const issueCount = conflictCount + openShiftCount + workingTimeAlertCount;
+  const hasIssues = issueCount > 0;
+  const publishActionLabel = published && hasUnpublishedChanges ? "Republish" : "Publish";
 
   React.useEffect(() => {
     if (open) {
       setPrepareStaffUpdate(true);
+      setIssuesAcknowledged(false);
       setPublishing(false);
     }
   }, [open]);
 
   const handleConfirm = async () => {
-    if (!canPublish) return;
+    if (!canPublish || (hasIssues && !issuesAcknowledged)) return;
     setPublishing(true);
     try {
       await onConfirm(prepareStaffUpdate);
@@ -91,8 +100,8 @@ export function PublishRotaDialog({
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Publish this rota?"
-      description={`${weekLabel} · ${staffCount} staff`}
+      title={`${publishActionLabel} this rota?`}
+      description={`${weekLabel} - ${staffCount} staff`}
       icon={Send}
       footer={
         <>
@@ -101,22 +110,37 @@ export function PublishRotaDialog({
           </ActionButton>
           <ActionButton
             icon={Send}
-            disabled={publishing || !canPublish}
+            disabled={publishing || !canPublish || (hasIssues && !issuesAcknowledged)}
             onClick={() => void handleConfirm()}
           >
-            Publish to {staffCount} staff
+            {publishActionLabel} to {staffCount} staff
           </ActionButton>
         </>
       }
     >
       <p>
-        Staff see only the published snapshot in the Docklist mobile portal. Any draft edits made
-        after publishing stay manager-only until you publish again.
+        Staff see only the published snapshot in the Docklist mobile portal. Draft edits stay
+        manager-only until you publish again.
       </p>
 
       {!canPublish && publishBlockedReason && (
         <p className="mt-3 text-sm font-medium text-warning">{publishBlockedReason}</p>
       )}
+
+      <div className="card mt-3 p-3" style={{ background: "var(--bg-raised)" }}>
+        <div className="text-sm font-semibold">
+          {published && hasUnpublishedChanges ? "Re-publish change summary" : "Publish summary"}
+        </div>
+        <ul className="mt-2 flex flex-col gap-1.5 text-sm text-muted-foreground">
+          <li>{plannedShiftCount} planned shifts in this draft.</li>
+          <li>{assignedShiftCount} assigned shifts will be visible to assigned staff.</li>
+          <li>{openShiftCount} open shifts stay manager-only until assigned.</li>
+          <li>
+            {conflictCount + workingTimeAlertCount} rota issue
+            {conflictCount + workingTimeAlertCount === 1 ? "" : "s"} remain for manager review.
+          </li>
+        </ul>
+      </div>
 
       <div className="card mt-3 p-3" style={{ background: "var(--bg-raised)" }}>
         {checks.map((check) => (
@@ -145,6 +169,21 @@ export function PublishRotaDialog({
         />
         Prepare a staff-app update when published
       </label>
+
+      {hasIssues && (
+        <label className="mt-3 flex items-start gap-2 text-sm text-foreground">
+          <input
+            type="checkbox"
+            checked={issuesAcknowledged}
+            onChange={(event) => setIssuesAcknowledged(event.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-brand"
+          />
+          <span>
+            I have reviewed the open shifts, conflicts, and working-time alerts and still want to{" "}
+            {publishActionLabel.toLowerCase()} this manager-approved rota snapshot.
+          </span>
+        </label>
+      )}
     </DialogShell>
   );
 }

@@ -136,6 +136,25 @@ export function upcomingPortalShifts(
   });
 }
 
+/** Published shifts that have already ended, newest first for the History tab. */
+export function historicalPortalShifts(
+  shifts: PortalShift[],
+  now: PortalNow = DEMO_NOW,
+): PortalShift[] {
+  const { todayIso, nowMinutes } = now;
+  return shifts
+    .filter((shift) => {
+      if (shift.date < todayIso) return true;
+      if (shift.date > todayIso) return false;
+      const start = parseHHMMToMinutes(shift.start);
+      const end = parseHHMMToMinutes(shift.end);
+      if (start === null || end === null) return false;
+      if (end <= start) return false;
+      return end <= nowMinutes;
+    })
+    .sort((a, b) => `${b.date} ${b.start}`.localeCompare(`${a.date} ${a.start}`));
+}
+
 export function resolvePortalHasPublished(
   shifts: PortalShift[],
   workspaceHasPublishedRota?: boolean,
