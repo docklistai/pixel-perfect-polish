@@ -5,7 +5,8 @@ import { ActionButton, Card } from "@/components/dl";
 import { AiChip } from "@/components/ai/AiChip";
 import { buildRotaIssues, type IssueTone, type RotaIssue } from "../lib/rotaIssues";
 import { IssueDetailDrawer } from "./IssueDetailDrawer";
-import type { ConflictSummary, ShiftId, WorkingTimeAlert } from "../types";
+import type { LeaveRequest } from "@/features/leave/types";
+import type { ConflictSummary, DraftShift, ShiftId, StaffMember, WorkingTimeAlert } from "../types";
 
 const toneCardClasses: Record<IssueTone, string> = {
   danger: "border-danger/25 bg-danger-soft/60",
@@ -27,11 +28,21 @@ export function IssuesToResolveCard({
   workingTimeAlerts,
   onReviewShift,
   onOpenSupport,
+  draftShifts,
+  assignableStaff,
+  leaveRequests,
+  dayIsoDates,
+  onChooseRecoveryCandidate,
 }: {
   conflicts: ConflictSummary[];
   workingTimeAlerts: WorkingTimeAlert[];
   onReviewShift: (shiftId: ShiftId) => void;
   onOpenSupport: () => void;
+  draftShifts: DraftShift[];
+  assignableStaff: StaffMember[];
+  leaveRequests: LeaveRequest[];
+  dayIsoDates: string[];
+  onChooseRecoveryCandidate: (shiftId: ShiftId, staffId: string) => void;
 }) {
   const [reviewed, setReviewed] = React.useState<Record<string, boolean>>({});
   const [openIssueId, setOpenIssueId] = React.useState<string | null>(null);
@@ -158,6 +169,11 @@ export function IssuesToResolveCard({
           setOpenIssueId(null);
           onReviewShift(shiftId);
         }}
+        draftShifts={draftShifts}
+        assignableStaff={assignableStaff}
+        leaveRequests={leaveRequests}
+        dayIsoDates={dayIsoDates}
+        onChooseRecoveryCandidate={onChooseRecoveryCandidate}
       />
     </Card>
   );

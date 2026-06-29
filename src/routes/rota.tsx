@@ -26,6 +26,7 @@ import {
   publishStateLabel,
 } from "@/features/rota/lib/publishEligibility";
 import { requireManagerAccess } from "@/features/auth";
+import type { ShiftId } from "@/features/rota/types";
 
 export const Route = createFileRoute("/rota")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
@@ -49,6 +50,10 @@ function RotaPage() {
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(rota);
   const [showInsights, setShowInsights] = React.useState(true);
+  const [recoverySelection, setRecoverySelection] = React.useState<{
+    shiftId: ShiftId;
+    staffId: string;
+  } | null>(null);
   const readOnly = rota.readOnly;
   const isLiveEditing = rota.source === "live" && !readOnly;
   const publishEligibility = getRotaPublishEligibility({
@@ -87,6 +92,13 @@ function RotaPage() {
   useIntentHandler("rota.publish", requestPublish);
   useIntentHandler("rota.generate", () => openOverlay("generate"));
   useIntentHandler("rota.addShift", () => openOverlay("addShift"));
+  const handleChooseRecoveryCandidate = React.useCallback(
+    (shiftId: ShiftId, staffId: string) => {
+      setRecoverySelection({ shiftId, staffId });
+      rota.setSelectedShiftId(shiftId);
+    },
+    [rota],
+  );
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
   const leaveDataState =
@@ -317,6 +329,11 @@ function RotaPage() {
                 workingTimeAlerts={rota.workingTimeAlertList}
                 onReviewShift={rota.setSelectedShiftId}
                 onOpenSupport={openAiDrawer}
+                draftShifts={rota.draftShifts}
+                assignableStaff={rota.assignableStaff}
+                leaveRequests={rota.leaveRequests}
+                dayIsoDates={rota.dayIsoDates}
+                onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
               />
               <PublishReadinessCard
                 published={rota.published}
@@ -357,6 +374,10 @@ function RotaPage() {
         onMarkShiftOpen={actions.handleMarkShiftOpen}
         onRepeatShift={actions.handleRepeatShift}
         publishEligibility={publishEligibility}
+        suggestedAssignTo={
+          recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null
+        }
+        onClearRecoverySelection={() => setRecoverySelection(null)}
       />
     </AppShell>
   );

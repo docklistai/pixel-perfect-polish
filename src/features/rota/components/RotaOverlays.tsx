@@ -30,6 +30,8 @@ export function RotaOverlays({
   onMarkShiftOpen,
   onRepeatShift,
   publishEligibility,
+  suggestedAssignTo,
+  onClearRecoverySelection,
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
@@ -38,6 +40,8 @@ export function RotaOverlays({
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
   onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
   publishEligibility: RotaPublishEligibility;
+  suggestedAssignTo: string | null;
+  onClearRecoverySelection: () => void;
 }) {
   const { openOverlays, setOverlay } = overlays;
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
@@ -131,7 +135,14 @@ export function RotaOverlays({
         staff={rota.staff}
         assignableStaff={rota.assignableStaff}
         days={rota.days}
-        onClose={rota.closeShiftDetail}
+        draftShifts={rota.draftShifts}
+        leaveRequests={rota.leaveRequests}
+        dayIsoDates={rota.dayIsoDates}
+        suggestedAssignTo={suggestedAssignTo}
+        onClose={() => {
+          onClearRecoverySelection();
+          rota.closeShiftDetail();
+        }}
         onUpdate={rota.updateShift}
         onRemove={rota.requestRemoveShift}
         onMarkOpen={onMarkShiftOpen}

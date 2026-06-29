@@ -1,7 +1,10 @@
-import { CircleAlert, ExternalLink, Lightbulb, TrendingUp } from "lucide-react";
+import * as React from "react";
+import { CircleAlert, ExternalLink, Lightbulb, TrendingUp, UserPlus } from "lucide-react";
 import { ActionButton, DrawerShell, StatusBadge } from "@/components/dl";
+import type { LeaveRequest } from "@/features/leave/types";
+import type { DraftShift, StaffMember, ShiftId } from "../types";
+import { buildRotaRecoveryOptions, NO_SAFE_RECOVERY_OPTIONS } from "../lib/rotaRecoveryOptions";
 import type { RotaIssue } from "../lib/rotaIssues";
-import type { ShiftId } from "../types";
 
 /** Drawer with Problem / Suggested fix / Impact rows for a rota issue (prototype "View fix & actions"). */
 export function IssueDetailDrawer({
@@ -10,12 +13,22 @@ export function IssueDetailDrawer({
   onClose,
   onMarkReviewed,
   onReviewShift,
+  draftShifts,
+  assignableStaff,
+  leaveRequests,
+  dayIsoDates,
+  onChooseRecoveryCandidate,
 }: {
   issue: RotaIssue | null;
   reviewed: boolean;
   onClose: () => void;
   onMarkReviewed: (issue: RotaIssue) => void;
   onReviewShift: (shiftId: ShiftId) => void;
+  draftShifts: DraftShift[];
+  assignableStaff: StaffMember[];
+  leaveRequests: LeaveRequest[];
+  dayIsoDates: string[];
+  onChooseRecoveryCandidate: (shiftId: ShiftId, staffId: string) => void;
 }) {
   const sections = issue
     ? [
@@ -39,6 +52,21 @@ export function IssueDetailDrawer({
         },
       ]
     : [];
+  const recoveryShift =
+    issue?.shiftId === undefined
+      ? null
+      : (draftShifts.find((shift) => shift.id === issue.shiftId) ?? null);
+  const recoveryOptions = React.useMemo(() => {
+    if (!recoveryShift) return [];
+    return buildRotaRecoveryOptions({
+      shift: recoveryShift,
+      staff: assignableStaff,
+      shifts: draftShifts,
+      leaveRequests,
+      dayIsoDates,
+      excludeStaffId: recoveryShift.staffId,
+    });
+  }, [assignableStaff, dayIsoDates, draftShifts, leaveRequests, recoveryShift]);
 
   return (
     <DrawerShell
@@ -87,6 +115,47 @@ export function IssueDetailDrawer({
               </div>
             </div>
           ))}
+
+          {recoveryShift && (
+            <div className="rounded-[10px] border border-border bg-muted/25 p-3">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Recovery options
+              </div>
+              {recoveryOptions.length > 0 ? (
+                <div className="mt-2 space-y-2">
+                  {recoveryOptions.map((option) => (
+                    <div
+                      key={option.staffId}
+                      className="flex items-start justify-between gap-3 rounded-[8px] border border-border bg-background px-2.5 py-2"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">{option.staffName}</div>
+                        <div className="mt-0.5 text-[11px] text-muted-foreground">
+                          {option.note}
+                        </div>
+                      </div>
+                      <ActionButton
+                        variant="secondary"
+                        size="sm"
+                        icon={UserPlus}
+                        onClick={() => {
+                          onChooseRecoveryCandidate(recoveryShift.id, option.staffId);
+                          onClose();
+                        }}
+                      >
+                        Open &amp; use
+                      </ActionButton>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">{NO_SAFE_RECOVERY_OPTIONS}</p>
+              )}
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                This only preloads the shift drawer. Save is still required.
+              </p>
+            </div>
+          )}
 
           <div className="pt-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             Actions

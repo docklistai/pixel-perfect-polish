@@ -1,9 +1,11 @@
 import * as React from "react";
-import { Trash2, UserMinus, Save } from "lucide-react";
+import { Trash2, UserMinus, Save, UserPlus } from "lucide-react";
 import { ActionButton, DrawerShell, FormRow, FormSection, StatusBadge } from "@/components/dl";
+import type { LeaveRequest } from "@/features/leave/types";
 import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
+import { buildRotaRecoveryOptions, NO_SAFE_RECOVERY_OPTIONS } from "../lib/rotaRecoveryOptions";
 import type { MaybePromise } from "./grid";
 import { RepeatShiftControls } from "./RepeatShiftControls";
 
@@ -35,6 +37,10 @@ export function ShiftDetailDrawer({
   onRemove,
   onMarkOpen,
   onRepeat,
+  draftShifts,
+  leaveRequests,
+  dayIsoDates,
+  suggestedAssignTo,
 }: {
   shift: DraftShift | null;
   staff: StaffMember[];
@@ -45,6 +51,10 @@ export function ShiftDetailDrawer({
   onRemove: (id: ShiftId) => MaybePromise<void>;
   onMarkOpen: (id: ShiftId) => MaybePromise<void>;
   onRepeat: (id: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
+  draftShifts: DraftShift[];
+  leaveRequests: LeaveRequest[];
+  dayIsoDates: string[];
+  suggestedAssignTo?: string | null;
 }) {
   const [form, setForm] = React.useState<FormState>(() =>
     shift ? formStateFromShift(shift) : { role: "", start: "", end: "", assignTo: "" },
@@ -62,6 +72,29 @@ export function ShiftDetailDrawer({
     }
   }, [shift]);
 
+  React.useEffect(() => {
+    if (!shift || !suggestedAssignTo) return;
+    setForm((current) =>
+      current.assignTo === suggestedAssignTo
+        ? current
+        : { ...current, assignTo: suggestedAssignTo },
+    );
+  }, [shift, suggestedAssignTo]);
+
+  const recoveryOptions = React.useMemo(() => {
+    if (!shift) return [];
+    const isOpen = shift.staffId === null;
+    const isConflict = shift.status === "conflict";
+    if (!isOpen && !isConflict) return [];
+    return buildRotaRecoveryOptions({
+      shift,
+      staff: assignableStaff,
+      shifts: draftShifts,
+      leaveRequests,
+      dayIsoDates,
+      excludeStaffId: shift.staffId,
+    });
+  }, [assignableStaff, dayIsoDates, draftShifts, leaveRequests, shift]);
   if (!shift) {
     return (
       <DrawerShell open={false} onOpenChange={(o) => !o && onClose()} title="Shift">
@@ -259,6 +292,39 @@ export function ShiftDetailDrawer({
         )}
         {saveHint && <p className="text-[11px] text-muted-foreground">{saveHint}</p>}
       </FormSection>
+
+      {(isOpen || isConflict) && (
+        <FormSection title="Recovery options">
+          {recoveryOptions.length > 0 ? (
+            <div className="space-y-2">
+              {recoveryOptions.map((option) => (
+                <div
+                  key={option.staffId}
+                  className="flex items-start justify-between gap-3 rounded-xl border border-border bg-muted/25 px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium">{option.staffName}</div>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">{option.note}</div>
+                  </div>
+                  <ActionButton
+                    variant="secondary"
+                    size="sm"
+                    icon={UserPlus}
+                    onClick={() => setForm((current) => ({ ...current, assignTo: option.staffId }))}
+                  >
+                    Use
+                  </ActionButton>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">{NO_SAFE_RECOVERY_OPTIONS}</p>
+          )}
+          <p className="text-[11px] text-muted-foreground">
+            This fills the assignment field only. Save is still required.
+          </p>
+        </FormSection>
+      )}
 
       <FormSection title="Quick actions">
         <div className="flex flex-wrap gap-2">
