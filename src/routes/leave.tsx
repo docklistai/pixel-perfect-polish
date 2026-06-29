@@ -30,6 +30,7 @@ import { LeaveDetailPanel } from "@/features/leave/components/LeaveDetailPanel";
 import { LeaveBottomCards } from "@/features/leave/components/LeaveBottomCards";
 import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialogs";
 import { LeaveImpactSummaryCard } from "@/features/leave/components/LeaveImpactSummaryCard";
+import { LeaveRotaImpactCard } from "@/features/leave/components/LeaveRotaImpactCard";
 import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
@@ -226,6 +227,9 @@ function LeavePage() {
                       });
                     }}
                   />
+                )}
+                {activeRequest.state === "pending" && source === "live" && (
+                  <LeaveRotaImpactCard request={activeRequest} todayIso={todayIso} />
                 )}
               </div>
             )}
