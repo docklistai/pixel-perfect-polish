@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
+import { MAX_ROTA_WEEK_OFFSET } from "@/features/rota/lib/rotaSearch";
 import { buildLeaveRotaImpact, weekOffsetForDate } from "../lib/leaveRotaImpact";
 import type { LeaveRequest } from "../types";
 
@@ -13,9 +14,6 @@ interface Props {
   /** Live "today" ISO (YYYY-MM-DD), used to resolve the leave week offset. */
   todayIso: string;
 }
-
-// fetchWorkspaceRotaWeekFn validates weekOffset to ±260 weeks.
-const MAX_WEEK_OFFSET = 260;
 
 function firstName(name: string): string {
   return name.split(" ")[0] || name;
@@ -32,9 +30,10 @@ function firstName(name: string): string {
  */
 export function LeaveRotaImpactCard({ request, todayIso }: Props) {
   const { auth } = leaveRouteApi.useRouteContext();
+  const navigate = useNavigate();
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const weekOffset = weekOffsetForDate(todayIso, request.startIso);
-  const inRange = Math.abs(weekOffset) <= MAX_WEEK_OFFSET;
+  const inRange = Math.abs(weekOffset) <= MAX_ROTA_WEEK_OFFSET;
 
   const query = useQuery({
     queryKey: ["leave", "rota-impact-week", workspaceId, weekOffset],
@@ -142,6 +141,15 @@ export function LeaveRotaImpactCard({ request, todayIso }: Props) {
         <span className="muted txt-xs">Read-only · decision support</span>
       </div>
       {body}
+      {inRange && (
+        <button
+          type="button"
+          className="btn ghost sm mt-3"
+          onClick={() => void navigate({ to: "/rota", search: { week: weekOffset } })}
+        >
+          <CalendarClock className="h-3 w-3" aria-hidden /> Open this week in rota
+        </button>
+      )}
       {footnote && <p className="muted txt-xs mt-2">{footnote}</p>}
     </div>
   );

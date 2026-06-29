@@ -26,10 +26,12 @@ import {
   publishStateLabel,
 } from "@/features/rota/lib/publishEligibility";
 import { requireManagerAccess } from "@/features/auth";
+import { parseRotaWeekSearch } from "@/features/rota/lib/rotaSearch";
 import type { ShiftId } from "@/features/rota/types";
 
 export const Route = createFileRoute("/rota")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  validateSearch: parseRotaWeekSearch,
   head: () => ({ meta: [{ title: "Rota — Docklist" }] }),
   component: RotaPage,
 });
@@ -46,6 +48,18 @@ type RotaController = ReturnType<typeof useRotaDraftController>;
 function RotaPage() {
   const rota = useRotaDraftController();
   const navigate = useNavigate();
+  const { week } = Route.useSearch();
+
+  // Apply a `?week=` deep-link once per distinct value (client-only, so it
+  // never causes a hydration mismatch). Manual week navigation afterwards is
+  // left untouched because it changes the store, not the search param.
+  const setWeekOffset = rota.setWeekOffset;
+  const appliedWeekRef = React.useRef<number | null>(null);
+  React.useEffect(() => {
+    if (week === undefined || appliedWeekRef.current === week) return;
+    appliedWeekRef.current = week;
+    setWeekOffset(week);
+  }, [week, setWeekOffset]);
   const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(rota);
