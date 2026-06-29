@@ -8,6 +8,7 @@ export function PublishReadinessCard({
   conflictCount,
   openShiftCount,
   workingTimeAlertCount,
+  leaveDataState,
   assignedShiftCount,
   plannedShiftCount,
   coveragePct,
@@ -21,6 +22,7 @@ export function PublishReadinessCard({
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
+  leaveDataState: "ready" | "loading" | "error";
   assignedShiftCount: number;
   plannedShiftCount: number;
   coveragePct: number;
@@ -52,6 +54,16 @@ export function PublishReadinessCard({
           : `${workingTimeAlertCount} alert${workingTimeAlertCount === 1 ? "" : "s"}`,
       ok: workingTimeAlertCount === 0,
     },
+    {
+      k: "Leave data",
+      v:
+        leaveDataState === "ready"
+          ? "Checked"
+          : leaveDataState === "loading"
+            ? "Loading"
+            : "Unavailable",
+      ok: leaveDataState === "ready",
+    },
   ];
 
   const badgeTone =
@@ -77,7 +89,10 @@ export function PublishReadinessCard({
             ? "Published with issues"
             : "Published"
           : "Publish unavailable"
-    : openShiftCount > 0 || conflictCount > 0 || workingTimeAlertCount > 0
+    : openShiftCount > 0 ||
+        conflictCount > 0 ||
+        workingTimeAlertCount > 0 ||
+        leaveDataState !== "ready"
       ? "Publish with issues"
       : "Publish to staff";
 
@@ -104,6 +119,12 @@ export function PublishReadinessCard({
         Staff see only the published rota. Publish with issues only when the team is ready for this
         version.
       </p>
+      {leaveDataState !== "ready" && (
+        <p className="mt-2 text-xs text-warning">
+          Approved leave checks are incomplete while leave data is{" "}
+          {leaveDataState === "loading" ? "loading" : "unavailable"}.
+        </p>
+      )}
       <ActionButton
         className="mt-4 w-full"
         icon={Send}

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Info, Settings } from "lucide-react";
 import { ActionButton, Card, IconButton } from "@/components/dl";
 
-/** Demo figures for the labour breakdown — frontend-only, mirrors the prototype rail. */
+/** Demo figures for the labour breakdown - frontend-only, mirrors the prototype rail. */
 const DEMO_FORECAST_SALES = 17800;
 const DEMO_BLENDED_RATE = 14;
 const DEMO_LABOUR_TARGET_PCT = 30;
@@ -61,9 +61,9 @@ export function LabourSummaryCard({
           <span className="text-sm font-semibold">Labour summary</span>
           <span
             className="badge"
-            title="Cost and labour % are sample estimates until pay rates and forecast sales are configured. Scheduled hours and coverage are live."
+            title="Estimated cost and labour % only. Scheduled hours and coverage are live."
           >
-            Sample
+            Estimate
           </span>
         </div>
         <IconButton
@@ -129,8 +129,8 @@ export function LabourSummaryCard({
         >
           <Info className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
           <span>
-            Cost and labour % are sample estimates from a placeholder rate and forecast sales until
-            set in Settings → Rota &amp; scheduling. Edit labour targets →
+            Estimated cost and labour % only. Scheduled hours and coverage stay live. Set labour
+            targets in Settings - Rota &amp; scheduling.
           </span>
         </Link>
       </div>

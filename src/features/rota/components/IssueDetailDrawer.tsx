@@ -45,11 +45,11 @@ export function IssueDetailDrawer({
       open={issue !== null}
       onOpenChange={(open) => !open && onClose()}
       title={issue?.title ?? ""}
-      description="Source: Rota draft · this week"
+      description="Source: Rota draft - this week"
       meta={
         issue && (
           <StatusBadge tone={reviewed ? "muted" : issue.tone === "danger" ? "danger" : "warning"}>
-            {reviewed ? "Reviewed" : "Needs attention"}
+            {reviewed ? "Seen this session" : "Needs attention"}
           </StatusBadge>
         )
       }
@@ -60,7 +60,7 @@ export function IssueDetailDrawer({
               Close
             </ActionButton>
             <ActionButton variant="secondary" size="sm" onClick={() => onMarkReviewed(issue)}>
-              Mark reviewed
+              Mark seen
             </ActionButton>
           </>
         )
@@ -104,6 +104,9 @@ export function IssueDetailDrawer({
               </ActionButton>
             )}
           </div>
+          <p className="text-[11px] text-muted-foreground">
+            This marker only lives in the current view.
+          </p>
         </div>
       )}
     </DrawerShell>

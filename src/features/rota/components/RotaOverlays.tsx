@@ -41,6 +41,14 @@ export function RotaOverlays({
 }) {
   const { openOverlays, setOverlay } = overlays;
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
+  const leaveDataState =
+    rota.source !== "live"
+      ? "ready"
+      : rota.isLiveLeaveLoading
+        ? "loading"
+        : rota.isLiveLeaveError
+          ? "error"
+          : "ready";
 
   const reviewConflictShift = (shiftId: string) => {
     rota.setSelectedShiftId(shiftId);
@@ -78,6 +86,7 @@ export function RotaOverlays({
         conflictCount={rota.conflictCount}
         openShiftCount={rota.openShiftCount}
         workingTimeAlertCount={workingTimeAlertCount}
+        leaveDataState={leaveDataState}
         published={rota.published}
         hasUnpublishedChanges={rota.hasUnpublishedChanges}
         canPublish={publishEligibility.canPublish}

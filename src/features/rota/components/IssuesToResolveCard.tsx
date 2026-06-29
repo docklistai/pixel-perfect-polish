@@ -46,9 +46,9 @@ export function IssuesToResolveCard({
     const isDone = !!reviewed[issue.id];
     setReviewed((prev) => ({ ...prev, [issue.id]: !isDone }));
     if (isDone) {
-      toast.info("Reopened", { description: issue.title });
+      toast.info("Shown again", { description: issue.title });
     } else {
-      toast.success("Marked reviewed", { description: issue.title });
+      toast.success("Marked seen", { description: issue.title });
     }
   };
 
@@ -56,10 +56,10 @@ export function IssuesToResolveCard({
     <Card className="p-4">
       <div className="mb-1 flex items-center justify-between gap-2">
         <div className="text-sm font-semibold">Issues to resolve</div>
-        <AiChip size="sm" label="Rota review" />
+        <AiChip size="sm" label="Session review" />
       </div>
       <div className="mb-3 text-xs text-muted-foreground">
-        Resolve before publishing · from this week's rota draft
+        Resolve before publishing · local review markers only
       </div>
 
       {issues.length === 0 ? (
@@ -118,8 +118,8 @@ export function IssuesToResolveCard({
                   <button
                     type="button"
                     className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-background/60 hover:text-foreground"
-                    title={done ? "Reopen" : "Mark reviewed"}
-                    aria-label={done ? `Reopen: ${issue.title}` : `Mark reviewed: ${issue.title}`}
+                    title={done ? "Show again" : "Mark seen"}
+                    aria-label={done ? `Show again: ${issue.title}` : `Mark seen: ${issue.title}`}
                     onClick={() => toggleReviewed(issue)}
                   >
                     {done ? (
@@ -152,7 +152,7 @@ export function IssuesToResolveCard({
         onMarkReviewed={(issue) => {
           setReviewed((prev) => ({ ...prev, [issue.id]: true }));
           setOpenIssueId(null);
-          toast.info("Marked reviewed", { description: issue.title });
+          toast.info("Marked seen", { description: issue.title });
         }}
         onReviewShift={(shiftId) => {
           setOpenIssueId(null);

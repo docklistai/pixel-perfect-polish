@@ -20,6 +20,7 @@ export function PublishRotaDialog({
   conflictCount,
   openShiftCount,
   workingTimeAlertCount,
+  leaveDataState,
   published,
   hasUnpublishedChanges,
   canPublish,
@@ -36,6 +37,7 @@ export function PublishRotaDialog({
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
+  leaveDataState: "ready" | "loading" | "error";
   published: boolean;
   hasUnpublishedChanges: boolean;
   canPublish: boolean;
@@ -45,7 +47,8 @@ export function PublishRotaDialog({
   const [prepareStaffUpdate, setPrepareStaffUpdate] = React.useState(true);
   const [issuesAcknowledged, setIssuesAcknowledged] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
-  const issueCount = conflictCount + openShiftCount + workingTimeAlertCount;
+  const leaveDataWarningCount = leaveDataState === "ready" ? 0 : 1;
+  const issueCount = conflictCount + openShiftCount + workingTimeAlertCount + leaveDataWarningCount;
   const hasIssues = issueCount > 0;
   const publishActionLabel = published && hasUnpublishedChanges ? "Republish" : "Publish";
 
@@ -94,6 +97,16 @@ export function PublishRotaDialog({
           : `${workingTimeAlertCount} alert${workingTimeAlertCount === 1 ? "" : "s"}`,
       ok: workingTimeAlertCount === 0,
     },
+    {
+      label: "Leave data",
+      value:
+        leaveDataState === "ready"
+          ? "Checked"
+          : leaveDataState === "loading"
+            ? "Loading"
+            : "Unavailable",
+      ok: leaveDataState === "ready",
+    },
   ];
 
   return (
@@ -136,8 +149,8 @@ export function PublishRotaDialog({
           <li>{assignedShiftCount} assigned shifts will be visible to assigned staff.</li>
           <li>{openShiftCount} open shifts stay manager-only until assigned.</li>
           <li>
-            {conflictCount + workingTimeAlertCount} rota issue
-            {conflictCount + workingTimeAlertCount === 1 ? "" : "s"} remain for manager review.
+            {issueCount} rota issue
+            {issueCount === 1 ? "" : "s"} remain for manager review.
           </li>
         </ul>
       </div>
@@ -160,6 +173,13 @@ export function PublishRotaDialog({
         ))}
       </div>
 
+      {leaveDataState !== "ready" && (
+        <div className="mt-3 rounded-xl border border-warning/30 bg-warning-soft px-3 py-2 text-xs text-warning-700">
+          Approved leave checks are incomplete while leave data is{" "}
+          {leaveDataState === "loading" ? "loading" : "unavailable"}.
+        </div>
+      )}
+
       <label className="mt-3 flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
@@ -179,8 +199,9 @@ export function PublishRotaDialog({
             className="mt-0.5 h-4 w-4 accent-brand"
           />
           <span>
-            I have reviewed the open shifts, conflicts, and working-time alerts and still want to{" "}
-            {publishActionLabel.toLowerCase()} this manager-approved rota snapshot.
+            I have reviewed the open shifts, conflicts, working-time alerts, and leave-data status
+            and still want to {publishActionLabel.toLowerCase()} this manager-approved rota
+            snapshot.
           </span>
         </label>
       )}

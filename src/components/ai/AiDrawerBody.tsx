@@ -10,9 +10,11 @@ import type { SupportRoute, SupportTopic } from "./aiDrawerData";
 export function AiDrawerBody({
   topics,
   onGoTo,
+  statusMessage,
 }: {
   topics: SupportTopic[];
   onGoTo: (route: SupportRoute) => void;
+  statusMessage: string;
 }) {
   return (
     <>
@@ -25,10 +27,7 @@ export function AiDrawerBody({
         }}
       >
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
-        <span>
-          Deterministic review aids from this workspace only. Suggestions are review-only — nothing
-          changes and nothing is shared with staff until you act.
-        </span>
+        <span>{statusMessage}</span>
       </div>
 
       <div className="section-label mt-4 mb-2">Manager support</div>

@@ -89,7 +89,17 @@ function RotaPage() {
   useIntentHandler("rota.addShift", () => openOverlay("addShift"));
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
-  const readinessIssueCount = rota.openShiftCount + rota.conflictCount + workingTimeAlertCount;
+  const leaveDataState =
+    rota.source !== "live"
+      ? "ready"
+      : rota.isLiveLeaveLoading
+        ? "loading"
+        : rota.isLiveLeaveError
+          ? "error"
+          : "ready";
+  const leaveDataIssueCount = leaveDataState === "ready" ? 0 : 1;
+  const readinessIssueCount =
+    rota.openShiftCount + rota.conflictCount + workingTimeAlertCount + leaveDataIssueCount;
   const hasReadinessIssues = readinessIssueCount > 0;
   const publishState = getPublishState({
     published: rota.published,
@@ -184,12 +194,12 @@ function RotaPage() {
             title="Live rota — read-only"
             description={
               rota.isLiveError
-                ? "The live rota couldn't be loaded. A sample rota is shown as a read-only fallback."
+                ? "The live rota couldn't be loaded. A read-only fallback is shown."
                 : rota.isLiveLoading
-                  ? "Loading your workspace rota. A sample rota is shown as a read-only fallback."
+                  ? "Loading your workspace rota. A read-only fallback is shown until the live draft is ready."
                   : rota.hasLiveWeek
-                    ? "You're viewing your workspace's saved rota. Editing and publishing aren't available in live mode yet."
-                    : "No saved rota for this week yet. Editing and publishing aren't available in live mode yet."
+                    ? "The live rota has not loaded yet. A read-only fallback is shown."
+                    : "No live rota for this week is available yet. A read-only fallback is shown."
             }
             className="mb-4"
           />
@@ -315,6 +325,7 @@ function RotaPage() {
                 conflictCount={rota.conflictCount}
                 openShiftCount={rota.openShiftCount}
                 workingTimeAlertCount={workingTimeAlertCount}
+                leaveDataState={leaveDataState}
                 assignedShiftCount={rota.assignedShiftCount}
                 plannedShiftCount={rota.plannedShiftCount}
                 coveragePct={rota.coveragePct}
