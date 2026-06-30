@@ -4,18 +4,21 @@ import {
   ChevronLeft,
   Mail,
   Briefcase,
-  Calendar,
   Clock,
-  Plane,
   Activity,
   Pencil,
+  type LucideIcon,
 } from "lucide-react";
 import { AppShell, Card, StatusBadge, type Tone } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
 import { EditStaffDialog } from "../EditStaffDialog";
 import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileEmptyPanel } from "./ProfileEmptyPanel";
+import { LiveOperationalCards } from "./LiveOperationalCards";
+import { LiveScheduleList } from "./LiveScheduleList";
+import { LiveLeaveList } from "./LiveLeaveList";
 import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
+import { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
 import type { StaffRow } from "../../types";
 
 const NOT_RECORDED = "Not recorded";
@@ -33,27 +36,20 @@ function portalTone(status: string | undefined): Tone {
   return "muted";
 }
 
-/** Tab → honest empty-state copy for live members with no history yet. */
-function emptyPanel(tab: ProfileTab, firstName: string) {
+/**
+ * Tab → honest empty-state copy for live members on the tabs that have no live
+ * connection yet. Schedule and Leave are handled by their own live lists.
+ */
+function emptyPanel(
+  tab: ProfileTab,
+  firstName: string,
+): { icon: LucideIcon; title: string; description: string; hint?: string } | null {
   switch (tab) {
-    case "schedule":
-      return {
-        icon: Calendar,
-        title: "No schedule yet",
-        description: `Shifts appear here once ${firstName} is scheduled on the rota.`,
-        hint: "Add a shift from the rota to start building this view.",
-      };
     case "time":
       return {
         icon: Clock,
         title: "No timesheets yet",
         description: `Clock-in and clock-out records appear here once ${firstName} starts logging time.`,
-      };
-    case "leave":
-      return {
-        icon: Plane,
-        title: "No leave history yet",
-        description: `Leave requests and absences appear here once they are recorded for ${firstName}.`,
       };
     case "insights":
       return {
@@ -128,6 +124,7 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
   const [activeTab, setActiveTab] = React.useState<ProfileTab>("overview");
   const [editOpen, setEditOpen] = React.useState(false);
   const firstName = member.n.split(" ")[0] || member.n;
+  const ops = useLiveStaffProfileOps(member.id);
 
   const empty = emptyPanel(activeTab, firstName);
 
@@ -202,7 +199,14 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
         id={`staff-profile-panel-${activeTab}`}
         aria-labelledby={`staff-profile-tab-${activeTab}`}
       >
-        {activeTab === "overview" && <LiveOverviewPanel member={member} />}
+        {activeTab === "overview" && (
+          <div className="grid gap-5">
+            <LiveOverviewPanel member={member} />
+            <LiveOperationalCards ops={ops} firstName={firstName} />
+          </div>
+        )}
+        {activeTab === "schedule" && <LiveScheduleList ops={ops} firstName={firstName} />}
+        {activeTab === "leave" && <LiveLeaveList ops={ops} firstName={firstName} />}
         {empty && (
           <ProfileEmptyPanel
             icon={empty.icon}
