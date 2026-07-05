@@ -34,6 +34,8 @@ import { LeaveRotaImpactCard } from "@/features/leave/components/LeaveRotaImpact
 import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
 import { toast } from "sonner";
 import type { LeaveRequest } from "@/features/leave/types";
+import { MAX_ROTA_WEEK_OFFSET } from "@/features/rota/lib/rotaSearch";
+import { weekOffsetForDate } from "@/features/leave/lib/leaveRotaImpact";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { requireManagerAccess } from "@/features/auth";
 
@@ -221,9 +223,16 @@ function LeavePage() {
                   <LeaveImpactSummaryCard
                     request={activeRequest}
                     onCheckRota={() => {
-                      navigate({ to: "/rota" });
+                      const weekOffset = weekOffsetForDate(todayIso, activeRequest.startIso);
+                      const inRange = Math.abs(weekOffset) <= MAX_ROTA_WEEK_OFFSET;
+                      navigate({
+                        to: "/rota",
+                        search: inRange ? { week: weekOffset } : undefined,
+                      });
                       toast.info("Rota opened", {
-                        description: "Checking coverage for these dates.",
+                        description: inRange
+                          ? "Opened the rota week for this leave request."
+                          : "These leave dates are outside the supported rota week range.",
                       });
                     }}
                   />

@@ -54,6 +54,11 @@ function Home() {
   const moreRef = React.useRef<HTMLDivElement>(null);
   const dashboard = useDashboardData();
   const { workspaceName } = useManagerIdentity();
+  const isLiveDashboard = dashboard.source === "live";
+  const visibleQuickActionItems = React.useMemo(
+    () => (isLiveDashboard ? quickActionItems.filter((item) => !item.preview) : quickActionItems),
+    [isLiveDashboard],
+  );
 
   const runQuickAction = React.useCallback(
     (to: "/" | "/rota" | "/staff" | "/leave" | "/team" | "/ops", intent?: IntentName) => {
@@ -283,10 +288,10 @@ function Home() {
 
       {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
       <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardStaffOnShift items={staffDeptItems} total={6} />
+        {!isLiveDashboard && <DashboardStaffOnShift items={staffDeptItems} total={6} />}
         <DashboardTimesheets items={dashboard.timesheetItems} />
-        <DashboardAnnouncements items={announcementItems} />
-        <DashboardQuickActions items={quickActionItems} />
+        {!isLiveDashboard && <DashboardAnnouncements items={announcementItems} />}
+        <DashboardQuickActions items={visibleQuickActionItems} />
       </div>
 
       <DashboardAlertDrawer
