@@ -10,6 +10,7 @@ import { TimeRightRail } from "@/features/time/components/TimeRightRail";
 import { TimesheetReviewDrawer } from "@/features/time/components/TimesheetReviewDrawer";
 import { TimeExportDialog } from "@/features/time/components/TimeExportDialog";
 import { TimeAdjustDialog } from "@/features/time/components/TimeAdjustDialog";
+import { TimeAddEntryDialog } from "@/features/time/components/TimeAddEntryDialog";
 import { TimeQueryDrawer } from "@/features/time/components/TimeQueryDrawer";
 import {
   TimeHeaderActions,
@@ -19,7 +20,8 @@ import {
 import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
 import { useWorkspaceTime } from "@/features/time/hooks/useWorkspaceTime";
 import { useTimeController } from "@/features/time/hooks/useTimeController";
-import { isWithinPeriod, type ReviewPeriod } from "@/features/time/lib/reviewPeriod";
+import { useAddTimeEntry } from "@/features/time/hooks/useAddTimeEntry";
+import { isWithinPeriod, weekPeriodOf, type ReviewPeriod } from "@/features/time/lib/reviewPeriod";
 import { canExportApprovedHours } from "@/features/time/lib/timeExport";
 import { requireManagerAccess } from "@/features/auth";
 
@@ -43,6 +45,9 @@ function TimePage() {
   const [reminderFor, setReminderFor] = React.useState<string | null>(null);
   const [approveSuggestedOpen, setApproveSuggestedOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
+  const [addEntryOpen, setAddEntryOpen] = React.useState(false);
+  const addEntry = useAddTimeEntry(liveWorkspaceId);
+  const openAddEntry = liveWorkspaceId ? () => setAddEntryOpen(true) : undefined;
   const [tab, setTab] = React.useState<TimesheetTab>("all");
   const [query, setQuery] = React.useState("");
   const [team, setTeam] = React.useState(TEAM_OPTIONS[0]!);
@@ -117,6 +122,7 @@ function TimePage() {
             onExport={() => setExportOpen(true)}
             canExport={canExport}
             onApproveAllPending={time.approveAllPending}
+            onAddEntry={openAddEntry}
           />
         }
       />
@@ -181,6 +187,7 @@ function TimePage() {
             onQueryChange={setQuery}
             counts={counts}
             onResetFilters={resetFilters}
+            onAddEntry={openAddEntry}
           />
         </div>
 
@@ -208,6 +215,22 @@ function TimePage() {
         onClose={() => setAdjustRow(null)}
         onSave={time.saveAdjustment}
       />
+      {liveWorkspaceId && (
+        <TimeAddEntryDialog
+          open={addEntryOpen}
+          onClose={() => setAddEntryOpen(false)}
+          workspaceId={liveWorkspaceId}
+          isSaving={addEntry.isSaving}
+          onSave={async (payload, staffName) => {
+            const saved = await addEntry.save(payload, staffName);
+            // Snap the review period to the entry's week so the new row is visible.
+            if (saved && !isWithinPeriod(payload.workDate, period)) {
+              setPeriod(weekPeriodOf(payload.workDate));
+            }
+            return saved;
+          }}
+        />
+      )}
       <TimeQueryDrawer
         query={queryRow}
         onClose={() => setQueryRow(null)}

@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Download,
   Calendar,
+  Plus,
   Users,
   Settings2,
   Sparkles,
@@ -46,6 +47,8 @@ interface Props {
   onExport: () => void;
   canExport: boolean;
   onApproveAllPending: () => void;
+  /** Live mode only — omitted in demo mode, where manual entry isn't wired. */
+  onAddEntry?: () => void;
 }
 
 export function TimeHeaderActions({
@@ -58,6 +61,7 @@ export function TimeHeaderActions({
   onExport,
   canExport,
   onApproveAllPending,
+  onAddEntry,
 }: Props) {
   return (
     <>
@@ -107,6 +111,11 @@ export function TimeHeaderActions({
           })),
         ]}
       />
+      {onAddEntry && (
+        <ActionButton icon={Plus} onClick={onAddEntry} title="Record actual worked time">
+          Add time entry
+        </ActionButton>
+      )}
       <ActionButton variant="outline" icon={Sparkles} onClick={onOpenAssistant}>
         Manager support
       </ActionButton>

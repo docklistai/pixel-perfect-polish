@@ -1,0 +1,78 @@
+/**
+ * Validates the Add Time Entry dialog's inputs and builds the exact payload
+ * `createTimeEntryFn` requires, or an honest error message when the input
+ * can't be trusted. Pure and testable; the hook handles the toast + write.
+ * Times are wall-clock in the workspace timezone against the chosen work date,
+ * matching the adjustment path, so approvals and export see exact instants.
+ */
+
+import { parseBreakMinutes, parseClockField, workspaceWallTimeToIso } from "./adjustTime";
+
+export interface ManualEntryInput {
+  staffMemberId: string;
+  workDate: string;
+  clockIn: string;
+  clockOut: string;
+  breakTime: string;
+  note: string;
+}
+
+export interface ManualEntryPayload {
+  staffMemberId: string;
+  workDate: string;
+  clockedInAt: string;
+  clockedOutAt: string;
+  breakMinutes: number;
+  reason: string;
+}
+
+export type PreparedManualEntry =
+  | { ok: true; payload: ManualEntryPayload }
+  | { ok: false; message: string };
+
+const DATE_ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Recorded on the entry's audit-trail event when the manager leaves no note. */
+export const DEFAULT_MANUAL_ENTRY_REASON = "Manual time entry recorded by manager";
+
+function invalid(message: string): PreparedManualEntry {
+  return { ok: false, message };
+}
+
+export function prepareManualEntry(input: ManualEntryInput): PreparedManualEntry {
+  if (!input.staffMemberId) return invalid("Choose a staff member.");
+
+  const workDate = input.workDate.trim();
+  if (!DATE_ISO.test(workDate)) return invalid("Choose a work date.");
+
+  const inField = parseClockField(input.clockIn);
+  const outField = parseClockField(input.clockOut);
+  if (inField === null || outField === null) {
+    return invalid("Enter clock-in and clock-out as HH:MM.");
+  }
+
+  const breakMinutes = parseBreakMinutes(input.breakTime);
+  if (breakMinutes === null) return invalid("Enter the break as H:MM.");
+
+  const startMinutes = inField.hours * 60 + inField.minutes;
+  const endMinutes = outField.hours * 60 + outField.minutes;
+  if (endMinutes <= startMinutes) return invalid("Clock-out must be after clock-in.");
+  if (breakMinutes >= endMinutes - startMinutes) {
+    return invalid("The break can't be as long as the time worked.");
+  }
+
+  const note = input.note.trim();
+  if (note.length > 2000) return invalid("Keep the note under 2000 characters.");
+
+  return {
+    ok: true,
+    payload: {
+      staffMemberId: input.staffMemberId,
+      workDate,
+      clockedInAt: workspaceWallTimeToIso(workDate, inField.hours, inField.minutes),
+      clockedOutAt: workspaceWallTimeToIso(workDate, outField.hours, outField.minutes),
+      breakMinutes,
+      reason: note || DEFAULT_MANUAL_ENTRY_REASON,
+    },
+  };
+}

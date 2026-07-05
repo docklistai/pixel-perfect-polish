@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AlertTriangle, Loader2, Search } from "lucide-react";
+import { AlertTriangle, Loader2, Plus, Search } from "lucide-react";
 import { StatusBadge } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import type { StoredTimesheetRow, TimesheetStatus } from "../types";
@@ -39,6 +39,8 @@ interface Props {
   onQueryChange: (q: string) => void;
   counts: TabCounts;
   onResetFilters: () => void;
+  /** Live mode only — surfaces "Add time entry" on the empty period state. */
+  onAddEntry?: () => void;
 }
 
 const tabs: Array<{
@@ -76,6 +78,7 @@ export function TimesheetTable({
   onQueryChange,
   counts,
   onResetFilters,
+  onAddEntry,
 }: Props) {
   const allSelected = rows.length > 0 && rows.every((r) => selectedIds.has(r.id));
 
@@ -192,7 +195,15 @@ export function TimesheetTable({
               {viewState === "live-ready" && totalRows === 0 ? (
                 <>
                   <h4>No time entries this period</h4>
-                  <p>Nothing was clocked for {periodLabel}. Try another review period.</p>
+                  <p>
+                    Nothing was recorded for {periodLabel}. Record actual worked time so it can be
+                    reviewed, approved, and exported as approved hours.
+                  </p>
+                  {onAddEntry && (
+                    <button type="button" className="btn primary sm mt-2" onClick={onAddEntry}>
+                      <Plus className="h-3.5 w-3.5" aria-hidden /> Add time entry
+                    </button>
+                  )}
                 </>
               ) : (
                 <>
