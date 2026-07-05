@@ -10,9 +10,19 @@ const valid: ManualEntryInput = {
   workDate: "2026-07-01",
   clockIn: "09:00",
   clockOut: "17:00",
+  finishesNextDay: false,
   breakTime: "0:30",
   note: "",
 };
+
+function paidMinutes(result: ReturnType<typeof prepareManualEntry>): number | null {
+  if (!result.ok) return null;
+  return (
+    Math.round(
+      (Date.parse(result.payload.clockedOutAt) - Date.parse(result.payload.clockedInAt)) / 60_000,
+    ) - result.payload.breakMinutes
+  );
+}
 
 describe("prepareManualEntry", () => {
   it("builds a payload with exact UTC instants for a BST work date", () => {
@@ -53,11 +63,45 @@ describe("prepareManualEntry", () => {
     expect(prepareManualEntry({ ...valid, clockIn: "nine" }).ok).toBe(false);
   });
 
-  it("rejects a clock-out at or before the clock-in", () => {
+  it("rejects a same-day clock-out at or before the clock-in", () => {
     const equal = prepareManualEntry({ ...valid, clockOut: "09:00" });
     expect(equal).toEqual({ ok: false, message: "Clock-out must be after clock-in." });
     const before = prepareManualEntry({ ...valid, clockOut: "08:00" });
     expect(before.ok).toBe(false);
+  });
+
+  it("rejects overnight-looking wall-clock times without the next-day flag", () => {
+    const result = prepareManualEntry({ ...valid, clockIn: "18:00", clockOut: "02:00" });
+    expect(result).toEqual({ ok: false, message: "Clock-out must be after clock-in." });
+  });
+
+  it("builds an overnight entry when the manager marks it as finishing next day", () => {
+    const result = prepareManualEntry({
+      ...valid,
+      clockIn: "18:00",
+      clockOut: "02:00",
+      finishesNextDay: true,
+      breakTime: "0:00",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.payload.clockedInAt).toBe("2026-07-01T17:00:00.000Z");
+    expect(result.payload.clockedOutAt).toBe("2026-07-02T01:00:00.000Z");
+    expect(paidMinutes(result)).toBe(8 * 60);
+  });
+
+  it("calculates overnight paid time from exact instants minus break", () => {
+    const result = prepareManualEntry({
+      ...valid,
+      clockIn: "22:00",
+      clockOut: "06:00",
+      finishesNextDay: true,
+      breakTime: "0:30",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.payload.breakMinutes).toBe(30);
+    expect(paidMinutes(result)).toBe(7 * 60 + 30);
   });
 
   it("rejects a break that consumes the whole worked time", () => {
@@ -71,6 +115,36 @@ describe("prepareManualEntry", () => {
       ok: false,
       message: "The break can't be as long as the time worked.",
     });
+  });
+
+  it("rejects a break that consumes the whole overnight shift", () => {
+    const result = prepareManualEntry({
+      ...valid,
+      clockIn: "22:00",
+      clockOut: "06:00",
+      finishesNextDay: true,
+      breakTime: "8:00",
+    });
+    expect(result).toEqual({
+      ok: false,
+      message: "The break can't be as long as the time worked.",
+    });
+  });
+
+  it("uses exact instants across a DST boundary", () => {
+    const result = prepareManualEntry({
+      ...valid,
+      workDate: "2026-03-28",
+      clockIn: "22:00",
+      clockOut: "02:00",
+      finishesNextDay: true,
+      breakTime: "0:00",
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.payload.clockedInAt).toBe("2026-03-28T22:00:00.000Z");
+    expect(result.payload.clockedOutAt).toBe("2026-03-29T01:00:00.000Z");
+    expect(paidMinutes(result)).toBe(3 * 60);
   });
 
   it("rejects an unparseable break", () => {

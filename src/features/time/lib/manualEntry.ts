@@ -13,6 +13,7 @@ export interface ManualEntryInput {
   workDate: string;
   clockIn: string;
   clockOut: string;
+  finishesNextDay: boolean;
   breakTime: string;
   note: string;
 }
@@ -39,6 +40,16 @@ function invalid(message: string): PreparedManualEntry {
   return { ok: false, message };
 }
 
+function addOneDay(dateIso: string): string {
+  const date = new Date(`${dateIso}T12:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function workedMinutes(clockedInAt: string, clockedOutAt: string): number {
+  return Math.round((Date.parse(clockedOutAt) - Date.parse(clockedInAt)) / 60_000);
+}
+
 export function prepareManualEntry(input: ManualEntryInput): PreparedManualEntry {
   if (!input.staffMemberId) return invalid("Choose a staff member.");
 
@@ -56,8 +67,18 @@ export function prepareManualEntry(input: ManualEntryInput): PreparedManualEntry
 
   const startMinutes = inField.hours * 60 + inField.minutes;
   const endMinutes = outField.hours * 60 + outField.minutes;
-  if (endMinutes <= startMinutes) return invalid("Clock-out must be after clock-in.");
-  if (breakMinutes >= endMinutes - startMinutes) {
+  if (!input.finishesNextDay && endMinutes <= startMinutes) {
+    return invalid("Clock-out must be after clock-in.");
+  }
+
+  const clockedInAt = workspaceWallTimeToIso(workDate, inField.hours, inField.minutes);
+  const clockOutDate = input.finishesNextDay ? addOneDay(workDate) : workDate;
+  const clockedOutAt = workspaceWallTimeToIso(clockOutDate, outField.hours, outField.minutes);
+  const durationMinutes = workedMinutes(clockedInAt, clockedOutAt);
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    return invalid("Clock-out must be after clock-in.");
+  }
+  if (breakMinutes >= durationMinutes) {
     return invalid("The break can't be as long as the time worked.");
   }
 
@@ -69,8 +90,8 @@ export function prepareManualEntry(input: ManualEntryInput): PreparedManualEntry
     payload: {
       staffMemberId: input.staffMemberId,
       workDate,
-      clockedInAt: workspaceWallTimeToIso(workDate, inField.hours, inField.minutes),
-      clockedOutAt: workspaceWallTimeToIso(workDate, outField.hours, outField.minutes),
+      clockedInAt,
+      clockedOutAt,
       breakMinutes,
       reason: note || DEFAULT_MANUAL_ENTRY_REASON,
     },

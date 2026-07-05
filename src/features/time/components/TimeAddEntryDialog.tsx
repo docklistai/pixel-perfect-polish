@@ -29,6 +29,7 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
   const [workDate, setWorkDate] = React.useState(() => londonDateIso(new Date()));
   const [clockIn, setClockIn] = React.useState("");
   const [clockOut, setClockOut] = React.useState("");
+  const [finishesNextDay, setFinishesNextDay] = React.useState(false);
   const [breakTime, setBreakTime] = React.useState<string>("0:00");
   const [note, setNote] = React.useState("");
 
@@ -46,6 +47,7 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
     setWorkDate(londonDateIso(new Date()));
     setClockIn("");
     setClockOut("");
+    setFinishesNextDay(false);
     setBreakTime("0:00");
     setNote("");
   }, [open]);
@@ -56,6 +58,7 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
       workDate,
       clockIn,
       clockOut,
+      finishesNextDay,
       breakTime,
       note,
     });
@@ -151,6 +154,24 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
             onChange={(event) => setClockOut(event.target.value)}
           />
         </FormRow>
+        <label
+          htmlFor="add-entry-finishes-next-day"
+          className="col-span-2 flex items-start gap-2 rounded-lg border border-border bg-muted/20 px-3 py-2 text-sm font-medium"
+        >
+          <input
+            id="add-entry-finishes-next-day"
+            type="checkbox"
+            className="mt-0.5 h-4 w-4"
+            checked={finishesNextDay}
+            onChange={(event) => setFinishesNextDay(event.target.checked)}
+          />
+          <span>
+            Finishes next day
+            <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+              Use for shifts that finish after midnight.
+            </span>
+          </span>
+        </label>
         <div className="col-span-2">
           <FormRow label="Note (kept on the entry's audit trail)" htmlFor="add-entry-note">
             <textarea
