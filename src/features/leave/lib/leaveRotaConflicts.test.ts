@@ -4,6 +4,7 @@ import type { DraftShift, StaffMember } from "@/features/rota/types";
 import type { LeaveRequest } from "../types";
 import {
   buildApprovedLeaveConflictSummaries,
+  pendingLeaveForStaffOnDay,
   withApprovedLeaveConflictStatus,
 } from "./leaveRotaConflicts";
 
@@ -79,5 +80,38 @@ describe("approved leave dates on the rota", () => {
       staff: "Ana",
       day: "Wed 8 Jul",
     });
+  });
+});
+
+describe("pendingLeaveForStaffOnDay", () => {
+  const pendingLeave: LeaveRequest = {
+    ...approvedLeave,
+    id: "leave-pending",
+    state: "pending",
+    startIso: "2026-07-08",
+    endIso: "2026-07-10",
+  };
+
+  it("returns the request on the start, middle, and end day of the range", () => {
+    expect(pendingLeaveForStaffOnDay([pendingLeave], "staff-1", "2026-07-08")).toBe(pendingLeave);
+    expect(pendingLeaveForStaffOnDay([pendingLeave], "staff-1", "2026-07-09")).toBe(pendingLeave);
+    expect(pendingLeaveForStaffOnDay([pendingLeave], "staff-1", "2026-07-10")).toBe(pendingLeave);
+  });
+
+  it("returns null outside the range", () => {
+    expect(pendingLeaveForStaffOnDay([pendingLeave], "staff-1", "2026-07-07")).toBeNull();
+    expect(pendingLeaveForStaffOnDay([pendingLeave], "staff-1", "2026-07-11")).toBeNull();
+  });
+
+  it("ignores other staff members", () => {
+    expect(pendingLeaveForStaffOnDay([pendingLeave], "staff-2", "2026-07-09")).toBeNull();
+  });
+
+  it("ignores approved, declined, and cancelled requests", () => {
+    const states: LeaveRequest["state"][] = ["approved", "declined", "cancelled"];
+    for (const state of states) {
+      const request: LeaveRequest = { ...pendingLeave, id: `leave-${state}`, state };
+      expect(pendingLeaveForStaffOnDay([request], "staff-1", "2026-07-09")).toBeNull();
+    }
   });
 });

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { ShiftCell } from "../ShiftCell";
+import { cellLeaveTitle } from "./cellLeaveTitle";
 import { InlineCellEditor } from "./InlineCellEditor";
 import { commitInlineCellEdit } from "./inlineCellCommit";
 import type { RotaGridDay, ShiftActionHandlers, ShiftMenuHandlers } from "./types";
@@ -143,13 +144,7 @@ export function RotaGridCell({
       tabIndex={0}
       role="gridcell"
       aria-label={cellAriaLabel}
-      title={
-        cell.leaveState && !firstShift
-          ? cell.leaveState === "approved"
-            ? "Approved leave"
-            : "Pending leave request"
-          : undefined
-      }
+      title={cellLeaveTitle(cell.leaveState, Boolean(firstShift))}
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
       onDoubleClick={startEditing}

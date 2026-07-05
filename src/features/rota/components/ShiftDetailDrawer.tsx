@@ -8,6 +8,7 @@ import type { DraftShift, ShiftId, StaffMember } from "../types";
 import { buildRotaRecoveryOptions, NO_SAFE_RECOVERY_OPTIONS } from "../lib/rotaRecoveryOptions";
 import type { MaybePromise } from "./grid";
 import { RepeatShiftControls } from "./RepeatShiftControls";
+import { ShiftPendingLeaveHint } from "./ShiftPendingLeaveHint";
 
 type DayEntry = { d: string };
 
@@ -216,6 +217,11 @@ export function ShiftDetailDrawer({
             {saveError}
           </div>
         )}
+        <ShiftPendingLeaveHint
+          leaveRequests={leaveRequests}
+          staffId={shift.staffId}
+          dayIso={dayIsoDates[shift.dayIndex]}
+        />
         <FormRow label="Role" required htmlFor="shift-edit-role">
           <input
             id="shift-edit-role"

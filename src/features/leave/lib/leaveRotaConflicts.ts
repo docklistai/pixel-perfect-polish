@@ -32,6 +32,27 @@ export function withApprovedLeaveConflictStatus(
   );
 }
 
+/**
+ * The pending request covering `dayIso` for one staff member, if any. Warn-only
+ * context for the rota: pending never blocks assignment or becomes a conflict —
+ * approved leave keeps its own conflict path above.
+ */
+export function pendingLeaveForStaffOnDay(
+  requests: LeaveRequest[],
+  staffId: string,
+  dayIso: string,
+): LeaveRequest | null {
+  return (
+    requests.find(
+      (request) =>
+        request.state === "pending" &&
+        request.staffId === staffId &&
+        request.startIso <= dayIso &&
+        request.endIso >= dayIso,
+    ) ?? null
+  );
+}
+
 export function buildApprovedLeaveConflictSummaries(
   shifts: DraftShift[],
   requests: LeaveRequest[],

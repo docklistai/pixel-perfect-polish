@@ -22,6 +22,20 @@ export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
           />
           Open shift
         </span>
+        <span className="rota-legend-chip flex items-center gap-1.5">
+          <span
+            className="inline-block h-3 w-3 rounded-[3px] border border-border bg-muted/20"
+            aria-hidden
+          />
+          Leave
+        </span>
+        <span className="rota-legend-chip flex items-center gap-1.5">
+          <span
+            className="inline-block h-3 w-3 rounded-[3px] border border-warning/40 bg-warning-soft/20"
+            aria-hidden
+          />
+          Pending
+        </span>
         <span className="rota-legend-chip flex items-center gap-1.5 text-warning">
           <AlertTriangle className="h-3 w-3" aria-hidden />
           Conflict
