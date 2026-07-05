@@ -83,9 +83,6 @@ export function LeaveCalendarDrawer({ open, onOpenChange, onNewRequest, requests
         <StatusBadge tone="warning" dot>
           Pending
         </StatusBadge>
-        <StatusBadge tone="danger" dot>
-          Coverage at risk
-        </StatusBadge>
       </div>
 
       <div className="grid grid-cols-7 overflow-hidden rounded-[10px] border border-border/70">

@@ -137,7 +137,7 @@ export function LeaveRequestInbox({
                         <Plane className="h-3 w-3" aria-hidden /> {r.type}
                       </StatusBadge>
                       <StatusBadge tone={impactTone} dot className="shrink-0 whitespace-nowrap">
-                        {r.impact} impact
+                        {r.impact} duration
                       </StatusBadge>
                       <StatusBadge tone="muted" className="shrink-0 whitespace-nowrap">
                         {r.notice}d notice

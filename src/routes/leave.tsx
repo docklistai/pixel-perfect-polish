@@ -51,7 +51,7 @@ const LEAVE_FILTER_LABELS: Record<LeaveFilter, string> = {
   all: "All types",
   annual: "Annual leave",
   sick: "Sick leave",
-  coverage: "Coverage at risk",
+  coverage: "Long requests (5+ days)",
   notice: "High notice (>30d)",
 };
 
@@ -153,7 +153,7 @@ function LeavePage() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => setFilter("coverage")}>
-                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Coverage at risk
+                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Long requests (5+ days)
                   {filter === "coverage" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilter("notice")}>
@@ -189,7 +189,8 @@ function LeavePage() {
         <>
           <div className="guidance-note mb-4">
             <Info className="h-3 w-3 shrink-0" aria-hidden />
-            Check coverage impact before deciding — high-impact requests are highlighted.
+            Check the rota impact before deciding — affected scheduled shifts appear on pending
+            requests when available.
           </div>
 
           <LeaveMetricCards requests={requests} todayIso={todayIso} />

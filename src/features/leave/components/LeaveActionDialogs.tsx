@@ -38,7 +38,7 @@ export function LeaveActionDialogs({
   onCreateRequest,
 }: Props) {
   const [declineReason, setDeclineReason] = React.useState(
-    "Coverage on these days is already at risk. Could you suggest the week before or after?",
+    "We can't cover these dates — could you suggest the week before or after?",
   );
 
   const isApprove = decisionType === "approve";

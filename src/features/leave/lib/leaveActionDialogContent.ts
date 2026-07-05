@@ -26,7 +26,7 @@ export function approvalDialogRows(
 ): ApprovalDialogRow[] {
   const impactRow: ApprovalDialogRow = {
     kind: "badge",
-    label: "Coverage impact",
+    label: "Request length",
     value: request.impact,
     tone: request.tone,
   };

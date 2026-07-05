@@ -41,12 +41,12 @@ export function LeaveMetricCards({ requests, todayIso }: Props) {
       <MetricCard
         icon={Users}
         tone="danger"
-        label="Coverage at risk"
+        label="Long requests"
         value={coverageRisk.length}
         sub={
           coverageRisk[0]
             ? `${coverageRisk[0].date} · ${coverageRisk[0].dept}`
-            : "No high-risk requests"
+            : "No long pending requests"
         }
       />
     </div>

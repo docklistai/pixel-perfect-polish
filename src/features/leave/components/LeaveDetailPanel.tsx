@@ -63,7 +63,7 @@ export function LeaveDetailPanel({
             </div>
             <div className="mt-2">
               <StatusBadge tone={impactTone} dot>
-                {request.impact} coverage impact
+                {request.impact} duration
               </StatusBadge>
             </div>
           </div>

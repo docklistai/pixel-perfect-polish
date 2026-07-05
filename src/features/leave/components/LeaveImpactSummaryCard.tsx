@@ -8,10 +8,12 @@ interface Props {
 }
 
 function headline(request: LeaveRequest): string {
+  const days = `${request.days} day${request.days === 1 ? "" : "s"}`;
   if (request.impact === "High")
-    return "Possible high coverage impact — check cover before deciding";
-  if (request.impact === "Medium") return "Possible coverage impact — review cover before deciding";
-  return "Low recorded coverage impact for these dates";
+    return `Longer request (${days}) — check the rota for these dates before deciding`;
+  if (request.impact === "Medium")
+    return `Multi-day request (${days}) — review the rota before deciding`;
+  return `Short request (${days})`;
 }
 
 function body(request: LeaveRequest): string {
@@ -20,10 +22,10 @@ function body(request: LeaveRequest): string {
 }
 
 /**
- * Coverage-impact review aid for a pending request. Shows the recorded impact
- * tier and the request's own structured facts only — it does not invent named
- * cover, percentages, or a recommendation. The manager checks the rota and
- * decides.
+ * Review aid for a pending request. Describes the request's length and the
+ * request's own structured facts only — duration is not presented as coverage
+ * risk, and it does not invent named cover, percentages, or a recommendation.
+ * The manager checks the rota and decides.
  */
 export function LeaveImpactSummaryCard({ request, onCheckRota }: Props) {
   return (
@@ -32,7 +34,7 @@ export function LeaveImpactSummaryCard({ request, onCheckRota }: Props) {
       style={{ background: "var(--st-teal-bg)", borderColor: "var(--st-teal-line)" }}
     >
       <div className="row gap-2 mb-2" style={{ alignItems: "center" }}>
-        <AiChip size="sm" label="Coverage check" />
+        <AiChip size="sm" label="Rota check" />
         <span className="muted txt-xs">Review before deciding</span>
       </div>
       <div className="strong txt-sm" style={{ color: "var(--st-teal-ink)" }}>
