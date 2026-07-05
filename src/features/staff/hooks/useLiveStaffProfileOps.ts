@@ -3,10 +3,13 @@ import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
 import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
+import { fetchWorkspaceTimeFn } from "@/features/time/api/timeLiveData";
 import type { LeaveRequest } from "@/features/leave/types";
+import type { StoredTimesheetRow } from "@/features/time/types";
 import {
   memberLeaveRequests,
   memberLeaveSummary,
+  memberRecentTimeRows,
   memberUpcomingShifts,
   type MemberLeaveSummary,
   type MemberUpcomingShift,
@@ -18,6 +21,7 @@ const staffProfileRouteApi = getRouteApi("/staff/$staffId");
 const ROTA_WEEK_OFFSETS = [0, 1] as const;
 const MAX_OVERVIEW_SHIFTS = 3;
 const MAX_SCHEDULE_SHIFTS = 14;
+const MAX_TIME_ROWS = 10;
 
 export interface LiveStaffProfileOps {
   enabled: boolean;
@@ -25,6 +29,8 @@ export interface LiveStaffProfileOps {
   isShiftsError: boolean;
   isLeaveLoading: boolean;
   isLeaveError: boolean;
+  isTimeLoading: boolean;
+  isTimeError: boolean;
   /** True when more than one active location exists, so shifts are one-location only. */
   multiLocation: boolean;
   locationName: string | null;
@@ -32,6 +38,7 @@ export interface LiveStaffProfileOps {
   scheduleShifts: MemberUpcomingShift[];
   leaveSummary: MemberLeaveSummary;
   leaveRequests: LeaveRequest[];
+  timeRows: StoredTimesheetRow[];
 }
 
 const EMPTY_LEAVE_SUMMARY: MemberLeaveSummary = {
@@ -73,6 +80,13 @@ export function useLiveStaffProfileOps(staffId: string): LiveStaffProfileOps {
     staleTime: 15_000,
   });
 
+  const timeQuery = useQuery({
+    queryKey: ["time", "workspace-entries", workspaceId],
+    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId! } }),
+    enabled,
+    staleTime: 15_000,
+  });
+
   const weeks = rotaQuery.data ?? [];
   const todayIso = weeks[0]?.today ?? new Date().toISOString().slice(0, 10);
   const weekInputs = weeks.map((week) => ({
@@ -83,6 +97,7 @@ export function useLiveStaffProfileOps(staffId: string): LiveStaffProfileOps {
   const scheduleShifts = memberUpcomingShifts(weekInputs, staffId, todayIso, MAX_SCHEDULE_SHIFTS);
 
   const allLeave = leaveQuery.data ?? [];
+  const allTime = timeQuery.data ?? [];
 
   return {
     enabled,
@@ -90,11 +105,14 @@ export function useLiveStaffProfileOps(staffId: string): LiveStaffProfileOps {
     isShiftsError: enabled && rotaQuery.isError,
     isLeaveLoading: enabled && leaveQuery.isLoading,
     isLeaveError: enabled && leaveQuery.isError,
+    isTimeLoading: enabled && timeQuery.isLoading,
+    isTimeError: enabled && timeQuery.isError,
     multiLocation: (weeks[0]?.locations.length ?? 0) > 1,
     locationName: weeks[0]?.locationName ?? null,
     overviewShifts: scheduleShifts.slice(0, MAX_OVERVIEW_SHIFTS),
     scheduleShifts,
     leaveSummary: enabled ? memberLeaveSummary(allLeave, staffId, todayIso) : EMPTY_LEAVE_SUMMARY,
     leaveRequests: enabled ? memberLeaveRequests(allLeave, staffId) : [],
+    timeRows: enabled ? memberRecentTimeRows(allTime, staffId, MAX_TIME_ROWS) : [],
   };
 }

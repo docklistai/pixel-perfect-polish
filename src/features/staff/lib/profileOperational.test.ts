@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { DraftShift } from "@/features/rota/types";
 import type { LeaveRequest, LeaveRequestState } from "@/features/leave/types";
+import type { StoredTimesheetRow } from "@/features/time/types";
 import {
   memberLeaveRequests,
   memberLeaveSummary,
+  memberRecentTimeRows,
   memberUpcomingShifts,
   type WeekShiftsInput,
 } from "./profileOperational";
@@ -144,5 +146,68 @@ describe("memberLeaveSummary", () => {
     const summary = memberLeaveSummary(leaveRequests, "s1", "2026-07-01");
     expect(summary.pendingCount).toBe(1);
     expect(summary.nextUpcoming).toBeNull();
+  });
+});
+
+function timeRow(
+  overrides: Partial<StoredTimesheetRow> & Pick<StoredTimesheetRow, "id">,
+): StoredTimesheetRow {
+  return {
+    n: "Test Member",
+    role: "Server",
+    img: 1,
+    sched: "09:00-17:00",
+    in: "09:00",
+    inN: "",
+    out: "17:00",
+    outN: "",
+    brk: "30m",
+    paid: "7 h 30 m",
+    exc: "—",
+    department: "FOH",
+    status: "pending",
+    flagged: false,
+    auditTrail: [],
+    workDate: "2026-06-10",
+    staffMemberId: "s1",
+    ...overrides,
+  } satisfies StoredTimesheetRow;
+}
+
+const demoTimeRow = timeRow({ id: "demo-without-staff-id", workDate: "2026-06-13" });
+delete demoTimeRow.staffMemberId;
+
+const timeRows: StoredTimesheetRow[] = [
+  timeRow({ id: "older", workDate: "2026-06-09", in: "09:00" }),
+  timeRow({ id: "newest-early", workDate: "2026-06-11", in: "08:00" }),
+  timeRow({ id: "newest-late", workDate: "2026-06-11", in: "10:00" }),
+  timeRow({ id: "other-member", staffMemberId: "s2", workDate: "2026-06-12" }),
+  demoTimeRow,
+];
+
+describe("memberRecentTimeRows", () => {
+  it("filters time rows by staff member", () => {
+    const result = memberRecentTimeRows(timeRows, "s1", 0);
+    expect(result.map((row) => row.id)).toEqual(["newest-late", "newest-early", "older"]);
+  });
+
+  it("sorts recent time rows newest first, then later clock-in first", () => {
+    const result = memberRecentTimeRows(timeRows, "s1", 0);
+    expect(result.map((row) => row.id)).toEqual(["newest-late", "newest-early", "older"]);
+  });
+
+  it("caps displayed time rows", () => {
+    const result = memberRecentTimeRows(timeRows, "s1", 2);
+    expect(result.map((row) => row.id)).toEqual(["newest-late", "newest-early"]);
+  });
+
+  it("returns an honest empty result for a member with no time rows", () => {
+    expect(memberRecentTimeRows(timeRows, "nobody", 10)).toEqual([]);
+  });
+
+  it("keeps other members and rows without live ids out of the profile result", () => {
+    const result = memberRecentTimeRows(timeRows, "s1", 0);
+    expect(result.some((row) => row.id === "other-member")).toBe(false);
+    expect(result.some((row) => row.id === "demo-without-staff-id")).toBe(false);
   });
 });

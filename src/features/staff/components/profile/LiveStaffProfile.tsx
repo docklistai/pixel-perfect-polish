@@ -1,14 +1,6 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  ChevronLeft,
-  Mail,
-  Briefcase,
-  Clock,
-  Activity,
-  Pencil,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronLeft, Mail, Briefcase, Activity, Pencil, type LucideIcon } from "lucide-react";
 import { AppShell, Card, StatusBadge, type Tone } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
 import { EditStaffDialog } from "../EditStaffDialog";
@@ -17,6 +9,7 @@ import { ProfileEmptyPanel } from "./ProfileEmptyPanel";
 import { LiveOperationalCards } from "./LiveOperationalCards";
 import { LiveScheduleList } from "./LiveScheduleList";
 import { LiveLeaveList } from "./LiveLeaveList";
+import { LiveTimeList } from "./LiveTimeList";
 import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
 import { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
 import type { StaffRow } from "../../types";
@@ -38,19 +31,13 @@ function portalTone(status: string | undefined): Tone {
 
 /**
  * Tab → honest empty-state copy for live members on the tabs that have no live
- * connection yet. Schedule and Leave are handled by their own live lists.
+ * connection yet. Schedule, Leave, and Time are handled by their own live lists.
  */
 function emptyPanel(
   tab: ProfileTab,
   firstName: string,
 ): { icon: LucideIcon; title: string; description: string; hint?: string } | null {
   switch (tab) {
-    case "time":
-      return {
-        icon: Clock,
-        title: "No timesheets yet",
-        description: `Clock-in and clock-out records appear here once ${firstName} starts logging time.`,
-      };
     case "insights":
       return {
         icon: Activity,
@@ -207,6 +194,7 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
         )}
         {activeTab === "schedule" && <LiveScheduleList ops={ops} firstName={firstName} />}
         {activeTab === "leave" && <LiveLeaveList ops={ops} firstName={firstName} />}
+        {activeTab === "time" && <LiveTimeList ops={ops} firstName={firstName} />}
         {empty && (
           <ProfileEmptyPanel
             icon={empty.icon}

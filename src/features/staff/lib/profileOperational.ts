@@ -1,6 +1,7 @@
 import { addIsoDays, liveWeekDayLabels } from "@/features/rota/lib/liveRotaDates";
 import type { DraftShift, DraftShiftStatus } from "@/features/rota/types";
 import type { LeaveRequest, LeaveRequestState } from "@/features/leave/types";
+import type { StoredTimesheetRow } from "@/features/time/types";
 
 /**
  * Pure, presentation-free helpers that turn already-fetched manager-side live
@@ -125,4 +126,25 @@ export function memberLeaveSummary(
         }
       : null,
   };
+}
+
+/**
+ * This member's recent live time rows, newest work date first. Rows without a
+ * live `staffMemberId` are excluded, which prevents demo-only rows from leaking
+ * into live profile context.
+ */
+export function memberRecentTimeRows(
+  rows: StoredTimesheetRow[],
+  staffId: string,
+  cap: number,
+): StoredTimesheetRow[] {
+  const mine = rows
+    .filter((row) => row.staffMemberId === staffId)
+    .sort((a, b) => {
+      const dateCompare = (b.workDate ?? "").localeCompare(a.workDate ?? "");
+      if (dateCompare !== 0) return dateCompare;
+      return b.in.localeCompare(a.in);
+    });
+
+  return cap > 0 ? mine.slice(0, cap) : mine;
 }

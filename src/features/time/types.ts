@@ -26,6 +26,11 @@ export interface TimeAuditEntry {
 }
 
 export interface StoredTimesheetRow extends TimesheetRow {
+  /**
+   * Live rows carry the owning staff member id so read-only profile surfaces can
+   * filter workspace time entries without changing the Time page behavior.
+   */
+  staffMemberId?: string;
   department: string;
   status: TimesheetStatus;
   flagged: boolean;

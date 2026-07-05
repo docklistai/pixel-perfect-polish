@@ -106,6 +106,7 @@ function avatarIndex(id: string): number {
 function mapTimeRow(row: TimeEntryRow, staff: StaffLite | undefined): StoredTimesheetRow {
   return {
     id: row.id,
+    staffMemberId: row.staff_member_id,
     n: staff?.display_name ?? "Team member",
     role: staff?.role_name ?? "—",
     img: avatarIndex(row.staff_member_id),
