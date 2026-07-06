@@ -4,9 +4,9 @@ import { toast } from "sonner";
 import { AppShell, Card, FeedbackBanner } from "@/components/dl";
 import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
 import { useRotaShiftActions } from "@/features/rota/hooks/useRotaShiftActions";
+import { useGuardedRotaController } from "@/features/rota/hooks/useGuardedRotaController";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { useOverlays } from "@/components/AppShortcuts";
-import { Eye, EyeOff } from "lucide-react";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
 
@@ -14,9 +14,7 @@ import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
 import { RotaLeaveDataWarning } from "@/features/rota/components/RotaLeaveDataWarning";
-import { LabourSummaryCard } from "@/features/rota/components/LabourSummaryCard";
-import { IssuesToResolveCard } from "@/features/rota/components/IssuesToResolveCard";
-import { PublishReadinessCard } from "@/features/rota/components/PublishReadinessCard";
+import { RotaInsightsColumn } from "@/features/rota/components/RotaInsightsColumn";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { useRotaOverlays, type RotaOverlayKey } from "@/features/rota/hooks/useRotaOverlays";
 import { useRotaPublishIntent } from "@/features/rota/hooks/useRotaPublishIntent";
@@ -42,8 +40,6 @@ const SCHEDULE_DESC_ID = "rota-schedule-desc";
 /** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
 const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate"]);
 const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>();
-
-type RotaController = ReturnType<typeof useRotaDraftController>;
 
 function RotaPage() {
   const rota = useRotaDraftController();
@@ -163,39 +159,7 @@ function RotaPage() {
 
   // Block every direct controller mutation in live mode so an edit from a drawer
   // or the grid can never write to the demo store while live data is on screen.
-  const guardedRota = React.useMemo<RotaController>(() => {
-    if (!readOnly) return rota;
-    const blocked = () => actions.block();
-    const blockedAsync = async () => actions.block();
-    return {
-      ...rota,
-      confirmation: null,
-      addShift: blocked,
-      duplicateShiftAsOpen: blocked,
-      duplicateShiftToNextDay: () => {
-        actions.block();
-        return null;
-      },
-      removeShiftNow: blocked,
-      restoreShift: blocked,
-      updateShift: blocked,
-      previewCopyPreviousWeek: async () => {
-        actions.block();
-        throw new Error("Live rota is unavailable.");
-      },
-      copyPreviousWeek: blocked,
-      requestCopyPreviousWeek: blocked,
-      applyOpenShiftSuggestions: () => {
-        actions.block();
-        return [];
-      },
-      handlePublish: blocked,
-      requestRemoveShift: blocked,
-      requestClearWeek: blocked,
-      confirmPendingAction: blockedAsync,
-      markShiftOpen: blocked,
-    };
-  }, [readOnly, rota, actions]);
+  const guardedRota = useGuardedRotaController(rota, readOnly, actions.block);
 
   const headerStatusTone =
     readOnly && rota.source !== "live"
@@ -310,73 +274,19 @@ function RotaPage() {
             <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
           </Card>
 
-          {showInsights ? (
-            <div className="space-y-3">
-              <div className="flex justify-end xl:hidden mb-[-4px]">
-                <button
-                  type="button"
-                  onClick={() => setShowInsights(false)}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-                >
-                  <EyeOff className="h-3.5 w-3.5" aria-hidden />
-                  Hide insights
-                </button>
-              </div>
-              <div className="hidden xl:flex justify-end mb-[-4px]">
-                <button
-                  type="button"
-                  onClick={() => setShowInsights(false)}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-                >
-                  <EyeOff className="h-3.5 w-3.5" aria-hidden />
-                  Hide insights
-                </button>
-              </div>
-              <LabourSummaryCard
-                scheduledHours={rota.scheduledHours}
-                targetHours={rota.targetHours}
-                coveragePct={rota.coveragePct}
-                onViewCoverageDetails={() => openOverlay("coverageDetails")}
-              />
-              <IssuesToResolveCard
-                conflicts={rota.conflictSummaries}
-                workingTimeAlerts={rota.workingTimeAlertList}
-                onReviewShift={rota.setSelectedShiftId}
-                onOpenSupport={openAiDrawer}
-                draftShifts={rota.draftShifts}
-                assignableStaff={rota.assignableStaff}
-                leaveRequests={rota.leaveRequests}
-                dayIsoDates={rota.dayIsoDates}
-                onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
-              />
-              <PublishReadinessCard
-                published={rota.published}
-                hasUnpublishedChanges={rota.hasUnpublishedChanges}
-                publishState={publishState}
-                conflictCount={rota.conflictCount}
-                openShiftCount={rota.openShiftCount}
-                workingTimeAlertCount={workingTimeAlertCount}
-                leaveDataState={leaveDataState}
-                assignedShiftCount={rota.assignedShiftCount}
-                plannedShiftCount={rota.plannedShiftCount}
-                coveragePct={rota.coveragePct}
-                readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
-                canPublish={publishEligibility.canPublish}
-                onPublish={requestPublish}
-              />
-            </div>
-          ) : (
-            <div className="flex justify-center xl:justify-end">
-              <button
-                type="button"
-                onClick={() => setShowInsights(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-              >
-                <Eye className="h-3.5 w-3.5" aria-hidden />
-                Show insights
-              </button>
-            </div>
-          )}
+          <RotaInsightsColumn
+            rota={rota}
+            visible={showInsights}
+            onVisibleChange={setShowInsights}
+            publishState={publishState}
+            leaveDataState={leaveDataState}
+            readOnly={readOnly}
+            canPublish={publishEligibility.canPublish}
+            onPublish={requestPublish}
+            onViewCoverageDetails={() => openOverlay("coverageDetails")}
+            onOpenSupport={openAiDrawer}
+            onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
+          />
         </div>
       </div>
 
