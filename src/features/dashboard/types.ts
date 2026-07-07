@@ -4,8 +4,10 @@ export interface KpiItem {
   icon: LucideIcon;
   label: string;
   value: string;
+  /** Short caption under the value, e.g. "Live roster" or a real trend. */
   delta: string;
-  up: boolean;
+  /** Trend direction. Omit when there is no real week-on-week comparison. */
+  up?: boolean;
   tone: string;
   tip?: string;
 }

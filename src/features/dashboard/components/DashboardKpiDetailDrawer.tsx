@@ -44,16 +44,20 @@ export function DashboardKpiDetailDrawer({ item, onOpenChange }: Props) {
             </div>
             <div>
               <div className="text-[34px] font-bold leading-none tracking-tight">{item.value}</div>
-              <div
-                className={`mt-2 flex items-center gap-1.5 text-sm font-medium ${item.up ? "text-success" : "text-danger"}`}
-              >
-                {item.up ? (
-                  <ArrowUp className="h-3.5 w-3.5" aria-hidden />
-                ) : (
-                  <ArrowDown className="h-3.5 w-3.5" aria-hidden />
-                )}
-                {item.delta} vs last week
-              </div>
+              {item.up === undefined ? (
+                <div className="mt-2 text-sm font-medium text-muted-foreground">{item.delta}</div>
+              ) : (
+                <div
+                  className={`mt-2 flex items-center gap-1.5 text-sm font-medium ${item.up ? "text-success" : "text-danger"}`}
+                >
+                  {item.up ? (
+                    <ArrowUp className="h-3.5 w-3.5" aria-hidden />
+                  ) : (
+                    <ArrowDown className="h-3.5 w-3.5" aria-hidden />
+                  )}
+                  {item.delta} vs last week
+                </div>
+              )}
             </div>
           </div>
 
@@ -62,25 +66,6 @@ export function DashboardKpiDetailDrawer({ item, onOpenChange }: Props) {
               How this is calculated
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">{item.tip}</p>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card/50 p-4">
-            <div className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Week-on-week trend
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full w-[72%] rounded-full bg-brand transition-all" />
-            </div>
-            <div className="mt-2 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">On track</span>
-              <button
-                type="button"
-                onClick={handleViewReports}
-                className="font-semibold text-brand hover:underline"
-              >
-                Drill in from Reports
-              </button>
-            </div>
           </div>
         </div>
       )}

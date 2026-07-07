@@ -30,6 +30,7 @@ export function weekScopePossessive(scope: DashboardWeekScope): string {
 
 /** Manager-support card title with correct singular/plural for the active count. */
 export function dashboardAttentionTitle(activeCategories: number): string {
+  if (activeCategories === 0) return "Nothing needs your attention right now";
   return `${activeCategories} thing${activeCategories === 1 ? "" : "s"} worth your attention today`;
 }
 
@@ -41,7 +42,22 @@ export function dashboardAttentionSummary(input: {
   pendingLeave: number;
 }): string {
   const { weekScope, openShifts, pendingTime, pendingLeave } = input;
-  return `${weekScopePossessive(weekScope)} draft has ${openShifts} open shifts. ${pendingTime} timesheets need manager review and ${pendingLeave} leave requests are pending.`;
+  if (openShifts === 0 && pendingTime === 0 && pendingLeave === 0) {
+    return `${weekScopePossessive(weekScope)} draft has no open shifts, and no timesheets or leave requests are waiting on you.`;
+  }
+  const shiftPart =
+    openShifts === 0
+      ? `${weekScopePossessive(weekScope)} draft has no open shifts`
+      : `${weekScopePossessive(weekScope)} draft has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`;
+  const timePart =
+    pendingTime === 0
+      ? "No timesheets need manager review"
+      : `${pendingTime} timesheet${pendingTime === 1 ? "" : "s"} need${pendingTime === 1 ? "s" : ""} manager review`;
+  const leavePart =
+    pendingLeave === 0
+      ? "no leave requests are pending"
+      : `${pendingLeave} leave request${pendingLeave === 1 ? "" : "s"} ${pendingLeave === 1 ? "is" : "are"} pending`;
+  return `${shiftPart}. ${timePart} and ${leavePart}.`;
 }
 
 export interface DashboardOperationalInput {

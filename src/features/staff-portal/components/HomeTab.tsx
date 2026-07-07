@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, MessageSquare, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, CalendarDays, Clock, MapPin, MessageSquare } from "lucide-react";
 import { DashboardCard, StatusBadge } from "@/components/dl";
 import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalProfile } from "../hooks/usePortalProfile";
@@ -36,26 +36,16 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
                 <MapPin className="h-4 w-4 text-white/75" /> {nextShift.station}
               </div>
             </div>
-            <div className="mt-4 flex items-end gap-3">
-              <div className="h-1.5 flex-1 rounded-full bg-white/20">
-                <div className="h-full w-[32%] rounded-full bg-white" />
-              </div>
-              <span className="text-[11px] font-medium text-white/80">Published rota</span>
+            <div className="mt-4 text-[11px] font-medium text-white/80">
+              From your published rota
             </div>
             <button
               type="button"
               onClick={() => onNavigate("shifts")}
-              className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-brand font-semibold shadow-[var(--shadow-card)] hover:bg-white/95"
+              className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-brand font-semibold shadow-[var(--shadow-card)] hover:bg-white/95"
             >
               <Clock className="h-4 w-4" />
               View shift details
-            </button>
-            <button
-              type="button"
-              onClick={() => onNavigate("shifts")}
-              className="mt-2 inline-flex w-full items-center justify-center gap-1 text-[11px] font-semibold text-white/85 hover:text-white"
-            >
-              View published rota <ArrowRight className="h-3 w-3" />
             </button>
           </div>
         </DashboardCard>
@@ -130,7 +120,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             {
               title: "View shifts",
               description: "Upcoming rota",
-              icon: Sparkles,
+              icon: CalendarDays,
               tone: "info",
               tab: "shifts" as PortalTab,
             },

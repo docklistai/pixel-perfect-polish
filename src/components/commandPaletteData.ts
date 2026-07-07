@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Home,
+  KeyRound,
   MessageSquare,
   Plus,
   Send,
@@ -92,6 +93,13 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
     icon: UserPlus,
     to: "/staff",
     intent: "staff.add",
+  },
+  {
+    label: "Share access codes",
+    hint: "Give staff their portal sign-in codes",
+    icon: KeyRound,
+    to: "/staff",
+    intent: "staff.accessCodes",
   },
   {
     label: "Review leave requests",

@@ -138,9 +138,12 @@ describe("dashboardAttentionTitle (D3 pluralization)", () => {
     expect(dashboardAttentionTitle(1)).toBe("1 thing worth your attention today");
   });
 
-  it("uses the plural 'things' for zero or many", () => {
-    expect(dashboardAttentionTitle(0)).toBe("0 things worth your attention today");
+  it("uses the plural 'things' for many", () => {
     expect(dashboardAttentionTitle(2)).toBe("2 things worth your attention today");
+  });
+
+  it("reads as a genuine all-clear when nothing is active", () => {
+    expect(dashboardAttentionTitle(0)).toBe("Nothing needs your attention right now");
   });
 });
 
@@ -154,5 +157,29 @@ describe("dashboardAttentionSummary", () => {
     });
     expect(body).toContain("This week's draft has 4 open shifts");
     expect(body.toLowerCase()).not.toContain("next week");
+  });
+
+  it("never renders robotic zero counts", () => {
+    const body = dashboardAttentionSummary({
+      weekScope: "current",
+      openShifts: 0,
+      pendingTime: 2,
+      pendingLeave: 0,
+    });
+    expect(body).not.toMatch(/\b0\b/);
+    expect(body).toContain("no open shifts");
+    expect(body).toContain("2 timesheets need manager review");
+  });
+
+  it("summarises an all-clear week in one natural sentence", () => {
+    const body = dashboardAttentionSummary({
+      weekScope: "current",
+      openShifts: 0,
+      pendingTime: 0,
+      pendingLeave: 0,
+    });
+    expect(body).toBe(
+      "This week's draft has no open shifts, and no timesheets or leave requests are waiting on you.",
+    );
   });
 });

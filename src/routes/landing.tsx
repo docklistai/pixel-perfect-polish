@@ -15,7 +15,7 @@ import {
 export const Route = createFileRoute("/landing")({
   head: () => ({
     meta: [
-      { title: "DocklistAI - The rota, rebuilt." },
+      { title: "DocklistAI — The rota, rebuilt." },
       {
         name: "description",
         content:

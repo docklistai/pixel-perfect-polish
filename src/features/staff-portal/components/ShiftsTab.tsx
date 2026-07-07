@@ -1,7 +1,9 @@
 import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
+import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 import { usePortalRota } from "../hooks/usePortalRota";
+import { toPortalRequest } from "../lib/portalRequests";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalRequest, PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
@@ -179,14 +181,16 @@ function ShiftList({
 }
 
 function RequestsList() {
-  const requests: PortalRequest[] = [];
+  // Same live source as the Leave tab, so staff find their requests either way.
+  const { isLive, requestHistory } = usePortalLeaveRequests();
+  const requests: PortalRequest[] = (isLive ? requestHistory : []).map(toPortalRequest);
   if (requests.length === 0) {
     return (
       <DashboardCard className="p-6">
         <EmptyState
           icon={CalendarOff}
           title="No requests yet"
-          description="Submitted requests will appear here."
+          description="Time-off requests you submit will appear here."
         />
       </DashboardCard>
     );

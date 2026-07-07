@@ -8,7 +8,7 @@ import {
   StatusBadge,
   AlertCard,
 } from "@/components/dl";
-import { Megaphone, Gift, Users, User, X, ChevronRight, Edit3, Check, Info } from "lucide-react";
+import { Megaphone, Gift, ChevronRight, Edit3, Check, Info } from "lucide-react";
 import { toast } from "sonner";
 import { TeamKpiCards } from "@/features/team/components/TeamKpiCards";
 import { TeamAnnouncementList } from "@/features/team/components/TeamAnnouncementList";
@@ -39,7 +39,7 @@ function TeamPage() {
   const [selectedBirthday, setSelectedBirthday] = React.useState<TeamBirthdayItem | null>(null);
   const [selectedTraining, setSelectedTraining] = React.useState<TeamTrainingItem | null>(null);
 
-  const handleBirthdayAction = (action: "note" | "update" | "profile" | "hide") => {
+  const handleBirthdayAction = (action: "note" | "update") => {
     if (!selectedBirthday) return;
     setSelectedBirthday(null);
 
@@ -53,16 +53,6 @@ function TeamPage() {
       case "update":
         toast.info("Preview only", {
           description: "Sample staff update opened in the composer. Nothing is saved or posted.",
-        });
-        break;
-      case "profile":
-        toast.info("Preview only", {
-          description: `${selectedBirthday.n}'s profile is not opened from this sample reminder.`,
-        });
-        break;
-      case "hide":
-        toast.info("Preview only", {
-          description: "Sample reminder visibility is not persisted.",
         });
         break;
     }
@@ -189,20 +179,6 @@ function TeamPage() {
                   title: "Create staff update draft",
                   desc: "Preview a team announcement — nothing is posted",
                 },
-                {
-                  id: "profile" as const,
-                  icon: User,
-                  tone: "info" as const,
-                  title: "Open profile",
-                  desc: "Preview action only — no profile opens",
-                },
-                {
-                  id: "hide" as const,
-                  icon: X,
-                  tone: "muted" as const,
-                  title: "Hide this reminder",
-                  desc: "Preview action only — visibility is unchanged",
-                },
               ].map((btn) => (
                 <button
                   key={btn.id}
@@ -213,11 +189,7 @@ function TeamPage() {
                     className={`p-2 rounded-lg shrink-0 ${
                       btn.tone === "brand"
                         ? "bg-brand-soft text-brand"
-                        : btn.tone === "purple"
-                          ? "bg-accent-purple-soft text-accent-purple"
-                          : btn.tone === "info"
-                            ? "bg-info-soft text-info"
-                            : "bg-muted text-muted-foreground"
+                        : "bg-accent-purple-soft text-accent-purple"
                     }`}
                   >
                     <btn.icon className="h-4 w-4" />

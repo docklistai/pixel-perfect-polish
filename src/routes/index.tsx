@@ -6,6 +6,8 @@ import { useOverlays } from "@/components/AppShortcuts";
 import { useIntents, type IntentName } from "@/lib/interactionIntents";
 import { Sparkles, MoreHorizontal, Plus, ChevronDown } from "lucide-react";
 import { DashboardAISummaryCard } from "@/features/dashboard/components/DashboardAISummaryCard";
+import { DashboardSetupPanel } from "@/features/dashboard/components/DashboardSetupPanel";
+import { buildDashboardSetup } from "@/features/dashboard/lib/dashboardSetup";
 import { DashboardKpiCards } from "@/features/dashboard/components/DashboardKpiCards";
 import { DashboardAttentionPanel } from "@/features/dashboard/components/DashboardAttentionPanel";
 import { DashboardLabourWatch } from "@/features/dashboard/components/DashboardLabourWatch";
@@ -57,6 +59,16 @@ function Home() {
   const { workspaceName } = useManagerIdentity();
   const greeting = useGreeting();
   const isLiveDashboard = dashboard.source === "live";
+  // Live-only setup/readiness checklist; demo workspaces are always populated.
+  const setupPlan =
+    dashboard.source === "live" && dashboard.liveReady
+      ? buildDashboardSetup({
+          staffCount: dashboard.staffCount,
+          plannedShiftCount: dashboard.plannedShiftCount,
+          hasPublishedSnapshot: dashboard.nextPublished,
+        })
+      : null;
+  const showSetupPanel = setupPlan?.show ?? false;
   const visibleQuickActionItems = React.useMemo(
     () => (isLiveDashboard ? quickActionItems.filter((item) => !item.preview) : quickActionItems),
     [isLiveDashboard],
@@ -110,8 +122,16 @@ function Home() {
         <div className="min-w-0">
           <h1>{greeting}</h1>
           <p>
-            Here&apos;s what needs your attention across {workspaceName}{" "}
-            {filter === "today" ? "today" : "this week"}.
+            {showSetupPanel && setupPlan?.mode === "workspace" ? (
+              <>Let&apos;s get {workspaceName} ready for its first published rota.</>
+            ) : showSetupPanel ? (
+              <>Time to plan the week ahead for {workspaceName}.</>
+            ) : (
+              <>
+                Here&apos;s what needs your attention across {workspaceName}{" "}
+                {filter === "today" ? "today" : "this week"}.
+              </>
+            )}
           </p>
         </div>
         <div className="actions flex-wrap">
@@ -238,8 +258,15 @@ function Home() {
         </div>
       </div>
 
+      {/* Setup / weekly-readiness checklist for empty live workspaces */}
+      {showSetupPanel && setupPlan && (
+        <div className="mb-4">
+          <DashboardSetupPanel plan={setupPlan} />
+        </div>
+      )}
+
       {/* AI manager summary (dismissible) */}
-      {!summaryDismissed && (
+      {!summaryDismissed && !showSetupPanel && (
         <div className="mb-4">
           <DashboardAISummaryCard
             onDismiss={() => setSummaryDismissed(true)}

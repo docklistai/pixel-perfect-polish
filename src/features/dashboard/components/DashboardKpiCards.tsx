@@ -12,11 +12,8 @@ interface Props {
 export function DashboardKpiCards({ items, title, onKpiClick }: Props) {
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="dock-section-eyebrow">{title}</div>
-        </div>
-        <div className="text-xs text-muted-foreground">Vs last week</div>
+      <div className="flex items-center gap-2">
+        <div className="dock-section-eyebrow">{title}</div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {items.map((m) => (
@@ -35,18 +32,22 @@ export function DashboardKpiCards({ items, title, onKpiClick }: Props) {
               {m.label}
             </div>
             <div className="text-[24px] font-semibold tracking-tight">{m.value}</div>
-            <div
-              className={`flex items-center gap-1.5 text-xs font-medium ${
-                m.up ? "text-success" : "text-danger"
-              }`}
-            >
-              {m.up ? (
-                <ArrowUp className="h-3 w-3" aria-hidden />
-              ) : (
-                <ArrowDown className="h-3 w-3" aria-hidden />
-              )}
-              <span>{m.delta}</span>
-            </div>
+            {m.up === undefined ? (
+              <div className="text-xs font-medium text-muted-foreground">{m.delta}</div>
+            ) : (
+              <div
+                className={`flex items-center gap-1.5 text-xs font-medium ${
+                  m.up ? "text-success" : "text-danger"
+                }`}
+              >
+                {m.up ? (
+                  <ArrowUp className="h-3 w-3" aria-hidden />
+                ) : (
+                  <ArrowDown className="h-3 w-3" aria-hidden />
+                )}
+                <span>{m.delta}</span>
+              </div>
+            )}
           </button>
         ))}
       </div>

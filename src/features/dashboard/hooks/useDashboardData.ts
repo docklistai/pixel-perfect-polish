@@ -75,6 +75,10 @@ export function useDashboardData() {
     };
   }
 
+  // The setup panel must never flash while live reads resolve, so it only
+  // renders once the roster and week reads have both succeeded.
+  const liveReady = staffQuery.isSuccess && weekQuery.isSuccess;
+
   const week = weekQuery.data ?? null;
   const shifts = week?.shifts ?? [];
   const openShifts = countOpenShifts(shifts);
@@ -106,7 +110,6 @@ export function useDashboardData() {
       label: "Scheduled hours",
       value: `${Math.round(totalScheduledHours(shifts))}h`,
       delta: "This week · live",
-      up: true,
       tone: "info",
       tip: "Total scheduled hours this week, from your live rota.",
     },
@@ -115,7 +118,6 @@ export function useDashboardData() {
       label: "Team size",
       value: String(staffCount),
       delta: "Live roster",
-      up: true,
       tone: "brand",
       tip: "Staff members in your workspace roster.",
     },
@@ -126,7 +128,6 @@ export function useDashboardData() {
       label: "On shift today",
       value: String(onShiftToday),
       delta: "Live",
-      up: true,
       tone: "info",
       tip: "Assigned shifts on today's live rota.",
     },
@@ -134,7 +135,9 @@ export function useDashboardData() {
 
   return {
     source: "live" as const,
+    liveReady,
     openShifts,
+    plannedShiftCount: shifts.length,
     pendingTime,
     pendingLeave,
     leaveItems,

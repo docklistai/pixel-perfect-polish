@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
 import {
   ActionButton,
   DashboardCard,
@@ -11,7 +11,7 @@ import {
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import type { PortalRequest, RequestKind, RequestStatus } from "../types";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
-import type { PortalLeaveRequest } from "../api/portalLiveData";
+import { toPortalRequest } from "../lib/portalRequests";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 import { usePortalRota } from "../hooks/usePortalRota";
 
@@ -66,14 +66,11 @@ export function LeaveTab() {
           </div>
           <span className="text-[11px] text-muted-foreground">As of today</span>
         </div>
-        <dl className="mt-3 grid grid-cols-1 gap-2.5 text-center sm:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-muted/40 py-3 px-2">
-            <dt className="text-[11px] text-muted-foreground">Balances</dt>
-            <dd className="mt-1 text-sm font-semibold text-muted-foreground">Not available yet</dd>
+        <div className="mt-3 rounded-2xl border border-border bg-muted/40 px-3 py-4 text-center">
+          <div className="text-sm font-semibold text-muted-foreground">Not available yet</div>
+          <div className="mt-1 text-xs text-muted-foreground">
+            Live leave balances will appear here in a future update.
           </div>
-        </dl>
-        <div className="mt-3 text-center text-xs text-muted-foreground">
-          Live leave balances will appear here in a future update
         </div>
       </DashboardCard>
 
@@ -123,31 +120,10 @@ export function LeaveTab() {
           <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
             AVAILABILITY
           </div>
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
-            <Pencil className="h-3 w-3" /> Edit
-          </span>
-        </div>
-        <div className="mt-2 flex items-center justify-between">
-          <button
-            type="button"
-            aria-label="Previous week"
-            className="p-1 rounded-md opacity-40"
-            disabled
-          >
-            <ChevronLeft className="h-4 w-4 text-muted-foreground" />
-          </button>
-          <div className="text-xs text-foreground font-medium">{weekLabel}</div>
-          <button
-            type="button"
-            aria-label="Next week"
-            className="p-1 rounded-md opacity-40"
-            disabled
-          >
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </button>
+          <span className="text-[11px] text-muted-foreground">{weekLabel}</span>
         </div>
         <div className="mt-3 text-[11px] text-muted-foreground">
-          Availability editing will be available in a future update
+          Availability editing will be available in a future update.
         </div>
       </DashboardCard>
 
@@ -218,16 +194,4 @@ export function LeaveTab() {
       </DrawerShell>
     </div>
   );
-}
-
-function toPortalRequest(request: PortalLeaveRequest): PortalRequest {
-  return {
-    id: request.id,
-    kind: "time-off",
-    title: `${request.type} · ${request.date}`,
-    detail: request.reason,
-    submitted: request.submittedAt,
-    status: request.status,
-    managerResponse: request.decisionReason,
-  };
 }
