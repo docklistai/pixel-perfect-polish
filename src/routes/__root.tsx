@@ -94,9 +94,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Docklist" },
-      { name: "description", content: "Smart scheduling for hospitality" },
-      { property: "og:description", content: "Smart scheduling for hospitality" },
-      { name: "twitter:description", content: "Smart scheduling for hospitality" },
+      {
+        name: "twitter:description",
+        content:
+          "Workforce management for hospitality teams — rota, time, leave and operations in one place.",
+      },
       {
         property: "og:image",
         content:

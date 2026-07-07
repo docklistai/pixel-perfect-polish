@@ -39,7 +39,7 @@ function ReportsPage() {
         subtitle="Review labour cost, coverage, and attendance — with scheduling context and manager review points."
         actions={
           <>
-            <span className="btn secondary sm" aria-label="Reporting period">
+            <span className="badge" title="Sample reporting period">
               <CalendarDays className="h-3.5 w-3.5" aria-hidden />
               Last 4 weeks
             </span>
@@ -64,7 +64,6 @@ function ReportsPage() {
         tone="warning"
         title="Preview — Reports uses sample reporting content"
         description="Charts, £ figures, saved reports, exports, and insight drawers are sample previews. They are not live BI, payroll, finance, or performance analytics."
-        action={<></>}
       />
 
       <div className="guidance-note mb-4">

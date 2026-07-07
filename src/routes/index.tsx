@@ -24,6 +24,7 @@ import {
   quickActionItems,
 } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
+import { useGreeting } from "@/features/dashboard/hooks/useGreeting";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
@@ -54,6 +55,7 @@ function Home() {
   const moreRef = React.useRef<HTMLDivElement>(null);
   const dashboard = useDashboardData();
   const { workspaceName } = useManagerIdentity();
+  const greeting = useGreeting();
   const isLiveDashboard = dashboard.source === "live";
   const visibleQuickActionItems = React.useMemo(
     () => (isLiveDashboard ? quickActionItems.filter((item) => !item.preview) : quickActionItems),
@@ -106,7 +108,7 @@ function Home() {
       {/* Header — prototype: title + actions row */}
       <div className="page-head flex-col lg:flex-row">
         <div className="min-w-0">
-          <h1>Good morning</h1>
+          <h1>{greeting}</h1>
           <p>
             Here&apos;s what needs your attention across {workspaceName}{" "}
             {filter === "today" ? "today" : "this week"}.

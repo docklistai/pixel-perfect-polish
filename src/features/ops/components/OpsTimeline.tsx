@@ -9,20 +9,31 @@ import { BriefingsTab, ChecklistsTab, EntryListTab } from "./OpsLogTabs";
 import { OpsTimelineEntry } from "./OpsTimelineEntry";
 import { notifyOpsPreview } from "../lib/opsPreview";
 
-const SORT_OPTIONS = ["Time (newest)", "Time (oldest)", "Priority", "Status"];
+const SORT_OPTIONS = ["Time (newest)", "Time (oldest)", "Priority", "Status"] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
 
-const tabs: Array<{
-  id: OpsLogTab;
-  label: string;
-  count?: number;
-  tone?: Tone;
-}> = [
-  { id: "timeline", label: "Today's timeline" },
-  { id: "briefings", label: "Briefings", count: 2, tone: "purple" },
-  { id: "tasks", label: "Tasks", count: 6, tone: "info" },
-  { id: "incidents", label: "Incidents", count: 5, tone: "warning" },
-  { id: "checks", label: "Checklists", count: 4, tone: "muted" },
-];
+const PRIORITY_ORDER: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
+const STATUS_ORDER: Record<string, number> = { Open: 0, "In progress": 1, Done: 2, Closed: 3 };
+
+function sortEntries(entries: OpsEntry[], sortBy: SortOption): OpsEntry[] {
+  const sorted = [...entries];
+  switch (sortBy) {
+    case "Time (newest)":
+      return sorted.sort((a, b) => b.t.localeCompare(a.t));
+    case "Time (oldest)":
+      return sorted.sort((a, b) => a.t.localeCompare(b.t));
+    case "Priority":
+      return sorted.sort(
+        (a, b) => (PRIORITY_ORDER[a.prio ?? ""] ?? 3) - (PRIORITY_ORDER[b.prio ?? ""] ?? 3),
+      );
+    case "Status":
+      return sorted.sort((a, b) => (STATUS_ORDER[a.st] ?? 4) - (STATUS_ORDER[b.st] ?? 4));
+  }
+}
+
+const isTaskEntry = (entry: OpsEntry) => entry.icon !== FileText && entry.dot !== "danger";
+const isIncidentEntry = (entry: OpsEntry) =>
+  entry.dot === "danger" || entry.dot === "warning" || entry.icon === FileText;
 
 interface OpsTimelineProps {
   entries: OpsEntry[];
@@ -30,6 +41,8 @@ interface OpsTimelineProps {
   onMarkDone: (id: string) => void;
   onDelete: (id: string) => void;
   onOpenLogEntry: () => void;
+  /** Present when a route-level filter hides entries; renders a clearer empty state. */
+  onClearFilter?: (() => void) | null;
 }
 
 export function OpsTimeline({
@@ -38,9 +51,24 @@ export function OpsTimeline({
   onMarkDone,
   onDelete,
   onOpenLogEntry,
+  onClearFilter,
 }: OpsTimelineProps) {
   const [tab, setTab] = React.useState<OpsLogTab>("timeline");
-  const [sortBy, setSortBy] = React.useState(SORT_OPTIONS[0]);
+  const [sortBy, setSortBy] = React.useState<SortOption>(SORT_OPTIONS[0]);
+  const sortedEntries = React.useMemo(() => sortEntries(entries, sortBy), [entries, sortBy]);
+
+  const tabs: Array<{ id: OpsLogTab; label: string; count?: number; tone?: Tone }> = [
+    { id: "timeline", label: "Today's timeline" },
+    { id: "briefings", label: "Briefings", count: 2, tone: "purple" },
+    { id: "tasks", label: "Tasks", count: entries.filter(isTaskEntry).length, tone: "info" },
+    {
+      id: "incidents",
+      label: "Incidents",
+      count: entries.filter(isIncidentEntry).length,
+      tone: "warning",
+    },
+    { id: "checks", label: "Checklists", count: 4, tone: "muted" },
+  ];
 
   return (
     <Card className="overflow-hidden p-0">
@@ -84,16 +112,17 @@ export function OpsTimeline({
 
       {tab === "timeline" && (
         <TimelineTab
-          entries={entries}
+          entries={sortedEntries}
           onOpenEntry={onOpenEntry}
           onMarkDone={onMarkDone}
           onDelete={onDelete}
+          onClearFilter={onClearFilter}
         />
       )}
       {tab === "briefings" && <BriefingsTab onNew={onOpenLogEntry} />}
       {tab === "tasks" && (
         <EntryListTab
-          entries={entries.filter((entry) => entry.icon !== FileText && entry.dot !== "danger")}
+          entries={sortedEntries.filter(isTaskEntry)}
           emptyTitle="No tasks to review"
           onOpenEntry={onOpenEntry}
           onMarkDone={onMarkDone}
@@ -101,9 +130,7 @@ export function OpsTimeline({
       )}
       {tab === "incidents" && (
         <EntryListTab
-          entries={entries.filter(
-            (entry) => entry.dot === "danger" || entry.dot === "warning" || entry.icon === FileText,
-          )}
+          entries={sortedEntries.filter(isIncidentEntry)}
           emptyTitle="No incidents to review"
           onOpenEntry={onOpenEntry}
           onMarkDone={onMarkDone}
@@ -119,8 +146,22 @@ function TimelineTab({
   onOpenEntry,
   onMarkDone,
   onDelete,
+  onClearFilter,
 }: Omit<OpsTimelineProps, "onOpenLogEntry">) {
   if (entries.length === 0) {
+    if (onClearFilter) {
+      return (
+        <EmptyState
+          title="No entries match this filter"
+          description="Change the filter to see the rest of today's log."
+          action={
+            <button type="button" className="btn secondary sm" onClick={onClearFilter}>
+              Show all entries
+            </button>
+          }
+        />
+      );
+    }
     return (
       <EmptyState
         title="No activity yet"

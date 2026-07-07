@@ -4,23 +4,11 @@ import {
   AppShell,
   PageHeader,
   ActionButton,
-  IconButton,
   DialogShell,
   StatusBadge,
   AlertCard,
 } from "@/components/dl";
-import {
-  Megaphone,
-  MoreHorizontal,
-  Gift,
-  Users,
-  User,
-  X,
-  ChevronRight,
-  Edit3,
-  Check,
-  Info,
-} from "lucide-react";
+import { Megaphone, Gift, Users, User, X, ChevronRight, Edit3, Check, Info } from "lucide-react";
 import { toast } from "sonner";
 import { TeamKpiCards } from "@/features/team/components/TeamKpiCards";
 import { TeamAnnouncementList } from "@/features/team/components/TeamAnnouncementList";
@@ -86,12 +74,9 @@ function TeamPage() {
         title="Team"
         subtitle="Preview manager announcements, briefings, and private reminders without live messaging."
         actions={
-          <>
-            <ActionButton icon={Megaphone} onClick={() => setComposeOpen(true)}>
-              Compose
-            </ActionButton>
-            <IconButton icon={MoreHorizontal} label="More actions" />
-          </>
+          <ActionButton icon={Megaphone} onClick={() => setComposeOpen(true)}>
+            Compose
+          </ActionButton>
         }
       />
 
@@ -100,7 +85,6 @@ function TeamPage() {
         tone="warning"
         title="Preview — Team uses sample communication content"
         description="Announcements, read indicators, manager notes, birthdays, events, and training reminders are sample previews. No chat, social feed, monitoring, LMS, or staff delivery is live-wired."
-        action={<></>}
       />
 
       <div className="grid grid-cols-12 gap-5">

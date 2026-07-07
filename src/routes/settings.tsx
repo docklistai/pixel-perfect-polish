@@ -76,7 +76,6 @@ function SettingsPage() {
         tone="warning"
         title="Preview — Settings changes are not live-wired"
         description="Some settings, permissions, security controls, exports, and plan details are sample previews. Unsupported actions are labelled and do not change auth, billing, integrations, or files."
-        action={<></>}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">

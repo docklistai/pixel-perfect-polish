@@ -184,7 +184,7 @@ function AuthPage() {
 
                     <button
                       type="button"
-                      onClick={() => navigate({ to: "/" })}
+                      onClick={() => navigate({ to: "/landing" })}
                       className="w-full text-center text-sm text-muted-foreground hover:text-foreground"
                     >
                       Learn more about DocklistAI →

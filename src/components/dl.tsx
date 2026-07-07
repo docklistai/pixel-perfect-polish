@@ -669,7 +669,7 @@ export function AlertCard({
         <div className="text-sm font-medium">{title}</div>
         {description && <div className="text-xs text-muted-foreground">{description}</div>}
       </div>
-      {action ?? <ArrowRight className="h-4 w-4 text-muted-foreground" aria-hidden />}
+      {action}
     </div>
   );
 }

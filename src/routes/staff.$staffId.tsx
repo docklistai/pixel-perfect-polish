@@ -14,8 +14,10 @@ import { ProfileDocumentsTab } from "@/features/staff/components/profile/Profile
 import { ProfileNotesTab } from "@/features/staff/components/profile/ProfileNotesTab";
 import { ProfileInsightsTab } from "@/features/staff/components/profile/ProfileInsightsTab";
 import type { StaffProfile, StaffProfileNote } from "@/features/staff/types";
+import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/staff/$staffId")({
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Staff Profile — Docklist" }] }),
   component: StaffProfilePage,
 });

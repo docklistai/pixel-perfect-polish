@@ -45,8 +45,19 @@ const STATUS_TONE: Record<string, OpsEntry["stTone"]> = {
   Closed: "info",
 };
 
-const FILTER_SCOPES = ["All entries", "Open only", "High priority only", "Assigned to me"];
-const FILTER_RANGES = ["Today", "Yesterday", "Last 7 days"];
+const FILTER_SCOPES = ["All entries", "Open only", "High priority only"] as const;
+type FilterScope = (typeof FILTER_SCOPES)[number];
+
+function matchesFilterScope(entry: OpsEntry, scope: FilterScope): boolean {
+  switch (scope) {
+    case "All entries":
+      return true;
+    case "Open only":
+      return entry.st === "Open" || entry.st === "In progress";
+    case "High priority only":
+      return entry.prio === "High";
+  }
+}
 
 function OpsPage() {
   const navigate = useNavigate();
@@ -57,10 +68,13 @@ function OpsPage() {
   const [logEntryOpen, setLogEntryOpen] = React.useState(false);
   const [handoverOpen, setHandoverOpen] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const [filterScope, setFilterScope] = React.useState(FILTER_SCOPES[0]);
-  const [filterRange, setFilterRange] = React.useState(FILTER_RANGES[0]);
+  const [filterScope, setFilterScope] = React.useState<FilterScope>(FILTER_SCOPES[0]);
 
   const selectedEntry = entries.find((e) => e.id === selectedId) ?? null;
+  const visibleEntries = React.useMemo(
+    () => entries.filter((entry) => matchesFilterScope(entry, filterScope)),
+    [entries, filterScope],
+  );
 
   const handleAddEntry = ({
     title,
@@ -141,26 +155,21 @@ function OpsPage() {
               triggerLabel="Filter entries"
               trigger={
                 <button type="button" className="btn secondary">
-                  <Filter className="h-3.5 w-3.5" aria-hidden /> Filters
+                  <Filter className="h-3.5 w-3.5" aria-hidden />{" "}
+                  {filterScope === "All entries" ? "Filters" : filterScope}
                 </button>
               }
               items={[
-                { kind: "label", text: "Filter" },
+                { kind: "label", text: "Show in timeline" },
                 ...FILTER_SCOPES.map((s) => ({
                   label: s,
                   icon: filterScope === s ? Check : undefined,
                   onSelect: () => setFilterScope(s),
                 })),
-                { kind: "separator" },
-                ...FILTER_RANGES.map((r) => ({
-                  label: r,
-                  icon: filterRange === r ? Check : undefined,
-                  onSelect: () => setFilterRange(r),
-                })),
               ]}
             />
             <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Open risks
+              Manager support
             </ActionButton>
             <ActionButton variant="secondary" icon={FileText} onClick={() => setHandoverOpen(true)}>
               Handover note
@@ -199,7 +208,6 @@ function OpsPage() {
         tone="warning"
         title={OPS_PREVIEW_BANNER_TITLE}
         description={OPS_PREVIEW_BANNER_DESCRIPTION}
-        action={<></>}
       />
 
       <div className="guidance-note mb-4">
@@ -219,11 +227,14 @@ function OpsPage() {
             onOpenAssistant={openAiDrawer}
           />
           <OpsTimeline
-            entries={entries}
+            entries={visibleEntries}
             onOpenEntry={(entry) => setSelectedId(entry.id)}
             onMarkDone={(id) => handleChangeStatus(id, "Done", { close: true })}
             onDelete={handleDelete}
             onOpenLogEntry={() => setLogEntryOpen(true)}
+            onClearFilter={
+              filterScope !== "All entries" ? () => setFilterScope("All entries") : null
+            }
           />
         </div>
         <OpsRightRail />
