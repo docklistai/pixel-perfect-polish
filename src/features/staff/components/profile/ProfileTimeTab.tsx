@@ -1,5 +1,4 @@
 import * as React from "react";
-import { Download, CheckCircle } from "lucide-react";
 import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileTimesheetTable } from "./ProfileTimesheetTable";
 import type { StaffProfile } from "../../types";
@@ -53,10 +52,6 @@ export function ProfileTimeTab({ profile }: Props) {
 
   const timesheets = React.useMemo(() => buildDemoTimesheets(profile), [profile]);
 
-  const approvedHours = ts.hoursThisMonth;
-  const pendingHours = ts.overtimeThisMonth;
-  const estPay = (approvedHours * 12.5).toFixed(2);
-
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 2000);
@@ -94,70 +89,29 @@ export function ProfileTimeTab({ profile }: Props) {
 
       <ProfileTimesheetTable profileName={profile.name} rows={timesheets} onToast={showToast} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <ProfileCard title="Clock-in pattern">
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              { label: "Avg start drift", value: "+2 min" },
-              { label: "On-time rate", value: `${ins.onTimeStarts}%` },
-              { label: "Missed clocks", value: String(ins.lateClockIns) },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
-                  {label}
-                </div>
-                <div className="text-lg font-bold tabular-nums">{value}</div>
+      <ProfileCard title="Clock-in pattern">
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          {[
+            { label: "Avg start drift", value: "+2 min" },
+            { label: "On-time rate", value: `${ins.onTimeStarts}%` },
+            { label: "Missed clocks", value: String(ins.lateClockIns) },
+          ].map(({ label, value }) => (
+            <div key={label}>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                {label}
               </div>
-            ))}
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full bg-success rounded-full"
-              style={{ width: `${ins.onTimeStarts}%` }}
-            />
-          </div>
-          <div className="text-[11px] text-muted-foreground mt-1.5">Last 30 days</div>
-        </ProfileCard>
-
-        <ProfileCard title="Pay period · Jun 2026">
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              { label: "Approved hours", value: `${approvedHours}h` },
-              { label: "Pending", value: `${pendingHours}h` },
-              { label: "Est. pay", value: `£${estPay}` },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
-                  {label}
-                </div>
-                <div className="text-lg font-bold tabular-nums">{value}</div>
-              </div>
-            ))}
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-3">
-            <div
-              className="h-full bg-brand rounded-full"
-              style={{ width: `${Math.min(100, (approvedHours / 180) * 100)}%` }}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => showToast("All pending entries approved")}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors"
-            >
-              <CheckCircle className="h-3.5 w-3.5" aria-hidden /> Approve all
-            </button>
-            <button
-              type="button"
-              onClick={() => showToast("payslip.pdf prepared")}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:bg-muted/50 transition-colors"
-            >
-              <Download className="h-3.5 w-3.5" aria-hidden /> Payslip
-            </button>
-          </div>
-        </ProfileCard>
-      </div>
+              <div className="text-lg font-bold tabular-nums">{value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full bg-success rounded-full"
+            style={{ width: `${ins.onTimeStarts}%` }}
+          />
+        </div>
+        <div className="text-[11px] text-muted-foreground mt-1.5">Last 30 days</div>
+      </ProfileCard>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="xl:col-span-2">

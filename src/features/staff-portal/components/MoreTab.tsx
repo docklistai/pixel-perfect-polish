@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  Bell,
   CalendarDays,
   ChevronRight,
   ClipboardList,
@@ -9,32 +8,22 @@ import {
   HelpCircle,
   Home,
   LogOut,
-  Mail,
-  Phone,
   Settings,
-  ShieldCheck,
   User,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate, useRouter } from "@tanstack/react-router";
-import {
-  ActionButton,
-  ConfirmDialog,
-  DashboardCard,
-  DetailRow,
-  DrawerShell,
-  FormSection,
-  StatusBadge,
-} from "@/components/dl";
+import { ConfirmDialog, DashboardCard } from "@/components/dl";
 import { clearAuthStateCache } from "@/features/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { usePortalProfile } from "../hooks/usePortalProfile";
-import { teamOnDutyToday } from "../lib/portalRota";
-import type { MoreSection, PortalTab, TeamOnDuty, PortalProfile } from "../types";
-
-const APP_VERSION = "2.4.1 (138)";
+import { PortalProfileDrawer } from "./PortalProfileDrawer";
+import { PortalTeamDrawer } from "./PortalTeamDrawer";
+import { PortalDocumentsDrawer } from "./PortalDocumentsDrawer";
+import { PortalSettingsDrawer } from "./PortalSettingsDrawer";
+import { PortalHelpDrawer } from "./PortalHelpDrawer";
+import type { MoreSection, PortalTab } from "../types";
 
 export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const [section, setSection] = React.useState<MoreSection>(null);
@@ -119,18 +108,22 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         onConfirm={handleSignOut}
       />
 
-      <div className="text-center text-[11px] text-muted-foreground">Docklist · v{APP_VERSION}</div>
+      <div className="text-center text-[11px] text-muted-foreground">Docklist staff portal</div>
 
       {/* Section drawers */}
-      <ProfileDrawer
+      <PortalProfileDrawer
         open={section === "profile"}
         onClose={() => setSection(null)}
         profile={profile}
       />
-      <TeamDrawer open={section === "team"} onClose={() => setSection(null)} profile={profile} />
-      <DocumentsDrawer open={section === "documents"} onClose={() => setSection(null)} />
-      <SettingsDrawer open={section === "settings"} onClose={() => setSection(null)} />
-      <HelpDrawer open={section === "help"} onClose={() => setSection(null)} profile={profile} />
+      <PortalTeamDrawer open={section === "team"} onClose={() => setSection(null)} />
+      <PortalDocumentsDrawer open={section === "documents"} onClose={() => setSection(null)} />
+      <PortalSettingsDrawer open={section === "settings"} onClose={() => setSection(null)} />
+      <PortalHelpDrawer
+        open={section === "help"}
+        onClose={() => setSection(null)}
+        profile={profile}
+      />
     </div>
   );
 }
@@ -163,295 +156,5 @@ function Row({
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </button>
     </li>
-  );
-}
-
-/* ---------- Profile ---------- */
-function ProfileDrawer({
-  open,
-  onClose,
-  profile,
-}: {
-  open: boolean;
-  onClose: () => void;
-  profile: PortalProfile | null | undefined;
-}) {
-  if (!profile) return null;
-  const p = profile;
-  return (
-    <DrawerShell
-      open={open}
-      onOpenChange={(o) => !o && onClose()}
-      title="Profile"
-      description="Your details and manager contact"
-      width="lg"
-    >
-      <div className="space-y-4">
-        <DashboardCard className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-brand-soft text-brand flex items-center justify-center text-base font-semibold">
-              {p.initials}
-            </div>
-            <div>
-              <div className="text-base font-semibold">{p.name}</div>
-              <div className="text-xs text-muted-foreground">{p.role}</div>
-              <div className="mt-1">
-                <StatusBadge tone={p.accessStatus === "active" ? "success" : "warning"} dot>
-                  Portal access · {p.accessStatus}
-                </StatusBadge>
-              </div>
-            </div>
-          </div>
-        </DashboardCard>
-
-        <FormSection title="Your details">
-          <DetailRow label="Department" value={p.department} />
-          <DetailRow label="Email" value={p.email} />
-          <DetailRow label="Phone" value={p.phone} />
-        </FormSection>
-
-        <FormSection title="Manager contact">
-          <DetailRow label="Name" value={p.manager.name} />
-          <DetailRow label="Email" value={p.manager.email} />
-          <DetailRow label="Phone" value={p.manager.phone} />
-        </FormSection>
-
-        <div className="flex gap-2">
-          <ActionButton
-            size="sm"
-            variant="secondary"
-            icon={Mail}
-            onClick={() => (window.location.href = `mailto:${p.manager.email}`)}
-          >
-            Email manager
-          </ActionButton>
-          <ActionButton
-            size="sm"
-            variant="secondary"
-            icon={Phone}
-            onClick={() => (window.location.href = `tel:${p.manager.phone}`)}
-          >
-            Call
-          </ActionButton>
-        </div>
-      </div>
-    </DrawerShell>
-  );
-}
-
-/* ---------- Team ---------- */
-const MANAGER_ON_DUTY: TeamOnDuty = {
-  id: "alex-thompson",
-  name: "Alex Thompson",
-  initials: "AT",
-  role: "Manager",
-  shiftLabel: "08:00 – 16:00",
-  isManagerOnDuty: true,
-};
-
-function TeamDrawer({
-  open,
-  onClose,
-  profile,
-}: {
-  open: boolean;
-  onClose: () => void;
-  profile: PortalProfile | null | undefined;
-}) {
-  const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
-  const others = React.useMemo(
-    () => (profile ? teamOnDutyToday(weekDrafts, profile.staffId) : []),
-    [weekDrafts, profile],
-  );
-
-  return (
-    <DrawerShell
-      open={open}
-      onOpenChange={(o) => !o && onClose()}
-      title="Team"
-      description="Who's on today and team noticeboard"
-      width="lg"
-      footer={
-        <ActionButton
-          className="w-full justify-center"
-          onClick={() => toast.message("Team briefing started")}
-        >
-          Start team briefing
-        </ActionButton>
-      }
-    >
-      <div className="space-y-4">
-        <div>
-          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
-            TEAM ON SHIFT
-          </div>
-          {others.length === 0 ? (
-            <DashboardCard className="p-4 text-xs text-muted-foreground">
-              No one else is on the published rota today.
-            </DashboardCard>
-          ) : (
-            <ul className="space-y-2">
-              {others.map((m) => (
-                <li key={`${m.id}-${m.shiftLabel}`}>
-                  <TeamRow member={m} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </DrawerShell>
-  );
-}
-
-function TeamRow({ member }: { member: TeamOnDuty }) {
-  return (
-    <DashboardCard className="p-3">
-      <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-full bg-brand-soft text-brand flex items-center justify-center text-xs font-semibold">
-          {member.initials}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-semibold truncate">{member.name}</div>
-          <div className="text-[11px] text-muted-foreground truncate">{member.role}</div>
-        </div>
-        <span className="text-xs text-muted-foreground tabular-nums">{member.shiftLabel}</span>
-      </div>
-    </DashboardCard>
-  );
-}
-
-/* ---------- Documents ---------- */
-function DocumentsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  return (
-    <DrawerShell
-      open={open}
-      onOpenChange={(o) => !o && onClose()}
-      title="Documents"
-      description="Read-only document preview."
-      width="lg"
-    >
-      <div className="space-y-4">
-        <DashboardCard className="p-5 text-center">
-          <div className="text-sm font-semibold">No documents yet</div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Your required documents and certificates will appear here once uploaded by a manager.
-          </p>
-        </DashboardCard>
-      </div>
-    </DrawerShell>
-  );
-}
-
-/* ---------- Settings ---------- */
-function SettingsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  return (
-    <DrawerShell
-      open={open}
-      onOpenChange={(o) => !o && onClose()}
-      title="Settings"
-      description="Personal app preferences"
-      width="lg"
-    >
-      <div className="space-y-4">
-        <Group title="Preferences">
-          <SettingRow icon={Bell} label="Notifications" value="On" />
-          <SettingRow icon={CalendarDays} label="Calendar sync" value="Off" />
-          <SettingRow icon={Clock} label="Clock-in reminders" value="15 min before shift" />
-        </Group>
-        <Group title="Account & security">
-          <SettingRow icon={ShieldCheck} label="Change password" />
-          <SettingRow icon={ShieldCheck} label="Two-factor authentication" value="On" />
-          <SettingRow icon={User} label="Login activity" />
-        </Group>
-        <Group title="Privacy">
-          <SettingRow icon={ShieldCheck} label="Privacy policy" />
-          <SettingRow icon={ShieldCheck} label="Data preferences" />
-        </Group>
-        <Group title="Support">
-          <SettingRow icon={HelpCircle} label="Help centre" />
-          <SettingRow icon={Mail} label="Contact support" />
-          <SettingRow icon={Settings} label="App version" value={APP_VERSION} />
-        </Group>
-      </div>
-    </DrawerShell>
-  );
-}
-
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground px-1 mb-2">
-        {title.toUpperCase()}
-      </div>
-      <DashboardCard className="rounded-2xl p-2">
-        <ul className="divide-y divide-border">{children}</ul>
-      </DashboardCard>
-    </div>
-  );
-}
-
-function SettingRow({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value?: string;
-}) {
-  return (
-    <li>
-      <button
-        type="button"
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-sm hover:bg-muted/40 rounded-lg transition-colors"
-        onClick={() => toast.message(`${label} — saved for this session`)}
-      >
-        <Icon className="h-4 w-4 text-muted-foreground" />
-        <span className="flex-1 text-left">{label}</span>
-        {value && <span className="text-xs text-muted-foreground">{value}</span>}
-        <ChevronRight className="h-4 w-4 text-muted-foreground" />
-      </button>
-    </li>
-  );
-}
-
-/* ---------- Help ---------- */
-function HelpDrawer({
-  open,
-  onClose,
-  profile,
-}: {
-  open: boolean;
-  onClose: () => void;
-  profile: PortalProfile | null | undefined;
-}) {
-  return (
-    <DrawerShell
-      open={open}
-      onOpenChange={(o) => !o && onClose()}
-      title="Help & support"
-      description="Find answers or contact your manager"
-      width="lg"
-    >
-      <div className="space-y-3">
-        <DashboardCard className="p-4">
-          <div className="text-sm font-semibold">Help articles</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Browse short guides on shifts, leave, time clock and notifications.
-          </p>
-        </DashboardCard>
-        <DashboardCard className="p-4">
-          <div className="text-sm font-semibold">Contact your manager</div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {profile?.manager.name ?? "Manager"}{" "}
-            {profile?.manager.email ? `· ${profile.manager.email}` : ""}
-          </p>
-        </DashboardCard>
-        <div className="text-center text-[11px] text-muted-foreground">
-          Docklist · v{APP_VERSION}
-        </div>
-      </div>
-    </DrawerShell>
   );
 }
