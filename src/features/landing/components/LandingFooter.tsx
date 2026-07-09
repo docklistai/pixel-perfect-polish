@@ -11,9 +11,9 @@ const footerGroups = [
   {
     title: "Company",
     links: [
-      { label: "About", href: "#" },
+      { label: "About" },
       { label: "Contact", href: "mailto:docklistai@gmail.com" },
-      { label: "Made in Scotland", href: "#" },
+      { label: "Made in Scotland" },
     ],
   },
   {
@@ -106,18 +106,25 @@ export function LandingFooter() {
               <ul className="flex flex-col gap-2.5">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      target={"external" in link && link.external ? "_blank" : undefined}
-                      rel={"external" in link && link.external ? "noreferrer" : undefined}
-                      className="group inline-flex items-center gap-1.5 text-[13.5px] text-[var(--landing-cream-dim)] transition-colors hover:text-[var(--landing-cream)]"
-                    >
-                      <span
-                        aria-hidden="true"
-                        className="h-px w-0 bg-[#d9ad70] transition-all duration-200 group-hover:w-3"
-                      />
-                      {link.label}
-                    </a>
+                    {"href" in link ? (
+                      <a
+                        href={link.href}
+                        target={"external" in link && link.external ? "_blank" : undefined}
+                        rel={"external" in link && link.external ? "noreferrer" : undefined}
+                        className="group inline-flex items-center gap-1.5 text-[13.5px] text-[var(--landing-cream-dim)] transition-colors hover:text-[var(--landing-cream)]"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="h-px w-0 bg-[#d9ad70] transition-all duration-200 group-hover:w-3"
+                        />
+                        {link.label}
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-[13.5px] text-[var(--landing-cream-dim)]">
+                        <span aria-hidden="true" className="h-px w-3 bg-[#d9ad70]/60" />
+                        {link.label}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

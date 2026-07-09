@@ -1,15 +1,9 @@
 import * as React from "react";
-import {
-  SectionCard,
-  FieldLabel,
-  TextField,
-  SelectField,
-  ToggleRow,
-  PreviewTag,
-} from "./SettingsPrimitives";
+import { SectionCard, FieldLabel, SelectField, ToggleRow, PreviewTag } from "./SettingsPrimitives";
 import { SettingsToggle } from "./SettingsToggle";
-import { Info } from "lucide-react";
-import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { LabourTargetsSection } from "./LabourTargetsSection";
+import { RoleBudgetsSection } from "./RoleBudgetsSection";
+import { RoleColoursSection } from "./RoleColoursSection";
 
 function ConflictRuleRow({
   label,
@@ -52,7 +46,6 @@ function ConflictRuleRow({
 }
 
 export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
-  const { workspaceName } = useManagerIdentity();
   return (
     <div className="space-y-4">
       <div>
@@ -60,11 +53,22 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
           Rota & scheduling
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Defaults applied to all new rotas. Individual rotas can override.
+          Labour targets are live. The remaining defaults are previews and not yet applied to
+          rotas.
         </p>
       </div>
 
-      <SectionCard title="Defaults" description="Starting points for new scheduling periods.">
+      <LabourTargetsSection />
+
+      <RoleBudgetsSection />
+
+      <RoleColoursSection />
+
+      <SectionCard
+        title="Defaults"
+        badge={<PreviewTag />}
+        description="Starting points for new scheduling periods. Preview only — not yet applied."
+      >
         <div className="grid gap-3 md:grid-cols-3">
           <label className="space-y-1.5">
             <FieldLabel>Default shift length</FieldLabel>
@@ -117,7 +121,11 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Behaviour" description="Enable or disable key rota options.">
+      <SectionCard
+        title="Behaviour"
+        badge={<PreviewTag />}
+        description="Enable or disable key rota options. Preview only — not yet applied."
+      >
         <div className="space-y-3">
           <ToggleRow
             label="Allow staff to swap shifts"
@@ -155,84 +163,9 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
       </SectionCard>
 
       <SectionCard
-        title="Labour targets"
-        badge={<PreviewTag>Used by Rota &amp; Home</PreviewTag>}
-        description="Set the weekly budget and labour % target to drive budget warnings on the Rota and Dashboard."
-      >
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1.5">
-            <FieldLabel>Weekly hours budget</FieldLabel>
-            <div className="flex overflow-hidden rounded-xl border border-border">
-              <span className="flex items-center bg-muted px-3 text-xs text-muted-foreground font-semibold">
-                h
-              </span>
-              <TextField defaultValue="820" className="border-0 rounded-none" onChange={onDirty} />
-            </div>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Target labour %</FieldLabel>
-            <div className="flex overflow-hidden rounded-xl border border-border">
-              <span className="flex items-center bg-muted px-3 text-xs text-muted-foreground font-semibold">
-                %
-              </span>
-              <TextField defaultValue="30" className="border-0 rounded-none" onChange={onDirty} />
-            </div>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Forecast weekly sales</FieldLabel>
-            <div className="flex overflow-hidden rounded-xl border border-border">
-              <span className="flex items-center bg-muted px-3 text-xs text-muted-foreground font-semibold">
-                £
-              </span>
-              <TextField
-                defaultValue="64,000"
-                className="border-0 rounded-none"
-                onChange={onDirty}
-              />
-            </div>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Avg hourly cost (fallback)</FieldLabel>
-            <div className="flex overflow-hidden rounded-xl border border-border">
-              <span className="flex items-center bg-muted px-3 text-xs text-muted-foreground font-semibold">
-                £
-              </span>
-              <TextField
-                defaultValue="13.20"
-                className="border-0 rounded-none"
-                onChange={onDirty}
-              />
-            </div>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Budget warning threshold</FieldLabel>
-            <SelectField defaultValue="95" onChange={onDirty}>
-              <option value="95">Warn at 95% of budget</option>
-              <option value="90">Warn at 90% of budget</option>
-              <option value="100">Warn at 100% of budget</option>
-            </SelectField>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Apply to</FieldLabel>
-            <SelectField key={workspaceName} defaultValue="primary" onChange={onDirty}>
-              <option value="primary">{workspaceName}</option>
-            </SelectField>
-          </label>
-        </div>
-
-        <div className="mt-4 flex gap-2.5 rounded-2xl border border-teal-500/20 bg-teal-500/5 p-4 text-sm text-teal-800 dark:text-teal-200">
-          <Info className="h-4 w-4 shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            These figures appear in <strong>Rota → Labour summary</strong> and{" "}
-            <strong>Home → Labour watch</strong>. They are planning targets only; approved hours can
-            be exported separately after manager review.
-          </p>
-        </div>
-      </SectionCard>
-
-      <SectionCard
         title="Conflict detection"
-        description="When the rota engine should warn you of scheduling issues."
+        badge={<PreviewTag />}
+        description="When the rota engine should warn you of scheduling issues. Preview only — rota warnings currently use fixed rules."
       >
         <div className="space-y-3">
           {[

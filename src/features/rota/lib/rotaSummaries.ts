@@ -162,6 +162,8 @@ export type RotaDayStat = {
   h: string;
   c: string;
   tone: "muted" | "warning" | "danger";
+  /** Assigned scheduled hours for the day, for daily-budget comparison. */
+  hours: number;
 };
 
 export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
@@ -184,6 +186,7 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
       h: `${Math.round(hours)}h`,
       c: `${coverage}%`,
       tone,
+      hours,
     };
   });
 }

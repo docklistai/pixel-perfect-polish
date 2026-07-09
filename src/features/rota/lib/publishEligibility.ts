@@ -83,6 +83,31 @@ export function getPublishState({
   return hasReadinessIssues ? "draft" : "ready";
 }
 
+/** Header status pill tone + label from the live-load state and publish state. */
+export function getRotaHeaderStatus(input: {
+  readOnly: boolean;
+  isLive: boolean;
+  isLiveError: boolean;
+  isLiveLoading: boolean;
+  hasLiveWeek: boolean;
+  publishState: PublishState;
+}): { tone: "success" | "warning"; label: string } {
+  const tone: "success" | "warning" =
+    input.readOnly && !input.isLive
+      ? "warning"
+      : input.publishState === "published" || input.publishState === "ready"
+        ? "success"
+        : "warning";
+  const label = input.isLiveError
+    ? "Live unavailable"
+    : input.isLiveLoading
+      ? "Loading live rota"
+      : input.isLive && !input.hasLiveWeek
+        ? "No saved rota"
+        : publishStateLabel(input.publishState);
+  return { tone, label };
+}
+
 export function publishStateLabel(state: PublishState): string {
   switch (state) {
     case "draft":

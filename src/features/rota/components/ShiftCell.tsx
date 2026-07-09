@@ -1,6 +1,6 @@
-import * as React from "react";
 import { AlertTriangle, Pencil, Plus } from "lucide-react";
 import { ShiftActionMenu } from "./grid/ShiftActionMenu";
+import { useRoleColoursConfig } from "./grid/roleColoursContext";
 import { resolveShiftChipClasses } from "../lib/deptColours";
 import { formatShiftTime } from "../lib/draftRota";
 import type { ShiftMenuHandlers } from "./grid/types";
@@ -81,6 +81,7 @@ function ShiftPill({
   onMenuOpenChange: (shiftId: ShiftId, open: boolean) => void;
   compact: boolean;
 }) {
+  const roleColours = useRoleColoursConfig();
   const isOpen = shift.staffId === null;
   const isConflict = shift.status === "conflict";
   const hasOverride = Boolean(shift.colourOverride || shift.deptOverride);
@@ -90,7 +91,7 @@ function ShiftPill({
     ? "border-warning/70 bg-warning-soft/80 text-foreground shadow-[inset_3px_0_0_hsl(var(--warning))]"
     : isOpen
       ? "border-2 border-dashed border-warning/80 bg-warning-soft/60 text-warning-700"
-      : resolveShiftChipClasses(roleLabel, shift.colourOverride);
+      : resolveShiftChipClasses(roleLabel, shift.colourOverride, roleColours);
 
   const indicator = isConflict ? (
     <span

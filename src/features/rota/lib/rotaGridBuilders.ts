@@ -8,6 +8,7 @@ import type {
 } from "../types";
 import type { LeaveRequest } from "@/features/leave/types";
 import { DAY_COUNT } from "./draftShiftCore";
+import { shortLeaveLabel } from "./leaveGridLabel";
 
 function emptyCells(): RotaGridCell[] {
   return Array.from({ length: DAY_COUNT }, () => ({ shifts: [] }));
@@ -46,23 +47,25 @@ export function buildStaffRows(
     const cells = rawCells.map((cell, index) => {
       const isoDate = dayIsoDates[index];
       if (!isoDate) return cell;
-      const approvedLeave = leaveRequests.some(
-        (req) =>
-          req.staffId === member.id &&
-          req.state === "approved" &&
-          req.startIso <= isoDate &&
-          req.endIso >= isoDate,
-      );
-      if (approvedLeave) return { ...cell, hasLeave: true, leaveState: "approved" as const };
+      const coversDay = (req: LeaveRequest) =>
+        req.staffId === member.id && req.startIso <= isoDate && req.endIso >= isoDate;
 
-      const pendingLeave = leaveRequests.some(
-        (req) =>
-          req.staffId === member.id &&
-          req.state === "pending" &&
-          req.startIso <= isoDate &&
-          req.endIso >= isoDate,
+      const approvedLeave = leaveRequests.find(
+        (req) => req.state === "approved" && coversDay(req),
       );
-      return pendingLeave ? { ...cell, leaveState: "pending" as const } : cell;
+      if (approvedLeave) {
+        return {
+          ...cell,
+          hasLeave: true,
+          leaveState: "approved" as const,
+          leaveLabel: shortLeaveLabel(approvedLeave.type),
+        };
+      }
+
+      const pendingLeave = leaveRequests.find((req) => req.state === "pending" && coversDay(req));
+      return pendingLeave
+        ? { ...cell, leaveState: "pending" as const, leaveLabel: shortLeaveLabel(pendingLeave.type) }
+        : cell;
     });
 
     return {

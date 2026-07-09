@@ -1,4 +1,4 @@
-import { Copy, Filter, Keyboard, Plus, Sparkles } from "lucide-react";
+import { Copy, Filter, Keyboard, Plus, Redo2, Sparkles, Undo2 } from "lucide-react";
 import { ActionButton, IconButton } from "@/components/dl";
 
 export function RotaGridToolbar({
@@ -12,6 +12,10 @@ export function RotaGridToolbar({
   onViewConflicts,
   onViewWorkingTime,
   onCopyLastWeek,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
 }: {
   conflictCount: number;
   openShiftCount: number;
@@ -23,6 +27,10 @@ export function RotaGridToolbar({
   onViewConflicts: () => void;
   onViewWorkingTime: () => void;
   onCopyLastWeek: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }) {
   const coverageTone = coveragePct > 110 ? "warning" : coveragePct >= 95 ? "success" : "warning";
 
@@ -32,6 +40,25 @@ export function RotaGridToolbar({
         <ActionButton variant="secondary" size="sm" icon={Filter} onClick={onFilter}>
           Filter
         </ActionButton>
+
+        <IconButton
+          icon={Undo2}
+          label="Undo"
+          size="sm"
+          variant="ghost"
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="Undo (Ctrl/Cmd+Z)"
+        />
+        <IconButton
+          icon={Redo2}
+          label="Redo"
+          size="sm"
+          variant="ghost"
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="Redo (Ctrl/Cmd+Shift+Z)"
+        />
 
         <span className="rota-toolbar-separator hidden sm:block" aria-hidden />
 
@@ -112,7 +139,18 @@ export function RotaGridToolbar({
           >
             Copy last week
           </ActionButton>
-          <ActionButton variant="outline" size="sm" icon={Sparkles} onClick={onGenerateRota}>
+          <ActionButton
+            variant="outline"
+            size="sm"
+            icon={Sparkles}
+            onClick={onGenerateRota}
+            disabled={openShiftCount === 0}
+            title={
+              openShiftCount === 0
+                ? "No open shifts to fill yet — add open shifts, or use Copy last week to start."
+                : "Suggest a colleague for every open shift (draft only, never auto-published)"
+            }
+          >
             Fill open shifts
           </ActionButton>
           <IconButton icon={Plus} label="Add shift" onClick={onAddShift} />

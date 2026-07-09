@@ -13,6 +13,8 @@ import { RotaFiltersDrawer } from "./RotaFiltersDrawer";
 import { CoverageDetailsDrawer } from "./CoverageDetailsDrawer";
 import { WorkingTimeDetailsDrawer } from "./WorkingTimeDetailsDrawer";
 import { PublishRotaDialog } from "./PublishRotaDialog";
+import { DemandTemplatesDrawer } from "./DemandTemplatesDrawer";
+import { CopyDayDialog } from "./CopyDayDialog";
 import type { MaybePromise } from "./grid";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
@@ -114,6 +116,18 @@ export function RotaOverlays({
         filters={rota.filters}
         roleOptions={rota.roleOptions}
         onFiltersChange={rota.setFilters}
+      />
+      <DemandTemplatesDrawer
+        open={openOverlays.templates}
+        onOpenChange={(open) => setOverlay("templates", open)}
+        rotaWeekId={rota.source === "live" ? rota.liveRotaWeekId : null}
+        weekLabel={rota.weekLabel}
+      />
+      <CopyDayDialog
+        open={openOverlays.copyDay}
+        onOpenChange={(open) => setOverlay("copyDay", open)}
+        rotaWeekId={rota.source === "live" ? rota.liveRotaWeekId : null}
+        dayLabels={rota.days.map((day) => day.d)}
       />
       <CoverageDetailsDrawer
         open={openOverlays.coverageDetails}

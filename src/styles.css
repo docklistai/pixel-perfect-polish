@@ -3454,8 +3454,6 @@
     grid-template-columns: minmax(0, 1fr) auto auto auto;
     gap: 6px;
   }
-  .rota-view-modes { grid-column: 1 / -1; width: 100%; }
-  .rota-view-modes > button { flex: 1; }
   .rota-view-by {
     width: 100%;
     min-width: 0;

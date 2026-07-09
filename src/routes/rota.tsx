@@ -1,31 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import * as React from "react";
-import { toast } from "sonner";
+import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, Card, FeedbackBanner } from "@/components/dl";
-import { useRotaDraftController } from "@/features/rota/hooks/useRotaDraftController";
-import { useRotaShiftActions } from "@/features/rota/hooks/useRotaShiftActions";
-import { useGuardedRotaController } from "@/features/rota/hooks/useGuardedRotaController";
-import { useIntentHandler } from "@/lib/interactionIntents";
-import { useOverlays } from "@/components/AppShortcuts";
+import { useRotaPage } from "@/features/rota/hooks/useRotaPage";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
-
 import { RotaGridToolbar } from "@/features/rota/components/RotaGridToolbar";
 import { RotaGrid } from "@/features/rota/components/RotaGrid";
 import { RotaGridLegendBar } from "@/features/rota/components/RotaGridLegendBar";
 import { RotaLeaveDataWarning } from "@/features/rota/components/RotaLeaveDataWarning";
 import { RotaInsightsColumn } from "@/features/rota/components/RotaInsightsColumn";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
-import { useRotaOverlays, type RotaOverlayKey } from "@/features/rota/hooks/useRotaOverlays";
-import { useRotaPublishIntent } from "@/features/rota/hooks/useRotaPublishIntent";
-import {
-  getPublishState,
-  getRotaPublishEligibility,
-  publishStateLabel,
-} from "@/features/rota/lib/publishEligibility";
+import { RoleColoursContext } from "@/features/rota/components/grid/roleColoursContext";
 import { requireManagerAccess } from "@/features/auth";
 import { parseRotaWeekSearch } from "@/features/rota/lib/rotaSearch";
-import type { ShiftId } from "@/features/rota/types";
 
 export const Route = createFileRoute("/rota")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
@@ -37,145 +23,37 @@ export const Route = createFileRoute("/rota")({
 const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
-/** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
-const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate"]);
-const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>();
-
 function RotaPage() {
-  const rota = useRotaDraftController();
-  const navigate = useNavigate();
   const { week } = Route.useSearch();
-
-  // Apply a `?week=` deep-link once per distinct value (client-only, so it
-  // never causes a hydration mismatch). Manual week navigation afterwards is
-  // left untouched because it changes the store, not the search param.
-  const setWeekOffset = rota.setWeekOffset;
-  const appliedWeekRef = React.useRef<number | null>(null);
-  React.useEffect(() => {
-    if (week === undefined || appliedWeekRef.current === week) return;
-    appliedWeekRef.current = week;
-    setWeekOffset(week);
-  }, [week, setWeekOffset]);
-  const { openAiDrawer } = useOverlays();
-  const overlays = useRotaOverlays();
-  const actions = useRotaShiftActions(rota);
-  const [showInsights, setShowInsights] = React.useState(true);
-  const [recoverySelection, setRecoverySelection] = React.useState<{
-    shiftId: ShiftId;
-    staffId: string;
-  } | null>(null);
-  const readOnly = rota.readOnly;
-  const isLiveEditing = rota.source === "live" && !readOnly;
-  const publishEligibility = getRotaPublishEligibility({
+  const {
+    rota,
+    actions,
+    overlays,
+    guardedRota,
     readOnly,
-    mutationPending: rota.liveMutationPending,
-    mutationFailed: rota.liveMutationFailed,
-    plannedShiftCount: rota.plannedShiftCount,
-    weekStatus: rota.liveWeekStatus,
-    published: rota.published,
-    hasUnpublishedChanges: rota.hasUnpublishedChanges,
-  });
-
-  // Loading/error fallback blocks mutations; successful live reads allow only
-  // actions wired to persisted shift rows.
-  const openOverlay = React.useCallback(
-    (key: RotaOverlayKey) => {
-      if (readOnly && MUTATING_OVERLAYS.has(key)) {
-        actions.block();
-        return;
-      }
-      if (isLiveEditing && LIVE_UNSUPPORTED_OVERLAYS.has(key)) {
-        actions.blockDraftOnly();
-        return;
-      }
-      overlays.openOverlay(key);
-    },
-    [isLiveEditing, readOnly, actions, overlays],
-  );
-
-  const requestPublish = useRotaPublishIntent({
-    isLoading: rota.isLiveLoading,
-    eligibility: publishEligibility,
     openOverlay,
-  }).requestPublish;
-
-  useIntentHandler("rota.publish", requestPublish);
-  useIntentHandler("rota.generate", () => openOverlay("generate"));
-  useIntentHandler("rota.addShift", () => openOverlay("addShift"));
-  const handleChooseRecoveryCandidate = React.useCallback(
-    (shiftId: ShiftId, staffId: string) => {
-      setRecoverySelection({ shiftId, staffId });
-      rota.setSelectedShiftId(shiftId);
-    },
-    [rota],
-  );
-
-  const workingTimeAlertCount = rota.workingTimeAlertList.length;
-  const leaveDataState =
-    rota.source !== "live"
-      ? "ready"
-      : rota.isLiveLeaveLoading
-        ? "loading"
-        : rota.isLiveLeaveError
-          ? "error"
-          : "ready";
-  const leaveDataIssueCount = leaveDataState === "ready" ? 0 : 1;
-  const readinessIssueCount =
-    rota.openShiftCount + rota.conflictCount + workingTimeAlertCount + leaveDataIssueCount;
-  const hasReadinessIssues = readinessIssueCount > 0;
-  const publishState = getPublishState({
-    published: rota.published,
-    hasUnpublishedChanges: rota.hasUnpublishedChanges,
-    hasReadinessIssues,
-  });
-
-  const handlePublish = async (prepareStaffUpdate: boolean) => {
-    if (!publishEligibility.canPublish) {
-      toast.info("Publish unavailable", {
-        description: publishEligibility.blockedReason ?? "Publishing is unavailable.",
-      });
-      return;
-    }
-    try {
-      await rota.handlePublish();
-      overlays.setOverlay("publish", false);
-      toast.success("Rota published", {
-        description: prepareStaffUpdate
-          ? "Published snapshot ready. Staff-app update prepared for review."
-          : "Staff see the published snapshot the next time they open the app.",
-        action: {
-          label: "Open staff view",
-          onClick: () => navigate({ to: "/portal" }),
-        },
-      });
-    } catch (error) {
-      if (rota.source !== "live") {
-        toast.error("Rota not published", {
-          description: error instanceof Error ? error.message : "The rota could not be published.",
-        });
-      }
-    }
-  };
-
-  // Block every direct controller mutation in live mode so an edit from a drawer
-  // or the grid can never write to the demo store while live data is on screen.
-  const guardedRota = useGuardedRotaController(rota, readOnly, actions.block);
-
-  const headerStatusTone =
-    readOnly && rota.source !== "live"
-      ? "warning"
-      : publishState === "published" || publishState === "ready"
-        ? "success"
-        : "warning";
-  const headerStatusLabel = rota.isLiveError
-    ? "Live unavailable"
-    : rota.isLiveLoading
-      ? "Loading live rota"
-      : rota.source === "live" && !rota.hasLiveWeek
-        ? "No saved rota"
-        : publishStateLabel(publishState);
+    openAiDrawer,
+    requestPublish,
+    publishEligibility,
+    roleColours,
+    dayOffClashes,
+    workingTimeAlertCount,
+    leaveDataState,
+    publishState,
+    headerStatusTone,
+    headerStatusLabel,
+    handlePublish,
+    handleChooseRecoveryCandidate,
+    recoverySelection,
+    setRecoverySelection,
+    showInsights,
+    setShowInsights,
+    roleColoursConfig,
+    history,
+  } = useRotaPage(week);
 
   return (
+    <RoleColoursContext.Provider value={roleColoursConfig}>
     <AppShell topbarWeekLabel={rota.weekLabel}>
       <div className="w-full max-w-full overflow-x-hidden">
         {readOnly && (
@@ -195,18 +73,13 @@ function RotaPage() {
           />
         )}
         {rota.source === "live" && (
-          <RotaLeaveDataWarning
-            isLoading={rota.isLiveLeaveLoading}
-            isError={rota.isLiveLeaveError}
-          />
+          <RotaLeaveDataWarning isLoading={rota.isLiveLeaveLoading} isError={rota.isLiveLeaveError} />
         )}
 
         <RotaPageHeader
           weekLabel={rota.weekLabel}
           locationName={
-            rota.source === "live" && rota.liveLocationName
-              ? rota.liveLocationName
-              : "Your workspace"
+            rota.source === "live" && rota.liveLocationName ? rota.liveLocationName : "Your workspace"
           }
           staffCount={rota.staff.length}
           statusTone={headerStatusTone}
@@ -214,6 +87,8 @@ function RotaPage() {
           canPublish={publishEligibility.canPublish}
           onPrintRota={() => window.print()}
           onClearWeek={guardedRota.requestClearWeek}
+          onOpenTemplates={() => openOverlay("templates")}
+          onCopyDay={() => openOverlay("copyDay")}
           onPublish={requestPublish}
         />
 
@@ -242,6 +117,10 @@ function RotaPage() {
               onViewConflicts={() => openOverlay("conflicts")}
               onViewWorkingTime={() => openOverlay("workingTime")}
               onCopyLastWeek={actions.handleCopyLastWeek}
+              onUndo={() => void history.undo()}
+              onRedo={() => void history.redo()}
+              canUndo={history.canUndo}
+              canRedo={history.canRedo}
             />
             <RotaGrid
               days={rota.days}
@@ -271,7 +150,7 @@ function RotaPage() {
               onShiftAdd={guardedRota.addShift}
               onShiftUpdate={guardedRota.updateShift}
             />
-            <RotaGridLegendBar staffCount={rota.visibleStaff.length} />
+            <RotaGridLegendBar staffCount={rota.visibleStaff.length} roleColours={roleColours} />
           </Card>
 
           <RotaInsightsColumn
@@ -286,6 +165,7 @@ function RotaPage() {
             onViewCoverageDetails={() => openOverlay("coverageDetails")}
             onOpenSupport={openAiDrawer}
             onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
+            dayOffClashes={dayOffClashes}
           />
         </div>
       </div>
@@ -304,5 +184,6 @@ function RotaPage() {
         onClearRecoverySelection={() => setRecoverySelection(null)}
       />
     </AppShell>
+    </RoleColoursContext.Provider>
   );
 }

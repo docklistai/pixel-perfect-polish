@@ -56,6 +56,8 @@ interface ShiftRow {
   break_minutes: number;
   role_name: string;
   assignment_status: "scheduled" | "open";
+  colour_override: string | null;
+  dept_override: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -83,6 +85,8 @@ function mapShift(row: ShiftRow, weekStartIso: string, timezone: string): DraftS
     breakMinutes: row.break_minutes,
     tone,
     status: isOpen ? "open" : "scheduled",
+    ...(row.colour_override ? { colourOverride: row.colour_override } : {}),
+    ...(row.dept_override ? { deptOverride: row.dept_override } : {}),
   };
 }
 
@@ -140,7 +144,9 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       (data.locationId && locations.find((row) => row.id === data.locationId)) || locations[0];
     if (!location) throw new Error("No active rota location is available");
 
-    const weekStart = weekStartForOffset(location.timezone, data.weekOffset);
+    const { fetchRotaStartDay } = await import("./rotaLiveMutationContext");
+    const startDay = await fetchRotaStartDay(supabase, workspaceId);
+    const weekStart = weekStartForOffset(location.timezone, data.weekOffset, startDay);
 
     const { data: week, error: weekError } = await supabase
       .from("rota_weeks")
@@ -176,7 +182,7 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
         supabase
           .from("shifts")
           .select(
-            "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, created_at, updated_at",
+            "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, colour_override, dept_override, created_at, updated_at",
           )
           .eq("workspace_id", workspaceId)
           .eq("rota_week_id", week.id)

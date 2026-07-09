@@ -27,6 +27,9 @@ export const updateShiftInput = shiftIdInput.extend({
       start: timeSchema.optional(),
       end: timeSchema.optional(),
       breakMinutes: z.number().int().min(0).max(1440).optional(),
+      // Manager grid overrides; null clears them back to the role default.
+      colourOverride: z.string().trim().max(30).nullable().optional(),
+      deptOverride: z.string().trim().min(1).max(120).nullable().optional(),
     })
     .refine((patch) => Object.keys(patch).length > 0, "At least one shift field is required"),
 });

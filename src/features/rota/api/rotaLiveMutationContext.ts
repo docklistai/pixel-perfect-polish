@@ -29,6 +29,20 @@ export async function resolveWorkspace(supabase: SupabaseClient): Promise<string
   return requireActiveManagerWorkspaceId(supabase);
 }
 
+/** The workspace's configured rota start weekday (0 = Mon .. 6 = Sun, default Monday). */
+export async function fetchRotaStartDay(
+  supabase: SupabaseClient,
+  workspaceId: string,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from("workspaces")
+    .select("rota_start_weekday")
+    .eq("id", workspaceId)
+    .single();
+  if (error) throw error;
+  return (data as { rota_start_weekday: number | null }).rota_start_weekday ?? 0;
+}
+
 async function selectLocation(
   supabase: SupabaseClient,
   workspaceId: string,
@@ -78,7 +92,8 @@ export async function getLiveContext(
   const supabase = getSupabaseServerClient();
   const workspaceId = await resolveWorkspace(supabase);
   const location = await selectLocation(supabase, workspaceId, data.locationId);
-  const weekStart = weekStartForOffset(location.timezone, data.weekOffset);
+  const startDay = await fetchRotaStartDay(supabase, workspaceId);
+  const weekStart = weekStartForOffset(location.timezone, data.weekOffset, startDay);
   const week = await selectWeek(supabase, workspaceId, location.id, weekStart);
   if (!week && !options.createWeek)
     return { supabase, workspaceId, location, weekStart, week: null };

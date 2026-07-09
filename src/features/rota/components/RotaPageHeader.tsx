@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Eraser, Printer, Send } from "lucide-react";
+import { CopyPlus, Eraser, LayoutTemplate, Printer, Send } from "lucide-react";
 import { ActionButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 
@@ -14,6 +14,8 @@ export function RotaPageHeader({
   canPublish,
   onPrintRota,
   onClearWeek,
+  onOpenTemplates,
+  onCopyDay,
   onPublish,
 }: {
   weekLabel: string;
@@ -24,6 +26,8 @@ export function RotaPageHeader({
   canPublish: boolean;
   onPrintRota: () => void;
   onClearWeek: () => void;
+  onOpenTemplates: () => void;
+  onCopyDay: () => void;
   onPublish: () => void;
 }) {
   return (
@@ -41,12 +45,6 @@ export function RotaPageHeader({
         </p>
       </div>
       <div className="rota-page-actions flex flex-wrap items-center gap-2 lg:justify-end">
-        <div className="rota-view-modes inline-flex items-center gap-0.5 rounded-[9px] border border-border bg-muted/40 p-[3px]">
-          <span className="rounded-[7px] bg-background px-3 py-1 text-xs font-semibold text-foreground shadow-sm">
-            Week view
-          </span>
-        </div>
-
         {canPublish && (
           <ActionButton className="rota-publish" size="sm" icon={Send} onClick={onPublish}>
             Publish
@@ -57,6 +55,8 @@ export function RotaPageHeader({
           className="rota-more"
           items={[
             { kind: "label", text: "Planning" },
+            { label: "Copy or clear a day", icon: CopyPlus, onSelect: onCopyDay },
+            { label: "Rota templates", icon: LayoutTemplate, onSelect: onOpenTemplates },
             { label: "Print rota", icon: Printer, onSelect: onPrintRota },
 
             { kind: "separator" },

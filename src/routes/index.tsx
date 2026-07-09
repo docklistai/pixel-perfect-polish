@@ -10,7 +10,7 @@ import { DashboardSetupPanel } from "@/features/dashboard/components/DashboardSe
 import { buildDashboardSetup } from "@/features/dashboard/lib/dashboardSetup";
 import { DashboardKpiCards } from "@/features/dashboard/components/DashboardKpiCards";
 import { DashboardAttentionPanel } from "@/features/dashboard/components/DashboardAttentionPanel";
-import { DashboardLabourWatch } from "@/features/dashboard/components/DashboardLabourWatch";
+import { DashboardLabourWatchLive } from "@/features/dashboard/components/DashboardLabourWatchLive";
 import { DashboardRotaPublish } from "@/features/dashboard/components/DashboardRotaPublish";
 import { DashboardPendingLeave } from "@/features/dashboard/components/DashboardPendingLeave";
 import { DashboardTimesheets } from "@/features/dashboard/components/DashboardTimesheets";
@@ -27,9 +27,10 @@ import {
 } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
 import { useGreeting } from "@/features/dashboard/hooks/useGreeting";
-import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { useWorkspaceLabourSettings } from "@/features/settings/hooks/useWorkspaceLabourSettings";
+import { useWorkspaceProfile } from "@/features/settings/hooks/useWorkspaceProfile";
 
 export const Route = createFileRoute("/")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
@@ -58,6 +59,8 @@ function Home() {
   const dashboard = useDashboardData();
   const { workspaceName } = useManagerIdentity();
   const greeting = useGreeting();
+  const labourSettings = useWorkspaceLabourSettings();
+  const workspaceProfile = useWorkspaceProfile();
   const isLiveDashboard = dashboard.source === "live";
   // Live-only setup/readiness checklist; demo workspaces are always populated.
   const setupPlan =
@@ -66,6 +69,16 @@ function Home() {
           staffCount: dashboard.staffCount,
           plannedShiftCount: dashboard.plannedShiftCount,
           hasPublishedSnapshot: dashboard.nextPublished,
+          hasLabourTargets: labourSettings.isUnset
+            ? false
+            : labourSettings.settings
+              ? labourSettings.settings.weeklyBudgetMinutes !== null ||
+                labourSettings.settings.avgHourlyCostPence !== null
+              : null,
+          hasBusinessBasics:
+            !workspaceProfile.enabled || workspaceProfile.isLoading
+              ? null
+              : workspaceProfile.openWeekdaysMask !== null,
         })
       : null;
   const showSetupPanel = setupPlan?.show ?? false;
@@ -301,12 +314,7 @@ function Home() {
 
       {/* Secondary row: labour watch · rota countdown · leave queue */}
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatch
-          labourCost={`£${DEMO_WORLD.labour.labourCost.toLocaleString("en-GB")}`}
-          projectedSales={`£${DEMO_WORLD.labour.projectedSales.toLocaleString("en-GB")}`}
-          labourPct={DEMO_WORLD.labour.labourPercent}
-          sample
-        />
+        <DashboardLabourWatchLive source={dashboard.source} weekShifts={dashboard.weekShifts} />
         <DashboardRotaPublish
           published={dashboard.nextPublished}
           hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}

@@ -14,7 +14,8 @@ const MONTH_NAMES = [
   "Nov",
   "Dec",
 ];
-const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/** Abbreviations indexed by JS getUTCDay (0 = Sun .. 6 = Sat). */
+const WEEKDAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MAX_SHIFT_DURATION_MINUTES = 16 * 60;
 
 function datePartsInTimezone(date: Date, timezone: string) {
@@ -44,21 +45,29 @@ function addIsoDaysDate(isoDate: string, days: number): Date {
   return new Date(`${addIsoDays(isoDate, days)}T12:00:00Z`);
 }
 
+/**
+ * The ISO date the rota week starts on for a given offset. `startDay` is the
+ * configured first weekday, 0 = Monday .. 6 = Sunday (defaults to Monday, so
+ * existing behaviour is unchanged until a workspace configures otherwise).
+ */
 export function weekStartForOffset(
   timezone: string,
   weekOffset: number,
+  startDay: number = 0,
   baseDate: Date = new Date(),
 ): string {
   const today = dateIsoInTimezone(baseDate, timezone);
-  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
-  const daysSinceMonday = weekday === 0 ? 6 : weekday - 1;
-  return addIsoDays(today, weekOffset * 7 - daysSinceMonday);
+  const utcDay = new Date(`${today}T12:00:00Z`).getUTCDay(); // 0 = Sun .. 6 = Sat
+  const weekdayMon0 = (utcDay + 6) % 7; // 0 = Mon .. 6 = Sun
+  const daysSinceStart = (weekdayMon0 - startDay + 7) % 7;
+  return addIsoDays(today, weekOffset * 7 - daysSinceStart);
 }
 
+/** Day labels derived from each date, so they are correct whatever day the week starts on. */
 export function liveWeekDayLabels(weekStart: string): string[] {
-  return DAY_NAMES.map((day, index) => {
+  return Array.from({ length: 7 }, (_, index) => {
     const date = addIsoDaysDate(weekStart, index);
-    return `${day} ${date.getUTCDate()} ${MONTH_NAMES[date.getUTCMonth()]}`;
+    return `${WEEKDAY_ABBR[date.getUTCDay()]} ${date.getUTCDate()} ${MONTH_NAMES[date.getUTCMonth()]}`;
   });
 }
 

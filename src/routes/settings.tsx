@@ -74,8 +74,8 @@ function SettingsPage() {
       <AlertCard
         className="mb-4"
         tone="warning"
-        title="Preview — Settings changes are not live-wired"
-        description="Some settings, permissions, security controls, exports, and plan details are sample previews. Unsupported actions are labelled and do not change auth, billing, integrations, or files."
+        title="Preview — most settings are not live-wired yet"
+        description="Labour targets (Rota & scheduling) save to your workspace and drive Rota and Home. Other settings, permissions, security controls, exports, and plan details remain labelled previews and do not change auth, billing, integrations, or files."
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">

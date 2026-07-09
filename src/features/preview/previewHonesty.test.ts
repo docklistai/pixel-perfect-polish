@@ -51,7 +51,7 @@ describe("preview containment honesty", () => {
       "Preview — Team uses sample communication content",
     );
     expect(source("src/routes/settings.tsx")).toContain(
-      "Preview — Settings changes are not live-wired",
+      "Preview — most settings are not live-wired yet",
     );
   });
 

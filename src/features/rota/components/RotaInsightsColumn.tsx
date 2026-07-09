@@ -1,10 +1,17 @@
 import { Eye, EyeOff } from "lucide-react";
+import { useRotaInsights } from "../hooks/useRotaInsights";
 import type { useRotaDraftController } from "../hooks/useRotaDraftController";
+import type { RecurringDayOffClash } from "../lib/recurringDayOffClashes";
 import type { PublishState } from "../lib/publishEligibility";
 import type { ShiftId } from "../types";
 import { IssuesToResolveCard } from "./IssuesToResolveCard";
 import { LabourSummaryCard } from "./LabourSummaryCard";
+import { DailyBudgetCard } from "./DailyBudgetCard";
+import { RoleBudgetCard } from "./RoleBudgetCard";
 import { PublishReadinessCard } from "./PublishReadinessCard";
+import { RecurringDayOffClashesCard } from "./RecurringDayOffClashesCard";
+import { ClosedDayShiftsCard } from "./ClosedDayShiftsCard";
+import { OutsideHoursCard } from "./OutsideHoursCard";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -25,6 +32,7 @@ export function RotaInsightsColumn({
   onViewCoverageDetails,
   onOpenSupport,
   onChooseRecoveryCandidate,
+  dayOffClashes,
 }: {
   rota: RotaController;
   visible: boolean;
@@ -37,7 +45,16 @@ export function RotaInsightsColumn({
   onViewCoverageDetails: () => void;
   onOpenSupport: () => void;
   onChooseRecoveryCandidate: (shiftId: ShiftId, staffId: string) => void;
+  dayOffClashes: RecurringDayOffClash[];
 }) {
+  const insights = useRotaInsights({
+    source: rota.source,
+    draftShifts: rota.draftShifts,
+    scheduledHours: rota.scheduledHours,
+    days: rota.days,
+    dayIsoDates: rota.dayIsoDates,
+  });
+
   if (!visible) {
     return (
       <div className="flex justify-center xl:justify-end">
@@ -66,10 +83,22 @@ export function RotaInsightsColumn({
         </button>
       </div>
       <LabourSummaryCard
+        source={rota.source}
         scheduledHours={rota.scheduledHours}
-        targetHours={rota.targetHours}
+        contractedHours={rota.targetHours}
         coveragePct={rota.coveragePct}
+        labour={insights.labour}
         onViewCoverageDetails={onViewCoverageDetails}
+      />
+      {insights.dailyBudget && <DailyBudgetCard view={insights.dailyBudget} />}
+      {insights.roleBudget && <RoleBudgetCard view={insights.roleBudget} />}
+      <ClosedDayShiftsCard
+        shifts={insights.closedDayShifts}
+        onReviewShift={rota.setSelectedShiftId}
+      />
+      <OutsideHoursCard
+        shifts={insights.outsideHoursShifts}
+        onReviewShift={rota.setSelectedShiftId}
       />
       <IssuesToResolveCard
         conflicts={rota.conflictSummaries}
@@ -82,6 +111,7 @@ export function RotaInsightsColumn({
         dayIsoDates={rota.dayIsoDates}
         onChooseRecoveryCandidate={onChooseRecoveryCandidate}
       />
+      <RecurringDayOffClashesCard clashes={dayOffClashes} onReviewShift={rota.setSelectedShiftId} />
       <PublishReadinessCard
         published={rota.published}
         hasUnpublishedChanges={rota.hasUnpublishedChanges}

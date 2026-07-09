@@ -10,6 +10,7 @@ import { LiveOperationalCards } from "./LiveOperationalCards";
 import { LiveScheduleList } from "./LiveScheduleList";
 import { LiveLeaveList } from "./LiveLeaveList";
 import { LiveTimeList } from "./LiveTimeList";
+import { StaffRecurringDaysOffCard } from "./StaffRecurringDaysOffCard";
 import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
 import { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
 import type { StaffRow } from "../../types";
@@ -193,7 +194,12 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
           </div>
         )}
         {activeTab === "schedule" && <LiveScheduleList ops={ops} firstName={firstName} />}
-        {activeTab === "leave" && <LiveLeaveList ops={ops} firstName={firstName} />}
+        {activeTab === "leave" && (
+          <div className="grid gap-5">
+            <LiveLeaveList ops={ops} firstName={firstName} />
+            <StaffRecurringDaysOffCard staffMemberId={member.id} firstName={firstName} />
+          </div>
+        )}
         {activeTab === "time" && <LiveTimeList ops={ops} firstName={firstName} />}
         {empty && (
           <ProfileEmptyPanel

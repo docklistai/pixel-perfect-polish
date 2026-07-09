@@ -159,27 +159,39 @@ export function useRotaShiftActions(rota: RotaController) {
     toastClearedDraft(rota, restored);
   };
 
-  const handleSetShiftDept = (shiftId: string, dept: string) => {
+  const handleSetShiftDept = async (shiftId: string, dept: string) => {
     if (readOnly) return block();
-    if (isLive) return blockDraftOnly();
     const prev = findShift(shiftId)?.deptOverride;
-    rota.updateShift(shiftId, { deptOverride: dept, edited: true });
+    try {
+      await rota.updateShift(shiftId, { deptOverride: dept, edited: true });
+    } catch {
+      return;
+    }
+    if (isLive) return;
     toastDepartmentDraft(rota, shiftId, dept, prev);
   };
 
-  const handleSetShiftColour = (shiftId: string, presetId: string) => {
+  const handleSetShiftColour = async (shiftId: string, presetId: string) => {
     if (readOnly) return block();
-    if (isLive) return blockDraftOnly();
     const prev = findShift(shiftId)?.colourOverride;
-    rota.updateShift(shiftId, { colourOverride: presetId });
+    try {
+      await rota.updateShift(shiftId, { colourOverride: presetId });
+    } catch {
+      return;
+    }
+    if (isLive) return;
     toastColourDraft(rota, shiftId, presetId, prev);
   };
 
-  const handleResetShiftColour = (shiftId: string) => {
+  const handleResetShiftColour = async (shiftId: string) => {
     if (readOnly) return block();
-    if (isLive) return blockDraftOnly();
     const prev = findShift(shiftId);
-    rota.updateShift(shiftId, { colourOverride: undefined, deptOverride: undefined });
+    try {
+      await rota.updateShift(shiftId, { colourOverride: undefined, deptOverride: undefined });
+    } catch {
+      return;
+    }
+    if (isLive) return;
     toastResetColourDraft(rota, shiftId, prev);
   };
 

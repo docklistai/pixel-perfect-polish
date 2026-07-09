@@ -11,6 +11,7 @@ import { countOpenShifts, totalScheduledHours } from "@/features/rota/lib/rotaSu
 import { buildDashboardOperational } from "../lib/dashboardOperational";
 import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
 import { useDashboardWorkspace } from "./useDashboardWorkspace";
+import type { DraftShift } from "@/features/rota/types";
 import type { KpiItem } from "../types";
 
 const dashRouteApi = getRouteApi("/");
@@ -72,6 +73,7 @@ export function useDashboardData() {
       ...demo,
       publishWeekLabel: formatDashboardPublishWeekLabel(null),
       staffCount: null as number | null,
+      weekShifts: [] as DraftShift[],
     };
   }
 
@@ -150,5 +152,6 @@ export function useDashboardData() {
     publishWeekLabel: formatDashboardPublishWeekLabel(week?.weekStart),
     attentionWeekScope: "current" as const,
     staffCount,
+    weekShifts: shifts,
   };
 }

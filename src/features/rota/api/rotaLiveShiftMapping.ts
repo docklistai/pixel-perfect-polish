@@ -251,6 +251,10 @@ export async function buildShiftUpdate(
     ends_at: range.endsAt,
     break_minutes: patch.breakMinutes ?? shift.break_minutes,
     role_name: nextRole,
-    assignment_status: nextStaffId ? "scheduled" : "open",
+    assignment_status: nextStaffId ? "scheduled" : ("open" as const),
+    // Presence in the patch (null clears) is what toggles these; absence leaves
+    // the stored override untouched.
+    ...("colourOverride" in patch ? { colour_override: patch.colourOverride ?? null } : {}),
+    ...("deptOverride" in patch ? { dept_override: patch.deptOverride ?? null } : {}),
   };
 }

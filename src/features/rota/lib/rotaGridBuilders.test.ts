@@ -52,4 +52,9 @@ describe("buildStaffRows leave visibility", () => {
     );
     expect(row?.cells[0]).toMatchObject({ hasLeave: true, leaveState: "approved" });
   });
+
+  it("surfaces the leave kind as a short cell label", () => {
+    const [row] = buildStaffRows([member], [], [leave("approved")], ["2026-06-08"]);
+    expect(row?.cells[0]?.leaveLabel).toBe("Holiday");
+  });
 });

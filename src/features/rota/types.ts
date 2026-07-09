@@ -86,6 +86,8 @@ export type RotaGridCell = {
   hasLeave?: boolean;
   /** Leave visibility for scheduling scanability; only approved leave creates conflicts. */
   leaveState?: "approved" | "pending";
+  /** Short leave-kind label (Holiday/Sick/Unpaid/Personal/Leave) for the cell badge. */
+  leaveLabel?: string;
 };
 
 export type RotaGridStaffRow = {

@@ -1,8 +1,14 @@
-import * as React from "react";
 import { toast } from "sonner";
-import { SectionCard, FieldLabel, TextField, SelectField } from "./SettingsPrimitives";
+import { SectionCard } from "./SettingsPrimitives";
 import { Upload } from "lucide-react";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { OpeningDaysSection } from "./OpeningDaysSection";
+import {
+  WorkspaceLocationField,
+  WorkspaceNameField,
+  WorkspaceRotaStartDayField,
+  WorkspaceTimezoneField,
+} from "./WorkspaceIdentityFields";
 
 function monogram(name: string): string {
   const parts = name.split(/\s+/).filter(Boolean);
@@ -10,7 +16,7 @@ function monogram(name: string): string {
   return (letters.join("") || "WS").toUpperCase();
 }
 
-export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
+export function WorkspaceTab(_props: { onDirty: () => void }) {
   const { workspaceName, email, roleLabel, initials } = useManagerIdentity();
   return (
     <div className="space-y-4">
@@ -41,44 +47,17 @@ export function WorkspaceTab({ onDirty }: { onDirty: () => void }) {
             </button>
             <p className="text-[10px] text-muted-foreground">PNG or SVG · max 2MB</p>
           </div>
-          <div className="flex-1 space-y-1.5 sm:ml-4">
-            <FieldLabel>Workspace name</FieldLabel>
-            <TextField key={workspaceName} defaultValue={workspaceName} onChange={onDirty} />
-          </div>
+          <WorkspaceNameField />
         </div>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <label className="space-y-1.5">
-            <FieldLabel>Default location</FieldLabel>
-            <SelectField key={workspaceName} defaultValue="primary" onChange={onDirty}>
-              <option value="primary">{workspaceName}</option>
-            </SelectField>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Time zone</FieldLabel>
-            <SelectField defaultValue="europe-london" onChange={onDirty}>
-              <option value="europe-london">Europe/London (GMT+1)</option>
-              <option value="europe-dublin">Europe/Dublin</option>
-              <option value="utc">UTC</option>
-            </SelectField>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Currency</FieldLabel>
-            <SelectField defaultValue="gbp" onChange={onDirty}>
-              <option value="gbp">GBP (£)</option>
-              <option value="eur">EUR (€)</option>
-              <option value="usd">USD ($)</option>
-            </SelectField>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Pay week ends on</FieldLabel>
-            <SelectField defaultValue="sunday" onChange={onDirty}>
-              <option value="sunday">Sunday</option>
-              <option value="saturday">Saturday</option>
-            </SelectField>
-          </label>
+          <WorkspaceLocationField />
+          <WorkspaceTimezoneField />
+          <WorkspaceRotaStartDayField />
         </div>
       </SectionCard>
+
+      <OpeningDaysSection />
 
       <SectionCard title="Workspace owner" description="Primary contact for this workspace.">
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/20 p-3">

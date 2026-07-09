@@ -11,9 +11,9 @@ import {
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import type { PortalRequest, RequestKind, RequestStatus } from "../types";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
+import { PortalRecurringDaysOffCard } from "./PortalRecurringDaysOffCard";
 import { toPortalRequest } from "../lib/portalRequests";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
-import { usePortalRota } from "../hooks/usePortalRota";
 
 const statusTone: Record<RequestStatus, "warning" | "success" | "danger" | "muted"> = {
   pending: "warning",
@@ -50,7 +50,6 @@ export function LeaveTab() {
     approvedLeave: liveApproved,
     requestHistory: liveHistory,
   } = usePortalLeaveRequests();
-  const { weekLabel } = usePortalRota();
 
   // Phase 13 connects these to live data.
   const approvedLeave = isLive ? liveApproved : [];
@@ -114,18 +113,8 @@ export function LeaveTab() {
         </DashboardCard>
       )}
 
-      {/* Availability strip */}
-      <DashboardCard className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            AVAILABILITY
-          </div>
-          <span className="text-[11px] text-muted-foreground">{weekLabel}</span>
-        </div>
-        <div className="mt-3 text-[11px] text-muted-foreground">
-          Availability editing will be available in a future update.
-        </div>
-      </DashboardCard>
+      {/* Regular days off — live standing day-off requests */}
+      <PortalRecurringDaysOffCard />
 
       <div>
         <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">

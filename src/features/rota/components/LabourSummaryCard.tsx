@@ -1,19 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Info, Settings } from "lucide-react";
 import { ActionButton, Card, IconButton } from "@/components/dl";
+import type { LabourCostView } from "../lib/labourCost";
+import {
+  buildLabourSummaryView,
+  formatMoneyPence,
+  formatPct,
+} from "../lib/labourSummaryView";
 
-/** Demo figures for the labour breakdown - frontend-only, mirrors the prototype rail. */
-const DEMO_FORECAST_SALES = 17800;
-const DEMO_BLENDED_RATE = 14;
+/** Demo figures for the prototype rail — used only when the demo dataset is shown. */
+const DEMO_FORECAST_SALES_PENCE = 1_780_000;
+const DEMO_BLENDED_RATE_PENCE = 1_400;
 const DEMO_LABOUR_TARGET_PCT = 30;
-
-function formatPct(value: number) {
-  return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
-}
-
-function formatMoney(value: number) {
-  return `£${Math.round(value).toLocaleString("en-GB")}`;
-}
 
 function Ring({ pct }: { pct: number }) {
   const r = 18;
@@ -37,22 +35,54 @@ function Ring({ pct }: { pct: number }) {
   );
 }
 
+const TONE_TEXT = {
+  ok: "text-brand",
+  warning: "text-warning",
+  danger: "text-danger",
+} as const;
+
+const TONE_BAR = {
+  ok: "bg-brand",
+  warning: "bg-warning",
+  danger: "bg-danger",
+} as const;
+
 export function LabourSummaryCard({
+  source,
   scheduledHours,
-  targetHours,
+  contractedHours,
   coveragePct,
+  labour,
   onViewCoverageDetails,
 }: {
+  source: "live" | "demo";
   scheduledHours: number;
-  targetHours: number;
+  contractedHours: number;
   coveragePct: number;
+  /** Live cost estimate; null while demo data or settings are on screen. */
+  labour: LabourCostView | null;
   onViewCoverageDetails: () => void;
 }) {
   const navigate = useNavigate();
   const clampedPct = Math.min(100, Math.max(0, coveragePct));
-  const withinBudget = scheduledHours <= targetHours;
-  const estCost = scheduledHours * DEMO_BLENDED_RATE;
-  const labourPct = (estCost / DEMO_FORECAST_SALES) * 100;
+
+  const isLiveEstimate = source === "live" && labour !== null;
+  const view = isLiveEstimate
+    ? buildLabourSummaryView({ scheduledHours, contractedHours, labour })
+    : {
+        budgetHours: contractedHours,
+        budgetSource: "budget" as const,
+        estCostLabel: formatMoneyPence(scheduledHours * DEMO_BLENDED_RATE_PENCE),
+        labourPctLabel: formatPct(
+          ((scheduledHours * DEMO_BLENDED_RATE_PENCE) / DEMO_FORECAST_SALES_PENCE) * 100,
+        ),
+        targetPctLabel: `${DEMO_LABOUR_TARGET_PCT}%`,
+        statusTone: scheduledHours <= contractedHours ? ("ok" as const) : ("warning" as const),
+        statusLabel: scheduledHours <= contractedHours ? "Within budget" : "Over budget",
+        hint: null,
+      };
+
+  const budgetRatio = view.budgetHours > 0 ? scheduledHours / view.budgetHours : 0;
 
   return (
     <Card className="p-4">
@@ -61,9 +91,13 @@ export function LabourSummaryCard({
           <span className="text-sm font-semibold">Labour summary</span>
           <span
             className="badge"
-            title="Estimated cost and labour % only. Scheduled hours and coverage are live."
+            title={
+              isLiveEstimate
+                ? "Cost estimate from your labour targets and staff rates. Hours and coverage are live."
+                : "Demo figures. Scheduled hours and coverage reflect the grid."
+            }
           >
-            Estimate
+            {isLiveEstimate ? "Estimate" : "Demo figures"}
           </span>
         </div>
         <IconButton
@@ -81,16 +115,19 @@ export function LabourSummaryCard({
             {Math.round(scheduledHours)}h
           </div>
           <div className="text-[11px] text-muted-foreground">
-            of {Math.round(targetHours)}h weekly budget
+            of {Math.round(view.budgetHours)}h{" "}
+            {view.budgetSource === "budget" ? "weekly budget" : "contracted hours"}
           </div>
         </div>
         <div className="flex-1" />
         <div className="text-right">
-          <div className="font-display text-[22px] font-semibold leading-tight tracking-tight tabular-nums text-brand">
-            {formatPct(labourPct)}
+          <div
+            className={`font-display text-[22px] font-semibold leading-tight tracking-tight tabular-nums ${TONE_TEXT[view.statusTone]}`}
+          >
+            {view.labourPctLabel ?? "—"}
           </div>
           <div className="text-[11px] text-muted-foreground">
-            vs {DEMO_LABOUR_TARGET_PCT}% target
+            {view.targetPctLabel ? `vs ${view.targetPctLabel} target` : "labour % target unset"}
           </div>
         </div>
         <Ring pct={clampedPct} />
@@ -98,42 +135,27 @@ export function LabourSummaryCard({
 
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
         <div
-          className={`h-full rounded-full transition-all ${withinBudget ? "bg-brand" : "bg-warning"}`}
-          style={{ width: `${Math.min(100, (scheduledHours / Math.max(1, targetHours)) * 100)}%` }}
+          className={`h-full rounded-full transition-all ${TONE_BAR[view.statusTone]}`}
+          style={{ width: `${Math.min(100, budgetRatio * 100)}%` }}
         />
       </div>
       <div className="mt-1.5 flex items-center justify-between text-[11px]">
-        <span className={`font-semibold ${withinBudget ? "text-brand" : "text-warning"}`}>
-          {withinBudget ? "Within budget" : "Over budget"}
-        </span>
+        <span className={`font-semibold ${TONE_TEXT[view.statusTone]}`}>{view.statusLabel}</span>
         <span className="font-mono tabular-nums text-muted-foreground">
-          {formatMoney(estCost)} est. cost
+          {view.estCostLabel ? `${view.estCostLabel} est. cost` : "no cost estimate"}
         </span>
       </div>
 
-      <div className="mt-3 space-y-1 border-t border-border/60 pt-2.5">
-        {[
-          ["Forecast sales", formatMoney(DEMO_FORECAST_SALES)],
-          ["Projected labour %", formatPct(labourPct)],
-          ["Labour % target", `${DEMO_LABOUR_TARGET_PCT}%`],
-          ["Hours budget", `${Math.round(targetHours)}h / week`],
-        ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between gap-3">
-            <span className="text-[11px] text-muted-foreground">{label}</span>
-            <span className="font-mono text-[11px] font-semibold tabular-nums">{value}</span>
-          </div>
-        ))}
+      {view.hint && (
         <Link
           to="/settings"
-          className="mt-1 flex items-start gap-1.5 text-left text-[11px] leading-snug text-brand hover:underline"
+          className="mt-3 flex items-start gap-1.5 border-t border-border/60 pt-2.5 text-left text-[11px] leading-snug text-brand hover:underline"
         >
           <Info className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
-          <span>
-            Estimated cost and labour % only. Scheduled hours and coverage stay live. Set labour
-            targets in Settings - Rota &amp; scheduling.
-          </span>
+          <span>{view.hint}</span>
         </Link>
-      </div>
+      )}
+
       <ActionButton
         variant="ghost"
         size="sm"

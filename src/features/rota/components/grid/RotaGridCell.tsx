@@ -163,7 +163,7 @@ export function RotaGridCell({
               cell.leaveState === "approved" ? "text-muted-foreground/40" : "text-warning/60"
             }`}
           >
-            {cell.leaveState === "approved" ? "Leave" : "Pending"}
+            {cell.leaveLabel ?? (cell.leaveState === "approved" ? "Leave" : "Pending")}
           </span>
         </div>
       )}

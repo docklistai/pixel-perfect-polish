@@ -1,12 +1,35 @@
 import { AlertTriangle, Pencil } from "lucide-react";
+import type { RoleColourKey } from "../lib/deptColours";
 
-export function RotaGridLegendBar({ staffCount }: { staffCount: number }) {
+export function RotaGridLegendBar({
+  staffCount,
+  roleColours = [],
+}: {
+  staffCount: number;
+  /** Distinct role → colour swatches present on the grid, for the colour key. */
+  roleColours?: RoleColourKey[];
+}) {
   return (
     <div className="rota-grid-legend flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-4 py-2.5 text-[11px] text-muted-foreground">
-      <span className="rota-grid-legend-summary">
-        Target 100% · Breaks: 30 min unpaid for shifts ≥ 6h · {staffCount}{" "}
-        {staffCount === 1 ? "staff member" : "staff members"}
-      </span>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <span className="rota-grid-legend-summary">
+          Target 100% · Breaks: 30 min unpaid for shifts ≥ 6h · {staffCount}{" "}
+          {staffCount === 1 ? "staff member" : "staff members"}
+        </span>
+        {roleColours.length > 0 && (
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1" aria-label="Role colours">
+            {roleColours.map((entry) => (
+              <span key={entry.label} className="rota-legend-chip flex items-center gap-1.5">
+                <span
+                  className={`inline-block h-3 w-3 rounded-[3px] ${entry.swatch}`}
+                  aria-hidden
+                />
+                {entry.label}
+              </span>
+            ))}
+          </span>
+        )}
+      </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className="rota-legend-chip flex items-center gap-1.5">
           <span

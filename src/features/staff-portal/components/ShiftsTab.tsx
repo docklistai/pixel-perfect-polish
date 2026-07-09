@@ -6,6 +6,7 @@ import { usePortalRota } from "../hooks/usePortalRota";
 import { toPortalRequest } from "../lib/portalRequests";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalRequest, PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
+import { PortalPayEstimateCard } from "./PortalPayEstimateCard";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
 const statusTone: Record<ShiftStatus, "success" | "warning" | "info"> = {
@@ -49,6 +50,7 @@ export function ShiftsTab() {
                 ? "Couldn't reach live data — showing sample shifts."
                 : "Showing sample shifts."}
           </div>
+          {source === "live" && <PortalPayEstimateCard upcoming={upcoming} />}
           <ShiftList
             shifts={upcoming}
             hasPublishedSnapshot={hasPublished}
