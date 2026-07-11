@@ -13,6 +13,8 @@ const footerGroups = [
     links: [
       { label: "About" },
       { label: "Contact", href: "mailto:docklistai@gmail.com" },
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms", href: "/terms" },
       { label: "Made in Scotland" },
     ],
   },

@@ -96,6 +96,23 @@ into the client by Vite — this is expected for these two values only.
   production must point at the correct Supabase project for each environment —
   **do not let a preview deploy write to the production Supabase project.**
 
+### Password-recovery redirect allowlist (manual dashboard step)
+
+The forgot-password flow sends a Supabase recovery email that redirects to
+`<app origin>/auth/reset`. For each environment, that exact URL must be added
+to **Dashboard → Authentication → URL Configuration → Redirect URLs** (e.g.
+`http://localhost:8080/auth/reset` locally, plus the production origin). Until
+the URL is allowlisted, recovery links fall back to the project's Site URL and
+the reset page will report a missing recovery session. This is remote auth
+config, not migration state — it cannot be verified from the repo.
+
+Note: recovery uses the PKCE flow, so a reset link only opens in the **same
+browser** that requested it (the code verifier is stored client-side). Opening
+the link elsewhere shows an honest "open it in the same browser" error. If
+cross-device recovery becomes a requirement, switch the recovery email
+template to a `token_hash` link verified with `supabase.auth.verifyOtp` — a
+separate, reviewed change.
+
 ### Never expose service-role keys
 
 - **Never** add `SUPABASE_SERVICE_ROLE_KEY` (or any `SUPABASE_SERVICE*` secret)
@@ -109,12 +126,18 @@ into the client by Vite — this is expected for these two values only.
 
 Linked project: `gdprvrvcwjpibmnjvtyd` (DocklistAI, West Europe / London).
 
-### Verified during Phase 11 (read-only)
+### Verified during Phase 11 (read-only) — now historical
 
-- **Migrations in sync.** `supabase migration list --linked` shows local and
-  remote both at `20260612090000 … 20260612090700` — i.e. the Phase 7 portal
-  claim throttle (`20260612090700`) **is applied remotely.** No migration apply
-  is needed before deploy.
+- **Migrations in sync (as of Phase 11 / HEAD `c98e006` only).**
+  `supabase migration list --linked` showed local and remote both at
+  `20260612090000 … 20260612090700` — i.e. the Phase 7 portal claim throttle
+  (`20260612090700`) was applied remotely **at that time.**
+
+> **⚠ Stale as of 2026-07-10.** The repo now contains migrations through
+> `20260708144500` (phases 8–24). Whether phases 8–24 are applied remotely is
+> **unverified** — a `supabase migration list --linked` run on 2026-07-10
+> failed with `LegacyProjectNotLinkedError` (checkout not linked). Re-link and
+> re-run the read-only check before any deploy; do not assume remote sync.
 - **RPC / RLS objects present (by transitivity).** The Phase 3–7 RLS policies,
   staff-safe views, and `SECURITY DEFINER` RPCs are defined in migrations
   `…090300`, `…090500`, `…090600`, `…090700`, all confirmed applied. Applied
@@ -163,8 +186,8 @@ separately reviewed.
 ## Post-deploy smoke checklist
 
 After a deploy, run the relevant subset of
-[`phase-10-smoke-checklist.md`](./phase-10-smoke-checklist.md) **against the
-deployed URL** (live mode). Minimum subset:
+[`private-beta-smoke-checklist.md`](./private-beta-smoke-checklist.md) **against
+the deployed URL** (live mode). Minimum subset:
 
 - **Auth / no-access** — manager sign-in lands on dashboard; unauthenticated
   manager-route visit redirects to `/auth` (no data flash); user with no

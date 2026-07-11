@@ -311,7 +311,7 @@ begin
   exception when insufficient_privilege then raise notice 'PASS: delivery updates are limited to delivery state columns'; end;
   begin
     insert into public.leave_requests (workspace_id, staff_member_id, leave_type, start_date, end_date, reason, submitted_at)
-    values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000005', 'annual_leave', '2026-07-01', '2026-07-02', 'Backdated request.', '2020-01-01T09:00:00Z');
+    values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000005', 'annual_leave', current_date + 7, current_date + 8, 'Backdated request.', '2020-01-01T09:00:00Z');
     raise exception 'FAIL: staff backdated a leave submission';
   exception when sqlstate '55000' then raise notice 'PASS: leave submissions carry transaction time'; end;
   begin
@@ -338,7 +338,7 @@ begin
   get diagnostics affected_rows = row_count;
   if affected_rows <> 1 then raise exception 'FAIL: staff could not toggle own read state'; end if;
   insert into public.leave_requests (workspace_id, staff_member_id, leave_type, start_date, end_date, reason)
-  values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000005', 'personal', '2026-07-06', '2026-07-06', 'Appointment.');
+  values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000005', 'personal', current_date + 7, current_date + 7, 'Appointment.');
   raise notice 'PASS: staff self-service writes (read state, own leave submission) succeed';
 end $$;
 rollback to savepoint staff_allowed_writes;
@@ -431,7 +431,7 @@ begin
   end loop;
   begin
     insert into public.leave_requests (workspace_id, staff_member_id, leave_type, start_date, end_date, reason)
-    values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000005', 'personal', '2026-07-06', '2026-07-06', 'Intrusion.');
+    values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000005', 'personal', current_date + 7, current_date + 7, 'Intrusion.');
     raise exception 'FAIL: non-member inserted workspace data';
   exception when insufficient_privilege then null; end;
   raise notice 'PASS: non-members see and write nothing in any workspace relation';

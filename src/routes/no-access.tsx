@@ -4,6 +4,7 @@ import { Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BootstrapWorkspaceForm } from "@/features/auth/components/BootstrapWorkspaceForm";
+import { WorkspaceSelectionCard } from "@/features/auth/components/WorkspaceSelectionCard";
 import { clearAuthStateCache, requireNoWorkspaceState } from "@/features/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 
@@ -36,6 +37,16 @@ function NoAccessPage() {
 
   if (auth.status === "no-workspace") {
     return <BootstrapWorkspaceForm onSignOut={handleSignOut} signingOut={signingOut} />;
+  }
+
+  if (auth.status === "workspace-selection-required") {
+    return (
+      <WorkspaceSelectionCard
+        workspaces={auth.workspaces}
+        onSignOut={handleSignOut}
+        signingOut={signingOut}
+      />
+    );
   }
 
   return (

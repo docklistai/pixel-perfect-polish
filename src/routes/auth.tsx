@@ -205,7 +205,22 @@ function AuthPage() {
               </div>
 
               <div className="mt-4 text-center">
-                <p className="text-xs text-muted-foreground">Secure login • GDPR compliant</p>
+                <p className="text-xs text-muted-foreground">
+                  Private beta ·{" "}
+                  <Link
+                    to="/terms"
+                    className="underline-offset-4 hover:text-foreground hover:underline"
+                  >
+                    Terms
+                  </Link>{" "}
+                  ·{" "}
+                  <Link
+                    to="/privacy"
+                    className="underline-offset-4 hover:text-foreground hover:underline"
+                  >
+                    Privacy
+                  </Link>
+                </p>
               </div>
             </div>
           </div>

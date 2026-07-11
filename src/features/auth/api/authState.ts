@@ -48,12 +48,25 @@ export const fetchAuthStateFn = createServerFn({ method: "GET" }).handler(
       (activeMemberships.length === 1 ? activeMemberships[0] : null);
 
     if (!membership) {
+      // Names let the selection screen show real venues instead of ids. The
+      // read stays scoped to the caller's own membership workspace ids.
+      const { data: workspaceRows } = await supabase
+        .from("workspaces")
+        .select("id, name")
+        .in(
+          "id",
+          activeMemberships.map((m) => m.workspace_id),
+        );
+      const nameById = new Map(
+        (workspaceRows ?? []).map((row) => [row.id as string, row.name as string]),
+      );
       return {
         status: "workspace-selection-required",
         userId: user.id,
         email: user.email ?? null,
         workspaces: activeMemberships.map((m) => ({
           workspaceId: m.workspace_id,
+          name: nameById.get(m.workspace_id) ?? null,
           role: m.role as WorkspaceRole,
         })),
       };

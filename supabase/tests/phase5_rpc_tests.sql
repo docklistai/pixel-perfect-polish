@@ -553,7 +553,7 @@ declare
   new_request_id uuid;
   delivery_count bigint;
 begin
-  result := public.rpc_submit_leave_request('10000000-0000-4000-8000-000000000001', 'personal', '2026-07-06', '2026-07-07', 'Family appointment.');
+  result := public.rpc_submit_leave_request('10000000-0000-4000-8000-000000000001', 'personal', current_date + 7, current_date + 8, 'Family appointment.');
   new_request_id := (result ->> 'leave_request_id')::uuid;
   perform 1 from public.leave_requests
     where id = new_request_id and staff_member_id = '14000000-0000-4000-8000-000000000005'

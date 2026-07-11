@@ -18,9 +18,9 @@ The goal is to stop obvious defects, risks, stale behaviour, broken states, unsa
 
 DocklistAI must stay focused:
 
-- 80% scheduling
-- 15% lightweight HR
-- 5% AI
+- 50% scheduling
+- 30% lightweight workforce admin
+- 20% limited manager-led AI
 
 Protect the product from bloat, scope creep, random refactors, and unnecessary complexity.
 

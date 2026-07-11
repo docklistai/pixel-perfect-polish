@@ -18,7 +18,8 @@ export type AuthState =
       status: "workspace-selection-required";
       userId: string;
       email: string | null;
-      workspaces: Array<{ workspaceId: string; role: WorkspaceRole }>;
+      /** Name is null when the workspaces row isn't readable (e.g. RLS). */
+      workspaces: Array<{ workspaceId: string; name: string | null; role: WorkspaceRole }>;
     }
   | {
       status: "no-staff-profile";

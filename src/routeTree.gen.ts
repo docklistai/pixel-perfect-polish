@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UiKitRouteImport } from './routes/ui-kit'
 import { Route as TimeRouteImport } from './routes/time'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as RotaRouteImport } from './routes/rota'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PortalRouteImport } from './routes/portal'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as NoAccessRouteImport } from './routes/no-access'
@@ -25,6 +27,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StaffStaffIdRouteImport } from './routes/staff.$staffId'
 import { Route as PortalAccessRouteImport } from './routes/portal_.access'
+import { Route as AuthResetRouteImport } from './routes/auth_.reset'
 
 const UiKitRoute = UiKitRouteImport.update({
   id: '/ui-kit',
@@ -34,6 +37,11 @@ const UiKitRoute = UiKitRouteImport.update({
 const TimeRoute = TimeRouteImport.update({
   id: '/time',
   path: '/time',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TeamRoute = TeamRouteImport.update({
@@ -59,6 +67,11 @@ const RotaRoute = RotaRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PortalRoute = PortalRouteImport.update({
@@ -106,6 +119,11 @@ const PortalAccessRoute = PortalAccessRouteImport.update({
   path: '/portal/access',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthResetRoute = AuthResetRouteImport.update({
+  id: '/auth_/reset',
+  path: '/auth/reset',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -115,13 +133,16 @@ export interface FileRoutesByFullPath {
   '/no-access': typeof NoAccessRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
+  '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
   '/staff': typeof StaffRouteWithChildren
   '/team': typeof TeamRoute
+  '/terms': typeof TermsRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/auth/reset': typeof AuthResetRoute
   '/portal/access': typeof PortalAccessRoute
   '/staff/$staffId': typeof StaffStaffIdRoute
 }
@@ -133,13 +154,16 @@ export interface FileRoutesByTo {
   '/no-access': typeof NoAccessRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
+  '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
   '/staff': typeof StaffRouteWithChildren
   '/team': typeof TeamRoute
+  '/terms': typeof TermsRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/auth/reset': typeof AuthResetRoute
   '/portal/access': typeof PortalAccessRoute
   '/staff/$staffId': typeof StaffStaffIdRoute
 }
@@ -152,13 +176,16 @@ export interface FileRoutesById {
   '/no-access': typeof NoAccessRoute
   '/ops': typeof OpsRoute
   '/portal': typeof PortalRoute
+  '/privacy': typeof PrivacyRoute
   '/reports': typeof ReportsRoute
   '/rota': typeof RotaRoute
   '/settings': typeof SettingsRoute
   '/staff': typeof StaffRouteWithChildren
   '/team': typeof TeamRoute
+  '/terms': typeof TermsRoute
   '/time': typeof TimeRoute
   '/ui-kit': typeof UiKitRoute
+  '/auth_/reset': typeof AuthResetRoute
   '/portal_/access': typeof PortalAccessRoute
   '/staff/$staffId': typeof StaffStaffIdRoute
 }
@@ -172,13 +199,16 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/ops'
     | '/portal'
+    | '/privacy'
     | '/reports'
     | '/rota'
     | '/settings'
     | '/staff'
     | '/team'
+    | '/terms'
     | '/time'
     | '/ui-kit'
+    | '/auth/reset'
     | '/portal/access'
     | '/staff/$staffId'
   fileRoutesByTo: FileRoutesByTo
@@ -190,13 +220,16 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/ops'
     | '/portal'
+    | '/privacy'
     | '/reports'
     | '/rota'
     | '/settings'
     | '/staff'
     | '/team'
+    | '/terms'
     | '/time'
     | '/ui-kit'
+    | '/auth/reset'
     | '/portal/access'
     | '/staff/$staffId'
   id:
@@ -208,13 +241,16 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/ops'
     | '/portal'
+    | '/privacy'
     | '/reports'
     | '/rota'
     | '/settings'
     | '/staff'
     | '/team'
+    | '/terms'
     | '/time'
     | '/ui-kit'
+    | '/auth_/reset'
     | '/portal_/access'
     | '/staff/$staffId'
   fileRoutesById: FileRoutesById
@@ -227,13 +263,16 @@ export interface RootRouteChildren {
   NoAccessRoute: typeof NoAccessRoute
   OpsRoute: typeof OpsRoute
   PortalRoute: typeof PortalRoute
+  PrivacyRoute: typeof PrivacyRoute
   ReportsRoute: typeof ReportsRoute
   RotaRoute: typeof RotaRoute
   SettingsRoute: typeof SettingsRoute
   StaffRoute: typeof StaffRouteWithChildren
   TeamRoute: typeof TeamRoute
+  TermsRoute: typeof TermsRoute
   TimeRoute: typeof TimeRoute
   UiKitRoute: typeof UiKitRoute
+  AuthResetRoute: typeof AuthResetRoute
   PortalAccessRoute: typeof PortalAccessRoute
 }
 
@@ -251,6 +290,13 @@ declare module '@tanstack/react-router' {
       path: '/time'
       fullPath: '/time'
       preLoaderRoute: typeof TimeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/team': {
@@ -286,6 +332,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/portal': {
@@ -351,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortalAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth_/reset': {
+      id: '/auth_/reset'
+      path: '/auth/reset'
+      fullPath: '/auth/reset'
+      preLoaderRoute: typeof AuthResetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -372,13 +432,16 @@ const rootRouteChildren: RootRouteChildren = {
   NoAccessRoute: NoAccessRoute,
   OpsRoute: OpsRoute,
   PortalRoute: PortalRoute,
+  PrivacyRoute: PrivacyRoute,
   ReportsRoute: ReportsRoute,
   RotaRoute: RotaRoute,
   SettingsRoute: SettingsRoute,
   StaffRoute: StaffRouteWithChildren,
   TeamRoute: TeamRoute,
+  TermsRoute: TermsRoute,
   TimeRoute: TimeRoute,
   UiKitRoute: UiKitRoute,
+  AuthResetRoute: AuthResetRoute,
   PortalAccessRoute: PortalAccessRoute,
 }
 export const routeTree = rootRouteImport
