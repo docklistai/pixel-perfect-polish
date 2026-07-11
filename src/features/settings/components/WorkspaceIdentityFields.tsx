@@ -31,7 +31,8 @@ export function WorkspaceNameField() {
   const nameEditor = useUpdateWorkspaceName();
   const [value, setValue] = React.useState<string | null>(null);
   const current = value ?? nameEditor.currentName;
-  const dirty = value !== null && value.trim() !== nameEditor.currentName && value.trim().length > 0;
+  const dirty =
+    value !== null && value.trim() !== nameEditor.currentName && value.trim().length > 0;
 
   const handleSave = async () => {
     const result = await nameEditor.save(current.trim());
@@ -71,7 +72,8 @@ export function WorkspaceLocationField() {
   const location = profile.primaryLocation;
   const [value, setValue] = React.useState<string | null>(null);
   const current = value ?? location?.name ?? "";
-  const dirty = value !== null && value.trim().length > 0 && value.trim() !== (location?.name ?? "");
+  const dirty =
+    value !== null && value.trim().length > 0 && value.trim() !== (location?.name ?? "");
   const editable = profile.enabled && location !== null;
 
   const handleSave = async () => {
@@ -152,7 +154,9 @@ export function WorkspaceTimezoneField() {
   const location = profile.primaryLocation;
   const editable = profile.enabled && location !== null;
   const current = location?.timezone ?? "Europe/London";
-  const options = COMMON_TIMEZONES.includes(current) ? COMMON_TIMEZONES : [current, ...COMMON_TIMEZONES];
+  const options = COMMON_TIMEZONES.includes(current)
+    ? COMMON_TIMEZONES
+    : [current, ...COMMON_TIMEZONES];
 
   const handleChange = async (timezone: string) => {
     if (!location || timezone === location.timezone) return;

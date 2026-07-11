@@ -27,7 +27,9 @@ function SwatchPicker({
           aria-pressed={value === preset}
           onClick={() => onPick(preset)}
           className={`h-6 w-6 rounded-full ${DEPT_COLOUR_PRESETS[preset]!.swatch} transition disabled:opacity-40 ${
-            value === preset ? "ring-2 ring-offset-1 ring-brand ring-offset-background" : "opacity-70 hover:opacity-100"
+            value === preset
+              ? "ring-2 ring-offset-1 ring-brand ring-offset-background"
+              : "opacity-70 hover:opacity-100"
           }`}
         />
       ))}
@@ -68,7 +70,13 @@ export function RoleColoursSection() {
   return (
     <SectionCard
       title="Role colours"
-      badge={live.enabled ? <PreviewTag>Live — drives Rota</PreviewTag> : <PreviewTag>Preview in demo mode</PreviewTag>}
+      badge={
+        live.enabled ? (
+          <PreviewTag>Live — drives Rota</PreviewTag>
+        ) : (
+          <PreviewTag>Preview in demo mode</PreviewTag>
+        )
+      }
       description="Give each role its own colour on the rota grid. Overrides the default department palette."
     >
       {live.enabled && live.colours.length > 0 && (
@@ -113,7 +121,11 @@ export function RoleColoursSection() {
           <FieldLabel>Colour</FieldLabel>
           <SwatchPicker value={preset} disabled={!live.enabled} onPick={setPreset} />
         </div>
-        <ActionButton icon={Plus} onClick={() => void handleAdd()} disabled={!live.enabled || live.isSaving}>
+        <ActionButton
+          icon={Plus}
+          onClick={() => void handleAdd()}
+          disabled={!live.enabled || live.isSaving}
+        >
           Add
         </ActionButton>
       </div>

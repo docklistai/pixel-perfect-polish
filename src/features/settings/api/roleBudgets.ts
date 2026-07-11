@@ -22,9 +22,8 @@ interface RoleBudgetRow {
 export const fetchRoleBudgetsFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ budgets: RoleBudget[] }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -56,9 +55,8 @@ export const saveRoleBudgetFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => saveSchema.parse(input))
   .handler(async ({ data }): Promise<{ ok: true } | { ok: false; message: string }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -80,9 +78,8 @@ export const deleteRoleBudgetFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteSchema.parse(input))
   .handler(async ({ data }): Promise<{ ok: true } | { ok: false; message: string }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 

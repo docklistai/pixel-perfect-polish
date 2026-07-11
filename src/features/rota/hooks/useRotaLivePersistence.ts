@@ -84,7 +84,9 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
               ...(patch.end !== undefined ? { end: patch.end } : {}),
               ...(patch.breakMinutes !== undefined ? { breakMinutes: patch.breakMinutes } : {}),
               // Key presence (not value) signals intent; undefined → null clears it.
-              ...("colourOverride" in patch ? { colourOverride: patch.colourOverride ?? null } : {}),
+              ...("colourOverride" in patch
+                ? { colourOverride: patch.colourOverride ?? null }
+                : {}),
               ...("deptOverride" in patch ? { deptOverride: patch.deptOverride ?? null } : {}),
             },
           },

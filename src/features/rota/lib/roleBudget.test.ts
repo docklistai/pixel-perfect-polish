@@ -34,9 +34,10 @@ describe("buildRoleBudgetView", () => {
   });
 
   it("ignores open shifts and shows zero for a budgeted role with no shifts", () => {
-    const view = buildRoleBudgetView([shift("Chef", null, "09:00", "17:00")], [
-      { role: "Chef", minutes: 600 },
-    ]);
+    const view = buildRoleBudgetView(
+      [shift("Chef", null, "09:00", "17:00")],
+      [{ role: "Chef", minutes: 600 }],
+    );
     expect(view.rows[0]).toMatchObject({ role: "Chef", hours: 0, over: false });
     expect(view.overCount).toBe(0);
   });

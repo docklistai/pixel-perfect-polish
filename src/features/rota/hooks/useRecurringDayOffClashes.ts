@@ -36,5 +36,12 @@ export function useRecurringDayOffClashes(input: {
       approvedByStaff,
       staffById,
     );
-  }, [input.source, input.draftShifts, input.dayIsoDates, input.staff, recurring.enabled, recurring.requests]);
+  }, [
+    input.source,
+    input.draftShifts,
+    input.dayIsoDates,
+    input.staff,
+    recurring.enabled,
+    recurring.requests,
+  ]);
 }

@@ -27,7 +27,13 @@ function TemplateRow({
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
-        <ActionButton size="sm" variant="secondary" icon={Plus} onClick={onApply} disabled={disabled}>
+        <ActionButton
+          size="sm"
+          variant="secondary"
+          icon={Plus}
+          onClick={onApply}
+          disabled={disabled}
+        >
           Apply
         </ActionButton>
         <ActionButton
@@ -124,7 +130,10 @@ export function DemandTemplatesDrawer({
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm disabled:opacity-50"
             />
           </label>
-          <ActionButton onClick={() => void handleSave()} disabled={!canWrite || templates.isSaving}>
+          <ActionButton
+            onClick={() => void handleSave()}
+            disabled={!canWrite || templates.isSaving}
+          >
             {templates.isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />}
             Save
           </ActionButton>

@@ -32,9 +32,8 @@ interface SlotRow {
 export const fetchDemandTemplatesFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ templates: DemandTemplateSummary[] }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -86,7 +85,9 @@ function describeError(sqlState: string | null, context: "save" | "apply"): stri
         ? "This week has no shifts to save as a template yet."
         : "Templates can only be applied to a draft week.";
     case "P0002":
-      return context === "save" ? "That rota week could not be found." : "That template no longer exists.";
+      return context === "save"
+        ? "That rota week could not be found."
+        : "That template no longer exists.";
     case "22023":
       return "Check the template name, then try again.";
     default:
@@ -104,9 +105,8 @@ export const saveDemandTemplateFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => saveSchema.parse(input))
   .handler(async ({ data }): Promise<DemandTemplateWriteResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
     const { error } = await supabase.rpc("rpc_save_demand_template", {
@@ -128,9 +128,8 @@ export const applyDemandTemplateFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => applySchema.parse(input))
   .handler(async ({ data }): Promise<DemandTemplateWriteResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
     const { data: result, error } = await supabase.rpc("rpc_apply_demand_template", {
@@ -149,9 +148,8 @@ export const deleteDemandTemplateFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteSchema.parse(input))
   .handler(async ({ data }): Promise<DemandTemplateWriteResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
     const { error } = await supabase

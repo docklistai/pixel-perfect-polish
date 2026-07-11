@@ -9,7 +9,8 @@ import {
 /** Copy or clear a rota day; refreshes the live grid on success. */
 export function useCopyRotaDay() {
   const queryClient = useQueryClient();
-  const invalidate = () => void queryClient.invalidateQueries({ queryKey: ["rota", "workspace-week"] });
+  const invalidate = () =>
+    void queryClient.invalidateQueries({ queryKey: ["rota", "workspace-week"] });
 
   const copyMutation = useMutation({
     mutationFn: (vars: { rotaWeekId: string; fromWeekday: number; toWeekdays: number[] }) =>

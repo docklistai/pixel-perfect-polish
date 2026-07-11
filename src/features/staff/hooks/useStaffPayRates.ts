@@ -13,9 +13,7 @@ const PAY_RATES_KEY = (workspaceId: string | null) => ["staff", "pay-rates", wor
 export function useStaffPayRates() {
   const { workspaceId, role } = useManagerIdentity();
   const enabled =
-    Boolean(getSupabaseEnv()) &&
-    workspaceId !== null &&
-    (role === "owner" || role === "manager");
+    Boolean(getSupabaseEnv()) && workspaceId !== null && (role === "owner" || role === "manager");
 
   const query = useQuery({
     queryKey: PAY_RATES_KEY(workspaceId),

@@ -7,8 +7,7 @@ import { updateWorkspaceNameFn } from "../api/workspaceProfile";
 export function useUpdateWorkspaceName() {
   const queryClient = useQueryClient();
   const { role, workspaceName } = useManagerIdentity();
-  const enabled =
-    Boolean(getSupabaseEnv()) && (role === "owner" || role === "manager");
+  const enabled = Boolean(getSupabaseEnv()) && (role === "owner" || role === "manager");
 
   const mutation = useMutation({
     mutationFn: (name: string) => updateWorkspaceNameFn({ data: { name } }),

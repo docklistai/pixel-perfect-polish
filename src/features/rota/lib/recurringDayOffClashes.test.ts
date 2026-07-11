@@ -13,7 +13,9 @@ const WEEK = [
   "2026-06-14",
 ];
 
-function shift(partial: Partial<DraftShift> & { id: string; dayIndex: DraftShift["dayIndex"] }): DraftShift {
+function shift(
+  partial: Partial<DraftShift> & { id: string; dayIndex: DraftShift["dayIndex"] },
+): DraftShift {
   return {
     staffId: "olivia",
     role: "Waiter",
@@ -27,7 +29,10 @@ function shift(partial: Partial<DraftShift> & { id: string; dayIndex: DraftShift
 }
 
 const staffById = new Map<string, StaffMember>([
-  ["olivia", { id: "olivia", name: "Olivia Bennett", role: "Waiter", hrs: "", img: 1, tone: "info" }],
+  [
+    "olivia",
+    { id: "olivia", name: "Olivia Bennett", role: "Waiter", hrs: "", img: 1, tone: "info" },
+  ],
 ]);
 
 describe("isoWeekday", () => {
@@ -47,7 +52,11 @@ describe("findRecurringDayOffClashes", () => {
       staffById,
     );
     expect(clashes).toHaveLength(1);
-    expect(clashes[0]).toMatchObject({ shiftId: "s1", staffName: "Olivia Bennett", dayLabel: "Sunday" });
+    expect(clashes[0]).toMatchObject({
+      shiftId: "s1",
+      staffName: "Olivia Bennett",
+      dayLabel: "Sunday",
+    });
   });
 
   it("ignores shifts on other days, open shifts, and staff without an approval", () => {

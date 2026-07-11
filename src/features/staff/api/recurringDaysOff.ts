@@ -29,9 +29,8 @@ interface RecurringDayOffRow {
 export const fetchStaffRecurringDaysOffFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ requests: ManagerRecurringDayOff[] }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -67,9 +66,8 @@ export const decideRecurringDayOffFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => decideSchema.parse(input))
   .handler(async ({ data }): Promise<{ ok: true } | { ok: false; message: string }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 

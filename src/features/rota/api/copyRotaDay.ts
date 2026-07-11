@@ -21,9 +21,8 @@ export const copyRotaDayFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => schema.parse(input))
   .handler(async ({ data }): Promise<CopyRotaDayResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -61,9 +60,8 @@ export const clearRotaDayFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => clearSchema.parse(input))
   .handler(async ({ data }): Promise<ClearRotaDayResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildRoleColourKey,
-  DEPT_COLOUR_PRESETS,
-  resolvePresetIdForRole,
-} from "./deptColours";
+import { buildRoleColourKey, DEPT_COLOUR_PRESETS, resolvePresetIdForRole } from "./deptColours";
 
 describe("resolvePresetIdForRole", () => {
   it("maps a known role to its department preset", () => {

@@ -92,7 +92,11 @@ export function useRotaPage(week: number | undefined) {
 
   const roleColoursConfig = useRoleColours().configMap;
   const roleColours = React.useMemo(
-    () => buildRoleColourKey(rota.draftShifts.map((s) => s.deptOverride ?? s.role), roleColoursConfig),
+    () =>
+      buildRoleColourKey(
+        rota.draftShifts.map((s) => s.deptOverride ?? s.role),
+        roleColoursConfig,
+      ),
     [rota.draftShifts, roleColoursConfig],
   );
 
@@ -105,10 +109,19 @@ export function useRotaPage(week: number | undefined) {
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
   const leaveDataState: "ready" | "loading" | "error" =
-    rota.source !== "live" ? "ready" : rota.isLiveLeaveLoading ? "loading" : rota.isLiveLeaveError ? "error" : "ready";
+    rota.source !== "live"
+      ? "ready"
+      : rota.isLiveLeaveLoading
+        ? "loading"
+        : rota.isLiveLeaveError
+          ? "error"
+          : "ready";
   const readinessIssueCount =
-    rota.openShiftCount + rota.conflictCount + workingTimeAlertCount +
-    (leaveDataState === "ready" ? 0 : 1) + dayOffClashes.length;
+    rota.openShiftCount +
+    rota.conflictCount +
+    workingTimeAlertCount +
+    (leaveDataState === "ready" ? 0 : 1) +
+    dayOffClashes.length;
   const publishState = getPublishState({
     published: rota.published,
     hasUnpublishedChanges: rota.hasUnpublishedChanges,

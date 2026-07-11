@@ -19,9 +19,7 @@ interface RecurringDayOffViewRow {
   decision_note: string | null;
 }
 
-export async function fetchPortalRecurringDaysOff(
-  workspaceId: string,
-): Promise<RecurringDayOff[]> {
+export async function fetchPortalRecurringDaysOff(workspaceId: string): Promise<RecurringDayOff[]> {
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
     .from("staff_portal_recurring_days_off")

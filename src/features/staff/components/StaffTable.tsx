@@ -58,7 +58,10 @@ export function StaffTable({
     [rows, query, deptFilter, statusFilter],
   );
   const departmentOptions = React.useMemo(
-    () => ["All", ...Array.from(new Set(rows.map((row) => row.dept))).sort((a, b) => a.localeCompare(b))],
+    () => [
+      "All",
+      ...Array.from(new Set(rows.map((row) => row.dept))).sort((a, b) => a.localeCompare(b)),
+    ],
     [rows],
   );
 

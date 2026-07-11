@@ -7,7 +7,15 @@ import { z } from "zod";
  * department palette; a per-shift override still wins over both.
  */
 
-export const COLOUR_PRESETS = ["blue", "amber", "purple", "green", "rose", "teal", "slate"] as const;
+export const COLOUR_PRESETS = [
+  "blue",
+  "amber",
+  "purple",
+  "green",
+  "rose",
+  "teal",
+  "slate",
+] as const;
 export type ColourPreset = (typeof COLOUR_PRESETS)[number];
 
 export type RoleColour = {
@@ -25,9 +33,8 @@ interface RoleColourRow {
 export const fetchRoleColoursFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<{ colours: RoleColour[] }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -59,16 +66,17 @@ export const saveRoleColourFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => saveSchema.parse(input))
   .handler(async ({ data }): Promise<{ ok: true } | { ok: false; message: string }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
-    const { error } = await supabase.from("workspace_role_colours").upsert(
-      { workspace_id: workspaceId, role_name: data.roleName, colour_preset: data.colourPreset },
-      { onConflict: "workspace_id,role_name" },
-    );
+    const { error } = await supabase
+      .from("workspace_role_colours")
+      .upsert(
+        { workspace_id: workspaceId, role_name: data.roleName, colour_preset: data.colourPreset },
+        { onConflict: "workspace_id,role_name" },
+      );
     if (error) return { ok: false, message: "Couldn't save the role colour. Please try again." };
     return { ok: true };
   });
@@ -79,9 +87,8 @@ export const deleteRoleColourFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => deleteSchema.parse(input))
   .handler(async ({ data }): Promise<{ ok: true } | { ok: false; message: string }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 

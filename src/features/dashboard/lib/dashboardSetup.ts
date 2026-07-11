@@ -54,8 +54,13 @@ export interface DashboardSetupPlan {
 }
 
 export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupPlan {
-  const { staffCount, plannedShiftCount, hasPublishedSnapshot, hasLabourTargets, hasBusinessBasics } =
-    input;
+  const {
+    staffCount,
+    plannedShiftCount,
+    hasPublishedSnapshot,
+    hasLabourTargets,
+    hasBusinessBasics,
+  } = input;
   const teamDone = staffCount > 0;
   const rotaDone = plannedShiftCount > 0;
   const publishDone = hasPublishedSnapshot;

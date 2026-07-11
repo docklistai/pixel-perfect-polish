@@ -70,8 +70,7 @@ export function buildLabourSummaryView({
     budgetSource,
     estCostLabel: labour.estCostPence === null ? null : formatMoneyPence(labour.estCostPence),
     labourPctLabel: labour.labourPct === null ? null : formatPct(labour.labourPct),
-    targetPctLabel:
-      labour.targetLabourPct === null ? null : formatPct(labour.targetLabourPct),
+    targetPctLabel: labour.targetLabourPct === null ? null : formatPct(labour.targetLabourPct),
     statusTone,
     statusLabel,
     hint,

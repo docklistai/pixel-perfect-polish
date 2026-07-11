@@ -39,7 +39,9 @@ export function OpeningDaysSection() {
     const open = hoursValue.open.trim();
     const close = hoursValue.close.trim();
     if ((open === "") !== (close === "")) {
-      toast.error("Set both times", { description: "Enter an open and a close time, or clear both." });
+      toast.error("Set both times", {
+        description: "Enter an open and a close time, or clear both.",
+      });
       return;
     }
     const result = await profile.saveOpeningTimes(open || null, close || null);

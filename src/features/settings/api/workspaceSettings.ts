@@ -49,9 +49,8 @@ function mapSettings(row: SettingsRow): WorkspaceLabourSettings {
 export const fetchWorkspaceLabourSettingsFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<WorkspaceLabourSettingsResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -70,12 +69,7 @@ const saveSettingsInput = z.object({
   weeklyBudgetMinutes: z.number().int().min(0).max(1_000_000).nullable(),
   dailyBudgetMinutes: z.number().int().min(0).max(200_000).nullable(),
   targetLabourPct: z.number().gt(0).max(100).nullable(),
-  forecastWeeklySalesPence: z
-    .number()
-    .int()
-    .min(0)
-    .max(10_000_000_000)
-    .nullable(),
+  forecastWeeklySalesPence: z.number().int().min(0).max(10_000_000_000).nullable(),
   avgHourlyCostPence: z.number().int().min(0).max(100_000).nullable(),
   budgetWarningPct: z.number().int().min(50).max(120),
 });
@@ -86,9 +80,8 @@ export const saveWorkspaceLabourSettingsFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => saveSettingsInput.parse(input))
   .handler(async ({ data }): Promise<WorkspaceLabourSettingsResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 

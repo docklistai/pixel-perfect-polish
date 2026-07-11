@@ -53,8 +53,7 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
           Rota & scheduling
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Labour targets are live. The remaining defaults are previews and not yet applied to
-          rotas.
+          Labour targets are live. The remaining defaults are previews and not yet applied to rotas.
         </p>
       </div>
 

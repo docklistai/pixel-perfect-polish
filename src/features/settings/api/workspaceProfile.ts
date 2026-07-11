@@ -41,7 +41,9 @@ export const fetchWorkspaceProfileFn = createServerFn({ method: "GET" }).handler
     const [workspaceRes, locationRes, rotaWeekRes] = await Promise.all([
       supabase
         .from("workspaces")
-        .select("name, open_weekdays_mask, default_open_time, default_close_time, rota_start_weekday")
+        .select(
+          "name, open_weekdays_mask, default_open_time, default_close_time, rota_start_weekday",
+        )
         .eq("id", workspaceId)
         .single(),
       supabase
@@ -85,9 +87,8 @@ export const updateRotaStartDayFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => rotaStartSchema.parse(input))
   .handler(async ({ data }): Promise<UpdateWorkspaceNameResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -102,7 +103,8 @@ export const updateRotaStartDayFn = createServerFn({ method: "POST" })
     if ((existing ?? []).length > 0) {
       return {
         ok: false,
-        message: "Set your rota start day before building any rotas — it's locked once a week exists.",
+        message:
+          "Set your rota start day before building any rotas — it's locked once a week exists.",
       };
     }
 
@@ -132,9 +134,8 @@ export const updateOpeningTimesFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => openingTimesSchema.parse(input))
   .handler(async ({ data }): Promise<UpdateWorkspaceNameResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
     const { error } = await supabase
@@ -192,9 +193,8 @@ export const updateLocationTimezoneFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => timezoneSchema.parse(input))
   .handler(async ({ data }): Promise<UpdateWorkspaceNameResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
     const { error } = await supabase

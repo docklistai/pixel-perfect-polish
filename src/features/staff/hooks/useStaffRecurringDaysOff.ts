@@ -17,7 +17,9 @@ export type StaffRecurringDaysOffState = {
   /** All standing day-off requests in the active manager workspace. */
   requests: ManagerRecurringDayOff[];
   isDeciding: boolean;
-  decide: (input: DecideRecurringDayOffInput) => Promise<{ ok: true } | { ok: false; message: string }>;
+  decide: (
+    input: DecideRecurringDayOffInput,
+  ) => Promise<{ ok: true } | { ok: false; message: string }>;
 };
 
 /** Manager view of standing day-off requests, with approve/decline. */
@@ -25,9 +27,7 @@ export function useStaffRecurringDaysOff(): StaffRecurringDaysOffState {
   const { workspaceId, role } = useManagerIdentity();
   const queryClient = useQueryClient();
   const enabled =
-    Boolean(getSupabaseEnv()) &&
-    workspaceId !== null &&
-    (role === "owner" || role === "manager");
+    Boolean(getSupabaseEnv()) && workspaceId !== null && (role === "owner" || role === "manager");
 
   const query = useQuery({
     queryKey: KEY(workspaceId),

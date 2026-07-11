@@ -54,7 +54,10 @@ function parseOptionalNumber(raw: string): number | null | undefined {
 
 export function buildLabourTargetsPayload(fields: LabourTargetFields): LabourTargetsParseResult {
   const budgetHours = parseOptionalNumber(fields.weeklyBudgetHours);
-  if (budgetHours === undefined || (budgetHours !== null && (budgetHours < 0 || budgetHours > 16000))) {
+  if (
+    budgetHours === undefined ||
+    (budgetHours !== null && (budgetHours < 0 || budgetHours > 16000))
+  ) {
     return { ok: false, message: "Weekly hours budget must be a number of hours (e.g. 820)." };
   }
 

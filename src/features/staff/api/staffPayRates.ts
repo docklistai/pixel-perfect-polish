@@ -16,9 +16,8 @@ export type StaffPayRatesResult = {
 export const fetchStaffPayRatesFn = createServerFn({ method: "GET" }).handler(
   async (): Promise<StaffPayRatesResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
@@ -48,9 +47,8 @@ export const saveStaffPayRateFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => savePayRateInput.parse(input))
   .handler(async ({ data }): Promise<{ ok: true }> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } = await import(
-      "@/features/auth/api/activeManagerWorkspace"
-    );
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 

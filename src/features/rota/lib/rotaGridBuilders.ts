@@ -50,9 +50,7 @@ export function buildStaffRows(
       const coversDay = (req: LeaveRequest) =>
         req.staffId === member.id && req.startIso <= isoDate && req.endIso >= isoDate;
 
-      const approvedLeave = leaveRequests.find(
-        (req) => req.state === "approved" && coversDay(req),
-      );
+      const approvedLeave = leaveRequests.find((req) => req.state === "approved" && coversDay(req));
       if (approvedLeave) {
         return {
           ...cell,
@@ -64,7 +62,11 @@ export function buildStaffRows(
 
       const pendingLeave = leaveRequests.find((req) => req.state === "pending" && coversDay(req));
       return pendingLeave
-        ? { ...cell, leaveState: "pending" as const, leaveLabel: shortLeaveLabel(pendingLeave.type) }
+        ? {
+            ...cell,
+            leaveState: "pending" as const,
+            leaveLabel: shortLeaveLabel(pendingLeave.type),
+          }
         : cell;
     });
 

@@ -45,7 +45,11 @@ export function buildRoleBudgetView(
       };
     })
     // Over-budget roles first, then by how close to the cap.
-    .sort((a, b) => Number(b.over) - Number(a.over) || b.hours / (b.budgetHours || 1) - a.hours / (a.budgetHours || 1));
+    .sort(
+      (a, b) =>
+        Number(b.over) - Number(a.over) ||
+        b.hours / (b.budgetHours || 1) - a.hours / (a.budgetHours || 1),
+    );
 
   return { rows, overCount: rows.filter((row) => row.over).length };
 }

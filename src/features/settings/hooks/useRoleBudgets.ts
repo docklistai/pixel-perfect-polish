@@ -26,9 +26,7 @@ export function useRoleBudgets(): RoleBudgetsState {
   const { workspaceId, role } = useManagerIdentity();
   const queryClient = useQueryClient();
   const enabled =
-    Boolean(getSupabaseEnv()) &&
-    workspaceId !== null &&
-    (role === "owner" || role === "manager");
+    Boolean(getSupabaseEnv()) && workspaceId !== null && (role === "owner" || role === "manager");
 
   const query = useQuery({
     queryKey: KEY(workspaceId),

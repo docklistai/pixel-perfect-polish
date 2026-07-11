@@ -31,7 +31,12 @@ describe("buildWeekdayCells", () => {
   it("returns seven Mon..Sun cells with no request when empty", () => {
     const cells = buildWeekdayCells([]);
     expect(cells).toHaveLength(7);
-    expect(cells[0]).toMatchObject({ weekday: 0, shortLabel: "Mon", label: "Monday", request: null });
+    expect(cells[0]).toMatchObject({
+      weekday: 0,
+      shortLabel: "Mon",
+      label: "Monday",
+      request: null,
+    });
     expect(cells[6]!.shortLabel).toBe("Sun");
     expect(cells.every((cell) => cell.request === null)).toBe(true);
   });

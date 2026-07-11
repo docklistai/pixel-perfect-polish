@@ -38,7 +38,10 @@ describe("captureInversePatch", () => {
   });
 
   it("ignores non-reversible keys like id or dayIndex", () => {
-    const inverse = captureInversePatch(shift(), { id: "x", start: "10:00" } as Partial<DraftShift>);
+    const inverse = captureInversePatch(shift(), {
+      id: "x",
+      start: "10:00",
+    } as Partial<DraftShift>);
     expect(inverse).toEqual({ start: "09:00" });
   });
 });

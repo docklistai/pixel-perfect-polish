@@ -54,136 +54,141 @@ function RotaPage() {
 
   return (
     <RoleColoursContext.Provider value={roleColoursConfig}>
-    <AppShell topbarWeekLabel={rota.weekLabel}>
-      <div className="w-full max-w-full overflow-x-hidden">
-        {readOnly && (
-          <FeedbackBanner
-            tone="info"
-            title="Live rota — read-only"
-            description={
-              rota.isLiveError
-                ? "The live rota couldn't be loaded. A read-only fallback is shown."
-                : rota.isLiveLoading
-                  ? "Loading your workspace rota. A read-only fallback is shown until the live draft is ready."
-                  : rota.hasLiveWeek
-                    ? "The live rota has not loaded yet. A read-only fallback is shown."
-                    : "No live rota for this week is available yet. A read-only fallback is shown."
+      <AppShell topbarWeekLabel={rota.weekLabel}>
+        <div className="w-full max-w-full overflow-x-hidden">
+          {readOnly && (
+            <FeedbackBanner
+              tone="info"
+              title="Live rota — read-only"
+              description={
+                rota.isLiveError
+                  ? "The live rota couldn't be loaded. A read-only fallback is shown."
+                  : rota.isLiveLoading
+                    ? "Loading your workspace rota. A read-only fallback is shown until the live draft is ready."
+                    : rota.hasLiveWeek
+                      ? "The live rota has not loaded yet. A read-only fallback is shown."
+                      : "No live rota for this week is available yet. A read-only fallback is shown."
+              }
+              className="mb-4"
+            />
+          )}
+          {rota.source === "live" && (
+            <RotaLeaveDataWarning
+              isLoading={rota.isLiveLeaveLoading}
+              isError={rota.isLiveLeaveError}
+            />
+          )}
+
+          <RotaPageHeader
+            weekLabel={rota.weekLabel}
+            locationName={
+              rota.source === "live" && rota.liveLocationName
+                ? rota.liveLocationName
+                : "Your workspace"
             }
-            className="mb-4"
-          />
-        )}
-        {rota.source === "live" && (
-          <RotaLeaveDataWarning isLoading={rota.isLiveLeaveLoading} isError={rota.isLiveLeaveError} />
-        )}
-
-        <RotaPageHeader
-          weekLabel={rota.weekLabel}
-          locationName={
-            rota.source === "live" && rota.liveLocationName ? rota.liveLocationName : "Your workspace"
-          }
-          staffCount={rota.staff.length}
-          statusTone={headerStatusTone}
-          statusLabel={headerStatusLabel}
-          canPublish={publishEligibility.canPublish}
-          onPrintRota={() => window.print()}
-          onClearWeek={guardedRota.requestClearWeek}
-          onOpenTemplates={() => openOverlay("templates")}
-          onCopyDay={() => openOverlay("copyDay")}
-          onPublish={requestPublish}
-        />
-
-        {actions.fillSummary && (
-          <FeedbackBanner
-            tone="info"
-            title="Open shifts updated"
-            description={actions.fillSummary}
-            className="mb-4"
-            onDismiss={() => actions.setFillSummary(null)}
-          />
-        )}
-
-        <div
-          className={`grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden ${showInsights ? "xl:grid-cols-[minmax(0,1fr)_300px]" : "xl:grid-cols-1"}`}
-        >
-          <Card className="min-w-0 overflow-hidden p-0">
-            <RotaGridToolbar
-              conflictCount={rota.conflictCount}
-              openShiftCount={rota.openShiftCount}
-              workingTimeAlertCount={workingTimeAlertCount}
-              coveragePct={rota.coveragePct}
-              onFilter={() => openOverlay("filters")}
-              onGenerateRota={() => openOverlay("generate")}
-              onAddShift={() => openOverlay("addShift")}
-              onViewConflicts={() => openOverlay("conflicts")}
-              onViewWorkingTime={() => openOverlay("workingTime")}
-              onCopyLastWeek={actions.handleCopyLastWeek}
-              onUndo={() => void history.undo()}
-              onRedo={() => void history.redo()}
-              canUndo={history.canUndo}
-              canRedo={history.canRedo}
-            />
-            <RotaGrid
-              days={rota.days}
-              staffRows={rota.staffRows}
-              openRow={rota.openRow}
-              staffCount={rota.staff.length}
-              visibleStaffCount={rota.visibleStaff.length}
-              weekLabel={rota.weekLabel}
-              staffSearch={rota.staffSearch}
-              hasActiveFilters={rota.hasActiveFilters}
-              scheduleTitleId={SCHEDULE_TITLE_ID}
-              scheduleDescId={SCHEDULE_DESC_ID}
-              onStaffSearchChange={rota.setStaffSearch}
-              onClearFilters={rota.clearFilters}
-              readOnly={readOnly}
-              serverBacked={rota.source === "live"}
-              canCopyShiftAssignment={actions.canCopyShiftAssignment}
-              onReadOnlyAttempt={actions.block}
-              onShiftOpen={rota.setSelectedShiftId}
-              onShiftDuplicate={actions.handleDuplicateShift}
-              onShiftRemove={guardedRota.requestRemoveShift}
-              onShiftClear={actions.handleClearShift}
-              onShiftMarkOpen={actions.handleMarkShiftOpen}
-              onShiftSetDept={actions.handleSetShiftDept}
-              onShiftSetColour={actions.handleSetShiftColour}
-              onShiftResetColour={actions.handleResetShiftColour}
-              onShiftAdd={guardedRota.addShift}
-              onShiftUpdate={guardedRota.updateShift}
-            />
-            <RotaGridLegendBar staffCount={rota.visibleStaff.length} roleColours={roleColours} />
-          </Card>
-
-          <RotaInsightsColumn
-            rota={rota}
-            visible={showInsights}
-            onVisibleChange={setShowInsights}
-            publishState={publishState}
-            leaveDataState={leaveDataState}
-            readOnly={readOnly}
+            staffCount={rota.staff.length}
+            statusTone={headerStatusTone}
+            statusLabel={headerStatusLabel}
             canPublish={publishEligibility.canPublish}
+            onPrintRota={() => window.print()}
+            onClearWeek={guardedRota.requestClearWeek}
+            onOpenTemplates={() => openOverlay("templates")}
+            onCopyDay={() => openOverlay("copyDay")}
             onPublish={requestPublish}
-            onViewCoverageDetails={() => openOverlay("coverageDetails")}
-            onOpenSupport={openAiDrawer}
-            onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
-            dayOffClashes={dayOffClashes}
           />
-        </div>
-      </div>
 
-      <RotaOverlays
-        rota={guardedRota}
-        overlays={overlays}
-        onPublishConfirm={handlePublish}
-        onApplySuggestions={actions.handleApplySuggestions}
-        onMarkShiftOpen={actions.handleMarkShiftOpen}
-        onRepeatShift={actions.handleRepeatShift}
-        publishEligibility={publishEligibility}
-        suggestedAssignTo={
-          recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null
-        }
-        onClearRecoverySelection={() => setRecoverySelection(null)}
-      />
-    </AppShell>
+          {actions.fillSummary && (
+            <FeedbackBanner
+              tone="info"
+              title="Open shifts updated"
+              description={actions.fillSummary}
+              className="mb-4"
+              onDismiss={() => actions.setFillSummary(null)}
+            />
+          )}
+
+          <div
+            className={`grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden ${showInsights ? "xl:grid-cols-[minmax(0,1fr)_300px]" : "xl:grid-cols-1"}`}
+          >
+            <Card className="min-w-0 overflow-hidden p-0">
+              <RotaGridToolbar
+                conflictCount={rota.conflictCount}
+                openShiftCount={rota.openShiftCount}
+                workingTimeAlertCount={workingTimeAlertCount}
+                coveragePct={rota.coveragePct}
+                onFilter={() => openOverlay("filters")}
+                onGenerateRota={() => openOverlay("generate")}
+                onAddShift={() => openOverlay("addShift")}
+                onViewConflicts={() => openOverlay("conflicts")}
+                onViewWorkingTime={() => openOverlay("workingTime")}
+                onCopyLastWeek={actions.handleCopyLastWeek}
+                onUndo={() => void history.undo()}
+                onRedo={() => void history.redo()}
+                canUndo={history.canUndo}
+                canRedo={history.canRedo}
+              />
+              <RotaGrid
+                days={rota.days}
+                staffRows={rota.staffRows}
+                openRow={rota.openRow}
+                staffCount={rota.staff.length}
+                visibleStaffCount={rota.visibleStaff.length}
+                weekLabel={rota.weekLabel}
+                staffSearch={rota.staffSearch}
+                hasActiveFilters={rota.hasActiveFilters}
+                scheduleTitleId={SCHEDULE_TITLE_ID}
+                scheduleDescId={SCHEDULE_DESC_ID}
+                onStaffSearchChange={rota.setStaffSearch}
+                onClearFilters={rota.clearFilters}
+                readOnly={readOnly}
+                serverBacked={rota.source === "live"}
+                canCopyShiftAssignment={actions.canCopyShiftAssignment}
+                onReadOnlyAttempt={actions.block}
+                onShiftOpen={rota.setSelectedShiftId}
+                onShiftDuplicate={actions.handleDuplicateShift}
+                onShiftRemove={guardedRota.requestRemoveShift}
+                onShiftClear={actions.handleClearShift}
+                onShiftMarkOpen={actions.handleMarkShiftOpen}
+                onShiftSetDept={actions.handleSetShiftDept}
+                onShiftSetColour={actions.handleSetShiftColour}
+                onShiftResetColour={actions.handleResetShiftColour}
+                onShiftAdd={guardedRota.addShift}
+                onShiftUpdate={guardedRota.updateShift}
+              />
+              <RotaGridLegendBar staffCount={rota.visibleStaff.length} roleColours={roleColours} />
+            </Card>
+
+            <RotaInsightsColumn
+              rota={rota}
+              visible={showInsights}
+              onVisibleChange={setShowInsights}
+              publishState={publishState}
+              leaveDataState={leaveDataState}
+              readOnly={readOnly}
+              canPublish={publishEligibility.canPublish}
+              onPublish={requestPublish}
+              onViewCoverageDetails={() => openOverlay("coverageDetails")}
+              onOpenSupport={openAiDrawer}
+              onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
+              dayOffClashes={dayOffClashes}
+            />
+          </div>
+        </div>
+
+        <RotaOverlays
+          rota={guardedRota}
+          overlays={overlays}
+          onPublishConfirm={handlePublish}
+          onApplySuggestions={actions.handleApplySuggestions}
+          onMarkShiftOpen={actions.handleMarkShiftOpen}
+          onRepeatShift={actions.handleRepeatShift}
+          publishEligibility={publishEligibility}
+          suggestedAssignTo={
+            recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null
+          }
+          onClearRecoverySelection={() => setRecoverySelection(null)}
+        />
+      </AppShell>
     </RoleColoursContext.Provider>
   );
 }

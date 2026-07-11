@@ -90,9 +90,12 @@ export function PortalRecurringDaysOffCard() {
       return;
     }
     if (!cell.request) setNote("");
-    toast.success(cell.request ? `${cell.label} request withdrawn` : `${cell.label} off requested`, {
-      description: cell.request ? undefined : "Your manager will review it.",
-    });
+    toast.success(
+      cell.request ? `${cell.label} request withdrawn` : `${cell.label} off requested`,
+      {
+        description: cell.request ? undefined : "Your manager will review it.",
+      },
+    );
   };
 
   return (

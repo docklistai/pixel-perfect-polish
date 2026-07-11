@@ -12,7 +12,9 @@ export function DailyBudgetCard({ view }: { view: DailyBudgetView }) {
     <Card className="p-4">
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-sm font-semibold">Daily budget</span>
-        <span className="text-[11px] text-muted-foreground">{Math.round(view.budgetHours)}h/day</span>
+        <span className="text-[11px] text-muted-foreground">
+          {Math.round(view.budgetHours)}h/day
+        </span>
       </div>
       <div className="grid grid-cols-7 gap-1">
         {view.days.map((day, index) => (

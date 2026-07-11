@@ -2,11 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Info, Settings } from "lucide-react";
 import { ActionButton, Card, IconButton } from "@/components/dl";
 import type { LabourCostView } from "../lib/labourCost";
-import {
-  buildLabourSummaryView,
-  formatMoneyPence,
-  formatPct,
-} from "../lib/labourSummaryView";
+import { buildLabourSummaryView, formatMoneyPence, formatPct } from "../lib/labourSummaryView";
 
 /** Demo figures for the prototype rail — used only when the demo dataset is shown. */
 const DEMO_FORECAST_SALES_PENCE = 1_780_000;

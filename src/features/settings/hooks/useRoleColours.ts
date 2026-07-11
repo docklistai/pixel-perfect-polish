@@ -28,9 +28,7 @@ export function useRoleColours(): RoleColoursState {
   const { workspaceId, role } = useManagerIdentity();
   const queryClient = useQueryClient();
   const enabled =
-    Boolean(getSupabaseEnv()) &&
-    workspaceId !== null &&
-    (role === "owner" || role === "manager");
+    Boolean(getSupabaseEnv()) && workspaceId !== null && (role === "owner" || role === "manager");
 
   const query = useQuery({
     queryKey: KEY(workspaceId),
@@ -58,7 +56,8 @@ export function useRoleColours(): RoleColoursState {
   const colours = query.data?.colours;
   const configMap = useMemo(() => {
     const map: Record<string, string> = {};
-    for (const colour of colours ?? []) map[colour.roleName.trim().toLowerCase()] = colour.colourPreset;
+    for (const colour of colours ?? [])
+      map[colour.roleName.trim().toLowerCase()] = colour.colourPreset;
     return map;
   }, [colours]);
 

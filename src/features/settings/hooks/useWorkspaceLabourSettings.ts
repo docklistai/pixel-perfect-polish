@@ -8,11 +8,7 @@ import {
   type WorkspaceLabourSettings,
 } from "../api/workspaceSettings";
 
-const LABOUR_SETTINGS_KEY = (workspaceId: string | null) => [
-  "settings",
-  "labour",
-  workspaceId,
-];
+const LABOUR_SETTINGS_KEY = (workspaceId: string | null) => ["settings", "labour", workspaceId];
 
 export type WorkspaceLabourSettingsView = {
   /** True when live settings can be read for the active manager workspace. */
@@ -29,9 +25,7 @@ export type WorkspaceLabourSettingsView = {
 export function useWorkspaceLabourSettings(): WorkspaceLabourSettingsView {
   const { workspaceId, role } = useManagerIdentity();
   const enabled =
-    Boolean(getSupabaseEnv()) &&
-    workspaceId !== null &&
-    (role === "owner" || role === "manager");
+    Boolean(getSupabaseEnv()) && workspaceId !== null && (role === "owner" || role === "manager");
 
   const query = useQuery({
     queryKey: LABOUR_SETTINGS_KEY(workspaceId),

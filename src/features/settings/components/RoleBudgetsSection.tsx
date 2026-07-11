@@ -46,7 +46,13 @@ export function RoleBudgetsSection() {
   return (
     <SectionCard
       title="Role budgets"
-      badge={live.enabled ? <PreviewTag>Live — drives Rota</PreviewTag> : <PreviewTag>Preview in demo mode</PreviewTag>}
+      badge={
+        live.enabled ? (
+          <PreviewTag>Live — drives Rota</PreviewTag>
+        ) : (
+          <PreviewTag>Preview in demo mode</PreviewTag>
+        )
+      }
       description="Optional weekly hours caps per role or area. The Rota warns when a role goes over."
     >
       {live.enabled && live.budgets.length > 0 && (

@@ -19,7 +19,11 @@ export type DemandTemplatesState = {
   templates: DemandTemplateSummary[];
   isSaving: boolean;
   isApplying: boolean;
-  save: (rotaWeekId: string, name: string, notes: string | null) => Promise<DemandTemplateWriteResult>;
+  save: (
+    rotaWeekId: string,
+    name: string,
+    notes: string | null,
+  ) => Promise<DemandTemplateWriteResult>;
   apply: (rotaWeekId: string, templateId: string) => Promise<DemandTemplateWriteResult>;
   remove: (templateId: string) => Promise<DemandTemplateWriteResult>;
 };
@@ -29,9 +33,7 @@ export function useDemandTemplates(): DemandTemplatesState {
   const { workspaceId, role } = useManagerIdentity();
   const queryClient = useQueryClient();
   const enabled =
-    Boolean(getSupabaseEnv()) &&
-    workspaceId !== null &&
-    (role === "owner" || role === "manager");
+    Boolean(getSupabaseEnv()) && workspaceId !== null && (role === "owner" || role === "manager");
 
   const query = useQuery({
     queryKey: KEY(workspaceId),

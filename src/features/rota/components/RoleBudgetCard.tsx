@@ -12,9 +12,7 @@ export function RoleBudgetCard({ view }: { view: RoleBudgetView }) {
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-sm font-semibold">Role budgets</span>
         {view.overCount > 0 && (
-          <span className="text-[11px] font-semibold text-danger">
-            {view.overCount} over
-          </span>
+          <span className="text-[11px] font-semibold text-danger">{view.overCount} over</span>
         )}
       </div>
       <ul className="space-y-1.5">
