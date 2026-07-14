@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { Coins } from "lucide-react";
 import { DashboardCard } from "@/components/dl";
+import { addIsoDays, dateIsoInTimezone } from "@/features/rota/lib/liveRotaDates";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchPortalOwnPayRate } from "../api/portalPayData";
-import { addIsoDays, portalTodayIso } from "../api/portalTeamData";
 import { estimatePortalPay, formatEstimateAmount } from "../lib/portalPayEstimate";
+import { usePortalTimezone } from "../hooks/usePortalTimezone";
 import type { PortalShift } from "../types";
 
 const portalRouteApi = getRouteApi("/portal");
@@ -17,6 +18,7 @@ const portalRouteApi = getRouteApi("/portal");
  */
 export function PortalPayEstimateCard({ upcoming }: { upcoming: PortalShift[] }) {
   const { auth } = portalRouteApi.useRouteContext();
+  const timezone = usePortalTimezone();
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const staffMemberId = auth.status === "member" ? auth.staffMemberId : null;
   const enabled =
@@ -33,9 +35,9 @@ export function PortalPayEstimateCard({ upcoming }: { upcoming: PortalShift[] })
   });
 
   const rate = rateQuery.data ?? null;
-  if (!enabled || rate === null) return null;
+  if (!enabled || !timezone || rate === null) return null;
 
-  const today = portalTodayIso();
+  const today = dateIsoInTimezone(new Date(), timezone);
   const estimate = estimatePortalPay(upcoming, rate, today, addIsoDays(today, 6));
   if (estimate.shiftCount === 0) return null;
 

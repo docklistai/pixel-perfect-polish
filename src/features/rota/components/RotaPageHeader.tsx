@@ -4,10 +4,15 @@ import { ActionButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 
 type StatusTone = "success" | "warning";
+type RotaLocationOption = { id: string; name: string };
 
 export function RotaPageHeader({
   weekLabel,
   locationName,
+  locations = [],
+  locationId = null,
+  onLocationChange,
+  locationChangeDisabled = false,
   staffCount,
   statusTone,
   statusLabel,
@@ -20,6 +25,11 @@ export function RotaPageHeader({
 }: {
   weekLabel: string;
   locationName: string;
+  /** Active rota locations; the selector renders only when more than one exists. */
+  locations?: RotaLocationOption[];
+  locationId?: string | null;
+  onLocationChange?: (locationId: string) => void;
+  locationChangeDisabled?: boolean;
   staffCount: number;
   statusTone: StatusTone;
   statusLabel: string;
@@ -30,6 +40,7 @@ export function RotaPageHeader({
   onCopyDay: () => void;
   onPublish: () => void;
 }) {
+  const showLocationSelector = locations.length > 1 && Boolean(onLocationChange);
   return (
     <div className="rota-page-header mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
       <div className="min-w-0">
@@ -40,9 +51,29 @@ export function RotaPageHeader({
             {statusLabel}
           </span>
         </div>
-        <p className="rota-page-subtitle">
-          Week of {weekLabel} · {locationName} · {staffCount} staff
-        </p>
+        {showLocationSelector ? (
+          <p className="rota-page-subtitle flex flex-wrap items-center gap-1.5">
+            <span>Week of {weekLabel} ·</span>
+            <select
+              className="select h-7 w-auto max-w-[220px] px-2 py-0 text-xs"
+              aria-label="Rota location"
+              disabled={locationChangeDisabled}
+              value={locationId ?? ""}
+              onChange={(event) => onLocationChange?.(event.target.value)}
+            >
+              {locations.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+            <span>· {staffCount} staff</span>
+          </p>
+        ) : (
+          <p className="rota-page-subtitle">
+            Week of {weekLabel} · {locationName} · {staffCount} staff
+          </p>
+        )}
       </div>
       <div className="rota-page-actions flex flex-wrap items-center gap-2 lg:justify-end">
         {canPublish && (

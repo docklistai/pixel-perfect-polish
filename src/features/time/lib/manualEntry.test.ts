@@ -13,6 +13,7 @@ const valid: ManualEntryInput = {
   finishesNextDay: false,
   breakTime: "0:30",
   note: "",
+  timezone: "Europe/London",
 };
 
 function paidMinutes(result: ReturnType<typeof prepareManualEntry>): number | null {
@@ -154,5 +155,20 @@ describe("prepareManualEntry", () => {
   it("rejects a note over 2000 characters", () => {
     const result = prepareManualEntry({ ...valid, note: "x".repeat(2001) });
     expect(result).toEqual({ ok: false, message: "Keep the note under 2000 characters." });
+  });
+
+  it("rejects a nonexistent local DST time without throwing", () => {
+    const result = prepareManualEntry({
+      ...valid,
+      workDate: "2026-03-29",
+      clockIn: "01:30",
+      clockOut: "03:30",
+      timezone: "Europe/London",
+    });
+    expect(result).toEqual({
+      ok: false,
+      message:
+        "Local time 01:30 on 2026-03-29 does not exist in Europe/London. Choose another time.",
+    });
   });
 });

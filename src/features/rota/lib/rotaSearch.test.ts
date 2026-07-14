@@ -38,4 +38,19 @@ describe("parseRotaWeekSearch", () => {
     expect(parseRotaWeekSearch({ week: null })).toEqual({});
     expect(parseRotaWeekSearch({ week: true })).toEqual({});
   });
+
+  it("accepts a UUID location and lowercases it", () => {
+    expect(parseRotaWeekSearch({ location: "32000000-0000-4000-8000-000000000001" })).toEqual({
+      location: "32000000-0000-4000-8000-000000000001",
+    });
+    expect(parseRotaWeekSearch({ location: "32000000-0000-4000-8000-00000000000A" })).toEqual({
+      location: "32000000-0000-4000-8000-00000000000a",
+    });
+  });
+
+  it("ignores a malformed location and keeps a valid week", () => {
+    expect(parseRotaWeekSearch({ week: 1, location: "not-a-uuid" })).toEqual({ week: 1 });
+    expect(parseRotaWeekSearch({ location: 7 })).toEqual({});
+    expect(parseRotaWeekSearch({ location: "" })).toEqual({});
+  });
 });

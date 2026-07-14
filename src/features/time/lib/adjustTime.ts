@@ -1,59 +1,32 @@
 /**
  * Helpers for turning the manager adjust-dialog's wall-clock inputs into the
  * exact UTC instants `rpc_adjust_time_entry` requires. Times are interpreted in
- * the workspace timezone against the entry's own work date, so a "08:00" typed
- * in London resolves to the correct instant across DST boundaries.
+ * the entry's venue timezone (the staff member's location, workspace fallback)
+ * against the entry's own work date, so a "08:00" typed for a London venue
+ * resolves to the correct instant across DST boundaries.
  */
 
-const WORKSPACE_TZ = "Europe/London";
+import { zonedLocalTimeToUtcIso } from "@/features/rota/lib/liveRotaDates";
+
 const HHMM = /^(\d{1,2}):(\d{2})$/;
 const MINUTES = /^(\d{1,4})\s*m$/i;
 
 /** Break lengths the adjust dialog offers; the single source of truth. */
 export const BREAK_OPTIONS = ["0:00", "0:15", "0:30", "0:45", "1:00"] as const;
 
-/** Offset (ms) the timezone is ahead of UTC at the given UTC instant. */
-function tzOffsetMs(timeZone: string, utcMs: number): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(new Date(utcMs));
-  const part = (type: string) => Number(parts.find((p) => p.type === type)!.value);
-  const asUtc = Date.UTC(
-    part("year"),
-    part("month") - 1,
-    part("day"),
-    part("hour"),
-    part("minute"),
-    part("second"),
-  );
-  return asUtc - utcMs;
-}
-
 /**
- * A wall-clock time (date + hour/minute) in the workspace timezone → UTC ISO
+ * A wall-clock time (date + hour/minute) in the given venue timezone → UTC ISO
  * instant. Refines the offset once so the result is correct on either side of a
  * DST transition.
  */
-export function workspaceWallTimeToIso(dateStr: string, hours: number, minutes: number): string {
-  const guess = Date.UTC(
-    Number(dateStr.slice(0, 4)),
-    Number(dateStr.slice(5, 7)) - 1,
-    Number(dateStr.slice(8, 10)),
-    hours,
-    minutes,
-  );
-  const offset = tzOffsetMs(WORKSPACE_TZ, guess);
-  let utc = guess - offset;
-  const refinedOffset = tzOffsetMs(WORKSPACE_TZ, utc);
-  if (refinedOffset !== offset) utc = guess - refinedOffset;
-  return new Date(utc).toISOString();
+export function wallTimeToIso(
+  dateStr: string,
+  hours: number,
+  minutes: number,
+  timeZone: string,
+): string {
+  const hhmm = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  return zonedLocalTimeToUtcIso(dateStr, hhmm, timeZone);
 }
 
 /** Parses an "HH:MM" clock field, or null when blank / not a valid time. */

@@ -2,11 +2,11 @@
  * Validates the Add Time Entry dialog's inputs and builds the exact payload
  * `createTimeEntryFn` requires, or an honest error message when the input
  * can't be trusted. Pure and testable; the hook handles the toast + write.
- * Times are wall-clock in the workspace timezone against the chosen work date,
+ * Times are wall-clock in the venue timezone against the chosen work date,
  * matching the adjustment path, so approvals and export see exact instants.
  */
 
-import { parseBreakMinutes, parseClockField, workspaceWallTimeToIso } from "./adjustTime";
+import { parseBreakMinutes, parseClockField, wallTimeToIso } from "./adjustTime";
 
 export interface ManualEntryInput {
   staffMemberId: string;
@@ -16,6 +16,8 @@ export interface ManualEntryInput {
   finishesNextDay: boolean;
   breakTime: string;
   note: string;
+  /** Venue timezone the wall-clock times are typed in. */
+  timezone: string;
 }
 
 export interface ManualEntryPayload {
@@ -71,9 +73,15 @@ export function prepareManualEntry(input: ManualEntryInput): PreparedManualEntry
     return invalid("Clock-out must be after clock-in.");
   }
 
-  const clockedInAt = workspaceWallTimeToIso(workDate, inField.hours, inField.minutes);
-  const clockOutDate = input.finishesNextDay ? addOneDay(workDate) : workDate;
-  const clockedOutAt = workspaceWallTimeToIso(clockOutDate, outField.hours, outField.minutes);
+  let clockedInAt: string;
+  let clockedOutAt: string;
+  try {
+    clockedInAt = wallTimeToIso(workDate, inField.hours, inField.minutes, input.timezone);
+    const clockOutDate = input.finishesNextDay ? addOneDay(workDate) : workDate;
+    clockedOutAt = wallTimeToIso(clockOutDate, outField.hours, outField.minutes, input.timezone);
+  } catch (error) {
+    return invalid(error instanceof Error ? error.message : "Choose valid local clock times.");
+  }
   const durationMinutes = workedMinutes(clockedInAt, clockedOutAt);
   if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
     return invalid("Clock-out must be after clock-in.");

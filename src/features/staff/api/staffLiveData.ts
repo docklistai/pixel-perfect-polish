@@ -21,6 +21,7 @@ interface StaffMemberRow {
   contracted_minutes_per_week: number | null;
   membership_id: string | null;
   department_id: string | null;
+  primary_location_id: string | null;
 }
 
 const STATUS_LABEL: Record<StaffMemberRow["employment_status"], string> = {
@@ -61,6 +62,7 @@ function mapStaffRow(
   row: StaffMemberRow,
   departmentName: string | null,
   userIdByMembership: Map<string, string | null>,
+  timezone: string,
 ): StaffRow {
   const dept = departmentName ?? "Unassigned";
   const hoursPerWeek = row.contracted_minutes_per_week;
@@ -86,6 +88,7 @@ function mapStaffRow(
     contractType: row.contract_type,
     contractedMinutesPerWeek: row.contracted_minutes_per_week,
     employmentStatus: row.employment_status,
+    timezone,
   };
 }
 
@@ -105,22 +108,28 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       { data: staff, error: staffError },
       { data: departments, error: deptError },
       { data: memberships, error: membershipError },
+      { data: locations, error: locationError },
+      { data: workspace, error: workspaceError },
     ] = await Promise.all([
       supabase
         .from("staff_members")
         .select(
-          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id",
+          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id, primary_location_id",
         )
         .eq("workspace_id", workspaceId)
         .order("display_name", { ascending: true }),
       supabase.from("departments").select("id, name").eq("workspace_id", workspaceId),
       // user_id distinguishes a claimed membership from a pending (unclaimed) one.
       supabase.from("workspace_memberships").select("id, user_id").eq("workspace_id", workspaceId),
+      supabase.from("locations").select("id, timezone").eq("workspace_id", workspaceId),
+      supabase.from("workspaces").select("timezone").eq("id", workspaceId).single(),
     ]);
 
     if (staffError) throw staffError;
     if (deptError) throw deptError;
     if (membershipError) throw membershipError;
+    if (locationError) throw locationError;
+    if (workspaceError) throw workspaceError;
 
     const departmentNames = new Map(
       ((departments as { id: string; name: string }[] | null) ?? []).map((d) => [d.id, d.name]),
@@ -131,12 +140,21 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         m.user_id,
       ]),
     );
+    const workspaceTimezone = (workspace as { timezone: string | null }).timezone ?? "UTC";
+    const locationTimezones = new Map(
+      ((locations as { id: string; timezone: string | null }[] | null) ?? []).map((location) => [
+        location.id,
+        location.timezone ?? workspaceTimezone,
+      ]),
+    );
 
     return ((staff as StaffMemberRow[] | null) ?? []).map((row) =>
       mapStaffRow(
         row,
         row.department_id ? (departmentNames.get(row.department_id) ?? null) : null,
         userIdByMembership,
+        (row.primary_location_id ? locationTimezones.get(row.primary_location_id) : null) ??
+          workspaceTimezone,
       ),
     );
   },

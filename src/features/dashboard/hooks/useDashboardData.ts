@@ -86,7 +86,7 @@ export function useDashboardData() {
   const openShifts = countOpenShifts(shifts);
   const staffCount = staffQuery.data?.length ?? 0;
   const pendingLeave = (leaveQuery.data ?? []).filter((request) => request.state === "pending");
-  const pendingTime = (timeQuery.data ?? []).filter((row) => row.status !== "approved");
+  const pendingTime = (timeQuery.data?.rows ?? []).filter((row) => row.status !== "approved");
 
   const { leaveItems, timesheetItems, attentionItems } = buildDashboardOperational({
     openShifts,

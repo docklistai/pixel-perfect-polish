@@ -97,7 +97,7 @@ export function useLiveStaffProfileOps(staffId: string): LiveStaffProfileOps {
   const scheduleShifts = memberUpcomingShifts(weekInputs, staffId, todayIso, MAX_SCHEDULE_SHIFTS);
 
   const allLeave = leaveQuery.data ?? [];
-  const allTime = timeQuery.data ?? [];
+  const allTime = timeQuery.data?.rows ?? [];
 
   return {
     enabled,

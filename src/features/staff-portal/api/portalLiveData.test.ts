@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatDayLabel,
   mapLeaveRequest,
   upcomingApprovedLeaveRequests,
   type LeaveRequestViewRow,
@@ -56,5 +57,11 @@ describe("upcomingApprovedLeaveRequests", () => {
     );
 
     expect(upcomingApprovedLeaveRequests([approved, cancelled], "2026-06-23")).toEqual([approved]);
+  });
+});
+
+describe("formatDayLabel", () => {
+  it("formats database date-only values without shifting them through a venue timezone", () => {
+    expect(formatDayLabel("2026-08-03")).toBe("Mon 3 Aug");
   });
 });

@@ -176,7 +176,13 @@ export const publishLiveRotaWeekFn = createServerFn({ method: "POST" })
       p_workspace_id: context.workspaceId,
       p_rota_week_id: week.id,
     });
-    if (error) throw error;
+    if (error) {
+      // Publication refusals carry the exact reason the manager must see
+      // ("a selected applicant now has approved leave for the shift", "the
+      // published rota changed…"). A raw PostgrestError loses its message in
+      // server-function serialisation, leaving a misleading generic toast.
+      throw new Error(error.message || "The rota could not be published.");
+    }
     return result as {
       snapshot_id: string;
       version: number;

@@ -22,6 +22,9 @@ export interface PortalShift {
   changeAcknowledged?: boolean;
   sourceSnapshotVersion?: number;
   publishedAt?: string;
+  /** Authoritative live instants; demo rows omit them. */
+  startsAtMs?: number;
+  endsAtMs?: number;
 }
 
 export interface ClockEntry {
@@ -71,6 +74,8 @@ export interface PortalProfile {
   phone: string;
   accessStatus: "active" | "pending" | "suspended";
   manager: { name: string; email: string; phone: string };
+  /** IANA timezone of the staff member's venue (primary location, workspace fallback). */
+  timezone: string;
 }
 
 export interface WeeklySummary {
@@ -98,7 +103,8 @@ export type NotificationKind =
   | "leave-approved"
   | "leave-declined"
   | "announcement"
-  | "timesheet-reminder";
+  | "timesheet-reminder"
+  | "open-shift-update";
 
 export type NotificationCategory = "all" | "unread" | "important";
 

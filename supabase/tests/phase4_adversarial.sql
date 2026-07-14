@@ -110,60 +110,39 @@ rollback to savepoint owner_succession;
 -- --------------------------------------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"aa000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 
+-- Since phase 30, publication evidence has exactly one client-reachable
+-- writer: rpc_publish_rota_week. Any direct insert — even a perfectly formed
+-- one — is refused at the grant/RLS layer before the phase 4 guards run. The
+-- guards remain as defence in depth for the definer/service paths.
 do $$
 begin
   begin
-    set constraints all immediate;
     insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
     values ('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000001', 2, '13000000-0000-4000-8000-000000000010', transaction_timestamp(), transaction_timestamp());
-    raise exception 'FAIL: empty snapshot became the latest version';
-  exception when sqlstate '55000' then raise notice 'PASS: empty snapshot rejected at constraint time'; end;
-  begin
-    insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
-    values ('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000001', 2, '13000000-0000-4000-8000-000000000001', transaction_timestamp(), transaction_timestamp());
-    raise exception 'FAIL: manager published as the owner';
-  exception when insufficient_privilege then raise notice 'PASS: snapshot publisher cannot be forged'; end;
-  begin
-    insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
-    values ('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000001', 5, '13000000-0000-4000-8000-000000000010', transaction_timestamp(), transaction_timestamp());
-    raise exception 'FAIL: snapshot version gap accepted';
-  exception when sqlstate '55000' then raise notice 'PASS: snapshot versions must be sequential'; end;
-  begin
-    insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
-    values ('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000001', 2, '13000000-0000-4000-8000-000000000010', '2026-05-01T08:00:00Z', transaction_timestamp());
-    raise exception 'FAIL: backdated published_at accepted';
-  exception when sqlstate '55000' then raise notice 'PASS: snapshot timestamps must be transaction time'; end;
-  begin
-    insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
-    values ('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000002', 1, '13000000-0000-4000-8000-000000000010', transaction_timestamp(), transaction_timestamp());
-    raise exception 'FAIL: snapshot created for a draft rota week';
-  exception when sqlstate '55000' then raise notice 'PASS: snapshots require a published rota week'; end;
+    raise exception 'FAIL: manager minted a snapshot by direct insert';
+  exception when insufficient_privilege then raise notice 'PASS: snapshots can only be created by the publish RPC'; end;
   begin
     insert into public.published_rota_shifts (workspace_id, snapshot_id, source_shift_id, location_id, department_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status)
     values ('10000000-0000-4000-8000-000000000001', '17000000-0000-4000-8000-000000000001', gen_random_uuid(), '11000000-0000-4000-8000-000000000001', '12000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', '2026-06-09', '2026-06-09T08:00:00+01:00', '2026-06-09T16:00:00+01:00', 30, 'FOH Supervisor', 'scheduled');
-    raise exception 'FAIL: shift injected into an already-published snapshot';
-  exception when sqlstate '55000' then raise notice 'PASS: snapshots are closed after their creation transaction'; end;
+    raise exception 'FAIL: shift injected into a published snapshot by direct insert';
+  exception when insufficient_privilege then raise notice 'PASS: published shifts can only be created by the publish RPC'; end;
 end $$;
 
 savepoint honest_publish;
 do $$
-declare new_snapshot_id uuid;
+declare publish_result jsonb;
 begin
-  insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
-  values ('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000001', 2, '13000000-0000-4000-8000-000000000010', transaction_timestamp(), transaction_timestamp())
-  returning id into new_snapshot_id;
-
-  begin
-    insert into public.published_rota_shifts (workspace_id, snapshot_id, source_shift_id, location_id, department_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status)
-    values ('10000000-0000-4000-8000-000000000001', new_snapshot_id, gen_random_uuid(), '11000000-0000-4000-8000-000000000001', '12000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', '2026-06-20', '2026-06-20T08:00:00+01:00', '2026-06-20T16:00:00+01:00', 30, 'FOH Supervisor', 'scheduled');
-    raise exception 'FAIL: published shift outside the rota week accepted';
-  exception when sqlstate '55000' then raise notice 'PASS: published shift dates stay inside the rota week'; end;
-
-  insert into public.published_rota_shifts (workspace_id, snapshot_id, source_shift_id, location_id, department_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status)
-  values ('10000000-0000-4000-8000-000000000001', new_snapshot_id, gen_random_uuid(), '11000000-0000-4000-8000-000000000001', '12000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', '2026-06-09', '2026-06-09T08:00:00+01:00', '2026-06-09T16:00:00+01:00', 30, 'FOH Supervisor', 'scheduled');
-  set constraints all immediate;
-  raise notice 'PASS: honest atomic publication succeeds';
+  -- Week 15…02 is the seeded draft week that still has draft shifts; the RPC
+  -- publishes it atomically as version 1.
+  publish_result := public.rpc_publish_rota_week(
+    '10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000002');
+  if (publish_result ->> 'version')::int <> 1 then
+    raise exception 'FAIL: canonical publish RPC returned version %', publish_result ->> 'version';
+  end if;
+  raise notice 'PASS: honest atomic publication succeeds through the publish RPC';
 end $$;
+set constraints all immediate;
+set constraints all deferred;
 rollback to savepoint honest_publish;
 
 -- --------------------------------------------------------------------------
@@ -475,10 +454,18 @@ begin
     update public.leave_requests set staff_member_id = '14000000-0000-4000-8000-000000000001' where id = '19000000-0000-4000-8000-000000000002';
     raise exception 'FAIL: leave request staff_member_id mutated';
   exception when sqlstate '55000' then raise notice 'PASS: leave request staff_member_id is immutable'; end;
+  -- Since phase 30 managers have no delivery write policy at all: the update
+  -- reaches no rows instead of tripping the immutability guard.
+  declare
+    affected_rows integer;
   begin
     update public.notification_deliveries set delivered_at = delivered_at + interval '1 hour' where id = '1f000000-0000-4000-8000-000000000001';
-    raise exception 'FAIL: manager-path delivered_at rewrite accepted';
-  exception when sqlstate '55000' then raise notice 'PASS: delivered_at rewrite is blocked for managers too'; end;
+    get diagnostics affected_rows = row_count;
+    if affected_rows <> 0 then
+      raise exception 'FAIL: manager-path delivered_at rewrite touched % rows', affected_rows;
+    end if;
+    raise notice 'PASS: managers have no write path to notification deliveries';
+  end;
 end $$;
 
 -- --------------------------------------------------------------------------

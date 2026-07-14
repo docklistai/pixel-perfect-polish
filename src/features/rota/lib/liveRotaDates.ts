@@ -136,21 +136,32 @@ function localPartsAsUtcMs(date: Date, timezone: string): number {
   );
 }
 
-function zonedLocalTimeToUtcIso(dateIso: string, hhmm: string, timezone: string): string {
+export function zonedLocalTimeToUtcIso(dateIso: string, hhmm: string, timezone: string): string {
   const minutes = parseHHMM(hhmm);
   if (minutes === null) throw new Error("Shift time must use HH:MM format");
   const [year, month, day] = dateIso.split("-").map(Number);
   const hour = Math.floor(minutes / 60);
   const minute = minutes % 60;
   const targetUtc = Date.UTC(year!, month! - 1, day!, hour, minute, 0);
-  let guess = targetUtc;
+  const offsets = new Set(
+    [-36, 0, 36].map((hoursFromTarget) => {
+      const sample = targetUtc + hoursFromTarget * 3_600_000;
+      return localPartsAsUtcMs(new Date(sample), timezone) - sample;
+    }),
+  );
+  const [instant] = [...offsets]
+    .map((offset) => targetUtc - offset)
+    .filter((candidate) => localPartsAsUtcMs(new Date(candidate), timezone) === targetUtc)
+    .sort((left, right) => left - right);
 
-  for (let i = 0; i < 3; i += 1) {
-    const localAsUtc = localPartsAsUtcMs(new Date(guess), timezone);
-    guess += targetUtc - localAsUtc;
+  // Gaps have no round-trip match. Overlaps choose the first occurrence
+  // (earliest UTC instant), so fall-back handling is deterministic.
+  if (instant === undefined) {
+    throw new Error(
+      `Local time ${hhmm} on ${dateIso} does not exist in ${timezone}. Choose another time.`,
+    );
   }
-
-  return new Date(guess).toISOString();
+  return new Date(instant).toISOString();
 }
 
 export function buildShiftDateTimeRange({

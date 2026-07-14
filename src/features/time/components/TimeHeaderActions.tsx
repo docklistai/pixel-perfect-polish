@@ -30,17 +30,22 @@ export const TEAM_OPTIONS = [
   "Maintenance",
 ];
 
-/** The demo dataset is pinned to the frozen demo week; live defaults to now. */
-export function defaultPeriod(source: "live" | "demo"): ReviewPeriod {
+/**
+ * The demo dataset is pinned to the frozen demo week; live defaults to the
+ * current week resolved in the workspace timezone.
+ */
+export function defaultPeriod(source: "live" | "demo", workspaceTimezone: string): ReviewPeriod {
   return source === "demo"
     ? weekPeriodOf(DEMO_WORLD.weeks.current.startIso)
-    : currentWeekPeriod(new Date());
+    : currentWeekPeriod(new Date(), workspaceTimezone);
 }
 
 interface Props {
   period: ReviewPeriod;
   setPeriod: React.Dispatch<React.SetStateAction<ReviewPeriod>>;
   source: "live" | "demo";
+  /** Workspace default timezone; anchors the "This week" boundary. */
+  workspaceTimezone: string;
   team: string;
   setTeam: (team: string) => void;
   onOpenAssistant: () => void;
@@ -55,6 +60,7 @@ export function TimeHeaderActions({
   period,
   setPeriod,
   source,
+  workspaceTimezone,
   team,
   setTeam,
   onOpenAssistant,
@@ -81,7 +87,10 @@ export function TimeHeaderActions({
         items={[
           { kind: "label", text: "Review period" },
           { label: "Previous week", onSelect: () => setPeriod((p) => shiftPeriod(p, -1)) },
-          { label: "This week", onSelect: () => setPeriod(defaultPeriod(source)) },
+          {
+            label: "This week",
+            onSelect: () => setPeriod(defaultPeriod(source, workspaceTimezone)),
+          },
           { label: "Next week", onSelect: () => setPeriod((p) => shiftPeriod(p, 1)) },
         ]}
       />

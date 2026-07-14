@@ -11,6 +11,17 @@ import {
   type LiveCopySourceShiftRow,
 } from "./copyPreviousLiveRotaWeek";
 
+/**
+ * Bulk shift inserts fire the phase 31 staff eligibility lock per row, so rows
+ * are inserted in ascending staff order — the same acquisition order the
+ * publish preflight uses — to keep the lock protocol deadlock-free.
+ */
+function inStaffLockOrder<Row extends { staff_member_id: string | null }>(rows: Row[]): Row[] {
+  return [...rows].sort((left, right) =>
+    (left.staff_member_id ?? "").localeCompare(right.staff_member_id ?? ""),
+  );
+}
+
 async function loadPreviousWeekSourceRows({
   context,
   previousWeekStart,
@@ -82,11 +93,11 @@ export const copyPreviousLiveRotaWeekFn = createServerFn({ method: "POST" })
         if (error) throw error;
       },
       insertRows: async (rows) => {
-        const { error } = await context.supabase.from("shifts").insert(rows);
+        const { error } = await context.supabase.from("shifts").insert(inStaffLockOrder(rows));
         if (error) throw error;
       },
       restoreRows: async (rows) => {
-        const { error } = await context.supabase.from("shifts").insert(rows);
+        const { error } = await context.supabase.from("shifts").insert(inStaffLockOrder(rows));
         if (error) throw error;
       },
     });

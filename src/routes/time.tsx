@@ -21,7 +21,12 @@ import type { StoredTimesheetRow, TimeQuery } from "@/features/time/types";
 import { useWorkspaceTime } from "@/features/time/hooks/useWorkspaceTime";
 import { useTimeController } from "@/features/time/hooks/useTimeController";
 import { useAddTimeEntry } from "@/features/time/hooks/useAddTimeEntry";
-import { isWithinPeriod, weekPeriodOf, type ReviewPeriod } from "@/features/time/lib/reviewPeriod";
+import {
+  currentWeekPeriod,
+  isWithinPeriod,
+  weekPeriodOf,
+  type ReviewPeriod,
+} from "@/features/time/lib/reviewPeriod";
 import { canExportApprovedHours } from "@/features/time/lib/timeExport";
 import { requireManagerAccess } from "@/features/auth";
 
@@ -35,10 +40,32 @@ function TimePage() {
   const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
   const { auth } = Route.useRouteContext();
-  const { rows: rawRows, source: timeSource, state: timeState } = useWorkspaceTime();
+  const {
+    rows: rawRows,
+    source: timeSource,
+    state: timeState,
+    workspaceTimezone,
+  } = useWorkspaceTime();
   const liveWorkspaceId =
     timeSource === "live" && auth.status === "member" ? auth.workspaceId : null;
-  const [period, setPeriod] = React.useState<ReviewPeriod>(() => defaultPeriod(timeSource));
+  // UTC is a neutral loading-only fallback; live actions use the stored zone
+  // once the workspace read resolves, and the effect below corrects the week.
+  const workspaceTz = workspaceTimezone ?? "UTC";
+  const [period, setPeriodState] = React.useState<ReviewPeriod>(() =>
+    defaultPeriod(timeSource, workspaceTz),
+  );
+  const periodTouchedRef = React.useRef(false);
+  const setPeriod = React.useCallback<React.Dispatch<React.SetStateAction<ReviewPeriod>>>(
+    (update) => {
+      periodTouchedRef.current = true;
+      setPeriodState(update);
+    },
+    [],
+  );
+  React.useEffect(() => {
+    if (!workspaceTimezone || periodTouchedRef.current) return;
+    setPeriodState(currentWeekPeriod(new Date(), workspaceTimezone));
+  }, [workspaceTimezone]);
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
@@ -116,6 +143,7 @@ function TimePage() {
             period={period}
             setPeriod={setPeriod}
             source={timeSource}
+            workspaceTimezone={workspaceTz}
             team={team}
             setTeam={setTeam}
             onOpenAssistant={openAiDrawer}
@@ -220,6 +248,7 @@ function TimePage() {
           open={addEntryOpen}
           onClose={() => setAddEntryOpen(false)}
           workspaceId={liveWorkspaceId}
+          workspaceTimezone={workspaceTz}
           isSaving={addEntry.isSaving}
           onSave={async (payload, staffName) => {
             const saved = await addEntry.save(payload, staffName);

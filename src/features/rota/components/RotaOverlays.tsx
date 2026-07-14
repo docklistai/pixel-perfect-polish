@@ -37,7 +37,7 @@ export function RotaOverlays({
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
-  onPublishConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
+  onPublishConfirm: () => MaybePromise<void>;
   onApplySuggestions: () => void;
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
   onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
@@ -153,6 +153,7 @@ export function RotaOverlays({
         leaveRequests={rota.leaveRequests}
         dayIsoDates={rota.dayIsoDates}
         suggestedAssignTo={suggestedAssignTo}
+        liveRotaWeekId={rota.source === "live" ? rota.liveRotaWeekId : null}
         onClose={() => {
           onClearRecoverySelection();
           rota.closeShiftDetail();

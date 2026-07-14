@@ -1,18 +1,10 @@
 import * as React from "react";
-import {
-  AlertCircle,
-  Bell,
-  Calendar,
-  Clock,
-  Home,
-  MoreHorizontal,
-  Plane,
-  RefreshCw,
-} from "lucide-react";
+import { Calendar, Clock, Home, MoreHorizontal, Plane } from "lucide-react";
 import { FeedbackBanner } from "@/components/dl";
 import { cn } from "@/lib/utils";
 import type { PortalTab } from "../types";
 import { usePortalProfile } from "../hooks/usePortalProfile";
+import { NotificationBell, PortalAvatar, PortalLoadError } from "./PortalShellParts";
 
 const TABS: Array<{
   id: PortalTab;
@@ -85,7 +77,7 @@ export function PortalShell({
         </div>
         <div className="px-6 pb-5">
           <div className="flex items-center gap-3">
-            <Avatar initials={profile.initials} dark />
+            <PortalAvatar initials={profile.initials} dark />
             <div className="min-w-0">
               <div className="text-sm font-semibold truncate text-white">{profile.name}</div>
               <div className="text-[11px] text-[var(--sidebar-muted)] truncate">{profile.role}</div>
@@ -116,7 +108,7 @@ export function PortalShell({
           })}
         </nav>
         <div className="px-6 py-4 text-[11px] text-[var(--sidebar-muted)]">
-          All times Europe/London
+          Shift times use each location's timezone
         </div>
       </aside>
 
@@ -211,79 +203,6 @@ export function PortalShell({
           </ul>
         </nav>
       </div>
-    </div>
-  );
-}
-
-function NotificationBell({
-  count,
-  onClick,
-  dark,
-}: {
-  count: number;
-  onClick: () => void;
-  dark?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={`Notifications (${count} unread)`}
-      className={cn(
-        "relative p-2 -mr-2 rounded-lg transition-colors",
-        dark ? "hover:bg-white/10" : "hover:bg-muted/60",
-      )}
-    >
-      <Bell className="h-5 w-5" />
-      {count > 0 && (
-        <span
-          aria-hidden
-          className="absolute top-1 right-1 min-w-[16px] h-[16px] rounded-full bg-brand text-brand-foreground text-[10px] font-bold px-1 flex items-center justify-center"
-        >
-          {count}
-        </span>
-      )}
-    </button>
-  );
-}
-
-function PortalLoadError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <div className="min-h-[100dvh] bg-[oklch(0.96_0.008_240)] flex items-center justify-center px-6">
-      <div className="w-full max-w-[360px] rounded-2xl bg-card p-6 text-center shadow-[var(--shadow-card)]">
-        <div
-          aria-hidden
-          className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft text-warning"
-        >
-          <AlertCircle className="h-6 w-6" />
-        </div>
-        <h1 className="mt-4 text-base font-semibold">We couldn&apos;t load your portal</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Check your connection and try again. Your shifts and details are safe.
-        </p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Try again
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Avatar({ initials, dark }: { initials: string; dark?: boolean }) {
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        "h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold",
-        dark ? "bg-white/10 text-white" : "bg-brand-soft text-brand",
-      )}
-    >
-      {initials}
     </div>
   );
 }

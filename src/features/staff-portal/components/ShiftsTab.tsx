@@ -1,13 +1,14 @@
 import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
-import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 import { usePortalRota } from "../hooks/usePortalRota";
-import { toPortalRequest } from "../lib/portalRequests";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
-import type { PortalRequest, PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
+import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
+import { OpenShiftsCard } from "./OpenShiftsCard";
 import { PortalPayEstimateCard } from "./PortalPayEstimateCard";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
+import { ShiftRequestsList } from "./ShiftRequestsList";
+import { PortalRotaReadState } from "./PortalRotaReadState";
 
 const statusTone: Record<ShiftStatus, "success" | "warning" | "info"> = {
   confirmed: "success",
@@ -28,7 +29,8 @@ const SUB_TABS: { id: ShiftsSubTab; label: string }[] = [
 ];
 
 export function ShiftsTab() {
-  const { upcoming, history, hasPublished, source, isError } = usePortalRota();
+  const rota = usePortalRota();
+  const { upcoming, history, hasPublished, source } = rota;
   const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
   const [selected, setSelected] = React.useState<PortalShift | null>(null);
   const [acknowledgedShiftIds, setAcknowledgedShiftIds] = React.useState<Set<string>>(new Set());
@@ -44,25 +46,43 @@ export function ShiftsTab() {
       {sub === "upcoming" && (
         <>
           <div className="px-1 text-[11px] text-muted-foreground">
-            {source === "live"
+            {source === "live" && !rota.isLoading && !rota.isError
               ? "Showing your live published rota."
-              : isError
-                ? "Couldn't reach live data — showing sample shifts."
-                : "Showing sample shifts."}
+              : source === "demo"
+                ? "Showing sample shifts."
+                : "Published rota status"}
           </div>
-          {source === "live" && <PortalPayEstimateCard upcoming={upcoming} />}
-          <ShiftList
-            shifts={upcoming}
-            hasPublishedSnapshot={hasPublished}
-            emptyCopy={noUpcomingShiftsCopy(hasPublished)}
-            onOpen={setSelected}
-          />
+          {rota.isLoading || rota.isError ? (
+            <PortalRotaReadState
+              isLoading={rota.isLoading}
+              isError={rota.isError}
+              onRetry={rota.retry}
+            />
+          ) : (
+            <>
+              {source === "live" && <PortalPayEstimateCard upcoming={upcoming} />}
+              <ShiftList
+                shifts={upcoming}
+                hasPublishedSnapshot={hasPublished}
+                emptyCopy={noUpcomingShiftsCopy(hasPublished)}
+                onOpen={setSelected}
+              />
+              {source === "live" && <OpenShiftsCard />}
+            </>
+          )}
         </>
       )}
-      {sub === "requests" && <RequestsList />}
-      {sub === "history" && (
-        <ShiftList shifts={history} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
-      )}
+      {sub === "requests" && <ShiftRequestsList />}
+      {sub === "history" &&
+        (rota.isLoading || rota.isError ? (
+          <PortalRotaReadState
+            isLoading={rota.isLoading}
+            isError={rota.isError}
+            onRetry={rota.retry}
+          />
+        ) : (
+          <ShiftList shifts={history} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
+        ))}
 
       <ShiftDetailDrawer
         shift={selected}
@@ -182,55 +202,6 @@ function ShiftList({
   );
 }
 
-function RequestsList() {
-  // Same live source as the Leave tab, so staff find their requests either way.
-  const { isLive, requestHistory } = usePortalLeaveRequests();
-  const requests: PortalRequest[] = (isLive ? requestHistory : []).map(toPortalRequest);
-  if (requests.length === 0) {
-    return (
-      <DashboardCard className="p-6">
-        <EmptyState
-          icon={CalendarOff}
-          title="No requests yet"
-          description="Time-off requests you submit will appear here."
-        />
-      </DashboardCard>
-    );
-  }
-  return (
-    <ul className="space-y-2">
-      {requests.map((r) => (
-        <li key={r.id}>
-          <DashboardCard className="p-4 rounded-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-sm font-semibold truncate">{r.title}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{r.submitted}</div>
-                {r.managerResponse && (
-                  <div className="text-xs text-foreground mt-1.5">
-                    <span className="font-medium">Manager response:</span> {r.managerResponse}
-                  </div>
-                )}
-              </div>
-              <StatusBadge
-                tone={
-                  r.status === "approved"
-                    ? "success"
-                    : r.status === "declined"
-                      ? "danger"
-                      : "warning"
-                }
-              >
-                {r.status[0].toUpperCase() + r.status.slice(1)}
-              </StatusBadge>
-            </div>
-          </DashboardCard>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function countByDate(shifts: PortalShift[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const shift of shifts) counts.set(shift.date, (counts.get(shift.date) ?? 0) + 1);
@@ -240,8 +211,12 @@ function countByDate(shifts: PortalShift[]): Map<string, number> {
 function groupByMonth(shifts: PortalShift[]): { label: string; shifts: PortalShift[] }[] {
   const map = new Map<string, PortalShift[]>();
   for (const s of shifts) {
-    const d = new Date(s.date);
-    const label = d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    const d = new Date(`${s.date}T12:00:00Z`);
+    const label = d.toLocaleDateString("en-GB", {
+      timeZone: "UTC",
+      month: "long",
+      year: "numeric",
+    });
     const existing = map.get(label) ?? [];
     existing.push(s);
     map.set(label, existing);

@@ -9,19 +9,15 @@ import {
 } from "@/components/dl";
 import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalClock } from "../hooks/usePortalClock";
-
-function formatElapsed(ms: number) {
-  const total = Math.floor(ms / 1000);
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
-}
+import { formatPortalElapsed } from "../lib/portalElapsed";
+import { PortalRotaReadState } from "./PortalRotaReadState";
 
 export function TimeTab() {
+  const clock = usePortalClock();
   const { clockedIn, onBreak, startedAtMs, sinceLabel, entries, clockIn, clockOut, toggleBreak } =
-    usePortalClock();
-  const { nextShift, activeShift } = usePortalRota();
+    clock;
+  const rota = usePortalRota();
+  const { nextShift, activeShift } = rota;
   const [now, setNow] = React.useState(() => Date.now());
 
   React.useEffect(() => {
@@ -33,7 +29,8 @@ export function TimeTab() {
   const elapsed = clockedIn && startedAtMs ? now - startedAtMs : 0;
   // Clock in only against today's active shift; otherwise show the next one.
   const displayShift = activeShift ?? nextShift;
-  const clockInAvailable = activeShift !== null;
+  const rotaUnavailable = rota.isLoading || rota.isError;
+  const clockInAvailable = !rotaUnavailable && activeShift !== null;
   const missingEntry = entries.find((e) => e.flag === "missing-clock-out");
 
   const onToggle = () => {
@@ -48,6 +45,30 @@ export function TimeTab() {
 
   return (
     <div className="space-y-4">
+      {rotaUnavailable && (
+        <PortalRotaReadState
+          isLoading={rota.isLoading}
+          isError={rota.isError}
+          onRetry={rota.retry}
+        />
+      )}
+      {clock.isLoading && (
+        <div role="status" className="text-sm text-muted-foreground">
+          Loading your clock…
+        </div>
+      )}
+      {clock.isError && (
+        <FeedbackBanner
+          tone="warning"
+          title="Your clock is unavailable"
+          description="Try again before clocking in or changing a break."
+          action={
+            <ActionButton variant="secondary" size="sm" onClick={clock.retry}>
+              Try again
+            </ActionButton>
+          }
+        />
+      )}
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
@@ -86,7 +107,7 @@ export function TimeTab() {
             <button
               type="button"
               onClick={onToggle}
-              disabled={!clockInAvailable && !clockedIn}
+              disabled={clock.isLoading || clock.isError || (!clockInAvailable && !clockedIn)}
               className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
                 clockedIn
                   ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
@@ -124,7 +145,7 @@ export function TimeTab() {
           <div className="mt-4 w-full rounded-2xl border border-border bg-muted/40 px-4 py-3">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Worked</span>
-              <span>{clockedIn ? formatElapsed(elapsed) : "00:00:00"}</span>
+              <span>{clockedIn ? formatPortalElapsed(elapsed) : "00:00:00"}</span>
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-border/70">
               <div
@@ -140,7 +161,7 @@ export function TimeTab() {
         </div>
 
         <div className="mt-5 space-y-2">
-          {clockedIn && (
+          {clockedIn && !clock.isError && (
             <ActionButton
               variant="secondary"
               icon={Coffee}
@@ -169,7 +190,7 @@ export function TimeTab() {
               Worked
             </div>
             <div className="mt-2 text-[28px] font-bold tabular-nums leading-none">
-              {clockedIn ? formatElapsed(elapsed).slice(0, 5) : "0h 00m"}
+              {clockedIn ? formatPortalElapsed(elapsed).slice(0, 5) : "0h 00m"}
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">This session</div>
           </div>

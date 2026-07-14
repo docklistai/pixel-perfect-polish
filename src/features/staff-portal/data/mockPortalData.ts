@@ -27,6 +27,8 @@ export const mockProfile: PortalProfile = {
     email: "alex@harbourview.co.uk",
     phone: "+44 7700 900456",
   },
+  // The frozen Harbour View demo world is pinned to London time.
+  timezone: "Europe/London",
 };
 
 export const mockPastShifts: PortalShift[] = [

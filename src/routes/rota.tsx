@@ -24,7 +24,7 @@ const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
 function RotaPage() {
-  const { week } = Route.useSearch();
+  const { week, location } = Route.useSearch();
   const {
     rota,
     actions,
@@ -43,6 +43,7 @@ function RotaPage() {
     headerStatusTone,
     headerStatusLabel,
     handlePublish,
+    handleLocationChange,
     handleChooseRecoveryCandidate,
     recoverySelection,
     setRecoverySelection,
@@ -50,7 +51,7 @@ function RotaPage() {
     setShowInsights,
     roleColoursConfig,
     history,
-  } = useRotaPage(week);
+  } = useRotaPage(week, location);
 
   return (
     <RoleColoursContext.Provider value={roleColoursConfig}>
@@ -86,6 +87,10 @@ function RotaPage() {
                 ? rota.liveLocationName
                 : "Your workspace"
             }
+            locations={rota.source === "live" ? rota.liveLocations : []}
+            locationId={rota.source === "live" ? rota.liveLocationId : null}
+            onLocationChange={handleLocationChange}
+            locationChangeDisabled={rota.liveMutationPending}
             staffCount={rota.staff.length}
             statusTone={headerStatusTone}
             statusLabel={headerStatusLabel}

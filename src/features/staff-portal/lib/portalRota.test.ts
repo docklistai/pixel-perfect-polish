@@ -3,7 +3,7 @@ import {
   clockInShift,
   DEMO_NOW,
   historicalPortalShifts,
-  londonPortalNow,
+  portalNowInTimezone,
   resolvePortalHasPublished,
   upcomingPortalShifts,
   type PortalNow,
@@ -64,6 +64,24 @@ describe("historicalPortalShifts", () => {
 
     expect(ids).toEqual(["evening", "morning"]);
   });
+
+  it("uses live instants when the shift location differs from the profile timezone", () => {
+    const nowMs = Date.parse("2026-06-12T00:30:00Z");
+    const crossLocation = shift({
+      id: "cross-location",
+      date: "2026-06-11",
+      start: "19:00",
+      end: "20:00",
+      startsAtMs: Date.parse("2026-06-11T23:00:00Z"),
+      endsAtMs: Date.parse("2026-06-12T00:00:00Z"),
+    });
+    const now = { todayIso: "2026-06-12", nowMinutes: 90, nowMs };
+
+    expect(upcomingPortalShifts([crossLocation], now)).toEqual([]);
+    expect(historicalPortalShifts([crossLocation], now).map((item) => item.id)).toEqual([
+      "cross-location",
+    ]);
+  });
 });
 
 describe("clockInShift (injected now)", () => {
@@ -78,12 +96,19 @@ describe("clockInShift (injected now)", () => {
   });
 });
 
-describe("londonPortalNow", () => {
-  it("derives date and minutes in the workspace timezone", () => {
+describe("portalNowInTimezone", () => {
+  it("derives date and minutes in the venue timezone", () => {
     // 23:30 UTC on 11 Jun is 00:30 BST on 12 Jun.
-    expect(londonPortalNow(new Date("2026-06-11T23:30:00Z"))).toEqual({
+    expect(portalNowInTimezone("Europe/London", new Date("2026-06-11T23:30:00Z"))).toEqual({
       todayIso: "2026-06-12",
       nowMinutes: 30,
+      nowMs: new Date("2026-06-11T23:30:00Z").getTime(),
+    });
+    // The same instant is still 11 Jun in New York.
+    expect(portalNowInTimezone("America/New_York", new Date("2026-06-11T23:30:00Z"))).toEqual({
+      todayIso: "2026-06-11",
+      nowMinutes: 19 * 60 + 30,
+      nowMs: new Date("2026-06-11T23:30:00Z").getTime(),
     });
   });
 });

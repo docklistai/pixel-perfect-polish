@@ -5,7 +5,7 @@ import {
   currentWeekStrip,
   DEMO_NOW,
   historicalPortalShifts,
-  londonPortalNow,
+  portalNowInTimezone,
   portalShiftsForStaff,
   publishedSnapshots,
   resolvePortalHasPublished,
@@ -16,6 +16,7 @@ import {
 import { currentWeekRangeLabel } from "../lib/portalWeekLabel";
 import type { PortalShift } from "../types";
 import { usePortalLiveShifts } from "./usePortalLiveShifts";
+import { usePortalTimezone } from "./usePortalTimezone";
 
 export type PortalRota = {
   /** True once any current/future week has published shifts for this member. */
@@ -36,14 +37,16 @@ export type PortalRota = {
   source: "live" | "demo";
   /** Live read in flight with nothing to show yet. */
   isLoading: boolean;
-  /** Live read failed; the demo fallback is being shown instead. */
+  /** Live read failed; callers must show a retryable error, never demo data. */
   isError: boolean;
+  /** Retry the staff-safe published-rota read. */
+  retry: () => void;
 };
 
 function buildRota(
   shifts: PortalShift[],
   now: PortalNow,
-): Omit<PortalRota, "source" | "isLoading" | "isError" | "weekLabel"> {
+): Omit<PortalRota, "source" | "isLoading" | "isError" | "weekLabel" | "retry"> {
   const upcoming = upcomingPortalShifts(shifts, now);
   return {
     hasPublished: shifts.length > 0,
@@ -57,19 +60,33 @@ function buildRota(
 
 /**
  * Staff-safe rota projection for the signed-in staff member. Prefers the live
- * published-snapshot view when an authenticated staff session is available and
- * the read succeeds; otherwise falls back to the demo WorkspaceStore so the
- * Harbour View playground keeps working when Supabase is unconfigured or the
- * read fails.
+ * published-snapshot view for authenticated staff. The demo WorkspaceStore is
+ * used only when Supabase is unconfigured; live loading/failure remains an
+ * explicit state so staff never mistake missing data for an empty rota.
  */
 export function usePortalRota(): PortalRota {
   const weekDrafts = useWorkspaceSelector((state) => state.weekDrafts);
   const live = usePortalLiveShifts();
+  const timezone = usePortalTimezone();
 
   return React.useMemo(() => {
+    if (live.enabled && !timezone) {
+      return {
+        ...buildRota([], DEMO_NOW),
+        hasPublished: false,
+        weekDays: [],
+        weekLabel: "",
+        source: "live",
+        isLoading: true,
+        isError: live.isError,
+        retry: live.retry,
+      };
+    }
+
     if (live.enabled && live.isSuccess) {
-      // Live rota uses real wall-clock time, never the frozen demo clock.
-      const liveNow = londonPortalNow();
+      // Live rota uses real wall-clock time in the venue timezone, never the
+      // frozen demo clock.
+      const liveNow = portalNowInTimezone(timezone!);
       const shifts = live.data?.shifts ?? [];
       return {
         ...buildRota(shifts, liveNow),
@@ -78,11 +95,12 @@ export function usePortalRota(): PortalRota {
         source: "live",
         isLoading: false,
         isError: false,
+        retry: live.retry,
       };
     }
 
     if (live.enabled) {
-      const liveNow = londonPortalNow();
+      const liveNow = portalNowInTimezone(timezone!);
       return {
         ...buildRota([], liveNow),
         hasPublished: false,
@@ -90,6 +108,7 @@ export function usePortalRota(): PortalRota {
         source: "live",
         isLoading: live.isLoading,
         isError: live.isError,
+        retry: live.retry,
       };
     }
 
@@ -102,6 +121,16 @@ export function usePortalRota(): PortalRota {
       source: "demo",
       isLoading: false,
       isError: false,
+      retry: () => undefined,
     };
-  }, [weekDrafts, live.enabled, live.isSuccess, live.isLoading, live.isError, live.data]);
+  }, [
+    weekDrafts,
+    live.enabled,
+    live.isSuccess,
+    live.isLoading,
+    live.isError,
+    live.data,
+    live.retry,
+    timezone,
+  ]);
 }

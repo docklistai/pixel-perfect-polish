@@ -71,6 +71,8 @@ export interface StaffRow {
   contractType?: StaffContractType | null;
   contractedMinutesPerWeek?: number | null;
   employmentStatus?: StaffEmploymentStatus;
+  /** Primary-location timezone for manager scheduling/time-entry forms. */
+  timezone?: string;
 }
 
 // Extended manager-only profile data — never exposed to staff portal

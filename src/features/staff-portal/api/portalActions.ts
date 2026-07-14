@@ -129,3 +129,79 @@ export const staffClockEventFn = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+export type OpenShiftActionResult = { ok: true } | { ok: false; message: string };
+
+const requestOpenShiftSchema = z.object({
+  workspaceId: z.string().uuid(),
+  publishedShiftId: z.string().uuid(),
+});
+
+const withdrawOpenShiftSchema = z.object({
+  workspaceId: z.string().uuid(),
+  requestId: z.string().uuid(),
+});
+
+/**
+ * The phase-27 RPCs raise state-specific reasons ("this rota has been
+ * republished…", "this shift is in the past") that staff need verbatim;
+ * anything else gets a neutral fallback.
+ */
+function describeOpenShiftError(sqlState: string | null, message: string | null): string {
+  switch (sqlState) {
+    case "42501":
+      return "Only staff members can request open shifts.";
+    case "P0002":
+      return "That open shift is no longer on the published rota.";
+    case "55000":
+      return message ?? "That request isn't valid right now.";
+    default:
+      return "We couldn't update your request. Please try again.";
+  }
+}
+
+/**
+ * Requests a published open shift for the signed-in staff member via
+ * `rpc_request_open_shift`. The RPC never changes any rota — it records a
+ * pending request the manager decides on.
+ */
+export const requestOpenShiftFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => requestOpenShiftSchema.parse(input))
+  .handler(async ({ data }): Promise<OpenShiftActionResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const supabase = getSupabaseServerClient();
+
+    const { error } = await supabase.rpc("rpc_request_open_shift", {
+      p_workspace_id: data.workspaceId,
+      p_published_shift_id: data.publishedShiftId,
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        message: describeOpenShiftError(error.code ?? null, error.message ?? null),
+      };
+    }
+    return { ok: true };
+  });
+
+/** Withdraws the caller's own pending request via `rpc_withdraw_open_shift_request`. */
+export const withdrawOpenShiftRequestFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => withdrawOpenShiftSchema.parse(input))
+  .handler(async ({ data }): Promise<OpenShiftActionResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const supabase = getSupabaseServerClient();
+
+    const { error } = await supabase.rpc("rpc_withdraw_open_shift_request", {
+      p_workspace_id: data.workspaceId,
+      p_request_id: data.requestId,
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        message: describeOpenShiftError(error.code ?? null, error.message ?? null),
+      };
+    }
+    return { ok: true };
+  });

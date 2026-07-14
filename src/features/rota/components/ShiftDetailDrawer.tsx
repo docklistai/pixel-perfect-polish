@@ -7,6 +7,7 @@ import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
 import { buildRotaRecoveryOptions } from "../lib/rotaRecoveryOptions";
 import type { MaybePromise } from "./grid";
+import { OpenShiftApplicantsSection } from "./OpenShiftApplicantsSection";
 import { RepeatShiftControls } from "./RepeatShiftControls";
 import { ShiftDetailFooterActions } from "./ShiftDetailFooterActions";
 import { ShiftEditFormFields, type ShiftEditFormState } from "./ShiftEditFormFields";
@@ -38,6 +39,7 @@ export function ShiftDetailDrawer({
   leaveRequests,
   dayIsoDates,
   suggestedAssignTo,
+  liveRotaWeekId = null,
 }: {
   shift: DraftShift | null;
   staff: StaffMember[];
@@ -52,6 +54,8 @@ export function ShiftDetailDrawer({
   leaveRequests: LeaveRequest[];
   dayIsoDates: string[];
   suggestedAssignTo?: string | null;
+  /** Live rota week id; enables the open-shift applicants review (live mode only). */
+  liveRotaWeekId?: string | null;
 }) {
   const [form, setForm] = React.useState<ShiftEditFormState>(() =>
     shift ? formStateFromShift(shift) : { role: "", start: "", end: "", assignTo: "" },
@@ -217,6 +221,10 @@ export function ShiftDetailDrawer({
           originalStaffId={shift.staffId}
         />
       </FormSection>
+
+      {liveRotaWeekId && (
+        <OpenShiftApplicantsSection rotaWeekId={liveRotaWeekId} sourceShiftId={shift.id} />
+      )}
 
       {(isOpen || isConflict) && (
         <ShiftRecoveryOptionsSection

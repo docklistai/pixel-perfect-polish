@@ -3,6 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchPortalPublishedRotaState, fetchPortalPublishedShifts } from "../api/portalLiveData";
 import type { PortalShift } from "../types";
+import { usePortalTimezone } from "./usePortalTimezone";
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -12,6 +13,7 @@ export type PortalLiveShifts = {
   isLoading: boolean;
   isError: boolean;
   isSuccess: boolean;
+  retry: () => void;
   data:
     | {
         shifts: PortalShift[];
@@ -29,6 +31,7 @@ export type PortalLiveShifts = {
  */
 export function usePortalLiveShifts(): PortalLiveShifts {
   const { auth } = portalRouteApi.useRouteContext();
+  const timezone = usePortalTimezone();
 
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const staffMemberId = auth.status === "member" ? auth.staffMemberId : null;
@@ -37,9 +40,10 @@ export function usePortalLiveShifts(): PortalLiveShifts {
     auth.status === "member" &&
     auth.role === "staff" &&
     Boolean(staffMemberId);
+  const queryEnabled = enabled && Boolean(timezone);
 
   const query = useQuery({
-    queryKey: ["portal", "published-shifts", workspaceId, staffMemberId],
+    queryKey: ["portal", "published-shifts", workspaceId, staffMemberId, timezone],
     queryFn: async () => {
       const [shifts, publishedState] = await Promise.all([
         fetchPortalPublishedShifts(workspaceId!, staffMemberId!),
@@ -47,15 +51,16 @@ export function usePortalLiveShifts(): PortalLiveShifts {
       ]);
       return { shifts, hasPublishedRota: publishedState.hasPublished };
     },
-    enabled,
+    enabled: queryEnabled,
     staleTime: 30_000,
   });
 
   return {
     enabled,
-    isLoading: query.isLoading,
+    isLoading: enabled && (!timezone || query.isLoading),
     isError: query.isError,
     isSuccess: query.isSuccess,
+    retry: () => void query.refetch(),
     data: query.data,
   };
 }

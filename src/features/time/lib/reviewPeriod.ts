@@ -3,8 +3,12 @@
  * week, derived from an injected date so live mode uses the real current week
  * while demo mode can pin to the frozen demo week. All maths runs on
  * `YYYY-MM-DD` strings in UTC to stay timezone-stable; the "now" boundary is
- * resolved in the workspace timezone via {@link londonDateIso}.
+ * resolved in the workspace timezone via the canonical rota date helper.
  */
+
+import { dateIsoInTimezone } from "@/features/rota/lib/liveRotaDates";
+
+export { dateIsoInTimezone } from "@/features/rota/lib/liveRotaDates";
 
 export interface ReviewPeriod {
   /** Inclusive Monday, `YYYY-MM-DD`. */
@@ -29,8 +33,6 @@ const MONTHS = [
   "Nov",
   "Dec",
 ] as const;
-
-const WORKSPACE_TZ = "Europe/London";
 
 function toUtc(dateIso: string): Date {
   const [y, m, d] = dateIso.split("-").map(Number);
@@ -81,17 +83,7 @@ export function periodFilename(period: ReviewPeriod): string {
   return `approved-hours_${period.startIso}_to_${period.endIso}.csv`;
 }
 
-/** Today's date (`YYYY-MM-DD`) in the workspace timezone for the given instant. */
-export function londonDateIso(now: Date): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: WORKSPACE_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-}
-
 /** The current real-world review week, resolved in the workspace timezone. */
-export function currentWeekPeriod(now: Date): ReviewPeriod {
-  return weekPeriodOf(londonDateIso(now));
+export function currentWeekPeriod(now: Date, timeZone: string): ReviewPeriod {
+  return weekPeriodOf(dateIsoInTimezone(now, timeZone));
 }

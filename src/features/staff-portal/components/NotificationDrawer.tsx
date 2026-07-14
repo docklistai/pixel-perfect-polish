@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Bell } from "lucide-react";
-import { DrawerShell, EmptyState, StatusBadge } from "@/components/dl";
+import { ActionButton, DrawerShell, EmptyState, StatusBadge } from "@/components/dl";
 import type { NotificationCategory, PortalNotification } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -15,11 +15,17 @@ export function NotificationDrawer({
   onClose,
   items,
   markAllRead,
+  isLoading,
+  isError,
+  onRetry,
 }: {
   open: boolean;
   onClose: () => void;
   items: PortalNotification[];
   markAllRead: () => void;
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
 }) {
   const [tab, setTab] = React.useState<NotificationCategory>("all");
 
@@ -38,6 +44,22 @@ export function NotificationDrawer({
       width="lg"
     >
       <div className="space-y-4">
+        {isLoading && (
+          <p role="status" className="text-sm text-muted-foreground">
+            Loading notifications…
+          </p>
+        )}
+        {isError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-warning/30 bg-warning-soft p-3 text-sm"
+          >
+            <p className="font-medium">Notifications are unavailable</p>
+            <ActionButton variant="secondary" size="sm" className="mt-2" onClick={onRetry}>
+              Try again
+            </ActionButton>
+          </div>
+        )}
         <div className="flex items-center justify-between gap-2">
           <div className="rounded-xl bg-muted p-1 grid grid-cols-3 text-xs font-medium flex-1">
             {TABS.map((t) => {
@@ -75,7 +97,7 @@ export function NotificationDrawer({
           </button>
         </div>
 
-        {filtered.length === 0 ? (
+        {!isLoading && !isError && filtered.length === 0 ? (
           <EmptyState icon={Bell} title="Nothing here" description="You're all caught up." />
         ) : (
           <ul className="space-y-2">
@@ -120,5 +142,7 @@ function kindLabel(k: PortalNotification["kind"]) {
       return "Announcement";
     case "timesheet-reminder":
       return "Timesheet";
+    case "open-shift-update":
+      return "Open shift";
   }
 }

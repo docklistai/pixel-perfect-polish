@@ -54,6 +54,6 @@ export function useChromeBadges(): ChromeBadges | null {
   return {
     rota: weekQuery.data ? countOpenShifts(weekQuery.data.shifts) : 0,
     leave: (leaveQuery.data ?? []).filter((request) => request.state === "pending").length,
-    time: (timeQuery.data ?? []).filter((row) => row.status !== "approved").length,
+    time: (timeQuery.data?.rows ?? []).filter((row) => row.status !== "approved").length,
   };
 }

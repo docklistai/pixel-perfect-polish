@@ -42,9 +42,8 @@ export function PublishRotaDialog({
   hasUnpublishedChanges: boolean;
   canPublish: boolean;
   publishBlockedReason: string | null;
-  onConfirm: (prepareStaffUpdate: boolean) => MaybePromise<void>;
+  onConfirm: () => MaybePromise<void>;
 }) {
-  const [prepareStaffUpdate, setPrepareStaffUpdate] = React.useState(true);
   const [issuesAcknowledged, setIssuesAcknowledged] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
   const leaveDataWarningCount = leaveDataState === "ready" ? 0 : 1;
@@ -54,7 +53,6 @@ export function PublishRotaDialog({
 
   React.useEffect(() => {
     if (open) {
-      setPrepareStaffUpdate(true);
       setIssuesAcknowledged(false);
       setPublishing(false);
     }
@@ -64,7 +62,7 @@ export function PublishRotaDialog({
     if (!canPublish || (hasIssues && !issuesAcknowledged)) return;
     setPublishing(true);
     try {
-      await onConfirm(prepareStaffUpdate);
+      await onConfirm();
     } catch {
       // Route/persistence handlers own publish failure toasts and keep the dialog open.
     } finally {
@@ -126,7 +124,9 @@ export function PublishRotaDialog({
             disabled={publishing || !canPublish || (hasIssues && !issuesAcknowledged)}
             onClick={() => void handleConfirm()}
           >
-            {publishActionLabel} to {staffCount} staff
+            {published && hasUnpublishedChanges
+              ? "Republish rota"
+              : `Publish to ${staffCount} staff`}
           </ActionButton>
         </>
       }
@@ -147,7 +147,11 @@ export function PublishRotaDialog({
         <ul className="mt-2 flex flex-col gap-1.5 text-sm text-muted-foreground">
           <li>{plannedShiftCount} planned shifts in this draft.</li>
           <li>{assignedShiftCount} assigned shifts will be visible to assigned staff.</li>
-          <li>{openShiftCount} open shifts stay manager-only until assigned.</li>
+          <li>
+            {openShiftCount === 0
+              ? "No open shifts will be published."
+              : `${openShiftCount} open shift${openShiftCount === 1 ? "" : "s"} will be visible to staff, who can request to work them.`}
+          </li>
           <li>
             {issueCount} rota issue
             {issueCount === 1 ? "" : "s"} remain for manager review.
@@ -179,16 +183,6 @@ export function PublishRotaDialog({
           {leaveDataState === "loading" ? "loading" : "unavailable"}.
         </div>
       )}
-
-      <label className="mt-3 flex items-center gap-2 text-sm text-foreground">
-        <input
-          type="checkbox"
-          checked={prepareStaffUpdate}
-          onChange={(event) => setPrepareStaffUpdate(event.target.checked)}
-          className="h-4 w-4 accent-brand"
-        />
-        Prepare a staff-app update when published
-      </label>
 
       {hasIssues && (
         <label className="mt-3 flex items-start gap-2 text-sm text-foreground">

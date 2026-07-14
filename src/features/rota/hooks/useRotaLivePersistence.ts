@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
 import type { RotaLiveData } from "./useRotaLiveData";
+import { useRotaMutationRunner } from "./useRotaMutationRunner";
 import {
   clearLiveRotaWeekFn,
   copyPreviousLiveRotaWeekFn,
@@ -15,15 +16,12 @@ import {
   updateLiveRotaShiftFn,
 } from "../api/rotaLiveMutations";
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "The live rota could not be saved.";
-}
-
 export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
   const queryClient = useQueryClient();
-  const pendingCountRef = React.useRef(0);
-  const [pendingCount, setPendingCount] = React.useState(0);
-  const [lastMutationFailed, setLastMutationFailed] = React.useState(false);
+  const { runMutation, pendingCountRef, pendingCount, lastMutationFailed } = useRotaMutationRunner(
+    live.refetchWeek,
+    live.locationId,
+  );
 
   const liveWeekInput = React.useCallback(() => {
     if (!live.isLive) throw new Error("Live rota is not available.");
@@ -32,34 +30,6 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
       ...(live.locationId ? { locationId: live.locationId } : {}),
     };
   }, [live.isLive, live.locationId, weekOffset]);
-
-  const runMutation = React.useCallback(
-    async <T>(label: string, operation: () => Promise<T>): Promise<T> => {
-      if (pendingCountRef.current > 0) {
-        const error = new Error("Wait for the current rota save to finish.");
-        toast.info("Rota save in progress", { description: error.message });
-        throw error;
-      }
-
-      pendingCountRef.current += 1;
-      setPendingCount(pendingCountRef.current);
-      setLastMutationFailed(false);
-      try {
-        const result = await operation();
-        await live.refetchWeek();
-        setLastMutationFailed(false);
-        return result;
-      } catch (error) {
-        setLastMutationFailed(true);
-        toast.error(label, { description: errorMessage(error) });
-        throw error;
-      } finally {
-        pendingCountRef.current -= 1;
-        setPendingCount(pendingCountRef.current);
-      }
-    },
-    [live],
-  );
 
   const addShift = React.useCallback(
     async (input: DraftShiftInput) => {
@@ -171,9 +141,14 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["portal", "published-shifts"] }),
       queryClient.invalidateQueries({ queryKey: ["portal", "notifications"] }),
+      // Republishing finalises open-shift requests and reshapes the open list.
+      queryClient.invalidateQueries({ queryKey: ["portal", "team-shifts"] }),
+      queryClient.invalidateQueries({ queryKey: ["portal", "open-shifts"] }),
+      queryClient.invalidateQueries({ queryKey: ["portal", "open-shift-requests"] }),
+      queryClient.invalidateQueries({ queryKey: ["rota", "open-shift-applicants"] }),
     ]);
     return result;
-  }, [lastMutationFailed, live, liveWeekInput, queryClient, runMutation]);
+  }, [lastMutationFailed, live, liveWeekInput, pendingCountRef, queryClient, runMutation]);
 
   return {
     isMutationPending: pendingCount > 0,

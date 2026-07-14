@@ -2,17 +2,19 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Check, Plus } from "lucide-react";
-import { DialogShell, ActionButton, FormRow } from "@/components/dl";
+import { DialogShell, ActionButton, FeedbackBanner, FormRow } from "@/components/dl";
 import { fetchWorkspaceStaffFn } from "@/features/staff/api/staffLiveData";
 import { BREAK_OPTIONS } from "../lib/adjustTime";
 import { prepareManualEntry, type ManualEntryPayload } from "../lib/manualEntry";
-import { londonDateIso } from "../lib/reviewPeriod";
+import { dateIsoInTimezone } from "../lib/reviewPeriod";
 
 interface Props {
   open: boolean;
   onClose: () => void;
   /** Live workspace only — the dialog is never rendered in demo mode. */
   workspaceId: string;
+  /** Workspace timezone the typed wall-clock times are interpreted in. */
+  workspaceTimezone: string;
   isSaving: boolean;
   /** Resolves true when the entry was recorded; the dialog then closes. */
   onSave: (payload: ManualEntryPayload, staffName: string) => Promise<boolean>;
@@ -24,9 +26,18 @@ interface Props {
  * live staff roster read for the picker and the shared HH:MM / break parsing
  * used by the adjustment path.
  */
-export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSave }: Props) {
+export function TimeAddEntryDialog({
+  open,
+  onClose,
+  workspaceId,
+  workspaceTimezone,
+  isSaving,
+  onSave,
+}: Props) {
   const [staffMemberId, setStaffMemberId] = React.useState("");
-  const [workDate, setWorkDate] = React.useState(() => londonDateIso(new Date()));
+  const [workDate, setWorkDate] = React.useState(() =>
+    dateIsoInTimezone(new Date(), workspaceTimezone),
+  );
   const [clockIn, setClockIn] = React.useState("");
   const [clockOut, setClockOut] = React.useState("");
   const [finishesNextDay, setFinishesNextDay] = React.useState(false);
@@ -40,17 +51,19 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
     staleTime: 30_000,
   });
   const staff = roster.data ?? [];
+  const selectedStaff = staff.find((row) => row.id === staffMemberId);
+  const entryTimezone = selectedStaff?.timezone ?? workspaceTimezone;
 
   React.useEffect(() => {
     if (!open) return;
     setStaffMemberId("");
-    setWorkDate(londonDateIso(new Date()));
+    setWorkDate(dateIsoInTimezone(new Date(), workspaceTimezone));
     setClockIn("");
     setClockOut("");
     setFinishesNextDay(false);
     setBreakTime("0:00");
     setNote("");
-  }, [open]);
+  }, [open, workspaceTimezone]);
 
   const handleSave = async () => {
     const prepared = prepareManualEntry({
@@ -61,6 +74,7 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
       finishesNextDay,
       breakTime,
       note,
+      timezone: entryTimezone,
     });
     if (!prepared.ok) {
       toast.error("Check the entry", { description: prepared.message });
@@ -83,12 +97,28 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
           <ActionButton variant="ghost" size="sm" onClick={onClose} disabled={isSaving}>
             Cancel
           </ActionButton>
-          <ActionButton size="sm" onClick={() => void handleSave()} disabled={isSaving}>
+          <ActionButton
+            size="sm"
+            onClick={() => void handleSave()}
+            disabled={isSaving || roster.isError}
+          >
             <Check className="mr-1.5 h-3.5 w-3.5" /> {isSaving ? "Recording…" : "Record entry"}
           </ActionButton>
         </>
       }
     >
+      {roster.isError && (
+        <FeedbackBanner
+          tone="warning"
+          title="Staff list unavailable"
+          description="We couldn't load the staff locations needed to record trustworthy local times."
+          action={
+            <ActionButton variant="secondary" size="sm" onClick={() => void roster.refetch()}>
+              Try again
+            </ActionButton>
+          }
+        />
+      )}
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
           <FormRow label="Staff member" htmlFor="add-entry-staff" required>
@@ -96,11 +126,21 @@ export function TimeAddEntryDialog({ open, onClose, workspaceId, isSaving, onSav
               id="add-entry-staff"
               className="select w-full"
               value={staffMemberId}
-              onChange={(event) => setStaffMemberId(event.target.value)}
-              disabled={roster.isLoading}
+              onChange={(event) => {
+                const nextStaffId = event.target.value;
+                const nextTimezone =
+                  staff.find((row) => row.id === nextStaffId)?.timezone ?? workspaceTimezone;
+                setStaffMemberId(nextStaffId);
+                setWorkDate(dateIsoInTimezone(new Date(), nextTimezone));
+              }}
+              disabled={roster.isLoading || roster.isError}
             >
               <option value="">
-                {roster.isLoading ? "Loading staff…" : "Choose a staff member"}
+                {roster.isLoading
+                  ? "Loading staff…"
+                  : roster.isError
+                    ? "Staff unavailable"
+                    : "Choose a staff member"}
               </option>
               {staff.map((s) => (
                 <option key={s.id} value={s.id}>

@@ -3,14 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceStaffFn } from "@/features/staff/api/staffLiveData";
-import type { StaffRow } from "@/features/staff/types";
 import { getAssignableStaffRows } from "../lib/assignableStaff";
+import { toRotaStaffMember } from "../lib/rotaLiveStaff";
 import {
   fetchWorkspaceRotaWeekFn,
   type LiveRotaLocation,
   type LiveWeekStatus,
 } from "../api/rotaLiveData";
-import type { DraftShift, ShiftTone, StaffMember } from "../types";
+import type { DraftShift, StaffMember } from "../types";
 import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
 import type { LeaveRequest } from "@/features/leave/types";
 
@@ -70,28 +70,16 @@ const DEMO: RotaLiveData = {
   leaveRequests: [],
 };
 
-const TONE_CYCLE: ShiftTone[] = ["info", "warning", "purple", "success", "danger"];
-
-function toStaffMember(row: StaffRow, index: number): StaffMember {
-  return {
-    id: row.id,
-    name: row.name,
-    role: row.role,
-    hrs: row.hours === "—" ? "—" : row.hours.replace("/wk", ""),
-    img: row.img,
-    tone: TONE_CYCLE[index % TONE_CYCLE.length]!,
-  };
-}
-
-/**
- * Live, manager-scoped rota source for /rota. Shares the /staff roster read (same
- * query key) so the grid roster and live shift assignments resolve against the
- * same staff ids. Live mode starts only after both reads succeed, so live shifts
- * never mix with the demo roster.
- */
-export function useRotaLiveData(weekOffset: number): RotaLiveData {
+/** Manager-scoped live rota source, aligned with the route location selection. */
+export function useRotaLiveData(
+  weekOffset: number,
+  initialLocationId: string | null = null,
+): RotaLiveData {
   const { auth } = rotaRouteApi.useRouteContext();
-  const [selectedLocationId, setSelectedLocationId] = React.useState<string | null>(null);
+  const [selectedLocationId, setSelectedLocationId] = React.useState<string | null>(
+    initialLocationId,
+  );
+  const routeLocationRef = React.useRef(initialLocationId);
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const enabled =
     Boolean(getSupabaseEnv()) &&
@@ -126,6 +114,12 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
   });
 
   const isLive = enabled && staffQuery.isSuccess && weekQuery.isSuccess;
+
+  React.useEffect(() => {
+    if (routeLocationRef.current === initialLocationId) return;
+    routeLocationRef.current = initialLocationId;
+    setSelectedLocationId(initialLocationId);
+  }, [initialLocationId]);
 
   React.useEffect(() => {
     if (weekQuery.isSuccess && weekQuery.data.locationId !== selectedLocationId) {
@@ -172,8 +166,8 @@ export function useRotaLiveData(weekOffset: number): RotaLiveData {
     today: weekQuery.data.today,
     setLocationId: setSelectedLocationId,
     refetchWeek,
-    staff: (staffQuery.data ?? []).map(toStaffMember),
-    assignableStaff: getAssignableStaffRows(staffQuery.data ?? []).map(toStaffMember),
+    staff: (staffQuery.data ?? []).map(toRotaStaffMember),
+    assignableStaff: getAssignableStaffRows(staffQuery.data ?? []).map(toRotaStaffMember),
     shifts: weekQuery.data.shifts,
     leaveRequests: leaveQuery.data ?? [],
   };

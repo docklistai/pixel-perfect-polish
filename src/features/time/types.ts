@@ -40,6 +40,11 @@ export interface StoredTimesheetRow extends TimesheetRow {
    * build exact timestamptz values for a live adjustment; demo rows omit it.
    */
   workDate?: string;
+  /**
+   * The venue timezone the entry's clock times render and adjust in (the staff
+   * member's primary location, workspace fallback). Live rows only.
+   */
+  timezone?: string;
 }
 
 export interface TimeAdjustment {

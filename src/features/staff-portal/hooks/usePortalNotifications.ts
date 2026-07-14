@@ -1,11 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { toast } from "sonner";
 import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import { markAllPortalNotificationsRead } from "@/features/demo/store/workspaceActions";
 import { fetchPortalNotifications } from "../api/portalLiveData";
 import { markPortalNotificationsReadFn } from "../api/portalActions";
 import type { PortalNotification } from "../types";
+import { usePortalTimezone } from "./usePortalTimezone";
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -14,6 +16,9 @@ export type PortalNotifications = {
   unreadCount: number;
   /** Where the list came from: the live deliveries view or the demo store. */
   source: "live" | "demo";
+  isLoading: boolean;
+  isError: boolean;
+  retry: () => void;
   markAllRead: () => void;
 };
 
@@ -28,6 +33,7 @@ export function usePortalNotifications(): PortalNotifications {
   const queryClient = useQueryClient();
   const store = useWorkspaceStore();
   const demoItems = useWorkspaceSelector((state) => state.portalNotifications);
+  const timezone = usePortalTimezone();
 
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const enabled =
@@ -35,22 +41,26 @@ export function usePortalNotifications(): PortalNotifications {
     auth.status === "member" &&
     auth.role === "staff" &&
     Boolean(auth.staffMemberId);
+  const queryEnabled = enabled && Boolean(timezone);
 
-  const queryKey = ["portal", "notifications", workspaceId];
+  const queryKey = ["portal", "notifications", workspaceId, timezone];
   const query = useQuery({
     queryKey,
-    queryFn: () => fetchPortalNotifications(workspaceId!),
-    enabled,
+    queryFn: () => fetchPortalNotifications(workspaceId!, timezone!),
+    enabled: queryEnabled,
     staleTime: 30_000,
   });
 
-  const isLive = enabled && query.isSuccess;
+  const isLive = queryEnabled && query.isSuccess;
 
   if (enabled && !isLive) {
     return {
       items: [],
       unreadCount: 0,
       source: "live",
+      isLoading: !query.isError,
+      isError: query.isError,
+      retry: () => void query.refetch(),
       markAllRead: () => undefined,
     };
   }
@@ -60,6 +70,9 @@ export function usePortalNotifications(): PortalNotifications {
       items: demoItems,
       unreadCount: demoItems.filter((n) => n.unread).length,
       source: "demo",
+      isLoading: false,
+      isError: false,
+      retry: () => undefined,
       markAllRead: () => markAllPortalNotificationsRead(store),
     };
   }
@@ -69,10 +82,20 @@ export function usePortalNotifications(): PortalNotifications {
     items,
     unreadCount: items.filter((n) => n.unread).length,
     source: "live",
+    isLoading: false,
+    isError: false,
+    retry: () => void query.refetch(),
     markAllRead: () => {
-      void markPortalNotificationsReadFn({ data: { workspaceId: workspaceId! } }).then(() =>
-        queryClient.invalidateQueries({ queryKey }),
-      );
+      void markPortalNotificationsReadFn({ data: { workspaceId: workspaceId! } })
+        .then((result) => {
+          if (!result.ok) throw new Error(result.message);
+          return queryClient.invalidateQueries({ queryKey });
+        })
+        .catch((error: unknown) => {
+          toast.error("Notifications not updated", {
+            description: error instanceof Error ? error.message : "Please try again.",
+          });
+        });
     },
   };
 }

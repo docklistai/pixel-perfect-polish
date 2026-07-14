@@ -97,18 +97,23 @@ begin
       and subject_id = (result ->> 'snapshot_id')::uuid;
   if not found then raise exception 'FAIL: publish audit event missing'; end if;
 
-  -- Republish: versions stay sequential through the RPC.
+  -- Republish: versions stay sequential through the RPC. Since phase 28 an
+  -- unchanged republish notifies NOBODY (targeted diff finds no changes).
   result := public.rpc_publish_rota_week('10000000-0000-4000-8000-000000000001', '15000000-0000-4000-8000-000000000002');
   if (result ->> 'version')::int <> 2 then raise exception 'FAIL: republish version was %', result ->> 'version'; end if;
+  if (result ->> 'notified_memberships')::int <> 0 then
+    raise exception 'FAIL: unchanged republish notified % memberships (expected 0 since phase 28)', result ->> 'notified_memberships';
+  end if;
   set constraints all immediate;
 
   -- Staff portal: Olivia sees only the latest published projection (2 seeded
-  -- week-1 rows + 2 open shifts in the new week-2 snapshot) and her deliveries.
+  -- week-1 rows + 2 open shifts in the new week-2 snapshot) and her deliveries
+  -- (2 seeded + the first publish; the unchanged republish adds nothing).
   perform set_config('request.jwt.claims', '{"sub":"aa000000-0000-4000-8000-000000000003","role":"authenticated"}', true);
   select count(*) into portal_shift_count from public.staff_portal_published_shifts;
   if portal_shift_count <> 4 then raise exception 'FAIL: staff portal sees % published shifts (expected 4)', portal_shift_count; end if;
   select count(*) into portal_notification_count from public.staff_portal_notifications;
-  if portal_notification_count <> 4 then raise exception 'FAIL: staff portal sees % notifications (expected 4)', portal_notification_count; end if;
+  if portal_notification_count <> 3 then raise exception 'FAIL: staff portal sees % notifications (expected 3)', portal_notification_count; end if;
 
   raise notice 'PASS: publish is atomic, sequential, fanned out, audited, and staff-visible';
 end $$;
@@ -484,10 +489,21 @@ declare
 begin
   clock_in_result := public.rpc_staff_clock_event('10000000-0000-4000-8000-000000000001', 'clock_in');
   own_entry_id := (clock_in_result ->> 'time_entry_id')::uuid;
-  perform 1 from public.time_entries
-    where id = own_entry_id and staff_member_id = '14000000-0000-4000-8000-000000000005'
-      and work_date = current_date and clocked_in_at is not null
-      and clocked_out_at is null and approval_status = 'pending';
+  perform 1
+  from public.time_entries as entry
+  join public.staff_members as staff
+    on staff.workspace_id = entry.workspace_id and staff.id = entry.staff_member_id
+  join public.workspaces as workspace on workspace.id = entry.workspace_id
+  left join public.locations as location
+    on location.workspace_id = staff.workspace_id and location.id = staff.primary_location_id
+  where entry.id = own_entry_id
+    and entry.staff_member_id = '14000000-0000-4000-8000-000000000005'
+    and entry.work_date = (
+      entry.clocked_in_at at time zone coalesce(location.timezone, workspace.timezone, 'UTC')
+    )::date
+    and entry.clocked_in_at is not null
+    and entry.clocked_out_at is null
+    and entry.approval_status = 'pending';
   if not found then raise exception 'FAIL: clock_in did not open an own pending entry'; end if;
   perform 1 from public.clock_events
     where id = (clock_in_result ->> 'clock_event_id')::uuid and event_type = 'clock_in'

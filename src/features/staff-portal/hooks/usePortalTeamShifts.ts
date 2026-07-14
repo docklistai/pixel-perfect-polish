@@ -1,12 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import {
-  addIsoDays,
-  fetchPortalTeamShifts,
-  portalTodayIso,
-  type PortalTeamShift,
-} from "../api/portalTeamData";
+import { fetchPortalTeamShifts, type PortalTeamShift } from "../api/portalTeamData";
+import { usePortalTimezone } from "./usePortalTimezone";
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -24,6 +20,7 @@ export type PortalTeamShifts = {
 /** Who's working this week, from the latest published snapshot only. */
 export function usePortalTeamShifts(): PortalTeamShifts {
   const { auth } = portalRouteApi.useRouteContext();
+  const timezone = usePortalTimezone();
 
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const staffMemberId = auth.status === "member" ? auth.staffMemberId : null;
@@ -32,20 +29,18 @@ export function usePortalTeamShifts(): PortalTeamShifts {
     auth.status === "member" &&
     auth.role === "staff" &&
     Boolean(staffMemberId);
+  const queryEnabled = enabled && Boolean(timezone);
 
   const query = useQuery({
-    queryKey: ["portal", "team-shifts", workspaceId, staffMemberId],
-    queryFn: () => {
-      const today = portalTodayIso();
-      return fetchPortalTeamShifts(workspaceId!, today, addIsoDays(today, 6));
-    },
-    enabled,
+    queryKey: ["portal", "team-shifts", workspaceId, staffMemberId, timezone],
+    queryFn: () => fetchPortalTeamShifts(workspaceId!),
+    enabled: queryEnabled,
     staleTime: 60_000,
   });
 
   return {
     enabled,
-    isLoading: enabled && query.isLoading,
+    isLoading: enabled && (!timezone || query.isLoading),
     isError: enabled && query.isError,
     selfStaffMemberId: staffMemberId,
     shifts: query.data ?? [],

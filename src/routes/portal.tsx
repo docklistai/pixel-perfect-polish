@@ -29,7 +29,8 @@ export const Route = createFileRoute("/portal")({
 function PortalPage() {
   const [tab, setTab] = React.useState<PortalTab>("home");
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
-  const { items: notifications, unreadCount: unread, markAllRead } = usePortalNotifications();
+  const notificationState = usePortalNotifications();
+  const { items: notifications, unreadCount: unread, markAllRead } = notificationState;
 
   return (
     <>
@@ -50,6 +51,9 @@ function PortalPage() {
         onClose={() => setNotificationsOpen(false)}
         items={notifications}
         markAllRead={markAllRead}
+        isLoading={notificationState.isLoading}
+        isError={notificationState.isError}
+        onRetry={notificationState.retry}
       />
     </>
   );

@@ -33,7 +33,8 @@ export function useRotaOverlays() {
     (key: RotaOverlayKey) => setOverlay(key, true),
     [setOverlay],
   );
-  return { openOverlays, setOverlay, openOverlay };
+  const closeAll = React.useCallback(() => setOpenOverlays(CLOSED_OVERLAYS), []);
+  return { openOverlays, setOverlay, openOverlay, closeAll };
 }
 
 export type RotaOverlaysState = ReturnType<typeof useRotaOverlays>;

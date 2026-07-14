@@ -1,14 +1,15 @@
 import * as React from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { useOverlays } from "@/components/AppShortcuts";
 import { useRotaDraftController } from "./useRotaDraftController";
 import { useRotaShiftActions } from "./useRotaShiftActions";
 import { useGuardedRotaController } from "./useGuardedRotaController";
 import { useRotaHistory } from "./useRotaHistory";
+import { useRotaLocationSelection, useRotaWeekSearch } from "./useRotaLocationSelection";
 import { useRotaOverlays, type RotaOverlayKey } from "./useRotaOverlays";
 import { useRotaPublishIntent } from "./useRotaPublishIntent";
+import { useRotaPublishAction } from "./useRotaPublishAction";
 import { useRecurringDayOffClashes } from "./useRecurringDayOffClashes";
 import { useRoleColours } from "@/features/settings/hooks/useRoleColours";
 import { buildRoleColourKey } from "../lib/deptColours";
@@ -18,30 +19,16 @@ import {
   getRotaPublishEligibility,
 } from "../lib/publishEligibility";
 import type { ShiftId } from "../types";
+import { LIVE_UNSUPPORTED_OVERLAYS, MUTATING_OVERLAYS } from "../lib/rotaOverlayGuards";
 
-/** Drawers/dialogs that mutate the rota — blocked while viewing the live rota. */
-const MUTATING_OVERLAYS = new Set<RotaOverlayKey>(["addShift", "publish", "generate"]);
-const LIVE_UNSUPPORTED_OVERLAYS = new Set<RotaOverlayKey>();
-
-/**
- * Orchestrates the /rota route: the draft controller, shift actions, overlays,
- * publish flow, and every derived value the page JSX renders. Extracted so the
- * route file stays a thin layout shell.
- */
-export function useRotaPage(week: number | undefined) {
-  const rota = useRotaDraftController();
+export function useRotaPage(week: number | undefined, location: string | undefined) {
+  const rota = useRotaDraftController(location ?? null);
   const history = useRotaHistory(rota);
   const navigate = useNavigate();
 
-  // Apply a `?week=` deep-link once per distinct value (client-only).
-  const setWeekOffset = rota.setWeekOffset;
-  const appliedWeekRef = React.useRef<number | null>(null);
-  React.useEffect(() => {
-    if (week === undefined || appliedWeekRef.current === week) return;
-    appliedWeekRef.current = week;
-    setWeekOffset(week);
-  }, [week, setWeekOffset]);
+  useRotaWeekSearch(week, rota.setWeekOffset);
 
+  const liveLocationId = rota.source === "live" ? rota.liveLocationId : null;
   const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(history.controller);
@@ -50,6 +37,18 @@ export function useRotaPage(week: number | undefined) {
     shiftId: ShiftId;
     staffId: string;
   } | null>(null);
+  const handleLocationChange = useRotaLocationSelection({
+    searchLocation: location,
+    searchLocationIsValid: rota.liveLocations.some((option) => option.id === location),
+    liveLocationId,
+    hasMultipleLocations: rota.liveLocations.length > 1,
+    setLiveLocationId: rota.setLiveLocationId,
+    clearSelectedShift: () => rota.setSelectedShiftId(null),
+    clearRecovery: () => setRecoverySelection(null),
+    clearFillSummary: () => actions.setFillSummary(null),
+    clearConfirmation: rota.clearConfirmation,
+    closeOverlays: overlays.closeAll,
+  });
 
   const readOnly = rota.readOnly;
   const isLiveEditing = rota.source === "live" && !readOnly;
@@ -128,30 +127,13 @@ export function useRotaPage(week: number | undefined) {
     hasReadinessIssues: readinessIssueCount > 0,
   });
 
-  const handlePublish = async (prepareStaffUpdate: boolean) => {
-    if (!publishEligibility.canPublish) {
-      toast.info("Publish unavailable", {
-        description: publishEligibility.blockedReason ?? "Publishing is unavailable.",
-      });
-      return;
-    }
-    try {
-      await rota.handlePublish();
-      overlays.setOverlay("publish", false);
-      toast.success("Rota published", {
-        description: prepareStaffUpdate
-          ? "Published snapshot ready. Staff-app update prepared for review."
-          : "Staff see the published snapshot the next time they open the app.",
-        action: { label: "Open staff view", onClick: () => navigate({ to: "/portal" }) },
-      });
-    } catch (error) {
-      if (rota.source !== "live") {
-        toast.error("Rota not published", {
-          description: error instanceof Error ? error.message : "The rota could not be published.",
-        });
-      }
-    }
-  };
+  const handlePublish = useRotaPublishAction({
+    eligibility: publishEligibility,
+    source: rota.source,
+    publish: rota.handlePublish,
+    closeDialog: () => overlays.setOverlay("publish", false),
+    openStaffView: () => navigate({ to: "/portal" }),
+  });
 
   const guardedRota = useGuardedRotaController(history.controller, readOnly, actions.block);
 
@@ -183,6 +165,7 @@ export function useRotaPage(week: number | undefined) {
     headerStatusTone: headerStatus.tone,
     headerStatusLabel: headerStatus.label,
     handlePublish,
+    handleLocationChange,
     handleChooseRecoveryCandidate,
     recoverySelection,
     setRecoverySelection,

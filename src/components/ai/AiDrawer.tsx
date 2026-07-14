@@ -94,10 +94,10 @@ export function AiDrawer({
           isError: timeQuery.isError,
         }),
         pendingTimeCount: timeQuery.data
-          ? timeQuery.data.filter((row) => row.status !== "approved").length
+          ? timeQuery.data.rows.filter((row) => row.status !== "approved").length
           : null,
         approvedTimeCount: timeQuery.data
-          ? timeQuery.data.filter((row) => row.status === "approved").length
+          ? timeQuery.data.rows.filter((row) => row.status === "approved").length
           : null,
       },
     }),

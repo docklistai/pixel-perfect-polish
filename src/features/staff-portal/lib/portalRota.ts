@@ -3,73 +3,17 @@ import { parseHHMMToMinutes, shiftHours } from "@/features/rota/lib/draftRota";
 import type { WorkspaceState } from "@/features/demo/store/workspaceStoreTypes";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import type { PortalShift, ShiftStatus, TeamOnDuty } from "../types";
+import { DEMO_NOW, type PortalNow } from "./portalNow";
 
-/** Staff may clock in up to 15 minutes before their scheduled start. */
+export {
+  currentWeekStrip,
+  DEMO_NOW,
+  portalNowInTimezone,
+  type PortalNow,
+  type PortalWeekDay,
+} from "./portalNow";
+
 const CLOCK_IN_GRACE_MINUTES = 15;
-
-const WORKSPACE_TZ = "Europe/London";
-
-/** The "now" boundary used to decide which shifts are current/upcoming. */
-export interface PortalNow {
-  /** Today's date, `YYYY-MM-DD`, in the workspace timezone. */
-  todayIso: string;
-  /** Minutes since local midnight in the workspace timezone. */
-  nowMinutes: number;
-}
-
-/** Real wall-clock "now" in the workspace timezone — used in live mode. */
-export function londonPortalNow(now: Date = new Date()): PortalNow {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: WORKSPACE_TZ,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(now);
-  const get = (type: string) => parts.find((p) => p.type === type)!.value;
-  const hour = get("hour") === "24" ? "00" : get("hour");
-  return {
-    todayIso: `${get("year")}-${get("month")}-${get("day")}`,
-    nowMinutes: Number(hour) * 60 + Number(get("minute")),
-  };
-}
-
-/** The frozen demo "now" — keeps the Harbour View playground coherent offline. */
-export const DEMO_NOW: PortalNow = {
-  todayIso: DEMO_WORLD.todayIso,
-  nowMinutes: DEMO_WORLD.nowMinutes,
-};
-
-/** A single day in the portal "this week" strip. */
-export interface PortalWeekDay {
-  /** Date as `YYYY-MM-DD`. */
-  iso: string;
-  /** Day of month, 1–31. */
-  dayNum: number;
-  /** Single-letter weekday label (Mon–Sun). */
-  letter: string;
-}
-
-const WEEK_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
-
-/**
- * Monday–Sunday of the week containing `now`, derived from the same clock the
- * rota uses (demo clock in demo mode, real wall-clock in live mode). Dates are
- * computed in UTC to avoid off-by-one drift around timezone boundaries.
- */
-export function currentWeekStrip(now: PortalNow = DEMO_NOW): PortalWeekDay[] {
-  const base = new Date(`${now.todayIso}T00:00:00Z`);
-  const mondayOffset = (base.getUTCDay() + 6) % 7;
-  const monday = new Date(base);
-  monday.setUTCDate(base.getUTCDate() - mondayOffset);
-  return WEEK_LETTERS.map((letter, i) => {
-    const day = new Date(monday);
-    day.setUTCDate(monday.getUTCDate() + i);
-    return { iso: day.toISOString().slice(0, 10), dayNum: day.getUTCDate(), letter };
-  });
-}
 
 function portalStatus(status: PublishedShiftSnapshot["status"]): ShiftStatus {
   return status === "changed" ? "changed" : "confirmed";
@@ -127,6 +71,9 @@ export function upcomingPortalShifts(
 ): PortalShift[] {
   const { todayIso, nowMinutes } = now;
   return shifts.filter((shift) => {
+    if (now.nowMs !== undefined && shift.endsAtMs !== undefined) {
+      return shift.endsAtMs > now.nowMs;
+    }
     if (shift.date > todayIso) return true;
     if (shift.date < todayIso) return false;
     const end = parseHHMMToMinutes(shift.end);
@@ -144,6 +91,9 @@ export function historicalPortalShifts(
   const { todayIso, nowMinutes } = now;
   return shifts
     .filter((shift) => {
+      if (now.nowMs !== undefined && shift.endsAtMs !== undefined) {
+        return shift.endsAtMs <= now.nowMs;
+      }
       if (shift.date < todayIso) return true;
       if (shift.date > todayIso) return false;
       const start = parseHHMMToMinutes(shift.start);
@@ -192,6 +142,16 @@ export function clockInShift(shifts: PortalShift[], now: PortalNow = DEMO_NOW): 
   const { todayIso, nowMinutes } = now;
   return (
     shifts.find((shift) => {
+      if (
+        now.nowMs !== undefined &&
+        shift.startsAtMs !== undefined &&
+        shift.endsAtMs !== undefined
+      ) {
+        return (
+          now.nowMs >= shift.startsAtMs - CLOCK_IN_GRACE_MINUTES * 60_000 &&
+          now.nowMs < shift.endsAtMs
+        );
+      }
       if (shift.date !== todayIso) return false;
       const start = parseHHMMToMinutes(shift.start);
       const end = parseHHMMToMinutes(shift.end);

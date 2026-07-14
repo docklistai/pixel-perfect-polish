@@ -1,6 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import type { StoredTimesheetRow } from "../types";
+import {
+  adjustInput,
+  approveInput,
+  exportInput,
+  workspaceInput,
+  type ExportResult,
+  type TimeWriteResult,
+} from "./timeLiveSchemas";
+
+export type { ExportResult, ExportRow, TimeWriteResult } from "./timeLiveSchemas";
 
 /**
  * Manager-side live time & attendance reads and writes. Reads run as a server
@@ -12,48 +21,14 @@ import type { StoredTimesheetRow } from "../types";
  * schema does not carry (avatar, exception text) are neutral defaults.
  */
 
-const WORKSPACE_TZ = "Europe/London";
-const TIME_FMT = new Intl.DateTimeFormat("en-GB", {
-  timeZone: WORKSPACE_TZ,
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-});
-
-const workspaceInput = z.object({ workspaceId: z.string().uuid() });
-
-const approveInput = z.object({
-  workspaceId: z.string().uuid(),
-  timeEntryIds: z.array(z.string().uuid()).min(1),
-  approvalStatus: z.enum(["approved", "rejected", "pending"]),
-  reason: z.string().trim().max(2000).optional(),
-});
-
-const adjustInput = z.object({
-  workspaceId: z.string().uuid(),
-  timeEntryId: z.string().uuid(),
-  clockedInAt: z.string().datetime().nullable(),
-  clockedOutAt: z.string().datetime().nullable(),
-  breakMinutes: z.number().int().min(0).max(1440),
-  reason: z.string().trim().min(1).max(2000),
-});
-
-const exportInput = z.object({
-  workspaceId: z.string().uuid(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-});
-
-export type TimeWriteResult = { ok: true } | { ok: false; message: string };
-export type ExportRow = {
-  staffMemberId: string;
-  displayName: string;
-  roleName: string;
-  departmentName: string;
-  entryCount: number;
-  approvedHours: number;
-};
-export type ExportResult = { ok: true; rows: ExportRow[] } | { ok: false; message: string };
+function timeFormat(timeZone: string): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
 
 interface TimeEntryRow {
   id: string;
@@ -71,6 +46,14 @@ interface StaffLite {
   display_name: string;
   role_name: string;
   department: string;
+  /** Venue timezone: the staff member's primary location, workspace fallback. */
+  timezone: string;
+}
+
+export interface WorkspaceTimeResult {
+  /** The workspace default timezone (review-period boundaries, add-entry default). */
+  workspaceTimezone: string;
+  rows: StoredTimesheetRow[];
 }
 
 const STATUS_MAP: Record<TimeEntryRow["approval_status"], StoredTimesheetRow["status"]> = {
@@ -79,20 +62,21 @@ const STATUS_MAP: Record<TimeEntryRow["approval_status"], StoredTimesheetRow["st
   rejected: "unapproved",
 };
 
-function clockLabel(iso: string | null): string {
-  return iso ? TIME_FMT.format(new Date(iso)) : "—";
+function clockLabel(iso: string | null, timeZone: string): string {
+  return iso ? timeFormat(timeZone).format(new Date(iso)) : "—";
 }
 
-function scheduleLabel(startIso: string | null, endIso: string | null): string {
+function scheduleLabel(startIso: string | null, endIso: string | null, timeZone: string): string {
   if (!startIso || !endIso) return "—";
-  return `${TIME_FMT.format(new Date(startIso))}–${TIME_FMT.format(new Date(endIso))}`;
+  const fmt = timeFormat(timeZone);
+  return `${fmt.format(new Date(startIso))}–${fmt.format(new Date(endIso))}`;
 }
 
 function paidLabel(inIso: string | null, outIso: string | null, breakMinutes: number): string {
   if (!inIso || !outIso) return "—";
   const worked = Math.max(
     0,
-    Math.round((new Date(outIso).getTime() - new Date(inIso).getTime()) / 60_000) - breakMinutes,
+    Math.floor((new Date(outIso).getTime() - new Date(inIso).getTime()) / 60_000) - breakMinutes,
   );
   return `${Math.floor(worked / 60)} h ${String(worked % 60).padStart(2, "0")} m`;
 }
@@ -103,17 +87,22 @@ function avatarIndex(id: string): number {
   return (hash % 70) + 1;
 }
 
-function mapTimeRow(row: TimeEntryRow, staff: StaffLite | undefined): StoredTimesheetRow {
+function mapTimeRow(
+  row: TimeEntryRow,
+  staff: StaffLite | undefined,
+  workspaceTimezone: string,
+): StoredTimesheetRow {
+  const timezone = staff?.timezone ?? workspaceTimezone;
   return {
     id: row.id,
     staffMemberId: row.staff_member_id,
     n: staff?.display_name ?? "Team member",
     role: staff?.role_name ?? "—",
     img: avatarIndex(row.staff_member_id),
-    sched: scheduleLabel(row.scheduled_start_at, row.scheduled_end_at),
-    in: clockLabel(row.clocked_in_at),
+    sched: scheduleLabel(row.scheduled_start_at, row.scheduled_end_at, timezone),
+    in: clockLabel(row.clocked_in_at, timezone),
     inN: "",
-    out: clockLabel(row.clocked_out_at),
+    out: clockLabel(row.clocked_out_at, timezone),
     outN: "",
     brk: `${row.break_minutes}m`,
     paid: paidLabel(row.clocked_in_at, row.clocked_out_at, row.break_minutes),
@@ -123,20 +112,23 @@ function mapTimeRow(row: TimeEntryRow, staff: StaffLite | undefined): StoredTime
     flagged: false,
     auditTrail: [],
     workDate: row.work_date,
+    timezone,
   };
 }
 
 /** All time entries in the manager's workspace for the active period, newest first. */
 export const fetchWorkspaceTimeFn = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => workspaceInput.parse(input))
-  .handler(async ({ data }): Promise<StoredTimesheetRow[]> => {
+  .handler(async ({ data }): Promise<WorkspaceTimeResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
     const supabase = getSupabaseServerClient();
 
     const [
       { data: entries, error: entryError },
       { data: staff, error: staffError },
-      { data: depts },
+      { data: depts, error: deptError },
+      { data: locations, error: locationError },
+      { data: workspace, error: workspaceError },
     ] = await Promise.all([
       supabase
         .from("time_entries")
@@ -147,21 +139,39 @@ export const fetchWorkspaceTimeFn = createServerFn({ method: "GET" })
         .order("work_date", { ascending: false }),
       supabase
         .from("staff_members")
-        .select("id, display_name, role_name, department_id")
+        .select("id, display_name, role_name, department_id, primary_location_id")
         .eq("workspace_id", data.workspaceId),
       supabase.from("departments").select("id, name").eq("workspace_id", data.workspaceId),
+      supabase.from("locations").select("id, timezone").eq("workspace_id", data.workspaceId),
+      supabase.from("workspaces").select("timezone").eq("id", data.workspaceId).single(),
     ]);
 
     if (entryError) throw entryError;
     if (staffError) throw staffError;
+    if (deptError) throw deptError;
+    if (locationError) throw locationError;
+    if (workspaceError) throw workspaceError;
 
+    const workspaceTimezone = (workspace as { timezone: string | null }).timezone ?? "UTC";
     const deptNames = new Map(
       ((depts as { id: string; name: string }[] | null) ?? []).map((d) => [d.id, d.name]),
+    );
+    const locationTimezones = new Map(
+      ((locations as { id: string; timezone: string | null }[] | null) ?? []).map((l) => [
+        l.id,
+        l.timezone,
+      ]),
     );
     const staffById = new Map<string, StaffLite>(
       (
         (staff as
-          | { id: string; display_name: string; role_name: string; department_id: string | null }[]
+          | {
+              id: string;
+              display_name: string;
+              role_name: string;
+              department_id: string | null;
+              primary_location_id: string | null;
+            }[]
           | null) ?? []
       ).map((s) => [
         s.id,
@@ -169,13 +179,19 @@ export const fetchWorkspaceTimeFn = createServerFn({ method: "GET" })
           display_name: s.display_name,
           role_name: s.role_name,
           department: s.department_id ? (deptNames.get(s.department_id) ?? "—") : "—",
+          timezone:
+            (s.primary_location_id ? locationTimezones.get(s.primary_location_id) : null) ??
+            workspaceTimezone,
         },
       ]),
     );
 
-    return ((entries as TimeEntryRow[] | null) ?? []).map((row) =>
-      mapTimeRow(row, staffById.get(row.staff_member_id)),
-    );
+    return {
+      workspaceTimezone,
+      rows: ((entries as TimeEntryRow[] | null) ?? []).map((row) =>
+        mapTimeRow(row, staffById.get(row.staff_member_id), workspaceTimezone),
+      ),
+    };
   });
 
 function describeWriteError(code: string | null | undefined): string {

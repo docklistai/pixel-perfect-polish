@@ -4,7 +4,7 @@ import {
   shiftPeriod,
   isWithinPeriod,
   periodFilename,
-  londonDateIso,
+  dateIsoInTimezone,
   currentWeekPeriod,
 } from "./reviewPeriod";
 
@@ -55,14 +55,17 @@ describe("periodFilename", () => {
   });
 });
 
-describe("londonDateIso / currentWeekPeriod", () => {
+describe("dateIsoInTimezone / currentWeekPeriod", () => {
   it("resolves the workspace-timezone date for an instant", () => {
-    // 23:30 UTC on 11 Jun is still 12 Jun 00:30 BST.
-    expect(londonDateIso(new Date("2026-06-11T23:30:00Z"))).toBe("2026-06-12");
+    // 23:30 UTC on 11 Jun is 12 Jun 00:30 BST in London, still 11 Jun in New York.
+    expect(dateIsoInTimezone(new Date("2026-06-11T23:30:00Z"), "Europe/London")).toBe("2026-06-12");
+    expect(dateIsoInTimezone(new Date("2026-06-11T23:30:00Z"), "America/New_York")).toBe(
+      "2026-06-11",
+    );
   });
 
-  it("derives the current week from a real instant", () => {
-    expect(currentWeekPeriod(new Date("2026-06-11T12:00:00Z"))).toEqual({
+  it("derives the current week from a real instant in the given zone", () => {
+    expect(currentWeekPeriod(new Date("2026-06-11T12:00:00Z"), "Europe/London")).toEqual({
       startIso: "2026-06-08",
       endIso: "2026-06-14",
       label: "8 – 14 Jun 2026",

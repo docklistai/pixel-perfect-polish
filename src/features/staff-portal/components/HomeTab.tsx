@@ -4,12 +4,20 @@ import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalProfile } from "../hooks/usePortalProfile";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalTab } from "../types";
+import { PortalRotaReadState } from "./PortalRotaReadState";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
-  const { hasPublished, nextShift, upcoming, weekDays } = usePortalRota();
+  const rota = usePortalRota();
+  const { hasPublished, nextShift, upcoming, weekDays } = rota;
   const { data: profile } = usePortalProfile();
   const publishedDates = new Set(upcoming.map((shift) => shift.date));
   const emptyCopy = noUpcomingShiftsCopy(hasPublished);
+
+  if (rota.isLoading || rota.isError) {
+    return (
+      <PortalRotaReadState isLoading={rota.isLoading} isError={rota.isError} onRetry={rota.retry} />
+    );
+  }
 
   return (
     <div className="space-y-4">

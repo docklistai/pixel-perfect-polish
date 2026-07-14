@@ -2,24 +2,13 @@ import * as React from "react";
 import type { useRotaDraftController } from "./useRotaDraftController";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
 import { captureInversePatch, patchChangesShift } from "../lib/rotaHistory";
+import { shiftToInput } from "../lib/rotaHistoryInput";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
 type HistoryEntry = { undo: () => Promise<void> | void; redo: () => Promise<void> | void };
 
 const MAX_HISTORY = 50;
-
-function shiftToInput(shift: DraftShift): DraftShiftInput {
-  return {
-    dayIndex: shift.dayIndex,
-    staffId: shift.staffId,
-    role: shift.role,
-    start: shift.start,
-    end: shift.end,
-    breakMinutes: shift.breakMinutes,
-    status: shift.status,
-  };
-}
 
 /**
  * Undo/redo for single-shift rota edits. Wraps the controller's mutating actions
@@ -42,10 +31,12 @@ export function useRotaHistory(controller: RotaController) {
     setRedoStack([]);
   }, []);
 
-  // A new week (or demo/live switch) invalidates every recorded inverse.
+  // A new week, demo/live switch, or location change invalidates every
+  // recorded inverse — an undo captured against another location's rota must
+  // never replay onto this one.
   React.useEffect(() => {
     reset();
-  }, [controller.weekLabel, controller.source, reset]);
+  }, [controller.weekLabel, controller.source, controller.liveLocationId, reset]);
 
   // A bulk change (copy/clear week, copy-day, template) moves the count by >1 — its inverses aren't tracked, so drop history.
   const prevLenRef = React.useRef(controller.draftShifts.length);

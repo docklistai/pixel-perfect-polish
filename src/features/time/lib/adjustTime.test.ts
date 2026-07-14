@@ -3,7 +3,7 @@ import {
   parseClockField,
   parseBreakMinutes,
   breakValueToOption,
-  workspaceWallTimeToIso,
+  wallTimeToIso,
 } from "./adjustTime";
 
 describe("parseClockField", () => {
@@ -53,12 +53,17 @@ describe("breakValueToOption", () => {
   });
 });
 
-describe("workspaceWallTimeToIso (Europe/London)", () => {
-  it("treats winter wall time as GMT (UTC+0)", () => {
-    expect(workspaceWallTimeToIso("2026-01-15", 8, 0)).toBe("2026-01-15T08:00:00.000Z");
+describe("wallTimeToIso", () => {
+  it("treats London winter wall time as GMT (UTC+0)", () => {
+    expect(wallTimeToIso("2026-01-15", 8, 0, "Europe/London")).toBe("2026-01-15T08:00:00.000Z");
   });
 
-  it("treats summer wall time as BST (UTC+1)", () => {
-    expect(workspaceWallTimeToIso("2026-07-15", 8, 0)).toBe("2026-07-15T07:00:00.000Z");
+  it("treats London summer wall time as BST (UTC+1)", () => {
+    expect(wallTimeToIso("2026-07-15", 8, 0, "Europe/London")).toBe("2026-07-15T07:00:00.000Z");
+  });
+
+  it("resolves the same wall time in another venue timezone", () => {
+    // 08:00 in New York on 15 Jul 2026 (EDT, UTC-4) → 12:00Z.
+    expect(wallTimeToIso("2026-07-15", 8, 0, "America/New_York")).toBe("2026-07-15T12:00:00.000Z");
   });
 });

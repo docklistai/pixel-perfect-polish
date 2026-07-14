@@ -1,9 +1,10 @@
 import * as React from "react";
 import { staff } from "../data/mockData";
-import type { RotaFilters } from "../types";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
+import { DEFAULT_ROTA_FILTERS } from "../lib/rotaFilters";
 import { getCurrentWeekDayIndex, getWeekDayLabels, getWeekDateIsoLabels } from "../lib/weekHelpers";
 import * as liveDates from "../lib/liveRotaDates";
+import { visibleLiveRoster } from "../lib/rotaRoster";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
   buildDayStats,
@@ -27,18 +28,12 @@ import {
   withApprovedLeaveConflictStatus,
 } from "@/features/leave/lib/leaveRotaConflicts";
 
-const DEFAULT_ROTA_FILTERS: RotaFilters = {
-  department: "all",
-  shiftStatus: "all",
-  warningType: "all",
-};
-
-export function useRotaDraftController() {
+export function useRotaDraftController(initialLocationId: string | null = null) {
   const weekDraft = useRotaWeekDrafts();
-  const live = useRotaLiveData(weekDraft.weekOffset);
+  const live = useRotaLiveData(weekDraft.weekOffset, initialLocationId);
   const livePersistence = useRotaLivePersistence(live, weekDraft.weekOffset);
   const demoLeaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
-  const [filters, setFilters] = React.useState<RotaFilters>(DEFAULT_ROTA_FILTERS);
+  const [filters, setFilters] = React.useState(DEFAULT_ROTA_FILTERS);
   const [staffSearch, setStaffSearch] = React.useState("");
   const liveConfirmations = useRotaConfirmations({
     clearWeek: livePersistence.clearWeek,
@@ -55,13 +50,7 @@ export function useRotaDraftController() {
   const confirmations = liveActions ? liveConfirmations : weekDraft;
   const roster = React.useMemo(() => {
     if (!live.isLive) return fullRoster;
-    const assignableIds = new Set(assignableStaff.map((member) => member.id));
-    const shiftStaffIds = new Set(
-      sourceShifts.map((shift) => shift.staffId).filter((id): id is string => Boolean(id)),
-    );
-    return fullRoster.filter(
-      (member) => assignableIds.has(member.id) || shiftStaffIds.has(member.id),
-    );
+    return visibleLiveRoster(fullRoster, assignableStaff, sourceShifts);
   }, [live.isLive, fullRoster, assignableStaff, sourceShifts]);
 
   const dayIsoDates = React.useMemo(() => {

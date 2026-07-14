@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { liveWeekDayLabels, weekStartForOffset } from "./liveRotaDates";
+import { liveWeekDayLabels, weekStartForOffset, zonedLocalTimeToUtcIso } from "./liveRotaDates";
 
 // 2026-06-10 is a Wednesday (that week's Monday is 2026-06-08, Sunday 2026-06-07).
 const wednesday = new Date("2026-06-10T12:00:00Z");
@@ -25,5 +25,31 @@ describe("liveWeekDayLabels", () => {
     expect(sundayStart[0]).toBe("Sun 7 Jun");
     expect(sundayStart[1]).toBe("Mon 8 Jun");
     expect(sundayStart[6]).toBe("Sat 13 Jun");
+  });
+});
+
+describe("zonedLocalTimeToUtcIso", () => {
+  it("preserves ordinary winter and summer conversions", () => {
+    expect(zonedLocalTimeToUtcIso("2026-01-15", "08:00", "Europe/London")).toBe(
+      "2026-01-15T08:00:00.000Z",
+    );
+    expect(zonedLocalTimeToUtcIso("2026-07-15", "08:00", "America/New_York")).toBe(
+      "2026-07-15T12:00:00.000Z",
+    );
+  });
+
+  it("rejects a wall time skipped by the spring DST transition", () => {
+    expect(() => zonedLocalTimeToUtcIso("2026-03-29", "01:30", "Europe/London")).toThrow(
+      "Local time 01:30 on 2026-03-29 does not exist in Europe/London",
+    );
+  });
+
+  it("uses the first occurrence of an ambiguous fall-back wall time", () => {
+    expect(zonedLocalTimeToUtcIso("2026-10-25", "01:30", "Europe/London")).toBe(
+      "2026-10-25T00:30:00.000Z",
+    );
+    expect(zonedLocalTimeToUtcIso("2026-11-01", "01:30", "America/New_York")).toBe(
+      "2026-11-01T05:30:00.000Z",
+    );
   });
 });

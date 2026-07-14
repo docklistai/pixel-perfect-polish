@@ -18,6 +18,8 @@ export type WorkspaceTime = {
   isError: boolean;
   /** Honest render state — drives loading/error/empty surfaces, never demo blending. */
   state: TimeViewState;
+  /** The workspace default timezone once the live read resolves; null otherwise. */
+  workspaceTimezone: string | null;
 };
 
 /**
@@ -43,12 +45,15 @@ export function useWorkspaceTime(): WorkspaceTime {
     staleTime: 15_000,
   });
 
-  return resolveTimeView({
-    enabled,
-    isSuccess: query.isSuccess,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    liveRows: query.data,
-    demoRows,
-  });
+  return {
+    ...resolveTimeView({
+      enabled,
+      isSuccess: query.isSuccess,
+      isLoading: query.isLoading,
+      isError: query.isError,
+      liveRows: query.data?.rows,
+      demoRows,
+    }),
+    workspaceTimezone: query.data?.workspaceTimezone ?? null,
+  };
 }
