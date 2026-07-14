@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0ea5a2" />
+    <title>Docklist is offline</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #0f172a;
+        color: #f8fafc;
+      }
+      main {
+        width: min(30rem, calc(100% - 2rem));
+        text-align: center;
+      }
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1.25rem;
+        border-radius: 1rem;
+        background: #0ea5a2;
+        font-size: 2rem;
+        font-weight: 800;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+      p {
+        color: #cbd5e1;
+        line-height: 1.6;
+      }
+      a {
+        display: inline-block;
+        margin-top: 0.75rem;
+        border-radius: 0.65rem;
+        background: #0ea5a2;
+        color: white;
+        padding: 0.7rem 1rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      a:focus-visible {
+        outline: 3px solid white;
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">D</div>
+      <h1>You're offline</h1>
+      <p>
+        Docklist needs a secure connection to load rota, staff, time, leave, notifications and
+        account data. Tenant data is not stored for offline use.
+      </p>
+      <a href="/portal">Try again</a>
+    </main>
+  </body>
+</html>

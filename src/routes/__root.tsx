@@ -12,6 +12,7 @@ import { AppShortcuts } from "@/components/AppShortcuts";
 import { getAuthState } from "@/features/auth";
 import { WorkspaceStoreProvider } from "@/features/demo/store/WorkspaceStoreProvider";
 import { SkipToContent, RouteAnnouncer, RouteFocusManager } from "@/components/RouteAnnouncer";
+import { ServiceWorkerRegistration } from "@/features/pwa/components/ServiceWorkerRegistration";
 
 import appCss from "../styles.css?url";
 
@@ -78,6 +79,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#0ea5a2" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Docklist" },
       { title: "Docklist" },
       {
         name: "description",
@@ -92,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Workforce management for hospitality teams — rota, time, leave and operations in one place.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Docklist" },
       {
         name: "twitter:description",
@@ -101,13 +107,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91427390-4a5f-4dd1-832b-ac3afd5f6f5e/id-preview-26c658da--fc821881-5f55-4948-8357-044805330730.lovable.app-1781725495668.png",
+        content: "/og-image.png",
       },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/91427390-4a5f-4dd1-832b-ac3afd5f6f5e/id-preview-26c658da--fc821881-5f55-4948-8357-044805330730.lovable.app-1781725495668.png",
+        content: "/og-image.png",
       },
     ],
     links: [
@@ -116,6 +120,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png", sizes: "180x180" },
     ],
   }),
   shellComponent: RootShell,
@@ -170,6 +176,7 @@ function RootComponent() {
       <RouteFocusManager />
       <RouteAnnouncer />
       <Toaster />
+      <ServiceWorkerRegistration />
     </QueryClientProvider>
   );
 }
