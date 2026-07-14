@@ -122,33 +122,40 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
     [liveWeekInput, runMutation],
   );
 
-  const publish = React.useCallback(async () => {
-    const blockPublish = (message: string) => {
-      toast.error("Rota not published", { description: message });
-      throw new Error(message);
-    };
+  const publish = React.useCallback(
+    async (acknowledgeConstraints = false) => {
+      const blockPublish = (message: string) => {
+        toast.error("Rota not published", { description: message });
+        throw new Error(message);
+      };
 
-    if (lastMutationFailed) blockPublish("Resolve the failed save before publishing.");
-    if (pendingCountRef.current > 0)
-      blockPublish("Wait for the current rota save before publishing.");
-    if (!live.rotaWeekId) blockPublish("Save at least one shift before publishing.");
-    if (live.weekStatus === "archived") blockPublish("Archived rota weeks cannot be published.");
-    if (live.shifts.length === 0) blockPublish("Cannot publish a rota week with no saved shifts.");
+      if (lastMutationFailed) blockPublish("Resolve the failed save before publishing.");
+      if (pendingCountRef.current > 0)
+        blockPublish("Wait for the current rota save before publishing.");
+      if (!live.rotaWeekId) blockPublish("Save at least one shift before publishing.");
+      if (live.weekStatus === "archived") blockPublish("Archived rota weeks cannot be published.");
+      if (live.shifts.length === 0)
+        blockPublish("Cannot publish a rota week with no saved shifts.");
 
-    const result = await runMutation("Rota not published", async () =>
-      publishLiveRotaWeekFn({ data: liveWeekInput() }),
-    );
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["portal", "published-shifts"] }),
-      queryClient.invalidateQueries({ queryKey: ["portal", "notifications"] }),
-      // Republishing finalises open-shift requests and reshapes the open list.
-      queryClient.invalidateQueries({ queryKey: ["portal", "team-shifts"] }),
-      queryClient.invalidateQueries({ queryKey: ["portal", "open-shifts"] }),
-      queryClient.invalidateQueries({ queryKey: ["portal", "open-shift-requests"] }),
-      queryClient.invalidateQueries({ queryKey: ["rota", "open-shift-applicants"] }),
-    ]);
-    return result;
-  }, [lastMutationFailed, live, liveWeekInput, pendingCountRef, queryClient, runMutation]);
+      const result = await runMutation("Rota not published", async () =>
+        publishLiveRotaWeekFn({ data: { ...liveWeekInput(), acknowledgeConstraints } }),
+      );
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["portal", "published-shifts"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal", "notifications"] }),
+        // Republishing finalises open-shift requests and reshapes the open list.
+        queryClient.invalidateQueries({ queryKey: ["portal", "team-shifts"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal", "open-shifts"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal", "open-shift-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["portal", "shift-release-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["rota", "open-shift-applicants"] }),
+        queryClient.invalidateQueries({ queryKey: ["rota", "shift-release-requests"] }),
+        queryClient.invalidateQueries({ queryKey: ["rota", "operational-issues"] }),
+      ]);
+      return result;
+    },
+    [lastMutationFailed, live, liveWeekInput, pendingCountRef, queryClient, runMutation],
+  );
 
   return {
     isMutationPending: pendingCount > 0,

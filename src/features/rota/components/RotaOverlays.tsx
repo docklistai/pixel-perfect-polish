@@ -32,16 +32,20 @@ export function RotaOverlays({
   onMarkShiftOpen,
   onRepeatShift,
   publishEligibility,
+  constraintClashCount,
+  availabilityDataState,
   suggestedAssignTo,
   onClearRecoverySelection,
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
-  onPublishConfirm: () => MaybePromise<void>;
+  onPublishConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
   onApplySuggestions: () => void;
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
   onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
   publishEligibility: RotaPublishEligibility;
+  constraintClashCount: number;
+  availabilityDataState: "ready" | "loading" | "error";
   suggestedAssignTo: string | null;
   onClearRecoverySelection: () => void;
 }) {
@@ -93,6 +97,8 @@ export function RotaOverlays({
         openShiftCount={rota.openShiftCount}
         workingTimeAlertCount={workingTimeAlertCount}
         leaveDataState={leaveDataState}
+        constraintClashCount={constraintClashCount}
+        availabilityDataState={availabilityDataState}
         published={rota.published}
         hasUnpublishedChanges={rota.hasUnpublishedChanges}
         canPublish={publishEligibility.canPublish}

@@ -12,6 +12,8 @@ import {
 import { requestOpenShiftFn, withdrawOpenShiftRequestFn } from "../api/portalActions";
 import { usePortalTimezone } from "./usePortalTimezone";
 import { usePortalProfile } from "./usePortalProfile";
+import { usePortalOpenShiftConstraints } from "./usePortalOpenShiftConstraints";
+import { filterEligibleOpenShifts } from "../lib/openShiftEligibility";
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -43,6 +45,7 @@ export function usePortalOpenShifts(): PortalOpenShifts {
   const queryClient = useQueryClient();
   const timezone = usePortalTimezone();
   const profile = usePortalProfile();
+  const eligibility = usePortalOpenShiftConstraints();
   const [busy, setBusy] = React.useState(false);
 
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
@@ -72,6 +75,10 @@ export function usePortalOpenShifts(): PortalOpenShifts {
   });
 
   const requests = React.useMemo(() => requestsQuery.data ?? [], [requestsQuery.data]);
+  const eligibleOpenShifts = React.useMemo(
+    () => filterEligibleOpenShifts(openShiftsQuery.data ?? [], eligibility.constraints),
+    [eligibility.constraints, openShiftsQuery.data],
+  );
   const requestByShift = React.useMemo(
     () => new Map(requests.map((request) => [request.publishedShiftId, request])),
     [requests],
@@ -115,9 +122,14 @@ export function usePortalOpenShifts(): PortalOpenShifts {
   return {
     enabled,
     isLoading:
-      enabled && (!timezone || !roleName || openShiftsQuery.isLoading || requestsQuery.isLoading),
-    isError: enabled && (openShiftsQuery.isError || requestsQuery.isError),
-    openShifts: openShiftsQuery.data ?? [],
+      enabled &&
+      (!timezone ||
+        !roleName ||
+        openShiftsQuery.isLoading ||
+        requestsQuery.isLoading ||
+        eligibility.isLoading),
+    isError: enabled && (openShiftsQuery.isError || requestsQuery.isError || eligibility.isError),
+    openShifts: eligibility.isError ? [] : eligibleOpenShifts,
     requests,
     requestFor: (publishedShiftId: string) => requestByShift.get(publishedShiftId) ?? null,
     busy,

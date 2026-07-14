@@ -42,6 +42,8 @@ export function RotaGridCell({
       : cell.leaveState === "pending" && !openRow
         ? "bg-warning-soft/20"
         : "";
+  const availabilityClass =
+    !openRow && !cell.leaveState && cell.availabilityHint ? "bg-muted/10" : "";
 
   const firstShift = cell.shifts[0];
   const initialValue = firstShift
@@ -137,14 +139,24 @@ export function RotaGridCell({
         ? `${emptyAriaLabel} — Approved leave, press Enter to add a shift, F2 to edit`
         : cell.leaveState === "pending"
           ? `${emptyAriaLabel} — Pending leave request, press Enter to add a shift, F2 to edit`
-          : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
+          : cell.availabilityHint === "unavailable"
+            ? `${emptyAriaLabel} — Approved unavailable date, press Enter to override`
+            : cell.availabilityHint === "day-off"
+              ? `${emptyAriaLabel} — Approved recurring day off, press Enter to override`
+              : `${emptyAriaLabel} — press Enter to add a shift, F2 to edit`;
+  const availabilityTitle =
+    cell.availabilityHint === "unavailable"
+      ? "Approved one-off unavailability"
+      : cell.availabilityHint === "day-off"
+        ? "Approved recurring day off"
+        : undefined;
 
   return (
     <div
       tabIndex={0}
       role="gridcell"
       aria-label={cellAriaLabel}
-      title={cellLeaveTitle(cell.leaveState, Boolean(firstShift))}
+      title={cellLeaveTitle(cell.leaveState, Boolean(firstShift)) ?? availabilityTitle}
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
       onDoubleClick={startEditing}
@@ -154,7 +166,7 @@ export function RotaGridCell({
       onKeyDown={handleKeyDown}
       className={`relative border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass
-      } ${leaveClass}`}
+      } ${leaveClass} ${availabilityClass}`}
     >
       {cell.leaveState && !firstShift && !isEditing && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -164,6 +176,19 @@ export function RotaGridCell({
             }`}
           >
             {cell.leaveLabel ?? (cell.leaveState === "approved" ? "Leave" : "Pending")}
+          </span>
+        </div>
+      )}
+      {!cell.leaveState && cell.availabilityHint && !firstShift && !isEditing && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span
+            className={
+              cell.availabilityHint === "unavailable"
+                ? "text-[10px] font-medium text-muted-foreground/60"
+                : "text-[10px] text-muted-foreground/40"
+            }
+          >
+            {cell.availabilityHint === "unavailable" ? "Unavailable" : "Day off"}
           </span>
         </div>
       )}

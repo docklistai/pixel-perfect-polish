@@ -287,8 +287,8 @@ function Home() {
             onOpenRota={() => navigate({ to: "/rota" })}
             onReviewTimesheets={() => navigate({ to: "/time" })}
             openShiftCount={dashboard.openShifts}
-            pendingTimeCount={dashboard.pendingTime.length}
-            pendingLeaveCount={dashboard.pendingLeave.length}
+            pendingTimeCount={dashboard.pendingTimeCount}
+            pendingLeaveCount={dashboard.pendingLeaveCount}
             weekScope={dashboard.attentionWeekScope}
           />
         </div>

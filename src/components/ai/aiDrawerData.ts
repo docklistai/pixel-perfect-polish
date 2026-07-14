@@ -1,4 +1,5 @@
 import { AlertTriangle, Plane, Clock, type LucideIcon } from "lucide-react";
+import { TIME_OPERATIONAL_LOOKBACK_DAYS } from "@/features/time/lib/timeQueryRange";
 
 export type SupportState = "ready" | "loading" | "unavailable" | "error";
 
@@ -133,8 +134,8 @@ export function buildSupportTopics(context: AiWorkspaceContext): SupportTopic[] 
           ? pendingTimeCount === null || approvedTimeCount === null
             ? "Time counts are available on the time page."
             : pendingTimeCount > 0
-              ? `${plural(pendingTimeCount, "timesheet")} awaiting review; ${approvedTimeCount} approved.`
-              : `No timesheets awaiting review; ${approvedTimeCount} approved.`
+              ? `${plural(pendingTimeCount, "timesheet")} awaiting review; ${approvedTimeCount} approved in the last ${TIME_OPERATIONAL_LOOKBACK_DAYS} days.`
+              : `No timesheets awaiting review; ${approvedTimeCount} approved in the last ${TIME_OPERATIONAL_LOOKBACK_DAYS} days.`
           : buildUnavailableNote("Time", "time", context.time.state),
       route: "/time",
       routeLabel: "Open time",

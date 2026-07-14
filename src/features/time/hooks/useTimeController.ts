@@ -12,19 +12,13 @@ import {
   REASON_LABEL,
 } from "../lib/approvalEligibility";
 import { prepareAdjustment } from "../lib/liveAdjustment";
+import { runTimeWrite } from "../lib/timeWriteFeedback";
 import { useTimeActions } from "./useTimeActions";
-import { TIME_QUERY_KEY } from "./useWorkspaceTime";
+import { timeQueryKeys } from "../lib/timeQueryRange";
 import type { StoredTimesheetRow, TimeAdjustment } from "../types";
 
 const timeRouteApi = getRouteApi("/time");
 
-/**
- * Time-page actions. Reuses {@link useTimeActions} for client selection state
- * and the demo path; in live mode it overrides approvals to route through
- * `rpc_batch_approve_time_entries` and adjustments through `rpc_adjust_time_entry`
- * (payload built by {@link prepareAdjustment}). All approvals pass through the
- * shared eligibility gate; flagging has no live column/RPC and stays disabled.
- */
 export function useTimeController(
   allRows: StoredTimesheetRow[],
   scopedRows: StoredTimesheetRow[],
@@ -45,25 +39,35 @@ export function useTimeController(
     status: "approved" | "rejected" | "pending",
     successTitle: string,
     successDescription: string,
+    reason?: string,
   ) => {
     if (ids.length === 0 || submitting) return;
     setSubmitting(true);
     try {
-      const result = await batchApproveTimeFn({
-        data: { workspaceId: workspaceId!, timeEntryIds: ids, approvalStatus: status },
-      });
+      const result = await runTimeWrite(
+        () =>
+          batchApproveTimeFn({
+            data: {
+              workspaceId: workspaceId!,
+              timeEntryIds: ids,
+              approvalStatus: status,
+              reason: reason?.trim() || undefined,
+            },
+          }),
+        "Couldn't update timesheets",
+      );
+      if (!result) return;
       if (!result.ok) {
         toast.error("Couldn't update timesheets", { description: result.message });
         return;
       }
-      await queryClient.invalidateQueries({ queryKey: ["time", TIME_QUERY_KEY, workspaceId] });
+      await queryClient.invalidateQueries({ queryKey: timeQueryKeys.root });
       toast.success(successTitle, { description: successDescription });
     } finally {
       setSubmitting(false);
     }
   };
 
-  /** Approve only the eligible subset of `rows`, surfacing what was skipped. */
   const approveEligible = (rows: StoredTimesheetRow[], successTitle: string) => {
     const { eligible, excluded } = partitionForApproval(rows);
     const outcome = describeBulkApproval(eligible, excluded);
@@ -90,14 +94,19 @@ export function useTimeController(
       toast.error("Can't save adjustment", { description: prepared.message });
       return;
     }
-    const result = await adjustTimeEntryFn({
-      data: { workspaceId: workspaceId!, timeEntryId: row.id, ...prepared.payload },
-    });
+    const result = await runTimeWrite(
+      () =>
+        adjustTimeEntryFn({
+          data: { workspaceId: workspaceId!, timeEntryId: row.id, ...prepared.payload },
+        }),
+      "Couldn't save adjustment",
+    );
+    if (!result) return;
     if (!result.ok) {
       toast.error("Couldn't save adjustment", { description: result.message });
       return;
     }
-    await queryClient.invalidateQueries({ queryKey: ["time", TIME_QUERY_KEY, workspaceId] });
+    await queryClient.invalidateQueries({ queryKey: timeQueryKeys.root });
     toast.success("Adjustment saved", {
       description: `${row.n}'s timesheet was updated and reset to pending.`,
     });
@@ -134,9 +143,15 @@ export function useTimeController(
     isApprovable: (row: StoredTimesheetRow) => isApprovable(row),
     toggleApprove: setApproval,
     revert: setApproval,
-    approve: (row: StoredTimesheetRow) => {
+    approve: (row: StoredTimesheetRow, note = "") => {
       if (row.status === "approved" || blockIneligible(row)) return;
-      void runApprove([row.id], "approved", "Approved", `${row.n}'s entry is ready to export.`);
+      void runApprove(
+        [row.id],
+        "approved",
+        "Approved",
+        `${row.n}'s entry is ready to export.`,
+        note,
+      );
     },
     reject: (row: StoredTimesheetRow) => {
       if (row.status === "unapproved") return;
@@ -159,7 +174,6 @@ export function useTimeController(
       ),
     saveAdjustment: (row: StoredTimesheetRow, adjustment: TimeAdjustment) =>
       void saveAdjustment(row, adjustment),
-    // Flagging has no flag column or RPC — do not fake success.
     toggleFlag: notLiveYet,
     flagSelection: notLiveYet,
   };

@@ -5,7 +5,7 @@ import type { LeaveRequest } from "@/features/leave/types";
 import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
-import { buildRotaRecoveryOptions } from "../lib/rotaRecoveryOptions";
+import { useRotaRecoveryOptions } from "../hooks/useRotaRecoveryOptions";
 import type { MaybePromise } from "./grid";
 import { OpenShiftApplicantsSection } from "./OpenShiftApplicantsSection";
 import { RepeatShiftControls } from "./RepeatShiftControls";
@@ -13,6 +13,7 @@ import { ShiftDetailFooterActions } from "./ShiftDetailFooterActions";
 import { ShiftEditFormFields, type ShiftEditFormState } from "./ShiftEditFormFields";
 import { ShiftPendingLeaveHint } from "./ShiftPendingLeaveHint";
 import { ShiftRecoveryOptionsSection } from "./ShiftRecoveryOptionsSection";
+import { ShiftReleaseRequestSection } from "./ShiftReleaseRequestSection";
 
 type DayEntry = { d: string };
 
@@ -82,20 +83,13 @@ export function ShiftDetailDrawer({
     );
   }, [shift, suggestedAssignTo]);
 
-  const recoveryOptions = React.useMemo(() => {
-    if (!shift) return [];
-    const isOpen = shift.staffId === null;
-    const isConflict = shift.status === "conflict";
-    if (!isOpen && !isConflict) return [];
-    return buildRotaRecoveryOptions({
-      shift,
-      staff: assignableStaff,
-      shifts: draftShifts,
-      leaveRequests,
-      dayIsoDates,
-      excludeStaffId: shift.staffId,
-    });
-  }, [assignableStaff, dayIsoDates, draftShifts, leaveRequests, shift]);
+  const recoveryOptions = useRotaRecoveryOptions({
+    shift,
+    staff: assignableStaff,
+    shifts: draftShifts,
+    leaveRequests,
+    dayIsoDates,
+  });
   if (!shift) {
     return (
       <DrawerShell open={false} onOpenChange={(o) => !o && onClose()} title="Shift">
@@ -223,7 +217,10 @@ export function ShiftDetailDrawer({
       </FormSection>
 
       {liveRotaWeekId && (
-        <OpenShiftApplicantsSection rotaWeekId={liveRotaWeekId} sourceShiftId={shift.id} />
+        <>
+          <ShiftReleaseRequestSection rotaWeekId={liveRotaWeekId} sourceShiftId={shift.id} />
+          <OpenShiftApplicantsSection rotaWeekId={liveRotaWeekId} sourceShiftId={shift.id} />
+        </>
       )}
 
       {(isOpen || isConflict) && (

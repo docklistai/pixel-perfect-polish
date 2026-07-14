@@ -181,8 +181,9 @@ export function PortalLeaveRequestDrawer({
       }
     >
       <FormSection title="Details">
-        <FormRow label="Type">
+        <FormRow label="Type" htmlFor="portal-leave-type">
           <select
+            id="portal-leave-type"
             value={leaveType}
             onChange={(event) => setLeaveType(event.target.value)}
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
@@ -193,8 +194,9 @@ export function PortalLeaveRequestDrawer({
             <option>Unpaid leave</option>
           </select>
         </FormRow>
-        <FormRow label="From">
+        <FormRow label="From" htmlFor="portal-leave-from">
           <input
+            id="portal-leave-from"
             type="date"
             value={startIso}
             min={localIsoDate(new Date())}
@@ -206,8 +208,9 @@ export function PortalLeaveRequestDrawer({
             aria-invalid={Boolean(dateError)}
           />
         </FormRow>
-        <FormRow label="To">
+        <FormRow label="To" htmlFor="portal-leave-to">
           <input
+            id="portal-leave-to"
             type="date"
             value={endIso}
             min={startIso || localIsoDate(new Date())}
@@ -224,8 +227,9 @@ export function PortalLeaveRequestDrawer({
             </p>
           )}
         </FormRow>
-        <FormRow label="Note">
+        <FormRow label="Note" htmlFor="portal-leave-note">
           <textarea
+            id="portal-leave-note"
             rows={3}
             value={reason}
             onChange={(event) => setReason(event.target.value)}

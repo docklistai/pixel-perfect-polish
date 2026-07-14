@@ -11,7 +11,8 @@ import {
   type LiveWeekStatus,
 } from "../api/rotaLiveData";
 import type { DraftShift, StaffMember } from "../types";
-import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
+import { fetchRotaLeaveFn } from "@/features/leave/api/leaveLiveData";
+import { leaveQueryKeys, rotaLeaveRange } from "@/features/leave/lib/leaveQueryRange";
 import type { LeaveRequest } from "@/features/leave/types";
 
 const rotaRouteApi = getRouteApi("/rota");
@@ -106,10 +107,13 @@ export function useRotaLiveData(
     staleTime: 15_000,
   });
 
+  const leaveRange = weekQuery.data?.weekStart ? rotaLeaveRange(weekQuery.data.weekStart) : null;
   const leaveQuery = useQuery({
-    queryKey: ["leave", "workspace-requests", workspaceId],
-    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
-    enabled,
+    queryKey: leaveRange
+      ? leaveQueryKeys.rota(workspaceId, leaveRange)
+      : ["leave", workspaceId, "rota-overlap", "awaiting-week"],
+    queryFn: () => fetchRotaLeaveFn({ data: { workspaceId: workspaceId!, ...leaveRange! } }),
+    enabled: enabled && leaveRange !== null,
     staleTime: 15_000,
   });
 

@@ -1,46 +1,7 @@
-import * as React from "react";
 import { toast } from "sonner";
 import { SectionCard, ToggleRow, SelectField, PreviewTag } from "./SettingsPrimitives";
-import { Info, Check, X } from "lucide-react";
-
-function NotifMatrixRow({
-  event,
-  defaults,
-  onDirty,
-}: {
-  event: string;
-  defaults: boolean[];
-  onDirty: () => void;
-}) {
-  const [vals, setVals] = React.useState(defaults);
-  const toggle = (idx: number) => {
-    const next = [...vals];
-    next[idx] = !next[idx];
-    setVals(next);
-    onDirty();
-  };
-
-  return (
-    <tr className="border-b border-border hover:bg-muted/10">
-      <td className="py-2.5 text-xs font-medium text-foreground">{event}</td>
-      {vals.map((val, idx) => (
-        <td key={idx} className="py-2.5 text-center">
-          <button
-            type="button"
-            onClick={() => toggle(idx)}
-            className="inline-flex h-6 w-6 items-center justify-center rounded-lg hover:bg-muted"
-          >
-            {val ? (
-              <Check className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
-            ) : (
-              <X className="h-3.5 w-3.5 text-muted-foreground/40" />
-            )}
-          </button>
-        </td>
-      ))}
-    </tr>
-  );
-}
+import { Info } from "lucide-react";
+import { NotificationMatrixSettings } from "./NotificationMatrixSettings";
 
 export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
   return (
@@ -48,99 +9,12 @@ export function NotificationsTab({ onDirty }: { onDirty: () => void }) {
       <div>
         <h2 className="text-[28px] font-semibold leading-tight text-foreground">Notifications</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          How managers are reminded. Staff-facing updates are prepared for review — nothing is
-          delivered to staff automatically.
+          Live in-app rota and request updates go to affected recipients. Other delivery channels
+          below remain preview preferences.
         </p>
       </div>
 
-      <SectionCard
-        title="Notification matrix"
-        description="Configure alert channels by event type."
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="py-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Event
-                </th>
-                <th className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-24">
-                  Manager Email
-                </th>
-                <th className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-24">
-                  Staff App
-                </th>
-                <th className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-24">
-                  In-App
-                </th>
-                <th className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-24">
-                  Phone (Preview)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <NotifMatrixRow
-                event="New leave request"
-                defaults={[true, true, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Leave request approved/declined"
-                defaults={[true, true, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Timesheet ready to approve"
-                defaults={[true, false, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Timesheet flagged"
-                defaults={[true, true, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Rota published"
-                defaults={[true, true, true, true]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Rota draft changed"
-                defaults={[false, false, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Missed clock-in"
-                defaults={[true, true, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Announcement acknowledgement"
-                defaults={[true, false, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Handover note posted"
-                defaults={[true, true, true, false]}
-                onDirty={onDirty}
-              />
-              <NotifMatrixRow
-                event="Document expiring (30 days)"
-                defaults={[true, false, true, false]}
-                onDirty={onDirty}
-              />
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-4 flex gap-2.5 rounded-2xl border border-border bg-muted/10 p-3 text-xs text-muted-foreground">
-          <Info className="h-4 w-4 shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
-            Staff app and phone reminders are being rolled out — nothing is sent to staff until you
-            enable delivery. Manager reminders appear in-app today.
-          </p>
-        </div>
-      </SectionCard>
+      <NotificationMatrixSettings onDirty={onDirty} />
 
       <SectionCard title="Manager digests" description="Cadence for compiled logs and digests.">
         <div className="space-y-3">

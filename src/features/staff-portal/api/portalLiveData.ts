@@ -111,10 +111,13 @@ const NOTIFICATION_KIND_MAP: Record<string, PortalNotification["kind"]> = {
   rota_published: "rota-published",
   leave_approved: "leave-approved",
   leave_declined: "leave-declined",
+  leave_cancelled: "leave-cancelled",
   shift_changed: "shift-changed",
   timesheet_reminder: "timesheet-reminder",
   announcement: "announcement",
   open_shift_update: "open-shift-update",
+  shift_release_update: "shift-release-update",
+  unavailability_update: "unavailability-update",
 };
 
 interface NotificationViewRow {
@@ -138,7 +141,12 @@ function mapNotification(row: NotificationViewRow, timezone: string): PortalNoti
     postedAt: formatNotificationStamp(row.created_at, timezone),
     unread: row.read_at === null,
     important:
-      kind === "leave-approved" || kind === "leave-declined" || kind === "open-shift-update",
+      kind === "leave-approved" ||
+      kind === "leave-declined" ||
+      kind === "leave-cancelled" ||
+      kind === "open-shift-update" ||
+      kind === "shift-release-update" ||
+      kind === "unavailability-update",
     relatedLeaveRequestId:
       row.related_entity_type === "leave_request" && row.related_entity_id
         ? row.related_entity_id
@@ -161,7 +169,8 @@ export async function fetchPortalNotifications(
       "notification_id, kind, title, body, related_entity_type, related_entity_id, created_at, read_at",
     )
     .eq("workspace_id", workspaceId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   if (error) throw error;
 
@@ -181,6 +190,8 @@ export {
 export {
   fetchPortalClockEvents,
   fetchPortalTimeEntries,
+  portalTimeWindowStart,
+  PORTAL_TIME_LOOKBACK_DAYS,
   type PortalClockEvent,
   type PortalClockEventType,
   type PortalTimeEntry,

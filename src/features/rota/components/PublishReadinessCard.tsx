@@ -9,6 +9,8 @@ export function PublishReadinessCard({
   openShiftCount,
   workingTimeAlertCount,
   leaveDataState,
+  constraintClashCount,
+  availabilityDataState,
   assignedShiftCount,
   plannedShiftCount,
   coveragePct,
@@ -23,6 +25,8 @@ export function PublishReadinessCard({
   openShiftCount: number;
   workingTimeAlertCount: number;
   leaveDataState: "ready" | "loading" | "error";
+  constraintClashCount: number;
+  availabilityDataState: "ready" | "loading" | "error";
   assignedShiftCount: number;
   plannedShiftCount: number;
   coveragePct: number;
@@ -64,6 +68,18 @@ export function PublishReadinessCard({
             : "Unavailable",
       ok: leaveDataState === "ready",
     },
+    {
+      k: "Availability constraints",
+      v:
+        availabilityDataState !== "ready"
+          ? availabilityDataState === "loading"
+            ? "Loading"
+            : "Unavailable"
+          : constraintClashCount === 0
+            ? "No overrides"
+            : constraintClashCount + " override" + (constraintClashCount === 1 ? "" : "s"),
+      ok: availabilityDataState === "ready" && constraintClashCount === 0,
+    },
   ];
 
   const badgeTone =
@@ -92,7 +108,9 @@ export function PublishReadinessCard({
     : openShiftCount > 0 ||
         conflictCount > 0 ||
         workingTimeAlertCount > 0 ||
-        leaveDataState !== "ready"
+        leaveDataState !== "ready" ||
+        availabilityDataState !== "ready" ||
+        constraintClashCount > 0
       ? "Publish with issues"
       : "Publish to staff";
 
@@ -123,6 +141,12 @@ export function PublishReadinessCard({
         <p className="mt-2 text-xs text-warning">
           Approved leave checks are incomplete while leave data is{" "}
           {leaveDataState === "loading" ? "loading" : "unavailable"}.
+        </p>
+      )}
+      {availabilityDataState !== "ready" && (
+        <p className="mt-2 text-xs text-warning">
+          Approved availability checks are{" "}
+          {availabilityDataState === "loading" ? "loading" : "unavailable"}.
         </p>
       )}
       <ActionButton

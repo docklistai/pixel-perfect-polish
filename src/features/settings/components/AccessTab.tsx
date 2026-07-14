@@ -1,19 +1,9 @@
 import * as React from "react";
-import { toast } from "sonner";
-import { ActionButton, DialogShell } from "@/components/dl";
 import { SectionCard, ToggleRow, PreviewTag } from "./SettingsPrimitives";
-import { Shield, ChevronRight, Check, Info } from "lucide-react";
+import { Shield, ChevronRight } from "lucide-react";
+import { AccessRoleDialog, type AccessRoleDef } from "./AccessRoleDialog";
 
-interface RoleDef {
-  id: string;
-  name: string;
-  people: number;
-  scope: string;
-  tags: { label: string; tone: "success" | "info" | "warning" | "muted" }[];
-  capabilities: [string, boolean][];
-}
-
-const ROLES: RoleDef[] = [
+const ROLES: AccessRoleDef[] = [
   {
     id: "gm",
     name: "General manager",
@@ -93,7 +83,7 @@ const ROLES: RoleDef[] = [
 ];
 
 export function AccessTab({ onDirty }: { onDirty: () => void }) {
-  const [selectedRole, setSelectedRole] = React.useState<RoleDef | null>(null);
+  const [selectedRole, setSelectedRole] = React.useState<AccessRoleDef | null>(null);
 
   return (
     <div className="space-y-4">
@@ -175,111 +165,14 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
             defaultOn={false}
             preview
           />
-          <ToggleRow
-            label="Require manager approval for all swaps"
-            description="Even peer-to-peer swaps."
-            ariaLabel="Require swap approval toggle"
-            onDirty={onDirty}
-            preview
-          />
         </div>
       </SectionCard>
 
-      <DialogShell
-        open={selectedRole !== null}
-        onOpenChange={(open) => {
-          if (!open) setSelectedRole(null);
-        }}
-        title={selectedRole ? `${selectedRole.name} permissions` : ""}
-        description={selectedRole ? `${selectedRole.scope} · ${selectedRole.people} people` : ""}
-        icon={Shield}
-        footer={
-          <>
-            <ActionButton variant="ghost" onClick={() => setSelectedRole(null)}>
-              Close
-            </ActionButton>
-            <ActionButton
-              variant="secondary"
-              onClick={() => {
-                toast.info("Preview only", {
-                  description: selectedRole
-                    ? `"${selectedRole.name}" was not duplicated. Custom roles are not live-wired.`
-                    : undefined,
-                });
-                setSelectedRole(null);
-              }}
-            >
-              Preview duplicate
-            </ActionButton>
-            <ActionButton
-              onClick={() => {
-                onDirty();
-                toast.info("Preview only", {
-                  description: "No role, permission, auth, or RBAC changes were saved.",
-                });
-                setSelectedRole(null);
-              }}
-            >
-              Preview save
-            </ActionButton>
-          </>
-        }
-      >
-        {selectedRole && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap gap-1.5">
-              {selectedRole.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${
-                    tag.tone === "success"
-                      ? "bg-teal-500/10 text-teal-600 dark:text-teal-400"
-                      : tag.tone === "warning"
-                        ? "bg-warning-soft text-warning"
-                        : tag.tone === "info"
-                          ? "bg-info-soft text-info"
-                          : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  {tag.label}
-                </span>
-              ))}
-            </div>
-
-            <div className="rounded-2xl border border-border bg-muted/15 p-4 space-y-2 max-h-[300px] overflow-y-auto">
-              <div className="dock-section-eyebrow mb-1">Capabilities</div>
-              {selectedRole.capabilities.map(([cap, allowed], idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between border-b border-border/40 pb-1.5 last:border-0 last:pb-0"
-                >
-                  <span className="text-xs text-foreground font-medium">{cap}</span>
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                      allowed
-                        ? "bg-teal-500/10 text-teal-600 dark:text-teal-400"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {allowed ? (
-                      <>
-                        <Check className="h-2.5 w-2.5" /> Allowed
-                      </>
-                    ) : (
-                      "Restricted"
-                    )}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-2 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
-              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-              <span>Preview only — no role or RBAC changes are written.</span>
-            </div>
-          </div>
-        )}
-      </DialogShell>
+      <AccessRoleDialog
+        role={selectedRole}
+        onClose={() => setSelectedRole(null)}
+        onDirty={onDirty}
+      />
     </div>
   );
 }

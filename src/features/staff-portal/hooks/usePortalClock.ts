@@ -12,6 +12,7 @@ import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 import {
   fetchPortalClockEvents,
   fetchPortalTimeEntries,
+  portalTimeWindowStart,
   type PortalClockEventType,
 } from "../api/portalLiveData";
 import { staffClockEventFn } from "../api/portalActions";
@@ -54,18 +55,19 @@ export function usePortalClock(): PortalClock {
     auth.role === "staff" &&
     Boolean(staffMemberId);
   const queryEnabled = enabled && Boolean(timezone);
+  const windowStart = portalTimeWindowStart(new Date());
 
-  const entriesKey = ["portal", "time-entries", workspaceId, staffMemberId, timezone];
-  const eventsKey = ["portal", "clock-events", workspaceId, staffMemberId];
+  const entriesKey = ["portal", "time-entries", workspaceId, staffMemberId, timezone, windowStart];
+  const eventsKey = ["portal", "clock-events", workspaceId, staffMemberId, windowStart];
   const entriesQuery = useQuery({
     queryKey: entriesKey,
-    queryFn: () => fetchPortalTimeEntries(workspaceId!, staffMemberId!, timezone!),
+    queryFn: () => fetchPortalTimeEntries(workspaceId!, staffMemberId!, timezone!, windowStart),
     enabled: queryEnabled,
     staleTime: 15_000,
   });
   const eventsQuery = useQuery({
     queryKey: eventsKey,
-    queryFn: () => fetchPortalClockEvents(workspaceId!, staffMemberId!),
+    queryFn: () => fetchPortalClockEvents(workspaceId!, staffMemberId!, windowStart),
     enabled: queryEnabled,
     staleTime: 15_000,
   });

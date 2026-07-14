@@ -1,29 +1,25 @@
 import { CalendarX } from "lucide-react";
-import { Card } from "@/components/dl";
-import type { RecurringDayOffClash } from "../lib/recurringDayOffClashes";
+import { Card, StatusBadge } from "@/components/dl";
+import type { AvailabilityConstraintClash } from "../lib/availabilityConstraints";
 
-/**
- * Surfaces rota shifts that fall on a staff member's approved standing day off,
- * so a manager can reassign or clear them before publishing. Renders nothing
- * when there are no clashes.
- */
-export function RecurringDayOffClashesCard({
+export function AvailabilityConstraintClashesCard({
   clashes,
   onReviewShift,
 }: {
-  clashes: RecurringDayOffClash[];
+  clashes: AvailabilityConstraintClash[];
   onReviewShift: (shiftId: string) => void;
 }) {
   if (clashes.length === 0) return null;
   return (
     <Card className="p-4">
       <div className="mb-2 flex items-center gap-2">
-        <CalendarX className="h-4 w-4 text-warning" aria-hidden />
-        <span className="text-sm font-semibold">Regular day-off clashes</span>
+        <CalendarX className="size-4 text-warning" aria-hidden />
+        <span className="text-sm font-semibold">Availability clashes</span>
         <span className="badge">{clashes.length}</span>
       </div>
       <p className="mb-2.5 text-[11px] text-muted-foreground">
-        Scheduled on an approved standing day off. Reassign or clear before publishing.
+        These shifts override approved unavailability or recurring days off. Review them before
+        publishing; a manager can publish only after acknowledging the warning.
       </p>
       <ul className="space-y-1.5">
         {clashes.map((clash) => (
@@ -31,10 +27,13 @@ export function RecurringDayOffClashesCard({
             <span className="min-w-0 truncate">
               <span className="font-medium">{clash.staffName}</span> · {clash.dayLabel}
             </span>
+            <StatusBadge tone="warning">
+              {clash.kind === "unavailable" ? "Unavailable" : "Day off"}
+            </StatusBadge>
             <button
               type="button"
               onClick={() => onReviewShift(clash.shiftId)}
-              className="shrink-0 font-semibold text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded px-1"
+              className="shrink-0 rounded px-1 font-semibold text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               Review
             </button>

@@ -2,6 +2,14 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import type { ClockEntry } from "../types";
 import { formatDayLabel, formatTime } from "./portalFormatting";
 
+export const PORTAL_TIME_LOOKBACK_DAYS = 120;
+
+export function portalTimeWindowStart(now: Date): string {
+  const date = new Date(now);
+  date.setUTCDate(date.getUTCDate() - PORTAL_TIME_LOOKBACK_DAYS);
+  return date.toISOString().slice(0, 10);
+}
+
 export interface PortalTimeEntry extends ClockEntry {
   clockedInAtMs: number | null;
   clockedOutAtMs: number | null;
@@ -40,6 +48,7 @@ export async function fetchPortalTimeEntries(
   workspaceId: string,
   staffMemberId: string,
   timezone: string,
+  windowStart: string,
 ): Promise<PortalTimeEntry[]> {
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
@@ -49,8 +58,10 @@ export async function fetchPortalTimeEntries(
     )
     .eq("workspace_id", workspaceId)
     .eq("staff_member_id", staffMemberId)
+    .or(`work_date.gte.${windowStart},clocked_out_at.is.null`)
     .order("work_date", { ascending: false })
-    .order("clocked_in_at", { ascending: false, nullsFirst: false });
+    .order("clocked_in_at", { ascending: false, nullsFirst: false })
+    .limit(250);
 
   if (error) throw error;
   return ((data as TimeEntryViewRow[] | null) ?? []).map((row) =>
@@ -75,6 +86,7 @@ interface ClockEventViewRow {
 export async function fetchPortalClockEvents(
   workspaceId: string,
   staffMemberId: string,
+  windowStart: string,
 ): Promise<PortalClockEvent[]> {
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
@@ -82,8 +94,9 @@ export async function fetchPortalClockEvents(
     .select("time_entry_id, event_type, occurred_at")
     .eq("workspace_id", workspaceId)
     .eq("staff_member_id", staffMemberId)
+    .gte("occurred_at", `${windowStart}T00:00:00.000Z`)
     .order("occurred_at", { ascending: false })
-    .limit(200);
+    .limit(1000);
 
   if (error) throw error;
   return ((data as ClockEventViewRow[] | null) ?? []).map((row) => ({

@@ -1,4 +1,4 @@
-import type { LeaveDecisionState, LeaveRequest } from "@/features/leave/types";
+import type { LeaveRequest, LeaveRequestState } from "@/features/leave/types";
 import type { PortalNotification } from "@/features/staff-portal/types";
 import type { MockNotification } from "@/components/notificationData";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
@@ -8,22 +8,33 @@ const PORTAL_STAFF_ID = "olivia-bennett";
 
 function decisionNotification(
   request: LeaveRequest,
-  state: "approved" | "declined",
+  state: "approved" | "declined" | "cancelled",
   reason: string,
 ): PortalNotification {
+  const cancelled = state === "cancelled";
   return {
     id: `nt-leave-${request.id}-${state}-${Date.now()}`,
-    kind: state === "approved" ? "leave-approved" : "leave-declined",
-    title: state === "approved" ? "Leave approved" : "Leave request declined",
+    kind:
+      state === "approved" ? "leave-approved" : cancelled ? "leave-cancelled" : "leave-declined",
+    title:
+      state === "approved"
+        ? "Leave approved"
+        : cancelled
+          ? "Approved leave cancelled"
+          : "Leave request declined",
     body:
       state === "approved"
         ? `Your ${request.type.toLowerCase()} request for ${request.date} has been approved.`
-        : `Your ${request.type.toLowerCase()} request for ${request.date} was declined: ${reason}`,
+        : cancelled
+          ? `Your approved ${request.type.toLowerCase()} for ${request.date} was cancelled by a manager: ${reason}`
+          : `Your ${request.type.toLowerCase()} request for ${request.date} was declined: ${reason}`,
     postedAt: `Today, ${DEMO_WORLD.nowLabel}`,
     badge:
       state === "approved"
         ? { tone: "success", label: "Approved" }
-        : { tone: "danger", label: "Declined" },
+        : cancelled
+          ? { tone: "warning", label: "Cancelled" }
+          : { tone: "danger", label: "Declined" },
     unread: true,
     important: true,
     relatedLeaveRequestId: request.id,
@@ -37,7 +48,7 @@ function decisionNotification(
 export function setLeaveRequestState(
   store: WorkspaceStore,
   id: string,
-  state: LeaveDecisionState,
+  state: LeaveRequestState,
   reason: string,
 ): void {
   store.setState((current) => {
@@ -48,6 +59,7 @@ export function setLeaveRequestState(
         ? {
             ...item,
             state,
+            cancellationSource: state === "cancelled" ? "manager" : item.cancellationSource,
             decisionHistory: [
               ...(item.decisionHistory ?? []),
               { state, reason, at: `Today, ${DEMO_WORLD.nowLabel} (Europe/London)` },
@@ -56,7 +68,8 @@ export function setLeaveRequestState(
         : item,
     );
     const notify =
-      request.staffId === PORTAL_STAFF_ID && (state === "approved" || state === "declined");
+      request.staffId === PORTAL_STAFF_ID &&
+      (state === "approved" || state === "declined" || state === "cancelled");
     const withoutPriorDecision = current.portalNotifications.filter(
       (notification) => notification.relatedLeaveRequestId !== request.id,
     );

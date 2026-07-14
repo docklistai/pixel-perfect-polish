@@ -36,7 +36,7 @@ function RotaPage() {
     requestPublish,
     publishEligibility,
     roleColours,
-    dayOffClashes,
+    availability,
     workingTimeAlertCount,
     leaveDataState,
     publishState,
@@ -134,7 +134,7 @@ function RotaPage() {
               />
               <RotaGrid
                 days={rota.days}
-                staffRows={rota.staffRows}
+                staffRows={availability.staffRows}
                 openRow={rota.openRow}
                 staffCount={rota.staff.length}
                 visibleStaffCount={rota.visibleStaff.length}
@@ -175,7 +175,8 @@ function RotaPage() {
               onViewCoverageDetails={() => openOverlay("coverageDetails")}
               onOpenSupport={openAiDrawer}
               onChooseRecoveryCandidate={handleChooseRecoveryCandidate}
-              dayOffClashes={dayOffClashes}
+              availabilityClashes={availability.clashes}
+              availabilityDataState={availability.dataState}
             />
           </div>
         </div>
@@ -188,6 +189,8 @@ function RotaPage() {
           onMarkShiftOpen={actions.handleMarkShiftOpen}
           onRepeatShift={actions.handleRepeatShift}
           publishEligibility={publishEligibility}
+          constraintClashCount={availability.clashes.length}
+          availabilityDataState={availability.dataState}
           suggestedAssignTo={
             recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null
           }

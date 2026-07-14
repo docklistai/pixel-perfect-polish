@@ -11,6 +11,8 @@ import { NotificationItem } from "./NotificationItem";
 import { type MockNotification, type NotificationFilter } from "./notificationData";
 import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import type { AuthState } from "@/features/auth";
+import { useManagerNotifications } from "@/features/notifications/hooks/useManagerNotifications";
 import {
   clearManagerNotifications,
   markAllManagerNotificationsRead,
@@ -22,22 +24,22 @@ export function NotificationDrawer({
   open,
   onOpenChange,
   onUnreadCountChange,
+  auth,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUnreadCountChange?: (count: number) => void;
+  auth: AuthState;
 }) {
   const navigate = useNavigate();
   const store = useWorkspaceStore();
   const storeItems = useWorkspaceSelector((state) => state.managerNotifications);
-  // In a live workspace there is no manager-notification feed wired to the bell
-  // yet, so show an honest empty inbox and report a zero count rather than the
-  // demo store's seeded notifications. The demo playground keeps its seed.
-  const isLive = Boolean(getSupabaseEnv());
-  const items = isLive ? [] : storeItems;
+  const live = useManagerNotifications(auth, open);
+  const isLive = Boolean(getSupabaseEnv()) && live.enabled;
+  const items = isLive ? live.items : storeItems;
   const [filter, setFilter] = React.useState<NotificationFilter>("all");
 
-  const unreadCount = items.filter((i) => !i.read).length;
+  const unreadCount = isLive ? live.unreadCount : items.filter((i) => !i.read).length;
   const alertCount = items.filter((i) => i.tone === "amber" || i.tone === "red").length;
 
   React.useEffect(() => {
@@ -60,15 +62,26 @@ export function NotificationDrawer({
         ? items.filter((i) => i.tone === "amber" || i.tone === "red")
         : items;
 
-  const markRead = (id: string) => markManagerNotificationRead(store, id);
-  const markAllRead = () => markAllManagerNotificationsRead(store);
+  const markRead = (id: string) =>
+    isLive ? live.markRead(id) : markManagerNotificationRead(store, id);
+  const markAllRead = () => (isLive ? live.markAllRead() : markAllManagerNotificationsRead(store));
   const clearAll = () => clearManagerNotifications(store);
   const restoreDefaults = () => restoreManagerNotifications(store);
 
   const openItem = (n: MockNotification) => {
     markRead(n.id);
     onOpenChange(false);
-    navigate({ to: n.to });
+    if (n.staffId) {
+      navigate({
+        to: "/staff/$staffId",
+        params: { staffId: n.staffId },
+        search: n.staffSearch,
+      });
+    } else if (n.rotaSearch) {
+      navigate({ to: "/rota", search: n.rotaSearch });
+    } else {
+      navigate({ to: n.to });
+    }
   };
 
   const tabs: { key: NotificationFilter; label: string; count: number }[] = [
@@ -89,7 +102,7 @@ export function NotificationDrawer({
         </ActionButton>
       }
       footer={
-        items.length > 0 ? (
+        !isLive && items.length > 0 ? (
           <>
             <ActionButton variant="ghost" size="sm" onClick={clearAll}>
               Clear all
@@ -109,12 +122,27 @@ export function NotificationDrawer({
         )
       }
     >
+      {isLive && live.isLoading && (
+        <p role="status" className="muted txt-sm mb-3">
+          Loading notifications...
+        </p>
+      )}
+      {isLive && live.isError && (
+        <div role="alert" className="card mb-3 p-3">
+          <p className="strong txt-sm">Notifications are unavailable</p>
+          <p className="muted txt-xs mt-1">Your unread state has not been changed.</p>
+          <ActionButton variant="secondary" size="sm" className="mt-2" onClick={live.retry}>
+            Try again
+          </ActionButton>
+        </div>
+      )}
       {/* Filter tabs */}
       <div className="tabs mb-3">
         {tabs.map(({ key, label, count }) => (
           <button
             key={key}
             type="button"
+            aria-pressed={filter === key}
             className={cn("tab", filter === key && "active")}
             onClick={() => setFilter(key)}
           >
@@ -134,7 +162,7 @@ export function NotificationDrawer({
       </div>
 
       {/* Empty state */}
-      {visible.length === 0 ? (
+      {!live.isLoading && !live.isError && visible.length === 0 ? (
         <div className="empty">
           <div className="ill">
             {filter === "unread" ? (
@@ -158,7 +186,7 @@ export function NotificationDrawer({
                 : "No high-priority alerts right now."}
           </p>
         </div>
-      ) : (
+      ) : !live.isLoading && !live.isError ? (
         <div className="col gap-2">
           {visible.map((notification) => (
             <NotificationItem
@@ -169,7 +197,7 @@ export function NotificationDrawer({
             />
           ))}
         </div>
-      )}
+      ) : null}
     </DrawerShell>
   );
 }

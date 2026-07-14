@@ -2,9 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
-import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
-import { fetchWorkspaceTimeFn } from "@/features/time/api/timeLiveData";
-import { TIME_QUERY_KEY } from "@/features/time/hooks/useWorkspaceTime";
+import { fetchPendingLeaveCountFn } from "@/features/leave/api/leaveLiveData";
+import { leaveQueryKeys } from "@/features/leave/lib/leaveQueryRange";
+import { fetchTimeOperationalCountsFn } from "@/features/time/api/timeOperationalReads";
+import {
+  rollingTimeRange,
+  TIME_OPERATIONAL_LOOKBACK_DAYS,
+  timeQueryKeys,
+} from "@/features/time/lib/timeQueryRange";
 import { countOpenShifts } from "@/features/rota/lib/rotaSummaries";
 
 export interface ChromeBadges {
@@ -29,6 +34,7 @@ export function useChromeBadges(): ChromeBadges | null {
   const { workspaceId, role } = useManagerIdentity();
   const enabled =
     Boolean(getSupabaseEnv()) && Boolean(workspaceId) && (role === "owner" || role === "manager");
+  const timeRange = rollingTimeRange(new Date(), TIME_OPERATIONAL_LOOKBACK_DAYS);
 
   const weekQuery = useQuery({
     queryKey: ["rota", "workspace-week", workspaceId, 0, null],
@@ -37,14 +43,15 @@ export function useChromeBadges(): ChromeBadges | null {
     staleTime: 15_000,
   });
   const leaveQuery = useQuery({
-    queryKey: ["leave", "workspace-requests", workspaceId],
-    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: leaveQueryKeys.pendingCount(workspaceId),
+    queryFn: () => fetchPendingLeaveCountFn({ data: { workspaceId: workspaceId! } }),
     enabled,
     staleTime: 15_000,
   });
   const timeQuery = useQuery({
-    queryKey: ["time", TIME_QUERY_KEY, workspaceId],
-    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: timeQueryKeys.operationalCounts(workspaceId, timeRange),
+    queryFn: () =>
+      fetchTimeOperationalCountsFn({ data: { workspaceId: workspaceId!, ...timeRange } }),
     enabled,
     staleTime: 15_000,
   });
@@ -53,7 +60,7 @@ export function useChromeBadges(): ChromeBadges | null {
 
   return {
     rota: weekQuery.data ? countOpenShifts(weekQuery.data.shifts) : 0,
-    leave: (leaveQuery.data ?? []).filter((request) => request.state === "pending").length,
-    time: (timeQuery.data?.rows ?? []).filter((row) => row.status !== "approved").length,
+    leave: leaveQuery.data ?? 0,
+    time: timeQuery.data?.awaitingReview ?? 0,
   };
 }

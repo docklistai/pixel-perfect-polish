@@ -2,6 +2,37 @@ import { z } from "zod";
 
 export const workspaceInput = z.object({ workspaceId: z.string().uuid() });
 
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+export const timeRangeInput = z
+  .object({
+    workspaceId: z.string().uuid(),
+    startDate: isoDate,
+    endDate: isoDate,
+    staffMemberId: z.string().uuid().optional(),
+  })
+  .refine((value) => value.startDate <= value.endDate, {
+    message: "startDate must be on or before endDate",
+    path: ["endDate"],
+  });
+
+export const timeEntryReviewInput = z.object({
+  workspaceId: z.string().uuid(),
+  timeEntryId: z.string().uuid(),
+});
+
+export const pendingTimePreviewInput = z.object({
+  workspaceId: z.string().uuid(),
+  limit: z.number().int().min(1).max(20).default(5),
+});
+
+export const timeOperationalCountsInput = z
+  .object({ workspaceId: z.string().uuid(), startDate: isoDate, endDate: isoDate })
+  .refine((value) => value.startDate <= value.endDate, {
+    message: "startDate must be on or before endDate",
+    path: ["endDate"],
+  });
+
 export const approveInput = z.object({
   workspaceId: z.string().uuid(),
   timeEntryIds: z.array(z.string().uuid()).min(1),
@@ -20,8 +51,8 @@ export const adjustInput = z.object({
 
 export const exportInput = z.object({
   workspaceId: z.string().uuid(),
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  startDate: isoDate,
+  endDate: isoDate,
 });
 
 export type TimeWriteResult = { ok: true } | { ok: false; message: string };

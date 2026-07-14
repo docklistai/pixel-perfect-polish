@@ -1,4 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import * as React from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getSupabaseEnv } from "@/lib/supabase/env";
@@ -7,6 +8,7 @@ import { decideLeaveRequestFn, fetchWorkspaceLeaveFn } from "../api/leaveLiveDat
 import { resolveLeaveView, type LeaveViewState } from "../lib/leaveView";
 import { useLeaveActions } from "./useLeaveActions";
 import type { LeaveRequest, LeaveSource } from "../types";
+import { leaveQueryKeys, operationalLeaveRange } from "../lib/leaveQueryRange";
 
 const leaveRouteApi = getRouteApi("/leave");
 
@@ -23,8 +25,10 @@ export type LeaveController = {
   source: LeaveSource;
   /** Honest render state — drives loading/error/empty surfaces, never demo blending. */
   state: LeaveViewState;
+  decisionPending: boolean;
   approve: (id: string, reason: string) => void;
   decline: (id: string, reason: string) => void;
+  cancel: (id: string, reason: string) => void;
   reopen: (id: string) => void;
   createRequest: (request: LeaveRequest) => void;
 };
@@ -50,10 +54,11 @@ export function useLeaveController(args: ControllerArgs): LeaveController {
     auth.status === "member" &&
     (auth.role === "owner" || auth.role === "manager");
 
-  const queryKey = ["leave", "workspace-requests", workspaceId];
+  const range = React.useMemo(() => operationalLeaveRange(), []);
+  const queryKey = leaveQueryKeys.operational(workspaceId, range);
   const query = useQuery({
     queryKey,
-    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
+    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId!, ...range } }),
     enabled,
     staleTime: 15_000,
   });
@@ -67,38 +72,71 @@ export function useLeaveController(args: ControllerArgs): LeaveController {
     demoRequests,
   });
 
+  const decisionMutation = useMutation({
+    mutationFn: async ({
+      id,
+      status,
+      reason,
+    }: {
+      id: string;
+      status: "approved" | "declined" | "pending" | "cancelled";
+      reason: string;
+      successTitle: string;
+      successDescription: string;
+    }) => {
+      const result = await decideLeaveRequestFn({
+        data: {
+          workspaceId: workspaceId!,
+          leaveRequestId: id,
+          status,
+          reason: reason || undefined,
+        },
+      });
+      if (!result.ok) throw new Error(result.message);
+    },
+    onSuccess: async (_result, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: leaveQueryKeys.all(workspaceId) }),
+        queryClient.invalidateQueries({ queryKey: ["manager-notifications", workspaceId] }),
+        queryClient.invalidateQueries({ queryKey: ["rota", "workspace-week", workspaceId] }),
+        queryClient.invalidateQueries({ queryKey: ["rota", "operational-issues"] }),
+      ]);
+      args.onSelectRequest(variables.id);
+      args.onCloseDecision();
+      toast.success(variables.successTitle, { description: variables.successDescription });
+    },
+    onError: (error: Error) => {
+      toast.error("Couldn't update request", { description: error.message });
+    },
+  });
+
   // Demo mode (signed out / Supabase unconfigured) keeps the demo store + actions.
   // Live loading and live error fall through to live state with no demo requests.
   if (view.source === "demo") {
-    return { requests: view.requests, source: "demo", state: view.state, ...demo };
+    return {
+      requests: view.requests,
+      source: "demo",
+      state: view.state,
+      decisionPending: false,
+      ...demo,
+    };
   }
 
-  const decide = async (
+  const decide = (
     id: string,
-    status: "approved" | "declined" | "pending",
+    status: "approved" | "declined" | "pending" | "cancelled",
     reason: string,
     successTitle: string,
     successDescription: string,
-  ) => {
-    args.onCloseDecision();
-    const result = await decideLeaveRequestFn({
-      data: { workspaceId: workspaceId!, leaveRequestId: id, status, reason: reason || undefined },
-    });
-    if (!result.ok) {
-      toast.error("Couldn't update request", { description: result.message });
-      return;
-    }
-    await queryClient.invalidateQueries({ queryKey });
-    args.onSelectRequest(id);
-    toast.success(successTitle, { description: successDescription });
-  };
+  ) => decisionMutation.mutate({ id, status, reason, successTitle, successDescription });
 
   return {
     requests: view.requests,
     source: "live",
     state: view.state,
+    decisionPending: decisionMutation.isPending,
     approve: (id, reason) =>
-      void decide(
+      decide(
         id,
         "approved",
         reason,
@@ -106,15 +144,22 @@ export function useLeaveController(args: ControllerArgs): LeaveController {
         "The request is approved and the team member was notified.",
       ),
     decline: (id, reason) =>
-      void decide(
+      decide(
         id,
         "declined",
         reason,
         "Request declined",
         "The request is declined and the reason was saved to the record.",
       ),
-    reopen: (id) =>
-      void decide(id, "pending", "", "Reopened", "Request returned to the review queue."),
+    cancel: (id, reason) =>
+      decide(
+        id,
+        "cancelled",
+        reason,
+        "Approved leave cancelled",
+        "The reason was saved, the team member was notified, and any published-week inconsistency was flagged.",
+      ),
+    reopen: (id) => decide(id, "pending", "", "Reopened", "Request returned to the review queue."),
     // No manager-side leave-creation RPC: do not echo to the demo store or fake success.
     createRequest: () =>
       toast.info("Not available in live mode yet", {

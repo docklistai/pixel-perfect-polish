@@ -38,6 +38,7 @@ export interface LeaveItem {
 }
 
 export interface TimesheetItem {
+  id: string;
   n: string;
   d: string;
   late: string;

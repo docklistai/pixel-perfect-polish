@@ -1,59 +1,30 @@
 import * as React from "react";
 import { CalendarDays, Check } from "lucide-react";
-import {
-  ActionButton,
-  DashboardCard,
-  DetailRow,
-  DrawerShell,
-  FormSection,
-  StatusBadge,
-} from "@/components/dl";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import type { PortalRequest, RequestKind, RequestStatus } from "../types";
+import { ActionButton, DashboardCard } from "@/components/dl";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
 import { PortalRecurringDaysOffCard } from "./PortalRecurringDaysOffCard";
-import { toPortalRequest } from "../lib/portalRequests";
+import { PortalOneOffUnavailabilityCard } from "./PortalOneOffUnavailabilityCard";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
-
-const statusTone: Record<RequestStatus, "warning" | "success" | "danger" | "muted"> = {
-  pending: "warning",
-  approved: "success",
-  declined: "danger",
-  cancelled: "muted",
-};
-
-const statusLabel: Record<RequestStatus, string> = {
-  pending: "Pending",
-  approved: "Approved",
-  declined: "Declined",
-  cancelled: "Withdrawn",
-};
-
-const kindLabel: Record<RequestKind, string> = {
-  "time-off": "Time off",
-  availability: "Availability",
-  "shift-question": "Shift question",
-};
-
-const availabilityTone = {
-  available: { tone: "success" as const, label: "Available" },
-  limited: { tone: "warning" as const, label: "From 12:00" },
-  off: { tone: "danger" as const, label: "Unavailable" },
-};
+import { PortalLeaveHistory } from "./PortalLeaveHistory";
 
 export function LeaveTab() {
   const [open, setOpen] = React.useState(false);
-  const [detail, setDetail] = React.useState<PortalRequest | null>(null);
 
   const {
+    enabled,
     isLive,
+    isLoading,
+    isError,
+    isWithdrawing,
+    retry,
+    withdraw,
     approvedLeave: liveApproved,
     requestHistory: liveHistory,
   } = usePortalLeaveRequests();
 
   // Phase 13 connects these to live data.
   const approvedLeave = isLive ? liveApproved : [];
-  const requestHistory = (isLive ? liveHistory : []).map(toPortalRequest);
+  const requestHistory = isLive ? liveHistory : [];
 
   return (
     <div className="space-y-4">
@@ -76,13 +47,13 @@ export function LeaveTab() {
       <ActionButton
         icon={CalendarDays}
         className={
-          isLive ? "w-full justify-center" : "w-full justify-center opacity-50 cursor-not-allowed"
+          enabled ? "w-full justify-center" : "w-full justify-center opacity-50 cursor-not-allowed"
         }
         onClick={() => {
-          if (isLive) setOpen(true);
+          if (enabled) setOpen(true);
         }}
       >
-        {isLive ? "Request time off" : "Request time off (not available here)"}
+        {enabled ? "Request time off" : "Request time off (not available here)"}
       </ActionButton>
 
       {/* Upcoming approved leave */}
@@ -116,71 +87,18 @@ export function LeaveTab() {
       {/* Regular days off — live standing day-off requests */}
       <PortalRecurringDaysOffCard />
 
-      <div>
-        <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground px-1 mb-2 uppercase">
-          REQUEST HISTORY
-        </div>
-        {requestHistory.length === 0 ? (
-          <DashboardCard className="p-4 text-center">
-            <div className="text-sm font-semibold text-muted-foreground">No requests yet</div>
-          </DashboardCard>
-        ) : (
-          <ul className="space-y-2">
-            {requestHistory.map((req) => (
-              <li key={req.id}>
-                <button
-                  type="button"
-                  onClick={() => setDetail(req)}
-                  className="w-full text-left rounded-2xl border border-border bg-card p-4 hover:bg-muted/40 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold truncate">{req.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">{req.detail}</div>
-                    </div>
-                    <StatusBadge tone={statusTone[req.status]}>
-                      {statusLabel[req.status]}
-                    </StatusBadge>
-                  </div>
-                  <div className="mt-2 text-[11px] text-muted-foreground">
-                    Submitted {req.submitted}
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <PortalOneOffUnavailabilityCard />
+
+      <PortalLeaveHistory
+        requests={requestHistory}
+        isLoading={isLoading}
+        isError={isError}
+        isWithdrawing={isWithdrawing}
+        onRetry={retry}
+        onWithdraw={withdraw}
+      />
 
       <PortalLeaveRequestDrawer open={open} onOpenChange={setOpen} />
-
-      {/* Detail drawer */}
-      <DrawerShell
-        open={detail !== null}
-        onOpenChange={(o) => !o && setDetail(null)}
-        title={detail?.title ?? ""}
-        description={detail?.submitted}
-        width="lg"
-        footer={<ActionButton onClick={() => setDetail(null)}>Close</ActionButton>}
-      >
-        {detail && (
-          <FormSection title="Request">
-            <DetailRow label="Type" value={kindLabel[detail.kind]} />
-            <DetailRow
-              label="Status"
-              value={
-                <StatusBadge tone={statusTone[detail.status]}>
-                  {statusLabel[detail.status]}
-                </StatusBadge>
-              }
-            />
-            <DetailRow label="Detail" value={detail.detail} />
-            {detail.managerResponse && (
-              <DetailRow label="Manager response" value={detail.managerResponse} />
-            )}
-          </FormSection>
-        )}
-      </DrawerShell>
     </div>
   );
 }

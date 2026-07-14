@@ -2,6 +2,7 @@ import * as React from "react";
 import { AlertTriangle, CheckCircle2, Send } from "lucide-react";
 import { ActionButton, DialogShell } from "@/components/dl";
 import type { MaybePromise } from "./grid";
+import { constraintAcknowledgementValue } from "../lib/publishConstraintAcknowledgement";
 
 type ReadinessCheck = {
   label: string;
@@ -21,6 +22,8 @@ export function PublishRotaDialog({
   openShiftCount,
   workingTimeAlertCount,
   leaveDataState,
+  constraintClashCount,
+  availabilityDataState,
   published,
   hasUnpublishedChanges,
   canPublish,
@@ -38,16 +41,25 @@ export function PublishRotaDialog({
   openShiftCount: number;
   workingTimeAlertCount: number;
   leaveDataState: "ready" | "loading" | "error";
+  constraintClashCount: number;
+  availabilityDataState: "ready" | "loading" | "error";
   published: boolean;
   hasUnpublishedChanges: boolean;
   canPublish: boolean;
   publishBlockedReason: string | null;
-  onConfirm: () => MaybePromise<void>;
+  onConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
 }) {
   const [issuesAcknowledged, setIssuesAcknowledged] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
   const leaveDataWarningCount = leaveDataState === "ready" ? 0 : 1;
-  const issueCount = conflictCount + openShiftCount + workingTimeAlertCount + leaveDataWarningCount;
+  const availabilityDataWarningCount = availabilityDataState === "ready" ? 0 : 1;
+  const issueCount =
+    conflictCount +
+    openShiftCount +
+    workingTimeAlertCount +
+    leaveDataWarningCount +
+    availabilityDataWarningCount +
+    constraintClashCount;
   const hasIssues = issueCount > 0;
   const publishActionLabel = published && hasUnpublishedChanges ? "Republish" : "Publish";
 
@@ -62,7 +74,7 @@ export function PublishRotaDialog({
     if (!canPublish || (hasIssues && !issuesAcknowledged)) return;
     setPublishing(true);
     try {
-      await onConfirm();
+      await onConfirm(constraintAcknowledgementValue(constraintClashCount, issuesAcknowledged));
     } catch {
       // Route/persistence handlers own publish failure toasts and keep the dialog open.
     } finally {
@@ -104,6 +116,18 @@ export function PublishRotaDialog({
             ? "Loading"
             : "Unavailable",
       ok: leaveDataState === "ready",
+    },
+    {
+      label: "Availability constraints",
+      value:
+        availabilityDataState !== "ready"
+          ? availabilityDataState === "loading"
+            ? "Loading"
+            : "Unavailable"
+          : constraintClashCount === 0
+            ? "No overrides"
+            : constraintClashCount + " override" + (constraintClashCount === 1 ? "" : "s"),
+      ok: availabilityDataState === "ready" && constraintClashCount === 0,
     },
   ];
 
@@ -184,6 +208,13 @@ export function PublishRotaDialog({
         </div>
       )}
 
+      {availabilityDataState !== "ready" && (
+        <div className="mt-3 rounded-xl border border-warning/30 bg-warning-soft px-3 py-2 text-xs text-warning-700">
+          Approved unavailability and recurring day-off checks are{" "}
+          {availabilityDataState === "loading" ? "loading" : "unavailable"}.
+        </div>
+      )}
+
       {hasIssues && (
         <label className="mt-3 flex items-start gap-2 text-sm text-foreground">
           <input
@@ -193,9 +224,9 @@ export function PublishRotaDialog({
             className="mt-0.5 h-4 w-4 accent-brand"
           />
           <span>
-            I have reviewed the open shifts, conflicts, working-time alerts, and leave-data status
-            and still want to {publishActionLabel.toLowerCase()} this manager-approved rota
-            snapshot.
+            I have reviewed the open shifts, conflicts, working-time alerts, leave-data status, and
+            any approved unavailability or recurring day-off overrides. I still want to{" "}
+            {publishActionLabel.toLowerCase()} this manager-approved rota snapshot.
           </span>
         </label>
       )}

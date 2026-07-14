@@ -157,13 +157,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient, auth } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
       <SkipToContent />
       <WorkspaceStoreProvider>
-        <AppShortcuts>
+        <AppShortcuts auth={auth}>
           <Outlet />
         </AppShortcuts>
       </WorkspaceStoreProvider>

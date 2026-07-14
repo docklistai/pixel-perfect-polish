@@ -9,7 +9,7 @@ export type LeaveDecisionState = "pending" | "approved" | "declined";
 export type LeaveRequestState = LeaveDecisionState | "cancelled";
 
 export interface LeaveDecisionEvent {
-  state: LeaveDecisionState;
+  state: LeaveRequestState;
   reason: string;
   at: string;
 }
@@ -36,6 +36,8 @@ export interface LeaveRequest {
   balance: string;
   submitted: string;
   coverNote: string;
+  /** Distinguishes a staff withdrawal from a manager cancellation. */
+  cancellationSource?: "staff" | "manager";
   /** Manager decision/reopen history retained for the audit-facing views. */
   decisionHistory?: LeaveDecisionEvent[];
 }

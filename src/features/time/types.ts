@@ -1,3 +1,5 @@
+import type { TimeExceptionCode } from "./lib/timeExceptions";
+
 export interface TimesheetRow {
   id: string;
   n: string;
@@ -45,6 +47,17 @@ export interface StoredTimesheetRow extends TimesheetRow {
    * member's primary location, workspace fallback). Live rows only.
    */
   timezone?: string;
+  /** Raw linkage and instant fields retained for deterministic live derivation. */
+  shiftId?: string | null;
+  scheduledStartAt?: string | null;
+  scheduledEndAt?: string | null;
+  clockedInAt?: string | null;
+  clockedOutAt?: string | null;
+  breakMinutes?: number;
+  exceptionCodes?: TimeExceptionCode[];
+  /** Scheduled venue only; never evidence of the physical clocking location. */
+  scheduledLocationName?: string | null;
+  timezoneAuthority?: "scheduled-shift" | "draft-shift-fallback" | "staff-primary-or-workspace";
 }
 
 export interface TimeAdjustment {

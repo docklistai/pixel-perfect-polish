@@ -28,7 +28,7 @@ export function DashboardTimesheets({ items }: Props) {
       <div className="divide-y divide-border">
         {items.map((p) => (
           <Link
-            key={p.n}
+            key={p.id}
             to="/time"
             className="flex items-center gap-3 px-5 py-3 transition hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >

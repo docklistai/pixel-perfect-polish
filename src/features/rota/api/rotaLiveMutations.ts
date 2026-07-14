@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import type { DraftShiftInput } from "../types";
 import {
   addIsoDays,
@@ -159,7 +160,9 @@ export const clearLiveRotaWeekFn = createServerFn({ method: "POST" })
   });
 
 export const publishLiveRotaWeekFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => liveWeekInput.parse(input))
+  .inputValidator((input: unknown) =>
+    liveWeekInput.extend({ acknowledgeConstraints: z.boolean().default(false) }).parse(input),
+  )
   .handler(async ({ data }) => {
     const context = await getLiveContext(data, { createWeek: false });
     if (!context.week) throw new Error("Save at least one shift before publishing");
@@ -175,6 +178,7 @@ export const publishLiveRotaWeekFn = createServerFn({ method: "POST" })
     const { data: result, error } = await context.supabase.rpc("rpc_publish_rota_week", {
       p_workspace_id: context.workspaceId,
       p_rota_week_id: week.id,
+      p_acknowledge_constraints: data.acknowledgeConstraints,
     });
     if (error) {
       // Publication refusals carry the exact reason the manager must see

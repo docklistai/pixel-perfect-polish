@@ -67,8 +67,12 @@ export interface DashboardOperationalInput {
   weekScope: DashboardWeekScope;
   /** Leave requests already filtered to the pending state. */
   pendingLeave: LeaveRequest[];
+  /** Exact head-only count when `pendingLeave` is only a small live preview. */
+  pendingLeaveCount?: number;
   /** Timesheet rows already filtered to a non-approved status. */
-  pendingTime: StoredTimesheetRow[];
+  pendingTime: Array<Pick<StoredTimesheetRow, "id" | "n" | "img" | "status" | "flagged">>;
+  /** Exact head-only count when `pendingTime` is only a small live preview. */
+  pendingTimeCount?: number;
   /**
    * Subtitle for each timesheet row. The demo passes its fixed period; live
    * passes an honest period label rather than fabricating a per-row range.
@@ -86,6 +90,8 @@ export function buildDashboardOperational(
   input: DashboardOperationalInput,
 ): DashboardOperationalOutput {
   const { openShifts, weekScope, pendingLeave, pendingTime, timesheetPeriodLabel } = input;
+  const pendingTimeCount = input.pendingTimeCount ?? pendingTime.length;
+  const pendingLeaveCount = input.pendingLeaveCount ?? pendingLeave.length;
   const highLeave = pendingLeave.find((request) => request.impact === "High");
 
   const leaveItems: LeaveItem[] = pendingLeave.map((request) => ({
@@ -97,6 +103,7 @@ export function buildDashboardOperational(
   }));
 
   const timesheetItems: TimesheetItem[] = pendingTime.map((row) => ({
+    id: row.id,
     n: row.n,
     d: timesheetPeriodLabel,
     late: row.status === "unapproved" ? "Unapproved" : row.flagged ? "Flagged" : "Pending",
@@ -109,14 +116,14 @@ export function buildDashboardOperational(
       ? `${weekScopePossessive(weekScope)} draft has no open shifts. You're clear to publish.`
       : `${weekScopePossessive(weekScope)} draft has ${openShifts} unassigned shift${openShifts === 1 ? "" : "s"}. Open the rota to assign cover before you publish.`;
   const timeDetail =
-    pendingTime.length === 0
+    pendingTimeCount === 0
       ? "No timesheets are waiting for review."
-      : `${pendingTime.length} timesheet${pendingTime.length === 1 ? "" : "s"} ${pendingTime.length === 1 ? "is" : "are"} waiting for manager review. Approve or query each before exporting hours.`;
+      : `${pendingTimeCount} timesheet${pendingTimeCount === 1 ? "" : "s"} ${pendingTimeCount === 1 ? "is" : "are"} waiting for manager review. Approve or query each before exporting hours.`;
   const leaveDetail = highLeave
     ? `${highLeave.n}'s request (${highLeave.date}) needs a decision and may affect coverage. Review it against the rota.`
-    : pendingLeave.length === 0
+    : pendingLeaveCount === 0
       ? "No leave requests are pending."
-      : `${pendingLeave.length} leave request${pendingLeave.length === 1 ? "" : "s"} pending. Review each against the rota.`;
+      : `${pendingLeaveCount} leave request${pendingLeaveCount === 1 ? "" : "s"} pending. Review each against the rota.`;
 
   // Only surface categories with a real active issue, so the Attention count
   // reflects what actually needs the manager — never a fixed list of three.
@@ -133,9 +140,9 @@ export function buildDashboardOperational(
           detail: openShiftDetail,
         }
       : null,
-    pendingTime.length > 0
+    pendingTimeCount > 0
       ? {
-          t: `${pendingTime.length} timesheet${pendingTime.length === 1 ? "" : "s"} need manager review`,
+          t: `${pendingTimeCount} timesheet${pendingTimeCount === 1 ? "" : "s"} need manager review`,
           s: "Export approved hours after review",
           icon: Clock3,
           tone: "danger" as const,
@@ -145,11 +152,11 @@ export function buildDashboardOperational(
           detail: timeDetail,
         }
       : null,
-    pendingLeave.length > 0
+    pendingLeaveCount > 0
       ? {
           t: highLeave
             ? "1 leave request — high coverage impact"
-            : `${pendingLeave.length} leave request${pendingLeave.length === 1 ? "" : "s"} pending`,
+            : `${pendingLeaveCount} leave request${pendingLeaveCount === 1 ? "" : "s"} pending`,
           s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
           icon: Plane,
           tone: "purple" as const,

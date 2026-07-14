@@ -52,8 +52,9 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
         <h2 className="text-[28px] font-semibold leading-tight text-foreground">
           Rota & scheduling
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Labour targets are live. The remaining defaults are previews and not yet applied to rotas.
+        <p className="mt-1 text-pretty text-sm text-muted-foreground">
+          Labour targets and the request-and-publish workflows below are live. Other settings on
+          this page remain clearly labelled previews and are not applied to rotas.
         </p>
       </div>
 
@@ -121,35 +122,38 @@ export function RotaSchedulingTab({ onDirty }: { onDirty: () => void }) {
       </SectionCard>
 
       <SectionCard
+        title="Live scheduling workflows"
+        description="These request, approval and publication behaviours are active for live workspaces."
+      >
+        <div className="space-y-3">
+          <div className="border-b border-border/60 pb-3">
+            <div className="text-sm font-medium">Open-shift requests</div>
+            <p className="text-xs text-pretty text-muted-foreground">
+              Eligible staff can request published open shifts. A manager selects an applicant in
+              the draft, and the assignment becomes final only when the rota is republished.
+            </p>
+          </div>
+          <div>
+            <div className="text-sm font-medium">Published rota updates</div>
+            <p className="text-xs text-pretty text-muted-foreground">
+              Staff receive an in-app update when a rota is first published. On republish, only
+              staff whose published shifts changed are notified.
+            </p>
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard
         title="Behaviour"
         badge={<PreviewTag />}
         description="Enable or disable key rota options. Preview only — not yet applied."
       >
         <div className="space-y-3">
           <ToggleRow
-            label="Allow staff to swap shifts"
-            description="Staff request a swap from the mobile app; managers approve."
-            ariaLabel="Allow staff to swap shifts"
-            onDirty={onDirty}
-          />
-          <ToggleRow
-            label="Show open shifts to eligible staff"
-            description="Eligible staff see open shifts and can claim them."
-            ariaLabel="Show open shifts to eligible staff"
-            onDirty={onDirty}
-          />
-          <ToggleRow
             label="Auto-apply break thresholds"
             description="Apply unpaid breaks based on shift length."
             ariaLabel="Auto-apply break thresholds"
             onDirty={onDirty}
-          />
-          <ToggleRow
-            label="Staff app update on publish"
-            description="Prepares a staff-facing rota update in the app for review before anything is sent."
-            ariaLabel="Staff app update on publish"
-            onDirty={onDirty}
-            preview
           />
           <ToggleRow
             label="Approve overtime automatically"

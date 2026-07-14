@@ -24,6 +24,8 @@ export type OpenShiftRequestStatus =
 export interface PortalOpenShift {
   publishedShiftId: string;
   date: string;
+  /** Last local calendar date touched by the shift (handles overnight work). */
+  endDate: string;
   dayLabel: string;
   start: string;
   end: string;
@@ -105,6 +107,10 @@ export async function fetchPortalOpenShifts(
     .map((row) => ({
       publishedShiftId: row.published_shift_id,
       date: row.shift_date,
+      endDate: dateIsoInTimezone(
+        new Date(new Date(row.ends_at).getTime() - 1_000),
+        row.location_timezone,
+      ),
       dayLabel: dayFmt.format(new Date(`${row.shift_date}T12:00:00Z`)),
       start: timeFormat(row.location_timezone).format(new Date(row.starts_at)),
       end: timeFormat(row.location_timezone).format(new Date(row.ends_at)),

@@ -110,6 +110,40 @@ describe("buildRotaRecoveryOptions", () => {
     expect(result).toEqual([]);
   });
 
+  it("excludes approved one-off and recurring constraints across overnight dates", () => {
+    const target = shift("overnight", 0, "Chef", null, "22:00", "06:00");
+    const result = buildRotaRecoveryOptions({
+      shift: target,
+      staff: [
+        staff("one-off", "One Off", "Chef"),
+        staff("recurring", "Recurring", "Chef"),
+        staff("free", "Free", "Chef"),
+      ],
+      shifts: [target],
+      leaveRequests: [],
+      dayIsoDates: ["2026-06-08", "2026-06-09"],
+      availabilityConstraints: {
+        recurringByStaff: new Map([["recurring", new Set([1])]]),
+        unavailableDatesByStaff: new Map([["one-off", new Set(["2026-06-08"])]]),
+      },
+    });
+
+    expect(result.map((option) => option.staffId)).toEqual(["free"]);
+  });
+
+  it("excludes staff whose approved leave begins on an overnight shift's end date", () => {
+    const target = shift("overnight", 0, "Chef", null, "22:00", "06:00");
+    const result = buildRotaRecoveryOptions({
+      shift: target,
+      staff: [staff("leave", "On Leave", "Chef"), staff("free", "Free", "Chef")],
+      shifts: [target],
+      leaveRequests: [approvedLeave("leave", "2026-06-09")],
+      dayIsoDates: ["2026-06-08", "2026-06-09"],
+    });
+
+    expect(result.map((option) => option.staffId)).toEqual(["free"]);
+  });
+
   it("does not mutate the rota inputs while building suggestions", () => {
     const shifts = [shift("open", 0, "Chef", null)];
     const snapshot = structuredClone(shifts);

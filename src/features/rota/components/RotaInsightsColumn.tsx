@@ -1,7 +1,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useRotaInsights } from "../hooks/useRotaInsights";
 import type { useRotaDraftController } from "../hooks/useRotaDraftController";
-import type { RecurringDayOffClash } from "../lib/recurringDayOffClashes";
+import type { AvailabilityConstraintClash } from "../lib/availabilityConstraints";
 import type { PublishState } from "../lib/publishEligibility";
 import type { ShiftId } from "../types";
 import { IssuesToResolveCard } from "./IssuesToResolveCard";
@@ -9,9 +9,11 @@ import { LabourSummaryCard } from "./LabourSummaryCard";
 import { DailyBudgetCard } from "./DailyBudgetCard";
 import { RoleBudgetCard } from "./RoleBudgetCard";
 import { PublishReadinessCard } from "./PublishReadinessCard";
-import { RecurringDayOffClashesCard } from "./RecurringDayOffClashesCard";
+import { AvailabilityConstraintClashesCard } from "./AvailabilityConstraintClashesCard";
 import { ClosedDayShiftsCard } from "./ClosedDayShiftsCard";
 import { OutsideHoursCard } from "./OutsideHoursCard";
+import { ShiftReleaseRequestsCard } from "./ShiftReleaseRequestsCard";
+import { RotaUpdateRequiredCard } from "./RotaUpdateRequiredCard";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
@@ -32,7 +34,8 @@ export function RotaInsightsColumn({
   onViewCoverageDetails,
   onOpenSupport,
   onChooseRecoveryCandidate,
-  dayOffClashes,
+  availabilityClashes,
+  availabilityDataState,
 }: {
   rota: RotaController;
   visible: boolean;
@@ -45,7 +48,8 @@ export function RotaInsightsColumn({
   onViewCoverageDetails: () => void;
   onOpenSupport: () => void;
   onChooseRecoveryCandidate: (shiftId: ShiftId, staffId: string) => void;
-  dayOffClashes: RecurringDayOffClash[];
+  availabilityClashes: AvailabilityConstraintClash[];
+  availabilityDataState: "ready" | "loading" | "error";
 }) {
   const insights = useRotaInsights({
     source: rota.source,
@@ -111,7 +115,15 @@ export function RotaInsightsColumn({
         dayIsoDates={rota.dayIsoDates}
         onChooseRecoveryCandidate={onChooseRecoveryCandidate}
       />
-      <RecurringDayOffClashesCard clashes={dayOffClashes} onReviewShift={rota.setSelectedShiftId} />
+      <ShiftReleaseRequestsCard
+        rotaWeekId={rota.source === "live" ? rota.liveRotaWeekId : null}
+        onReviewShift={rota.setSelectedShiftId}
+      />
+      <RotaUpdateRequiredCard rotaWeekId={rota.source === "live" ? rota.liveRotaWeekId : null} />
+      <AvailabilityConstraintClashesCard
+        clashes={availabilityClashes}
+        onReviewShift={rota.setSelectedShiftId}
+      />
       <PublishReadinessCard
         published={rota.published}
         hasUnpublishedChanges={rota.hasUnpublishedChanges}
@@ -120,6 +132,8 @@ export function RotaInsightsColumn({
         openShiftCount={rota.openShiftCount}
         workingTimeAlertCount={rota.workingTimeAlertList.length}
         leaveDataState={leaveDataState}
+        constraintClashCount={availabilityClashes.length}
+        availabilityDataState={availabilityDataState}
         assignedShiftCount={rota.assignedShiftCount}
         plannedShiftCount={rota.plannedShiftCount}
         coveragePct={rota.coveragePct}

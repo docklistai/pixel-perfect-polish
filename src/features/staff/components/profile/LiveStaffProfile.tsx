@@ -11,6 +11,7 @@ import { LiveScheduleList } from "./LiveScheduleList";
 import { LiveLeaveList } from "./LiveLeaveList";
 import { LiveTimeList } from "./LiveTimeList";
 import { StaffRecurringDaysOffCard } from "./StaffRecurringDaysOffCard";
+import { StaffOneOffUnavailabilityCard } from "./StaffOneOffUnavailabilityCard";
 import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
 import { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
 import type { StaffRow } from "../../types";
@@ -102,17 +103,22 @@ function LiveOverviewPanel({ member }: { member: StaffRow }) {
 
 interface LiveStaffProfileProps {
   member: StaffRow;
+  initialTab?: ProfileTab;
 }
 
 /**
  * Honest full-profile surface for a live workspace staff member. Unsupported
  * tabs render explicit empty states rather than demo figures or fake editors.
  */
-export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
-  const [activeTab, setActiveTab] = React.useState<ProfileTab>("overview");
+export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffProfileProps) {
+  const [activeTab, setActiveTab] = React.useState<ProfileTab>(initialTab);
   const [editOpen, setEditOpen] = React.useState(false);
   const firstName = member.n.split(" ")[0] || member.n;
   const ops = useLiveStaffProfileOps(member.id);
+
+  React.useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   const empty = emptyPanel(activeTab, firstName);
 
@@ -198,6 +204,7 @@ export function LiveStaffProfile({ member }: LiveStaffProfileProps) {
           <div className="grid gap-5">
             <LiveLeaveList ops={ops} firstName={firstName} />
             <StaffRecurringDaysOffCard staffMemberId={member.id} firstName={firstName} />
+            <StaffOneOffUnavailabilityCard staffMemberId={member.id} firstName={firstName} />
           </div>
         )}
         {activeTab === "time" && <LiveTimeList ops={ops} firstName={firstName} />}

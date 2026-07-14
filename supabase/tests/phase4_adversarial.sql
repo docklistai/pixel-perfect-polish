@@ -181,17 +181,33 @@ savepoint honest_actor_writes;
 do $$
 declare affected_rows integer;
 begin
-  insert into public.leave_request_events (workspace_id, leave_request_id, actor_membership_id, event_type, resulting_status)
-  values ('10000000-0000-4000-8000-000000000001', '19000000-0000-4000-8000-000000000002', '13000000-0000-4000-8000-000000000010', 'reopened', 'pending');
+  -- Phase 34 makes the leave lifecycle RPC-authoritative. Even a correctly
+  -- attributed manager write must not bypass the request lock, notification,
+  -- operational-issue, event, and audit transaction.
+  begin
+    insert into public.leave_request_events (workspace_id, leave_request_id, actor_membership_id, event_type, resulting_status)
+    values ('10000000-0000-4000-8000-000000000001', '19000000-0000-4000-8000-000000000002', '13000000-0000-4000-8000-000000000010', 'reopened', 'pending');
+    raise exception 'FAIL: direct leave event insertion remained available';
+  exception when insufficient_privilege then
+    raise notice 'PASS: direct leave event insertion is RPC-authoritative';
+  end;
+
+  begin
+    update public.leave_requests
+    set status = 'approved', decided_at = now(),
+        decided_by_membership_id = '13000000-0000-4000-8000-000000000010',
+        decision_reason = 'Cover arranged.'
+    where id = '19000000-0000-4000-8000-000000000001';
+    raise exception 'FAIL: direct leave decision remained available';
+  exception when insufficient_privilege then
+    raise notice 'PASS: direct leave decisions are RPC-authoritative';
+  end;
+
   update public.time_entries set approval_status = 'approved', approved_at = now(), approved_by_membership_id = '13000000-0000-4000-8000-000000000010'
   where id = '1b000000-0000-4000-8000-000000000002';
   get diagnostics affected_rows = row_count;
   if affected_rows <> 1 then raise exception 'FAIL: caller-attributed approval did not update'; end if;
-  update public.leave_requests set status = 'approved', decided_at = now(), decided_by_membership_id = '13000000-0000-4000-8000-000000000010', decision_reason = 'Cover arranged.'
-  where id = '19000000-0000-4000-8000-000000000001';
-  get diagnostics affected_rows = row_count;
-  if affected_rows <> 1 then raise exception 'FAIL: caller-attributed decision did not update'; end if;
-  raise notice 'PASS: caller-attributed event, approval, and decision succeed';
+  raise notice 'PASS: caller-attributed time approval still succeeds';
 end $$;
 rollback to savepoint honest_actor_writes;
 
@@ -322,9 +338,8 @@ begin
 end $$;
 rollback to savepoint staff_allowed_writes;
 
--- Sophie owns the seeded pending leave request; her persona exercises the
--- update paths that RLS allows for pending rows, where only the canonical
--- guards stand between staff and the columns.
+-- Sophie owns the seeded pending leave request. Phase 34 removed every direct
+-- update path; even the owner of a pending row must use the cancellation RPC.
 select set_config('request.jwt.claims', '{"sub":"aa000000-0000-4000-8000-000000000004","role":"authenticated"}', true);
 
 do $$
@@ -332,11 +347,11 @@ begin
   begin
     update public.leave_requests set created_at = now() - interval '30 days' where id = '19000000-0000-4000-8000-000000000001';
     raise exception 'FAIL: staff rewrote leave created_at';
-  exception when sqlstate '55000' then raise notice 'PASS: leave created_at is immutable for the owning staff'; end;
+  exception when insufficient_privilege then raise notice 'PASS: direct leave updates are denied for the owning staff'; end;
   begin
     update public.leave_requests set submitted_at = now() - interval '30 days' where id = '19000000-0000-4000-8000-000000000001';
     raise exception 'FAIL: staff rewrote leave submitted_at';
-  exception when sqlstate '55000' then raise notice 'PASS: leave submitted_at is immutable for the owning staff'; end;
+  exception when insufficient_privilege then raise notice 'PASS: submitted_at cannot bypass the leave RPC authority'; end;
   begin
     update public.leave_requests set status = 'approved', decided_at = now(), decided_by_membership_id = '13000000-0000-4000-8000-000000000002' where id = '19000000-0000-4000-8000-000000000001';
     raise exception 'FAIL: staff decided their own leave request';
@@ -347,15 +362,19 @@ end $$;
 
 savepoint staff_pending_edits;
 do $$
-declare affected_rows integer;
 begin
-  update public.leave_requests set reason = 'Friend''s wedding in Manchester (updated).' where id = '19000000-0000-4000-8000-000000000001';
-  get diagnostics affected_rows = row_count;
-  if affected_rows <> 1 then raise exception 'FAIL: staff could not edit own pending leave'; end if;
-  update public.leave_requests set status = 'cancelled' where id = '19000000-0000-4000-8000-000000000001';
-  get diagnostics affected_rows = row_count;
-  if affected_rows <> 1 then raise exception 'FAIL: staff could not cancel own pending leave'; end if;
-  raise notice 'PASS: staff can edit and cancel their own pending leave';
+  begin
+    update public.leave_requests set reason = 'Friend''s wedding in Manchester (updated).' where id = '19000000-0000-4000-8000-000000000001';
+    raise exception 'FAIL: staff directly edited pending leave';
+  exception when insufficient_privilege then
+    raise notice 'PASS: staff cannot directly edit pending leave';
+  end;
+  begin
+    update public.leave_requests set status = 'cancelled' where id = '19000000-0000-4000-8000-000000000001';
+    raise exception 'FAIL: staff directly cancelled pending leave';
+  exception when insufficient_privilege then
+    raise notice 'PASS: staff cancellation is RPC-authoritative';
+  end;
 end $$;
 rollback to savepoint staff_pending_edits;
 
@@ -453,7 +472,7 @@ begin
   begin
     update public.leave_requests set staff_member_id = '14000000-0000-4000-8000-000000000001' where id = '19000000-0000-4000-8000-000000000002';
     raise exception 'FAIL: leave request staff_member_id mutated';
-  exception when sqlstate '55000' then raise notice 'PASS: leave request staff_member_id is immutable'; end;
+  exception when insufficient_privilege then raise notice 'PASS: leave request updates are RPC-authoritative'; end;
   -- Since phase 30 managers have no delivery write policy at all: the update
   -- reaches no rows instead of tripping the immutability guard.
   declare

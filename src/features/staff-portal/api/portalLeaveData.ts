@@ -12,6 +12,7 @@ export interface PortalLeaveRequest {
   status: "pending" | "approved" | "declined" | "cancelled";
   submittedAt: string;
   decisionReason?: string;
+  cancellationSource?: "staff" | "manager";
 }
 
 export interface LeaveRequestViewRow {
@@ -50,6 +51,8 @@ export function mapLeaveRequest(row: LeaveRequestViewRow): PortalLeaveRequest {
       row.status === "cancelled"
         ? (row.decision_reason ?? "Withdrawn by staff")
         : (row.decision_reason ?? undefined),
+    cancellationSource:
+      row.status === "cancelled" ? (row.decided_at ? "manager" : "staff") : undefined,
   };
 }
 
@@ -65,6 +68,8 @@ export function upcomingApprovedLeaveRequests(
 export async function fetchPortalLeaveRequests(
   workspaceId: string,
   staffMemberId: string,
+  startDate: string,
+  endDate: string,
 ): Promise<PortalLeaveRequest[]> {
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
@@ -74,6 +79,7 @@ export async function fetchPortalLeaveRequests(
     )
     .eq("workspace_id", workspaceId)
     .eq("staff_member_id", staffMemberId)
+    .or(`status.eq.pending,and(start_date.lte.${endDate},end_date.gte.${startDate})`)
     .order("submitted_at", { ascending: false });
 
   if (error) throw error;

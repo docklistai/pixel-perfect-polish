@@ -2,8 +2,9 @@ import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createTimeEntryFn } from "../api/createTimeEntry";
-import { TIME_QUERY_KEY } from "./useWorkspaceTime";
 import type { ManualEntryPayload } from "../lib/manualEntry";
+import { timeQueryKeys } from "../lib/timeQueryRange";
+import { runTimeWrite } from "../lib/timeWriteFeedback";
 
 /**
  * Saves a validated manual time entry through `createTimeEntryFn` and refreshes
@@ -18,12 +19,16 @@ export function useAddTimeEntry(workspaceId: string | null) {
     if (!workspaceId || isSaving) return false;
     setIsSaving(true);
     try {
-      const result = await createTimeEntryFn({ data: payload });
+      const result = await runTimeWrite(
+        () => createTimeEntryFn({ data: payload }),
+        "Couldn't record time entry",
+      );
+      if (!result) return false;
       if (!result.ok) {
         toast.error("Couldn't record time entry", { description: result.message });
         return false;
       }
-      await queryClient.invalidateQueries({ queryKey: ["time", TIME_QUERY_KEY, workspaceId] });
+      await queryClient.invalidateQueries({ queryKey: timeQueryKeys.root });
       toast.success("Time entry recorded", {
         description: `${staffName}'s hours for ${payload.workDate} are pending review.`,
       });

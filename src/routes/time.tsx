@@ -29,6 +29,7 @@ import {
 } from "@/features/time/lib/reviewPeriod";
 import { canExportApprovedHours } from "@/features/time/lib/timeExport";
 import { requireManagerAccess } from "@/features/auth";
+import { getSupabaseEnv } from "@/lib/supabase/env";
 
 export const Route = createFileRoute("/time")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
@@ -40,20 +41,24 @@ function TimePage() {
   const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
   const { auth } = Route.useRouteContext();
+  const liveExpected =
+    Boolean(getSupabaseEnv()) &&
+    auth.status === "member" &&
+    (auth.role === "owner" || auth.role === "manager");
+  const [period, setPeriodState] = React.useState<ReviewPeriod>(() =>
+    defaultPeriod(liveExpected ? "live" : "demo", "UTC"),
+  );
   const {
     rows: rawRows,
     source: timeSource,
     state: timeState,
     workspaceTimezone,
-  } = useWorkspaceTime();
+  } = useWorkspaceTime(period);
   const liveWorkspaceId =
     timeSource === "live" && auth.status === "member" ? auth.workspaceId : null;
   // UTC is a neutral loading-only fallback; live actions use the stored zone
   // once the workspace read resolves, and the effect below corrects the week.
   const workspaceTz = workspaceTimezone ?? "UTC";
-  const [period, setPeriodState] = React.useState<ReviewPeriod>(() =>
-    defaultPeriod(timeSource, workspaceTz),
-  );
   const periodTouchedRef = React.useRef(false);
   const setPeriod = React.useCallback<React.Dispatch<React.SetStateAction<ReviewPeriod>>>(
     (update) => {
@@ -231,6 +236,7 @@ function TimePage() {
 
       <TimesheetReviewDrawer
         row={reviewRow}
+        liveWorkspaceId={liveWorkspaceId}
         statusOf={time.statusOf}
         onApprove={time.approve}
         onRevert={time.revert}

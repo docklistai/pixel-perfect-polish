@@ -1,5 +1,8 @@
 import type { LeaveRequest } from "@/features/leave/types";
 import type { DraftShift, StaffMember } from "../types";
+import type { ApprovedAvailabilityConstraints } from "./availabilityConstraints";
+import { isStaffConstrainedOnDates } from "./availabilityConstraints";
+import { addIsoDays } from "./liveRotaDates";
 
 export type RotaRecoveryOption = {
   staffId: string;
@@ -17,6 +20,7 @@ export function buildRotaRecoveryOptions({
   leaveRequests,
   dayIsoDates,
   excludeStaffId,
+  availabilityConstraints,
 }: {
   shift: DraftShift;
   staff: StaffMember[];
@@ -24,14 +28,22 @@ export function buildRotaRecoveryOptions({
   leaveRequests: LeaveRequest[];
   dayIsoDates: string[];
   excludeStaffId?: string | null;
+  availabilityConstraints?: ApprovedAvailabilityConstraints;
 }): RotaRecoveryOption[] {
   const shiftDate = dayIsoDates[shift.dayIndex];
   if (!shiftDate) return [];
+  const endTouchesNextDate = (parseMinutes(shift.end) ?? 0) <= (parseMinutes(shift.start) ?? 0);
+  const constraintDates = endTouchesNextDate ? [shiftDate, addIsoDays(shiftDate, 1)] : [shiftDate];
 
   const options = staff
     .filter((member) => member.role === shift.role)
     .filter((member) => member.id !== excludeStaffId)
-    .filter((member) => !isOnApprovedLeave(member.id, shiftDate, leaveRequests))
+    .filter((member) => !isOnApprovedLeave(member.id, constraintDates, leaveRequests))
+    .filter(
+      (member) =>
+        !availabilityConstraints ||
+        !isStaffConstrainedOnDates(member.id, constraintDates, availabilityConstraints),
+    )
     .filter((member) => !hasSameTimeConflict(member.id, shift, shifts))
     .sort((left, right) => {
       const leftCount = countAssignedShifts(left.id, shifts);
@@ -54,20 +66,23 @@ function buildRecoveryNote(staffId: string, shifts: DraftShift[]): string {
     assignedCount === 0
       ? "No shifts yet this week"
       : `${assignedCount} shift${assignedCount === 1 ? "" : "s"} this week`;
-  return `${loadLabel}; role match, no approved leave clash, and no same-time conflict.`;
+  return `${loadLabel}; role match, no approved leave or availability clash, and no same-time conflict.`;
 }
 
 function countAssignedShifts(staffId: string, shifts: DraftShift[]): number {
   return shifts.reduce((count, shift) => (shift.staffId === staffId ? count + 1 : count), 0);
 }
 
-function isOnApprovedLeave(staffId: string, shiftDate: string, requests: LeaveRequest[]): boolean {
+function isOnApprovedLeave(
+  staffId: string,
+  shiftDates: string[],
+  requests: LeaveRequest[],
+): boolean {
   return requests.some(
     (request) =>
       request.state === "approved" &&
       request.staffId === staffId &&
-      request.startIso <= shiftDate &&
-      request.endIso >= shiftDate,
+      shiftDates.some((shiftDate) => request.startIso <= shiftDate && request.endIso >= shiftDate),
   );
 }
 

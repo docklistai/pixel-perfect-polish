@@ -8,12 +8,14 @@ import { LeaveManagerCreateDialog } from "./LeaveManagerCreateDialog";
 interface Props {
   source: LeaveSource;
   decisionRequest: LeaveRequest | null;
-  decisionType: "approve" | "decline" | null;
+  decisionType: "approve" | "decline" | "cancel" | null;
+  decisionPending: boolean;
   newRequestOpen: boolean;
   onDecisionOpenChange: (open: boolean) => void;
   onNewRequestOpenChange: (open: boolean) => void;
   onApprove: (id: string, reason: string) => void;
   onDecline: (id: string, reason: string) => void;
+  onCancel: (id: string, reason: string) => void;
   onCreateRequest: (request: LeaveRequest) => void;
 }
 
@@ -30,30 +32,42 @@ export function LeaveActionDialogs({
   source,
   decisionRequest,
   decisionType,
+  decisionPending,
   newRequestOpen,
   onDecisionOpenChange,
   onNewRequestOpenChange,
   onApprove,
   onDecline,
+  onCancel,
   onCreateRequest,
 }: Props) {
   const [declineReason, setDeclineReason] = React.useState(
     "We can't cover these dates — could you suggest the week before or after?",
   );
+  const [cancellationReason, setCancellationReason] = React.useState("");
 
   const isApprove = decisionType === "approve";
+  const isCancel = decisionType === "cancel";
   const decisionOpen = Boolean(decisionRequest && decisionType);
   const approvalRows = decisionRequest ? approvalDialogRows(source, decisionRequest) : [];
+
+  React.useEffect(() => {
+    if (decisionType === "cancel") setCancellationReason("");
+  }, [decisionRequest?.id, decisionType]);
 
   return (
     <>
       <DialogShell
         open={decisionOpen}
-        onOpenChange={onDecisionOpenChange}
+        onOpenChange={(open) => {
+          if (!decisionPending) onDecisionOpenChange(open);
+        }}
         title={
           isApprove
             ? `Approve ${decisionRequest?.n ?? "this request"}'s leave?`
-            : "Decline this leave request?"
+            : isCancel
+              ? "Cancel this approved leave?"
+              : "Decline this leave request?"
         }
         description={
           decisionRequest
@@ -66,7 +80,12 @@ export function LeaveActionDialogs({
         iconTone={isApprove ? "success" : "danger"}
         footer={
           <>
-            <ActionButton variant="secondary" size="sm" onClick={() => onDecisionOpenChange(false)}>
+            <ActionButton
+              variant="secondary"
+              size="sm"
+              onClick={() => onDecisionOpenChange(false)}
+              disabled={decisionPending}
+            >
               Cancel
             </ActionButton>
             <ActionButton
@@ -75,16 +94,21 @@ export function LeaveActionDialogs({
               onClick={() => {
                 if (!decisionRequest) return;
                 if (isApprove) onApprove(decisionRequest.id, "Approved after coverage review.");
+                else if (isCancel) onCancel(decisionRequest.id, cancellationReason.trim());
                 else onDecline(decisionRequest.id, declineReason);
               }}
+              disabled={decisionPending || (isCancel && !cancellationReason.trim())}
             >
-              {isApprove ? (
+              {decisionPending ? (
+                "Saving..."
+              ) : isApprove ? (
                 <>
                   <Check className="h-3 w-3" aria-hidden /> Approve
                 </>
               ) : (
                 <>
-                  <X className="h-3 w-3" aria-hidden /> Decline request
+                  <X className="h-3 w-3" aria-hidden />
+                  {isCancel ? "Cancel approved leave" : "Decline request"}
                 </>
               )}
             </ActionButton>
@@ -126,17 +150,26 @@ export function LeaveActionDialogs({
         {decisionRequest && !isApprove && (
           <>
             <p className="muted txt-sm mb-3">
-              {decisionRequest.n} will see your reason in their staff app. They can request again
-              with a new date.
+              {isCancel
+                ? "This does not republish the rota. If the leave overlaps a published week, Docklist retains a Rota update required issue until that week is republished."
+                : `${decisionRequest.n} will see your reason in their staff app. They can request again with a new date.`}
             </p>
             <div className="field">
-              <label htmlFor="leave-decline-reason">Reason for decline</label>
+              <label htmlFor={isCancel ? "leave-cancel-reason" : "leave-decline-reason"}>
+                {isCancel ? "Cancellation reason (required)" : "Reason for decline"}
+              </label>
               <textarea
-                id="leave-decline-reason"
+                id={isCancel ? "leave-cancel-reason" : "leave-decline-reason"}
                 className="dl-textarea"
                 rows={3}
-                value={declineReason}
-                onChange={(event) => setDeclineReason(event.target.value)}
+                maxLength={2000}
+                value={isCancel ? cancellationReason : declineReason}
+                disabled={decisionPending}
+                onChange={(event) =>
+                  isCancel
+                    ? setCancellationReason(event.target.value)
+                    : setDeclineReason(event.target.value)
+                }
               />
             </div>
           </>

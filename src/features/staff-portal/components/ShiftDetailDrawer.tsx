@@ -8,6 +8,7 @@ import {
   StatusBadge,
 } from "@/components/dl";
 import type { PortalShift } from "../types";
+import { PortalShiftReleaseSection } from "./PortalShiftReleaseSection";
 
 export function ShiftDetailDrawer({
   shift,
@@ -162,6 +163,8 @@ export function ShiftDetailDrawer({
         {isChanged && acknowledged && (
           <div className="text-center text-xs text-success font-medium">Changes acknowledged</div>
         )}
+
+        <PortalShiftReleaseSection shift={shift} />
       </div>
     </DrawerShell>
   );

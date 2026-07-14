@@ -4,11 +4,11 @@ import { getSupabaseEnv } from "@/lib/supabase/env";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { fetchWorkspaceTimeFn } from "../api/timeLiveData";
 import { resolveTimeView, type TimeViewState } from "../lib/timeView";
+import { periodTimeRange, timeQueryKeys } from "../lib/timeQueryRange";
+import type { ReviewPeriod } from "../lib/reviewPeriod";
 import type { StoredTimesheetRow } from "../types";
 
 const timeRouteApi = getRouteApi("/time");
-
-export const TIME_QUERY_KEY = "workspace-entries";
 
 export type WorkspaceTime = {
   rows: StoredTimesheetRow[];
@@ -16,7 +16,7 @@ export type WorkspaceTime = {
   source: "live" | "demo";
   isLoading: boolean;
   isError: boolean;
-  /** Honest render state — drives loading/error/empty surfaces, never demo blending. */
+  /** Honest render state: drives loading/error/empty surfaces, never demo blending. */
   state: TimeViewState;
   /** The workspace default timezone once the live read resolves; null otherwise. */
   workspaceTimezone: string | null;
@@ -28,7 +28,7 @@ export type WorkspaceTime = {
  * is unconfigured, the caller is signed out, or the read fails, so Harbour View
  * keeps working offline.
  */
-export function useWorkspaceTime(): WorkspaceTime {
+export function useWorkspaceTime(period: ReviewPeriod): WorkspaceTime {
   const { auth } = timeRouteApi.useRouteContext();
   const demoRows = useWorkspaceSelector((state) => state.timeRows);
 
@@ -38,9 +38,10 @@ export function useWorkspaceTime(): WorkspaceTime {
     auth.status === "member" &&
     (auth.role === "owner" || auth.role === "manager");
 
+  const range = periodTimeRange(period);
   const query = useQuery({
-    queryKey: ["time", TIME_QUERY_KEY, workspaceId],
-    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: timeQueryKeys.period(workspaceId, range),
+    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId!, ...range } }),
     enabled,
     staleTime: 15_000,
   });

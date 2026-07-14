@@ -1,9 +1,16 @@
+import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
-import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
+import { fetchStaffLeaveFn } from "@/features/leave/api/leaveLiveData";
+import { leaveQueryKeys, operationalLeaveRange } from "@/features/leave/lib/leaveQueryRange";
 import { fetchWorkspaceTimeFn } from "@/features/time/api/timeLiveData";
+import {
+  rollingTimeRange,
+  TIME_STAFF_LOOKBACK_DAYS,
+  timeQueryKeys,
+} from "@/features/time/lib/timeQueryRange";
 import type { LeaveRequest } from "@/features/leave/types";
 import type { StoredTimesheetRow } from "@/features/time/types";
 import {
@@ -60,6 +67,8 @@ export function useLiveStaffProfileOps(staffId: string): LiveStaffProfileOps {
     Boolean(getSupabaseEnv()) &&
     auth.status === "member" &&
     (auth.role === "owner" || auth.role === "manager");
+  const leaveRange = React.useMemo(() => operationalLeaveRange(), []);
+  const timeRange = React.useMemo(() => rollingTimeRange(new Date(), TIME_STAFF_LOOKBACK_DAYS), []);
 
   const rotaQuery = useQuery({
     queryKey: ["staff", "profile-rota", workspaceId],
@@ -74,15 +83,21 @@ export function useLiveStaffProfileOps(staffId: string): LiveStaffProfileOps {
   });
 
   const leaveQuery = useQuery({
-    queryKey: ["leave", "workspace-requests", workspaceId],
-    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: leaveQueryKeys.staff(workspaceId, staffId, leaveRange),
+    queryFn: () =>
+      fetchStaffLeaveFn({
+        data: { workspaceId: workspaceId!, staffId, ...leaveRange },
+      }),
     enabled,
     staleTime: 15_000,
   });
 
   const timeQuery = useQuery({
-    queryKey: ["time", "workspace-entries", workspaceId],
-    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: timeQueryKeys.staff(workspaceId, staffId, timeRange),
+    queryFn: () =>
+      fetchWorkspaceTimeFn({
+        data: { workspaceId: workspaceId!, staffMemberId: staffId, ...timeRange },
+      }),
     enabled,
     staleTime: 15_000,
   });

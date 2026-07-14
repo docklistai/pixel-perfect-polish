@@ -18,9 +18,26 @@ import { requireManagerAccess } from "@/features/auth";
 
 export const Route = createFileRoute("/staff/$staffId")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  validateSearch: parseStaffProfileSearch,
   head: () => ({ meta: [{ title: "Staff Profile — Docklist" }] }),
   component: StaffProfilePage,
 });
+
+const PROFILE_TABS = new Set<ProfileTab>([
+  "overview",
+  "schedule",
+  "time",
+  "leave",
+  "documents",
+  "notes",
+  "insights",
+]);
+
+function parseStaffProfileSearch(search: Record<string, unknown>): { tab?: ProfileTab } {
+  return typeof search.tab === "string" && PROFILE_TABS.has(search.tab as ProfileTab)
+    ? { tab: search.tab as ProfileTab }
+    : {};
+}
 
 const DEMO_PROFILE_ALIASES: Record<string, keyof typeof mockStaffProfiles> = {
   "staff-1": "sophie-carter",
@@ -28,6 +45,7 @@ const DEMO_PROFILE_ALIASES: Record<string, keyof typeof mockStaffProfiles> = {
 
 function StaffProfilePage() {
   const { staffId } = Route.useParams();
+  const { tab = "overview" } = Route.useSearch();
   const demoProfile = mockStaffProfiles[DEMO_PROFILE_ALIASES[staffId] ?? staffId] ?? null;
 
   // The live roster resolves real workspace members so they reach a full (if
@@ -35,14 +53,14 @@ function StaffProfilePage() {
   const { rows, source, state } = useWorkspaceStaff();
 
   if (source === "demo" && demoProfile) {
-    return <DemoStaffProfilePage profile={demoProfile} />;
+    return <DemoStaffProfilePage profile={demoProfile} initialTab={tab} />;
   }
 
   if (state !== "ready") return <StaffProfileMissing state={state} />;
 
   const liveMember = source === "live" ? (rows.find((row) => row.id === staffId) ?? null) : null;
   if (liveMember) {
-    return <LiveStaffProfile member={liveMember} />;
+    return <LiveStaffProfile member={liveMember} initialTab={tab} />;
   }
 
   return <StaffProfileMissing state={state} />;
@@ -79,13 +97,23 @@ function StaffProfileMissing({ state }: { state: "loading" | "error" | "ready" }
   );
 }
 
-function DemoStaffProfilePage({ profile }: { profile: StaffProfile }) {
-  const [activeTab, setActiveTab] = React.useState<ProfileTab>("overview");
+function DemoStaffProfilePage({
+  profile,
+  initialTab,
+}: {
+  profile: StaffProfile;
+  initialTab: ProfileTab;
+}) {
+  const [activeTab, setActiveTab] = React.useState<ProfileTab>(initialTab);
   const [notes, setNotes] = React.useState<StaffProfileNote[]>(profile.notes ?? []);
 
   React.useEffect(() => {
     setNotes(profile.notes ?? []);
   }, [profile.notes]);
+
+  React.useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   function handleSaveNote(note: StaffProfileNote) {
     setNotes((prev) => [note, ...prev]);

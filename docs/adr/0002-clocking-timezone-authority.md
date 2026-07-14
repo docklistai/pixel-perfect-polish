@@ -1,4 +1,4 @@
-# ADR-0002: Clocking Timezone Authority and Location Limitation
+# ADR-0002: Clocking Timezone Authority, Scheduled Linkage, and Location Limitation
 
 ## Status
 
@@ -43,13 +43,37 @@ Enforced by:
 staff member can be assigned away from their primary venue. Shift display uses
 the shift's venue; clocking uses the staff member's primary venue.
 
+### Conservative scheduled-shift linkage
+
+At staff clock-in, phase 35 attempts to link the new time entry to one assigned
+shift from the latest immutable published snapshot for each relevant rota week.
+The matcher evaluates current and previous local dates in each candidate
+venue's timezone, accepts only the four-hour window either side of scheduled
+start and before scheduled end, requires the source draft shift to still exist,
+and excludes a shift already linked to that staff member. It links only when
+exactly one candidate remains.
+
+Zero candidates, overlapping/split-shift ambiguity, or a candidate changing
+while the staff lock is acquired produces an **unscheduled** entry. A missed
+link is safer than claiming the wrong shift. A successful match stores
+`shift_id`, `scheduled_start_at`, and `scheduled_end_at`; the published snapshot
+remains the scheduling authority and is not changed by clocking.
+
+The manager Time list compares scheduled and actual instants with one fixed
+five-minute grace. Late clock-in, early clock-out, late finish, missing
+clock-out, incomplete break, and unscheduled attendance are derived review
+facts, not persisted states. Full event evidence loads only when the review
+drawer opens; a bounded event-type summary flags incomplete break pairing in
+the exception-first list.
+
 ### Limitation: no physical clocking location is captured
 
 Clock events record **who, what, and when — never where**. There is no
-geolocation, no geofencing, no device/location capture, and no linkage from a
-time entry to the shift or venue the person actually stood at when clocking.
-A staff member working a shift at a non-primary venue in a different timezone
-still gets their **primary** location's timezone for `work_date`.
+geolocation, no geofencing, and no device/location capture. Scheduled linkage
+identifies the published venue whose timezone should format scheduled-versus-
+actual review; it is **not** evidence that the person physically clocked there.
+An unmatched entry continues to use the staff-primary/workspace fallback for
+`work_date` and display.
 
 The UI must never claim a physical clocking location was captured. Current
 copy complies ("Shift times use each location's timezone"); any future copy
@@ -61,9 +85,9 @@ boundaries, ADR-0001).
 
 ## Consequences
 
-- Timesheets are trustworthy about instants and durations; the calendar day a
-  shift's pay lands on follows the staff member's primary venue.
-- Cross-venue clock-ins near midnight can land `work_date` on the primary
-  venue's calendar day rather than the physical venue's. Accepted until a
-  shift↔time-entry location linkage exists.
+- Timesheets are trustworthy about instants and durations. A matched entry uses
+  the published venue's shift date and timezone; an unmatched entry retains the
+  staff-primary/workspace calendar fallback.
+- Split shifts or overlapping candidates can remain unscheduled by design and
+  must be reviewed as attendance, not presented as a data failure.
 - Any geolocation/clock-location feature is forbidden scope without a new ADR.

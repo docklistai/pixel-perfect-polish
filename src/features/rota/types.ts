@@ -88,6 +88,8 @@ export type RotaGridCell = {
   leaveState?: "approved" | "pending";
   /** Short leave-kind label (Holiday/Sick/Unpaid/Personal/Leave) for the cell badge. */
   leaveLabel?: string;
+  /** Approved scheduling constraint shown when the cell has no shift. */
+  availabilityHint?: "unavailable" | "day-off";
 };
 
 export type RotaGridStaffRow = {

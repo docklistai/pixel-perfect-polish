@@ -18,6 +18,7 @@ import { ShortcutsDialog } from "./ShortcutsDialog";
 import { NotificationDrawer } from "./NotificationDrawer";
 import { AiDrawer } from "./ai/AiDrawer";
 import { InteractionIntentProvider } from "@/lib/interactionIntents";
+import type { AuthState } from "@/features/auth";
 
 interface OverlayApi {
   openPalette: () => void;
@@ -60,7 +61,7 @@ const G_TARGETS: Record<string, "/" | "/rota" | "/staff" | "/time" | "/leave"> =
   l: "/leave",
 };
 
-export function AppShortcuts({ children }: { children: React.ReactNode }) {
+export function AppShortcuts({ children, auth }: { children: React.ReactNode; auth: AuthState }) {
   const [palette, setPalette] = React.useState(false);
   const [shortcuts, setShortcuts] = React.useState(false);
   const [notifs, setNotifs] = React.useState(false);
@@ -139,6 +140,7 @@ export function AppShortcuts({ children }: { children: React.ReactNode }) {
           open={notifs}
           onOpenChange={setNotifs}
           onUnreadCountChange={setUnreadCount}
+          auth={auth}
         />
         <AiDrawer open={aiOpen} onOpenChange={setAiOpen} />
       </OverlayContext.Provider>

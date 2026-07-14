@@ -12,6 +12,7 @@ interface Props {
   onAsk: (request: LeaveRequest) => void;
   onApprove: (request: LeaveRequest) => void;
   onDecline: (request: LeaveRequest) => void;
+  onCancel: (request: LeaveRequest) => void;
   onReopen: (id: string) => void;
   onSelect: (id: string) => void;
 }
@@ -41,6 +42,7 @@ export function LeaveRequestInbox({
   onAsk,
   onApprove,
   onDecline,
+  onCancel,
   onReopen,
   onSelect,
 }: Props) {
@@ -172,8 +174,8 @@ export function LeaveRequestInbox({
                     <Check className="h-3 w-3" aria-hidden /> Approved
                   </StatusBadge>
                   <div className="grow" />
-                  <button type="button" className="btn ghost sm" onClick={() => onReopen(r.id)}>
-                    Undo
+                  <button type="button" className="btn danger sm" onClick={() => onCancel(r)}>
+                    Cancel leave
                   </button>
                 </div>
               )}
@@ -193,7 +195,10 @@ export function LeaveRequestInbox({
               {r.state === "cancelled" && (
                 <div className="row gap-2 mt-3">
                   <StatusBadge tone="muted">
-                    <X className="h-3 w-3" aria-hidden /> Cancelled by staff
+                    <X className="h-3 w-3" aria-hidden />
+                    {r.cancellationSource === "manager"
+                      ? "Cancelled by manager"
+                      : "Withdrawn by staff"}
                   </StatusBadge>
                 </div>
               )}

@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import { cn } from "@/lib/utils";
 import type { StoredTimesheetRow, TimesheetStatus } from "../types";
+import { TimeExceptionBadges } from "./TimeExceptionBadges";
 
 const cellTone: Record<string, string> = {
   warning: "text-warning",
@@ -115,13 +116,7 @@ export function TimesheetRow({
       <td className="font-mono text-sm">{row.brk}</td>
       <td className="font-mono text-sm font-semibold">{row.paid}</td>
       <td>
-        {row.exc === "—" ? (
-          <span className="text-muted-foreground">—</span>
-        ) : (
-          <StatusBadge tone={row.excTone === "danger" ? "danger" : "warning"}>
-            {row.exc}
-          </StatusBadge>
-        )}
+        <TimeExceptionBadges codes={row.exceptionCodes} legacyLabel={row.exc} />
       </td>
       <td>
         <span className="inline-flex flex-wrap items-center gap-1">

@@ -77,12 +77,14 @@ function LeavePage() {
   const [calendarOpen, setCalendarOpen] = React.useState(false);
   const [newRequestOpen, setNewRequestOpen] = React.useState(false);
   const [decisionRequest, setDecisionRequest] = React.useState<LeaveRequest | null>(null);
-  const [decisionType, setDecisionType] = React.useState<"approve" | "decline" | null>(null);
+  const [decisionType, setDecisionType] = React.useState<"approve" | "decline" | "cancel" | null>(
+    null,
+  );
   const [riskOpen, setRiskOpen] = React.useState(false);
 
   useIntentHandler("leave.new", () => setNewRequestOpen(true));
 
-  const openDecision = (request: LeaveRequest, type: "approve" | "decline") => {
+  const openDecision = (request: LeaveRequest, type: "approve" | "decline" | "cancel") => {
     setDecisionRequest(request);
     setDecisionType(type);
   };
@@ -116,7 +118,7 @@ function LeavePage() {
     <AppShell>
       <PageHeader
         title="Leave"
-        subtitle="Review requests, see balances, and plan around upcoming time off."
+        subtitle="Review requests and plan around upcoming time off."
         actions={
           <>
             {source === "demo" && (
@@ -206,6 +208,7 @@ function LeavePage() {
               }
               onApprove={(request) => openDecision(request, "approve")}
               onDecline={(request) => openDecision(request, "decline")}
+              onCancel={(request) => openDecision(request, "cancel")}
               onReopen={actions.reopen}
               onSelect={setActiveId}
             />
@@ -217,6 +220,7 @@ function LeavePage() {
                   source={source}
                   onApprove={(request) => openDecision(request, "approve")}
                   onDecline={(request) => openDecision(request, "decline")}
+                  onCancel={(request) => openDecision(request, "cancel")}
                   onReopen={actions.reopen}
                   onOpenRisk={() => setRiskOpen(true)}
                 />
@@ -260,6 +264,7 @@ function LeavePage() {
         source={source}
         decisionRequest={decisionRequest}
         decisionType={decisionType}
+        decisionPending={actions.decisionPending}
         newRequestOpen={newRequestOpen}
         onDecisionOpenChange={(open) => {
           if (!open) closeDecision();
@@ -267,6 +272,7 @@ function LeavePage() {
         onNewRequestOpenChange={setNewRequestOpen}
         onApprove={actions.approve}
         onDecline={actions.decline}
+        onCancel={actions.cancel}
         onCreateRequest={actions.createRequest}
       />
     </AppShell>

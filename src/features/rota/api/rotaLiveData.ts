@@ -177,29 +177,39 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       };
     }
 
-    const [{ data: shifts, error: shiftsError }, { data: latestSnapshot, error: snapshotError }] =
-      await Promise.all([
-        supabase
-          .from("shifts")
-          .select(
-            "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, colour_override, dept_override, created_at, updated_at",
-          )
-          .eq("workspace_id", workspaceId)
-          .eq("rota_week_id", week.id)
-          .order("shift_date", { ascending: true })
-          .order("starts_at", { ascending: true }),
-        supabase
-          .from("published_rota_snapshots")
-          .select("published_at")
-          .eq("workspace_id", workspaceId)
-          .eq("rota_week_id", week.id)
-          .order("version", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-      ]);
+    const [
+      { data: shifts, error: shiftsError },
+      { data: latestSnapshot, error: snapshotError },
+      { count: openOperationalIssueCount, error: operationalIssueError },
+    ] = await Promise.all([
+      supabase
+        .from("shifts")
+        .select(
+          "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, colour_override, dept_override, created_at, updated_at",
+        )
+        .eq("workspace_id", workspaceId)
+        .eq("rota_week_id", week.id)
+        .order("shift_date", { ascending: true })
+        .order("starts_at", { ascending: true }),
+      supabase
+        .from("published_rota_snapshots")
+        .select("published_at")
+        .eq("workspace_id", workspaceId)
+        .eq("rota_week_id", week.id)
+        .order("version", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("rota_operational_issues")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspaceId)
+        .eq("rota_week_id", week.id)
+        .eq("status", "open"),
+    ]);
 
     if (shiftsError) throw shiftsError;
     if (snapshotError) throw snapshotError;
+    if (operationalIssueError) throw operationalIssueError;
 
     const shiftRows = (shifts as ShiftRow[] | null) ?? [];
     const weekRow = week as WeekRow;
@@ -211,7 +221,13 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       rotaWeekId: weekRow.id,
       status: weekRow.status,
       hasPublishedSnapshot: Boolean(snapshotRow),
-      hasUnpublishedChanges: hasDraftChangedSincePublish(weekRow, shiftRows, snapshotRow),
+      // Leave approval/cancellation can require an explicit new publication
+      // even when the draft shift rows are otherwise identical. Treating the
+      // persistent issue as unpublished work keeps Republish available until
+      // the publication transaction resolves it.
+      hasUnpublishedChanges:
+        (openOperationalIssueCount ?? 0) > 0 ||
+        hasDraftChangedSincePublish(weekRow, shiftRows, snapshotRow),
       shifts: shiftRows.map((row) => mapShift(row, weekStart, location.timezone)),
     };
   });

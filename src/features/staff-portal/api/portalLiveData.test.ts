@@ -27,6 +27,23 @@ describe("mapLeaveRequest", () => {
     expect(mapLeaveRequest(leaveRow({ status: "cancelled" }))).toMatchObject({
       status: "cancelled",
       decisionReason: "Withdrawn by staff",
+      cancellationSource: "staff",
+    });
+  });
+
+  it("labels a decided cancellation as manager-led", () => {
+    expect(
+      mapLeaveRequest(
+        leaveRow({
+          status: "cancelled",
+          decided_at: "2026-06-12T10:00:00Z",
+          decision_reason: "Plans changed",
+        }),
+      ),
+    ).toMatchObject({
+      status: "cancelled",
+      decisionReason: "Plans changed",
+      cancellationSource: "manager",
     });
   });
 

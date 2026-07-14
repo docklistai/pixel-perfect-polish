@@ -102,9 +102,12 @@ export type NotificationKind =
   | "rota-published"
   | "leave-approved"
   | "leave-declined"
+  | "leave-cancelled"
   | "announcement"
   | "timesheet-reminder"
-  | "open-shift-update";
+  | "open-shift-update"
+  | "shift-release-update"
+  | "unavailability-update";
 
 export type NotificationCategory = "all" | "unread" | "important";
 

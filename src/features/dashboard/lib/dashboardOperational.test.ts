@@ -24,6 +24,7 @@ function leave(partial: Partial<LeaveRequest>): LeaveRequest {
 
 function timesheet(partial: Partial<StoredTimesheetRow>): StoredTimesheetRow {
   return {
+    id: "time-entry-default",
     n: "Sam Reed",
     img: 7,
     status: "pending",
@@ -75,12 +76,16 @@ describe("buildDashboardOperational", () => {
       openShifts: 0,
       weekScope: "current",
       pendingLeave: [],
-      pendingTime: [timesheet({ status: "unapproved" }), timesheet({ flagged: true })],
+      pendingTime: [
+        timesheet({ id: "entry-a", status: "unapproved" }),
+        timesheet({ id: "entry-b", flagged: true }),
+      ],
       timesheetPeriodLabel: "Awaiting review",
     });
     expect(out.timesheetItems[0]).toMatchObject({ late: "Unapproved", lateTone: "danger" });
     expect(out.timesheetItems[1]).toMatchObject({ late: "Flagged", lateTone: "warning" });
     expect(out.timesheetItems[0]?.d).toBe("Awaiting review");
+    expect(out.timesheetItems.map((item) => item.id)).toEqual(["entry-a", "entry-b"]);
   });
 
   it("describes current-week open shifts as 'This week', never 'next week' (D1)", () => {

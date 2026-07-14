@@ -10,7 +10,7 @@ import {
 export type NotificationTone = "amber" | "red" | "green" | "purple" | "blue";
 export type NotificationFilter = "all" | "unread" | "alerts";
 
-export interface MockNotification {
+export interface ManagerNotification {
   id: string;
   icon: LucideIcon;
   tone: NotificationTone;
@@ -19,8 +19,13 @@ export interface MockNotification {
   action: string;
   time: string;
   read: boolean;
-  to: "/rota" | "/leave" | "/time" | "/team" | "/ops";
+  to: "/" | "/rota" | "/leave" | "/time" | "/team" | "/staff" | "/ops";
+  staffId?: string;
+  staffSearch?: { tab: "leave" };
+  rotaSearch?: { week: number; location: string };
 }
+
+export type MockNotification = ManagerNotification;
 
 export const NOTIFICATION_SEED: MockNotification[] = [
   {

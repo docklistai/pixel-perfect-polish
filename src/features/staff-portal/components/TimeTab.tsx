@@ -26,7 +26,10 @@ export function TimeTab() {
     return () => window.clearInterval(id);
   }, [clockedIn]);
 
-  const elapsed = clockedIn && startedAtMs ? now - startedAtMs : 0;
+  // The persisted server timestamp can arrive a few milliseconds after the
+  // click-time `now` state. Clamp that brief skew so the first live render
+  // never presents a negative timer while the one-second ticker catches up.
+  const elapsed = clockedIn && startedAtMs ? Math.max(0, now - startedAtMs) : 0;
   // Clock in only against today's active shift; otherwise show the next one.
   const displayShift = activeShift ?? nextShift;
   const rotaUnavailable = rota.isLoading || rota.isError;

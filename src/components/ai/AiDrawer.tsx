@@ -9,9 +9,14 @@ import { buildSupportStatusMessage, buildSupportTopics, type SupportState } from
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
-import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
-import { fetchWorkspaceTimeFn } from "@/features/time/api/timeLiveData";
-import { TIME_QUERY_KEY } from "@/features/time/hooks/useWorkspaceTime";
+import { fetchLeaveOperationalCountsFn } from "@/features/leave/api/leaveLiveData";
+import { leaveQueryKeys, operationalLeaveRange } from "@/features/leave/lib/leaveQueryRange";
+import { fetchTimeOperationalCountsFn } from "@/features/time/api/timeOperationalReads";
+import {
+  rollingTimeRange,
+  TIME_OPERATIONAL_LOOKBACK_DAYS,
+  timeQueryKeys,
+} from "@/features/time/lib/timeQueryRange";
 import { countOpenShifts } from "@/features/rota/lib/rotaSummaries";
 
 function resolveSupportState({
@@ -43,6 +48,11 @@ export function AiDrawer({
     Boolean(getSupabaseEnv()) &&
     Boolean(workspaceId) &&
     (role === "owner" || role === "manager");
+  const leaveRange = React.useMemo(() => operationalLeaveRange(), []);
+  const timeRange = React.useMemo(
+    () => rollingTimeRange(new Date(), TIME_OPERATIONAL_LOOKBACK_DAYS),
+    [],
+  );
 
   const rotaQuery = useQuery({
     queryKey: ["rota", "workspace-week", workspaceId, 0, null],
@@ -51,14 +61,16 @@ export function AiDrawer({
     staleTime: 15_000,
   });
   const leaveQuery = useQuery({
-    queryKey: ["leave", "workspace-requests", workspaceId],
-    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: leaveQueryKeys.counts(workspaceId, leaveRange),
+    queryFn: () =>
+      fetchLeaveOperationalCountsFn({ data: { workspaceId: workspaceId!, ...leaveRange } }),
     enabled,
     staleTime: 15_000,
   });
   const timeQuery = useQuery({
-    queryKey: ["time", TIME_QUERY_KEY, workspaceId],
-    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: timeQueryKeys.operationalCounts(workspaceId, timeRange),
+    queryFn: () =>
+      fetchTimeOperationalCountsFn({ data: { workspaceId: workspaceId!, ...timeRange } }),
     enabled,
     staleTime: 15_000,
   });
@@ -80,12 +92,8 @@ export function AiDrawer({
           isLoading: leaveQuery.isLoading,
           isError: leaveQuery.isError,
         }),
-        pendingLeaveCount: leaveQuery.data
-          ? leaveQuery.data.filter((request) => request.state === "pending").length
-          : null,
-        approvedLeaveCount: leaveQuery.data
-          ? leaveQuery.data.filter((request) => request.state === "approved").length
-          : null,
+        pendingLeaveCount: leaveQuery.data?.pending ?? null,
+        approvedLeaveCount: leaveQuery.data?.approvedInWindow ?? null,
       },
       time: {
         state: resolveSupportState({
@@ -93,12 +101,8 @@ export function AiDrawer({
           isLoading: timeQuery.isLoading,
           isError: timeQuery.isError,
         }),
-        pendingTimeCount: timeQuery.data
-          ? timeQuery.data.rows.filter((row) => row.status !== "approved").length
-          : null,
-        approvedTimeCount: timeQuery.data
-          ? timeQuery.data.rows.filter((row) => row.status === "approved").length
-          : null,
+        pendingTimeCount: timeQuery.data?.awaitingReview ?? null,
+        approvedTimeCount: timeQuery.data?.approvedInWindow ?? null,
       },
     }),
     [

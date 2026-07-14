@@ -11,6 +11,7 @@ interface Props {
   source: LeaveSource;
   onApprove: (request: LeaveRequest) => void;
   onDecline: (request: LeaveRequest) => void;
+  onCancel: (request: LeaveRequest) => void;
   onReopen: (id: string) => void;
   onOpenRisk: () => void;
 }
@@ -30,6 +31,7 @@ export function LeaveDetailPanel({
   source,
   onApprove,
   onDecline,
+  onCancel,
   onReopen,
   onOpenRisk,
 }: Props) {
@@ -75,7 +77,7 @@ export function LeaveDetailPanel({
               <DetailRow label="Requested" value={request.date} />
               <DetailRow label="Days" value={`${request.days} days`} />
               <DetailRow label="Notice" value={`${request.notice} days`} />
-              <DetailRow label="Balance after" value={request.balance} />
+              {source === "demo" && <DetailRow label="Balance after" value={request.balance} />}
               <DetailRow label="Type" value={request.type} />
               {latestDecision && <DetailRow label="Decision note" value={latestDecision.reason} />}
             </dl>
@@ -149,16 +151,24 @@ export function LeaveDetailPanel({
 
       <div className="card-foot row gap-2">
         {isApproved ? (
-          <StatusBadge tone="success" className="w-full justify-center">
-            <Check className="h-3 w-3" aria-hidden /> Approved
-          </StatusBadge>
+          <>
+            <StatusBadge tone="success" className="flex-1 justify-center">
+              <Check className="h-3 w-3" aria-hidden /> Approved
+            </StatusBadge>
+            <ActionButton variant="danger" size="sm" onClick={() => onCancel(request)}>
+              Cancel leave
+            </ActionButton>
+          </>
         ) : isDeclined ? (
           <StatusBadge tone="danger" className="w-full justify-center">
             <X className="h-3 w-3" aria-hidden /> Declined
           </StatusBadge>
         ) : isCancelled ? (
           <StatusBadge tone="muted" className="w-full justify-center">
-            <X className="h-3 w-3" aria-hidden /> Cancelled by staff
+            <X className="h-3 w-3" aria-hidden />
+            {request.cancellationSource === "manager"
+              ? "Cancelled by manager"
+              : "Withdrawn by staff"}
           </StatusBadge>
         ) : (
           <>
@@ -176,7 +186,7 @@ export function LeaveDetailPanel({
             </ActionButton>
           </>
         )}
-        {(isApproved || isDeclined) && (
+        {isDeclined && (
           <ActionButton variant="secondary" size="sm" onClick={() => onReopen(request.id)}>
             Reopen
           </ActionButton>

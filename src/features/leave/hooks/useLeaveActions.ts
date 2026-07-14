@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import { createLeaveRequest, setLeaveRequestState } from "@/features/demo/store/leaveActions";
-import type { LeaveDecisionState, LeaveRequest } from "../types";
+import type { LeaveRequest, LeaveRequestState } from "../types";
 
 /**
  * Manager-side leave decisions for the Leave page. Wraps the workspace store
@@ -21,7 +21,7 @@ export function useLeaveActions({
 }) {
   const store = useWorkspaceStore();
 
-  const updateState = (id: string, state: LeaveDecisionState, reason: string) => {
+  const updateState = (id: string, state: LeaveRequestState, reason: string) => {
     setLeaveRequestState(store, id, state, reason);
     onSelectRequest(id);
   };
@@ -61,6 +61,14 @@ export function useLeaveActions({
     toast.info("Reopened", { description: "Request returned to review queue" });
   };
 
+  const cancel = (id: string, reason: string) => {
+    updateState(id, "cancelled", reason);
+    onCloseDecision();
+    toast.warning("Approved leave cancelled", {
+      description: "The cancellation reason was saved and the team member was notified.",
+    });
+  };
+
   const createRequest = (request: LeaveRequest) => {
     createLeaveRequest(store, request);
     onSelectRequest(request.id);
@@ -70,5 +78,5 @@ export function useLeaveActions({
     });
   };
 
-  return { approve, decline, reopen, createRequest };
+  return { approve, decline, cancel, reopen, createRequest };
 }

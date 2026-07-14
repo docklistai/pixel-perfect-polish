@@ -137,6 +137,7 @@ function kindLabel(k: PortalNotification["kind"]) {
       return "Rota";
     case "leave-approved":
     case "leave-declined":
+    case "leave-cancelled":
       return "Leave";
     case "announcement":
       return "Announcement";
@@ -144,5 +145,9 @@ function kindLabel(k: PortalNotification["kind"]) {
       return "Timesheet";
     case "open-shift-update":
       return "Open shift";
+    case "shift-release-update":
+      return "Shift release";
+    case "unavailability-update":
+      return "Unavailability";
   }
 }

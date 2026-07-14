@@ -10,7 +10,7 @@ import { useRotaLocationSelection, useRotaWeekSearch } from "./useRotaLocationSe
 import { useRotaOverlays, type RotaOverlayKey } from "./useRotaOverlays";
 import { useRotaPublishIntent } from "./useRotaPublishIntent";
 import { useRotaPublishAction } from "./useRotaPublishAction";
-import { useRecurringDayOffClashes } from "./useRecurringDayOffClashes";
+import { useAvailabilityConstraints } from "./useAvailabilityConstraints";
 import { useRoleColours } from "@/features/settings/hooks/useRoleColours";
 import { buildRoleColourKey } from "../lib/deptColours";
 import {
@@ -99,11 +99,12 @@ export function useRotaPage(week: number | undefined, location: string | undefin
     [rota.draftShifts, roleColoursConfig],
   );
 
-  const dayOffClashes = useRecurringDayOffClashes({
+  const availability = useAvailabilityConstraints({
     source: rota.source,
     draftShifts: rota.draftShifts,
     dayIsoDates: rota.dayIsoDates,
     staff: rota.staff,
+    staffRows: rota.staffRows,
   });
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
@@ -120,7 +121,8 @@ export function useRotaPage(week: number | undefined, location: string | undefin
     rota.conflictCount +
     workingTimeAlertCount +
     (leaveDataState === "ready" ? 0 : 1) +
-    dayOffClashes.length;
+    availability.clashes.length +
+    (availability.dataState === "ready" ? 0 : 1);
   const publishState = getPublishState({
     published: rota.published,
     hasUnpublishedChanges: rota.hasUnpublishedChanges,
@@ -158,7 +160,7 @@ export function useRotaPage(week: number | undefined, location: string | undefin
     publishEligibility,
     roleColours,
     roleColoursConfig,
-    dayOffClashes,
+    availability,
     workingTimeAlertCount,
     leaveDataState,
     publishState,

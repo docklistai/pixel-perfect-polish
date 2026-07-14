@@ -4,9 +4,10 @@ import { Users, Calendar } from "lucide-react";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceStaffFn } from "@/features/staff/api/staffLiveData";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
-import { fetchWorkspaceLeaveFn } from "@/features/leave/api/leaveLiveData";
-import { fetchWorkspaceTimeFn } from "@/features/time/api/timeLiveData";
-import { TIME_QUERY_KEY } from "@/features/time/hooks/useWorkspaceTime";
+import { fetchPendingLeavePreviewFn } from "@/features/leave/api/leaveLiveData";
+import { leaveQueryKeys } from "@/features/leave/lib/leaveQueryRange";
+import { fetchPendingTimePreviewFn } from "@/features/time/api/timeOperationalReads";
+import { timeQueryKeys } from "@/features/time/lib/timeQueryRange";
 import { countOpenShifts, totalScheduledHours } from "@/features/rota/lib/rotaSummaries";
 import { buildDashboardOperational } from "../lib/dashboardOperational";
 import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
@@ -15,6 +16,8 @@ import type { DraftShift } from "@/features/rota/types";
 import type { KpiItem } from "../types";
 
 const dashRouteApi = getRouteApi("/");
+const PENDING_LEAVE_PREVIEW_LIMIT = 5;
+const PENDING_TIME_PREVIEW_LIMIT = 5;
 
 /** Index of `todayIso` within the week starting `weekStartIso`, or null if outside it. */
 function dayIndexInWeek(weekStartIso: string | null, todayIso: string | null): number | null {
@@ -56,14 +59,20 @@ export function useDashboardData() {
     staleTime: 15_000,
   });
   const leaveQuery = useQuery({
-    queryKey: ["leave", "workspace-requests", workspaceId],
-    queryFn: () => fetchWorkspaceLeaveFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: leaveQueryKeys.pendingPreview(workspaceId, PENDING_LEAVE_PREVIEW_LIMIT),
+    queryFn: () =>
+      fetchPendingLeavePreviewFn({
+        data: { workspaceId: workspaceId!, limit: PENDING_LEAVE_PREVIEW_LIMIT },
+      }),
     enabled,
     staleTime: 15_000,
   });
   const timeQuery = useQuery({
-    queryKey: ["time", TIME_QUERY_KEY, workspaceId],
-    queryFn: () => fetchWorkspaceTimeFn({ data: { workspaceId: workspaceId! } }),
+    queryKey: timeQueryKeys.pendingPreview(workspaceId, PENDING_TIME_PREVIEW_LIMIT),
+    queryFn: () =>
+      fetchPendingTimePreviewFn({
+        data: { workspaceId: workspaceId!, limit: PENDING_TIME_PREVIEW_LIMIT },
+      }),
     enabled,
     staleTime: 15_000,
   });
@@ -74,6 +83,8 @@ export function useDashboardData() {
       publishWeekLabel: formatDashboardPublishWeekLabel(null),
       staffCount: null as number | null,
       weekShifts: [] as DraftShift[],
+      pendingLeaveCount: demo.pendingLeave.length,
+      pendingTimeCount: demo.pendingTime.length,
     };
   }
 
@@ -85,15 +96,19 @@ export function useDashboardData() {
   const shifts = week?.shifts ?? [];
   const openShifts = countOpenShifts(shifts);
   const staffCount = staffQuery.data?.length ?? 0;
-  const pendingLeave = (leaveQuery.data ?? []).filter((request) => request.state === "pending");
-  const pendingTime = (timeQuery.data?.rows ?? []).filter((row) => row.status !== "approved");
+  const pendingLeave = leaveQuery.data?.requests ?? [];
+  const pendingLeaveCount = leaveQuery.data?.total ?? 0;
+  const pendingTime = timeQuery.data?.rows ?? [];
+  const pendingTimeCount = timeQuery.data?.total ?? 0;
 
   const { leaveItems, timesheetItems, attentionItems } = buildDashboardOperational({
     openShifts,
     // Live reads watch the current rota week (weekOffset 0), so copy says "this week".
     weekScope: "current",
     pendingLeave,
+    pendingLeaveCount,
     pendingTime,
+    pendingTimeCount,
     timesheetPeriodLabel: "Awaiting review",
   });
 
@@ -141,7 +156,9 @@ export function useDashboardData() {
     openShifts,
     plannedShiftCount: shifts.length,
     pendingTime,
+    pendingTimeCount,
     pendingLeave,
+    pendingLeaveCount,
     leaveItems,
     timesheetItems,
     attentionItems,
