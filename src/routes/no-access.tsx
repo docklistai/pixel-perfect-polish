@@ -35,22 +35,32 @@ function NoAccessPage() {
     await navigate({ to: "/auth" });
   };
 
-  if (auth.status === "no-workspace") {
-    return <BootstrapWorkspaceForm onSignOut={handleSignOut} signingOut={signingOut} />;
+  if (auth.status === "no-workspace" && !auth.isAnonymous) {
+    return (
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
+        <BootstrapWorkspaceForm onSignOut={handleSignOut} signingOut={signingOut} />
+      </main>
+    );
   }
 
   if (auth.status === "workspace-selection-required") {
     return (
-      <WorkspaceSelectionCard
-        workspaces={auth.workspaces}
-        onSignOut={handleSignOut}
-        signingOut={signingOut}
-      />
+      <main id="main-content" tabIndex={-1} className="focus:outline-none">
+        <WorkspaceSelectionCard
+          workspaces={auth.workspaces}
+          onSignOut={handleSignOut}
+          signingOut={signingOut}
+        />
+      </main>
     );
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-dvh items-center justify-center bg-background px-4 focus:outline-none"
+    >
       <div className="max-w-md text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-border/60 bg-muted/30 text-muted-foreground">
           <Building2 className="h-6 w-6" aria-hidden="true" />
@@ -72,6 +82,6 @@ function NoAccessPage() {
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

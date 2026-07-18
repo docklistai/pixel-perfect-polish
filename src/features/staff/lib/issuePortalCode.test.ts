@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { describePortalCodeIssueError } from "./issuePortalCode";
+import { describePortalCodeIssueError, describePortalRecoveryIssueError } from "./issuePortalCode";
 
 describe("describePortalCodeIssueError (D5 — no dev-speak)", () => {
   it("explains the missing-membership case in plain manager language", () => {
@@ -22,5 +22,20 @@ describe("describePortalCodeIssueError (D5 — no dev-speak)", () => {
     expect(describePortalCodeIssueError("42501")).toContain("permission");
     expect(describePortalCodeIssueError("P0002")).toContain("isn't in this workspace");
     expect(describePortalCodeIssueError(null)).toContain("couldn't issue a code");
+  });
+});
+
+describe("describePortalRecoveryIssueError", () => {
+  it("keeps authorization and eligibility failures customer-safe", () => {
+    expect(describePortalRecoveryIssueError("42501")).toContain("permission");
+    expect(describePortalRecoveryIssueError("P0002")).toContain("active staff member");
+    expect(describePortalRecoveryIssueError("55000")).toContain("eligible");
+    expect(describePortalRecoveryIssueError("22023")).toContain("reason");
+  });
+
+  it("never exposes database wording for unknown failures", () => {
+    const message = describePortalRecoveryIssueError("XX999");
+    expect(message).toContain("couldn't reset staff access");
+    expect(message).not.toMatch(/sql|constraint|membership|rpc/i);
   });
 });

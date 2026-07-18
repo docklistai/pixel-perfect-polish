@@ -11,13 +11,28 @@
 
 begin;
 
-insert into auth.users (instance_id, id, aud, role, email, created_at)
+insert into auth.users (
+  instance_id, id, aud, role, email, email_confirmed_at, is_anonymous, created_at
+)
 values
-  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'bootstrap.owner@example.com', now()),
-  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'bootstrap.second@example.com', now()),
-  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'bootstrap.guard.manager@example.com', now()),
-  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'bootstrap.guard.owner@example.com', now()),
-  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000005', 'authenticated', 'authenticated', 'bootstrap.validation@example.com', now());
+  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'bootstrap.owner@example.com', now(), false, now()),
+  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000002', 'authenticated', 'authenticated', 'bootstrap.second@example.com', now(), false, now()),
+  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000003', 'authenticated', 'authenticated', 'bootstrap.guard.manager@example.com', now(), false, now()),
+  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000004', 'authenticated', 'authenticated', 'bootstrap.guard.owner@example.com', now(), false, now()),
+  ('00000000-0000-0000-0000-000000000000', 'da000000-0000-4000-8000-000000000005', 'authenticated', 'authenticated', 'bootstrap.validation@example.com', now(), false, now());
+
+select public.rpc_internal_create_manager_onboarding_invitation(
+  'bootstrap.owner@example.com', now() + interval '7 days', 'phase8-test',
+  'Bootstrap happy path', 'da000000-0000-4000-8000-000000000001'
+);
+select public.rpc_internal_create_manager_onboarding_invitation(
+  'bootstrap.second@example.com', now() + interval '7 days', 'phase8-test',
+  'Whitespace defaults', 'da000000-0000-4000-8000-000000000002'
+);
+select public.rpc_internal_create_manager_onboarding_invitation(
+  'bootstrap.validation@example.com', now() + interval '7 days', 'phase8-test',
+  'Input validation', 'da000000-0000-4000-8000-000000000005'
+);
 
 select set_config('request.jwt.claims', '{"sub":"da000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
 set local role authenticated;

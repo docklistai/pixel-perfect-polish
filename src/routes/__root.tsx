@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { AppShortcuts } from "@/components/AppShortcuts";
-import { getAuthState } from "@/features/auth";
+import { getAuthState, useAuthStateRevalidation } from "@/features/auth";
 import { WorkspaceStoreProvider } from "@/features/demo/store/WorkspaceStoreProvider";
 import { SkipToContent, RouteAnnouncer, RouteFocusManager } from "@/components/RouteAnnouncer";
 import { ServiceWorkerRegistration } from "@/features/pwa/components/ServiceWorkerRegistration";
@@ -164,6 +164,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient, auth } = Route.useRouteContext();
+  useAuthStateRevalidation();
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -8,7 +8,7 @@ export type WorkspaceRole = "owner" | "manager" | "staff";
  */
 export type AuthState =
   | { status: "signed-out" }
-  | { status: "no-workspace"; userId: string; email: string | null }
+  | { status: "no-workspace"; userId: string; email: string | null; isAnonymous: boolean }
   | {
       /**
        * Authenticated user with several active memberships and no explicit
@@ -43,6 +43,19 @@ export type AuthState =
  * `locked` is the per-workspace brute-force lockout (Phase 7). Unknown/missing
  * reasons fall back to the generic "couldn't match those codes" copy.
  */
-export type ClaimFailureReason = "invalid" | "expired" | "claimed" | "already_member" | "locked";
+export type ClaimFailureReason =
+  | "invalid"
+  | "expired"
+  | "claimed"
+  | "used"
+  | "revoked"
+  | "superseded"
+  | "inactive"
+  | "anonymous_required"
+  | "same_identity"
+  | "already_member"
+  | "locked";
 
-export type ClaimPortalAccessResult = { ok: true } | { ok: false; message: string };
+export type ClaimPortalAccessResult =
+  | { ok: true }
+  | { ok: false; message: string; referenceId?: string };

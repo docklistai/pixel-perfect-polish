@@ -38,7 +38,12 @@ export const fetchAuthStateFn = createServerFn({ method: "GET" }).handler(
 
     const activeMemberships = memberships ?? [];
     if (activeMemberships.length === 0) {
-      return { status: "no-workspace", userId: user.id, email: user.email ?? null };
+      return {
+        status: "no-workspace",
+        userId: user.id,
+        email: user.email ?? null,
+        isAnonymous: user.is_anonymous === true,
+      };
     }
 
     const explicitWorkspaceId = getCookies()[ACTIVE_WORKSPACE_COOKIE] ?? null;

@@ -19,3 +19,18 @@ export function describePortalCodeIssueError(sqlState: string | null): string {
       return "We couldn't issue a code. Please try again, or check the staff member with your team.";
   }
 }
+
+export function describePortalRecoveryIssueError(sqlState: string | null): string {
+  switch (sqlState) {
+    case "42501":
+      return "You don't have permission to reset staff access for this workspace.";
+    case "P0002":
+      return "Choose an active staff member from this workspace.";
+    case "22023":
+      return "Add a short reason for the access reset.";
+    case "55000":
+      return "This staff member isn't eligible for an access reset. Check that their portal access is active.";
+    default:
+      return "We couldn't reset staff access. Please try again.";
+  }
+}

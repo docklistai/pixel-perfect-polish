@@ -3,6 +3,7 @@ export { AuthForm } from "./components/AuthForm";
 export { AuthModeToggle } from "./components/AuthModeToggle";
 export { AuthNextStepNotice } from "./components/AuthNextStepNotice";
 export { getAuthState, clearAuthStateCache } from "./authStateCache";
+export { useAuthStateRevalidation } from "./hooks/useAuthStateRevalidation";
 export {
   requireManagerAccess,
   requireStaffPortalAccess,

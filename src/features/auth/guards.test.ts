@@ -25,6 +25,7 @@ const noWorkspace: AuthState = {
   status: "no-workspace",
   userId: "user-1",
   email: "new@example.com",
+  isAnonymous: false,
 };
 
 const selectionRequired: AuthState = {

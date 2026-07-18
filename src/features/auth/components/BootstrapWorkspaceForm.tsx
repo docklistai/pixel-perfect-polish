@@ -18,6 +18,13 @@ interface BootstrapWorkspaceFormProps {
   signingOut: boolean;
 }
 
+const BOOTSTRAP_FIELD_IDS = {
+  workspaceName: "workspace-name",
+  locationName: "starter-location",
+  departmentName: "starter-department",
+  timezone: "workspace-timezone",
+} as const;
+
 export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorkspaceFormProps) {
   const navigate = useNavigate();
   const router = useRouter();
@@ -32,6 +39,11 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
   const [errors, setErrors] = React.useState<Partial<Record<BootstrapWorkspaceField, string>>>({});
   const [formError, setFormError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const formErrorRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (formError) formErrorRef.current?.focus();
+  }, [formError]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -44,6 +56,14 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
     });
     if (!built.ok) {
       setErrors(built.errors);
+      const firstInvalidField = (
+        ["workspaceName", "locationName", "departmentName", "timezone"] as const
+      ).find((field) => built.errors[field]);
+      requestAnimationFrame(() => {
+        if (firstInvalidField) {
+          document.getElementById(BOOTSTRAP_FIELD_IDS[firstInvalidField])?.focus();
+        }
+      });
       return;
     }
 
@@ -87,13 +107,23 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
           </div>
 
           {formError && (
-            <Alert variant="destructive" className="mt-5">
+            <Alert
+              ref={formErrorRef}
+              id="bootstrap-workspace-form-error"
+              tabIndex={-1}
+              variant="destructive"
+              className="mt-5 focus:outline-none"
+            >
               <AlertTitle>Workspace not created</AlertTitle>
               <AlertDescription>{formError}</AlertDescription>
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="mt-6 space-y-4"
+            aria-describedby={formError ? "bootstrap-workspace-form-error" : undefined}
+          >
             <div className="space-y-2">
               <Label htmlFor="workspace-name">Workspace or business name</Label>
               <Input
@@ -103,12 +133,18 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
                   setWorkspaceName(event.target.value);
                   clearFieldError("workspaceName");
                 }}
+                required
                 aria-invalid={Boolean(errors.workspaceName)}
+                aria-describedby={
+                  errors.workspaceName ? "bootstrap-workspace-name-error" : undefined
+                }
                 autoComplete="organization"
                 placeholder="e.g. Harbour Bistro"
               />
               {errors.workspaceName && (
-                <p className="text-xs text-destructive">{errors.workspaceName}</p>
+                <p id="bootstrap-workspace-name-error" className="text-xs text-destructive">
+                  {errors.workspaceName}
+                </p>
               )}
             </div>
 
@@ -123,9 +159,14 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
                     clearFieldError("locationName");
                   }}
                   aria-invalid={Boolean(errors.locationName)}
+                  aria-describedby={
+                    errors.locationName ? "bootstrap-location-name-error" : undefined
+                  }
                 />
                 {errors.locationName && (
-                  <p className="text-xs text-destructive">{errors.locationName}</p>
+                  <p id="bootstrap-location-name-error" className="text-xs text-destructive">
+                    {errors.locationName}
+                  </p>
                 )}
               </div>
 
@@ -139,9 +180,14 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
                     clearFieldError("departmentName");
                   }}
                   aria-invalid={Boolean(errors.departmentName)}
+                  aria-describedby={
+                    errors.departmentName ? "bootstrap-department-name-error" : undefined
+                  }
                 />
                 {errors.departmentName && (
-                  <p className="text-xs text-destructive">{errors.departmentName}</p>
+                  <p id="bootstrap-department-name-error" className="text-xs text-destructive">
+                    {errors.departmentName}
+                  </p>
                 )}
               </div>
             </div>
@@ -156,10 +202,15 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
                   clearFieldError("timezone");
                 }}
                 aria-invalid={Boolean(errors.timezone)}
+                aria-describedby={errors.timezone ? "bootstrap-timezone-error" : undefined}
                 autoComplete="off"
                 spellCheck={false}
               />
-              {errors.timezone && <p className="text-xs text-destructive">{errors.timezone}</p>}
+              {errors.timezone && (
+                <p id="bootstrap-timezone-error" className="text-xs text-destructive">
+                  {errors.timezone}
+                </p>
+              )}
             </div>
 
             <Button

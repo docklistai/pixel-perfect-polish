@@ -1,9 +1,11 @@
 import * as React from "react";
-import { Check, Copy, KeyRound, Loader2 } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { ActionButton, DialogShell, FormRow, FormSection } from "@/components/dl";
 import { issueStaffPortalCodeFn, issueWorkspacePortalCodeFn } from "../api/issuePortalCode";
 import { getStaffSurfaceCapabilities } from "../lib/staffSurfaceCapabilities";
 import type { IssuePortalCodeResult, StaffRow } from "../types";
+import { PortalCodeResult } from "./PortalCodeResult";
+import { StaffAccessRecoverySection } from "./StaffAccessRecoverySection";
 
 interface AccessCodesDialogProps {
   open: boolean;
@@ -11,53 +13,6 @@ interface AccessCodesDialogProps {
   staff: StaffRow[];
   /** Live roster issuance is real; the demo seed cannot back real codes. */
   source: "live" | "demo";
-}
-
-/** Reveal-once display of a freshly issued plaintext code, with copy-to-clipboard. */
-function CodeReveal({ code }: { code: string }) {
-  const [copied, setCopied] = React.useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  };
-
-  return (
-    <div className="rounded-xl border border-[var(--st-teal-line)] bg-[var(--st-teal-bg)] px-3 py-2.5">
-      <div className="flex items-center gap-2">
-        <code className="flex-1 select-all font-mono text-base font-semibold tracking-[0.18em] text-[var(--st-teal-ink)]">
-          {code}
-        </code>
-        <button
-          type="button"
-          onClick={handleCopy}
-          aria-label="Copy code"
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--st-teal-line)] px-2.5 text-xs font-semibold text-[var(--st-teal-ink)] transition-colors hover:bg-background/40"
-        >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
-      <p className="mt-1.5 text-[11px] text-[var(--st-teal-ink)]/80">
-        Shown once — copy it now. Issuing again replaces it.
-      </p>
-    </div>
-  );
-}
-
-function ResultArea({ result }: { result: IssuePortalCodeResult | null }) {
-  if (!result) return null;
-  if (result.ok) return <CodeReveal code={result.code} />;
-  return (
-    <div className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger">
-      {result.message}
-    </div>
-  );
 }
 
 export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessCodesDialogProps) {
@@ -141,7 +96,7 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
               "Issue workspace code"
             )}
           </ActionButton>
-          <ResultArea result={wsResult} />
+          <PortalCodeResult result={wsResult} />
         </FormSection>
 
         <FormSection title="Personal staff code">
@@ -179,8 +134,10 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
               "Issue personal code"
             )}
           </ActionButton>
-          <ResultArea result={staffResult} />
+          <PortalCodeResult result={staffResult} />
         </FormSection>
+
+        <StaffAccessRecoverySection open={open} staff={staff} enabled={canIssueAccessCodes} />
       </div>
     </DialogShell>
   );
