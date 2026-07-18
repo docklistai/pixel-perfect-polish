@@ -1,6 +1,22 @@
 import * as React from "react";
 import { PreviewTag, SectionCard } from "./SettingsPrimitives";
 import { Check } from "lucide-react";
+import { COMMERCIAL_PLANS } from "@/config/commercial";
+
+const indicativePlans = [
+  {
+    ...COMMERCIAL_PLANS.starter,
+    features: ["Weekly rota", "Manager publish", "Staff portal"],
+  },
+  {
+    ...COMMERCIAL_PLANS.core,
+    features: ["Publish review", "Leave and time", "Approved-hours export"],
+  },
+  {
+    ...COMMERCIAL_PLANS.pro,
+    features: ["Core workflows", "Manager support", "Operational issue log"],
+  },
+] as const;
 
 export function PlanLimitsTab() {
   return (
@@ -8,7 +24,7 @@ export function PlanLimitsTab() {
       <div>
         <h2 className="text-[28px] font-semibold leading-tight text-foreground">Plan & limits</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Sample plan and usage preview. Billing is not live-wired.
+          Indicative post-beta plans and sample usage. Billing is inactive.
         </p>
       </div>
 
@@ -16,28 +32,31 @@ export function PlanLimitsTab() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <div className="text-lg font-bold">Hospitality · Pro</div>
-              <PreviewTag>Sample plan</PreviewTag>
+              <div className="text-lg font-bold">Private beta access</div>
+              <PreviewTag>No active plan</PreviewTag>
               <span className="inline-flex items-center rounded-full bg-teal-500/10 px-2.5 py-0.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
-                Current plan
+                Invitation only
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Up to 50 staff per workspace · all manager features
+              Workspace access is arranged manually; plan limits are not enforced during beta.
             </p>
           </div>
           <div className="sm:text-right">
             <div className="font-mono text-2xl font-bold">
-              £89 <span className="text-xs font-normal text-muted-foreground">/ month</span>
+              £0 <span className="text-xs font-normal text-muted-foreground">charged</span>
             </div>
             <div className="text-[10px] text-muted-foreground">
-              Sample billing date · no billing is active
+              No checkout, trial, renewal, cancellation fee, or refund process
             </div>
           </div>
         </div>
       </div>
 
-      <SectionCard title="Usage" description="Sample usage for this preview period.">
+      <SectionCard
+        title="Sample usage"
+        description="Illustrative limits only — not contractual or enforced during private beta."
+      >
         <div className="space-y-4">
           {[
             { label: "Staff seats", used: 8, total: 50 },
@@ -69,58 +88,25 @@ export function PlanLimitsTab() {
       </SectionCard>
 
       <SectionCard
-        title="Compare plans"
-        description="Sample plan comparison — switching is disabled."
+        title="Indicative plans after beta"
+        description="Public and in-app preview prices share one source. Switching and billing are disabled."
       >
         <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              name: "Starter",
-              price: "£29",
-              desc: "10 staff",
-              features: ["Rota", "Staff", "Time"],
-              current: false,
-            },
-            {
-              name: "Pro",
-              price: "£89",
-              desc: "50 staff",
-              features: ["+ Reports", "+ Manager support", "+ Approved-hours exports"],
-              current: true,
-            },
-            {
-              name: "Group",
-              price: "Talk",
-              desc: "Unlimited",
-              features: ["+ Multi-workspace", "+ SSO", "+ Priority support"],
-              current: false,
-            },
-          ].map((plan, index) => (
+          {indicativePlans.map((plan) => (
             <div
-              key={index}
-              className={`rounded-2xl border p-4 flex flex-col justify-between ${
-                plan.current
-                  ? "border-teal-500/20 bg-teal-500/5 dark:bg-teal-500/10"
-                  : "border-border bg-card"
-              }`}
+              key={plan.name}
+              className="flex flex-col justify-between rounded-2xl border border-border bg-card p-4"
             >
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold">{plan.name}</span>
-                  {plan.current && (
-                    <span className="inline-flex items-center rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-semibold text-teal-600 dark:text-teal-400">
-                      Current
-                    </span>
-                  )}
-                </div>
+                <span className="text-sm font-semibold">{plan.name} (planned)</span>
                 <div>
                   <div className="font-mono text-xl font-bold">
-                    {plan.price}
-                    {plan.price !== "Talk" && (
-                      <span className="text-xs font-normal text-muted-foreground">/mo</span>
-                    )}
+                    {plan.monthlyPrice}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      /mo after beta
+                    </span>
                   </div>
-                  <div className="text-[10px] text-muted-foreground">{plan.desc}</div>
+                  <div className="text-[10px] text-muted-foreground">{plan.staffLimit}</div>
                 </div>
                 <div className="border-t border-border pt-3">
                   <ul className="space-y-1.5">
@@ -139,13 +125,9 @@ export function PlanLimitsTab() {
               <button
                 type="button"
                 disabled
-                className={`mt-4 w-full rounded-xl py-1.5 text-xs font-semibold transition ${
-                  plan.current
-                    ? "bg-teal-500/10 text-teal-600 dark:text-teal-400 cursor-not-allowed opacity-80"
-                    : "bg-muted text-foreground cursor-not-allowed opacity-70"
-                }`}
+                className="mt-4 w-full cursor-not-allowed rounded-xl bg-muted py-1.5 text-xs font-semibold text-foreground opacity-70"
               >
-                {plan.current ? "Current sample plan" : "Preview only"}
+                Indicative only
               </button>
             </div>
           ))}

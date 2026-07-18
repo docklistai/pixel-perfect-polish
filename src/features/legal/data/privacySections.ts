@@ -25,7 +25,7 @@ export const privacySections: LegalSection[] = [
   {
     heading: "Cookies and local storage",
     body: [
-      "We use a session cookie to keep you signed in, a cookie that remembers which workspace you are working in, and your browser's local storage for the light/dark theme preference. The app contains no advertising trackers and no third-party analytics scripts.",
+      "We use a session cookie to keep you signed in, a cookie that remembers which workspace you are working in, local storage for the light/dark theme preference, and session storage for a small number of temporary interface states. The app contains no advertising trackers and no third-party analytics scripts.",
     ],
   },
   {
@@ -49,7 +49,7 @@ export const privacySections: LegalSection[] = [
   {
     heading: "Access, correction, and deletion",
     body: [
-      "During the private beta there is no self-serve export or deletion tool. To access, correct, export, or delete personal data, contact us and we will handle the request manually. Depending on where you live, you may have statutory rights over your personal data; contact us to exercise them and we will respond.",
+      "During the private beta there is no self-serve full-workspace export or deletion tool. To access, correct, export, or delete personal data, contact us. We verify the requester's identity and authority, handle the request manually, and confirm the outcome, subject to any records we must retain by law. Depending on where you live, you may have statutory rights over your personal data; contact us to exercise them and we will respond.",
     ],
   },
   {

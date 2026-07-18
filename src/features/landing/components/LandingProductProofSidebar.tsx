@@ -77,13 +77,13 @@ export function LandingProductProofSidebar() {
         </button>
       </div>
 
-      {/* AI Things to check panel */}
+      {/* Deterministic manager-support checks */}
       <div className="landing-surface-dark landing-surface-dark-brass p-4">
         <div
           className="flex items-center gap-2 border-b pb-3"
           style={{ borderColor: "rgba(255,255,255,.08)" }}
         >
-          <span className="text-[13.5px] font-bold text-white">AI things to check</span>
+          <span className="text-[13.5px] font-bold text-white">Manager support checks</span>
           <span className="landing-mono ml-auto text-[9.5px] uppercase tracking-wider text-white/45">
             support layer
           </span>
@@ -112,7 +112,7 @@ export function LandingProductProofSidebar() {
           style={{ borderColor: "rgba(255,255,255,.08)" }}
         >
           <span className="size-1.5 rounded-full bg-[var(--landing-teal-400)]" />
-          <span>AI suggests · manager confirms</span>
+          <span>Rule-based checks · manager confirms</span>
         </div>
       </div>
     </div>

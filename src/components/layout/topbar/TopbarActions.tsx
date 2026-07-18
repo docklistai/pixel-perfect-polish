@@ -1,4 +1,5 @@
 import * as React from "react";
+import { SUPPORT_EMAIL } from "@/config/commercial";
 import {
   Bell,
   ChevronDown,
@@ -165,7 +166,7 @@ export function TopbarActions({
               onClick={() => {
                 setUserOpen(false);
                 toast.info("Help & feedback", {
-                  description: "Email docklistai@gmail.com — we read everything.",
+                  description: `Email ${SUPPORT_EMAIL} — private-beta support is handled manually.`,
                 });
               }}
               className="menu-item"

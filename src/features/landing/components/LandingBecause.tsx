@@ -3,8 +3,8 @@ import {
   CalendarOff,
   Clock,
   FileText,
-  MessageSquare,
-  ArrowRightLeft,
+  CalendarClock,
+  UserRoundCheck,
   CalendarCheck,
 } from "lucide-react";
 
@@ -16,9 +16,9 @@ const adminItems = [
     desc: "Track approved time off before scheduling.",
   },
   { name: "Approved hours", icon: Clock, desc: "Export confirmed timesheets." },
-  { name: "Reminders & docs", icon: FileText, desc: "Key notes pinned to the week." },
-  { name: "Team updates", icon: MessageSquare, desc: "Broadcast messages to the floor." },
-  { name: "Handover", icon: ArrowRightLeft, desc: "Shift-to-shift continuity notes." },
+  { name: "Availability", icon: CalendarClock, desc: "Recurring and one-off availability." },
+  { name: "Staff requests", icon: UserRoundCheck, desc: "Open shifts and release requests." },
+  { name: "Operational notes", icon: FileText, desc: "Manager-owned issue and follow-up records." },
 ] as const;
 
 export function LandingBecause() {

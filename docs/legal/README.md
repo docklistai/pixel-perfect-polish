@@ -16,7 +16,8 @@ not claim GDPR or any other compliance.
 
 - **Governing law / jurisdiction** — intentionally omitted from the terms;
   a legal/owner decision.
-- **Legal contact address** — currently `docklistai@gmail.com`
+- **Legal/support contact address** — currently the owner-review placeholder exported as
+  `SUPPORT_EMAIL` from `src/config/commercial.ts`
   (`src/features/legal/data/legalMeta.ts`). Confirm or replace.
 - **Trading entity name** — pages say "DocklistAI"; confirm the legal entity
   once one exists.

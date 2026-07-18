@@ -2,23 +2,23 @@ import { CheckCircle2, ShieldAlert, FileText, Activity, AlertTriangle } from "lu
 
 const aiExamples = [
   {
-    title: "Spot gaps",
-    body: "Highlights open shifts and thin coverage before they bite.",
+    title: "Review open shifts",
+    body: "Shows the recorded open-shift count and links back to the live rota.",
     icon: Activity,
   },
   {
-    title: "Review leave impact",
-    body: "Shows clashes and cover risks across the week at a glance.",
+    title: "Review leave",
+    body: "Shows pending and approved leave counts without making a decision.",
     icon: ShieldAlert,
   },
   {
-    title: "Check handover notes",
-    body: "Keeps key notes visible so nothing important gets missed.",
+    title: "Review timesheets",
+    body: "Shows approved and awaiting-review counts from the live workspace.",
     icon: FileText,
   },
   {
-    title: "Flag coverage pressure",
-    body: "Shows when and where your service is most at risk.",
+    title: "Keep managers in control",
+    body: "Routes managers to the source screen; it never changes or publishes data.",
     icon: CheckCircle2,
   },
 ] as const;
@@ -42,13 +42,14 @@ export function LandingAI() {
       <div className="relative mx-auto max-w-[1240px] px-6 lg:px-10">
         <div className="grid gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <span className="landing-section-eyebrow on-dark">Manager-led AI</span>
+            <span className="landing-section-eyebrow on-dark">Manager support</span>
             <h2 className="landing-section-title on-dark max-w-[520px]">
-              AI helps you check, not guess.
+              Live facts to check, not guesses.
             </h2>
             <p className="mt-5 max-w-[500px] text-pretty text-[16.5px] leading-[1.62] text-[var(--landing-cream-dim)]">
-              It sits beside the rota, reviews the week, and drafts support notes. The manager still
-              decides what changes and what gets published.
+              Private-beta manager support is deterministic: it summarises recorded rota, leave, and
+              timesheet counts and links to the source screen. It is not a free-text AI assistant
+              and never acts on its own.
             </p>
 
             <div className="mt-10 grid gap-x-6 gap-y-8 sm:grid-cols-2">
@@ -88,7 +89,7 @@ export function LandingAI() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-bold text-white">Things to check</h3>
+                      <h3 className="text-[15px] font-bold text-white">Workspace checks</h3>
                       <p className="landing-mono mt-0.5 text-[10px] uppercase tracking-wider text-white/50">
                         Before publishing
                       </p>
@@ -97,7 +98,7 @@ export function LandingAI() {
                   <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
                     <span className="size-1.5 rounded-full bg-[#c9954d] shadow-[0_0_8px_rgba(201,149,77,0.8)]" />
                     <span className="landing-mono text-[9px] font-bold uppercase text-[#d9ad70]">
-                      2 Flags
+                      3 items
                     </span>
                   </div>
                 </div>
@@ -107,14 +108,14 @@ export function LandingAI() {
                     <div className="mb-2 flex items-center justify-between">
                       <span className="flex items-center gap-2 text-[13px] font-semibold text-[#d9ad70]">
                         <AlertTriangle className="size-3.5" aria-hidden="true" />
-                        Leave impact
+                        Leave decisions
                       </span>
                       <span className="landing-mono rounded-md bg-[#d9ad70]/10 px-2 py-1 text-[9px] font-bold uppercase text-[#d9ad70] shadow-sm">
-                        Risk
+                        Review
                       </span>
                     </div>
                     <p className="text-[13px] leading-relaxed text-white/70">
-                      Liam's bar shift overlaps approved leave on Wednesday.
+                      2 leave requests are waiting for manager review.
                     </p>
                   </div>
 
@@ -122,14 +123,14 @@ export function LandingAI() {
                     <div className="mb-2 flex items-center justify-between">
                       <span className="flex items-center gap-2 text-[13px] font-semibold text-white/90">
                         <Activity className="size-3.5 text-white/50" aria-hidden="true" />
-                        Coverage pressure
+                        Open shifts
                       </span>
                       <span className="landing-mono rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[9px] font-bold uppercase text-white/60">
                         Note
                       </span>
                     </div>
                     <p className="text-[13px] leading-relaxed text-white/70">
-                      Friday night prep looks thin. Consider pulling from floor support.
+                      2 open shifts in this week&apos;s live draft still need assignment.
                     </p>
                   </div>
 
@@ -137,11 +138,11 @@ export function LandingAI() {
                     <div className="mb-2 flex items-center justify-between">
                       <span className="flex items-center gap-2 text-[13px] font-semibold text-[var(--landing-teal-400)]">
                         <FileText className="size-3.5" aria-hidden="true" />
-                        Draft note
+                        Timesheet review
                       </span>
                     </div>
                     <p className="text-[13px] italic leading-relaxed text-white/80">
-                      "Remind kitchen about the new allergy matrix."
+                      3 timesheets are waiting for manager review.
                     </p>
                   </div>
                 </div>
@@ -158,9 +159,9 @@ export function LandingAI() {
                       Manager confirms before publish
                     </span>
                   </div>
-                  <button className="rounded-lg bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-white/20">
+                  <span className="rounded-lg bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white">
                     Review
-                  </button>
+                  </span>
                 </div>
               </div>
             </div>

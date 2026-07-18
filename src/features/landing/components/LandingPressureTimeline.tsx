@@ -35,7 +35,7 @@ const pressureMoments = [
     time: "Publish",
     status: "Ready",
     title: "Manager control",
-    body: "AI can suggest the next move, but the manager confirms before publishing.",
+    body: "Manager support can surface recorded items, but the manager decides what to change.",
     tone: "ready",
   },
 ] as const;

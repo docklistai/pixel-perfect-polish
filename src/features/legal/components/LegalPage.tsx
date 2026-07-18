@@ -16,7 +16,7 @@ interface LegalPageProps {
  */
 export function LegalPage({ title, version, intro, sections }: LegalPageProps) {
   return (
-    <div className="min-h-dvh bg-background">
+    <main id="main-content" tabIndex={-1} className="min-h-dvh bg-background focus:outline-none">
       <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
         <Link
           to="/landing"
@@ -77,6 +77,6 @@ export function LegalPage({ title, version, intro, sections }: LegalPageProps) {
           </p>
         </footer>
       </div>
-    </div>
+    </main>
   );
 }

@@ -1,26 +1,27 @@
 import { Check } from "lucide-react";
+import { COMMERCIAL_PLANS } from "@/config/commercial";
 import { betaAccessMailto, pricingNotes } from "../data/landingContent";
 
 const proFeatures = [
-  "Pre-publish checks and leave clash review",
-  "Coverage pressure and open shift visibility",
-  "Light staff records, approved hours, and handover notes",
-  "Manager-led AI support for checks and drafts",
+  "Pre-publish review and open-shift visibility",
+  "Published rota, leave, availability, and staff requests",
+  "Staff records, time review, and approved-hours export",
+  "Deterministic manager support for live workspace counts",
 ] as const;
 
 const supportPlans = [
   {
-    name: "Core",
-    price: "£39",
-    meta: "Up to 25 staff · workspace pricing",
-    body: "A focused rota workspace with checks, leave context, approved hours, and handover notes.",
+    name: `${COMMERCIAL_PLANS.core.name} (planned)`,
+    price: COMMERCIAL_PLANS.core.monthlyPrice,
+    meta: `${COMMERCIAL_PLANS.core.staffLimit} · indicative workspace price`,
+    body: "A focused rota workspace with publish review, leave context, time review, and approved-hours export.",
     cta: "Request beta access",
     highlights: ["Pre-publish checks", "Leave clash review", "Approved hours export"],
   },
   {
-    name: "Free",
-    price: "£0",
-    meta: "Up to 5 staff · workspace pricing",
+    name: `${COMMERCIAL_PLANS.starter.name} (planned)`,
+    price: COMMERCIAL_PLANS.starter.monthlyPrice,
+    meta: `${COMMERCIAL_PLANS.starter.staffLimit} · indicative workspace price`,
     body: "Basic weekly rota planning for small teams getting started.",
     cta: "Request beta access",
     highlights: ["Weekly rota build", "Manager publish", "Staff sees confirmed"],
@@ -29,7 +30,7 @@ const supportPlans = [
 
 const comparePoints = [
   ["Workspace price", "No per-seat meter for every staff name."],
-  ["Manager confirms", "AI can suggest checks, but publishing stays manual."],
+  ["Manager confirms", "Rule-based checks can assist, but publishing stays manual."],
   ["Rota first", "Scheduling stays the centre of the product."],
 ] as const;
 
@@ -58,8 +59,8 @@ export function LandingPricing() {
               built to <span className="landing-it">fit your team.</span>
             </h2>
             <p className="max-w-[360px] text-pretty text-[15px] leading-[1.6] text-[var(--landing-ink-600)] sm:text-[16px]">
-              DocklistAI is in private beta. We set up each manager&apos;s workspace manually — the
-              plans below show where pricing will land.
+              DocklistAI is invitation-only and free of charge during private beta. The prices below
+              are indicative post-beta workspace prices, not active subscriptions.
             </p>
             <div className="landing-mono mt-6 grid gap-2.5 text-[10.5px] uppercase text-[var(--landing-teal-deep)]">
               {pricingNotes.map((note) => (
@@ -88,17 +89,22 @@ export function LandingPricing() {
                   style={{ background: "rgba(201,149,77,.14)", filter: "blur(54px)" }}
                 />
                 <div className="relative flex items-center justify-between gap-4">
-                  <p className="landing-mono text-[11px] uppercase text-[#d9ad70]">Pro</p>
+                  <p className="landing-mono text-[11px] uppercase text-[#d9ad70]">
+                    {COMMERCIAL_PLANS.pro.name} (planned)
+                  </p>
                   <span className="landing-mono rounded-full bg-[#c9954d] px-3 py-1 text-[10px] font-bold uppercase text-[#111714]">
-                    Recommended
+                    Indicative
                   </span>
                 </div>
                 <div className="relative mt-6">
                   <p className="text-[56px] font-extrabold leading-none sm:text-[62px]">
-                    £79 <span className="text-[16px] font-semibold text-white/60">/mo flat</span>
+                    {COMMERCIAL_PLANS.pro.monthlyPrice}{" "}
+                    <span className="text-[16px] font-semibold text-white/60">
+                      /month after beta
+                    </span>
                   </p>
                   <p className="mt-3 text-[14px] font-semibold text-[var(--landing-teal-400)]">
-                    Up to 50 staff · workspace pricing
+                    {COMMERCIAL_PLANS.pro.staffLimit} · indicative workspace price
                   </p>
                   <p className="mt-5 text-pretty text-[15px] leading-[1.55] text-[var(--landing-cream-dim)]">
                     The best fit for hospitality managers who need rota control, lightweight
@@ -126,7 +132,7 @@ export function LandingPricing() {
                     Request beta access
                   </a>
                   <p className="mt-3 text-center text-[12px] text-white/52">
-                    Private beta — billing is not active. Access is arranged with our team.
+                    No payment is taken in private beta. Access is arranged with our team.
                   </p>
                 </div>
               </article>
@@ -154,7 +160,7 @@ export function LandingPricing() {
                         <p className="mt-2.5 text-[34px] font-extrabold leading-none text-[var(--landing-ink-900)]">
                           {plan.price}
                           <span className="ml-1.5 text-[12px] font-semibold text-[var(--landing-ink-400)]">
-                            /mo
+                            /mo after beta
                           </span>
                         </p>
                         <p className="mt-2 text-[12.5px] text-[var(--landing-ink-500)]">
@@ -204,6 +210,10 @@ export function LandingPricing() {
                 </div>
               ))}
             </div>
+            <p className="mt-4 text-center text-[11.5px] leading-relaxed text-[var(--landing-ink-500)]">
+              There is no checkout, trial, renewal, cancellation fee, or refund process while
+              billing is inactive.
+            </p>
           </div>
         </div>
       </div>

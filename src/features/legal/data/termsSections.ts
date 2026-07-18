@@ -33,13 +33,13 @@ export const termsSections: LegalSection[] = [
   {
     heading: "Beta status and availability",
     body: [
-      "The service is provided as-is during the private beta. We work to keep it reliable, but we make no availability, uptime, or fitness guarantees while in beta. Keep your own copies of anything you cannot afford to lose — the export tools exist for that reason.",
+      "The service is provided as-is during the private beta. We work to keep it reliable, but we make no availability, uptime, or fitness guarantees while in beta. The approved-hours export covers reviewed timesheet records; contact us if you need a broader workspace export during the beta.",
     ],
   },
   {
     heading: "Ending the beta relationship",
     body: [
-      "You can stop using the service at any time. On request we will delete your workspace data; during the beta this is handled manually. We may suspend access that breaks these terms or puts other workspaces' data at risk.",
+      "You can stop using the service at any time. Contact us to request suspension, export, correction, or deletion. During the beta we verify the requester's authority, handle the request manually, and confirm the outcome, subject to any records we must retain by law. We may suspend access that breaks these terms or puts other workspaces' data at risk.",
     ],
   },
   {

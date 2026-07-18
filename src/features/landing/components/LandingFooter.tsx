@@ -1,10 +1,12 @@
+import { SUPPORT_MAILTO } from "@/config/commercial";
+
 const footerGroups = [
   {
     title: "Product",
     links: [
       { label: "Weekly rhythm", href: "#rhythm" },
       { label: "The workspace", href: "#product" },
-      { label: "AI support", href: "#ai" },
+      { label: "Manager support", href: "#ai" },
       { label: "Pricing", href: "#pricing" },
     ],
   },
@@ -12,7 +14,7 @@ const footerGroups = [
     title: "Company",
     links: [
       { label: "About" },
-      { label: "Contact", href: "mailto:docklistai@gmail.com" },
+      { label: "Contact", href: SUPPORT_MAILTO },
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
       { label: "Made in Scotland" },
@@ -92,7 +94,7 @@ export function LandingFooter() {
             </a>
             <p className="max-w-[340px] text-[13.5px] leading-[1.55] text-[var(--landing-cream-dim)]">
               The scheduling workspace for hospitality teams — rota, light workforce admin, and
-              manager-led AI support. Made in Scotland.
+              deterministic manager support. Made in Scotland.
             </p>
           </div>
 

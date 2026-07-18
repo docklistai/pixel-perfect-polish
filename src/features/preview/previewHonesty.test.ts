@@ -81,7 +81,8 @@ describe("preview containment honesty", () => {
   it("keeps Settings changes as preview and removes fake RBAC, security, billing, and export claims", () => {
     expect(settingsSource).toContain("Preview only — no workspace settings are persisted");
     expect(settingsSource).toContain("Preview security control");
-    expect(settingsSource).toContain("Sample plan");
+    expect(settingsSource).toContain("Sample usage");
+    expect(settingsSource).toContain("Indicative only");
     expect(settingsSource).not.toMatch(/Settings saved|Role duplicated|Role updated/i);
     expect(settingsSource).not.toMatch(/Your download will start shortly|Renews 8 Jul 2026/i);
     expect(settingsSource).not.toMatch(/Permission changes apply to everyone in this role/i);
