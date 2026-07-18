@@ -7,19 +7,7 @@
  */
 import * as React from "react";
 import { useRouterState } from "@tanstack/react-router";
-
-const ROUTE_LABELS: Record<string, string> = {
-  "/": "Home",
-  "/rota": "Rota",
-  "/staff": "Staff",
-  "/time": "Time and attendance",
-  "/leave": "Leave",
-  "/team": "Team",
-  "/ops": "Operations",
-  "/reports": "Reports",
-  "/settings": "Settings",
-  "/ui-kit": "UI kit",
-};
+import { getRouteLabel } from "./routeLabels";
 
 export function SkipToContent() {
   return (
@@ -34,13 +22,9 @@ export function SkipToContent() {
 
 export function RouteAnnouncer() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const matchedKey = Object.keys(ROUTE_LABELS)
-    .filter((k) => pathname === k || pathname.startsWith(k + "/"))
-    .sort((a, b) => b.length - a.length)[0];
-  const label = matchedKey ? ROUTE_LABELS[matchedKey] : "Page";
   return (
     <div role="status" aria-live="polite" className="sr-only">
-      {label}
+      {getRouteLabel(pathname)}
     </div>
   );
 }

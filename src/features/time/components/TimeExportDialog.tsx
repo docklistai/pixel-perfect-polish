@@ -1,10 +1,11 @@
-import { DialogShell, ActionButton } from "@/components/dl";
-import { Download, Info } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Download, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { StoredTimesheetRow } from "../types";
+import { ActionButton, DialogShell } from "@/components/dl";
 import { exportApprovedHoursFn } from "../api/timeLiveData";
-import { periodFilename, type ReviewPeriod } from "../lib/reviewPeriod";
 import { approvedRowsForExport } from "../lib/timeExport";
+import { periodFilename, type ReviewPeriod } from "../lib/reviewPeriod";
+import type { StoredTimesheetRow } from "../types";
 
 interface Props {
   open: boolean;
@@ -12,8 +13,16 @@ interface Props {
   rows: StoredTimesheetRow[];
   period: ReviewPeriod;
   source: "live" | "demo";
-  /** When set, the download uses the server-authoritative, audited export RPC. */
-  liveWorkspaceId?: string | null;
+  departmentId?: string;
+  departmentLabel: string;
+}
+
+interface PreviewRow {
+  id: string;
+  name: string;
+  approvedHours: string;
+  role: string;
+  department: string;
 }
 
 function csvCell(value: string): string {
@@ -35,60 +44,65 @@ export function TimeExportDialog({
   rows,
   period,
   source,
-  liveWorkspaceId,
+  departmentId,
+  departmentLabel,
 }: Props) {
-  const approvedRows = approvedRowsForExport(rows);
-  const periodLabel = period.label;
-  const filename = periodFilename(period);
   const isLive = source === "live";
-  const nothingApproved = approvedRows.length === 0;
+  const livePreview = useQuery({
+    queryKey: ["approved-hours-export-preview", period.startIso, period.endIso, departmentId],
+    queryFn: () =>
+      exportApprovedHoursFn({
+        data: {
+          startDate: period.startIso,
+          endDate: period.endIso,
+          ...(departmentId ? { departmentId } : {}),
+        },
+      }),
+    enabled: open && isLive,
+    staleTime: 0,
+  });
 
-  const handleDownload = async () => {
-    if (nothingApproved) {
+  const demoPreview: PreviewRow[] = approvedRowsForExport(rows).map((row) => ({
+    id: row.id,
+    name: row.n,
+    approvedHours: row.paid,
+    role: row.role,
+    department: row.department,
+  }));
+  const liveResult = livePreview.data;
+  const previewRows: PreviewRow[] =
+    isLive && liveResult?.ok
+      ? liveResult.rows.map((row) => ({
+          id: row.staffMemberId,
+          name: row.displayName,
+          approvedHours: row.approvedHours.toFixed(2),
+          role: row.roleName,
+          department: row.departmentName,
+        }))
+      : isLive
+        ? []
+        : demoPreview;
+  const previewError = isLive && liveResult && !liveResult.ok ? liveResult : null;
+  const previewPending = isLive && livePreview.isPending;
+  const nothingApproved = !previewPending && !previewError && previewRows.length === 0;
+
+  const handleDownload = () => {
+    if (previewRows.length === 0) {
       toast.info("Nothing to export", {
-        description: `No approved hours in ${periodLabel} yet.`,
+        description: `No approved hours in ${period.label} yet.`,
       });
       return;
     }
-    // Live: the audited, CSV-injection-safe RPC is the authoritative source.
-    if (liveWorkspaceId) {
-      const result = await exportApprovedHoursFn({
-        data: { workspaceId: liveWorkspaceId, startDate: period.startIso, endDate: period.endIso },
-      });
-      if (!result.ok) {
-        toast.error("Couldn't export", { description: result.message });
-        return;
-      }
-      const content = [
-        ["Employee ID", "Name", "Approved Hours", "Role", "Department"],
-        ...result.rows.map((row) => [
-          row.staffMemberId,
-          row.displayName,
-          row.approvedHours.toFixed(2),
-          row.roleName,
-          row.departmentName,
-        ]),
-      ]
-        .map((line) => line.map(csvCell).join(","))
-        .join("\n");
-      triggerCsvDownload(content, filename);
-      onOpenChange(false);
-      toast.success("CSV ready", {
-        description: `${result.rows.length} approved staff exported for ${periodLabel}.`,
-      });
-      return;
-    }
-
     const content = [
       ["Employee ID", "Name", "Approved Hours", "Role", "Department"],
-      ...approvedRows.map((row) => [row.id, row.n, row.paid, row.role, row.department]),
+      ...previewRows.map((row) => [row.id, row.name, row.approvedHours, row.role, row.department]),
     ]
       .map((line) => line.map(csvCell).join(","))
       .join("\n");
-    triggerCsvDownload(content, filename);
+    triggerCsvDownload(content, periodFilename(period));
     onOpenChange(false);
     toast.success("CSV ready", {
-      description: `${approvedRows.length} approved rows exported for ${periodLabel}.`,
+      description: `${previewRows.length} approved staff exported for ${period.label}.`,
     });
   };
 
@@ -97,7 +111,7 @@ export function TimeExportDialog({
       open={open}
       onOpenChange={onOpenChange}
       title="Export approved hours (CSV)"
-      description="Preview the file before downloading"
+      description={`${departmentLabel} · ${period.label}`}
       icon={Download}
       iconTone="brand"
       footer={
@@ -105,19 +119,23 @@ export function TimeExportDialog({
           <ActionButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
             Cancel
           </ActionButton>
-          <ActionButton size="sm" onClick={handleDownload} disabled={nothingApproved}>
+          <ActionButton
+            size="sm"
+            onClick={handleDownload}
+            disabled={previewPending || Boolean(previewError) || nothingApproved}
+          >
             <Download className="mr-1.5 h-3.5 w-3.5" /> Download CSV
           </ActionButton>
         </>
       }
     >
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="mb-4 grid grid-cols-3 gap-3">
         {[
-          { label: "Rows", value: `${approvedRows.length} rows` },
-          { label: "Period", value: periodLabel },
-          { label: "Format", value: "CSV · standard" },
-        ].map((stat, idx) => (
-          <div key={idx} className="rounded-2xl border border-border bg-muted/20 p-3 text-left">
+          { label: "Rows", value: previewPending ? "Checking…" : `${previewRows.length} rows` },
+          { label: "Scope", value: departmentLabel },
+          { label: "Format", value: "CSV · approved" },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-2xl border border-border bg-muted/20 p-3">
             <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               {stat.label}
             </div>
@@ -126,47 +144,59 @@ export function TimeExportDialog({
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-muted/10">
-        <div className="overflow-x-auto max-h-48">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-border bg-muted/20 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                <th className="px-3 py-2">Employee ID</th>
-                <th className="px-3 py-2">Name</th>
-                <th className="px-3 py-2">Approved Hours</th>
-                <th className="px-3 py-2">Role</th>
-              </tr>
-            </thead>
-            <tbody>
-              {approvedRows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-border/40 last:border-0 hover:bg-muted/10"
-                >
-                  <td className="px-3 py-2 font-mono text-muted-foreground">{row.id}</td>
-                  <td className="px-3 py-2 font-medium">{row.n}</td>
-                  <td className="px-3 py-2 font-mono">{row.paid}</td>
-                  <td className="px-3 py-2">{row.role}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {previewPending && (
+        <div role="status" className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Calculating approved hours…
         </div>
-      </div>
-
-      {nothingApproved && (
-        <div className="mt-4 rounded-xl border border-warning/40 bg-warning-soft p-2.5 text-[11px] text-warning">
-          No approved hours in {periodLabel} yet — approve entries before exporting.
+      )}
+      {previewError && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-danger/30 bg-danger-soft p-3 text-xs text-danger"
+        >
+          <p>{previewError.message}</p>
+          {previewError.referenceId && (
+            <p className="mt-1 font-mono">Reference: {previewError.referenceId}</p>
+          )}
+        </div>
+      )}
+      {!previewPending && !previewError && (
+        <div className="overflow-hidden rounded-2xl border border-border bg-muted/10">
+          <div className="max-h-48 overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr className="border-b border-border bg-muted/20 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <th className="px-3 py-2">Employee ID</th>
+                  <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Approved hours</th>
+                  <th className="px-3 py-2">Department</th>
+                </tr>
+              </thead>
+              <tbody>
+                {previewRows.map((row) => (
+                  <tr key={row.id} className="border-b border-border/40 last:border-0">
+                    <td className="px-3 py-2 font-mono text-muted-foreground">{row.id}</td>
+                    <td className="px-3 py-2 font-medium">{row.name}</td>
+                    <td className="px-3 py-2 font-mono">{row.approvedHours}</td>
+                    <td className="px-3 py-2">{row.department || "Not set"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
+      {nothingApproved && (
+        <div className="mt-4 rounded-xl border border-warning/40 bg-warning-soft p-2.5 text-[11px] text-warning">
+          No approved hours in {period.label} for {departmentLabel.toLowerCase()}.
+        </div>
+      )}
       <div className="mt-4 flex gap-2.5 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
-        <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          Only approved entries are included — this is an approved-hours CSV, not a payroll export.
-          {isLive
-            ? " Live totals are recalculated on the server for the whole workspace and may differ from this preview."
-            : ""}
+          This preview is the exact data used for the download. Only approved entries with complete
+          clock times are included; this is not a payroll export.
         </span>
       </div>
     </DialogShell>

@@ -4,6 +4,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface SignupConsentSectionProps {
   accepted: boolean;
   onAcceptedChange: (accepted: boolean) => void;
+  describedBy?: string;
+  invalid?: boolean;
 }
 
 /**
@@ -11,7 +13,12 @@ interface SignupConsentSectionProps {
  * a new tab so the half-filled signup form isn't lost. The accepted document
  * versions are recorded in signup metadata by the caller.
  */
-export function SignupConsentSection({ accepted, onAcceptedChange }: SignupConsentSectionProps) {
+export function SignupConsentSection({
+  accepted,
+  onAcceptedChange,
+  describedBy,
+  invalid = false,
+}: SignupConsentSectionProps) {
   return (
     <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
       <div className="flex items-start gap-3">
@@ -20,6 +27,8 @@ export function SignupConsentSection({ accepted, onAcceptedChange }: SignupConse
           checked={accepted}
           onCheckedChange={(checked) => onAcceptedChange(Boolean(checked))}
           aria-required="true"
+          aria-invalid={invalid}
+          aria-describedby={describedBy}
         />
         <label
           htmlFor="signup-consent"

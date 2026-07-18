@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -16,16 +17,35 @@ interface AuthFormFieldsProps {
 
 /** The shared sign-in / sign-up form body rendered inside both AuthForm variants. */
 export function AuthFormFields({ form }: AuthFormFieldsProps) {
+  const errorRef = React.useRef<HTMLDivElement>(null);
+  const formMessageId = form.authError || form.statusMessage ? "auth-form-message" : undefined;
+  const passwordDescriptionIds = [
+    form.isSignUp ? "auth-password-hint auth-password-rules" : "",
+    formMessageId ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  React.useEffect(() => {
+    if (form.authError) errorRef.current?.focus();
+  }, [form.authError]);
+
   return (
     <div className="space-y-5">
       {(form.statusMessage || form.authError) && (
-        <Alert variant={form.authError ? "destructive" : "default"}>
+        <Alert
+          ref={form.authError ? errorRef : undefined}
+          id="auth-form-message"
+          tabIndex={form.authError ? -1 : undefined}
+          variant={form.authError ? "destructive" : "default"}
+          className={form.authError ? "focus:outline-none" : undefined}
+        >
           <AlertTitle>{form.authError ? "Something went wrong" : "Note"}</AlertTitle>
           <AlertDescription>{form.authError || form.statusMessage}</AlertDescription>
         </Alert>
       )}
 
-      <form onSubmit={form.handleSubmit} className="space-y-4">
+      <form onSubmit={form.handleSubmit} className="space-y-4" aria-describedby={formMessageId}>
         {form.isSignUp && (
           <div className="space-y-2">
             <Label htmlFor="displayName">Display Name</Label>
@@ -36,6 +56,7 @@ export function AuthFormFields({ form }: AuthFormFieldsProps) {
               value={form.displayName}
               onChange={(e) => form.setDisplayName(e.target.value)}
               required={form.isSignUp}
+              aria-describedby={formMessageId}
               autoComplete="name"
             />
           </div>
@@ -49,8 +70,9 @@ export function AuthFormFields({ form }: AuthFormFieldsProps) {
             placeholder="your@email.com"
             value={form.email}
             onChange={(e) => form.setEmail(e.target.value)}
-            required={form.isSignUp}
+            required
             aria-invalid={Boolean(form.authError)}
+            aria-describedby={formMessageId}
             autoComplete="email"
           />
         </div>
@@ -63,15 +85,18 @@ export function AuthFormFields({ form }: AuthFormFieldsProps) {
             placeholder="Enter your password"
             value={form.password}
             onChange={(e) => form.setPassword(e.target.value)}
-            required={form.isSignUp}
+            required
             aria-invalid={Boolean(form.authError)}
+            aria-describedby={passwordDescriptionIds || undefined}
             minLength={form.isSignUp ? 8 : 1}
             autoComplete={form.isSignUp ? "new-password" : "current-password"}
           />
           {form.isSignUp && (
             <div className="mt-3 space-y-2">
-              <p className="text-xs text-muted-foreground">{PASSWORD_HINT}</p>
-              <PasswordChecklist password={form.password} />
+              <p id="auth-password-hint" className="text-xs text-muted-foreground">
+                {PASSWORD_HINT}
+              </p>
+              <PasswordChecklist id="auth-password-rules" password={form.password} />
             </div>
           )}
           {!form.isSignUp && (
@@ -91,6 +116,8 @@ export function AuthFormFields({ form }: AuthFormFieldsProps) {
           <SignupConsentSection
             accepted={form.consentAccepted}
             onAcceptedChange={form.setConsentAccepted}
+            describedBy={formMessageId}
+            invalid={Boolean(form.authError)}
           />
         )}
 

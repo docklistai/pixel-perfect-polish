@@ -82,15 +82,27 @@ export function PortalOneOffUnavailabilityCard() {
   const timezone = usePortalTimezone();
   const [date, setDate] = React.useState("");
   const [note, setNote] = React.useState("");
+  const [actionError, setActionError] = React.useState("");
+  const actionErrorRef = React.useRef<HTMLParagraphElement>(null);
   const [withdrawTarget, setWithdrawTarget] = React.useState<PortalOneOffUnavailability | null>(
     null,
   );
 
+  React.useEffect(() => {
+    if (actionError) actionErrorRef.current?.focus();
+  }, [actionError]);
+
   if (!state.enabled) return null;
   const minDate = timezone ? dateIsoInTimezone(new Date(), timezone) : undefined;
-  const submit = async () => {
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setActionError("");
     const result = await state.request(date, note.trim() || null);
-    if (!result.ok) return toast.error("Request not sent", { description: result.message });
+    if (!result.ok) {
+      setActionError(result.message);
+      toast.error("Request not sent", { description: result.message });
+      return;
+    }
     setDate("");
     setNote("");
     toast.success("Unavailability requested", { description: "Your manager will review it." });
@@ -112,33 +124,64 @@ export function PortalOneOffUnavailabilityCard() {
         Tell your manager about one date you cannot work. This is a scheduling constraint, not
         leave, and it affects planning only after approval.
       </p>
-      <div className="mt-3 grid gap-3">
-        <label className="grid gap-1 text-xs font-medium">
-          Date
+      <form
+        onSubmit={submit}
+        className="mt-3 grid gap-3"
+        aria-describedby={actionError ? "one-off-unavailability-error" : undefined}
+      >
+        <div className="grid gap-1">
+          <label htmlFor="one-off-unavailability-date" className="text-xs font-medium">
+            Date
+          </label>
           <input
+            id="one-off-unavailability-date"
             type="date"
             required
             min={minDate}
             value={date}
-            onChange={(event) => setDate(event.target.value)}
+            onChange={(event) => {
+              setDate(event.target.value);
+              setActionError("");
+            }}
+            aria-invalid={Boolean(actionError)}
+            aria-describedby={actionError ? "one-off-unavailability-error" : undefined}
             className="rounded-xl border border-border bg-card px-3 py-2 text-sm"
           />
-        </label>
-        <label className="grid gap-1 text-xs font-medium">
-          Note <span className="font-normal text-muted-foreground">(optional)</span>
+        </div>
+        <div className="grid gap-1">
+          <label htmlFor="one-off-unavailability-note" className="text-xs font-medium">
+            Note <span className="font-normal text-muted-foreground">(optional)</span>
+          </label>
           <textarea
+            id="one-off-unavailability-note"
             value={note}
-            onChange={(event) => setNote(event.target.value)}
+            onChange={(event) => {
+              setNote(event.target.value);
+              setActionError("");
+            }}
             maxLength={500}
             rows={2}
+            aria-invalid={Boolean(actionError)}
+            aria-describedby={actionError ? "one-off-unavailability-error" : undefined}
             className="resize-none rounded-xl border border-border bg-card px-3 py-2 text-sm"
             placeholder="Why you cannot work that date"
           />
-        </label>
-        <ActionButton disabled={!date || state.isSaving} onClick={() => void submit()}>
+        </div>
+        <ActionButton type="submit" disabled={state.isSaving}>
           Request unavailability
         </ActionButton>
-      </div>
+        {actionError && (
+          <p
+            ref={actionErrorRef}
+            id="one-off-unavailability-error"
+            role="alert"
+            tabIndex={-1}
+            className="text-xs text-danger focus:outline-none"
+          >
+            {actionError}
+          </p>
+        )}
+      </form>
       {state.isError && (
         <div role="alert" className="mt-3 text-xs text-danger">
           Requests could not be loaded.{" "}

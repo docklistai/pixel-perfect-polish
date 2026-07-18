@@ -23,10 +23,12 @@ const STATUS_HINT: Record<RecurringDayOffStatus, string> = {
 function WeekdayButton({
   cell,
   disabled,
+  describedBy,
   onToggle,
 }: {
   cell: WeekdayCell;
   disabled: boolean;
+  describedBy?: string;
   onToggle: (cell: WeekdayCell) => void;
 }) {
   const request = cell.request;
@@ -44,6 +46,7 @@ function WeekdayButton({
       title={title}
       aria-label={title}
       aria-pressed={request !== null}
+      aria-describedby={describedBy}
       className={`flex flex-col items-center gap-0.5 rounded-xl border px-0 py-2 text-[11px] font-semibold transition disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand ${chip}`}
     >
       <span>{cell.shortLabel}</span>
@@ -63,6 +66,7 @@ function WeekdayButton({
 export function PortalRecurringDaysOffCard() {
   const state = usePortalRecurringDaysOff();
   const [note, setNote] = React.useState("");
+  const [actionError, setActionError] = React.useState("");
 
   if (!state.enabled) {
     return (
@@ -81,11 +85,13 @@ export function PortalRecurringDaysOffCard() {
   const declined = state.requests.filter((request) => request.status === "declined");
 
   const toggle = async (cell: WeekdayCell) => {
+    setActionError("");
     const trimmed = note.trim();
     const result = cell.request
       ? await state.withdraw(cell.weekday)
       : await state.request(cell.weekday, trimmed.length > 0 ? trimmed : null);
     if (!result.ok) {
+      setActionError(result.message);
       toast.error("Couldn't update", { description: result.message });
       return;
     }
@@ -104,31 +110,52 @@ export function PortalRecurringDaysOffCard() {
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           Regular days off
         </div>
-        {state.isError && <span className="text-[11px] text-danger">Couldn&apos;t load</span>}
+        {state.isError && (
+          <span role="alert" className="text-[11px] text-danger">
+            Couldn&apos;t load
+          </span>
+        )}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
         Tap a day you can&apos;t work each week. Your manager approves it, and approved days show
         when they plan the rota.
       </p>
 
+      <label htmlFor="recurring-days-off-note" className="sr-only">
+        Optional reason for a regular day-off request
+      </label>
       <input
+        id="recurring-days-off-note"
         value={note}
-        onChange={(event) => setNote(event.target.value)}
+        onChange={(event) => {
+          setNote(event.target.value);
+          setActionError("");
+        }}
         placeholder="Optional reason (e.g. college on Thursdays)"
         maxLength={500}
+        aria-invalid={Boolean(actionError)}
+        aria-describedby={actionError ? "recurring-days-off-error" : undefined}
         className="mt-3 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm"
       />
 
-      <div className="mt-3 grid grid-cols-7 gap-1.5">
+      <fieldset className="mt-3 grid grid-cols-7 gap-1.5">
+        <legend className="sr-only">Choose regular days off</legend>
         {cells.map((cell) => (
           <WeekdayButton
             key={cell.weekday}
             cell={cell}
             disabled={state.isSaving || state.isLoading}
+            describedBy={actionError ? "recurring-days-off-error" : undefined}
             onToggle={(target) => void toggle(target)}
           />
         ))}
-      </div>
+      </fieldset>
+
+      {actionError && (
+        <p id="recurring-days-off-error" role="alert" className="mt-3 text-xs text-danger">
+          {actionError}
+        </p>
+      )}
 
       {declined.map((request) => (
         <p key={request.requestId} className="mt-2 text-[11px] text-muted-foreground">

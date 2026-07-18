@@ -30,7 +30,7 @@ function LandingPage() {
   return (
     <div className="landing-page min-h-dvh text-[var(--landing-ink)]">
       <LandingNavbar />
-      <main id="main-content" className="!p-0">
+      <main id="main-content" tabIndex={-1} className="!p-0 focus:outline-none">
         <LandingHero />
         <LandingWeeklyRhythm />
         <LandingProductProof />

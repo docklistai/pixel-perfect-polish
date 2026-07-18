@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
 const decisionSchema = z.object({
   requestId: z.string().uuid(),
@@ -9,12 +10,10 @@ const decisionSchema = z.object({
 export type ShiftReleaseDecisionInput = z.infer<typeof decisionSchema>;
 export type ShiftReleaseDecisionResult = { ok: true } | { ok: false; message: string };
 
-function decisionError(code: string | null, message: string | null): string {
-  if (code === "42501") return "You don't have manager access for this action.";
-  if (code === "P0002") return "That release request no longer exists.";
-  if (code === "22023") return message ?? "Check the decision note, then try again.";
-  if (code === "55000") return message ?? "That request can no longer be decided.";
-  return "We couldn't save the release decision. Please try again.";
+function decisionError(error: { code?: string | null; message?: string | null }): string {
+  if (error.code === "42501") return "You don't have manager access for this action.";
+  if (error.code === "P0002") return "That release request no longer exists.";
+  return toSafeBusinessMessage(error, "We couldn't save the release decision. Please try again.");
 }
 
 async function decide(
@@ -31,9 +30,7 @@ async function decide(
     p_request_id: data.requestId,
     p_note: data.note,
   });
-  return error
-    ? { ok: false, message: decisionError(error.code ?? null, error.message ?? null) }
-    : { ok: true };
+  return error ? { ok: false, message: decisionError(error) } : { ok: true };
 }
 
 export const approveShiftReleaseFn = createServerFn({ method: "POST" })

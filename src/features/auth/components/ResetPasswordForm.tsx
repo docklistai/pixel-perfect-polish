@@ -29,6 +29,11 @@ export function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [formError, setFormError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const formErrorRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (formError) formErrorRef.current?.focus();
+  }, [formError]);
 
   React.useEffect(() => {
     const explicitError = describeRecoveryLinkError(window.location);
@@ -147,28 +152,48 @@ export function ResetPasswordForm() {
   return (
     <div className="space-y-5">
       {formError && (
-        <Alert variant="destructive">
+        <Alert
+          ref={formErrorRef}
+          id="reset-password-error"
+          tabIndex={-1}
+          variant="destructive"
+          className="focus:outline-none"
+        >
           <AlertTitle>Password not updated</AlertTitle>
           <AlertDescription>{formError}</AlertDescription>
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        aria-describedby={formError ? "reset-password-error" : undefined}
+      >
         <div className="space-y-2">
           <Label htmlFor="reset-password">New password</Label>
           <Input
             id="reset-password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setFormError("");
+            }}
             required
             minLength={8}
             autoComplete="new-password"
             aria-invalid={Boolean(formError)}
+            aria-describedby={
+              formError
+                ? "reset-password-hint reset-password-rules reset-password-error"
+                : "reset-password-hint reset-password-rules"
+            }
           />
           <div className="mt-3 space-y-2">
-            <p className="text-xs text-muted-foreground">{PASSWORD_HINT}</p>
-            <PasswordChecklist password={password} />
+            <p id="reset-password-hint" className="text-xs text-muted-foreground">
+              {PASSWORD_HINT}
+            </p>
+            <PasswordChecklist id="reset-password-rules" password={password} />
           </div>
         </div>
 
@@ -178,11 +203,15 @@ export function ResetPasswordForm() {
             id="reset-password-confirm"
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setFormError("");
+            }}
             required
             minLength={8}
             autoComplete="new-password"
             aria-invalid={Boolean(formError)}
+            aria-describedby={formError ? "reset-password-error" : undefined}
           />
         </div>
 

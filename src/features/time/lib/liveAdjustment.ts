@@ -79,6 +79,9 @@ export function prepareAdjustment(
       },
     };
   } catch (error) {
+    // wallTimeToIso only ever throws its own hand-authored, specific text
+    // (e.g. a DST-gap explanation) — never a server or database round trip —
+    // so surfacing it verbatim is safe and more useful than a generic fallback.
     return {
       ok: false,
       message: error instanceof Error ? error.message : "Choose valid local clock times.",

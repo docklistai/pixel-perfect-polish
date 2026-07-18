@@ -30,8 +30,7 @@ interface Props {
   onReview: (row: StoredTimesheetRow) => void;
   onAdjust: (row: StoredTimesheetRow) => void;
   onToggleApprove: (row: StoredTimesheetRow) => void;
-  onToggleFlag: (row: StoredTimesheetRow) => void;
-  onPrepareReminder: (name: string) => void;
+  onToggleFlag?: (row: StoredTimesheetRow) => void;
   onViewRota: () => void;
   tab: TimesheetTab;
   onTabChange: (tab: TimesheetTab) => void;
@@ -70,7 +69,6 @@ export function TimesheetTable({
   onAdjust,
   onToggleApprove,
   onToggleFlag,
-  onPrepareReminder,
   onViewRota,
   tab,
   onTabChange,
@@ -178,7 +176,6 @@ export function TimesheetTable({
                       onAdjust={onAdjust}
                       onToggleApprove={onToggleApprove}
                       onToggleFlag={onToggleFlag}
-                      onPrepareReminder={onPrepareReminder}
                       onViewRota={onViewRota}
                     />
                   );

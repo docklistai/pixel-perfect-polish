@@ -120,6 +120,7 @@ function mapTimeRow(
     exc: firstException ? TIME_EXCEPTION_DEFINITIONS[firstException].label : "—",
     excTone: exceptionTone === "danger" ? "danger" : undefined,
     department: staff?.department ?? "—",
+    departmentId: staff?.departmentId ?? null,
     status: STATUS_MAP[row.approval_status],
     flagged: false,
     auditTrail: [],

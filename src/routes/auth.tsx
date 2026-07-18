@@ -108,7 +108,11 @@ function AuthPage() {
   };
 
   return (
-    <div className="relative min-h-dvh overflow-hidden">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="relative min-h-dvh overflow-hidden focus:outline-none"
+    >
       <img
         src={heroBg}
         alt=""
@@ -226,6 +230,6 @@ function AuthPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

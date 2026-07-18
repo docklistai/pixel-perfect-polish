@@ -128,4 +128,34 @@ describe("applyLiveCopyRows", () => {
       }),
     ).rejects.toThrow("original draft could not be restored");
   });
+
+  it("never lets a raw PostgREST/constraint failure reach the composed customer message", async () => {
+    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const rawInsertError = new Error(
+      'duplicate key value violates unique constraint "shifts_workspace_id_id_key"',
+    );
+
+    let thrown: Error | undefined;
+    try {
+      await applyLiveCopyRows({
+        nextRows: copyRows(),
+        currentRows: [currentShift()],
+        deleteCurrentRows: vi.fn().mockResolvedValue(undefined),
+        insertRows: vi.fn().mockRejectedValue(rawInsertError),
+        restoreRows: vi.fn().mockResolvedValue(undefined),
+      });
+    } catch (error) {
+      thrown = error as Error;
+    }
+
+    expect(thrown).toBeDefined();
+    expect(thrown!.message).not.toContain("constraint");
+    expect(thrown!.message).not.toContain("duplicate key");
+    expect(thrown!.message).not.toContain("shifts_workspace_id_id_key");
+    // An unrecognised failure still hands back a reference the customer can quote.
+    expect(thrown!.message).toMatch(/Reference: err-/);
+    // ...and it is logged server-side for support to look up by that reference.
+    expect(errorLog).toHaveBeenCalled();
+    errorLog.mockRestore();
+  });
 });

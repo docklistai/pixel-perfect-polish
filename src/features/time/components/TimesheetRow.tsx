@@ -1,4 +1,4 @@
-import { AlertTriangle, Bell, Calendar, CheckCircle2, Edit3, ExternalLink, X } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle2, Edit3, ExternalLink, X } from "lucide-react";
 import { StatusBadge } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 import { cn } from "@/lib/utils";
@@ -28,8 +28,7 @@ interface Props {
   onReview: (row: StoredTimesheetRow) => void;
   onAdjust: (row: StoredTimesheetRow) => void;
   onToggleApprove: (row: StoredTimesheetRow) => void;
-  onToggleFlag: (row: StoredTimesheetRow) => void;
-  onPrepareReminder: (name: string) => void;
+  onToggleFlag?: (row: StoredTimesheetRow) => void;
   onViewRota: () => void;
 }
 
@@ -43,7 +42,6 @@ export function TimesheetRow({
   onAdjust,
   onToggleApprove,
   onToggleFlag,
-  onPrepareReminder,
   onViewRota,
 }: Props) {
   const badge = statusBadge[status];
@@ -137,17 +135,16 @@ export function TimesheetRow({
               icon: status === "approved" ? X : CheckCircle2,
               onSelect: () => onToggleApprove(row),
             },
-            {
-              label: flagged ? "Remove flag" : "Flag for review",
-              icon: AlertTriangle,
-              onSelect: () => onToggleFlag(row),
-            },
-            { kind: "separator" },
-            {
-              label: "Prepare reminder",
-              icon: Bell,
-              onSelect: () => onPrepareReminder(row.n),
-            },
+            ...(onToggleFlag
+              ? [
+                  {
+                    label: flagged ? "Remove flag" : "Flag for review",
+                    icon: AlertTriangle,
+                    onSelect: () => onToggleFlag(row),
+                  } as const,
+                ]
+              : []),
+            { kind: "separator" as const },
             { label: "View rota", icon: Calendar, onSelect: onViewRota },
           ]}
         />

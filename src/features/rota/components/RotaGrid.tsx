@@ -8,6 +8,7 @@ import {
   type RotaGridDay,
   type ShiftActionHandlers,
 } from "./grid";
+import { useRotaGridNavigation } from "./grid/useRotaGridNavigation";
 import type {
   RotaGridOpenRow,
   RotaGridStaffRow,
@@ -62,6 +63,12 @@ export function RotaGrid({
   onShiftAdd?: ShiftActionHandlers["onShiftAdd"];
   onShiftUpdate?: ShiftActionHandlers["onShiftUpdate"];
 } & ShiftActionHandlers) {
+  const renderedBodyRows = staffRows.length > 0 ? staffRows.length : 1;
+  const openRowIndex = staffRows.length > 0 ? staffRows.length : 1;
+  const gridNavigation = useRotaGridNavigation({
+    maxRowIndex: openRowIndex,
+    dayCount: days.length,
+  });
   const handlers = React.useMemo<ShiftActionHandlers>(
     () => ({
       readOnly,
@@ -108,7 +115,6 @@ export function RotaGrid({
       }) as const,
     [],
   );
-
   return (
     <section
       role="region"
@@ -130,13 +136,21 @@ export function RotaGrid({
       >
         Interactive schedule grid for the week of {weekLabel}. Each shift tile includes the staff
         member, day, role, and status so screen readers can understand open shifts, conflicts, and
-        days off.
+        days off. Tab enters at staff search. Press Arrow Down to enter the rota cells, then use the
+        arrow keys to move. Press Enter or Space to open or add a shift.
       </p>
 
       <div className="w-full max-w-full min-w-0">
         <div className="max-h-[70dvh] w-full max-w-full min-w-0 overflow-auto overscroll-contain">
           <div
+            ref={gridNavigation.gridRef}
             data-rota-grid
+            role="grid"
+            aria-labelledby={scheduleTitleId}
+            aria-describedby={scheduleDescId}
+            aria-colcount={days.length + 1}
+            aria-rowcount={renderedBodyRows + 3}
+            onBlurCapture={gridNavigation.handleBlur}
             className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]"
           >
             <RotaGridHeader
@@ -145,6 +159,10 @@ export function RotaGrid({
               visibleStaffCount={visibleStaffCount}
               staffSearch={staffSearch}
               onStaffSearchChange={onStaffSearchChange}
+              searchIsTabStop={gridNavigation.searchIsTabStop}
+              onSearchFocus={gridNavigation.resetToSearch}
+              onEnterGrid={gridNavigation.focusFirstCell}
+              descriptionId={scheduleDescId}
             />
 
             {staffRows.length > 0 ? (
@@ -155,6 +173,9 @@ export function RotaGrid({
                   days={days}
                   handlers={handlers}
                   rowIndex={rowIndex}
+                  activeRowIndex={gridNavigation.activeRowIndex}
+                  activeDayIndex={gridNavigation.activeDayIndex}
+                  onCellFocus={gridNavigation.setActiveCell}
                 />
               ))
             ) : (
@@ -163,6 +184,10 @@ export function RotaGrid({
                 staffSearch={staffSearch}
                 hasActiveFilters={hasActiveFilters}
                 onClearFilters={onClearFilters}
+                isTabStop={
+                  gridNavigation.activeRowIndex === 0 && gridNavigation.activeDayIndex === 0
+                }
+                onCellFocus={() => gridNavigation.setActiveCell(0, 0)}
               />
             )}
 
@@ -171,9 +196,13 @@ export function RotaGrid({
               days={days}
               totalOpenShifts={totalOpenShifts}
               handlers={handlers}
-              rowIndex={staffRows.length}
+              rowIndex={openRowIndex}
+              ariaRowIndex={staffRows.length > 0 ? staffRows.length + 2 : 3}
+              activeRowIndex={gridNavigation.activeRowIndex}
+              activeDayIndex={gridNavigation.activeDayIndex}
+              onCellFocus={gridNavigation.setActiveCell}
             />
-            <RotaGridFooter days={days} />
+            <RotaGridFooter days={days} ariaRowIndex={renderedBodyRows + 3} />
           </div>
         </div>
       </div>

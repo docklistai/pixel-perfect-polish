@@ -2,6 +2,7 @@ import * as React from "react";
 import { UserMinus } from "lucide-react";
 import { ActionButton, DrawerShell, FormSection, StatusBadge } from "@/components/dl";
 import type { LeaveRequest } from "@/features/leave/types";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
@@ -147,11 +148,7 @@ export function ShiftDetailDrawer({
     } catch (error) {
       // The live persistence hook also raises a toast; keep the drawer open with
       // the entered fields and show the reason inline so the manager can retry.
-      setSaveError(
-        error instanceof Error && error.message
-          ? error.message
-          : "We couldn't save this shift. Please try again.",
-      );
+      setSaveError(toSafeBusinessMessage(error, "We couldn't save this shift. Please try again."));
     } finally {
       setSaving(false);
     }
@@ -164,9 +161,7 @@ export function ShiftDetailDrawer({
       await action(shift.id);
     } catch (error) {
       setSaveError(
-        error instanceof Error && error.message
-          ? error.message
-          : "We couldn't update this shift. Please try again.",
+        toSafeBusinessMessage(error, "We couldn't update this shift. Please try again."),
       );
     } finally {
       setSaving(false);

@@ -7,13 +7,11 @@ export function useRotaPublishAction({
   source,
   publish,
   closeDialog,
-  openStaffView,
 }: {
   eligibility: RotaPublishEligibility;
   source: "live" | "demo";
   publish: (acknowledgeConstraints: boolean) => Promise<unknown> | unknown;
   closeDialog: () => void;
-  openStaffView: () => void;
 }) {
   return React.useCallback(
     async (acknowledgeConstraints = false) => {
@@ -31,7 +29,6 @@ export function useRotaPublishAction({
             source === "live"
               ? "Staff see the published snapshot next time they open the app. Affected staff are notified."
               : "The demo snapshot is now visible in the demo staff portal.",
-          action: { label: "Open staff view", onClick: openStaffView },
         });
       } catch (error) {
         if (source !== "live") {
@@ -42,6 +39,6 @@ export function useRotaPublishAction({
         }
       }
     },
-    [closeDialog, eligibility, openStaffView, publish, source],
+    [closeDialog, eligibility, publish, source],
   );
 }

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
 export {
   fetchLeaveOperationalCountsFn,
@@ -52,10 +53,6 @@ export const decideLeaveRequestFn = createServerFn({ method: "POST" })
     const message =
       error.code === "42501"
         ? "You don't have manager access to decide this request."
-        : error.code === "55000"
-          ? (error.message ?? "This request can't change to that state right now.")
-          : error.code === "22023"
-            ? "Check the decision reason and try again."
-            : "We couldn't update the request. Please try again.";
+        : toSafeBusinessMessage(error, "We couldn't update the request. Please try again.");
     return { ok: false, message };
   });

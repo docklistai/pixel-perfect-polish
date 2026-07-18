@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Check, Plus } from "lucide-react";
 import { DialogShell, ActionButton } from "@/components/dl";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
 import type { MaybePromise } from "./grid";
@@ -89,11 +90,7 @@ export function AddShiftDrawer({
     } catch (error) {
       // The live persistence hook also raises a toast, but the drawer stays open
       // with the entered fields so the manager can read the reason and retry.
-      setSaveError(
-        error instanceof Error && error.message
-          ? error.message
-          : "We couldn't save this shift. Please try again.",
-      );
+      setSaveError(toSafeBusinessMessage(error, "We couldn't save this shift. Please try again."));
     } finally {
       setSaving(false);
     }

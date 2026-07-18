@@ -1,6 +1,5 @@
 import { toast } from "sonner";
 import {
-  Bell,
   Check,
   CheckCircle2,
   ChevronDown,
@@ -8,7 +7,6 @@ import {
   Calendar,
   Plus,
   Users,
-  Settings2,
   Sparkles,
 } from "lucide-react";
 import { ActionButton } from "@/components/dl";
@@ -47,6 +45,7 @@ interface Props {
   /** Workspace default timezone; anchors the "This week" boundary. */
   workspaceTimezone: string;
   team: string;
+  teamOptions: string[];
   setTeam: (team: string) => void;
   onOpenAssistant: () => void;
   onExport: () => void;
@@ -62,6 +61,7 @@ export function TimeHeaderActions({
   source,
   workspaceTimezone,
   team,
+  teamOptions,
   setTeam,
   onOpenAssistant,
   onExport,
@@ -110,7 +110,7 @@ export function TimeHeaderActions({
         }
         items={[
           { kind: "label", text: "Department" },
-          ...TEAM_OPTIONS.map((t) => ({
+          ...teamOptions.map((t) => ({
             label: t,
             icon: t === team ? Check : undefined,
             onSelect: () => {
@@ -143,23 +143,6 @@ export function TimeHeaderActions({
             label: "Approve all eligible pending",
             icon: CheckCircle2,
             onSelect: onApproveAllPending,
-          },
-          {
-            label: "Prepare reminders for missing clock-ins",
-            icon: Bell,
-            onSelect: () =>
-              toast.info("Reminder prepared", {
-                description: "Review before sending from the staff update flow.",
-              }),
-          },
-          { kind: "separator" },
-          {
-            label: "Column settings",
-            icon: Settings2,
-            onSelect: () =>
-              toast.info("Column settings", {
-                description: "Column customisation arrives in a later update.",
-              }),
           },
         ]}
       />

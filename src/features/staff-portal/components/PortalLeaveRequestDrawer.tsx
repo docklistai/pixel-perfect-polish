@@ -13,18 +13,15 @@ import {
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { usePortalProfile } from "../hooks/usePortalProfile";
 import { submitLeaveRequestFn } from "../api/portalActions";
-import { validatePortalLeaveDates } from "../lib/portalLeaveValidation";
+import {
+  localIsoDate,
+  validatePortalLeaveRequest,
+  type PortalLeaveValidationError,
+} from "../lib/portalLeaveValidation";
 
 const portalRouteApi = getRouteApi("/portal");
 
 /** Local (workspace-facing) yyyy-mm-dd for sensible, non-past default dates. */
-function localIsoDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 /** UI leave-type labels → the RPC's `leave_type` enum. */
 const LEAVE_TYPE_TO_RPC: Record<string, "annual_leave" | "personal" | "sick" | "unpaid" | "other"> =
   {
@@ -48,8 +45,11 @@ export function PortalLeaveRequestDrawer({
   const [endIso, setEndIso] = React.useState(() => localIsoDate(new Date()));
   const [leaveType, setLeaveType] = React.useState("Annual leave");
   const [reason, setReason] = React.useState("");
-  const [dateError, setDateError] = React.useState<string | null>(null);
+  const [validationError, setValidationError] = React.useState<PortalLeaveValidationError | null>(
+    null,
+  );
   const [submitting, setSubmitting] = React.useState(false);
+  const errorSummaryRef = React.useRef<HTMLDivElement>(null);
 
   // Live submissions persist through the RPC; the demo path mutates the
   // WorkspaceStore so the Harbour View playground keeps working offline.
@@ -94,11 +94,24 @@ export function PortalLeaveRequestDrawer({
   const close = () => {
     onOpenChange(false);
     setReason("");
-    setDateError(null);
+    setValidationError(null);
   };
 
   const submit = async () => {
     if (submitting) return;
+
+    const nextValidationError = validatePortalLeaveRequest({
+      startIso,
+      endIso,
+      todayIso: localIsoDate(new Date()),
+      reason,
+    });
+    if (nextValidationError) {
+      setValidationError(nextValidationError);
+      window.requestAnimationFrame(() => errorSummaryRef.current?.focus());
+      return;
+    }
+    setValidationError(null);
 
     if (!liveWorkspaceId) {
       echoToStore();
@@ -108,22 +121,6 @@ export function PortalLeaveRequestDrawer({
       });
       return;
     }
-
-    if (reason.trim().length === 0) {
-      toast.error("Add a note", { description: "A short reason is required for your request." });
-      return;
-    }
-
-    const nextDateError = validatePortalLeaveDates({
-      startIso,
-      endIso,
-      todayIso: localIsoDate(new Date()),
-    });
-    if (nextDateError) {
-      setDateError(nextDateError);
-      return;
-    }
-    setDateError(null);
 
     if (!profile) {
       toast.error("Profile not loaded", { description: "Please wait a moment and try again." });
@@ -180,6 +177,17 @@ export function PortalLeaveRequestDrawer({
         </>
       }
     >
+      {validationError && (
+        <div
+          ref={errorSummaryRef}
+          id="portal-leave-error-summary"
+          role="alert"
+          tabIndex={-1}
+          className="mb-4 rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger"
+        >
+          Check your request: {validationError.message}
+        </div>
+      )}
       <FormSection title="Details">
         <FormRow label="Type" htmlFor="portal-leave-type">
           <select
@@ -202,10 +210,14 @@ export function PortalLeaveRequestDrawer({
             min={localIsoDate(new Date())}
             onChange={(event) => {
               setStartIso(event.target.value);
-              setDateError(null);
+              setValidationError(null);
             }}
+            required
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
-            aria-invalid={Boolean(dateError)}
+            aria-invalid={validationError?.field === "dates"}
+            aria-describedby={
+              validationError?.field === "dates" ? "portal-leave-date-error" : undefined
+            }
           />
         </FormRow>
         <FormRow label="To" htmlFor="portal-leave-to">
@@ -216,14 +228,18 @@ export function PortalLeaveRequestDrawer({
             min={startIso || localIsoDate(new Date())}
             onChange={(event) => {
               setEndIso(event.target.value);
-              setDateError(null);
+              setValidationError(null);
             }}
+            required
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
-            aria-invalid={Boolean(dateError)}
+            aria-invalid={validationError?.field === "dates"}
+            aria-describedby={
+              validationError?.field === "dates" ? "portal-leave-date-error" : undefined
+            }
           />
-          {dateError && (
-            <p role="alert" className="text-[11px] text-danger">
-              {dateError}
+          {validationError?.field === "dates" && (
+            <p id="portal-leave-date-error" className="text-[11px] text-danger">
+              {validationError.message}
             </p>
           )}
         </FormRow>
@@ -232,10 +248,23 @@ export function PortalLeaveRequestDrawer({
             id="portal-leave-note"
             rows={3}
             value={reason}
-            onChange={(event) => setReason(event.target.value)}
+            onChange={(event) => {
+              setReason(event.target.value);
+              if (validationError?.field === "reason") setValidationError(null);
+            }}
             placeholder="Add a short note about your request"
+            required
+            aria-invalid={validationError?.field === "reason"}
+            aria-describedby={
+              validationError?.field === "reason" ? "portal-leave-reason-error" : undefined
+            }
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
           />
+          {validationError?.field === "reason" && (
+            <p id="portal-leave-reason-error" className="text-[11px] text-danger">
+              {validationError.message}
+            </p>
+          )}
         </FormRow>
       </FormSection>
     </DrawerShell>

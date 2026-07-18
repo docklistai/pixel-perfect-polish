@@ -7,8 +7,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
       .open(CACHE_VERSION)
-      .then((cache) => cache.add(new Request(OFFLINE_URL, { cache: "reload" })))
-      .then(() => self.skipWaiting()),
+      .then((cache) => cache.add(new Request(OFFLINE_URL, { cache: "reload" }))),
   );
 });
 

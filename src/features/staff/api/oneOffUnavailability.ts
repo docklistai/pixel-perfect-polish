@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
 export type ManagerOneOffUnavailability = {
   id: string;
@@ -70,6 +71,8 @@ export const decideOneOffUnavailabilityFn = createServerFn({ method: "POST" })
     });
     if (!error) return { ok: true };
     if (error.code === "P0002") return { ok: false, message: "That request no longer exists." };
-    if (error.code === "55000") return { ok: false, message: error.message };
-    return { ok: false, message: "We couldn't save the decision. Please try again." };
+    return {
+      ok: false,
+      message: toSafeBusinessMessage(error, "We couldn't save the decision. Please try again."),
+    };
   });

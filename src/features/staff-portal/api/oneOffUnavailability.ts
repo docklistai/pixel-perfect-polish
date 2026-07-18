@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
 export type OneOffUnavailabilityStatus = "pending" | "approved" | "declined" | "withdrawn";
 
@@ -44,12 +45,13 @@ export async function fetchPortalOneOffUnavailability(
 
 export type OneOffWriteResult = { ok: true } | { ok: false; message: string };
 
-function writeError(code: string | null, message: string | null): string {
-  if (code === "42501") return "You don't have staff access to manage this request.";
-  if (code === "22023") return message ?? "Check the date and note, then try again.";
-  if (code === "P0002") return "That request is no longer available.";
-  if (code === "55000") return message ?? "That request can no longer be changed here.";
-  return "We couldn't save your unavailability request. Please try again.";
+function writeError(error: { code?: string | null; message?: string | null }): string {
+  if (error.code === "42501") return "You don't have staff access to manage this request.";
+  if (error.code === "P0002") return "That request is no longer available.";
+  return toSafeBusinessMessage(
+    error,
+    "We couldn't save your unavailability request. Please try again.",
+  );
 }
 
 const requestSchema = z.object({
@@ -67,9 +69,7 @@ export const requestOneOffUnavailabilityFn = createServerFn({ method: "POST" })
       p_date: data.date,
       p_note: data.note,
     });
-    return error
-      ? { ok: false, message: writeError(error.code ?? null, error.message ?? null) }
-      : { ok: true };
+    return error ? { ok: false, message: writeError(error) } : { ok: true };
   });
 
 const withdrawSchema = z.object({
@@ -85,7 +85,5 @@ export const withdrawOneOffUnavailabilityFn = createServerFn({ method: "POST" })
       p_workspace_id: data.workspaceId,
       p_date: data.date,
     });
-    return error
-      ? { ok: false, message: writeError(error.code ?? null, error.message ?? null) }
-      : { ok: true };
+    return error ? { ok: false, message: writeError(error) } : { ok: true };
   });

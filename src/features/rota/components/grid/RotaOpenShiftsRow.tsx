@@ -9,16 +9,28 @@ export function RotaOpenShiftsRow({
   totalOpenShifts,
   handlers,
   rowIndex,
+  ariaRowIndex,
+  activeRowIndex,
+  activeDayIndex,
+  onCellFocus,
 }: {
   openRow: RotaGridOpenRow;
   days: RotaGridDay[];
   totalOpenShifts: number;
   handlers: ShiftActionHandlers;
   rowIndex: number;
+  ariaRowIndex: number;
+  activeRowIndex: number | null;
+  activeDayIndex: number | null;
+  onCellFocus: (rowIndex: number, dayIndex: number) => void;
 }) {
   return (
-    <>
-      <div className="flex items-center gap-3 border-b border-border bg-background px-4 py-3.5 sticky left-0 z-10">
+    <div role="row" aria-rowindex={ariaRowIndex} className="contents">
+      <div
+        role="rowheader"
+        aria-colindex={1}
+        className="flex items-center gap-3 border-b border-border bg-background px-4 py-3.5 sticky left-0 z-10"
+      >
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning">
           <AlertTriangle className="h-4 w-4" aria-hidden />
         </div>
@@ -44,9 +56,11 @@ export function RotaOpenShiftsRow({
           staffRole="FOH"
           dayIndex={dayIndex}
           rowIndex={rowIndex}
-          emptyAriaLabel={`Open shifts, ${days[dayIndex]?.d ?? ""}: none`}
+          cellLabel={"Open shifts, " + (days[dayIndex]?.d ?? "")}
+          isTabStop={activeRowIndex === rowIndex && activeDayIndex === dayIndex}
+          onFocus={onCellFocus}
         />
       ))}
-    </>
+    </div>
   );
 }

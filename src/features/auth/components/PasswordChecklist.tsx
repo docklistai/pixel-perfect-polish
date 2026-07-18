@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 
 interface PasswordChecklistProps {
+  id?: string;
   password: string;
 }
 
@@ -10,9 +11,13 @@ const rules = [
   { label: "One number", test: (p: string) => /\d/.test(p) },
 ];
 
-export function PasswordChecklist({ password }: PasswordChecklistProps) {
+export function PasswordChecklist({ id, password }: PasswordChecklistProps) {
   return (
-    <ul className="space-y-1 text-xs text-muted-foreground" aria-label="Password requirements">
+    <ul
+      id={id}
+      className="space-y-1 text-xs text-muted-foreground"
+      aria-label="Password requirements"
+    >
       {rules.map((rule) => {
         const met = rule.test(password);
         return (

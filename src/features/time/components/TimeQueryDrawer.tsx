@@ -1,5 +1,4 @@
-import { Check, ChevronRight, Clock, Edit3, ExternalLink } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronRight, Clock, Edit3 } from "lucide-react";
 import { DrawerShell, ActionButton, StatusBadge, FormSection, DetailRow } from "@/components/dl";
 import type { TimeQuery } from "../types";
 
@@ -21,16 +20,6 @@ export function TimeQueryDrawer({ query, onClose, onOpenTimesheet, onAddAdjustme
   const quickActions = [
     { label: "Open timesheet entry", icon: Clock, onClick: onOpenTimesheet },
     { label: "Add adjustment", icon: Edit3, onClick: onAddAdjustment },
-    {
-      label: "Review full timesheet",
-      icon: ExternalLink,
-      onClick: () => {
-        onClose();
-        toast.info("Timesheet", {
-          description: `${query.n}'s full timesheet shown in the table.`,
-        });
-      },
-    },
   ];
 
   return (
@@ -43,34 +32,9 @@ export function TimeQueryDrawer({ query, onClose, onOpenTimesheet, onAddAdjustme
         <StatusBadge tone={query.stTone === "danger" ? "danger" : "info"}>{query.st}</StatusBadge>
       }
       footer={
-        <>
-          <ActionButton variant="ghost" size="sm" onClick={onClose}>
-            Close
-          </ActionButton>
-          <ActionButton
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              onClose();
-              toast.info("Kept under review", {
-                description: `${query.n}'s query stays open — revisit when the timesheet is reviewed.`,
-              });
-            }}
-          >
-            Keep under review
-          </ActionButton>
-          <ActionButton
-            size="sm"
-            onClick={() => {
-              onClose();
-              toast.success("Query resolved", {
-                description: `${query.n}'s hours query marked as resolved.`,
-              });
-            }}
-          >
-            <Check className="mr-1.5 h-3.5 w-3.5" /> Mark resolved
-          </ActionButton>
-        </>
+        <ActionButton variant="ghost" size="sm" onClick={onClose}>
+          Close
+        </ActionButton>
       }
     >
       <FormSection title="Query details">

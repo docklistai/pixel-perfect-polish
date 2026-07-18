@@ -74,7 +74,6 @@ function TimePage() {
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
-  const [reminderFor, setReminderFor] = React.useState<string | null>(null);
   const [approveSuggestedOpen, setApproveSuggestedOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
   const [addEntryOpen, setAddEntryOpen] = React.useState(false);
@@ -83,6 +82,17 @@ function TimePage() {
   const [tab, setTab] = React.useState<TimesheetTab>("all");
   const [query, setQuery] = React.useState("");
   const [team, setTeam] = React.useState(TEAM_OPTIONS[0]!);
+
+  const teamOptions = React.useMemo(
+    () =>
+      timeSource === "demo"
+        ? TEAM_OPTIONS
+        : ["All teams", ...new Set(rawRows.map((row) => row.department).filter(Boolean))],
+    [rawRows, timeSource],
+  );
+  React.useEffect(() => {
+    if (!teamOptions.includes(team)) setTeam("All teams");
+  }, [team, teamOptions]);
 
   // Live rows carry a work date and are scoped to the selected period; demo rows
   // have no date and represent a single coherent week, so they pass through.
@@ -100,6 +110,10 @@ function TimePage() {
   );
   const time = useTimeController(periodRows, teamRows, timeSource);
   const canExport = canExportApprovedHours(teamRows);
+  const exportDepartmentId =
+    timeSource === "live" && team !== "All teams"
+      ? (periodRows.find((row) => row.department === team)?.departmentId ?? undefined)
+      : undefined;
 
   const filtered = React.useMemo(() => {
     return teamRows.filter((r) => {
@@ -150,6 +164,7 @@ function TimePage() {
             source={timeSource}
             workspaceTimezone={workspaceTz}
             team={team}
+            teamOptions={teamOptions}
             setTeam={setTeam}
             onOpenAssistant={openAiDrawer}
             onExport={() => setExportOpen(true)}
@@ -189,9 +204,11 @@ function TimePage() {
               >
                 <Check className="h-3.5 w-3.5" aria-hidden /> Approve {time.selectedIds.size}
               </button>
-              <button type="button" className="btn secondary sm" onClick={time.flagSelection}>
-                <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Flag
-              </button>
+              {timeSource === "demo" && (
+                <button type="button" className="btn secondary sm" onClick={time.flagSelection}>
+                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Flag
+                </button>
+              )}
               <button type="button" className="btn ghost sm" onClick={time.clearSelection}>
                 Clear
               </button>
@@ -211,8 +228,7 @@ function TimePage() {
             onReview={setReviewRow}
             onAdjust={setAdjustRow}
             onToggleApprove={time.toggleApprove}
-            onToggleFlag={time.toggleFlag}
-            onPrepareReminder={setReminderFor}
+            onToggleFlag={timeSource === "demo" ? time.toggleFlag : undefined}
             onViewRota={() => navigate({ to: "/rota" })}
             tab={tab}
             onTabChange={setTab}
@@ -228,7 +244,6 @@ function TimePage() {
           source={timeSource}
           onApproveSuggested={() => setApproveSuggestedOpen(true)}
           onOpenAssistant={openAiDrawer}
-          onPrepareReminder={setReminderFor}
           onOpenQuery={setQueryRow}
           rows={teamRows}
         />
@@ -283,17 +298,6 @@ function TimePage() {
         }}
       />
       <ConfirmDialog
-        open={!!reminderFor}
-        onOpenChange={(o) => !o && setReminderFor(null)}
-        title={`Prepare reminder for ${reminderFor ?? ""}?`}
-        description={`A staff-facing reminder draft will be prepared for ${reminderFor ?? "them"}. Nothing is shared automatically — you review it in the staff update flow before it becomes staff-facing.`}
-        confirmLabel="Prepare reminder"
-        onConfirm={() => {
-          setReminderFor(null);
-          toast.info("Reminder prepared", { description: "Review before sending." });
-        }}
-      />
-      <ConfirmDialog
         open={approveSuggestedOpen}
         onOpenChange={setApproveSuggestedOpen}
         title={`Approve ${time.suggestedRows.length} timesheets?`}
@@ -323,7 +327,8 @@ function TimePage() {
         rows={teamRows}
         period={period}
         source={timeSource}
-        liveWorkspaceId={liveWorkspaceId}
+        departmentId={exportDepartmentId}
+        departmentLabel={team === "All teams" ? "Whole workspace" : team}
       />
     </AppShell>
   );

@@ -1,4 +1,3 @@
-import * as React from "react";
 import { RotaGridCell } from "./RotaGridCell";
 import type { RotaGridDay, ShiftActionHandlers } from "./types";
 import type { RotaGridStaffRow as RotaGridStaffRowData } from "../../types";
@@ -8,15 +7,25 @@ export function RotaStaffRow({
   days,
   handlers,
   rowIndex,
+  activeRowIndex,
+  activeDayIndex,
+  onCellFocus,
 }: {
   row: RotaGridStaffRowData;
   days: RotaGridDay[];
   handlers: ShiftActionHandlers;
   rowIndex: number;
+  activeRowIndex: number | null;
+  activeDayIndex: number | null;
+  onCellFocus: (rowIndex: number, dayIndex: number) => void;
 }) {
   return (
-    <React.Fragment>
-      <div className="flex items-center gap-2.5 border-b border-border px-3 py-3 sticky left-0 z-10 bg-background">
+    <div role="row" aria-rowindex={rowIndex + 2} className="contents">
+      <div
+        role="rowheader"
+        aria-colindex={1}
+        className="flex items-center gap-2.5 border-b border-border px-3 py-3 sticky left-0 z-10 bg-background"
+      >
         <img
           src={`https://i.pravatar.cc/64?img=${row.staff.img}`}
           alt=""
@@ -44,9 +53,11 @@ export function RotaStaffRow({
           staffRole={row.staff.role}
           dayIndex={dayIndex}
           rowIndex={rowIndex}
-          emptyAriaLabel={`${row.staff.name}, ${days[dayIndex]?.d ?? ""}: no shift`}
+          cellLabel={row.staff.name + ", " + (days[dayIndex]?.d ?? "")}
+          isTabStop={activeRowIndex === rowIndex && activeDayIndex === dayIndex}
+          onFocus={onCellFocus}
         />
       ))}
-    </React.Fragment>
+    </div>
   );
 }

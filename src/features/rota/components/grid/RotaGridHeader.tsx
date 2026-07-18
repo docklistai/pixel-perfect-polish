@@ -8,25 +8,37 @@ export function RotaGridHeader({
   visibleStaffCount,
   staffSearch,
   onStaffSearchChange,
+  searchIsTabStop,
+  onSearchFocus,
+  onEnterGrid,
+  descriptionId,
 }: {
   days: RotaGridDay[];
   staffCount: number;
   visibleStaffCount: number;
   staffSearch: string;
   onStaffSearchChange: (value: string) => void;
+  searchIsTabStop: boolean;
+  onSearchFocus: () => void;
+  onEnterGrid: () => void;
+  descriptionId: string;
 }) {
   return (
-    <>
+    <div role="row" aria-rowindex={1} className="contents">
       <StaffSearchHeader
         staffCount={staffCount}
         visibleStaffCount={visibleStaffCount}
         staffSearch={staffSearch}
         onStaffSearchChange={onStaffSearchChange}
+        searchIsTabStop={searchIsTabStop}
+        onSearchFocus={onSearchFocus}
+        onEnterGrid={onEnterGrid}
+        descriptionId={descriptionId}
       />
-      {days.map((day) => (
-        <DayHeader key={day.d} day={day} />
+      {days.map((day, dayIndex) => (
+        <DayHeader key={day.d} day={day} dayIndex={dayIndex} />
       ))}
-    </>
+    </div>
   );
 }
 
@@ -35,14 +47,26 @@ function StaffSearchHeader({
   visibleStaffCount,
   staffSearch,
   onStaffSearchChange,
+  searchIsTabStop,
+  onSearchFocus,
+  onEnterGrid,
+  descriptionId,
 }: {
   staffCount: number;
   visibleStaffCount: number;
   staffSearch: string;
   onStaffSearchChange: (value: string) => void;
+  searchIsTabStop: boolean;
+  onSearchFocus: () => void;
+  onEnterGrid: () => void;
+  descriptionId: string;
 }) {
   return (
-    <div className="rota-staff-header sticky top-0 left-0 z-30 bg-background border-b border-border px-4 py-3">
+    <div
+      role="columnheader"
+      aria-colindex={1}
+      className="rota-staff-header sticky top-0 left-0 z-30 bg-background border-b border-border px-4 py-3"
+    >
       <div className="text-xs font-semibold uppercase text-muted-foreground">
         Staff{" "}
         <span className="font-mono font-normal tabular-nums">
@@ -54,17 +78,27 @@ function StaffSearchHeader({
         <SearchField
           placeholder="Search..."
           aria-label="Search staff in rota"
+          aria-describedby={descriptionId}
           value={staffSearch}
           onChange={(event) => onStaffSearchChange(event.target.value)}
+          tabIndex={searchIsTabStop ? 0 : -1}
+          onFocus={onSearchFocus}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowDown") return;
+            event.preventDefault();
+            onEnterGrid();
+          }}
         />
       </div>
     </div>
   );
 }
 
-function DayHeader({ day }: { day: RotaGridDay }) {
+function DayHeader({ day, dayIndex }: { day: RotaGridDay; dayIndex: number }) {
   return (
     <div
+      role="columnheader"
+      aria-colindex={dayIndex + 2}
       className={`rota-day-header sticky top-0 z-20 border-b border-l bg-background px-3 py-3 ${
         day.isToday ? "border-brand/30" : "border-border"
       }`}

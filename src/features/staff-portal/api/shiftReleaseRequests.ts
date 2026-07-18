@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 import type { ShiftReleaseStatus } from "../lib/shiftReleaseRequests";
 
 export interface PortalShiftReleaseRequest {
@@ -81,12 +82,10 @@ export async function fetchPortalShiftReleaseRequests(
 
 export type ShiftReleaseWriteResult = { ok: true } | { ok: false; message: string };
 
-function writeError(code: string | null, message: string | null): string {
-  if (code === "42501") return "You don't have staff access to request this release.";
-  if (code === "22023") return message ?? "Enter a valid reason, then try again.";
-  if (code === "P0002") return "That published shift is no longer available.";
-  if (code === "55000") return message ?? "This shift can no longer be released.";
-  return "We couldn't update the release request. Please try again.";
+function writeError(error: { code?: string | null; message?: string | null }): string {
+  if (error.code === "42501") return "You don't have staff access to request this release.";
+  if (error.code === "P0002") return "That published shift is no longer available.";
+  return toSafeBusinessMessage(error, "We couldn't update the release request. Please try again.");
 }
 
 const requestSchema = z.object({
@@ -104,9 +103,7 @@ export const requestShiftReleaseFn = createServerFn({ method: "POST" })
       p_published_shift_id: data.publishedShiftId,
       p_reason: data.reason,
     });
-    return error
-      ? { ok: false, message: writeError(error.code ?? null, error.message ?? null) }
-      : { ok: true };
+    return error ? { ok: false, message: writeError(error) } : { ok: true };
   });
 
 const withdrawSchema = z.object({
@@ -122,7 +119,5 @@ export const withdrawShiftReleaseFn = createServerFn({ method: "POST" })
       p_workspace_id: data.workspaceId,
       p_request_id: data.requestId,
     });
-    return error
-      ? { ok: false, message: writeError(error.code ?? null, error.message ?? null) }
-      : { ok: true };
+    return error ? { ok: false, message: writeError(error) } : { ok: true };
   });

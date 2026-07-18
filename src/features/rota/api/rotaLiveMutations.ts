@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { reportServerError, toSafeBusinessMessage } from "@/lib/safe-errors";
 import type { DraftShiftInput } from "../types";
 import {
   addIsoDays,
@@ -183,9 +184,18 @@ export const publishLiveRotaWeekFn = createServerFn({ method: "POST" })
     if (error) {
       // Publication refusals carry the exact reason the manager must see
       // ("a selected applicant now has approved leave for the shift", "the
-      // published rota changed…"). A raw PostgrestError loses its message in
-      // server-function serialisation, leaving a misleading generic toast.
-      throw new Error(error.message || "The rota could not be published.");
+      // published rota changed…"), which the RPC authors as safe text. A raw
+      // PostgrestError loses its message in server-function serialisation, so
+      // it must be re-thrown as a plain Error either way; toSafeBusinessMessage
+      // decides whether that text is safe to keep verbatim. Anything else is
+      // an unexpected failure: log it server-side and hand back a reference.
+      const businessMessage = toSafeBusinessMessage(error, "");
+      if (businessMessage) throw new Error(businessMessage);
+      const failure = reportServerError(error, {
+        operation: "rota.publish_week",
+        fallbackMessage: "The rota could not be published.",
+      });
+      throw new Error(`${failure.message} Reference: ${failure.referenceId}`);
     }
     return result as {
       snapshot_id: string;

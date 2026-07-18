@@ -80,6 +80,9 @@ export function prepareManualEntry(input: ManualEntryInput): PreparedManualEntry
     const clockOutDate = input.finishesNextDay ? addOneDay(workDate) : workDate;
     clockedOutAt = wallTimeToIso(clockOutDate, outField.hours, outField.minutes, input.timezone);
   } catch (error) {
+    // wallTimeToIso only ever throws its own hand-authored, specific text
+    // (e.g. a DST-gap explanation) — never a server or database round trip —
+    // so surfacing it verbatim is safe and more useful than a generic fallback.
     return invalid(error instanceof Error ? error.message : "Choose valid local clock times.");
   }
   const durationMinutes = workedMinutes(clockedInAt, clockedOutAt);

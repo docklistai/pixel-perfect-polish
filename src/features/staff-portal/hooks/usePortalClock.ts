@@ -1,6 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/useWorkspaceStore";
 import {
@@ -15,9 +14,9 @@ import {
   portalTimeWindowStart,
   type PortalClockEventType,
 } from "../api/portalLiveData";
-import { staffClockEventFn } from "../api/portalActions";
 import type { ClockEntry } from "../types";
 import { usePortalTimezone } from "./usePortalTimezone";
+import { usePortalClockAction } from "./usePortalClockAction";
 
 const portalRouteApi = getRouteApi("/portal");
 
@@ -32,7 +31,10 @@ export type PortalClock = {
   entries: ClockEntry[];
   isLoading: boolean;
   isError: boolean;
+  isActionPending: boolean;
+  actionError: string | null;
   retry: () => void;
+  retryAction: () => void;
   clockIn: () => void;
   clockOut: () => void;
   toggleBreak: () => void;
@@ -72,6 +74,13 @@ export function usePortalClock(): PortalClock {
     staleTime: 15_000,
   });
 
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: entriesKey }),
+      queryClient.invalidateQueries({ queryKey: eventsKey }),
+    ]);
+  const clockAction = usePortalClockAction({ workspaceId, refresh });
+
   const isLive = queryEnabled && entriesQuery.isSuccess && eventsQuery.isSuccess;
   const retry = () => {
     void entriesQuery.refetch();
@@ -88,7 +97,10 @@ export function usePortalClock(): PortalClock {
       entries: [],
       isLoading: !entriesQuery.isError && !eventsQuery.isError,
       isError: entriesQuery.isError || eventsQuery.isError,
+      isActionPending: false,
+      actionError: null,
       retry,
+      retryAction: () => undefined,
       clockIn: () => undefined,
       clockOut: () => undefined,
       toggleBreak: () => undefined,
@@ -106,7 +118,10 @@ export function usePortalClock(): PortalClock {
       entries: demoEntries,
       isLoading: false,
       isError: false,
+      isActionPending: false,
+      actionError: null,
       retry: () => undefined,
+      retryAction: () => undefined,
       clockIn: () => portalClockIn(store),
       clockOut: () => portalClockOut(store),
       toggleBreak: () => portalToggleBreak(store),
@@ -129,28 +144,6 @@ export function usePortalClock(): PortalClock {
         )
     : 0;
 
-  const refresh = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: entriesKey }),
-      queryClient.invalidateQueries({ queryKey: eventsKey }),
-    ]);
-
-  const run = (eventType: PortalClockEventType, timeEntryId: string | null) => {
-    void staffClockEventFn({ data: { workspaceId: workspaceId!, eventType, timeEntryId } })
-      .then((result) => {
-        if (!result.ok) {
-          toast.error("Clock action failed", { description: result.message });
-          return;
-        }
-        void refresh();
-      })
-      .catch((error: unknown) => {
-        toast.error("Clock action failed", {
-          description: error instanceof Error ? error.message : "Please try again.",
-        });
-      });
-  };
-
   return {
     source: "live",
     clockedIn: open !== null,
@@ -168,13 +161,16 @@ export function usePortalClock(): PortalClock {
     entries: timeEntries.filter((entry) => entry.id !== open?.id),
     isLoading: false,
     isError: false,
+    isActionPending: clockAction.isPending,
+    actionError: clockAction.error,
     retry,
-    clockIn: () => run("clock_in", null),
+    retryAction: clockAction.retry,
+    clockIn: () => clockAction.run("clock_in", null),
     clockOut: () => {
-      if (open) run("clock_out", open.id);
+      if (open) clockAction.run("clock_out", open.id);
     },
     toggleBreak: () => {
-      if (open) run(openBreakBalance > 0 ? "break_end" : "break_start", open.id);
+      if (open) clockAction.run(openBreakBalance > 0 ? "break_end" : "break_start", open.id);
     },
   };
 }

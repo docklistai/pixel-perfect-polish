@@ -10,6 +10,7 @@ import {
 import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalClock } from "../hooks/usePortalClock";
 import { formatPortalElapsed } from "../lib/portalElapsed";
+import { PortalClockFeedback } from "./PortalClockFeedback";
 import { PortalRotaReadState } from "./PortalRotaReadState";
 
 export function TimeTab() {
@@ -37,6 +38,7 @@ export function TimeTab() {
   const missingEntry = entries.find((e) => e.flag === "missing-clock-out");
 
   const onToggle = () => {
+    if (clock.isActionPending) return;
     if (clockedIn) {
       clockOut();
       setNow(Date.now());
@@ -55,23 +57,7 @@ export function TimeTab() {
           onRetry={rota.retry}
         />
       )}
-      {clock.isLoading && (
-        <div role="status" className="text-sm text-muted-foreground">
-          Loading your clock…
-        </div>
-      )}
-      {clock.isError && (
-        <FeedbackBanner
-          tone="warning"
-          title="Your clock is unavailable"
-          description="Try again before clocking in or changing a break."
-          action={
-            <ActionButton variant="secondary" size="sm" onClick={clock.retry}>
-              Try again
-            </ActionButton>
-          }
-        />
-      )}
+      <PortalClockFeedback clock={clock} />
       <DashboardCard className="p-5">
         <div className="flex items-center justify-between">
           <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
@@ -110,7 +96,13 @@ export function TimeTab() {
             <button
               type="button"
               onClick={onToggle}
-              disabled={clock.isLoading || clock.isError || (!clockInAvailable && !clockedIn)}
+              disabled={
+                clock.isLoading ||
+                clock.isError ||
+                clock.isActionPending ||
+                (!clockInAvailable && !clockedIn)
+              }
+              aria-busy={clock.isActionPending}
               className={`relative flex h-[220px] w-[220px] items-center justify-center rounded-full border-0 text-white shadow-[0_18px_44px_rgba(14,165,162,.42)] ${
                 clockedIn
                   ? "bg-[linear-gradient(135deg,#0EA5A2_0%,#0B7A78_100%)]"
@@ -125,13 +117,15 @@ export function TimeTab() {
                   <PlayCircle className="h-9 w-9" />
                 )}
                 <span className="text-[22px] font-bold leading-none">
-                  {!displayShift
-                    ? "No shift"
-                    : clockedIn
-                      ? "Clock out"
-                      : clockInAvailable
-                        ? "Clock in"
-                        : "Not available"}
+                  {clock.isActionPending
+                    ? "Savingâ€¦"
+                    : !displayShift
+                      ? "No shift"
+                      : clockedIn
+                        ? "Clock out"
+                        : clockInAvailable
+                          ? "Clock in"
+                          : "Not available"}
                 </span>
                 <span className="text-[11px] font-medium text-white/85">
                   {clockedIn
@@ -169,6 +163,8 @@ export function TimeTab() {
               variant="secondary"
               icon={Coffee}
               onClick={toggleBreak}
+              disabled={clock.isActionPending}
+              aria-busy={clock.isActionPending}
               className="w-full justify-center"
             >
               {onBreak ? "End break" : "Start break"}

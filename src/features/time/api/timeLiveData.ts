@@ -82,13 +82,34 @@ export const exportApprovedHoursFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => exportInput.parse(input))
   .handler(async ({ data }): Promise<ExportResult> => {
     const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
+    let workspaceId: string;
+    try {
+      workspaceId = await requireActiveManagerWorkspaceId(supabase);
+    } catch {
+      return { ok: false, message: describeWriteError("42501") };
+    }
     const { data: rows, error } = await supabase.rpc("rpc_export_approved_hours", {
-      p_workspace_id: data.workspaceId,
+      p_workspace_id: workspaceId,
       p_start_date: data.startDate,
       p_end_date: data.endDate,
+      p_department_id: data.departmentId ?? null,
     });
-    if (error) return { ok: false, message: describeWriteError(error.code) };
+    if (error) {
+      if (["22023", "42501", "P0002"].includes(error.code)) {
+        return { ok: false, message: describeWriteError(error.code) };
+      }
+      const { reportServerError } = await import("@/lib/safe-errors");
+      return {
+        ok: false,
+        ...reportServerError(error, {
+          operation: "export_approved_hours",
+          fallbackMessage: describeWriteError(error.code),
+        }),
+      };
+    }
     return {
       ok: true,
       rows: ((rows as ExportRowRaw[] | null) ?? []).map((row) => ({

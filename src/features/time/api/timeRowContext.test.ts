@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { selectPublishedVenueLocationIds } from "./timeRowContext";
+import { selectPublishedVenueLocationIds } from "./publishedVenueSelection";
 
 describe("selectPublishedVenueLocationIds", () => {
   it("uses the latest immutable row matching the stored schedule", () => {
     const selected = selectPublishedVenueLocationIds(
       [
         {
-          staff_member_id: "staff",
           shift_id: "shift",
           scheduled_start_at: "2026-07-14T08:00:00Z",
           scheduled_end_at: "2026-07-14T16:00:00Z",
@@ -48,7 +47,6 @@ describe("selectPublishedVenueLocationIds", () => {
     const selected = selectPublishedVenueLocationIds(
       [
         {
-          staff_member_id: "staff",
           shift_id: "shift",
           scheduled_start_at: "2026-07-14T08:00:00Z",
           scheduled_end_at: "2026-07-14T16:00:00Z",

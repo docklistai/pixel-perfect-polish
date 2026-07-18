@@ -1,5 +1,4 @@
-import { ArrowRight, Bell, CheckCircle2, Info, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { CheckCircle2, Info, Sparkles } from "lucide-react";
 import { Card } from "@/components/dl";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
 import { timeQueries } from "../data/timeDemoData";
@@ -10,7 +9,6 @@ interface Props {
   source: "live" | "demo";
   onApproveSuggested: () => void;
   onOpenAssistant: () => void;
-  onPrepareReminder: (name: string) => void;
   onOpenQuery: (query: TimeQuery) => void;
   rows: StoredTimesheetRow[];
 }
@@ -29,7 +27,6 @@ export function TimeRightRail({
   source,
   onApproveSuggested,
   onOpenAssistant,
-  onPrepareReminder,
   onOpenQuery,
   rows,
 }: Props) {
@@ -163,11 +160,9 @@ export function TimeRightRail({
               <span className="badge red">{missedClockIns.length}</span>
             </div>
             {missedClockIns.map((p) => (
-              <button
+              <div
                 key={p.id}
-                type="button"
-                onClick={() => onPrepareReminder(p.n)}
-                className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left transition hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left"
               >
                 <img
                   src={`https://i.pravatar.cc/64?img=${p.img}`}
@@ -178,13 +173,7 @@ export function TimeRightRail({
                   <div className="text-sm font-medium">{p.n}</div>
                   <div className="text-[11px] text-muted-foreground">Today · {p.sched}</div>
                 </div>
-                <span
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted/60 hover:text-foreground"
-                  title={`Prepare reminder for ${p.n}`}
-                >
-                  <Bell className="h-3.5 w-3.5" aria-hidden />
-                </span>
-              </button>
+              </div>
             ))}
           </Card>
 
@@ -221,17 +210,6 @@ export function TimeRightRail({
                 <span className={`badge ${p.stTone === "danger" ? "red" : "blue"}`}>{p.st}</span>
               </button>
             ))}
-            <div className="card-foot">
-              <button
-                type="button"
-                className="link txt-sm inline-flex items-center gap-1"
-                onClick={() =>
-                  toast.info("Hours queries", { description: "All open queries are shown." })
-                }
-              >
-                View all <ArrowRight className="h-3 w-3" aria-hidden />
-              </button>
-            </div>
           </Card>
         </>
       )}

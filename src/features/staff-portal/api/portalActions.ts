@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
 /**
  * Staff-side portal write actions. Every write goes through a SECURITY DEFINER
@@ -147,17 +148,10 @@ const withdrawOpenShiftSchema = z.object({
  * republished…", "this shift is in the past") that staff need verbatim;
  * anything else gets a neutral fallback.
  */
-function describeOpenShiftError(sqlState: string | null, message: string | null): string {
-  switch (sqlState) {
-    case "42501":
-      return "Only staff members can request open shifts.";
-    case "P0002":
-      return "That open shift is no longer on the published rota.";
-    case "55000":
-      return message ?? "That request isn't valid right now.";
-    default:
-      return "We couldn't update your request. Please try again.";
-  }
+function describeOpenShiftError(error: { code?: string | null; message?: string | null }): string {
+  if (error.code === "42501") return "Only staff members can request open shifts.";
+  if (error.code === "P0002") return "That open shift is no longer on the published rota.";
+  return toSafeBusinessMessage(error, "We couldn't update your request. Please try again.");
 }
 
 /**
@@ -179,7 +173,7 @@ export const requestOpenShiftFn = createServerFn({ method: "POST" })
     if (error) {
       return {
         ok: false,
-        message: describeOpenShiftError(error.code ?? null, error.message ?? null),
+        message: describeOpenShiftError(error),
       };
     }
     return { ok: true };
@@ -200,7 +194,7 @@ export const withdrawOpenShiftRequestFn = createServerFn({ method: "POST" })
     if (error) {
       return {
         ok: false,
-        message: describeOpenShiftError(error.code ?? null, error.message ?? null),
+        message: describeOpenShiftError(error),
       };
     }
     return { ok: true };

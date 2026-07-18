@@ -5,6 +5,7 @@ import {
   formatTimeInTimezone,
   liveWeekLabel,
 } from "../lib/liveRotaDates";
+import { reportServerError, toSafeBusinessMessage } from "@/lib/safe-errors";
 
 export type LiveCopySourceShiftRow = {
   location_id: string;
@@ -103,8 +104,17 @@ export function buildLiveCopyPreview({
   };
 }
 
-function messageOf(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown database error";
+// This module only ever runs inside a server-function handler
+// (copyPreviousLiveRotaWeekServer.ts), so reportServerError's console.error
+// lands in a real server log, never the browser.
+function messageOf(error: unknown, operation: string): string {
+  const businessMessage = toSafeBusinessMessage(error, "");
+  if (businessMessage) return businessMessage;
+  const failure = reportServerError(error, {
+    operation,
+    fallbackMessage: "an unexpected database error",
+  });
+  return `${failure.message} (Reference: ${failure.referenceId})`;
 }
 
 export async function applyLiveCopyRows({
@@ -131,15 +141,15 @@ export async function applyLiveCopyRows({
         await restoreRows(currentRows);
       } catch (restoreError) {
         throw new Error(
-          `Previous week was not copied, and the original draft could not be restored. Refresh this rota before editing again. Insert failed: ${messageOf(insertError)}. Restore failed: ${messageOf(restoreError)}.`,
+          `Previous week was not copied, and the original draft could not be restored. Refresh this rota before editing again. Insert failed: ${messageOf(insertError, "rota.copy_previous_week.insert")}. Restore failed: ${messageOf(restoreError, "rota.copy_previous_week.restore")}.`,
         );
       }
       throw new Error(
-        `Previous week was not copied. The original draft was restored. Insert failed: ${messageOf(insertError)}.`,
+        `Previous week was not copied. The original draft was restored. Insert failed: ${messageOf(insertError, "rota.copy_previous_week.insert")}.`,
       );
     }
     throw new Error(
-      `Previous week was not copied. This week had no draft shifts to restore. Insert failed: ${messageOf(insertError)}.`,
+      `Previous week was not copied. This week had no draft shifts to restore. Insert failed: ${messageOf(insertError, "rota.copy_previous_week.insert")}.`,
     );
   }
 }

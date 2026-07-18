@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { useOverlays } from "@/components/AppShortcuts";
 import { useRotaDraftController } from "./useRotaDraftController";
@@ -24,7 +23,6 @@ import { LIVE_UNSUPPORTED_OVERLAYS, MUTATING_OVERLAYS } from "../lib/rotaOverlay
 export function useRotaPage(week: number | undefined, location: string | undefined) {
   const rota = useRotaDraftController(location ?? null);
   const history = useRotaHistory(rota);
-  const navigate = useNavigate();
 
   useRotaWeekSearch(week, rota.setWeekOffset);
 
@@ -134,7 +132,6 @@ export function useRotaPage(week: number | undefined, location: string | undefin
     source: rota.source,
     publish: rota.handlePublish,
     closeDialog: () => overlays.setOverlay("publish", false),
-    openStaffView: () => navigate({ to: "/portal" }),
   });
 
   const guardedRota = useGuardedRotaController(history.controller, readOnly, actions.block);

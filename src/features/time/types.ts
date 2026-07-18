@@ -34,6 +34,8 @@ export interface StoredTimesheetRow extends TimesheetRow {
    */
   staffMemberId?: string;
   department: string;
+  /** Workspace-owned department id used for server-authoritative export scope. */
+  departmentId?: string | null;
   status: TimesheetStatus;
   flagged: boolean;
   auditTrail: TimeAuditEntry[];

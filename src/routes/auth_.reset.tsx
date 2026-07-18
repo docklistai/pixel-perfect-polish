@@ -23,7 +23,11 @@ export const Route = createFileRoute("/auth_/reset")({
 
 function ResetPasswordPage() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-8">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-dvh items-center justify-center bg-background px-4 py-8 focus:outline-none"
+    >
       <div className="w-full max-w-md">
         <div className="rounded-2xl border border-border/50 bg-background/95 p-6 shadow-2xl sm:p-8">
           <div className="mb-5 text-center">
@@ -44,6 +48,6 @@ function ResetPasswordPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

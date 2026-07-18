@@ -49,11 +49,16 @@ export const adjustInput = z.object({
   reason: z.string().trim().min(1).max(2000),
 });
 
-export const exportInput = z.object({
-  workspaceId: z.string().uuid(),
-  startDate: isoDate,
-  endDate: isoDate,
-});
+export const exportInput = z
+  .object({
+    startDate: isoDate,
+    endDate: isoDate,
+    departmentId: z.string().uuid().optional(),
+  })
+  .refine((value) => value.startDate <= value.endDate, {
+    message: "startDate must be on or before endDate",
+    path: ["endDate"],
+  });
 
 export type TimeWriteResult = { ok: true } | { ok: false; message: string };
 
@@ -66,4 +71,6 @@ export type ExportRow = {
   approvedHours: number;
 };
 
-export type ExportResult = { ok: true; rows: ExportRow[] } | { ok: false; message: string };
+export type ExportResult =
+  | { ok: true; rows: ExportRow[] }
+  | { ok: false; message: string; referenceId?: string };

@@ -119,6 +119,7 @@ function ShiftPill({
       <div className="group relative">
         <button
           type="button"
+          tabIndex={-1}
           onClick={() => handlers.onOpen(shift.id)}
           onDoubleClick={(event) => event.stopPropagation()}
           onContextMenu={(e) => {
@@ -158,6 +159,7 @@ function ShiftPill({
     <div className="group relative">
       <button
         type="button"
+        tabIndex={-1}
         onClick={() => handlers.onOpen(shift.id)}
         onDoubleClick={(event) => event.stopPropagation()}
         onContextMenu={(e) => {

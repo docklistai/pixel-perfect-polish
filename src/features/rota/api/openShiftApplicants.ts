@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
 /**
  * Manager-side open-shift applicant reads and decisions. Reads run under the
@@ -36,18 +37,13 @@ export type ApplicantDecisionResult = { ok: true } | { ok: false; message: strin
  * The phase-27 RPCs raise revalidation reasons the manager needs verbatim
  * ("the applicant has approved leave on that day", "the published rota
  * changed after this request…"); anything else gets a neutral fallback.
+ * toSafeBusinessMessage only passes the RPC's own text through for the
+ * codes it hand-authors, and only if it doesn't look like raw internals.
  */
-function describeDecisionError(sqlState: string | null, message: string | null): string {
-  switch (sqlState) {
-    case "42501":
-      return "You don't have manager access for this action.";
-    case "P0002":
-      return "This request no longer exists in the workspace.";
-    case "55000":
-      return message ?? "That decision isn't valid for the current request state.";
-    default:
-      return "We couldn't apply the decision. Please try again.";
-  }
+function describeDecisionError(error: { code?: string | null; message?: string | null }): string {
+  if (error.code === "42501") return "You don't have manager access for this action.";
+  if (error.code === "P0002") return "This request no longer exists in the workspace.";
+  return toSafeBusinessMessage(error, "We couldn't apply the decision. Please try again.");
 }
 
 interface RequestRow {
@@ -125,7 +121,7 @@ export const selectOpenShiftApplicantFn = createServerFn({ method: "POST" })
     if (error) {
       return {
         ok: false,
-        message: describeDecisionError(error.code ?? null, error.message ?? null),
+        message: describeDecisionError(error),
       };
     }
     return { ok: true };
@@ -150,7 +146,7 @@ export const declineOpenShiftRequestFn = createServerFn({ method: "POST" })
     if (error) {
       return {
         ok: false,
-        message: describeDecisionError(error.code ?? null, error.message ?? null),
+        message: describeDecisionError(error),
       };
     }
     return { ok: true };
