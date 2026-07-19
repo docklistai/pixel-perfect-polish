@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
+import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import {
   AppShell,
   PageHeader,
@@ -25,10 +26,10 @@ import {
   quickGroups,
 } from "@/features/team/data/teamDemoData";
 import type { TeamAnnouncement, TeamBirthdayItem, TeamTrainingItem } from "@/features/team/types";
-import { requireManagerAccess } from "@/features/auth";
+import { requirePreviewSurface } from "@/features/auth";
 
 export const Route = createFileRoute("/team")({
-  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  beforeLoad: ({ context }) => requirePreviewSurface(context.auth),
   head: () => ({ meta: [{ title: "Team — Docklist" }] }),
   component: TeamPage,
 });
@@ -139,11 +140,7 @@ function TeamPage() {
           <div className="space-y-4">
             {/* Header info */}
             <div className="flex items-center gap-3">
-              <img
-                src={`https://i.pravatar.cc/64?img=${selectedBirthday.img}`}
-                className="h-12 w-12 rounded-full object-cover shrink-0"
-                alt=""
-              />
+              <StaffMonogram name={selectedBirthday.n} size="lg" />
               <div>
                 <div className="text-sm font-semibold text-foreground">{selectedBirthday.n}</div>
                 <div className="text-xs text-muted-foreground">Team Member</div>

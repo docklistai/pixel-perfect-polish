@@ -5,7 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { clearAuthStateCache, redirectActiveMembers } from "@/features/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { resetIdentityScopedClientState, redirectActiveMembers } from "@/features/auth";
 import { claimPortalAccessFn } from "@/features/auth/api/portalClaim";
 
 export const Route = createFileRoute("/portal_/access")({
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/portal_/access")({
 function PortalAccessPage() {
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [workspaceCode, setWorkspaceCode] = React.useState("");
   const [staffCode, setStaffCode] = React.useState("");
   const [mode, setMode] = React.useState<"initial" | "recovery">("initial");
@@ -53,7 +55,8 @@ function PortalAccessPage() {
         setError(result.message);
         return;
       }
-      clearAuthStateCache();
+      // Claim/recovery binds a new principal — drop anything cached before it.
+      await resetIdentityScopedClientState(queryClient);
       await router.invalidate();
       await navigate({ to: "/portal" });
     } catch {

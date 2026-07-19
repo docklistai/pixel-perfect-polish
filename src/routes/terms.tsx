@@ -22,7 +22,7 @@ function TermsPage() {
     <LegalPage
       title="Terms of Service"
       version={LEGAL_VERSIONS.terms}
-      intro="These are the plain-language terms for using DocklistAI during the private beta. By creating an account or claiming staff access you agree to them."
+      intro="These are the plain-language terms for using DocklistAI during the private beta. Managers and owners accept them when creating an account. Staff portal access is arranged by a workspace's managers — staff are not currently asked to accept these terms themselves."
       sections={termsSections}
     />
   );

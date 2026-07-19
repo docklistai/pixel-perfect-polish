@@ -14,8 +14,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog, DashboardCard } from "@/components/dl";
-import { clearAuthStateCache } from "@/features/auth";
+import { resetIdentityScopedClientState } from "@/features/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import { usePortalProfile } from "../hooks/usePortalProfile";
 import { PortalProfileDrawer } from "./PortalProfileDrawer";
@@ -30,6 +31,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
   const [confirmSignOut, setConfirmSignOut] = React.useState(false);
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
     try {
@@ -39,7 +41,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       toast.error("Sign-out failed", { description: "Please try again." });
       return;
     }
-    clearAuthStateCache();
+    await resetIdentityScopedClientState(queryClient);
     await router.invalidate();
     await navigate({ to: "/portal/access" });
   };

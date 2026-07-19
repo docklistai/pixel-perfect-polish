@@ -1,10 +1,8 @@
 import * as React from "react";
-import { staff } from "../data/mockData";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
 import { DEFAULT_ROTA_FILTERS } from "../lib/rotaFilters";
 import { getCurrentWeekDayIndex, getWeekDayLabels, getWeekDateIsoLabels } from "../lib/weekHelpers";
 import * as liveDates from "../lib/liveRotaDates";
-import { visibleLiveRoster } from "../lib/rotaRoster";
 import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
   buildDayStats,
@@ -19,6 +17,7 @@ import {
   workingTimeAlerts,
 } from "../lib/rotaSummaries";
 import { useRotaWeekDrafts } from "./useRotaWeekDrafts";
+import { useRotaGridSources } from "./useRotaGridSources";
 import { useRotaLiveData } from "./useRotaLiveData";
 import { useRotaLivePersistence } from "./useRotaLivePersistence";
 import { useRotaConfirmations } from "./useRotaConfirmations";
@@ -42,16 +41,14 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
   });
 
   const readOnly = live.enabled && !live.isLive;
-  const fullRoster = live.isLive ? live.staff : staff;
-  const assignableStaff = live.isLive ? live.assignableStaff : staff;
-  const sourceShifts = live.isLive ? live.shifts : weekDraft.draftShifts;
-  const leaveRequests = live.isLive ? live.leaveRequests : demoLeaveRequests;
+  const { roster, fullRoster, assignableStaff, sourceShifts, leaveRequests } = useRotaGridSources(
+    live,
+    readOnly,
+    weekDraft.draftShifts,
+    demoLeaveRequests,
+  );
   const liveActions = live.isLive ? livePersistence : null;
   const confirmations = liveActions ? liveConfirmations : weekDraft;
-  const roster = React.useMemo(() => {
-    if (!live.isLive) return fullRoster;
-    return visibleLiveRoster(fullRoster, assignableStaff, sourceShifts);
-  }, [live.isLive, fullRoster, assignableStaff, sourceShifts]);
 
   const dayIsoDates = React.useMemo(() => {
     if (live.isLive && live.weekStart) {
@@ -102,9 +99,16 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
   return {
     ...weekDraft,
     weekLabel:
-      live.isLive && live.weekStart ? liveDates.liveWeekLabel(live.weekStart) : weekDraft.weekLabel,
+      live.isLive && live.weekStart
+        ? liveDates.liveWeekLabel(live.weekStart)
+        : readOnly
+          ? live.isError
+            ? "Rota week unavailable"
+            : "Loading week…"
+          : weekDraft.weekLabel,
     source: live.source,
     readOnly,
+    retryLive: live.retry,
     isLiveLoading: live.isLoading,
     isLiveError: live.isError,
     isLiveLeaveLoading: live.isLeaveLoading,

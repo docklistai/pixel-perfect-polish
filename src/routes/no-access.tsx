@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BootstrapWorkspaceForm } from "@/features/auth/components/BootstrapWorkspaceForm";
 import { WorkspaceSelectionCard } from "@/features/auth/components/WorkspaceSelectionCard";
-import { clearAuthStateCache, requireNoWorkspaceState } from "@/features/auth";
+import { useQueryClient } from "@tanstack/react-query";
+import { resetIdentityScopedClientState, requireNoWorkspaceState } from "@/features/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 
 export const Route = createFileRoute("/no-access")({
@@ -18,6 +19,7 @@ function NoAccessPage() {
   const { auth } = Route.useRouteContext();
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [signingOut, setSigningOut] = React.useState(false);
 
   const handleSignOut = async () => {
@@ -30,7 +32,7 @@ function NoAccessPage() {
       setSigningOut(false);
       return;
     }
-    clearAuthStateCache();
+    await resetIdentityScopedClientState(queryClient);
     await router.invalidate();
     await navigate({ to: "/auth" });
   };

@@ -55,8 +55,13 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
   { label: "Team", to: "/team", icon: MessageSquare, preview: true },
   { label: "Ops", to: "/ops", icon: Wrench, preview: true },
   { label: "Reports", to: "/reports", icon: BarChart3, preview: true },
-  { label: "Settings", to: "/settings", icon: SettingsIcon, preview: true },
+  { label: "Settings", to: "/settings", icon: SettingsIcon },
 ];
+
+/** Nav entries for the current surface: the live pilot hides preview routes. */
+export function visibleCommandNavItems(pilot: boolean): CommandNavItem[] {
+  return pilot ? COMMAND_NAV_ITEMS.filter((item) => !item.preview) : COMMAND_NAV_ITEMS;
+}
 
 export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   {

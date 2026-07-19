@@ -1,5 +1,6 @@
 import { Users, Info } from "lucide-react";
 import { Card } from "@/components/dl";
+import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { toneBg } from "../types";
 import type { TeamTrainingItem, TeamBirthdayItem, TeamEventItem, TeamGroup } from "../types";
 
@@ -56,11 +57,7 @@ export function TeamRightRail({
               onClick={() => onSelectBirthday?.(person)}
               className="flex w-full items-center gap-3 py-2 border-t first:border-t-0 border-border text-left hover:bg-muted/40 transition-colors px-2 -mx-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <img
-                src={`https://i.pravatar.cc/64?img=${person.img}`}
-                className="h-8 w-8 rounded-full object-cover shrink-0"
-                alt=""
-              />
+              <StaffMonogram name={person.n} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium">{person.n}</div>
               </div>

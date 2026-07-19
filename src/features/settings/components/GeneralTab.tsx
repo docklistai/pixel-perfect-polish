@@ -1,5 +1,6 @@
 import * as React from "react";
 import { toast } from "sonner";
+import { isPilotSurface } from "@/config/pilot";
 import {
   DensityButton,
   FieldLabel,
@@ -11,6 +12,7 @@ import {
 } from "./SettingsPrimitives";
 
 export function GeneralTab({ onDirty }: { onDirty: () => void }) {
+  const pilot = isPilotSurface();
   const [theme, setTheme] = useThemePreference();
   const [density, setDensity] = React.useState<DensityMode>("comfortable");
 
@@ -49,51 +51,57 @@ export function GeneralTab({ onDirty }: { onDirty: () => void }) {
         </div>
       </SectionCard>
 
-      <SectionCard title="Density" description="How compact rows and tables appear.">
-        <div className="flex flex-wrap gap-2">
-          {(["compact", "comfortable", "spacious"] as DensityMode[]).map((option) => (
-            <DensityButton
-              key={option}
-              label={option[0].toUpperCase() + option.slice(1)}
-              active={density === option}
-              onClick={() => {
-                setDensity(option);
-                onDirty();
-              }}
-            />
-          ))}
-        </div>
-      </SectionCard>
+      {/* Density and language preferences are session-only previews; the live
+          pilot shows only controls that genuinely persist. */}
+      {!pilot && (
+        <>
+          <SectionCard title="Density" description="How compact rows and tables appear.">
+            <div className="flex flex-wrap gap-2">
+              {(["compact", "comfortable", "spacious"] as DensityMode[]).map((option) => (
+                <DensityButton
+                  key={option}
+                  label={option[0].toUpperCase() + option.slice(1)}
+                  active={density === option}
+                  onClick={() => {
+                    setDensity(option);
+                    onDirty();
+                  }}
+                />
+              ))}
+            </div>
+          </SectionCard>
 
-      <SectionCard
-        title="Language & region"
-        description="Shown in menus, dates, and export previews."
-      >
-        <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1.5">
-            <FieldLabel>Language</FieldLabel>
-            <SelectField defaultValue="en-gb" onChange={onDirty}>
-              <option value="en-gb">English (UK)</option>
-              <option value="en-us">English (US)</option>
-            </SelectField>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>Date format</FieldLabel>
-            <SelectField defaultValue="dd-mmm-yyyy" onChange={onDirty}>
-              <option value="dd-mmm-yyyy">DD MMM YYYY</option>
-              <option value="dd-mm-yyyy">DD/MM/YYYY</option>
-              <option value="mmm-dd-yyyy">MMM DD, YYYY</option>
-            </SelectField>
-          </label>
-          <label className="space-y-1.5">
-            <FieldLabel>First day of week</FieldLabel>
-            <SelectField defaultValue="monday" onChange={onDirty}>
-              <option value="monday">Monday</option>
-              <option value="sunday">Sunday</option>
-            </SelectField>
-          </label>
-        </div>
-      </SectionCard>
+          <SectionCard
+            title="Language & region"
+            description="Shown in menus, dates, and export previews."
+          >
+            <div className="grid gap-3 md:grid-cols-3">
+              <label className="space-y-1.5">
+                <FieldLabel>Language</FieldLabel>
+                <SelectField defaultValue="en-gb" onChange={onDirty}>
+                  <option value="en-gb">English (UK)</option>
+                  <option value="en-us">English (US)</option>
+                </SelectField>
+              </label>
+              <label className="space-y-1.5">
+                <FieldLabel>Date format</FieldLabel>
+                <SelectField defaultValue="dd-mmm-yyyy" onChange={onDirty}>
+                  <option value="dd-mmm-yyyy">DD MMM YYYY</option>
+                  <option value="dd-mm-yyyy">DD/MM/YYYY</option>
+                  <option value="mmm-dd-yyyy">MMM DD, YYYY</option>
+                </SelectField>
+              </label>
+              <label className="space-y-1.5">
+                <FieldLabel>First day of week</FieldLabel>
+                <SelectField defaultValue="monday" onChange={onDirty}>
+                  <option value="monday">Monday</option>
+                  <option value="sunday">Sunday</option>
+                </SelectField>
+              </label>
+            </div>
+          </SectionCard>
+        </>
+      )}
     </div>
   );
 }

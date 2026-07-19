@@ -1,12 +1,13 @@
 import * as React from "react";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { bootstrapWorkspaceFn } from "../api/bootstrapWorkspace";
-import { clearAuthStateCache } from "../authStateCache";
+import { resetIdentityScopedClientState } from "../lib/identityBoundary";
 import {
   BOOTSTRAP_WORKSPACE_DEFAULTS,
   buildBootstrapWorkspaceInput,
@@ -28,6 +29,7 @@ const BOOTSTRAP_FIELD_IDS = {
 export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorkspaceFormProps) {
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [workspaceName, setWorkspaceName] = React.useState("");
   const [locationName, setLocationName] = React.useState<string>(
     BOOTSTRAP_WORKSPACE_DEFAULTS.locationName,
@@ -75,7 +77,7 @@ export function BootstrapWorkspaceForm({ onSignOut, signingOut }: BootstrapWorks
         setFormError(result.message);
         return;
       }
-      clearAuthStateCache();
+      await resetIdentityScopedClientState(queryClient);
       await router.invalidate();
       await navigate({ to: "/" });
     } catch {

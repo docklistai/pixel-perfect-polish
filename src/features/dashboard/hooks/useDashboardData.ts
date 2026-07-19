@@ -80,6 +80,9 @@ export function useDashboardData() {
   if (!enabled) {
     return {
       ...demo,
+      isLiveLoading: false,
+      isLiveError: false,
+      retryLive: () => undefined,
       publishWeekLabel: formatDashboardPublishWeekLabel(null),
       staffCount: null as number | null,
       weekShifts: [] as DraftShift[],
@@ -91,6 +94,20 @@ export function useDashboardData() {
   // The setup panel must never flash while live reads resolve, so it only
   // renders once the roster and week reads have both succeeded.
   const liveReady = staffQuery.isSuccess && weekQuery.isSuccess;
+
+  // The home screen must not show zeros or "all clear" while any required
+  // read is still settling, and a failed read gets an explicit error + retry
+  // surface instead of quietly rendering empty-looking data.
+  const isLiveLoading =
+    staffQuery.isLoading || weekQuery.isLoading || leaveQuery.isLoading || timeQuery.isLoading;
+  const isLiveError =
+    staffQuery.isError || weekQuery.isError || leaveQuery.isError || timeQuery.isError;
+  const retryLive = () => {
+    void staffQuery.refetch();
+    void weekQuery.refetch();
+    void leaveQuery.refetch();
+    void timeQuery.refetch();
+  };
 
   const week = weekQuery.data ?? null;
   const shifts = week?.shifts ?? [];
@@ -153,6 +170,9 @@ export function useDashboardData() {
   return {
     source: "live" as const,
     liveReady,
+    isLiveLoading,
+    isLiveError,
+    retryLive,
     openShifts,
     plannedShiftCount: shifts.length,
     pendingTime,

@@ -147,7 +147,9 @@
   --st-teal-ink: var(--teal-700);
   --st-teal-line: var(--teal-100);
   --st-amber-bg: var(--amber-50);
-  --st-amber-ink: var(--amber-700);
+  /* WCAG AA: amber-700 (#b7791f) is only ~3.6:1 on white — this deeper amber
+     ink reaches over 4.5:1 on white and the amber-50 chip background. */
+  --st-amber-ink: #8a5c11;
   --st-amber-line: var(--amber-200);
   --st-red-bg: var(--red-50);
   --st-red-ink: var(--red-600);
@@ -3484,3 +3486,20 @@
   .rota-page-actions { grid-template-columns: minmax(0, 1fr) auto auto auto; }
   .rota-view-by { padding-inline: 9px; }
 }
+
+/* ============================================================================
+   WCAG AA foreground correction (pilot integrity batch).
+   The status 500 tokens (--warning, --success, --danger, --info, --brand,
+   --accent-purple) are surface/icon colours and genuinely fail 4.5:1 as text
+   on light surfaces (amber-500 = 2.2:1, teal-500 = 3.0:1, green-500 = 3.1:1,
+   blue-500 = 3.7:1, red-500 = 3.9:1). These unlayered overrides resolve the
+   TEXT utilities to the palette's designated readable ink steps
+   (--st-*-ink) in both themes; backgrounds, borders, and fills keep the
+   original tokens, so the palette itself is unchanged.
+   ==========================================================================*/
+.text-brand { color: var(--st-teal-ink); }
+.text-warning { color: var(--st-amber-ink); }
+.text-success { color: var(--st-green-ink); }
+.text-danger { color: var(--st-red-ink); }
+.text-info { color: var(--st-blue-ink); }
+.text-accent-purple { color: var(--st-purple-ink); }

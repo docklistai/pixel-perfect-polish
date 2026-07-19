@@ -1,10 +1,11 @@
 import * as React from "react";
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { Building2, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { selectActiveWorkspaceFn } from "../api/selectWorkspace";
-import { clearAuthStateCache } from "../authStateCache";
+import { resetIdentityScopedClientState } from "../lib/identityBoundary";
 import type { WorkspaceRole } from "../types";
 
 interface SelectableWorkspace {
@@ -34,6 +35,7 @@ export function WorkspaceSelectionCard({
 }: WorkspaceSelectionCardProps) {
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [error, setError] = React.useState("");
   const [selectingId, setSelectingId] = React.useState<string | null>(null);
 
@@ -48,7 +50,8 @@ export function WorkspaceSelectionCard({
         setError(result.message);
         return;
       }
-      clearAuthStateCache();
+      // Workspace change is an identity boundary — drop tenant-scoped caches.
+      await resetIdentityScopedClientState(queryClient);
       await router.invalidate();
       await navigate({ to: workspace.role === "staff" ? "/portal" : "/" });
     } catch {

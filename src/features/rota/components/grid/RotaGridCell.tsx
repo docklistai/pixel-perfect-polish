@@ -206,6 +206,7 @@ export function RotaGridCell({
       {isEditing ? (
         <InlineCellEditor
           initial={initialValue}
+          contextLabel={cellLabel}
           onCommit={handleCommit}
           onCancel={() => {
             setIsEditing(false);

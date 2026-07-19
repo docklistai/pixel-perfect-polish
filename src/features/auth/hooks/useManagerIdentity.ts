@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchManagerIdentityFn } from "../api/managerIdentity";
 import type { WorkspaceRole } from "../types";
@@ -9,6 +10,8 @@ const ROLE_LABEL: Record<WorkspaceRole, string> = {
   manager: "Workspace manager",
   staff: "Staff",
 };
+
+const rootRouteApi = getRouteApi("__root__");
 
 export interface ManagerIdentityView {
   /** Resolved active workspace id, or null while loading/unresolved. */
@@ -48,10 +51,15 @@ const unresolvedIdentity: ManagerIdentityView = {
  */
 export function useManagerIdentity(): ManagerIdentityView {
   const [hasHydrated, setHasHydrated] = useState(false);
+  const { auth } = rootRouteApi.useRouteContext();
+  const principalId = auth.status === "signed-out" ? null : auth.userId;
+  const workspaceId =
+    auth.status === "member" || auth.status === "no-staff-profile" ? auth.workspaceId : null;
+  const isManager = auth.status === "member" && (auth.role === "owner" || auth.role === "manager");
   const query = useQuery({
-    queryKey: ["manager-identity"],
+    queryKey: ["manager-identity", principalId, workspaceId],
     queryFn: () => fetchManagerIdentityFn(),
-    enabled: Boolean(getSupabaseEnv()),
+    enabled: Boolean(getSupabaseEnv()) && isManager,
     staleTime: 60_000,
   });
 

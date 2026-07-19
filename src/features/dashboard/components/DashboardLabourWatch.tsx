@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Settings } from "lucide-react";
 import { Card } from "@/components/dl";
+import { isPilotSurface } from "@/config/pilot";
 
 interface Props {
   labourCost: string;
@@ -68,6 +69,7 @@ export function DashboardLabourWatch({
   targetPct = 30,
   sample,
 }: Props) {
+  const pilot = isPilotSurface();
   const isHealthy = labourPct <= targetPct;
   const barClass = isHealthy ? "bg-brand" : "bg-warning";
   const pctClass = isHealthy ? "text-brand" : "text-warning";
@@ -120,12 +122,14 @@ export function DashboardLabourWatch({
           <span>Target 100%</span>
           <span className="font-mono">{targetPct}% target</span>
         </div>
-        <Link
-          to="/reports"
-          className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand"
-        >
-          Open labour report <ArrowRight className="h-3 w-3" />
-        </Link>
+        {!pilot && (
+          <Link
+            to="/reports"
+            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand"
+          >
+            Open labour report <ArrowRight className="h-3 w-3" />
+          </Link>
+        )}
       </div>
     </Card>
   );

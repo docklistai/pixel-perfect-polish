@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { DraftShift } from "../../types";
-import { buildRotaCellAccessibleName, nextRotaGridPosition } from "./rotaGridAccessibility";
+import {
+  buildRotaCellAccessibleName,
+  inlineEditorAccessibleName,
+  nextRotaGridPosition,
+} from "./rotaGridAccessibility";
 
 function shift(overrides: Partial<DraftShift> = {}): DraftShift {
   return {
@@ -39,6 +43,14 @@ describe("rota grid accessibility", () => {
     expect(accessibleName).toContain("5pm");
     expect(accessibleName).toContain("conflict, edited in draft");
     expect(accessibleName).toContain("Enter or Space");
+  });
+
+  it("names the inline editor with staff and date context plus instructions", () => {
+    const name = inlineEditorAccessibleName("Asha Khan, Monday 13 July");
+
+    expect(name).toContain("Edit shift for Asha Khan, Monday 13 July");
+    expect(name).toContain("Enter to save");
+    expect(name).toContain("Escape to cancel");
   });
 
   it("announces constraints on empty cells", () => {

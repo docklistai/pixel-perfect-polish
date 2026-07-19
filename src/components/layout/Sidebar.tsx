@@ -13,6 +13,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { isPilotSurface } from "@/config/pilot";
 import { useChromeBadges } from "./useChromeBadges";
 import { MobileMoreMenu } from "./MobileMoreMenu";
 
@@ -59,7 +60,7 @@ const navItems: readonly NavItem[] = [
   { to: "/team", label: "Team", icon: MessageSquare, group: "communication", preview: true },
   { to: "/ops", label: "Ops", icon: Briefcase, group: "communication", preview: true },
   { to: "/reports", label: "Reports", icon: BarChart3, group: "communication", preview: true },
-  { to: "/settings", label: "Settings", icon: Settings, group: "admin", preview: true },
+  { to: "/settings", label: "Settings", icon: Settings, group: "admin" },
 ];
 
 const NAV_GROUPS = [
@@ -68,7 +69,11 @@ const NAV_GROUPS = [
   { key: "admin", label: "Admin", ariaLabel: "Admin" },
 ] as const;
 
-const overflowNavItems = navItems.filter((item) => item.group !== "workspace");
+// The live pilot never links to preview-only surfaces; the demo playground
+// keeps them, labelled Preview.
+const visibleNavItems = isPilotSurface() ? navItems.filter((item) => !item.preview) : navItems;
+
+const overflowNavItems = visibleNavItems.filter((item) => item.group !== "workspace");
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -113,73 +118,75 @@ export function Sidebar() {
       </div>
 
       <div className="flex flex-col gap-1 overflow-y-auto pr-1 flex-1">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.key} data-nav-group={group.key}>
-            <div className="nav-section">{group.label}</div>
-            <nav className="nav" aria-label={group.ariaLabel}>
-              {navItems
-                .filter((it) => it.group === group.key)
-                .map((item) => {
-                  const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
-                  const Icon = item.icon;
-                  const badge = badges[item.to] ?? item.badge;
-                  return (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      aria-current={active ? "page" : undefined}
-                      title={item.label}
-                      className={`nav-item ${active ? "active" : ""}`}
-                    >
-                      <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
-                      <span>{item.label}</span>
-                      {item.preview && (
-                        <span className="ml-auto rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white/55">
-                          Preview
-                        </span>
-                      )}
-                      {item.flagship && !active && (
-                        <span
-                          style={{
-                            marginLeft: "auto",
-                            fontSize: 9,
-                            fontWeight: 700,
-                            letterSpacing: "0.08em",
-                            color: "var(--teal-400)",
-                            opacity: 0.8,
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          Core
-                        </span>
-                      )}
-                      {badge && badge.count > 0 && (
-                        <span
-                          className="count"
-                          style={
-                            badge.kind === "amber"
-                              ? {
-                                  background: "rgba(240,182,91,0.20)",
-                                  color: "#F6CC85",
-                                }
-                              : badge.kind === "red"
+        {NAV_GROUPS.filter((group) => visibleNavItems.some((item) => item.group === group.key)).map(
+          (group) => (
+            <div key={group.key} data-nav-group={group.key}>
+              <div className="nav-section">{group.label}</div>
+              <nav className="nav" aria-label={group.ariaLabel}>
+                {visibleNavItems
+                  .filter((it) => it.group === group.key)
+                  .map((item) => {
+                    const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
+                    const Icon = item.icon;
+                    const badge = badges[item.to] ?? item.badge;
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        aria-current={active ? "page" : undefined}
+                        title={item.label}
+                        className={`nav-item ${active ? "active" : ""}`}
+                      >
+                        <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
+                        <span>{item.label}</span>
+                        {item.preview && (
+                          <span className="ml-auto rounded-full bg-white/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white/55">
+                            Preview
+                          </span>
+                        )}
+                        {item.flagship && !active && (
+                          <span
+                            style={{
+                              marginLeft: "auto",
+                              fontSize: 9,
+                              fontWeight: 700,
+                              letterSpacing: "0.08em",
+                              color: "var(--teal-400)",
+                              opacity: 0.8,
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            Core
+                          </span>
+                        )}
+                        {badge && badge.count > 0 && (
+                          <span
+                            className="count"
+                            style={
+                              badge.kind === "amber"
                                 ? {
-                                    background: "rgba(242,100,122,0.22)",
-                                    color: "#FF8A9C",
+                                    background: "rgba(240,182,91,0.20)",
+                                    color: "#F6CC85",
                                   }
-                                : {}
-                          }
-                        >
-                          {badge.count}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              {group.key === "workspace" && <MobileMoreMenu items={overflowNavItems} />}
-            </nav>
-          </div>
-        ))}
+                                : badge.kind === "red"
+                                  ? {
+                                      background: "rgba(242,100,122,0.22)",
+                                      color: "#FF8A9C",
+                                    }
+                                  : {}
+                            }
+                          >
+                            {badge.count}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                {group.key === "workspace" && <MobileMoreMenu items={overflowNavItems} />}
+              </nav>
+            </div>
+          ),
+        )}
       </div>
 
       <div className="footer relative" ref={footerRef}>

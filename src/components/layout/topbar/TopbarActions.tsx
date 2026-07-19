@@ -13,8 +13,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useOverlays } from "@/components/AppShortcuts";
-import { clearAuthStateCache } from "@/features/auth";
+import { resetIdentityScopedClientState } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
 import type { ThemeMode } from "./topbarUtils";
@@ -31,6 +32,7 @@ export function TopbarActions({
   const displayName = email ?? "Your account";
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [userOpen, setUserOpen] = React.useState(false);
   const userRef = React.useRef<HTMLDivElement>(null);
 
@@ -42,7 +44,7 @@ export function TopbarActions({
       toast.error("Sign-out failed", { description: "Please try again." });
       return;
     }
-    clearAuthStateCache();
+    await resetIdentityScopedClientState(queryClient);
     await router.invalidate();
     await navigate({ to: "/auth" });
   };

@@ -5,7 +5,6 @@ import { usePortalRota } from "../hooks/usePortalRota";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
 import { OpenShiftsCard } from "./OpenShiftsCard";
-import { PortalPayEstimateCard } from "./PortalPayEstimateCard";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 import { ShiftRequestsList } from "./ShiftRequestsList";
 import { PortalRotaReadState } from "./PortalRotaReadState";
@@ -60,7 +59,6 @@ export function ShiftsTab() {
             />
           ) : (
             <>
-              {source === "live" && <PortalPayEstimateCard upcoming={upcoming} />}
               <ShiftList
                 shifts={upcoming}
                 hasPublishedSnapshot={hasPublished}

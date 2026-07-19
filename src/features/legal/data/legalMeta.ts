@@ -8,11 +8,18 @@ import { SUPPORT_EMAIL } from "@/config/commercial";
  * required before open (non-invite) release; see docs/legal/README.md.
  */
 export const LEGAL_VERSIONS = {
-  terms: "2026-07-14",
-  privacy: "2026-07-14",
+  terms: "2026-07-19",
+  privacy: "2026-07-19",
 } as const;
 
-/** Owner-review placeholder: confirm this is the intended legal contact. */
+/**
+ * OWNER-REVIEW PLACEHOLDER — operational decisions deliberately unresolved:
+ * the legal contact below is the approved temporary support mailbox, not a
+ * confirmed legal contact; the operating legal entity, VAT/registration
+ * details, governing law, and formal legal review of both pages remain open
+ * owner decisions (see docs/legal/README.md). Nothing in the app may claim
+ * these are settled.
+ */
 export const LEGAL_CONTACT_EMAIL = SUPPORT_EMAIL;
 
 export interface LegalSection {

@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { LEGAL_VERSIONS } from "@/features/legal/data/legalMeta";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
-import { clearAuthStateCache } from "../authStateCache";
+import { resetIdentityScopedClientState } from "../lib/identityBoundary";
 import { PASSWORD_HINT, PASSWORD_PATTERN } from "../lib/passwordReset";
 import { requestPasswordResetEmail } from "../lib/requestPasswordReset";
 
@@ -21,6 +22,7 @@ function describeSignInError(message: string): string {
 
 /** State and handlers behind the sign-in / private-beta sign-up form. */
 export function useAuthForm(onValidSignIn?: () => void) {
+  const queryClient = useQueryClient();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -61,7 +63,9 @@ export function useAuthForm(onValidSignIn?: () => void) {
           setAuthError(describeSignInError(error.message));
           return;
         }
-        clearAuthStateCache();
+        // Account switch in the same tab: nothing cached under the previous
+        // principal may survive into this session.
+        await resetIdentityScopedClientState(queryClient);
         onValidSignIn?.();
         return;
       }
@@ -88,7 +92,7 @@ export function useAuthForm(onValidSignIn?: () => void) {
         setStatusMessage("Check your inbox — confirm your email to finish creating your account.");
         return;
       }
-      clearAuthStateCache();
+      await resetIdentityScopedClientState(queryClient);
       onValidSignIn?.();
     } catch (cause) {
       setAuthError(

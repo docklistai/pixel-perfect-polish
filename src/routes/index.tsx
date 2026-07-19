@@ -11,6 +11,7 @@ import { buildDashboardSetup } from "@/features/dashboard/lib/dashboardSetup";
 import { DashboardKpiCards } from "@/features/dashboard/components/DashboardKpiCards";
 import { DashboardAttentionPanel } from "@/features/dashboard/components/DashboardAttentionPanel";
 import { DashboardLabourWatchLive } from "@/features/dashboard/components/DashboardLabourWatchLive";
+import { DashboardLiveReadState } from "@/features/dashboard/components/DashboardLiveReadState";
 import { DashboardRotaPublish } from "@/features/dashboard/components/DashboardRotaPublish";
 import { DashboardPendingLeave } from "@/features/dashboard/components/DashboardPendingLeave";
 import { DashboardTimesheets } from "@/features/dashboard/components/DashboardTimesheets";
@@ -62,6 +63,7 @@ function Home() {
   const labourSettings = useWorkspaceLabourSettings();
   const workspaceProfile = useWorkspaceProfile();
   const isLiveDashboard = dashboard.source === "live";
+  const liveReadsPending = isLiveDashboard && (dashboard.isLiveLoading || dashboard.isLiveError);
   // Live-only setup/readiness checklist; demo workspaces are always populated.
   const setupPlan =
     dashboard.source === "live" && dashboard.liveReady
@@ -214,12 +216,24 @@ function Home() {
                 >
                   Log a leave request…
                 </button>
-                <button type="button" className="menu-item" onClick={() => runQuickAction("/team")}>
-                  Compose announcement… (preview)
-                </button>
-                <button type="button" className="menu-item" onClick={() => runQuickAction("/ops")}>
-                  Log an incident… (preview)
-                </button>
+                {!isLiveDashboard && (
+                  <>
+                    <button
+                      type="button"
+                      className="menu-item"
+                      onClick={() => runQuickAction("/team")}
+                    >
+                      Compose announcement… (preview)
+                    </button>
+                    <button
+                      type="button"
+                      className="menu-item"
+                      onClick={() => runQuickAction("/ops")}
+                    >
+                      Log an incident… (preview)
+                    </button>
+                  </>
+                )}
                 <div className="menu-sep" />
                 <button
                   type="button"
@@ -242,16 +256,18 @@ function Home() {
             {moreOpen && (
               <div className="popover absolute top-[44px] right-0 z-50 w-52 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="menu-label">Dashboard</div>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => {
-                    setMoreOpen(false);
-                    navigate({ to: "/reports" });
-                  }}
-                >
-                  View reports… (preview)
-                </button>
+                {!isLiveDashboard && (
+                  <button
+                    type="button"
+                    className="menu-item"
+                    onClick={() => {
+                      setMoreOpen(false);
+                      navigate({ to: "/reports" });
+                    }}
+                  >
+                    View reports… (preview)
+                  </button>
+                )}
                 <button
                   type="button"
                   className="menu-item"
@@ -271,15 +287,24 @@ function Home() {
         </div>
       </div>
 
+      {/* Live workspace with unsettled reads: a distinct loading/error surface
+          instead of zeros, demo panels, or a premature "all clear". */}
+      {liveReadsPending && (
+        <DashboardLiveReadState
+          isError={dashboard.isLiveError}
+          onRetry={() => dashboard.retryLive()}
+        />
+      )}
+
       {/* Setup / weekly-readiness checklist for empty live workspaces */}
-      {showSetupPanel && setupPlan && (
+      {!liveReadsPending && showSetupPanel && setupPlan && (
         <div className="mb-4">
           <DashboardSetupPanel plan={setupPlan} />
         </div>
       )}
 
       {/* AI manager summary (dismissible) */}
-      {!summaryDismissed && !showSetupPanel && (
+      {!liveReadsPending && !summaryDismissed && !showSetupPanel && (
         <div className="mb-4">
           <DashboardAISummaryCard
             onDismiss={() => setSummaryDismissed(true)}
@@ -295,41 +320,45 @@ function Home() {
       )}
 
       {/* KPI row + attention rail */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
-        <DashboardKpiCards
-          items={filter === "today" ? dashboard.todayKpis : dashboard.weeklyKpis}
-          title={filter === "today" ? "Today's snapshot" : "Weekly overview"}
-          onKpiClick={setSelectedKpi}
-        />
-        <DashboardAttentionPanel
-          items={dashboard.attentionItems}
-          total={dashboard.attentionItems.length}
-          onAlertClick={(idx) => {
-            setSelectedAlertIdx(idx);
-            setAlertOpen(true);
-          }}
-          onViewAll={() => openNotifications()}
-        />
-      </div>
+      {!liveReadsPending && (
+        <>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
+            <DashboardKpiCards
+              items={filter === "today" ? dashboard.todayKpis : dashboard.weeklyKpis}
+              title={filter === "today" ? "Today's snapshot" : "Weekly overview"}
+              onKpiClick={setSelectedKpi}
+            />
+            <DashboardAttentionPanel
+              items={dashboard.attentionItems}
+              total={dashboard.attentionItems.length}
+              onAlertClick={(idx) => {
+                setSelectedAlertIdx(idx);
+                setAlertOpen(true);
+              }}
+              onViewAll={() => openNotifications()}
+            />
+          </div>
 
-      {/* Secondary row: labour watch · rota countdown · leave queue */}
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <DashboardLabourWatchLive source={dashboard.source} weekShifts={dashboard.weekShifts} />
-        <DashboardRotaPublish
-          published={dashboard.nextPublished}
-          hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
-          weekCommencing={dashboard.publishWeekLabel}
-        />
-        <DashboardPendingLeave items={dashboard.leaveItems} />
-      </div>
+          {/* Secondary row: labour watch · rota countdown · leave queue */}
+          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <DashboardLabourWatchLive source={dashboard.source} weekShifts={dashboard.weekShifts} />
+            <DashboardRotaPublish
+              published={dashboard.nextPublished}
+              hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
+              weekCommencing={dashboard.publishWeekLabel}
+            />
+            <DashboardPendingLeave items={dashboard.leaveItems} />
+          </div>
 
-      {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {!isLiveDashboard && <DashboardStaffOnShift items={staffDeptItems} total={6} />}
-        <DashboardTimesheets items={dashboard.timesheetItems} />
-        {!isLiveDashboard && <DashboardAnnouncements items={announcementItems} />}
-        <DashboardQuickActions items={visibleQuickActionItems} />
-      </div>
+          {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
+          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {!isLiveDashboard && <DashboardStaffOnShift items={staffDeptItems} total={6} />}
+            <DashboardTimesheets items={dashboard.timesheetItems} />
+            {!isLiveDashboard && <DashboardAnnouncements items={announcementItems} />}
+            <DashboardQuickActions items={visibleQuickActionItems} />
+          </div>
+        </>
+      )}
 
       <DashboardAlertDrawer
         open={alertOpen}

@@ -38,6 +38,8 @@ export type RotaLiveData = {
   today: string | null;
   setLocationId: (locationId: string) => void;
   refetchWeek: () => Promise<void>;
+  /** Re-runs every live read backing this page (staff, week, leave). */
+  retry: () => Promise<void>;
   staff: StaffMember[];
   assignableStaff: StaffMember[];
   shifts: DraftShift[];
@@ -65,6 +67,7 @@ const DEMO: RotaLiveData = {
   today: null,
   setLocationId: () => undefined,
   refetchWeek: async () => undefined,
+  retry: async () => undefined,
   staff: [],
   assignableStaff: [],
   shifts: [],
@@ -135,6 +138,10 @@ export function useRotaLiveData(
     await weekQuery.refetch();
   }, [weekQuery]);
 
+  const retry = React.useCallback(async () => {
+    await Promise.all([staffQuery.refetch(), weekQuery.refetch(), leaveQuery.refetch()]);
+  }, [staffQuery, weekQuery, leaveQuery]);
+
   if (!isLive) {
     return {
       ...DEMO,
@@ -142,6 +149,7 @@ export function useRotaLiveData(
       enabled,
       setLocationId: setSelectedLocationId,
       refetchWeek,
+      retry,
       isLoading: enabled && (staffQuery.isLoading || weekQuery.isLoading),
       isError: enabled && (staffQuery.isError || weekQuery.isError),
       isLeaveLoading: enabled && leaveQuery.isLoading,
@@ -170,6 +178,7 @@ export function useRotaLiveData(
     today: weekQuery.data.today,
     setLocationId: setSelectedLocationId,
     refetchWeek,
+    retry,
     staff: (staffQuery.data ?? []).map(toRotaStaffMember),
     assignableStaff: getAssignableStaffRows(staffQuery.data ?? []).map(toRotaStaffMember),
     shifts: weekQuery.data.shifts,

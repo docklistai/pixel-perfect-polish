@@ -1,5 +1,16 @@
 import { redirect } from "@tanstack/react-router";
+import { isPilotSurface } from "@/config/pilot";
 import type { AuthState } from "./types";
+
+/**
+ * Preview-only surfaces (Team, Ops, Reports) exist solely in the offline demo
+ * playground. The live pilot has no navigation to them and direct visits are
+ * sent home so demo content can never appear inside a live workspace.
+ */
+export function requirePreviewSurface(auth: AuthState): void {
+  requireManagerAccess(auth);
+  if (isPilotSurface()) throw redirect({ to: "/" });
+}
 
 /** Owner/manager-only routes: dashboard, rota, time, staff, leave, etc. */
 export function requireManagerAccess(auth: AuthState): void {

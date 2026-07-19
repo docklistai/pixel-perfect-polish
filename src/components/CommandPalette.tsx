@@ -20,10 +20,11 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 import { useIntents } from "@/lib/interactionIntents";
+import { isPilotSurface } from "@/config/pilot";
 import { useOverlays } from "./AppShortcuts";
 import {
-  COMMAND_NAV_ITEMS,
   COMMAND_QUICK_ACTIONS,
+  visibleCommandNavItems,
   type CommandQuickAction,
   type NavTarget,
 } from "./commandPaletteData";
@@ -99,7 +100,7 @@ export function CommandPalette({
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigate">
-          {COMMAND_NAV_ITEMS.map((item) => {
+          {visibleCommandNavItems(isPilotSurface()).map((item) => {
             const Icon = item.icon;
             return (
               <CommandItem

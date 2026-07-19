@@ -1,6 +1,7 @@
 import { CheckCircle2, ExternalLink, Plus, Trash2, User } from "lucide-react";
 import { StatusBadge, type Tone } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
+import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { cn } from "@/lib/utils";
 import type { OpsEntry } from "../types";
 import { notifyOpsPreview } from "../lib/opsPreview";
@@ -60,14 +61,9 @@ export function OpsTimelineEntry({
       )}
       <StatusBadge tone={statusTone}>{entry.st}</StatusBadge>
       {entry.who && (
-        <img
-          src={`https://i.pravatar.cc/64?img=${entry.who.img}`}
-          className="hidden size-7 rounded-full object-cover md:block"
-          alt=""
-          loading="lazy"
-          width={28}
-          height={28}
-        />
+        <span className="hidden md:block">
+          <StaffMonogram name={entry.who.n} />
+        </span>
       )}
       <div onClick={(event) => event.stopPropagation()}>
         <RowActionMenu

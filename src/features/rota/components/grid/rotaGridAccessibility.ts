@@ -14,6 +14,19 @@ export function nextRotaGridPosition(
   };
 }
 
+/**
+ * Accessible name for the inline shift editor: names the staff member and day
+ * being edited and states the expected format, so a screen-reader user knows
+ * whose shift on which date the free-text input changes.
+ */
+export function inlineEditorAccessibleName(contextLabel: string): string {
+  return (
+    "Edit shift for " +
+    contextLabel +
+    ". Enter times like 9-5, open 6-11 bar, clear, or 9-12 / 17-22. Press Enter to save, Escape to cancel."
+  );
+}
+
 function shiftAccessibleName(shift: DraftShift): string {
   const role = shift.deptOverride ?? shift.role;
   const kind = shift.staffId === null ? "Open " + role + " shift" : role + " shift";

@@ -3,9 +3,8 @@ import { z } from "zod";
 
 /**
  * Manager-side staff hourly rates (staff_pay_rates). One current rate per
- * staff member, in pence. Powers rota labour cost estimates and the staff
- * member's own portal pay estimate. This is planning data — payroll stays
- * disabled.
+ * staff member, in pence. Powers manager-only rota labour planning. Staff
+ * surfaces never receive this data, and payroll stays disabled.
  */
 
 export type StaffPayRatesResult = {

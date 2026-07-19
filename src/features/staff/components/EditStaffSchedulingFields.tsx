@@ -96,7 +96,7 @@ export function EditStaffSchedulingFields({
         <FormRow
           label="Hourly rate (£)"
           htmlFor="edit-staff-pay-rate"
-          hint="Optional — drives rota cost estimates and this person's portal pay estimate"
+          hint="Optional — used only for manager-side rota labour planning"
         >
           <input
             id="edit-staff-pay-rate"

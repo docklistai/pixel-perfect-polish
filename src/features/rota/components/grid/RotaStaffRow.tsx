@@ -1,3 +1,4 @@
+import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { RotaGridCell } from "./RotaGridCell";
 import type { RotaGridDay, ShiftActionHandlers } from "./types";
 import type { RotaGridStaffRow as RotaGridStaffRowData } from "../../types";
@@ -26,11 +27,7 @@ export function RotaStaffRow({
         aria-colindex={1}
         className="flex items-center gap-2.5 border-b border-border px-3 py-3 sticky left-0 z-10 bg-background"
       >
-        <img
-          src={`https://i.pravatar.cc/64?img=${row.staff.img}`}
-          alt=""
-          className="h-8 w-8 shrink-0 rounded-full object-cover"
-        />
+        <StaffMonogram name={row.staff.name} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-medium leading-tight">{row.staff.name}</div>
           <div className="truncate text-[11px] text-muted-foreground">{row.staff.role}</div>

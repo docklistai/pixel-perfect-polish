@@ -37,7 +37,7 @@ export const privacySections: LegalSection[] = [
   {
     heading: "What staff can see",
     body: [
-      "Staff portal accounts only ever see published rota snapshots, their own time entries, and their own leave requests. Staff never see manager drafts, manager notes, pay settings, or other staff members' private details.",
+      "Staff portal accounts see published rota snapshots (including colleagues' names, roles, and shift times on the published rota — the digital equivalent of the rota on the wall), their own time entries, their own leave requests, and their own availability records. Staff never see manager drafts, manager notes, pay rates or pay settings, or other staff members' private details.",
     ],
   },
   {

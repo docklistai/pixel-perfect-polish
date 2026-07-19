@@ -6,8 +6,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useQueryClient } from "@tanstack/react-query";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browserClient";
-import { clearAuthStateCache } from "../authStateCache";
+import { resetIdentityScopedClientState } from "../lib/identityBoundary";
 import {
   describePasswordUpdateError,
   describeRecoveryLinkError,
@@ -23,6 +24,7 @@ type RecoveryPhase = "checking" | "ready" | "missing";
 export function ResetPasswordForm() {
   const navigate = useNavigate();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [phase, setPhase] = React.useState<RecoveryPhase>("checking");
   const [linkError, setLinkError] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -111,7 +113,7 @@ export function ResetPasswordForm() {
       // The recovery session has served its purpose — end it so the user
       // signs in explicitly with the new password.
       await supabase.auth.signOut();
-      clearAuthStateCache();
+      await resetIdentityScopedClientState(queryClient);
       await router.invalidate();
       toast.success("Password updated", { description: "Sign in with your new password." });
       await navigate({ to: "/auth" });

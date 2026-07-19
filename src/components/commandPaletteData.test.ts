@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { COMMAND_NAV_ITEMS, COMMAND_QUICK_ACTIONS } from "./commandPaletteData";
+import {
+  COMMAND_NAV_ITEMS,
+  COMMAND_QUICK_ACTIONS,
+  visibleCommandNavItems,
+} from "./commandPaletteData";
 
 describe("command palette: Add team member", () => {
   const addTeamMember = COMMAND_QUICK_ACTIONS.find((a) => a.label === "Add team member");
@@ -17,6 +21,12 @@ describe("command palette preview routes", () => {
   it("labels preview-only manager routes", () => {
     const previewRoutes = COMMAND_NAV_ITEMS.filter((item) => item.preview).map((item) => item.to);
 
-    expect(previewRoutes).toEqual(["/team", "/ops", "/reports", "/settings"]);
+    expect(previewRoutes).toEqual(["/team", "/ops", "/reports"]);
+  });
+
+  it("hides preview routes from the live pilot but keeps them in the demo", () => {
+    const pilotRoutes = visibleCommandNavItems(true).map((item) => item.to);
+    expect(pilotRoutes).toEqual(["/", "/rota", "/staff", "/time", "/leave", "/settings"]);
+    expect(visibleCommandNavItems(false)).toEqual(COMMAND_NAV_ITEMS);
   });
 });

@@ -1,6 +1,7 @@
 import { DrawerShell, ActionButton } from "@/components/dl";
 import { ArrowUp, ArrowDown, BarChart2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { isPilotSurface } from "@/config/pilot";
 import type { KpiItem } from "../types";
 import { toneBg } from "../types";
 
@@ -11,6 +12,7 @@ interface Props {
 
 export function DashboardKpiDetailDrawer({ item, onOpenChange }: Props) {
   const navigate = useNavigate();
+  const pilot = isPilotSurface();
 
   const handleViewReports = () => {
     onOpenChange(false);
@@ -28,9 +30,11 @@ export function DashboardKpiDetailDrawer({ item, onOpenChange }: Props) {
           <ActionButton variant="secondary" onClick={() => onOpenChange(false)}>
             Close
           </ActionButton>
-          <ActionButton icon={BarChart2} onClick={handleViewReports}>
-            View in reports
-          </ActionButton>
+          {!pilot && (
+            <ActionButton icon={BarChart2} onClick={handleViewReports}>
+              View in reports
+            </ActionButton>
+          )}
         </>
       }
     >
