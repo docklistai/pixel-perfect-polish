@@ -1,26 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
+import { toSafeBusinessMessage } from "@/lib/safe-errors";
 import { addIsoDays } from "../lib/liveRotaDates";
-import { ensureWeek, getLiveContext } from "./rotaLiveMutationContext";
+import { getLiveContext } from "./rotaLiveMutationContext";
 import { liveWeekInput } from "./rotaLiveMutationSchemas";
-import { markWeekDraft } from "./rotaLiveShiftMapping";
-import {
-  applyLiveCopyRows,
-  buildLiveCopyPreview,
-  buildLiveCopyRows,
-  type LiveCopyInsertShiftRow,
-  type LiveCopySourceShiftRow,
-} from "./copyPreviousLiveRotaWeek";
-
-/**
- * Bulk shift inserts fire the phase 31 staff eligibility lock per row, so rows
- * are inserted in ascending staff order — the same acquisition order the
- * publish preflight uses — to keep the lock protocol deadlock-free.
- */
-function inStaffLockOrder<Row extends { staff_member_id: string | null }>(rows: Row[]): Row[] {
-  return [...rows].sort((left, right) =>
-    (left.staff_member_id ?? "").localeCompare(right.staff_member_id ?? ""),
-  );
-}
+import { buildLiveCopyPreview, type LiveCopySourceShiftRow } from "./copyPreviousLiveRotaWeek";
 
 async function loadPreviousWeekSourceRows({
   context,
@@ -52,58 +35,31 @@ async function loadPreviousWeekSourceRows({
   return ((previousShifts as LiveCopySourceShiftRow[] | null) ?? []).filter(Boolean);
 }
 
+/**
+ * Copy the previous week's rota into the requested week through one atomic,
+ * workspace-authorised database transaction (`rpc_copy_previous_rota_week`).
+ * The database either applies the whole copy or leaves the existing draft
+ * untouched — there is no client-side delete/insert/restore choreography.
+ */
 export const copyPreviousLiveRotaWeekFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => liveWeekInput.parse(input))
   .handler(async ({ data }) => {
-    const context = await getLiveContext(data, { createWeek: true });
-    const week = await ensureWeek(context);
-    const previousWeekStart = addIsoDays(context.weekStart, -7);
-    const sourceRows = await loadPreviousWeekSourceRows({ context, previousWeekStart });
-    const nextRows = buildLiveCopyRows({
-      sourceRows,
-      workspaceId: context.workspaceId,
-      targetWeekId: week.id,
-      targetLocationId: context.location.id,
-      previousWeekStart,
-      targetWeekStart: week.week_start,
-      timezone: context.location.timezone,
+    const context = await getLiveContext(data, { createWeek: false });
+
+    const { data: result, error } = await context.supabase.rpc("rpc_copy_previous_rota_week", {
+      p_workspace_id: context.workspaceId,
+      p_location_id: context.location.id,
+      p_target_week_start: context.weekStart,
     });
 
-    const { data: currentShifts, error: currentError } = await context.supabase
-      .from("shifts")
-      .select(
-        "id, workspace_id, rota_week_id, location_id, department_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status",
-      )
-      .eq("workspace_id", context.workspaceId)
-      .eq("rota_week_id", week.id)
-      .order("shift_date", { ascending: true })
-      .order("starts_at", { ascending: true });
-    if (currentError) throw currentError;
-    const currentRows = (currentShifts as LiveCopyInsertShiftRow[] | null) ?? [];
+    if (error) {
+      throw new Error(
+        toSafeBusinessMessage(error, "Previous week was not copied. Your draft is unchanged."),
+      );
+    }
 
-    await applyLiveCopyRows({
-      nextRows,
-      currentRows,
-      deleteCurrentRows: async () => {
-        const { error } = await context.supabase
-          .from("shifts")
-          .delete()
-          .eq("workspace_id", context.workspaceId)
-          .eq("rota_week_id", week.id);
-        if (error) throw error;
-      },
-      insertRows: async (rows) => {
-        const { error } = await context.supabase.from("shifts").insert(inStaffLockOrder(rows));
-        if (error) throw error;
-      },
-      restoreRows: async (rows) => {
-        const { error } = await context.supabase.from("shifts").insert(inStaffLockOrder(rows));
-        if (error) throw error;
-      },
-    });
-
-    await markWeekDraft(context.supabase, context.workspaceId, week.id);
-    return { rotaWeekId: week.id, shiftCount: nextRows.length };
+    const copyResult = result as { rota_week_id: string; shifts_created: number };
+    return { rotaWeekId: copyResult.rota_week_id, shiftCount: copyResult.shifts_created };
   });
 
 export const previewCopyPreviousLiveRotaWeekFn = createServerFn({ method: "POST" })

@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { Download, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ActionButton, DialogShell } from "@/components/dl";
@@ -25,6 +26,8 @@ interface PreviewRow {
   department: string;
 }
 
+const rootRouteApi = getRouteApi("__root__");
+
 function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
@@ -48,8 +51,18 @@ export function TimeExportDialog({
   departmentLabel,
 }: Props) {
   const isLive = source === "live";
+  const { auth } = rootRouteApi.useRouteContext();
+  const principalId = auth.status === "signed-out" ? null : auth.userId;
+  const workspaceId = auth.status === "member" ? auth.workspaceId : null;
   const livePreview = useQuery({
-    queryKey: ["approved-hours-export-preview", period.startIso, period.endIso, departmentId],
+    queryKey: [
+      "approved-hours-export-preview",
+      principalId,
+      workspaceId,
+      period.startIso,
+      period.endIso,
+      departmentId,
+    ],
     queryFn: () =>
       exportApprovedHoursFn({
         data: {
@@ -58,7 +71,7 @@ export function TimeExportDialog({
           ...(departmentId ? { departmentId } : {}),
         },
       }),
-    enabled: open && isLive,
+    enabled: open && isLive && workspaceId !== null,
     staleTime: 0,
   });
 

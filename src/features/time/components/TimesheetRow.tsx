@@ -1,6 +1,7 @@
 import { AlertTriangle, Calendar, CheckCircle2, Edit3, ExternalLink, X } from "lucide-react";
 import { StatusBadge } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
+import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { cn } from "@/lib/utils";
 import type { StoredTimesheetRow, TimesheetStatus } from "../types";
 import { TimeExceptionBadges } from "./TimeExceptionBadges";
@@ -77,11 +78,7 @@ export function TimesheetRow({
       </td>
       <td>
         <div className="flex items-center gap-3">
-          <img
-            src={`https://i.pravatar.cc/64?img=${row.img}`}
-            className="h-7 w-7 rounded-full object-cover"
-            alt=""
-          />
+          <StaffMonogram name={row.n} />
           <div>
             <div className="text-sm font-medium">{row.n}</div>
             <div className="text-[11px] text-muted-foreground">

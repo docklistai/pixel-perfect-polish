@@ -1,9 +1,18 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, Mail, Briefcase, Activity, Pencil, type LucideIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  Mail,
+  Briefcase,
+  Activity,
+  Pencil,
+  UserX,
+  type LucideIcon,
+} from "lucide-react";
 import { AppShell, Card, StatusBadge, type Tone } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
 import { EditStaffDialog } from "../EditStaffDialog";
+import { OffboardStaffDialog } from "./OffboardStaffDialog";
 import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileEmptyPanel } from "./ProfileEmptyPanel";
 import { LiveOperationalCards } from "./LiveOperationalCards";
@@ -113,6 +122,7 @@ interface LiveStaffProfileProps {
 export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffProfileProps) {
   const [activeTab, setActiveTab] = React.useState<ProfileTab>(initialTab);
   const [editOpen, setEditOpen] = React.useState(false);
+  const [offboardOpen, setOffboardOpen] = React.useState(false);
   const firstName = member.n.split(" ")[0] || member.n;
   const ops = useLiveStaffProfileOps(member.id);
 
@@ -172,19 +182,37 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
                 </span>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setEditOpen(true)}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold transition-colors hover:bg-muted/50"
-            >
-              <Pencil className="h-3.5 w-3.5" aria-hidden />
-              Edit details
-            </button>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {member.employmentStatus !== "left" && (
+                <button
+                  type="button"
+                  onClick={() => setOffboardOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-danger/30 bg-card px-3 py-2 text-xs font-semibold text-danger transition-colors hover:bg-danger-soft/30"
+                >
+                  <UserX className="h-3.5 w-3.5" aria-hidden />
+                  Offboard
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setEditOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold transition-colors hover:bg-muted/50"
+              >
+                <Pencil className="h-3.5 w-3.5" aria-hidden />
+                Edit details
+              </button>
+            </div>
           </div>
         </Card>
       </div>
 
       <EditStaffDialog open={editOpen} onOpenChange={setEditOpen} member={member} />
+      <OffboardStaffDialog
+        open={offboardOpen}
+        onOpenChange={setOffboardOpen}
+        staffMemberId={member.id}
+        staffName={member.n}
+      />
 
       <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} />
 

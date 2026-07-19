@@ -112,8 +112,8 @@ export function useTimeController(
     });
   };
 
-  const blockIneligible = (row: StoredTimesheetRow): boolean => {
-    const reason = approvalEligibility(row);
+  const blockIneligible = (row: StoredTimesheetRow, resolutionNote = ""): boolean => {
+    const reason = approvalEligibility(row, true, Boolean(resolutionNote.trim()));
     if (reason === "ok") return false;
     toast.error("Can't approve this entry", { description: `It is ${REASON_LABEL[reason]}.` });
     return true;
@@ -144,7 +144,7 @@ export function useTimeController(
     toggleApprove: setApproval,
     revert: setApproval,
     approve: (row: StoredTimesheetRow, note = "") => {
-      if (row.status === "approved" || blockIneligible(row)) return;
+      if (row.status === "approved" || blockIneligible(row, note)) return;
       void runApprove(
         [row.id],
         "approved",

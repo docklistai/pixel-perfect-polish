@@ -111,7 +111,7 @@ begin
 end $$;
 
 -- --------------------------------------------------------------------------
--- STAFF persona (Olivia): settings hidden, own rate visible, team visible.
+-- STAFF persona (Olivia): settings hidden, all pay rates hidden, team visible.
 -- --------------------------------------------------------------------------
 select set_config('request.jwt.claims', '{"sub":"ad000000-0000-4000-8000-000000000002","role":"authenticated"}', true);
 
@@ -138,9 +138,10 @@ begin
   end;
   raise notice 'PASS: workspace settings are manager-only';
 
+  -- Phase 39 removed the staff self-read path: pay rates are manager-only.
   select count(*), min(hourly_rate_pence) into rate_rows, own_rate from public.staff_pay_rates;
-  if rate_rows <> 1 or own_rate is distinct from 1250 then
-    raise exception 'FAIL: staff sees % pay rate rows / rate % (expected own row at 1250 only)', rate_rows, own_rate;
+  if rate_rows <> 0 then
+    raise exception 'FAIL: staff sees % pay rate rows / rate % (expected none)', rate_rows, own_rate;
   end if;
 
   begin
@@ -151,7 +152,7 @@ begin
     end if;
   exception when sqlstate '42501' then null;
   end;
-  raise notice 'PASS: staff read only their own rate and cannot change it';
+  raise notice 'PASS: staff cannot read or change any pay rate';
 
   -- Latest published snapshot (seeded week 2026-06-08) includes colleagues.
   select count(*) into colleague_rows

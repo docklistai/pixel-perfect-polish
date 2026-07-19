@@ -3,7 +3,9 @@
  * Individual, selected, suggested, and bulk approvals all flow through these
  * helpers so the rules can never drift between entry points. A row is approvable
  * only when it is in the review period, currently pending, has a clock-in and
- * clock-out, and carries no unresolved exception or flag.
+ * clock-out, and carries no unresolved exception or flag. Unscheduled
+ * attendance is the one resolvable exception: an individual manager approval
+ * may proceed when it includes the reconciliation note required by the RPC.
  */
 
 import type { StoredTimesheetRow } from "../types";
@@ -14,17 +16,27 @@ export type EligibilityReason =
   | "already-approved"
   | "rejected"
   | "incomplete"
+  | "unscheduled-resolution"
   | "exception";
 
 export type ExcludedReason = Exclude<EligibilityReason, "ok">;
 
 /** Why a single row can or cannot be approved. Order = reporting priority. */
-export function approvalEligibility(row: StoredTimesheetRow, inPeriod = true): EligibilityReason {
+export function approvalEligibility(
+  row: StoredTimesheetRow,
+  inPeriod = true,
+  hasUnscheduledResolution = false,
+): EligibilityReason {
   if (!inPeriod) return "out-of-period";
   if (row.status === "approved") return "already-approved";
   if (row.status === "unapproved") return "rejected";
   if (row.in === "—" || row.out === "—" || row.paid === "—") return "incomplete";
-  if (row.exc !== "—" || row.flagged) return "exception";
+  if (row.flagged) return "exception";
+  const exceptionCodes = row.exceptionCodes ?? [];
+  if (exceptionCodes.length === 1 && exceptionCodes[0] === "unscheduled-attendance") {
+    return hasUnscheduledResolution ? "ok" : "unscheduled-resolution";
+  }
+  if (exceptionCodes.length > 0 || row.exc !== "—") return "exception";
   return "ok";
 }
 
@@ -38,6 +50,7 @@ export const REASON_LABEL: Record<ExcludedReason, string> = {
   "already-approved": "already approved",
   rejected: "returned for correction",
   incomplete: "missing a clock-in or clock-out",
+  "unscheduled-resolution": "missing an unscheduled-attendance resolution note",
   exception: "has an unresolved exception",
 };
 
@@ -47,6 +60,7 @@ const SUMMARY_LABEL: Record<ExcludedReason, string> = {
   "already-approved": "already approved",
   rejected: "returned for correction",
   incomplete: "incomplete",
+  "unscheduled-resolution": "missing an unscheduled-attendance resolution",
   exception: "with exceptions",
 };
 

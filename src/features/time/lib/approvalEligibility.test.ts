@@ -54,6 +54,25 @@ describe("approvalEligibility", () => {
     expect(approvalEligibility(row({ exc: "Late in" }))).toBe("exception");
     expect(approvalEligibility(row({ flagged: true }))).toBe("exception");
   });
+
+  it("requires an explicit resolution note for unscheduled attendance only", () => {
+    const unscheduled = row({
+      exc: "Unscheduled attendance",
+      exceptionCodes: ["unscheduled-attendance"],
+    });
+    expect(approvalEligibility(unscheduled)).toBe("unscheduled-resolution");
+    expect(approvalEligibility(unscheduled, true, true)).toBe("ok");
+    expect(
+      approvalEligibility(
+        row({
+          exc: "Unscheduled attendance",
+          exceptionCodes: ["unscheduled-attendance", "late-clock-in"],
+        }),
+        true,
+        true,
+      ),
+    ).toBe("exception");
+  });
 });
 
 describe("partitionForApproval / excludedSummary", () => {

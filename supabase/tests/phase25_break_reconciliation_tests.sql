@@ -326,7 +326,7 @@ begin
   perform public.rpc_batch_approve_time_entries(
     '10000000-0000-4000-8000-000000000001',
     array['36000000-0000-4000-8000-000000000255']::uuid[],
-    'approved', null);
+    'approved', 'Unscheduled attendance reconciled against manager records');
 
   select greatest(
     0,

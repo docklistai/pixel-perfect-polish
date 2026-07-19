@@ -179,7 +179,6 @@ end $$;
 
 savepoint honest_actor_writes;
 do $$
-declare affected_rows integer;
 begin
   -- Phase 34 makes the leave lifecycle RPC-authoritative. Even a correctly
   -- attributed manager write must not bypass the request lock, notification,
@@ -203,11 +202,15 @@ begin
     raise notice 'PASS: direct leave decisions are RPC-authoritative';
   end;
 
-  update public.time_entries set approval_status = 'approved', approved_at = now(), approved_by_membership_id = '13000000-0000-4000-8000-000000000010'
-  where id = '1b000000-0000-4000-8000-000000000002';
-  get diagnostics affected_rows = row_count;
-  if affected_rows <> 1 then raise exception 'FAIL: caller-attributed approval did not update'; end if;
-  raise notice 'PASS: caller-attributed time approval still succeeds';
+  begin
+    update public.time_entries
+    set approval_status = 'approved', approved_at = now(),
+        approved_by_membership_id = '13000000-0000-4000-8000-000000000010'
+    where id = '1b000000-0000-4000-8000-000000000002';
+    raise exception 'FAIL: direct time approval remained available';
+  exception when insufficient_privilege then
+    raise notice 'PASS: direct time approval is RPC-authoritative';
+  end;
 end $$;
 rollback to savepoint honest_actor_writes;
 
@@ -247,6 +250,7 @@ rollback to savepoint honest_clock_event;
 -- --------------------------------------------------------------------------
 -- MANAGER persona: relational consistency on drafts and time entries
 -- --------------------------------------------------------------------------
+reset role;
 do $$
 declare second_location_id uuid;
 begin
@@ -280,6 +284,7 @@ end $$;
 savepoint shift_reassignment;
 insert into public.time_entries (workspace_id, staff_member_id, shift_id, work_date)
 values ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', '16000000-0000-4000-8000-000000000001', '2026-06-15');
+set local role authenticated;
 do $$
 begin
   begin
@@ -288,6 +293,7 @@ begin
   exception when sqlstate '55000' then raise notice 'PASS: shift assignment freezes while time entries reference it'; end;
 end $$;
 rollback to savepoint shift_reassignment;
+set local role authenticated;
 
 -- --------------------------------------------------------------------------
 -- STAFF persona (Olivia): canonical facts, self-service limits, visibility
@@ -468,7 +474,7 @@ begin
   begin
     update public.time_entries set staff_member_id = '14000000-0000-4000-8000-000000000001' where id = '1b000000-0000-4000-8000-000000000001';
     raise exception 'FAIL: time entry staff_member_id mutated';
-  exception when sqlstate '55000' then raise notice 'PASS: time entry staff_member_id is immutable'; end;
+  exception when insufficient_privilege then raise notice 'PASS: time entry updates are RPC-authoritative'; end;
   begin
     update public.leave_requests set staff_member_id = '14000000-0000-4000-8000-000000000001' where id = '19000000-0000-4000-8000-000000000002';
     raise exception 'FAIL: leave request staff_member_id mutated';

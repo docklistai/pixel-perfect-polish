@@ -1,20 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
-import {
-  applyLiveCopyRows,
-  buildLiveCopyPreview,
-  buildLiveCopyRows,
-  type LiveCopyInsertShiftRow,
-  type LiveCopySourceShiftRow,
-} from "./copyPreviousLiveRotaWeek";
+import { describe, expect, it } from "vitest";
+import { buildLiveCopyPreview, type LiveCopySourceShiftRow } from "./copyPreviousLiveRotaWeek";
 
 function sourceShift(overrides: Partial<LiveCopySourceShiftRow> = {}): LiveCopySourceShiftRow {
   return {
-    location_id: "location-previous",
-    department_id: "department-1",
+    location_id: "loc-1",
+    department_id: "dept-1",
     staff_member_id: "staff-1",
-    shift_date: "2026-06-22",
-    starts_at: "2026-06-22T09:00:00Z",
-    ends_at: "2026-06-22T17:00:00Z",
+    shift_date: "2026-06-08",
+    starts_at: "2026-06-08T08:00:00Z",
+    ends_at: "2026-06-08T16:00:00Z",
     break_minutes: 30,
     role_name: "Waiter",
     assignment_status: "scheduled",
@@ -22,140 +16,40 @@ function sourceShift(overrides: Partial<LiveCopySourceShiftRow> = {}): LiveCopyS
   };
 }
 
-function currentShift(overrides: Partial<LiveCopyInsertShiftRow> = {}): LiveCopyInsertShiftRow {
-  return {
-    id: "current-1",
-    workspace_id: "workspace-1",
-    rota_week_id: "week-current",
-    location_id: "location-current",
-    department_id: "department-1",
-    staff_member_id: "staff-current",
-    shift_date: "2026-06-29",
-    starts_at: "2026-06-29T09:00:00Z",
-    ends_at: "2026-06-29T17:00:00Z",
-    break_minutes: 30,
-    role_name: "Waiter",
-    assignment_status: "scheduled",
-    ...overrides,
-  };
-}
-
-function copyRows(
-  sourceRows: LiveCopySourceShiftRow[] = [sourceShift()],
-): LiveCopyInsertShiftRow[] {
-  return buildLiveCopyRows({
-    sourceRows,
-    workspaceId: "workspace-1",
-    targetWeekId: "week-current",
-    targetLocationId: "location-current",
-    previousWeekStart: "2026-06-22",
-    targetWeekStart: "2026-06-29",
-    timezone: "UTC",
-  });
-}
+// Atomicity of the copy itself now lives in the database
+// (rpc_copy_previous_rota_week — covered by the phase 40 SQL suite).
 
 describe("buildLiveCopyPreview", () => {
-  it("summarises what will be copied and replaced before apply", () => {
+  it("summarises source, current, assigned, and open counts with week labels", () => {
     const preview = buildLiveCopyPreview({
       sourceRows: [
         sourceShift(),
         sourceShift({ staff_member_id: null, assignment_status: "open" }),
+        sourceShift({ staff_member_id: "staff-2" }),
       ],
-      currentShiftCount: 3,
-      previousWeekStart: "2026-06-22",
-      targetWeekStart: "2026-06-29",
+      currentShiftCount: 4,
+      previousWeekStart: "2026-06-08",
+      targetWeekStart: "2026-06-15",
     });
 
-    expect(preview).toMatchObject({
-      sourceShiftCount: 2,
-      currentShiftCount: 3,
-      assignedShiftCount: 1,
-      openShiftCount: 1,
-    });
-    expect(preview.previousWeekLabel).toContain("22");
-    expect(preview.previousWeekLabel).toContain("28 Jun");
-    expect(preview.targetWeekLabel).toContain("29 Jun");
-    expect(preview.targetWeekLabel).toContain("5 Jul");
+    expect(preview.sourceShiftCount).toBe(3);
+    expect(preview.currentShiftCount).toBe(4);
+    expect(preview.assignedShiftCount).toBe(2);
+    expect(preview.openShiftCount).toBe(1);
+    expect(preview.previousWeekStart).toBe("2026-06-08");
+    expect(preview.targetWeekStart).toBe("2026-06-15");
+    expect(preview.previousWeekLabel).toContain("Jun");
+    expect(preview.targetWeekLabel).toContain("Jun");
   });
-});
 
-describe("applyLiveCopyRows", () => {
-  it("does not delete the current week when the copy payload is invalid or empty", async () => {
-    const deleteCurrentRows = vi.fn();
-
-    await expect(
-      applyLiveCopyRows({
-        nextRows: [],
-        currentRows: [currentShift()],
-        deleteCurrentRows,
-        insertRows: vi.fn(),
-        restoreRows: vi.fn(),
+  it("refuses to preview an empty source week", () => {
+    expect(() =>
+      buildLiveCopyPreview({
+        sourceRows: [],
+        currentShiftCount: 0,
+        previousWeekStart: "2026-06-08",
+        targetWeekStart: "2026-06-15",
       }),
-    ).rejects.toThrow("Previous week has no shifts to copy");
-
-    expect(deleteCurrentRows).not.toHaveBeenCalled();
-  });
-
-  it("restores the current draft and rejects when inserting copied shifts fails", async () => {
-    const currentRows = [currentShift()];
-    const deleteCurrentRows = vi.fn().mockResolvedValue(undefined);
-    const insertRows = vi.fn().mockRejectedValue(new Error("insert failed"));
-    const restoreRows = vi.fn().mockResolvedValue(undefined);
-
-    await expect(
-      applyLiveCopyRows({
-        nextRows: copyRows(),
-        currentRows,
-        deleteCurrentRows,
-        insertRows,
-        restoreRows,
-      }),
-    ).rejects.toThrow("The original draft was restored");
-
-    expect(deleteCurrentRows).toHaveBeenCalledTimes(1);
-    expect(insertRows).toHaveBeenCalledTimes(1);
-    expect(restoreRows).toHaveBeenCalledWith(currentRows);
-  });
-
-  it("surfaces a hard failure when copied insert and rollback both fail", async () => {
-    await expect(
-      applyLiveCopyRows({
-        nextRows: copyRows(),
-        currentRows: [currentShift()],
-        deleteCurrentRows: vi.fn().mockResolvedValue(undefined),
-        insertRows: vi.fn().mockRejectedValue(new Error("insert failed")),
-        restoreRows: vi.fn().mockRejectedValue(new Error("restore failed")),
-      }),
-    ).rejects.toThrow("original draft could not be restored");
-  });
-
-  it("never lets a raw PostgREST/constraint failure reach the composed customer message", async () => {
-    const errorLog = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const rawInsertError = new Error(
-      'duplicate key value violates unique constraint "shifts_workspace_id_id_key"',
-    );
-
-    let thrown: Error | undefined;
-    try {
-      await applyLiveCopyRows({
-        nextRows: copyRows(),
-        currentRows: [currentShift()],
-        deleteCurrentRows: vi.fn().mockResolvedValue(undefined),
-        insertRows: vi.fn().mockRejectedValue(rawInsertError),
-        restoreRows: vi.fn().mockResolvedValue(undefined),
-      });
-    } catch (error) {
-      thrown = error as Error;
-    }
-
-    expect(thrown).toBeDefined();
-    expect(thrown!.message).not.toContain("constraint");
-    expect(thrown!.message).not.toContain("duplicate key");
-    expect(thrown!.message).not.toContain("shifts_workspace_id_id_key");
-    // An unrecognised failure still hands back a reference the customer can quote.
-    expect(thrown!.message).toMatch(/Reference: err-/);
-    // ...and it is logged server-side for support to look up by that reference.
-    expect(errorLog).toHaveBeenCalled();
-    errorLog.mockRestore();
+    ).toThrow("Previous week has no shifts to copy.");
   });
 });

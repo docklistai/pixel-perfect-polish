@@ -50,7 +50,9 @@ export function TimesheetReviewDrawer({
   if (!row) return null;
 
   const status = statusOf(row);
-  const reason = approvalEligibility(row);
+  const isUnscheduledAttendance =
+    row.exceptionCodes?.length === 1 && row.exceptionCodes[0] === "unscheduled-attendance";
+  const reason = approvalEligibility(row, true, Boolean(managerNote.trim()));
   const canApprove = reason === "ok";
   const badgeTone =
     status === "approved" ? "success" : status === "unapproved" ? "danger" : "warning";
@@ -166,12 +168,27 @@ export function TimesheetReviewDrawer({
         live={Boolean(liveWorkspaceId)}
       />
 
-      <FormSection title="Manager note" description="Optional note recorded with approval.">
-        <FormRow label="Add a note" htmlFor="time-manager-note">
+      <FormSection
+        title="Manager note"
+        description={
+          isUnscheduledAttendance
+            ? "Required: record how this unscheduled attendance was verified before approval."
+            : "Optional note recorded with approval."
+        }
+      >
+        <FormRow
+          label={isUnscheduledAttendance ? "Resolution note" : "Add a note"}
+          htmlFor="time-manager-note"
+          required={isUnscheduledAttendance}
+        >
           <textarea
             id="time-manager-note"
             className="w-full min-h-20 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
-            placeholder="Optional approval note…"
+            placeholder={
+              isUnscheduledAttendance
+                ? "How was this unscheduled attendance verified?"
+                : "Optional approval note…"
+            }
             value={managerNote}
             maxLength={2000}
             onChange={(event) => setManagerNote(event.target.value)}

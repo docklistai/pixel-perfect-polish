@@ -1,6 +1,7 @@
 import { CheckCircle2, Info, Sparkles } from "lucide-react";
 import { Card } from "@/components/dl";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
+import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { timeQueries } from "../data/timeDemoData";
 import { isApprovable } from "../lib/approvalEligibility";
 import type { StoredTimesheetRow, TimeQuery } from "../types";
@@ -164,11 +165,7 @@ export function TimeRightRail({
                 key={p.id}
                 className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left"
               >
-                <img
-                  src={`https://i.pravatar.cc/64?img=${p.img}`}
-                  className="h-8 w-8 rounded-full object-cover"
-                  alt=""
-                />
+                <StaffMonogram name={p.n} />
                 <div className="flex-1">
                   <div className="text-sm font-medium">{p.n}</div>
                   <div className="text-[11px] text-muted-foreground">Today · {p.sched}</div>
@@ -198,11 +195,7 @@ export function TimeRightRail({
                 onClick={() => onOpenQuery(p)}
                 className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left transition hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               >
-                <img
-                  src={`https://i.pravatar.cc/64?img=${p.img}`}
-                  className="h-8 w-8 rounded-full object-cover"
-                  alt=""
-                />
+                <StaffMonogram name={p.n} />
                 <div className="flex-1">
                   <div className="text-sm font-medium">{p.n}</div>
                   <div className="text-[11px] text-muted-foreground">{p.t}</div>
