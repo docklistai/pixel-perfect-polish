@@ -98,6 +98,7 @@ export function RotaOverlays({
         workingTimeAlertCount={workingTimeAlertCount}
         leaveDataState={leaveDataState}
         constraintClashCount={constraintClashCount}
+        approvedLeaveClashCount={rota.approvedLeaveClashCount}
         availabilityDataState={availabilityDataState}
         published={rota.published}
         hasUnpublishedChanges={rota.hasUnpublishedChanges}

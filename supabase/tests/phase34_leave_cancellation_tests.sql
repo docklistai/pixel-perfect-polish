@@ -204,7 +204,7 @@ end $$;
 -- issue: the newer snapshot still assigns the person during approved leave.
 select public.rpc_publish_rota_week(
   '10000000-0000-4000-8000-000000000001',
-  '44000000-0000-4000-8000-000000000001');
+  '44000000-0000-4000-8000-000000000001', true);
 set constraints all immediate;
 set constraints all deferred;
 do $$ begin

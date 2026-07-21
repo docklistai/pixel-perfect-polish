@@ -81,6 +81,23 @@ describe("approved leave dates on the rota", () => {
       day: "Wed 8 Jul",
     });
   });
+
+  it("never raises a clash for pending, declined, or cancelled leave", () => {
+    const states: LeaveRequest["state"][] = ["pending", "declined", "cancelled"];
+    for (const state of states) {
+      const request: LeaveRequest = { ...approvedLeave, id: `leave-${state}`, state };
+      expect(
+        buildApprovedLeaveConflictSummaries([shift], [request], dayIsoDates, staff, [
+          "Mon 6 Jul",
+          "Tue 7 Jul",
+          "Wed 8 Jul",
+        ]),
+      ).toHaveLength(0);
+      expect(withApprovedLeaveConflictStatus([shift], [request], dayIsoDates)[0]?.status).toBe(
+        "scheduled",
+      );
+    }
+  });
 });
 
 describe("pendingLeaveForStaffOnDay", () => {

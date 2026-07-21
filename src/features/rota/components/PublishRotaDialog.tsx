@@ -2,7 +2,10 @@ import * as React from "react";
 import { AlertTriangle, CheckCircle2, Send } from "lucide-react";
 import { ActionButton, DialogShell } from "@/components/dl";
 import type { MaybePromise } from "./grid";
-import { constraintAcknowledgementValue } from "../lib/publishConstraintAcknowledgement";
+import {
+  constraintAcknowledgementLabel,
+  constraintAcknowledgementValue,
+} from "../lib/publishConstraintAcknowledgement";
 
 type ReadinessCheck = {
   label: string;
@@ -23,6 +26,7 @@ export function PublishRotaDialog({
   workingTimeAlertCount,
   leaveDataState,
   constraintClashCount,
+  approvedLeaveClashCount,
   availabilityDataState,
   published,
   hasUnpublishedChanges,
@@ -42,6 +46,12 @@ export function PublishRotaDialog({
   workingTimeAlertCount: number;
   leaveDataState: "ready" | "loading" | "error";
   constraintClashCount: number;
+  /**
+   * Approved-leave clashes already surface through `conflictCount`; this count
+   * is passed separately so the RPC override can include them without adding
+   * the same conflict to the issue tally twice.
+   */
+  approvedLeaveClashCount: number;
   availabilityDataState: "ready" | "loading" | "error";
   published: boolean;
   hasUnpublishedChanges: boolean;
@@ -74,7 +84,15 @@ export function PublishRotaDialog({
     if (!canPublish || (hasIssues && !issuesAcknowledged)) return;
     setPublishing(true);
     try {
-      await onConfirm(constraintAcknowledgementValue(constraintClashCount, issuesAcknowledged));
+      await onConfirm(
+        constraintAcknowledgementValue(
+          {
+            availabilityClashCount: constraintClashCount,
+            approvedLeaveClashCount,
+          },
+          issuesAcknowledged,
+        ),
+      );
     } catch {
       // Route/persistence handlers own publish failure toasts and keep the dialog open.
     } finally {
@@ -223,11 +241,7 @@ export function PublishRotaDialog({
             onChange={(event) => setIssuesAcknowledged(event.target.checked)}
             className="mt-0.5 h-4 w-4 accent-brand"
           />
-          <span>
-            I have reviewed the open shifts, conflicts, working-time alerts, leave-data status, and
-            any approved unavailability or recurring day-off overrides. I still want to{" "}
-            {publishActionLabel.toLowerCase()} this manager-approved rota snapshot.
-          </span>
+          <span>{constraintAcknowledgementLabel(publishActionLabel.toLowerCase())}</span>
         </label>
       )}
     </DialogShell>

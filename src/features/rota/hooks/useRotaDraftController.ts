@@ -82,15 +82,19 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
     }));
   }, [dayLabels, displayShifts, live.isLive, live.today, live.weekStart, weekDraft.weekOffset]);
   const visibleStaff = filterStaff(roster, displayShifts, filters, staffSearch);
+  // Approved-leave conflicts live in the conflict list only; the separate count
+  // is derived from the same array so the publish boundary can treat them as
+  // acknowledgeable scheduling constraints without duplicating the conflicts.
+  const approvedLeaveConflictSummaries = buildApprovedLeaveConflictSummaries(
+    displayShifts,
+    leaveRequests,
+    dayIsoDates,
+    roster,
+    dayLabels,
+  );
   const conflictSummaries = [
     ...buildLocalConflictSummaries(displayShifts, roster, dayLabels),
-    ...buildApprovedLeaveConflictSummaries(
-      displayShifts,
-      leaveRequests,
-      dayIsoDates,
-      roster,
-      dayLabels,
-    ),
+    ...approvedLeaveConflictSummaries,
   ];
   const selectedShift = weekDraft.selectedShiftId
     ? (displayShifts.find((shift) => shift.id === weekDraft.selectedShiftId) ?? null)
@@ -163,6 +167,7 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
       filters.warningType !== "all",
     openShiftCount: countOpenShifts(displayShifts),
     conflictCount: conflictSummaries.length,
+    approvedLeaveClashCount: approvedLeaveConflictSummaries.length,
     assignedShiftCount: countAssignedShifts(displayShifts),
     plannedShiftCount: countPlannedShifts(displayShifts),
     conflictSummaries,
