@@ -13,6 +13,12 @@ export interface PortalShift {
   hours: number;
   role: string;
   station: string;
+  /**
+   * The department this shift was actually scheduled in — taken from the
+   * published shift, not from the staff member's profile, so a shift covered
+   * in another department reads correctly.
+   */
+  department?: string | null;
   breakMinutes: number;
   status: ShiftStatus;
   shiftNote?: string;

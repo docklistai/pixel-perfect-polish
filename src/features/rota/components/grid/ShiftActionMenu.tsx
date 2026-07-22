@@ -26,7 +26,15 @@ import { COPY_ASSIGNMENT_BLOCKED_REASON } from "../../lib/assignableStaff";
 import type { DraftShift } from "../../types";
 import type { ShiftMenuHandlers } from "./types";
 
-export const ROTA_DEPT_NAMES = [
+/**
+ * Legacy department labels.
+ *
+ * These are NOT workspace departments — they are a fixed list kept only so the
+ * existing filter drawer still offers familiar chips for historical
+ * `deptOverride` values. The change-department menu now uses the workspace's
+ * real active departments instead.
+ */
+export const LEGACY_DEPT_LABELS = [
   "Front of House",
   "Kitchen",
   "Bar",
@@ -108,21 +116,27 @@ export function ShiftActionMenu({
             Mark as open shift
           </DropdownMenuItem>
         )}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Briefcase className="mr-2 h-4 w-4" aria-hidden />
-            Change department…
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-48">
-            <DropdownMenuLabel>Change department for this shift</DropdownMenuLabel>
-            {ROTA_DEPT_NAMES.map((dept) => (
-              <DropdownMenuItem key={dept} onSelect={() => handlers.onSetDept(shift.id, dept)}>
-                <Briefcase className="h-4 w-4" aria-hidden />
-                {dept}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+        {(handlers.departments?.length ?? 0) > 0 && handlers.onSetDepartment && (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Briefcase className="mr-2 h-4 w-4" aria-hidden />
+              Change department…
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-48">
+              <DropdownMenuLabel>Move this shift to</DropdownMenuLabel>
+              {handlers.departments!.map((department) => (
+                <DropdownMenuItem
+                  key={department.id}
+                  onSelect={() => handlers.onSetDepartment!(shift.id, department.id)}
+                >
+                  <Briefcase className="h-4 w-4" aria-hidden />
+                  {department.name}
+                  {shift.departmentId === department.id && " ✓"}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        )}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Tag className="mr-2 h-4 w-4" aria-hidden />

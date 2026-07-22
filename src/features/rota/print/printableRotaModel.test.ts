@@ -244,6 +244,22 @@ describe("missing department data", () => {
     expect(model.staffRows[0]!.days[0]![0]!.department).toBe("Kitchen");
   });
 
+  it("prints the shift's real department, not the legacy label", () => {
+    const model = build({
+      shifts: [shift("s1", 0, "a", undefined, { departmentId: "events", deptOverride: "Kitchen" })],
+      departmentNameById: new Map([["events", "Events"]]),
+    });
+    expect(model.staffRows[0]!.days[0]![0]!.department).toBe("Events");
+  });
+
+  it("keeps a historical department readable when its name is no longer known", () => {
+    const model = build({
+      shifts: [shift("s1", 0, "a", undefined, { departmentId: "retired", departmentName: "Spa" })],
+      departmentNameById: new Map(),
+    });
+    expect(model.staffRows[0]!.days[0]![0]!.department).toBe("Spa");
+  });
+
   it("omits a zero break rather than printing '0m break'", () => {
     const model = build({ shifts: [shift("s1", 0, "a", undefined, { breakMinutes: 0 })] });
     expect(model.staffRows[0]!.days[0]![0]!.breakMinutes).toBeNull();

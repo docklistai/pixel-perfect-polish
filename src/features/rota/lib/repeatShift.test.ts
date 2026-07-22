@@ -20,6 +20,7 @@ const source: DraftShift = {
   breakMinutes: 30,
   tone: "info",
   status: "scheduled",
+  departmentId: "events-department",
   deptOverride: "Kitchen",
   colourOverride: "amber",
 };
@@ -70,6 +71,23 @@ describe("planRepeatShift", () => {
       deptOverride: "Kitchen",
       colourOverride: "amber",
     });
+  });
+
+  it("repeats into the shift's own department, not the staff member's", () => {
+    // The source sits in Events even though its owner's profile is elsewhere;
+    // every repeat must land in Events too.
+    const plan = planRepeatShift(source, [1, 2], [source]);
+
+    expect(plan.inputs.map((input) => input.departmentId)).toEqual([
+      "events-department",
+      "events-department",
+    ]);
+  });
+
+  it("passes an explicit null when the source has no department yet", () => {
+    const plan = planRepeatShift({ ...source, departmentId: undefined }, [1], [source]);
+
+    expect(plan.inputs[0]!.departmentId).toBeNull();
   });
 
   it("does not block a named repeat because of an unrelated open shift", () => {

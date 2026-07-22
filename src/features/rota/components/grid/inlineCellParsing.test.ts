@@ -109,8 +109,22 @@ describe("break syntax", () => {
 
   it("applies a per-segment break in a split cell", () => {
     expect(shiftsOf("9-12 waiter / 17-22 bar break 30")).toEqual([
-      { start: "09:00", end: "12:00", role: "Waiter", breakMinutes: null, open: false },
-      { start: "17:00", end: "22:00", role: "Bar", breakMinutes: 30, open: false },
+      {
+        start: "09:00",
+        end: "12:00",
+        role: "Waiter",
+        breakMinutes: null,
+        open: false,
+        roleWarning: null,
+      },
+      {
+        start: "17:00",
+        end: "22:00",
+        role: "Bar",
+        breakMinutes: 30,
+        open: false,
+        roleWarning: null,
+      },
     ]);
   });
 });
@@ -124,21 +138,54 @@ describe("role handling", () => {
     expect(shiftsOf("9-5")[0]?.role).toBeNull();
   });
 
-  it("never invents a role from unmatched trailing text", () => {
+  it("accepts an unknown role as a temporary shift label", () => {
+    // Gate 3b: covering a gap as "Sommelier" is legitimate manual scheduling.
+    // It saves, it warns, and it never becomes a workspace role.
     const result = parseInlineCellInput("9-5 Sommelier", { roleOptions: ROLES });
-    expect(result.kind).toBe("error");
-    if (result.kind === "error") {
-      expect(result.message).toContain("not one of your roles");
-      expect(result.message).toContain("Bar, Waiter, Kitchen");
+    expect(result.kind).toBe("shifts");
+    if (result.kind === "shifts") {
+      expect(result.shifts[0]!.role).toBe("Sommelier");
+      expect(result.shifts[0]!.roleWarning).toBe(
+        "Temporary shift role — this will not be added to workspace roles",
+      );
     }
   });
 
-  it("does not invent a role from stray numbers either", () => {
+  it("warns when a configured role differs from the staff profile role", () => {
+    const result = parseInlineCellInput("9-5 Bar", {
+      roleOptions: ROLES,
+      profileRole: "Waiter",
+    });
+    expect(result.kind).toBe("shifts");
+    if (result.kind === "shifts") {
+      expect(result.shifts[0]!.role).toBe("Bar");
+      expect(result.shifts[0]!.roleWarning).toBe("Usual role: Waiter · Scheduled as Bar");
+    }
+  });
+
+  it("stays silent when the role matches the staff profile role", () => {
+    const result = parseInlineCellInput("9-5 Waiter", {
+      roleOptions: ROLES,
+      profileRole: "Waiter",
+    });
+    if (result.kind === "shifts") expect(result.shifts[0]!.roleWarning).toBeNull();
+  });
+
+  it.each(["training", "cover"])("treats a timed %s as a temporary shift role", (label) => {
+    const result = parseInlineCellInput(`9-5 ${label}`, { roleOptions: ROLES });
+    expect(result.kind).toBe("shifts");
+    if (result.kind === "shifts") {
+      expect(result.shifts[0]!.role).toBe(label[0]!.toUpperCase() + label.slice(1));
+      expect(result.shifts[0]!.roleWarning).toContain("not be added to workspace roles");
+    }
+  });
+
+  it('still refuses stray numbers rather than labelling a shift "30"', () => {
     expect(parseInlineCellInput("9-5 30", { roleOptions: ROLES }).kind).toBe("error");
   });
 
-  it("leaves the role unset when there are no permitted roles to check against", () => {
-    expect(shiftsOf("9-5 anything", [])[0]?.role).toBeNull();
+  it("accepts free text as a temporary role when no roles are configured", () => {
+    expect(shiftsOf("9-5 anything", [])[0]?.role).toBe("Anything");
   });
 
   it("shares a single named role across split segments", () => {
@@ -157,11 +204,29 @@ describe("open shifts and clear commands", () => {
   it("parses open shift text with time and role in either order", () => {
     expect(parseInlineCellInput("open 6pm-11pm bar", { roleOptions: ["Bar"] })).toEqual({
       kind: "shifts",
-      shifts: [{ start: "18:00", end: "23:00", role: "Bar", breakMinutes: null, open: true }],
+      shifts: [
+        {
+          start: "18:00",
+          end: "23:00",
+          role: "Bar",
+          breakMinutes: null,
+          open: true,
+          roleWarning: null,
+        },
+      ],
     });
     expect(parseInlineCellInput("bar 18:00-23:00 open", { roleOptions: ["Bar"] })).toEqual({
       kind: "shifts",
-      shifts: [{ start: "18:00", end: "23:00", role: "Bar", breakMinutes: null, open: true }],
+      shifts: [
+        {
+          start: "18:00",
+          end: "23:00",
+          role: "Bar",
+          breakMinutes: null,
+          open: true,
+          roleWarning: null,
+        },
+      ],
     });
   });
 
@@ -169,7 +234,16 @@ describe("open shifts and clear commands", () => {
     for (const input of ["open 9-5", "9-5 open"]) {
       expect(parseInlineCellInput(input, { roleOptions: ROLES })).toEqual({
         kind: "shifts",
-        shifts: [{ start: "09:00", end: "17:00", role: null, breakMinutes: null, open: true }],
+        shifts: [
+          {
+            start: "09:00",
+            end: "17:00",
+            role: null,
+            breakMinutes: null,
+            open: true,
+            roleWarning: null,
+          },
+        ],
       });
     }
   });

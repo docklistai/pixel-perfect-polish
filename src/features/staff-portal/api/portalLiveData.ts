@@ -27,6 +27,7 @@ interface PublishedShiftViewRow {
   snapshot_version: number;
   published_at: string;
   location_name: string;
+  department_name: string | null;
   location_timezone: string;
 }
 
@@ -40,6 +41,7 @@ function mapPublishedShift(row: PublishedShiftViewRow): PortalShift {
     hours: shiftHours(row.starts_at, row.ends_at),
     role: row.role_name,
     station: row.location_name,
+    department: row.department_name,
     breakMinutes: row.break_minutes,
     status: row.assignment_status === "open" ? "open" : "confirmed",
     sourceSnapshotVersion: row.snapshot_version,
@@ -62,7 +64,7 @@ export async function fetchPortalPublishedShifts(
   const { data, error } = await supabase
     .from("staff_portal_published_shifts")
     .select(
-      "published_shift_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, snapshot_version, published_at, location_name, location_timezone",
+      "published_shift_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, snapshot_version, published_at, location_name, department_name, location_timezone",
     )
     .eq("workspace_id", workspaceId)
     .eq("staff_member_id", staffMemberId)

@@ -47,10 +47,26 @@ describe("buildInlineCellPreview", () => {
     expect(summary("delete all")).toBe(`${expected} (every shift in this cell)`);
   });
 
-  it("surfaces the parse error as a blocking preview", () => {
+  it("previews an unknown role as a saveable temporary label", () => {
     const preview = buildInlineCellPreview("9-5 Sommelier", options);
-    expect(preview.tone).toBe("error");
-    expect(preview.summary).toContain("not one of your roles");
+    // "ok", not "error": the editor must still commit on Enter.
+    expect(preview.tone).toBe("ok");
+    expect(preview.summary).toContain("Sommelier");
+    expect(preview.summary).toContain("will not be added to workspace roles");
+  });
+
+  it("previews an unusual configured role without blocking", () => {
+    const preview = buildInlineCellPreview("9-5 Bar", { ...options, profileRole: "Waiter" });
+    expect(preview.tone).toBe("ok");
+    expect(preview.summary).toContain("Usual role: Waiter · Scheduled as Bar");
+  });
+
+  it("previews timed training and cover as temporary roles", () => {
+    for (const input of ["9-5 training", "9-5 cover"]) {
+      const preview = buildInlineCellPreview(input, options);
+      expect(preview.tone).toBe("ok");
+      expect(preview.summary).toContain("will not be added to workspace roles");
+    }
   });
 
   it("blocks on malformed times", () => {

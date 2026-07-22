@@ -6,6 +6,8 @@ import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
 import type { MaybePromise } from "./grid";
 import { AddShiftFormFields, type AddShiftFormState } from "./AddShiftFormFields";
+import { departmentWarning } from "../lib/departmentWarning";
+import { useWorkspaceDepartments } from "../hooks/useWorkspaceDepartments";
 
 type DayEntry = { d: string };
 
@@ -17,6 +19,7 @@ const DEFAULT_FORM: AddShiftFormState = {
   assignTo: "",
   breakMinutes: 30,
   repeat: false,
+  departmentId: "",
 };
 
 export function AddShiftDrawer({
@@ -26,6 +29,7 @@ export function AddShiftDrawer({
   staff,
   roles,
   onSubmit,
+  staffDepartmentId,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -33,7 +37,10 @@ export function AddShiftDrawer({
   staff: StaffMember[];
   roles: string[];
   onSubmit: (input: DraftShiftInput) => MaybePromise<void>;
+  /** The selected staff member's own department, used as the initial default. */
+  staffDepartmentId?: (staffId: string) => string | null;
 }) {
+  const departmentsState = useWorkspaceDepartments();
   const initialForm = React.useMemo<AddShiftFormState>(
     () => ({ ...DEFAULT_FORM, role: roles[0] ?? "" }),
     [roles],
@@ -79,6 +86,8 @@ export function AddShiftDrawer({
           start: form.start,
           end: form.end,
           breakMinutes: form.breakMinutes,
+          // Empty means "no explicit choice" — the server falls back safely.
+          departmentId: form.departmentId || null,
         });
       }
       if (keepOpen) {
@@ -135,6 +144,13 @@ export function AddShiftDrawer({
         submitted={submitted}
         roleError={errors.role}
         timeError={errors.timeOrder}
+        departments={departmentsState.departments}
+        departmentsEmpty={departmentsState.isEmpty}
+        departmentWarning={departmentWarning({
+          selectedId: form.departmentId || null,
+          profileDepartmentId: form.assignTo ? staffDepartmentId?.(form.assignTo) : null,
+          nameById: departmentsState.nameById,
+        })}
       />
     </DialogShell>
   );

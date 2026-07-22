@@ -50,6 +50,7 @@ interface LocationRow extends LiveRotaLocation {
 interface ShiftRow {
   id: string;
   staff_member_id: string | null;
+  department_id: string;
   shift_date: string;
   starts_at: string;
   ends_at: string;
@@ -72,13 +73,22 @@ interface SnapshotRow {
   published_at: string;
 }
 
-function mapShift(row: ShiftRow, weekStartIso: string, timezone: string): DraftShift {
+function mapShift(
+  row: ShiftRow,
+  weekStartIso: string,
+  timezone: string,
+  departmentNames?: Map<string, string>,
+): DraftShift {
   const isOpen = row.assignment_status === "open";
   const tone: ShiftTone = isOpen ? "open" : "info";
   return {
     id: row.id,
     dayIndex: dayIndexFromDates(weekStartIso, row.shift_date),
     staffId: row.staff_member_id,
+    departmentId: row.department_id,
+    // Historical shifts may point at a department that has since been
+    // deactivated; those still resolve here so the rota stays readable.
+    departmentName: departmentNames?.get(row.department_id) ?? null,
     role: row.role_name,
     start: formatTimeInTimezone(row.starts_at, timezone),
     end: formatTimeInTimezone(row.ends_at, timezone),
@@ -181,11 +191,12 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       { data: shifts, error: shiftsError },
       { data: latestSnapshot, error: snapshotError },
       { count: openOperationalIssueCount, error: operationalIssueError },
+      { data: departmentRows, error: departmentsError },
     ] = await Promise.all([
       supabase
         .from("shifts")
         .select(
-          "id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, colour_override, dept_override, created_at, updated_at",
+          "id, staff_member_id, department_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status, colour_override, dept_override, created_at, updated_at",
         )
         .eq("workspace_id", workspaceId)
         .eq("rota_week_id", week.id)
@@ -205,15 +216,24 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
         .eq("workspace_id", workspaceId)
         .eq("rota_week_id", week.id)
         .eq("status", "open"),
+      // Every department, not just active ones: a shift scheduled into a
+      // department that was later deactivated must still show its real name.
+      supabase.from("departments").select("id, name").eq("workspace_id", workspaceId),
     ]);
 
     if (shiftsError) throw shiftsError;
     if (snapshotError) throw snapshotError;
     if (operationalIssueError) throw operationalIssueError;
+    if (departmentsError) throw departmentsError;
 
     const shiftRows = (shifts as ShiftRow[] | null) ?? [];
     const weekRow = week as WeekRow;
     const snapshotRow = (latestSnapshot as SnapshotRow | null) ?? null;
+    const departmentNames = new Map(
+      (((departmentRows as { id: string; name: string }[] | null) ?? []).filter(Boolean) ?? []).map(
+        (department) => [department.id, department.name],
+      ),
+    );
 
     return {
       ...resultBase,
@@ -228,6 +248,6 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       hasUnpublishedChanges:
         (openOperationalIssueCount ?? 0) > 0 ||
         hasDraftChangedSincePublish(weekRow, shiftRows, snapshotRow),
-      shifts: shiftRows.map((row) => mapShift(row, weekStart, location.timezone)),
+      shifts: shiftRows.map((row) => mapShift(row, weekStart, location.timezone, departmentNames)),
     };
   });

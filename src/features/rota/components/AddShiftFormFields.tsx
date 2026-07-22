@@ -1,5 +1,7 @@
 import { FormRow, FormSection } from "@/components/dl";
 import type { RotaDayIndex, StaffMember } from "../types";
+import type { WorkspaceDepartment } from "../api/workspaceDepartments";
+import { ShiftDepartmentField } from "./ShiftDepartmentField";
 
 export type AddShiftFormState = {
   dayIndex: RotaDayIndex;
@@ -9,6 +11,8 @@ export type AddShiftFormState = {
   assignTo: string;
   breakMinutes: number;
   repeat: boolean;
+  /** Empty means "fall back safely" rather than a chosen department. */
+  departmentId: string;
 };
 
 export function AddShiftFormFields({
@@ -20,6 +24,9 @@ export function AddShiftFormFields({
   submitted,
   roleError,
   timeError,
+  departments,
+  departmentsEmpty,
+  departmentWarning,
 }: {
   form: AddShiftFormState;
   setForm: React.Dispatch<React.SetStateAction<AddShiftFormState>>;
@@ -29,6 +36,9 @@ export function AddShiftFormFields({
   submitted: boolean;
   roleError: string;
   timeError: string;
+  departments: WorkspaceDepartment[];
+  departmentsEmpty: boolean;
+  departmentWarning: string | null;
 }) {
   const roleErrorId = "add-shift-role-error";
   const timeErrorId = "add-shift-time-error";
@@ -76,6 +86,15 @@ export function AddShiftFormFields({
             </p>
           )}
         </FormRow>
+
+        <ShiftDepartmentField
+          id="add-shift-department"
+          value={form.departmentId}
+          departments={departments}
+          isEmpty={departmentsEmpty}
+          warning={departmentWarning}
+          onChange={(departmentId) => setForm((current) => ({ ...current, departmentId }))}
+        />
 
         <FormRow label="Day" required htmlFor="add-shift-day">
           <select

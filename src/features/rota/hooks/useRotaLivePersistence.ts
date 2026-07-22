@@ -53,6 +53,10 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
               ...(patch.start !== undefined ? { start: patch.start } : {}),
               ...(patch.end !== undefined ? { end: patch.end } : {}),
               ...(patch.breakMinutes !== undefined ? { breakMinutes: patch.breakMinutes } : {}),
+              // Moving the shift between real workspace departments. Null is not
+              // a meaningful value here — a shift always has a department — so
+              // only a concrete id is forwarded.
+              ...(patch.departmentId ? { departmentId: patch.departmentId } : {}),
               // Key presence (not value) signals intent; undefined → null clears it.
               ...("colourOverride" in patch
                 ? { colourOverride: patch.colourOverride ?? null }

@@ -1,5 +1,5 @@
 import { ActionButton, DrawerShell, FormRow, FormSection } from "@/components/dl";
-import { ROTA_DEPT_NAMES } from "./grid/ShiftActionMenu";
+import { LEGACY_DEPT_LABELS } from "./grid/ShiftActionMenu";
 import type { RotaFilters } from "../types";
 
 const defaultRotaFilters: RotaFilters = {
@@ -28,7 +28,7 @@ export function RotaFiltersDrawer({
   const resetFilters = () => {
     onFiltersChange(defaultRotaFilters);
   };
-  const filterOptions = Array.from(new Set([...ROTA_DEPT_NAMES, ...roleOptions]));
+  const filterOptions = Array.from(new Set([...LEGACY_DEPT_LABELS, ...roleOptions]));
 
   return (
     <DrawerShell

@@ -11,6 +11,11 @@ export type StaffMember = {
   hrs: string;
   img: number;
   tone: ShiftTone;
+  /**
+   * The staff member's own department. A default and a suitability signal for
+   * new shifts — never a restriction, and never rewritten by scheduling.
+   */
+  departmentId?: string | null;
 };
 
 export type DraftShift = {
@@ -25,9 +30,21 @@ export type DraftShift = {
   breakMinutes: number;
   tone: ShiftTone;
   status: DraftShiftStatus;
+  /**
+   * The shift's actual department (`shifts.department_id`). This is the
+   * authority — it is not derived from the staff profile, and changing it never
+   * edits the staff member's own department. Null only for drafts that have not
+   * been persisted yet.
+   */
+  departmentId?: string | null;
+  /** Resolved department name for display; null when it cannot be resolved. */
+  departmentName?: string | null;
   /** Manual chip colour override (dept colour preset id). Draft/local only. */
   colourOverride?: string;
-  /** Department override applied from the cell menu. Draft/local only. */
+  /**
+   * Legacy free-text department label from the old cell menu. Kept so existing
+   * data still renders, but it is NOT the department — use `departmentId`.
+   */
   deptOverride?: string;
   /** Marks the shift as edited in the current draft (amber indicator). */
   edited?: boolean;
@@ -74,6 +91,8 @@ export type DraftShiftInput = {
   breakMinutes?: number;
   tone?: ShiftTone;
   status?: DraftShiftStatus;
+  /** Explicit department for this shift. Omitted means "fall back safely". */
+  departmentId?: string | null;
   /** Draft-only department label override. Ignored by live persistence schemas. */
   deptOverride?: string;
   /** Draft-only chip colour override. Ignored by live persistence schemas. */

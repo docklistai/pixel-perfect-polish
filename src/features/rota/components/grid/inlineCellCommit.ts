@@ -30,16 +30,17 @@ export function buildInlineParseOptions({
   staffRole?: string;
   workspaceRoles?: readonly string[];
 }): InlineCellParseOptions {
+  // Only genuinely configured roles count. Roles already sitting on this cell's
+  // shifts are excluded: a temporary label like Training must still be reported
+  // as temporary when the manager re-opens the cell to edit it.
   const roleOptions = Array.from(
-    new Set(
-      [staffRole, ...(workspaceRoles ?? []), ...cell.shifts.map((shift) => shift.role)].filter(
-        Boolean,
-      ),
-    ),
+    new Set([staffRole, ...(workspaceRoles ?? [])].filter(Boolean)),
   ) as string[];
   return {
     defaultRole: staffRole ?? cell.shifts[0]?.role ?? "FOH",
     roleOptions,
+    // Used only to explain an unusual choice — never to restrict one.
+    profileRole: staffRole ?? null,
   };
 }
 

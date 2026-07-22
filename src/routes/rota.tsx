@@ -1,5 +1,4 @@
 import * as React from "react";
-import { flushSync } from "react-dom";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, Card, FeedbackBanner } from "@/components/dl";
 import { useRotaPage } from "@/features/rota/hooks/useRotaPage";
@@ -14,9 +13,10 @@ import { RotaInsightsColumn } from "@/features/rota/components/RotaInsightsColum
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { RoleColoursContext } from "@/features/rota/components/grid/roleColoursContext";
 import { PrintableRota } from "@/features/rota/print/PrintableRota";
-import { buildPrintableRota } from "@/features/rota/print/printableRotaModel";
+import { useRotaPrintDocument } from "@/features/rota/hooks/useRotaPrintDocument";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { useRotaDepartmentWiring } from "@/features/rota/hooks/useRotaDepartmentWiring";
 import { parseRotaWeekSearch } from "@/features/rota/lib/rotaSearch";
 
 export const Route = createFileRoute("/rota")({
@@ -60,44 +60,24 @@ function RotaPage() {
   } = useRotaPage(week, location);
 
   const { workspaceName } = useManagerIdentity();
-  const [printedAt, setPrintedAt] = React.useState(() => new Date());
-
+  const departmentWiring = useRotaDepartmentWiring({
+    staff: rota.staff,
+    updateShift: guardedRota.updateShift,
+  });
   const locationName =
     rota.source === "live" && rota.liveLocationName ? rota.liveLocationName : "Your workspace";
 
-  const printableRota = React.useMemo(
-    () =>
-      buildPrintableRota({
-        workspaceName,
-        locationName,
-        weekLabel: rota.weekLabel,
-        dayLabels: rota.days.map((day) => day.d),
-        staff: rota.staff,
-        shifts: rota.draftShifts,
-        published: rota.published,
-        hasUnpublishedChanges: rota.hasUnpublishedChanges,
-        printedAt,
-      }),
-    [
-      workspaceName,
-      locationName,
-      rota.weekLabel,
-      rota.days,
-      rota.staff,
-      rota.draftShifts,
-      rota.published,
-      rota.hasUnpublishedChanges,
-      printedAt,
-    ],
-  );
-
-  // Stamp the print time and commit it before the dialog opens, so the sheet
-  // shows when it was actually printed. Printing only reads the current draft —
-  // it publishes and mutates nothing, and cancelling the dialog leaves no trace.
-  const handlePrintRota = React.useCallback(() => {
-    flushSync(() => setPrintedAt(new Date()));
-    window.print();
-  }, []);
+  const printDocument = useRotaPrintDocument({
+    workspaceName,
+    locationName,
+    weekLabel: rota.weekLabel,
+    dayLabels: rota.days.map((day) => day.d),
+    staff: rota.staff,
+    shifts: rota.draftShifts,
+    published: rota.published,
+    hasUnpublishedChanges: rota.hasUnpublishedChanges,
+    departmentNameById: departmentWiring.nameById,
+  });
 
   return (
     <RoleColoursContext.Provider value={roleColoursConfig}>
@@ -121,7 +101,7 @@ function RotaPage() {
             statusTone={headerStatusTone}
             statusLabel={headerStatusLabel}
             canPublish={publishEligibility.canPublish}
-            onPrintRota={handlePrintRota}
+            onPrintRota={printDocument.print}
             onClearWeek={guardedRota.requestClearWeek}
             onOpenTemplates={() => openOverlay("templates")}
             onCopyDay={() => openOverlay("copyDay")}
@@ -187,6 +167,9 @@ function RotaPage() {
                   onShiftClear={actions.handleClearShift}
                   onShiftMarkOpen={actions.handleMarkShiftOpen}
                   onShiftSetDept={actions.handleSetShiftDept}
+                  onShiftSetDepartment={departmentWiring.setShiftDepartment}
+                  departments={departmentWiring.departments}
+                  configuredRoles={rota.roleOptions}
                   onShiftSetColour={actions.handleSetShiftColour}
                   onShiftResetColour={actions.handleResetShiftColour}
                   onShiftAdd={guardedRota.addShift}
@@ -237,7 +220,7 @@ function RotaPage() {
 
         {/* Print-only document. Renders nothing on screen; @media print hides
             every other body child so no app chrome can reach paper. */}
-        <PrintableRota model={printableRota} />
+        <PrintableRota model={printDocument.model} />
       </AppShell>
     </RoleColoursContext.Provider>
   );

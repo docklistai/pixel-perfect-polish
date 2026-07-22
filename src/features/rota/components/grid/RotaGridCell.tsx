@@ -107,6 +107,8 @@ export function RotaGridCell({
       onDuplicate: handlers.onShiftDuplicate,
       onMarkOpen: handlers.onShiftMarkOpen,
       onSetDept: handlers.onShiftSetDept,
+      onSetDepartment: handlers.onShiftSetDepartment,
+      departments: handlers.departments,
       onSetColour: handlers.onShiftSetColour,
       onResetColour: handlers.onShiftResetColour,
       onClear: handlers.onShiftClear,

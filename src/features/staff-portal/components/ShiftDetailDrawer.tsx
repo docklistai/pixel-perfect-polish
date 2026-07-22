@@ -59,6 +59,7 @@ export function ShiftDetailDrawer({
 
         <FormSection title="Details">
           <DetailRow label="Role" value={shift.role} />
+          {shift.department && <DetailRow label="Department" value={shift.department} />}
           <DetailRow
             label="Location"
             value={

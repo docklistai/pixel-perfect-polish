@@ -1,5 +1,6 @@
 import { endMinutesOf, parseTimeRange, RANGE_PATTERN } from "./shiftTimeTokens";
 import { matchInlineCellCommand } from "./inlineCellCommands";
+import { resolveShiftRole } from "../../lib/shiftRole";
 
 export { parseTimeRange } from "./shiftTimeTokens";
 
@@ -9,6 +10,8 @@ export type ParsedInlineShift = {
   role: string | null;
   breakMinutes: number | null;
   open: boolean;
+  /** Calm note when the role is unusual or temporary. Never blocks saving. */
+  roleWarning?: string | null;
 };
 
 export type InlineCellParseResult =
@@ -20,8 +23,10 @@ export type InlineCellParseResult =
 
 export type InlineCellParseOptions = {
   defaultRole?: string;
-  /** Roles the manager is allowed to name. Unmatched role text is never invented. */
+  /** Configured workspace roles, suggested but not enforced. */
   roleOptions?: string[];
+  /** The staff member's own role, used only to explain an unusual choice. */
+  profileRole?: string | null;
 };
 
 const TIME_HELP = "Use times like 9-5, 22:00-02:00, open 6pm-11pm bar, or 9-12 / 17-22.";
@@ -50,32 +55,41 @@ function extractBreakMinutes(input: string): { text: string; breakMinutes: numbe
   return { text: input.replace(match[0], " "), breakMinutes: minutes };
 }
 
-type RoleResolution = { ok: true; role: string | null } | { ok: false; text: string };
-
 /**
- * Matches leftover text against the permitted roles. Text that matches nothing
- * is reported so the caller can raise a parse error — a mistyped or unknown role
- * must never be turned into a brand-new role name.
+ * Resolves the leftover text into a role for this shift.
+ *
+ * Unknown text is accepted as a temporary shift label rather than rejected —
+ * managers legitimately schedule Training, Cover or a one-off role. Nothing
+ * here creates a workspace role; the label lives on the shift alone.
  */
-function resolveRole(text: string, options: InlineCellParseOptions): RoleResolution {
-  const compact = normaliseToken(text.replace(/\bovernight\b/gi, " "));
-  if (!compact) return { ok: true, role: null };
+function resolveRole(
+  text: string,
+  options: InlineCellParseOptions,
+): { ok: true; role: string | null; warning: string | null } | { ok: false; message: string } {
+  const cleaned = text.replace(/\bovernight\b/gi, " ").trim();
+  if (!cleaned) return { ok: true, role: null, warning: null };
 
-  const roleOptions = options.roleOptions ?? [];
-  // Nothing to validate against (e.g. an empty open row): leave the role unset
-  // and let the commit path fall back to its existing default.
-  if (roleOptions.length === 0) return { ok: true, role: null };
+  // Free-text roles are allowed, but leftovers that are plainly mistyped input
+  // rather than a role must still be rejected — otherwise "9-5 30" silently
+  // becomes a shift labelled "30", and "9-5 break 900" one labelled
+  // "Break 900".
+  if (/^\d+$/.test(cleaned)) {
+    return { ok: false, message: `"${cleaned}" is not a role. ${TIME_HELP}` };
+  }
+  if (/\b(?:break|brk)\b/i.test(cleaned)) {
+    return {
+      ok: false,
+      message: "That break isn't readable. Use something like 30m break, or no break.",
+    };
+  }
 
-  const direct = roleOptions.find((role) => normaliseToken(role) === compact);
-  if (direct) return { ok: true, role: direct };
-
-  const contained = roleOptions.find((role) => {
-    const roleKey = normaliseToken(role);
-    return compact.includes(roleKey) || roleKey.includes(compact);
+  const resolved = resolveShiftRole({
+    input: cleaned,
+    configuredRoles: options.roleOptions ?? [],
+    profileRole: options.profileRole ?? null,
   });
-  if (contained) return { ok: true, role: contained };
-
-  return { ok: false, text: compact };
+  if (!resolved) return { ok: true, role: null, warning: null };
+  return { ok: true, role: resolved.role, warning: resolved.warning };
 }
 
 type SegmentResult = { ok: true; shift: ParsedInlineShift } | { ok: false; message: string };
@@ -100,15 +114,12 @@ function parseShiftSegment(
     .trim();
 
   const role = resolveRole(roleText, options);
-  if (!role.ok) {
-    const permitted = (options.roleOptions ?? []).join(", ");
-    return {
-      ok: false,
-      message: `"${role.text}" is not one of your roles${permitted ? ` (${permitted})` : ""}. Use an existing role, or leave it out to keep the current one.`,
-    };
-  }
+  if (!role.ok) return { ok: false, message: role.message };
 
-  return { ok: true, shift: { ...range, role: role.role, breakMinutes, open } };
+  return {
+    ok: true,
+    shift: { ...range, role: role.role, breakMinutes, open, roleWarning: role.warning },
+  };
 }
 
 export function parseInlineCellInput(

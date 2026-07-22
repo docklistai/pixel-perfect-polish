@@ -74,13 +74,23 @@ function statusOf(published: boolean, hasUnpublishedChanges: boolean): Printable
   return { label: "Draft", detail: "Draft — not published. Staff cannot see this yet." };
 }
 
-function toPrintableShift(shift: DraftShift): PrintableShift {
+function toPrintableShift(
+  shift: DraftShift,
+  departmentNameById?: Map<string, string>,
+): PrintableShift {
   const open = shift.staffId === null || shift.status === "open";
+  // The shift's real department wins. `deptOverride` is only the legacy
+  // free-text label, kept as a fallback so older rows still print something.
+  const department =
+    (shift.departmentId ? departmentNameById?.get(shift.departmentId) : null) ??
+    shift.departmentName ??
+    shift.deptOverride ??
+    null;
   return {
     start: shift.start,
     end: shift.end,
     role: shift.role,
-    department: shift.deptOverride ?? null,
+    department,
     breakMinutes: shift.breakMinutes > 0 ? shift.breakMinutes : null,
     open,
   };
@@ -100,11 +110,14 @@ function isPrintableDay(dayIndex: number): dayIndex is RotaDayIndex {
 }
 
 /** Buckets a flat shift list into seven day columns, each in start-time order. */
-function daysFromShifts(shifts: DraftShift[]): PrintableShift[][] {
+function daysFromShifts(
+  shifts: DraftShift[],
+  departmentNameById?: Map<string, string>,
+): PrintableShift[][] {
   const days = emptyDays();
   for (const shift of shifts) {
     if (!isPrintableDay(shift.dayIndex)) continue;
-    days[shift.dayIndex]!.push(toPrintableShift(shift));
+    days[shift.dayIndex]!.push(toPrintableShift(shift, departmentNameById));
   }
   return days.map((day) => day.sort(byStartTime));
 }
@@ -125,6 +138,8 @@ export type BuildPrintableRotaInput = {
   published: boolean;
   hasUnpublishedChanges: boolean;
   printedAt: Date;
+  /** Department id → name, so the sheet shows the shift's real department. */
+  departmentNameById?: Map<string, string>;
 };
 
 export function buildPrintableRota(input: BuildPrintableRotaInput): PrintableRota {
@@ -154,10 +169,10 @@ export function buildPrintableRota(input: BuildPrintableRotaInput): PrintableRot
     key: String(member.id),
     name: names[index] ?? member.name,
     role: member.role,
-    days: daysFromShifts(shiftsByStaff.get(String(member.id)) ?? []),
+    days: daysFromShifts(shiftsByStaff.get(String(member.id)) ?? [], input.departmentNameById),
   }));
 
-  const openShiftDays = daysFromShifts(openShifts);
+  const openShiftDays = daysFromShifts(openShifts, input.departmentNameById);
 
   const hasAnyShift =
     staffRows.some((row) => row.days.some((day) => day.length > 0)) ||

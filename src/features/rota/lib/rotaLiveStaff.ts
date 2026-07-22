@@ -11,5 +11,6 @@ export function toRotaStaffMember(row: StaffRow, index: number): StaffMember {
     hrs: row.hours === "—" ? "—" : row.hours.replace("/wk", ""),
     img: row.img,
     tone: TONE_CYCLE[index % TONE_CYCLE.length]!,
+    departmentId: row.departmentId ?? null,
   };
 }

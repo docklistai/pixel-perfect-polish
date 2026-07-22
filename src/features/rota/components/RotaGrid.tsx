@@ -39,6 +39,9 @@ export function RotaGrid({
   onShiftClear,
   onShiftMarkOpen,
   onShiftSetDept,
+  onShiftSetDepartment,
+  departments,
+  configuredRoles,
   onShiftSetColour,
   onShiftResetColour,
   onShiftAdd,
@@ -59,6 +62,8 @@ export function RotaGrid({
   onClearFilters: () => void;
   readOnly: boolean;
   serverBacked?: boolean;
+  /** Roles the workspace has configured, beyond those held by staff. */
+  configuredRoles?: readonly string[];
   onReadOnlyAttempt: () => void;
   onShiftAdd?: ShiftActionHandlers["onShiftAdd"];
   onShiftUpdate?: ShiftActionHandlers["onShiftUpdate"];
@@ -69,17 +74,21 @@ export function RotaGrid({
     maxRowIndex: openRowIndex,
     dayCount: days.length,
   });
-  // Every role the workspace currently uses, so typed role text resolves against
-  // real roles instead of inventing new ones.
+  // The workspace's genuine configured roles: the roles people actually hold,
+  // plus any role the workspace has configured elsewhere.
+  //
+  // Roles seen only on shifts are deliberately excluded. A temporary label such
+  // as Training or Cover, typed onto one shift, must not become "configured"
+  // just because it now appears on the grid — otherwise re-editing it would
+  // stop warning, and the label would look like real workspace configuration.
   const workspaceRoles = React.useMemo(() => {
     const roles = new Set<string>();
     for (const row of staffRows) {
       if (row.staff.role) roles.add(row.staff.role);
-      for (const cell of row.cells) for (const shift of cell.shifts) roles.add(shift.role);
     }
-    for (const cell of openRow.cells) for (const shift of cell.shifts) roles.add(shift.role);
+    for (const role of configuredRoles ?? []) roles.add(role);
     return [...roles];
-  }, [staffRows, openRow]);
+  }, [staffRows, configuredRoles]);
 
   const handlers = React.useMemo<ShiftActionHandlers>(
     () => ({
@@ -94,6 +103,8 @@ export function RotaGrid({
       onShiftClear,
       onShiftMarkOpen,
       onShiftSetDept,
+      onShiftSetDepartment,
+      departments,
       onShiftSetColour,
       onShiftResetColour,
       onShiftAdd,
@@ -107,6 +118,8 @@ export function RotaGrid({
       onShiftRemove,
       onShiftClear,
       onShiftSetDept,
+      onShiftSetDepartment,
+      departments,
       onShiftSetColour,
       onShiftResetColour,
       onShiftAdd,

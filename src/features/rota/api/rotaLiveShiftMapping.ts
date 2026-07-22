@@ -28,98 +28,17 @@ export interface ExistingShiftRow {
   assignment_status: "scheduled" | "open";
 }
 
-interface DepartmentRow {
-  id: string;
-  name: string;
-}
+import {
+  resolveDepartmentForCreate,
+  resolveDepartmentForUpdate,
+  resolveActiveStaffAssignment,
+} from "./departmentAuthority";
 
-interface ActiveStaffAssignment {
-  id: string;
-  departmentId: string | null;
-}
-
-function normalise(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function roleMatchesDepartment(role: string, departmentName: string): boolean {
-  const roleValue = normalise(role);
-  const deptValue = normalise(departmentName);
-  const aliases: Record<string, string[]> = {
-    "front of house": ["foh", "front of house", "front house", "waiter"],
-    kitchen: ["kitchen", "chef", "cook"],
-    bar: ["bar", "bartender"],
-    housekeeping: ["housekeeping", "housekeeper"],
-    maintenance: ["maintenance", "porter"],
-  };
-  return (
-    roleValue.includes(deptValue) ||
-    (aliases[deptValue] ?? []).some((alias) => roleValue.includes(alias))
-  );
-}
-
-export async function resolveActiveStaffAssignment(
-  supabase: SupabaseClient,
-  workspaceId: string,
-  staffId: string,
-): Promise<ActiveStaffAssignment> {
-  const { data, error } = await supabase
-    .from("staff_members")
-    .select("id, department_id, employment_status")
-    .eq("workspace_id", workspaceId)
-    .eq("id", staffId)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data || data.employment_status !== "active") {
-    throw new Error("Assigned staff member is not active in this workspace");
-  }
-  return {
-    id: data.id as string,
-    departmentId: (data.department_id as string | null) ?? null,
-  };
-}
-
-export async function resolveDepartmentId(
-  supabase: SupabaseClient,
-  workspaceId: string,
-  input: { staffId: string | null; role: string; fallbackDepartmentId?: string },
-): Promise<string> {
-  if (input.staffId) {
-    const assignment = await resolveActiveStaffAssignment(supabase, workspaceId, input.staffId);
-    if (assignment.departmentId) return assignment.departmentId;
-  }
-
-  if (input.fallbackDepartmentId) return input.fallbackDepartmentId;
-
-  // Created order makes the first row the workspace's starter/default department,
-  // so the fallback below is deterministic.
-  const { data: departments, error } = await supabase
-    .from("departments")
-    .select("id, name")
-    .eq("workspace_id", workspaceId)
-    .eq("status", "active")
-    .order("created_at", { ascending: true })
-    .order("name", { ascending: true });
-  if (error) throw error;
-
-  const active = (departments as DepartmentRow[] | null) ?? [];
-  // A workspace with zero active departments genuinely can't place a shift; this
-  // should not happen after bootstrap seeds the starter departments.
-  if (active.length === 0) {
-    throw new Error("Add a department to this workspace before scheduling shifts.");
-  }
-  // Assigned active staff with no department still need to be schedulable. Use
-  // the workspace starter/default department rather than fuzzy role matching.
-  if (input.staffId) return active[0]!.id;
-
-  // For open shifts, prefer a department whose name matches the role for
-  // sensible grouping/colour, but never block scheduling.
-  const match = active.find((department) => roleMatchesDepartment(input.role, department.name));
-  return (match ?? active[0]!).id;
-}
+export {
+  resolveDepartmentForCreate,
+  resolveDepartmentForUpdate,
+  resolveActiveStaffAssignment,
+} from "./departmentAuthority";
 
 export async function markWeekDraft(
   supabase: SupabaseClient,
@@ -140,9 +59,9 @@ export async function insertShift(
   week: RotaWeekRow,
   input: z.infer<typeof draftShiftInput>,
 ): Promise<string> {
-  const departmentId = await resolveDepartmentId(context.supabase, context.workspaceId, {
+  const departmentId = await resolveDepartmentForCreate(context.supabase, context.workspaceId, {
+    departmentId: input.departmentId,
     staffId: input.staffId,
-    role: input.role,
   });
   const range = buildShiftDateTimeRange({
     weekStart: week.week_start,
@@ -238,11 +157,15 @@ export async function buildShiftUpdate(
           timezone: location.timezone,
         })
       : { shiftDate: shift.shift_date, startsAt: shift.starts_at, endsAt: shift.ends_at };
-  const departmentId = await resolveDepartmentId(supabase, workspaceId, {
+  // Approved update precedence: explicit patch, then the shift's own
+  // department, then the assignee's, then the workspace default. Reassigning
+  // staff must never silently move the shift to their department.
+  const departmentId = await resolveDepartmentForUpdate(supabase, workspaceId, {
+    departmentId: patch.departmentId,
     staffId: nextStaffId,
-    role: nextRole,
-    fallbackDepartmentId: shift.department_id,
+    existingDepartmentId: shift.department_id,
   });
+
   return {
     department_id: departmentId,
     staff_member_id: nextStaffId,

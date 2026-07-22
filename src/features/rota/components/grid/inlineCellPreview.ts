@@ -61,5 +61,14 @@ export function buildInlineCellPreview(
   if (result.shifts.every((shift) => shift.open)) trailing.push("open");
 
   const summary = [segments.join(" + "), ...trailing].join(` ${DOT} `);
+
+  // An unusual or temporary role is worth saying out loud, but it saves
+  // normally — the tone stays "ok" so Enter and blur still commit.
+  const roleWarnings = [
+    ...new Set(result.shifts.map((shift) => shift.roleWarning).filter(Boolean)),
+  ];
+  if (roleWarnings.length > 0) {
+    return { tone: "ok", summary: `${summary} — ${roleWarnings.join(" · ")}` };
+  }
   return { tone: "ok", summary };
 }

@@ -84,6 +84,9 @@ export function RotaOverlays({
         staff={rota.assignableStaff}
         roles={rota.roleOptions}
         onSubmit={rota.addShift}
+        staffDepartmentId={(staffId) =>
+          rota.assignableStaff.find((member) => String(member.id) === staffId)?.departmentId ?? null
+        }
       />
       <ConflictDrawer
         open={openOverlays.conflicts}

@@ -66,6 +66,9 @@ function repeatInput(source: DraftShift, dayIndex: RotaDayIndex): DraftShiftInpu
     breakMinutes: source.breakMinutes,
     status: isOpen ? "open" : "scheduled",
     tone: isOpen ? "open" : source.status === "conflict" ? "info" : source.tone,
+    // The repeat must land in the same department as the shift it copies, not
+    // wherever the staff member's profile would otherwise put it.
+    departmentId: source.departmentId ?? null,
     deptOverride: source.deptOverride,
     colourOverride: source.colourOverride,
   };
