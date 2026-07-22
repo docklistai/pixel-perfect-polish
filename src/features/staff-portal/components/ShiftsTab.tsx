@@ -32,11 +32,6 @@ export function ShiftsTab() {
   const { upcoming, history, hasPublished, source } = rota;
   const [sub, setSub] = React.useState<ShiftsSubTab>("upcoming");
   const [selected, setSelected] = React.useState<PortalShift | null>(null);
-  const [acknowledgedShiftIds, setAcknowledgedShiftIds] = React.useState<Set<string>>(new Set());
-
-  const acknowledgeShift = (shiftId: string) => {
-    setAcknowledgedShiftIds((current) => new Set([...current, shiftId]));
-  };
 
   return (
     <div className="space-y-4">
@@ -82,12 +77,7 @@ export function ShiftsTab() {
           <ShiftList shifts={history} hasPublishedSnapshot={hasPublished} onOpen={setSelected} />
         ))}
 
-      <ShiftDetailDrawer
-        shift={selected}
-        acknowledged={selected ? acknowledgedShiftIds.has(selected.id) : false}
-        onAcknowledge={acknowledgeShift}
-        onClose={() => setSelected(null)}
-      />
+      <ShiftDetailDrawer shift={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

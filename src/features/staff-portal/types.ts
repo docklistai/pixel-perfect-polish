@@ -19,7 +19,6 @@ export interface PortalShift {
   managerName?: string;
   tasks?: { id: string; label: string; done?: boolean }[];
   teammates?: { id: string; name: string; initials: string; role: string }[];
-  changeAcknowledged?: boolean;
   sourceSnapshotVersion?: number;
   publishedAt?: string;
   /** Authoritative live instants; demo rows omit them. */

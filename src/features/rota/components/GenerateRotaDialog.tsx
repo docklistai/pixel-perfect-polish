@@ -2,6 +2,7 @@ import * as React from "react";
 import { Check, Info, Lightbulb, RotateCcw, X } from "lucide-react";
 import { ActionButton, DrawerShell, FormSection } from "@/components/dl";
 import { fillOpenShiftsWithSuggestions } from "../lib/rotaSuggestions";
+import type { ApprovedAvailabilityConstraints } from "../lib/availabilityConstraints";
 import type { DraftShift, StaffMember } from "../types";
 import type { MaybePromise } from "./grid";
 import type { LeaveRequest } from "@/features/leave/types";
@@ -14,6 +15,7 @@ export function GenerateRotaDialog({
   staff,
   leaveRequests,
   dayIsoDates,
+  constraints,
   onApplySuggestions,
 }: {
   open: boolean;
@@ -24,12 +26,15 @@ export function GenerateRotaDialog({
   staff: StaffMember[];
   leaveRequests: LeaveRequest[];
   dayIsoDates: string[];
+  constraints?: ApprovedAvailabilityConstraints;
   onApplySuggestions: () => MaybePromise<void>;
 }) {
   const [previewOpen, setPreviewOpen] = React.useState(false);
+  // The preview runs the same deterministic fill the apply path runs, with the
+  // same constraints, so what the manager reviews is what gets written.
   const preview = React.useMemo(
-    () => fillOpenShiftsWithSuggestions(shifts, staff, { leaveRequests, dayIsoDates }),
-    [dayIsoDates, leaveRequests, shifts, staff],
+    () => fillOpenShiftsWithSuggestions(shifts, staff, { leaveRequests, dayIsoDates, constraints }),
+    [constraints, dayIsoDates, leaveRequests, shifts, staff],
   );
 
   React.useEffect(() => {
@@ -74,8 +79,11 @@ export function GenerateRotaDialog({
           {[
             "Only fills shifts that are currently open.",
             "Assigns a colleague whose role matches the shift.",
+            "Skips anyone on approved or pending leave that day.",
+            "Skips anyone marked unavailable or on a recurring day off.",
+            "Never overlaps a shift someone is already working.",
+            "Gives each person at most one shift per day — build split shifts yourself.",
             "Prefers people with fewer shifts already this week.",
-            "Never double-books anyone on the same day.",
             "Leaves your existing assignments untouched.",
             "Keeps the result as a manager-reviewed draft until you publish.",
           ].map((line) => (
@@ -120,6 +128,27 @@ export function GenerateRotaDialog({
         </FormSection>
       )}
 
+      {previewOpen && preview.unfilled.length > 0 && (
+        <FormSection
+          title={`Still open (${preview.unfilled.length})`}
+          description="These shifts stay open — nobody eligible is free."
+        >
+          <ul className="flex flex-col gap-2 text-sm">
+            {preview.unfilled.map((gap) => (
+              <li
+                key={gap.shiftId}
+                className="rounded-lg border border-warning/30 bg-warning-soft/40 p-2"
+              >
+                <div className="font-medium">
+                  {gap.role} - day {gap.dayIndex + 1}
+                </div>
+                <div className="text-xs text-muted-foreground">{gap.reason}</div>
+              </li>
+            ))}
+          </ul>
+        </FormSection>
+      )}
+
       <div
         className="flex items-start gap-3 rounded-lg border p-3"
         style={{ background: "var(--st-teal-bg)", borderColor: "var(--st-teal-line)" }}
@@ -130,9 +159,10 @@ export function GenerateRotaDialog({
         <div className="grow">
           <div className="text-sm font-semibold text-brand">Manager review required</div>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            These are suggestions, not a finished rota. They avoid already-scheduled same-day
-            assignments and demo leave clashes where that data is loaded, but they do not guarantee
-            availability, rest gaps, or contracted-hour limits. Staff see nothing until you publish.
+            These are draft staffing suggestions, not a finished or optimised rota. They respect
+            role, leave, approved unavailability, recurring days off, overlapping shifts and one
+            shift per person per day where that data is loaded. Contracted hours, rest gaps and
+            working-time limits are not modelled. Staff see nothing until you publish.
           </p>
         </div>
       </div>

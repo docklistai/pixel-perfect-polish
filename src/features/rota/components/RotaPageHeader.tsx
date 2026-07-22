@@ -76,6 +76,22 @@ export function RotaPageHeader({
         )}
       </div>
       <div className="rota-page-actions flex flex-wrap items-center gap-2 lg:justify-end">
+        {/* Discoverable during a guided session; the overflow menu keeps them too. */}
+        <ActionButton
+          variant="secondary"
+          size="sm"
+          icon={LayoutTemplate}
+          onClick={onOpenTemplates}
+          title="Save this week's shape, or stamp a saved one onto this week"
+        >
+          Templates
+        </ActionButton>
+        <ActionButton variant="secondary" size="sm" icon={CopyPlus} onClick={onCopyDay}>
+          Copy day
+        </ActionButton>
+        <ActionButton variant="ghost" size="sm" icon={Printer} onClick={onPrintRota}>
+          Print
+        </ActionButton>
         {canPublish && (
           <ActionButton className="rota-publish" size="sm" icon={Send} onClick={onPublish}>
             Publish

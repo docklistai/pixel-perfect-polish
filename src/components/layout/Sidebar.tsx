@@ -13,7 +13,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
-import { isPilotSurface } from "@/config/pilot";
 import { useChromeBadges } from "./useChromeBadges";
 import { MobileMoreMenu } from "./MobileMoreMenu";
 
@@ -27,53 +26,51 @@ interface NavItem {
   to: string;
   label: string;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  group: "workspace" | "communication" | "admin";
+  group: "live" | "preview" | "admin";
   flagship?: boolean;
-  preview?: boolean; // demo-only surface for the private beta — labelled, not yet live
+  preview?: boolean; // sample-content surface — labelled Preview, never live-wired
   badge?: {
     count: number;
     kind: "amber" | "neutral" | "red";
   };
 }
 const navItems: readonly NavItem[] = [
-  { to: "/", label: "Home", icon: Home, group: "workspace" },
+  { to: "/", label: "Home", icon: Home, group: "live" },
   {
     to: "/rota",
     label: "Rota",
     icon: Calendar,
-    group: "workspace",
+    group: "live",
     flagship: true,
   },
-  { to: "/staff", label: "Staff", icon: Users, group: "workspace" },
+  { to: "/staff", label: "Staff", icon: Users, group: "live" },
   {
     to: "/time",
     label: "Time",
     icon: Clock,
-    group: "workspace",
+    group: "live",
   },
   {
     to: "/leave",
     label: "Leave",
     icon: Plane,
-    group: "workspace",
+    group: "live",
   },
-  { to: "/team", label: "Team", icon: MessageSquare, group: "communication", preview: true },
-  { to: "/ops", label: "Ops", icon: Briefcase, group: "communication", preview: true },
-  { to: "/reports", label: "Reports", icon: BarChart3, group: "communication", preview: true },
+  { to: "/team", label: "Team", icon: MessageSquare, group: "preview", preview: true },
+  { to: "/ops", label: "Ops", icon: Briefcase, group: "preview", preview: true },
+  { to: "/reports", label: "Reports", icon: BarChart3, group: "preview", preview: true },
   { to: "/settings", label: "Settings", icon: Settings, group: "admin" },
 ];
 
 const NAV_GROUPS = [
-  { key: "workspace", label: "Workspace", ariaLabel: "Workspace" },
-  { key: "communication", label: "Communication", ariaLabel: "Communication" },
+  { key: "live", label: "Live", ariaLabel: "Live surfaces" },
+  { key: "preview", label: "Preview", ariaLabel: "Preview surfaces" },
   { key: "admin", label: "Admin", ariaLabel: "Admin" },
 ] as const;
 
-// The live pilot never links to preview-only surfaces; the demo playground
-// keeps them, labelled Preview.
-const visibleNavItems = isPilotSurface() ? navItems.filter((item) => !item.preview) : navItems;
-
-const overflowNavItems = visibleNavItems.filter((item) => item.group !== "workspace");
+// Preview surfaces stay reachable for manager testers, always under the Preview
+// group and pill so they are never read as active pilot features.
+const overflowNavItems = navItems.filter((item) => item.group !== "live");
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -118,12 +115,12 @@ export function Sidebar() {
       </div>
 
       <div className="flex flex-col gap-1 overflow-y-auto pr-1 flex-1">
-        {NAV_GROUPS.filter((group) => visibleNavItems.some((item) => item.group === group.key)).map(
+        {NAV_GROUPS.filter((group) => navItems.some((item) => item.group === group.key)).map(
           (group) => (
             <div key={group.key} data-nav-group={group.key}>
               <div className="nav-section">{group.label}</div>
               <nav className="nav" aria-label={group.ariaLabel}>
-                {visibleNavItems
+                {navItems
                   .filter((it) => it.group === group.key)
                   .map((item) => {
                     const active = item.to === "/" ? path === "/" : path.startsWith(item.to);
@@ -182,7 +179,7 @@ export function Sidebar() {
                       </Link>
                     );
                   })}
-                {group.key === "workspace" && <MobileMoreMenu items={overflowNavItems} />}
+                {group.key === "live" && <MobileMoreMenu items={overflowNavItems} />}
               </nav>
             </div>
           ),

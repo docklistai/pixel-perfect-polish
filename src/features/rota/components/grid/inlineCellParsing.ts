@@ -1,4 +1,7 @@
-import { isValidShiftTimeRange } from "../../lib/draftRota";
+import { endMinutesOf, parseTimeRange, RANGE_PATTERN } from "./shiftTimeTokens";
+import { matchInlineCellCommand } from "./inlineCellCommands";
+
+export { parseTimeRange } from "./shiftTimeTokens";
 
 export type ParsedInlineShift = {
   start: string;
@@ -11,26 +14,21 @@ export type ParsedInlineShift = {
 export type InlineCellParseResult =
   | { kind: "clear"; all: boolean }
   | { kind: "shifts"; shifts: ParsedInlineShift[] }
+  /** A recognised command this pilot deliberately does not record. Saves nothing. */
+  | { kind: "blocked"; message: string }
   | { kind: "error"; message: string };
 
 export type InlineCellParseOptions = {
   defaultRole?: string;
+  /** Roles the manager is allowed to name. Unmatched role text is never invented. */
   roleOptions?: string[];
 };
 
-type ParsedTime = {
-  value: string;
-  hour: number;
-  minute: number;
-  hasPeriod: boolean;
-  rawHour: number;
-};
+const TIME_HELP = "Use times like 9-5, 22:00-02:00, open 6pm-11pm bar, or 9-12 / 17-22.";
 
-const TIME_PATTERN = String.raw`(?:\d{3,4}|\d{1,2}(?::|\.)\d{2}|\d{1,2})\s*(?:am|pm)?`;
-const RANGE_PATTERN = new RegExp(
-  String.raw`(${TIME_PATTERN})\s*(?:[-\u2013\u2014]|\bto\b|\btill\b|\buntil\b)\s*(${TIME_PATTERN})`,
-  "i",
-);
+/** "break 30", "30m break", "30 min break", "30 minutes break", "no break". */
+const BREAK_PREFIX = /\b(?:break|brk)\s*(\d{1,3})\s*(?:m|mins?|minutes?)?\b/i;
+const BREAK_SUFFIX = /\b(\d{1,3})\s*(?:m|mins?|minutes?)?\s*(?:break|brk)\b/i;
 
 function normaliseToken(value: string): string {
   return value
@@ -39,62 +37,11 @@ function normaliseToken(value: string): string {
     .trim();
 }
 
-function parseTimePart(value: string): ParsedTime | null {
-  const cleaned = value.trim().toLowerCase().replace(".", ":").replace(/\s+/g, "");
-  const compact = cleaned.match(/^(\d{1,2})(\d{2})(am|pm)?$/i);
-  const colon = cleaned.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/i);
-  const match = compact ?? colon;
-  if (!match) return null;
-
-  let hour = Number(match[1]);
-  const rawHour = hour;
-  const minute = match[2] ? Number(match[2]) : 0;
-  const period = match[3]?.toLowerCase();
-  if (!Number.isInteger(hour) || !Number.isInteger(minute)) return null;
-  if (minute < 0 || minute > 59) return null;
-  if (period && (hour < 1 || hour > 12)) return null;
-  if (!period && (hour < 0 || hour > 23)) return null;
-  if (period === "pm" && hour < 12) hour += 12;
-  if (period === "am" && hour === 12) hour = 0;
-
-  return {
-    value: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
-    hour,
-    minute,
-    hasPeriod: Boolean(period),
-    rawHour,
-  };
-}
-
-function inferEndTime(start: ParsedTime, end: ParsedTime): string {
-  if (end.hasPeriod) return end.value;
-  if (end.hour >= start.hour) return end.value;
-
-  const shouldInferAfternoon = !start.hasPeriod && start.hour < 18 && end.rawHour <= 11;
-  if (!shouldInferAfternoon) return end.value;
-
-  const inferredHour = end.hour + 12;
-  if (inferredHour > 23) return end.value;
-  return `${String(inferredHour).padStart(2, "0")}:${String(end.minute).padStart(2, "0")}`;
-}
-
-export function parseTimeRange(input: string): { start: string; end: string } | null {
-  const match = input.match(RANGE_PATTERN);
-  if (!match) return null;
-  const start = parseTimePart(match[1]!);
-  const parsedEnd = parseTimePart(match[2]!);
-  if (!start || !parsedEnd) return null;
-
-  const end = inferEndTime(start, parsedEnd);
-  if (!isValidShiftTimeRange(start.value, end)) return null;
-  return { start: start.value, end };
-}
-
 function extractBreakMinutes(input: string): { text: string; breakMinutes: number | null } {
   if (/\bno\s+break\b/i.test(input)) {
     return { text: input.replace(/\bno\s+break\b/gi, " "), breakMinutes: 0 };
   }
-  const match = input.match(/\b(?:break|brk)\s*(\d{1,3})\b/i);
+  const match = input.match(BREAK_PREFIX) ?? input.match(BREAK_SUFFIX);
   if (!match) return { text: input, breakMinutes: null };
   const minutes = Number(match[1]);
   if (!Number.isInteger(minutes) || minutes < 0 || minutes > 240) {
@@ -103,37 +50,48 @@ function extractBreakMinutes(input: string): { text: string; breakMinutes: numbe
   return { text: input.replace(match[0], " "), breakMinutes: minutes };
 }
 
-function resolveRole(text: string, options: InlineCellParseOptions): string | null {
+type RoleResolution = { ok: true; role: string | null } | { ok: false; text: string };
+
+/**
+ * Matches leftover text against the permitted roles. Text that matches nothing
+ * is reported so the caller can raise a parse error — a mistyped or unknown role
+ * must never be turned into a brand-new role name.
+ */
+function resolveRole(text: string, options: InlineCellParseOptions): RoleResolution {
   const compact = normaliseToken(text.replace(/\bovernight\b/gi, " "));
-  if (!compact) return null;
+  if (!compact) return { ok: true, role: null };
 
   const roleOptions = options.roleOptions ?? [];
+  // Nothing to validate against (e.g. an empty open row): leave the role unset
+  // and let the commit path fall back to its existing default.
+  if (roleOptions.length === 0) return { ok: true, role: null };
+
   const direct = roleOptions.find((role) => normaliseToken(role) === compact);
-  if (direct) return direct;
+  if (direct) return { ok: true, role: direct };
 
   const contained = roleOptions.find((role) => {
     const roleKey = normaliseToken(role);
     return compact.includes(roleKey) || roleKey.includes(compact);
   });
-  if (contained) return contained;
+  if (contained) return { ok: true, role: contained };
 
-  return compact
-    .split(" ")
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ");
+  return { ok: false, text: compact };
 }
+
+type SegmentResult = { ok: true; shift: ParsedInlineShift } | { ok: false; message: string };
 
 function parseShiftSegment(
   input: string,
   options: InlineCellParseOptions,
-): ParsedInlineShift | null {
+  previousEndMinutes: number | null,
+): SegmentResult {
   const open = /\b(open|unassigned)\b/i.test(input);
   const { text: withoutBreak, breakMinutes } = extractBreakMinutes(input);
   const rangeMatch = withoutBreak.match(RANGE_PATTERN);
-  if (!rangeMatch) return null;
+  if (!rangeMatch) return { ok: false, message: TIME_HELP };
 
-  const range = parseTimeRange(rangeMatch[0]);
-  if (!range) return null;
+  const range = parseTimeRange(rangeMatch[0], previousEndMinutes);
+  if (!range) return { ok: false, message: TIME_HELP };
 
   const roleText = withoutBreak
     .replace(rangeMatch[0], " ")
@@ -141,12 +99,16 @@ function parseShiftSegment(
     .replace(/\s+/g, " ")
     .trim();
 
-  return {
-    ...range,
-    role: resolveRole(roleText, options),
-    breakMinutes,
-    open,
-  };
+  const role = resolveRole(roleText, options);
+  if (!role.ok) {
+    const permitted = (options.roleOptions ?? []).join(", ");
+    return {
+      ok: false,
+      message: `"${role.text}" is not one of your roles${permitted ? ` (${permitted})` : ""}. Use an existing role, or leave it out to keep the current one.`,
+    };
+  }
+
+  return { ok: true, shift: { ...range, role: role.role, breakMinutes, open } };
 }
 
 export function parseInlineCellInput(
@@ -156,12 +118,9 @@ export function parseInlineCellInput(
   const trimmed = input.trim();
   if (!trimmed) return { kind: "clear", all: false };
 
-  if (/^(?:off|day off|no shift|clear|delete)$/i.test(trimmed)) {
-    return { kind: "clear", all: false };
-  }
-  if (/^(?:clear|delete)\s+all$/i.test(trimmed)) {
-    return { kind: "clear", all: true };
-  }
+  const command = matchInlineCellCommand(trimmed);
+  if (command) return command;
+
   if (/^(?:open|unassigned)$/i.test(trimmed)) {
     return {
       kind: "shifts",
@@ -181,13 +140,26 @@ export function parseInlineCellInput(
     .split(/\s*(?:\/|\+|,)\s*/)
     .map((segment) => segment.trim())
     .filter(Boolean);
-  const parsed = segments.map((segment) => parseShiftSegment(segment, options));
-  if (parsed.some((shift) => shift === null)) {
-    return {
-      kind: "error",
-      message: "Use times like 9-5, 22:00-02:00, open 6pm-11pm bar, or 9-12 / 17-22.",
-    };
+
+  const shifts: ParsedInlineShift[] = [];
+  let previousEndMinutes: number | null = null;
+  for (const segment of segments) {
+    const result = parseShiftSegment(segment, options, previousEndMinutes);
+    if (!result.ok) return { kind: "error", message: result.message };
+    shifts.push(result.shift);
+    previousEndMinutes = endMinutesOf(result.shift);
   }
 
-  return { kind: "shifts", shifts: parsed as ParsedInlineShift[] };
+  return { kind: "shifts", shifts: applySharedRole(shifts) };
+}
+
+/**
+ * "9-12, 5-10 Bar" means both halves are on the bar. A role named exactly once
+ * across a split cell fills the segments that named none; a cell that names two
+ * different roles is left exactly as written.
+ */
+function applySharedRole(shifts: ParsedInlineShift[]): ParsedInlineShift[] {
+  const named = [...new Set(shifts.map((shift) => shift.role).filter(Boolean))];
+  if (named.length !== 1) return shifts;
+  return shifts.map((shift) => (shift.role === null ? { ...shift, role: named[0]! } : shift));
 }

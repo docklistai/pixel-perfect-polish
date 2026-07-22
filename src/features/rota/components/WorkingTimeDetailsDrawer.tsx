@@ -22,8 +22,8 @@ export function WorkingTimeDetailsDrawer({
     <DrawerShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Working time details"
-      description="Hours risk for this rota before publishing."
+      title="Scheduled days review"
+      description="Staff scheduled above their planned weekly days. This is a day-pattern check, not full working-time or rest-break enforcement."
       meta={meta}
       footer={<ActionButton onClick={() => onOpenChange(false)}>Close</ActionButton>}
     >
@@ -32,7 +32,7 @@ export function WorkingTimeDetailsDrawer({
           <div className="rounded-xl border border-warning/30 bg-warning-soft px-3 py-3">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <AlertTriangle className="h-4 w-4 text-warning" aria-hidden />
-              {alerts.length} working time alert{alerts.length === 1 ? "" : "s"}
+              {alerts.length} scheduled above plan
             </div>
             <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
               {alerts.map((alert) => (
@@ -51,7 +51,7 @@ export function WorkingTimeDetailsDrawer({
 
       <FormSection title="Why it matters">
         <dl className="divide-y divide-border">
-          <DetailRow label="Risk" value="Hours risk before publish" />
+          <DetailRow label="Signal" value="More days scheduled than planned" />
           <DetailRow label="Likely action" value="Move or shorten a shift" />
           <DetailRow label="Resolves with" value="Reassigning or removing extra days" />
         </dl>

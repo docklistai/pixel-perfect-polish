@@ -1,4 +1,4 @@
-import { Copy, Filter, Keyboard, Plus, Redo2, Sparkles, Undo2 } from "lucide-react";
+import { Copy, Filter, Keyboard, Plus, Redo2, Sparkles, Undo2, Wand2 } from "lucide-react";
 import { ActionButton, IconButton } from "@/components/dl";
 
 export function RotaGridToolbar({
@@ -7,6 +7,7 @@ export function RotaGridToolbar({
   workingTimeAlertCount,
   coveragePct,
   onFilter,
+  onBuildWeek,
   onGenerateRota,
   onAddShift,
   onViewConflicts,
@@ -22,6 +23,7 @@ export function RotaGridToolbar({
   workingTimeAlertCount: number;
   coveragePct: number;
   onFilter: () => void;
+  onBuildWeek: () => void;
   onGenerateRota: () => void;
   onAddShift: () => void;
   onViewConflicts: () => void;
@@ -98,7 +100,7 @@ export function RotaGridToolbar({
           <button
             type="button"
             onClick={workingTimeAlertCount > 0 ? onViewWorkingTime : undefined}
-            title="Working-time alerts — rest breaks and weekly limits"
+            title="Staff scheduled above their planned weekly days. Not a full working-time or rest-break check."
             className={`rota-toolbar-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition ${
               workingTimeAlertCount > 0
                 ? "cursor-pointer bg-accent-purple-soft text-accent-purple hover:bg-accent-purple-soft/80"
@@ -111,7 +113,7 @@ export function RotaGridToolbar({
               }`}
               aria-hidden
             />
-            {workingTimeAlertCount} working time
+            {workingTimeAlertCount} above plan
           </button>
 
           <span
@@ -130,6 +132,15 @@ export function RotaGridToolbar({
         </div>
 
         <div className="rota-toolbar-actions ml-auto flex flex-wrap items-center gap-2">
+          <ActionButton
+            variant="primary"
+            size="sm"
+            icon={Wand2}
+            onClick={onBuildWeek}
+            title="Start this week from last week, a saved template, or an empty draft — then fill open shifts"
+          >
+            Build this week
+          </ActionButton>
           <ActionButton
             className="rota-toolbar-copy"
             variant="secondary"

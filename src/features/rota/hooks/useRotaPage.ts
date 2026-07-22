@@ -26,10 +26,20 @@ export function useRotaPage(week: number | undefined, location: string | undefin
 
   useRotaWeekSearch(week, rota.setWeekOffset);
 
+  // Resolved before the shift actions so open-shift fill can exclude staff who
+  // are on an approved day off or marked unavailable.
+  const availability = useAvailabilityConstraints({
+    source: rota.source,
+    draftShifts: rota.draftShifts,
+    dayIsoDates: rota.dayIsoDates,
+    staff: rota.staff,
+    staffRows: rota.staffRows,
+  });
+
   const liveLocationId = rota.source === "live" ? rota.liveLocationId : null;
   const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
-  const actions = useRotaShiftActions(history.controller);
+  const actions = useRotaShiftActions(history.controller, availability.constraints);
   const [showInsights, setShowInsights] = React.useState(true);
   const [recoverySelection, setRecoverySelection] = React.useState<{
     shiftId: ShiftId;
@@ -96,14 +106,6 @@ export function useRotaPage(week: number | undefined, location: string | undefin
       ),
     [rota.draftShifts, roleColoursConfig],
   );
-
-  const availability = useAvailabilityConstraints({
-    source: rota.source,
-    draftShifts: rota.draftShifts,
-    dayIsoDates: rota.dayIsoDates,
-    staff: rota.staff,
-    staffRows: rota.staffRows,
-  });
 
   const workingTimeAlertCount = rota.workingTimeAlertList.length;
   const leaveDataState: "ready" | "loading" | "error" =

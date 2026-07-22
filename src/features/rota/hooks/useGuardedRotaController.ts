@@ -36,7 +36,7 @@ export function buildGuardedRotaController(
     requestCopyPreviousWeek: blocked,
     applyOpenShiftSuggestions: () => {
       onBlocked();
-      return [];
+      return { suggestions: [], unfilled: [] };
     },
     handlePublish: blocked,
     requestRemoveShift: blocked,

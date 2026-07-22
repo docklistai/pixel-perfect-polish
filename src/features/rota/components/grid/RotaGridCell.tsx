@@ -2,7 +2,7 @@ import * as React from "react";
 import { ShiftCell } from "../ShiftCell";
 import { cellLeaveTitle } from "./cellLeaveTitle";
 import { InlineCellEditor } from "./InlineCellEditor";
-import { commitInlineCellEdit } from "./inlineCellCommit";
+import { buildInlineParseOptions, commitInlineCellEdit } from "./inlineCellCommit";
 import { buildRotaCellAccessibleName, nextRotaGridPosition } from "./rotaGridAccessibility";
 import type { RotaGridDay, ShiftActionHandlers, ShiftMenuHandlers } from "./types";
 import type { RotaGridCell as RotaGridCellData, ShiftId } from "../../types";
@@ -70,6 +70,11 @@ export function RotaGridCell({
   const restoreCellFocus = React.useCallback(() => {
     requestAnimationFrame(() => cellRef.current?.focus());
   }, []);
+
+  const parseOptions = React.useMemo(
+    () => buildInlineParseOptions({ cell, staffRole, workspaceRoles: handlers.workspaceRoles }),
+    [cell, staffRole, handlers.workspaceRoles],
+  );
 
   const handleCommit = async (val: string) => {
     setIsEditing(false);
@@ -207,6 +212,7 @@ export function RotaGridCell({
         <InlineCellEditor
           initial={initialValue}
           contextLabel={cellLabel}
+          parseOptions={parseOptions}
           onCommit={handleCommit}
           onCancel={() => {
             setIsEditing(false);

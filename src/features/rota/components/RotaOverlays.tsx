@@ -3,6 +3,7 @@ import type { useRotaDraftController } from "../hooks/useRotaDraftController";
 import type { RotaOverlaysState } from "../hooks/useRotaOverlays";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { RotaPublishEligibility } from "../lib/publishEligibility";
+import type { ApprovedAvailabilityConstraints } from "../lib/availabilityConstraints";
 import type { ShiftId } from "../types";
 
 import { AddShiftDrawer } from "./AddShiftDrawer";
@@ -15,6 +16,7 @@ import { WorkingTimeDetailsDrawer } from "./WorkingTimeDetailsDrawer";
 import { PublishRotaDialog } from "./PublishRotaDialog";
 import { DemandTemplatesDrawer } from "./DemandTemplatesDrawer";
 import { CopyDayDialog } from "./CopyDayDialog";
+import { BuildThisWeekDialog } from "./BuildThisWeekDialog";
 import type { MaybePromise } from "./grid";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
@@ -29,10 +31,12 @@ export function RotaOverlays({
   overlays,
   onPublishConfirm,
   onApplySuggestions,
+  onCopyLastWeek,
   onMarkShiftOpen,
   onRepeatShift,
   publishEligibility,
   constraintClashCount,
+  availabilityConstraints,
   availabilityDataState,
   suggestedAssignTo,
   onClearRecoverySelection,
@@ -41,10 +45,12 @@ export function RotaOverlays({
   overlays: RotaOverlaysState;
   onPublishConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
   onApplySuggestions: () => void;
+  onCopyLastWeek: () => void;
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
   onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
   publishEligibility: RotaPublishEligibility;
   constraintClashCount: number;
+  availabilityConstraints?: ApprovedAvailabilityConstraints;
   availabilityDataState: "ready" | "loading" | "error";
   suggestedAssignTo: string | null;
   onClearRecoverySelection: () => void;
@@ -106,6 +112,18 @@ export function RotaOverlays({
         publishBlockedReason={publishEligibility.blockedReason}
         onConfirm={onPublishConfirm}
       />
+      <BuildThisWeekDialog
+        open={openOverlays.buildWeek}
+        onOpenChange={(open) => setOverlay("buildWeek", open)}
+        weekLabel={rota.weekLabel}
+        openShiftCount={rota.openShiftCount}
+        plannedShiftCount={rota.plannedShiftCount}
+        canEdit={!rota.readOnly}
+        onCopyLastWeek={onCopyLastWeek}
+        onOpenTemplates={() => setOverlay("templates", true)}
+        onClearWeek={rota.requestClearWeek}
+        onFillOpenShifts={() => setOverlay("generate", true)}
+      />
       <GenerateRotaDialog
         open={openOverlays.generate}
         onOpenChange={(open) => setOverlay("generate", open)}
@@ -115,6 +133,7 @@ export function RotaOverlays({
         staff={rota.assignableStaff}
         leaveRequests={rota.leaveRequests}
         dayIsoDates={rota.dayIsoDates}
+        constraints={availabilityConstraints}
         onApplySuggestions={onApplySuggestions}
       />
       <RotaFiltersDrawer

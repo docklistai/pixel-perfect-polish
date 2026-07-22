@@ -9,7 +9,8 @@ export type RotaOverlayKey =
   | "coverageDetails"
   | "workingTime"
   | "templates"
-  | "copyDay";
+  | "copyDay"
+  | "buildWeek";
 
 const CLOSED_OVERLAYS: Record<RotaOverlayKey, boolean> = {
   addShift: false,
@@ -21,6 +22,7 @@ const CLOSED_OVERLAYS: Record<RotaOverlayKey, boolean> = {
   workingTime: false,
   templates: false,
   copyDay: false,
+  buildWeek: false,
 };
 
 /** Open/closed state for every rota drawer and dialog. */

@@ -112,6 +112,7 @@ function RotaPage() {
                   workingTimeAlertCount={workingTimeAlertCount}
                   coveragePct={rota.coveragePct}
                   onFilter={() => openOverlay("filters")}
+                  onBuildWeek={() => openOverlay("buildWeek")}
                   onGenerateRota={() => openOverlay("generate")}
                   onAddShift={() => openOverlay("addShift")}
                   onViewConflicts={() => openOverlay("conflicts")}
@@ -180,10 +181,12 @@ function RotaPage() {
           overlays={overlays}
           onPublishConfirm={handlePublish}
           onApplySuggestions={actions.handleApplySuggestions}
+          onCopyLastWeek={actions.handleCopyLastWeek}
           onMarkShiftOpen={actions.handleMarkShiftOpen}
           onRepeatShift={actions.handleRepeatShift}
           publishEligibility={publishEligibility}
           constraintClashCount={availability.clashes.length}
+          availabilityConstraints={availability.constraints}
           availabilityDataState={availability.dataState}
           suggestedAssignTo={
             recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null

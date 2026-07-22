@@ -13,6 +13,8 @@ export type RotaGridDay = {
 export type ShiftActionHandlers = {
   readOnly: boolean;
   serverBacked: boolean;
+  /** Roles the inline editor may resolve typed role text against. */
+  workspaceRoles?: readonly string[];
   canCopyShiftAssignment: (shift: Pick<DraftShift, "staffId">) => boolean;
   onReadOnlyAttempt: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;

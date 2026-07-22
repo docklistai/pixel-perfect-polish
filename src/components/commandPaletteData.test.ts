@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   COMMAND_NAV_ITEMS,
+  COMMAND_PREVIEW_ROUTES,
   COMMAND_QUICK_ACTIONS,
-  visibleCommandNavItems,
 } from "./commandPaletteData";
 
 describe("command palette: Add team member", () => {
@@ -24,9 +24,26 @@ describe("command palette preview routes", () => {
     expect(previewRoutes).toEqual(["/team", "/ops", "/reports"]);
   });
 
-  it("hides preview routes from the live pilot but keeps them in the demo", () => {
-    const pilotRoutes = visibleCommandNavItems(true).map((item) => item.to);
-    expect(pilotRoutes).toEqual(["/", "/rota", "/staff", "/time", "/leave", "/settings"]);
-    expect(visibleCommandNavItems(false)).toEqual(COMMAND_NAV_ITEMS);
+  it("keeps preview routes reachable everywhere, labelled rather than hidden", () => {
+    expect(COMMAND_PREVIEW_ROUTES).toEqual(["/team", "/ops", "/reports"]);
+    expect(COMMAND_NAV_ITEMS.map((item) => item.to)).toEqual([
+      "/",
+      "/rota",
+      "/staff",
+      "/time",
+      "/leave",
+      "/team",
+      "/ops",
+      "/reports",
+      "/settings",
+    ]);
+  });
+});
+
+describe("command palette rota action copy", () => {
+  it("names the rota action for what it does, not optimal AI generation", () => {
+    const labels = COMMAND_QUICK_ACTIONS.map((action) => action.label);
+    expect(labels).toContain("Build this week");
+    expect(labels).not.toContain("Generate rota draft");
   });
 });

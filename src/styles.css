@@ -3395,9 +3395,9 @@
   .sidebar .brand,
   .sidebar .nav-section,
   .sidebar .footer,
-  .sidebar [data-nav-group]:not([data-nav-group="workspace"]) { display: none; }
+  .sidebar [data-nav-group]:not([data-nav-group="live"]) { display: none; }
   .sidebar > .flex,
-  .sidebar [data-nav-group="workspace"] {
+  .sidebar [data-nav-group="live"] {
     width: 100%;
     padding: 0;
     overflow: visible;

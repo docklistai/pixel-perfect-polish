@@ -3,7 +3,7 @@ import { useWorkspaceSelector, useWorkspaceStore } from "@/features/demo/store/u
 import { publishRotaWeek, selectRotaWeek } from "@/features/demo/store/workspaceActions";
 import { initialDraftShifts, staff } from "../data/mockData";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
-import type { OpenShiftSuggestion } from "../lib/rotaSuggestions";
+import type { OpenShiftFillSummary } from "../lib/rotaSuggestions";
 import {
   applyShiftPatch,
   createInitialDraftShifts,
@@ -106,20 +106,20 @@ export function useRotaWeekDrafts() {
     }));
   };
 
-  const applyOpenShiftSuggestions = (): OpenShiftSuggestion[] => {
-    const result = fillOpenShiftsWithSuggestions(currentDraft.shifts, staff, {
+  const applyOpenShiftSuggestions = (): OpenShiftFillSummary => {
+    // The offline demo store has no approved-availability data; the live rota
+    // page passes its real constraints through the live path instead.
+    const fillOptions = {
       leaveRequests,
       dayIsoDates: getWeekDateIsoLabels(weekOffset),
-    });
+    };
+    const result = fillOpenShiftsWithSuggestions(currentDraft.shifts, staff, fillOptions);
     setCurrentDraft((draft) => ({
       ...draft,
-      shifts: fillOpenShiftsWithSuggestions(draft.shifts, staff, {
-        leaveRequests,
-        dayIsoDates: getWeekDateIsoLabels(weekOffset),
-      }).shifts,
+      shifts: fillOpenShiftsWithSuggestions(draft.shifts, staff, fillOptions).shifts,
       hasUnpublishedChanges: true,
     }));
-    return result.suggestions;
+    return { suggestions: result.suggestions, unfilled: result.unfilled };
   };
 
   const removeShiftNow = (id: ShiftId) => {

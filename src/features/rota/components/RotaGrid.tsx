@@ -69,10 +69,23 @@ export function RotaGrid({
     maxRowIndex: openRowIndex,
     dayCount: days.length,
   });
+  // Every role the workspace currently uses, so typed role text resolves against
+  // real roles instead of inventing new ones.
+  const workspaceRoles = React.useMemo(() => {
+    const roles = new Set<string>();
+    for (const row of staffRows) {
+      if (row.staff.role) roles.add(row.staff.role);
+      for (const cell of row.cells) for (const shift of cell.shifts) roles.add(shift.role);
+    }
+    for (const cell of openRow.cells) for (const shift of cell.shifts) roles.add(shift.role);
+    return [...roles];
+  }, [staffRows, openRow]);
+
   const handlers = React.useMemo<ShiftActionHandlers>(
     () => ({
       readOnly,
       serverBacked,
+      workspaceRoles,
       canCopyShiftAssignment,
       onReadOnlyAttempt,
       onShiftOpen,
@@ -100,6 +113,7 @@ export function RotaGrid({
       onShiftUpdate,
       readOnly,
       serverBacked,
+      workspaceRoles,
       canCopyShiftAssignment,
     ],
   );

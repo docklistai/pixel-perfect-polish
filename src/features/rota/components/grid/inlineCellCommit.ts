@@ -1,7 +1,11 @@
 import { toast } from "sonner";
 import type { DraftShift, RotaDayIndex, RotaGridCell as RotaGridCellData } from "../../types";
 import type { ShiftActionHandlers } from "./types";
-import { parseInlineCellInput, type ParsedInlineShift } from "./inlineCellParsing";
+import {
+  parseInlineCellInput,
+  type InlineCellParseOptions,
+  type ParsedInlineShift,
+} from "./inlineCellParsing";
 
 type CommitInlineCellEditInput = {
   value: string;
@@ -13,10 +17,30 @@ type CommitInlineCellEditInput = {
   dayIndex: number;
 };
 
-function roleOptions(cell: RotaGridCellData, staffRole?: string): string[] {
-  return Array.from(
-    new Set([staffRole, ...cell.shifts.map((shift) => shift.role)].filter(Boolean)),
+/**
+ * The single source of parse options for a cell, shared by the live preview and
+ * the commit path so the manager never sees one interpretation and saves another.
+ */
+export function buildInlineParseOptions({
+  cell,
+  staffRole,
+  workspaceRoles,
+}: {
+  cell: RotaGridCellData;
+  staffRole?: string;
+  workspaceRoles?: readonly string[];
+}): InlineCellParseOptions {
+  const roleOptions = Array.from(
+    new Set(
+      [staffRole, ...(workspaceRoles ?? []), ...cell.shifts.map((shift) => shift.role)].filter(
+        Boolean,
+      ),
+    ),
   ) as string[];
+  return {
+    defaultRole: staffRole ?? cell.shifts[0]?.role ?? "FOH",
+    roleOptions,
+  };
 }
 
 function buildShiftPatch({
@@ -55,13 +79,20 @@ export async function commitInlineCellEdit({
   dayIndex,
 }: CommitInlineCellEditInput): Promise<void> {
   const firstShift = cell.shifts[0];
-  const command = parseInlineCellInput(value, {
-    defaultRole: staffRole ?? firstShift?.role ?? "FOH",
-    roleOptions: roleOptions(cell, staffRole),
-  });
+  const command = parseInlineCellInput(
+    value,
+    buildInlineParseOptions({ cell, staffRole, workspaceRoles: handlers.workspaceRoles }),
+  );
 
   if (command.kind === "error") {
     toast.error("Invalid rota entry", { description: command.message });
+    return;
+  }
+
+  // Understood, but not something the grid records. Nothing is written — in
+  // particular no leave, sickness or availability entry is ever fabricated here.
+  if (command.kind === "blocked") {
+    toast.info("Nothing saved", { description: command.message });
     return;
   }
 

@@ -14,11 +14,16 @@ import { buildRepeatShiftFeedback, type RepeatShiftResult } from "../lib/repeatS
 import { isShiftCopyAssignable } from "../lib/assignableStaff";
 import { executeDuplicateShiftCopy, executeRepeatShiftCopy } from "../lib/shiftCopyActions";
 import { applyLiveOpenShiftSuggestions } from "../lib/rotaSuggestions";
+import { buildFillSummaryMessage } from "../lib/fillSummary";
+import type { ApprovedAvailabilityConstraints } from "../lib/availabilityConstraints";
 import { requestLiveCopyPreviousWeekConfirmation } from "../lib/copyPreviousWeekAction";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
-export function useRotaShiftActions(rota: RotaController) {
+export function useRotaShiftActions(
+  rota: RotaController,
+  constraints?: ApprovedAvailabilityConstraints,
+) {
   const [fillSummary, setFillSummary] = React.useState<string | null>(null);
   const readOnly = rota.readOnly;
   const isLive = rota.source === "live";
@@ -39,26 +44,18 @@ export function useRotaShiftActions(rota: RotaController) {
   const handleApplySuggestions = async () => {
     if (readOnly) return block();
     if (isLive) {
-      const suggestions = await applyLiveOpenShiftSuggestions({
+      const result = await applyLiveOpenShiftSuggestions({
         shifts: rota.draftShifts,
         staff: rota.assignableStaff,
         leaveRequests: rota.leaveRequests,
         dayIsoDates: rota.dayIsoDates,
+        constraints,
         updateShift: rota.updateShift,
       });
-      setFillSummary(
-        suggestions.length > 0
-          ? `${suggestions.length} open shift${suggestions.length === 1 ? "" : "s"} filled in the live draft. Review before publishing.`
-          : "No open shifts could be filled from the current staff list.",
-      );
+      setFillSummary(buildFillSummaryMessage(result));
       return;
     }
-    const suggestions = rota.applyOpenShiftSuggestions();
-    setFillSummary(
-      suggestions.length > 0
-        ? `${suggestions.length} open shift${suggestions.length === 1 ? "" : "s"} filled. Review the assignments before publishing.`
-        : "No open shifts could be filled from the current staff list.",
-    );
+    setFillSummary(buildFillSummaryMessage(rota.applyOpenShiftSuggestions()));
   };
 
   const handleCopyLastWeek = async () => {

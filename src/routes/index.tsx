@@ -216,31 +216,21 @@ function Home() {
                 >
                   Log a leave request…
                 </button>
-                {!isLiveDashboard && (
-                  <>
-                    <button
-                      type="button"
-                      className="menu-item"
-                      onClick={() => runQuickAction("/team")}
-                    >
-                      Compose announcement… (preview)
-                    </button>
-                    <button
-                      type="button"
-                      className="menu-item"
-                      onClick={() => runQuickAction("/ops")}
-                    >
-                      Log an incident… (preview)
-                    </button>
-                  </>
-                )}
+                {/* Preview routes stay reachable, always labelled — they open
+                    sample-content pages, never a live workspace action. */}
+                <button type="button" className="menu-item" onClick={() => runQuickAction("/team")}>
+                  Compose announcement… (preview)
+                </button>
+                <button type="button" className="menu-item" onClick={() => runQuickAction("/ops")}>
+                  Log an incident… (preview)
+                </button>
                 <div className="menu-sep" />
                 <button
                   type="button"
                   className="menu-item"
                   onClick={() => runQuickAction("/rota", "rota.generate")}
                 >
-                  Generate rota draft…
+                  Build this week…
                 </button>
               </div>
             )}
@@ -256,18 +246,16 @@ function Home() {
             {moreOpen && (
               <div className="popover absolute top-[44px] right-0 z-50 w-52 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="menu-label">Dashboard</div>
-                {!isLiveDashboard && (
-                  <button
-                    type="button"
-                    className="menu-item"
-                    onClick={() => {
-                      setMoreOpen(false);
-                      navigate({ to: "/reports" });
-                    }}
-                  >
-                    View reports… (preview)
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    navigate({ to: "/reports" });
+                  }}
+                >
+                  View reports… (preview)
+                </button>
                 <button
                   type="button"
                   className="menu-item"

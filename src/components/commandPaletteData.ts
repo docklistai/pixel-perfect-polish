@@ -58,10 +58,14 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
   { label: "Settings", to: "/settings", icon: SettingsIcon },
 ];
 
-/** Nav entries for the current surface: the live pilot hides preview routes. */
-export function visibleCommandNavItems(pilot: boolean): CommandNavItem[] {
-  return pilot ? COMMAND_NAV_ITEMS.filter((item) => !item.preview) : COMMAND_NAV_ITEMS;
-}
+/**
+ * Every manager route is listed. Preview routes stay reachable for testers and
+ * carry a "Preview" label in the palette so they are never mistaken for live
+ * pilot features.
+ */
+export const COMMAND_PREVIEW_ROUTES: readonly NavTarget[] = COMMAND_NAV_ITEMS.filter(
+  (item) => item.preview,
+).map((item) => item.to);
 
 export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
   {
@@ -72,8 +76,8 @@ export const COMMAND_QUICK_ACTIONS: CommandQuickAction[] = [
     intent: "rota.publish",
   },
   {
-    label: "Generate rota draft",
-    hint: "Generate next week's rota draft and fill open shifts",
+    label: "Build this week",
+    hint: "Copy last week, apply a template, or fill open shifts — draft only",
     icon: Sparkles,
     to: "/rota",
     intent: "rota.generate",

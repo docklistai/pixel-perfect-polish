@@ -1,4 +1,4 @@
-import { Check, MapPin, MessageSquare, User, Users } from "lucide-react";
+import { Check, Info, MapPin, MessageSquare, User, Users } from "lucide-react";
 import {
   ActionButton,
   DashboardCard,
@@ -12,13 +12,9 @@ import { PortalShiftReleaseSection } from "./PortalShiftReleaseSection";
 
 export function ShiftDetailDrawer({
   shift,
-  acknowledged,
-  onAcknowledge,
   onClose,
 }: {
   shift: PortalShift | null;
-  acknowledged?: boolean;
-  onAcknowledge?: (shiftId: string) => void;
   onClose: () => void;
 }) {
   if (!shift) {
@@ -41,15 +37,9 @@ export function ShiftDetailDrawer({
       description={shift.dayLabel}
       width="lg"
       footer={
-        isChanged && !acknowledged ? (
-          <ActionButton onClick={() => onAcknowledge?.(shift.id)} className="w-full justify-center">
-            Acknowledge shift change
-          </ActionButton>
-        ) : (
-          <ActionButton variant="secondary" onClick={onClose} className="w-full justify-center">
-            Close
-          </ActionButton>
-        )
+        <ActionButton variant="secondary" onClick={onClose} className="w-full justify-center">
+          Close
+        </ActionButton>
       }
     >
       <div className="space-y-4">
@@ -160,8 +150,17 @@ export function ShiftDetailDrawer({
           </DashboardCard>
         )}
 
-        {isChanged && acknowledged && (
-          <div className="text-center text-xs text-success font-medium">Changes acknowledged</div>
+        {/* Confirming a change back to the manager needs persistence that does
+            not exist yet, so the pilot states that plainly instead of offering a
+            button that would forget. */}
+        {isChanged && (
+          <div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning-soft/40 p-3">
+            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
+            <p className="text-xs text-muted-foreground">
+              Your manager changed this shift. Confirming shift changes in the app isn&apos;t
+              available in this pilot — speak to your manager if the new time doesn&apos;t work.
+            </p>
+          </div>
         )}
 
         <PortalShiftReleaseSection shift={shift} />
