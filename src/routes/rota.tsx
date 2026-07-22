@@ -1,3 +1,5 @@
+import * as React from "react";
+import { flushSync } from "react-dom";
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, Card, FeedbackBanner } from "@/components/dl";
 import { useRotaPage } from "@/features/rota/hooks/useRotaPage";
@@ -11,7 +13,10 @@ import { RotaLiveReadState } from "@/features/rota/components/RotaLiveReadState"
 import { RotaInsightsColumn } from "@/features/rota/components/RotaInsightsColumn";
 import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { RoleColoursContext } from "@/features/rota/components/grid/roleColoursContext";
+import { PrintableRota } from "@/features/rota/print/PrintableRota";
+import { buildPrintableRota } from "@/features/rota/print/printableRotaModel";
 import { requireManagerAccess } from "@/features/auth";
+import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { parseRotaWeekSearch } from "@/features/rota/lib/rotaSearch";
 
 export const Route = createFileRoute("/rota")({
@@ -54,6 +59,46 @@ function RotaPage() {
     history,
   } = useRotaPage(week, location);
 
+  const { workspaceName } = useManagerIdentity();
+  const [printedAt, setPrintedAt] = React.useState(() => new Date());
+
+  const locationName =
+    rota.source === "live" && rota.liveLocationName ? rota.liveLocationName : "Your workspace";
+
+  const printableRota = React.useMemo(
+    () =>
+      buildPrintableRota({
+        workspaceName,
+        locationName,
+        weekLabel: rota.weekLabel,
+        dayLabels: rota.days.map((day) => day.d),
+        staff: rota.staff,
+        shifts: rota.draftShifts,
+        published: rota.published,
+        hasUnpublishedChanges: rota.hasUnpublishedChanges,
+        printedAt,
+      }),
+    [
+      workspaceName,
+      locationName,
+      rota.weekLabel,
+      rota.days,
+      rota.staff,
+      rota.draftShifts,
+      rota.published,
+      rota.hasUnpublishedChanges,
+      printedAt,
+    ],
+  );
+
+  // Stamp the print time and commit it before the dialog opens, so the sheet
+  // shows when it was actually printed. Printing only reads the current draft —
+  // it publishes and mutates nothing, and cancelling the dialog leaves no trace.
+  const handlePrintRota = React.useCallback(() => {
+    flushSync(() => setPrintedAt(new Date()));
+    window.print();
+  }, []);
+
   return (
     <RoleColoursContext.Provider value={roleColoursConfig}>
       <AppShell topbarWeekLabel={rota.weekLabel}>
@@ -67,11 +112,7 @@ function RotaPage() {
 
           <RotaPageHeader
             weekLabel={rota.weekLabel}
-            locationName={
-              rota.source === "live" && rota.liveLocationName
-                ? rota.liveLocationName
-                : "Your workspace"
-            }
+            locationName={locationName}
             locations={rota.source === "live" ? rota.liveLocations : []}
             locationId={rota.source === "live" ? rota.liveLocationId : null}
             onLocationChange={handleLocationChange}
@@ -80,7 +121,7 @@ function RotaPage() {
             statusTone={headerStatusTone}
             statusLabel={headerStatusLabel}
             canPublish={publishEligibility.canPublish}
-            onPrintRota={() => window.print()}
+            onPrintRota={handlePrintRota}
             onClearWeek={guardedRota.requestClearWeek}
             onOpenTemplates={() => openOverlay("templates")}
             onCopyDay={() => openOverlay("copyDay")}
@@ -193,6 +234,10 @@ function RotaPage() {
           }
           onClearRecoverySelection={() => setRecoverySelection(null)}
         />
+
+        {/* Print-only document. Renders nothing on screen; @media print hides
+            every other body child so no app chrome can reach paper. */}
+        <PrintableRota model={printableRota} />
       </AppShell>
     </RoleColoursContext.Provider>
   );

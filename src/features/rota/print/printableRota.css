@@ -1,0 +1,225 @@
+/*
+ * Print-only stylesheet for the dedicated rota document.
+ *
+ * The document is portalled to <body>, so the print rule can hide every other
+ * body child outright. That is the privacy mechanism: the app shell, topbar,
+ * sidebar, toolbar, dialogs, drawers, toasts and command palette are excluded by
+ * construction rather than by remembering to add a class to each of them.
+ *
+ * Screen layout is untouched — on screen this document is display:none.
+ */
+
+.rota-print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  body > *:not(.rota-print-root) {
+    display: none !important;
+  }
+
+  .rota-print-root {
+    display: block !important;
+    /* Forced light, monochrome-safe. Never inherits the app's dark theme. */
+    background: #fff;
+    color: #000;
+    font-family:
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      sans-serif;
+    font-size: 8.5pt;
+    line-height: 1.25;
+  }
+
+  .rota-print-root * {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+  }
+
+  .rota-print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8mm;
+    border-bottom: 1.5pt solid #000;
+    padding-bottom: 2mm;
+    margin-bottom: 3mm;
+  }
+
+  .rota-print-title {
+    font-size: 13pt;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .rota-print-subtitle {
+    font-size: 9pt;
+    margin: 0.5mm 0 0;
+  }
+
+  .rota-print-meta {
+    text-align: right;
+    font-size: 8pt;
+    white-space: nowrap;
+  }
+
+  /* Status reads on a monochrome printer: heavy border + uppercase word. */
+  .rota-print-status {
+    display: inline-block;
+    border: 1.5pt solid #000;
+    padding: 0.8mm 2mm;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 9pt;
+  }
+
+  .rota-print-status--draft,
+  .rota-print-status--changes {
+    border-style: dashed;
+    border-width: 2pt;
+  }
+
+  .rota-print-status-detail {
+    font-size: 8pt;
+    margin: 1mm 0 0;
+  }
+
+  .rota-print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  /* Repeat headers on every page where the engine supports it. */
+  .rota-print-table thead {
+    display: table-header-group;
+  }
+
+  .rota-print-table tfoot {
+    display: table-footer-group;
+  }
+
+  .rota-print-table th,
+  .rota-print-table td {
+    border: 0.5pt solid #000;
+    padding: 1mm 1.2mm;
+    vertical-align: top;
+    text-align: left;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .rota-print-table thead th {
+    border-bottom-width: 1.2pt;
+    font-size: 8.5pt;
+    font-weight: 700;
+  }
+
+  /* Name column fixed; the seven days share the rest evenly so no day is lost. */
+  .rota-print-col-name {
+    width: 16%;
+  }
+
+  .rota-print-col-day {
+    width: 12%;
+  }
+
+  /* Keep a person's whole row together where the page allows. */
+  .rota-print-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .rota-print-staff-name {
+    font-weight: 700;
+  }
+
+  .rota-print-staff-role {
+    font-size: 7.5pt;
+  }
+
+  .rota-print-shift {
+    border-bottom: 0.3pt dotted #000;
+    padding-bottom: 0.6mm;
+    margin-bottom: 0.6mm;
+  }
+
+  .rota-print-shift:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .rota-print-shift-time {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .rota-print-shift-meta {
+    font-size: 7.5pt;
+  }
+
+  /* Open shifts are distinguishable without colour: dashed box + "OPEN". */
+  .rota-print-shift--open {
+    border: 1pt dashed #000;
+    padding: 0.6mm;
+  }
+
+  .rota-print-open-tag {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 7pt;
+    letter-spacing: 0.05em;
+  }
+
+  .rota-print-empty-cell {
+    color: #000 !important;
+  }
+
+  .rota-print-empty {
+    border: 1pt solid #000;
+    padding: 4mm;
+    margin-top: 4mm;
+    font-size: 10pt;
+    text-align: center;
+  }
+
+  .rota-print-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4mm;
+    margin-top: 3mm;
+    font-size: 7.5pt;
+    border-top: 0.5pt solid #000;
+    padding-top: 1.5mm;
+  }
+
+  .rota-print-note {
+    margin-top: 3mm;
+    border: 0.5pt solid #000;
+    min-height: 14mm;
+    padding: 1.5mm;
+    font-size: 7.5pt;
+    /* A trailing note box must never create a page of its own. */
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .rota-print-note-label {
+    font-weight: 700;
+  }
+
+  /* Nothing after the last content block, so no blank trailing page. */
+  .rota-print-root > :last-child {
+    margin-bottom: 0;
+  }
+}
