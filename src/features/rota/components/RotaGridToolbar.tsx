@@ -1,5 +1,7 @@
 import { Copy, Filter, Keyboard, Plus, Redo2, Sparkles, Undo2, Wand2 } from "lucide-react";
 import { ActionButton, IconButton } from "@/components/dl";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useSelectionCapableViewport } from "./grid/selection/useSelectionCapableViewport";
 
 export function RotaGridToolbar({
   conflictCount,
@@ -35,6 +37,7 @@ export function RotaGridToolbar({
   canRedo: boolean;
 }) {
   const coverageTone = coveragePct > 110 ? "warning" : coveragePct >= 95 ? "success" : "warning";
+  const selectionCapable = useSelectionCapableViewport();
 
   return (
     <>
@@ -183,6 +186,33 @@ export function RotaGridToolbar({
         <span>menu</span>
         <kbd className="kbd">Esc</kbd>
         <span>cancel</span>
+        {selectionCapable && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="ml-auto rounded-md border border-border bg-background px-2 py-1 font-semibold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+              >
+                Shortcuts
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64 p-3 text-xs">
+              <p className="mb-2 font-semibold">Selection shortcuts</p>
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-muted-foreground">
+                <kbd className="kbd">Shift + arrows/click</kbd>
+                <span>select a block</span>
+                <kbd className="kbd">Ctrl/⌘ C / V</kbd>
+                <span>copy or paste</span>
+                <kbd className="kbd">Delete</kbd>
+                <span>clear</span>
+                <kbd className="kbd">Ctrl/⌘ D</kbd>
+                <span>fill down</span>
+                <kbd className="kbd">Ctrl/⌘ R</kbd>
+                <span>fill right</span>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
     </>
   );

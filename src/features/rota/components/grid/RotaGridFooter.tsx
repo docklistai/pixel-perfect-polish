@@ -3,9 +3,12 @@ import type { RotaGridDay } from "./types";
 export function RotaGridFooter({
   days,
   ariaRowIndex,
+  selectionEnabled,
 }: {
   days: RotaGridDay[];
   ariaRowIndex: number;
+  /** In a multiselectable grid every gridcell must state its selected state. */
+  selectionEnabled: boolean;
 }) {
   return (
     <div role="row" aria-rowindex={ariaRowIndex} className="contents">
@@ -23,6 +26,7 @@ export function RotaGridFooter({
           key={`footer-${day.d}`}
           role="gridcell"
           aria-colindex={dayIndex + 2}
+          aria-selected={selectionEnabled ? false : undefined}
           className={`border-b border-l px-2 py-3 font-mono text-[11px] text-muted-foreground ${
             day.isToday ? "border-brand/20 bg-brand-soft/10" : "border-border"
           }`}

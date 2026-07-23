@@ -84,6 +84,10 @@ export async function insertShift(
       break_minutes: input.breakMinutes ?? 30,
       role_name: input.role,
       assignment_status: input.staffId ? "scheduled" : "open",
+      // Carried only when supplied, so an ordinary create still leaves the
+      // overrides null and the shift takes its role's default appearance.
+      ...(input.colourOverride ? { colour_override: input.colourOverride } : {}),
+      ...(input.deptOverride ? { dept_override: input.deptOverride } : {}),
     })
     .select("id")
     .single();

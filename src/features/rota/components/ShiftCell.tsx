@@ -15,6 +15,7 @@ export function ShiftCell({
   openMenuShiftId,
   onMenuOpenChange,
   emptyAriaLabel,
+  suppressPillOpen = false,
 }: {
   shifts: DraftShift[];
   context: CellContext;
@@ -22,6 +23,8 @@ export function ShiftCell({
   openMenuShiftId: ShiftId | null;
   onMenuOpenChange: (shiftId: ShiftId, open: boolean) => void;
   emptyAriaLabel: string;
+  /** Desktop selection is on: a plain click selects the cell instead of opening. */
+  suppressPillOpen?: boolean;
 }) {
   if (shifts.length === 0) {
     if (context === "open") {
@@ -48,6 +51,7 @@ export function ShiftCell({
         menuOpen={openMenuShiftId === shifts[0]!.id}
         onMenuOpenChange={onMenuOpenChange}
         compact={false}
+        suppressOpen={suppressPillOpen}
       />
     );
   }
@@ -62,6 +66,7 @@ export function ShiftCell({
           menuOpen={openMenuShiftId === shift.id}
           onMenuOpenChange={onMenuOpenChange}
           compact
+          suppressOpen={suppressPillOpen}
         />
       ))}
     </div>
@@ -74,12 +79,14 @@ function ShiftPill({
   menuOpen,
   onMenuOpenChange,
   compact,
+  suppressOpen,
 }: {
   shift: DraftShift;
   handlers: ShiftMenuHandlers;
   menuOpen: boolean;
   onMenuOpenChange: (shiftId: ShiftId, open: boolean) => void;
   compact: boolean;
+  suppressOpen: boolean;
 }) {
   const roleColours = useRoleColoursConfig();
   const isOpen = shift.staffId === null;
@@ -120,8 +127,21 @@ function ShiftPill({
         <button
           type="button"
           tabIndex={-1}
-          onClick={() => handlers.onOpen(shift.id)}
-          onDoubleClick={(event) => event.stopPropagation()}
+          onMouseDown={(event) => {
+            // With selection on, keep focus on the owning cell so a following
+            // Delete or fill shortcut still reaches the grid — the mousedown
+            // still bubbles to the cell, which handles the selection.
+            if (suppressOpen) event.preventDefault();
+          }}
+          onClick={(event) => {
+            // Selection owns the plain and shifted click on desktop; the drawer
+            // is reached with Enter or from the shift menu instead.
+            if (event.shiftKey || suppressOpen) return;
+            handlers.onOpen(shift.id);
+          }}
+          onDoubleClick={(event) => {
+            if (!suppressOpen) event.stopPropagation();
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             onMenuOpenChange(shift.id, true);
@@ -160,8 +180,21 @@ function ShiftPill({
       <button
         type="button"
         tabIndex={-1}
-        onClick={() => handlers.onOpen(shift.id)}
-        onDoubleClick={(event) => event.stopPropagation()}
+        onMouseDown={(event) => {
+          // With selection on, keep focus on the owning cell so a following
+          // Delete or fill shortcut still reaches the grid — the mousedown
+          // still bubbles to the cell, which handles the selection.
+          if (suppressOpen) event.preventDefault();
+        }}
+        onClick={(event) => {
+          // Selection owns the plain and shifted click on desktop; the drawer
+          // is reached with Enter or from the shift menu instead.
+          if (event.shiftKey || suppressOpen) return;
+          handlers.onOpen(shift.id);
+        }}
+        onDoubleClick={(event) => {
+          if (!suppressOpen) event.stopPropagation();
+        }}
         onContextMenu={(e) => {
           e.preventDefault();
           onMenuOpenChange(shift.id, true);

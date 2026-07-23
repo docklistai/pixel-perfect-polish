@@ -1,12 +1,14 @@
 import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { RotaGridCell } from "./RotaGridCell";
-import type { RotaGridDay, ShiftActionHandlers } from "./types";
+import { staffRowKey } from "./selection/rotaSelectionModel";
+import type { RotaCellSelectionApi, RotaGridDay, ShiftActionHandlers } from "./types";
 import type { RotaGridStaffRow as RotaGridStaffRowData } from "../../types";
 
 export function RotaStaffRow({
   row,
   days,
   handlers,
+  selection,
   rowIndex,
   activeRowIndex,
   activeDayIndex,
@@ -15,11 +17,15 @@ export function RotaStaffRow({
   row: RotaGridStaffRowData;
   days: RotaGridDay[];
   handlers: ShiftActionHandlers;
+  selection: RotaCellSelectionApi;
   rowIndex: number;
   activeRowIndex: number | null;
   activeDayIndex: number | null;
   onCellFocus: (rowIndex: number, dayIndex: number) => void;
 }) {
+  // Identity comes from the staff id, so two people with the same display name
+  // never share a selection key.
+  const rowKey = staffRowKey(row.staff.id);
   return (
     <div role="row" aria-rowindex={rowIndex + 2} className="contents">
       <div
@@ -46,6 +52,8 @@ export function RotaStaffRow({
           day={days[dayIndex]}
           context="staff"
           handlers={handlers}
+          selection={selection}
+          rowKey={rowKey}
           staffId={row.staff.id}
           staffRole={row.staff.role}
           dayIndex={dayIndex}

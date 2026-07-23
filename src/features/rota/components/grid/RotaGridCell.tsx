@@ -2,10 +2,10 @@ import * as React from "react";
 import { ShiftCell } from "../ShiftCell";
 import { cellLeaveTitle } from "./cellLeaveTitle";
 import { InlineCellEditor } from "./InlineCellEditor";
-import { buildInlineParseOptions, commitInlineCellEdit } from "./inlineCellCommit";
-import { buildRotaCellAccessibleName, nextRotaGridPosition } from "./rotaGridAccessibility";
-import type { RotaGridDay, ShiftActionHandlers, ShiftMenuHandlers } from "./types";
-import type { RotaGridCell as RotaGridCellData, ShiftId } from "../../types";
+import { buildRotaCellAccessibleName } from "./rotaGridAccessibility";
+import { useRotaCellInteraction } from "./useRotaCellInteraction";
+import type { RotaCellSelectionApi, RotaGridDay, ShiftActionHandlers } from "./types";
+import type { RotaGridCell as RotaGridCellData } from "../../types";
 
 export function RotaGridCell({
   cell,
@@ -14,6 +14,8 @@ export function RotaGridCell({
   cellLabel,
   openRow = false,
   handlers,
+  selection,
+  rowKey,
   staffId,
   staffRole,
   dayIndex,
@@ -27,6 +29,9 @@ export function RotaGridCell({
   cellLabel: string;
   openRow?: boolean;
   handlers: ShiftActionHandlers;
+  selection: RotaCellSelectionApi;
+  /** Stable row identity: `staff:<id>` or `open`. Never a row position. */
+  rowKey: string;
   staffId?: string | null;
   staffRole?: string;
   dayIndex: number;
@@ -34,9 +39,17 @@ export function RotaGridCell({
   isTabStop: boolean;
   onFocus: (rowIndex: number, dayIndex: number) => void;
 }) {
-  const cellRef = React.useRef<HTMLDivElement>(null);
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [openMenuShiftId, setOpenMenuShiftId] = React.useState<ShiftId | null>(null);
+  const cellKey = React.useMemo(() => ({ row: rowKey, day: dayIndex }), [rowKey, dayIndex]);
+  const interaction = useRotaCellInteraction({
+    cell,
+    handlers,
+    staffId,
+    staffRole,
+    openRow,
+    dayIndex,
+    onGridKeyDown: (event) => selection.onCellKeyDown(event, cellKey),
+  });
+  const { firstShift, isEditing } = interaction;
 
   const todayClass = openRow
     ? "border-brand/20 bg-warning-soft/20"
@@ -51,105 +64,14 @@ export function RotaGridCell({
   const availabilityClass =
     !openRow && !cell.leaveState && cell.availabilityHint ? "bg-muted/10" : "";
 
-  const firstShift = cell.shifts[0];
-  const initialValue = firstShift
-    ? cell.shifts.length > 1
-      ? `${cell.shifts.length} shifts`
-      : firstShift.status === "open"
-        ? "OPEN"
-        : `${firstShift.start} - ${firstShift.end}`
-    : "OFF";
-
-  const startEditing = React.useCallback(() => {
-    if (handlers.readOnly) {
-      handlers.onReadOnlyAttempt();
-      return;
-    }
-    setIsEditing(true);
-  }, [handlers]);
-  const restoreCellFocus = React.useCallback(() => {
-    requestAnimationFrame(() => cellRef.current?.focus());
-  }, []);
-
-  const parseOptions = React.useMemo(
-    () => buildInlineParseOptions({ cell, staffRole, workspaceRoles: handlers.workspaceRoles }),
-    [cell, staffRole, handlers.workspaceRoles],
-  );
-
-  const handleCommit = async (val: string) => {
-    setIsEditing(false);
-    restoreCellFocus();
-    if (handlers.readOnly) {
-      handlers.onReadOnlyAttempt();
-      return;
-    }
-    try {
-      await commitInlineCellEdit({
-        value: val,
-        cell,
-        handlers,
-        staffId,
-        staffRole,
-        openRow,
-        dayIndex,
-      });
-    } catch {
-      // The server mutation hook owns the failure toast; keep the cell from
-      // reporting a successful edit when persistence fails.
-    }
-  };
-
-  const menuHandlers = React.useMemo<ShiftMenuHandlers>(
-    () => ({
-      canCopyShiftAssignment: handlers.canCopyShiftAssignment,
-      onEditInline: startEditing,
-      onOpen: handlers.onShiftOpen,
-      onDuplicate: handlers.onShiftDuplicate,
-      onMarkOpen: handlers.onShiftMarkOpen,
-      onSetDept: handlers.onShiftSetDept,
-      onSetDepartment: handlers.onShiftSetDepartment,
-      departments: handlers.departments,
-      onSetColour: handlers.onShiftSetColour,
-      onResetColour: handlers.onShiftResetColour,
-      onClear: handlers.onShiftClear,
-    }),
-    [handlers, startEditing],
-  );
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    // The inline editor owns its keys (↵ save / esc cancel).
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    if (e.target !== e.currentTarget) return;
-    if (
-      e.key === "ArrowRight" ||
-      e.key === "ArrowLeft" ||
-      e.key === "ArrowUp" ||
-      e.key === "ArrowDown"
-    ) {
-      e.preventDefault();
-      const next = nextRotaGridPosition(rowIndex, dayIndex, e.key);
-      const grid = e.currentTarget.closest("[data-rota-grid]");
-      const target = grid?.querySelector<HTMLElement>(
-        '[data-gridrow="' + next.rowIndex + '"][data-gridcol="' + next.dayIndex + '"]',
-      );
-      target?.focus();
-      return;
-    }
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      if (firstShift) handlers.onShiftOpen(firstShift.id);
-      else startEditing();
-    }
-    if (e.key === "F2") {
-      e.preventDefault();
-      startEditing();
-    }
-    if (e.key === "m" || e.key === "M") {
-      e.preventDefault();
-      if (firstShift) setOpenMenuShiftId(firstShift.id);
-      else startEditing();
-    }
-  };
+  const isSelected = selection.enabled && selection.isSelected(cellKey);
+  const isAnchor = selection.enabled && selection.isAnchor(cellKey);
+  // Selection is signalled by an inset ring and a corner marker on the anchor,
+  // never by colour alone — these cells already carry leave and availability
+  // tints that a selection tint would be indistinguishable from.
+  const selectionClass = `${isSelected ? "rota-cell-selected" : ""} ${
+    isAnchor ? "rota-cell-anchor" : ""
+  }`;
 
   const cellAriaLabel = buildRotaCellAccessibleName({
     cellLabel,
@@ -167,24 +89,49 @@ export function RotaGridCell({
 
   return (
     <div
-      ref={cellRef}
+      ref={interaction.cellRef}
       tabIndex={isTabStop ? 0 : -1}
       role="gridcell"
       aria-label={cellAriaLabel}
       aria-colindex={dayIndex + 2}
-      aria-keyshortcuts="ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space F2"
+      aria-selected={selection.enabled ? isSelected : undefined}
+      aria-keyshortcuts={
+        selection.enabled
+          ? "ArrowUp ArrowDown ArrowLeft ArrowRight Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight Enter Space F2 Escape Control+C Control+V Delete Control+D Control+R"
+          : "ArrowUp ArrowDown ArrowLeft ArrowRight Enter Space F2"
+      }
       title={cellLeaveTitle(cell.leaveState, Boolean(firstShift)) ?? availabilityTitle}
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
-      onFocus={() => onFocus(rowIndex, dayIndex)}
-      onDoubleClick={startEditing}
-      onClick={() => {
-        if (!firstShift) startEditing();
+      data-rowkey={rowKey}
+      onFocus={() => {
+        onFocus(rowIndex, dayIndex);
+        selection.onCellFocus(cellKey);
       }}
-      onKeyDown={handleKeyDown}
+      onMouseDown={(event) => {
+        selection.onCellMouseDown(event, cellKey);
+        // A shift pill prevents its own mousedown default so the button cannot
+        // steal focus — but preventing the default only stops focus moving, it
+        // does not hand it anywhere, so clicking a shift would leave focus
+        // outside the grid entirely and the next Delete or fill shortcut would
+        // reach nothing. The owning cell claims focus explicitly instead.
+        if (!selection.enabled) return;
+        if (event.target instanceof HTMLInputElement) return;
+        interaction.cellRef.current?.focus();
+      }}
+      onDoubleClick={interaction.startEditing}
+      onClick={(event) => {
+        if (event.shiftKey) return;
+        // With rectangular selection on, a single click only selects. Opening an
+        // editor here would fight the manager for focus every time they picked a
+        // cell; double-click, Enter and F2 are the ways in.
+        if (selection.enabled) return;
+        if (!firstShift) interaction.startEditing();
+      }}
+      onKeyDown={interaction.handleKeyDown}
       className={`relative border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass
-      } ${leaveClass} ${availabilityClass}`}
+      } ${leaveClass} ${availabilityClass} ${selectionClass}`}
     >
       {cell.leaveState && !firstShift && !isEditing && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -212,25 +159,22 @@ export function RotaGridCell({
       )}
       {isEditing ? (
         <InlineCellEditor
-          initial={initialValue}
+          initial={interaction.initialValue}
           contextLabel={cellLabel}
-          parseOptions={parseOptions}
-          onCommit={handleCommit}
-          onCancel={() => {
-            setIsEditing(false);
-            restoreCellFocus();
-          }}
+          parseOptions={interaction.parseOptions}
+          onCommit={interaction.handleCommit}
+          onCancel={interaction.cancelEditing}
         />
       ) : (
         <ShiftCell
           shifts={cell.shifts}
           context={context}
-          menuHandlers={menuHandlers}
-          openMenuShiftId={openMenuShiftId}
-          onMenuOpenChange={(shiftId, open) => {
-            setOpenMenuShiftId(open ? shiftId : null);
-            if (!open) restoreCellFocus();
-          }}
+          // Selecting a block must not pop a drawer per cell; on desktop the
+          // pill's own click is stood down and Enter or the shift menu open it.
+          suppressPillOpen={selection.enabled}
+          menuHandlers={interaction.menuHandlers}
+          openMenuShiftId={interaction.openMenuShiftId}
+          onMenuOpenChange={interaction.handleMenuOpenChange}
           emptyAriaLabel={cellLabel + ": no shift"}
         />
       )}

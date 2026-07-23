@@ -1,19 +1,14 @@
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { DraftShift, DraftShiftInput, ShiftId } from "../types";
 import type { RotaLiveData } from "./useRotaLiveData";
 import { useRotaMutationRunner } from "./useRotaMutationRunner";
+import { useRotaLiveShiftMutations } from "./useRotaLiveShiftMutations";
 import {
   clearLiveRotaWeekFn,
   copyPreviousLiveRotaWeekFn,
-  createLiveRotaShiftFn,
-  duplicateLiveRotaShiftFn,
-  markLiveRotaShiftOpenFn,
   previewCopyPreviousLiveRotaWeekFn,
   publishLiveRotaWeekFn,
-  removeLiveRotaShiftFn,
-  updateLiveRotaShiftFn,
 } from "../api/rotaLiveMutations";
 
 export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
@@ -31,76 +26,7 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
     };
   }, [live.isLive, live.locationId, weekOffset]);
 
-  const addShift = React.useCallback(
-    async (input: DraftShiftInput) => {
-      await runMutation("Shift not saved", async () =>
-        createLiveRotaShiftFn({ data: { ...liveWeekInput(), shift: input } }),
-      );
-      toast.success("Shift saved", { description: "Saved to the live draft." });
-    },
-    [liveWeekInput, runMutation],
-  );
-
-  const updateShift = React.useCallback(
-    async (shiftId: ShiftId, patch: Partial<DraftShift>) => {
-      await runMutation("Shift not saved", async () =>
-        updateLiveRotaShiftFn({
-          data: {
-            shiftId,
-            patch: {
-              ...(patch.staffId !== undefined ? { staffId: patch.staffId } : {}),
-              ...(patch.role !== undefined ? { role: patch.role } : {}),
-              ...(patch.start !== undefined ? { start: patch.start } : {}),
-              ...(patch.end !== undefined ? { end: patch.end } : {}),
-              ...(patch.breakMinutes !== undefined ? { breakMinutes: patch.breakMinutes } : {}),
-              // Moving the shift between real workspace departments. Null is not
-              // a meaningful value here — a shift always has a department — so
-              // only a concrete id is forwarded.
-              ...(patch.departmentId ? { departmentId: patch.departmentId } : {}),
-              // Key presence (not value) signals intent; undefined → null clears it.
-              ...("colourOverride" in patch
-                ? { colourOverride: patch.colourOverride ?? null }
-                : {}),
-              ...("deptOverride" in patch ? { deptOverride: patch.deptOverride ?? null } : {}),
-            },
-          },
-        }),
-      );
-      toast.success("Shift saved", { description: "Saved to the live draft." });
-    },
-    [runMutation],
-  );
-
-  const removeShiftNow = React.useCallback(
-    async (shiftId: ShiftId) => {
-      await runMutation("Shift not removed", async () =>
-        removeLiveRotaShiftFn({ data: { shiftId } }),
-      );
-      toast.success("Shift removed", { description: "Saved to the live draft." });
-    },
-    [runMutation],
-  );
-
-  const markShiftOpen = React.useCallback(
-    async (shiftId: ShiftId) => {
-      await runMutation("Shift not opened", async () =>
-        markLiveRotaShiftOpenFn({ data: { shiftId } }),
-      );
-      toast.success("Shift opened", { description: "Saved to the live draft." });
-    },
-    [runMutation],
-  );
-
-  const duplicateShiftToNextDay = React.useCallback(
-    async (shiftId: ShiftId): Promise<ShiftId | null> => {
-      const result = await runMutation("Shift not duplicated", async () =>
-        duplicateLiveRotaShiftFn({ data: { shiftId } }),
-      );
-      toast.success("Shift duplicated", { description: "Saved to the live draft." });
-      return result.shiftId;
-    },
-    [runMutation],
-  );
+  const shifts = useRotaLiveShiftMutations(runMutation, liveWeekInput);
 
   const clearWeek = React.useCallback(async () => {
     await runMutation("Week not cleared", async () =>
@@ -164,11 +90,13 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
   return {
     isMutationPending: pendingCount > 0,
     lastMutationFailed,
-    addShift,
-    updateShift,
-    removeShiftNow,
-    markShiftOpen,
-    duplicateShiftToNextDay,
+    addShift: shifts.addShift,
+    updateShift: shifts.updateShift,
+    removeShiftNow: shifts.removeShiftNow,
+    markShiftOpen: shifts.markShiftOpen,
+    duplicateShiftToNextDay: shifts.duplicateShiftToNextDay,
+    /** Toast-free, refetch-free writes for the bulk executor. */
+    bulkRunners: { ...shifts.silent, refetch: live.refetchWeek },
     previewCopyPreviousWeek,
     copyPreviousWeek,
     clearWeek,

@@ -1,11 +1,8 @@
 import * as React from "react";
 import { buildOpenRow, buildStaffRows } from "../lib/draftRota";
 import { DEFAULT_ROTA_FILTERS } from "../lib/rotaFilters";
-import { getCurrentWeekDayIndex, getWeekDayLabels, getWeekDateIsoLabels } from "../lib/weekHelpers";
 import * as liveDates from "../lib/liveRotaDates";
-import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
 import {
-  buildDayStats,
   buildRoleCoverage,
   countAssignedShifts,
   countOpenShifts,
@@ -18,14 +15,11 @@ import {
 } from "../lib/rotaSummaries";
 import { useRotaWeekDrafts } from "./useRotaWeekDrafts";
 import { useRotaGridSources } from "./useRotaGridSources";
+import { useRotaWeekDerivedData } from "./useRotaWeekDerivedData";
 import { useRotaLiveData } from "./useRotaLiveData";
 import { useRotaLivePersistence } from "./useRotaLivePersistence";
 import { useRotaConfirmations } from "./useRotaConfirmations";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import {
-  buildApprovedLeaveConflictSummaries,
-  withApprovedLeaveConflictStatus,
-} from "@/features/leave/lib/leaveRotaConflicts";
 
 export function useRotaDraftController(initialLocationId: string | null = null) {
   const weekDraft = useRotaWeekDrafts();
@@ -41,7 +35,7 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
   });
 
   const readOnly = live.enabled && !live.isLive;
-  const { roster, fullRoster, assignableStaff, sourceShifts, leaveRequests } = useRotaGridSources(
+  const { roster, assignableStaff, sourceShifts, leaveRequests } = useRotaGridSources(
     live,
     readOnly,
     weekDraft.draftShifts,
@@ -50,55 +44,45 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
   const liveActions = live.isLive ? livePersistence : null;
   const confirmations = liveActions ? liveConfirmations : weekDraft;
 
-  const dayIsoDates = React.useMemo(() => {
-    if (live.isLive && live.weekStart) {
-      return Array.from({ length: 7 }, (_, i) => liveDates.addIsoDays(live.weekStart!, i));
-    }
-    return getWeekDateIsoLabels(weekDraft.weekOffset);
-  }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
-  const displayShifts = React.useMemo(
-    () =>
-      withApprovedLeaveConflictStatus(
-        withLocalConflictStatus(sourceShifts),
-        leaveRequests,
-        dayIsoDates,
-      ),
-    [dayIsoDates, leaveRequests, sourceShifts],
-  );
-  const dayLabels = React.useMemo(() => {
-    if (live.isLive && live.weekStart) return liveDates.liveWeekDayLabels(live.weekStart);
-    return getWeekDayLabels(weekDraft.weekOffset);
-  }, [live.isLive, live.weekStart, weekDraft.weekOffset]);
-  const days = React.useMemo(() => {
-    const stats = buildDayStats(displayShifts);
-    const currentDayIndex =
-      live.isLive && live.weekStart && live.today
-        ? liveDates.liveCurrentDayIndex(live.weekStart, live.today)
-        : getCurrentWeekDayIndex(weekDraft.weekOffset);
-    return dayLabels.map((d, index) => ({
-      d,
-      isToday: index === currentDayIndex,
-      ...stats[index]!,
-    }));
-  }, [dayLabels, displayShifts, live.isLive, live.today, live.weekStart, weekDraft.weekOffset]);
-  const visibleStaff = filterStaff(roster, displayShifts, filters, staffSearch);
-  // Approved-leave conflicts live in the conflict list only; the separate count
-  // is derived from the same array so the publish boundary can treat them as
-  // acknowledgeable scheduling constraints without duplicating the conflicts.
-  const approvedLeaveConflictSummaries = buildApprovedLeaveConflictSummaries(
-    displayShifts,
+  const derived = useRotaWeekDerivedData({
+    isLive: live.isLive,
+    weekStart: live.weekStart,
+    today: live.today,
+    weekOffset: weekDraft.weekOffset,
+    sourceShifts,
     leaveRequests,
-    dayIsoDates,
     roster,
-    dayLabels,
-  );
-  const conflictSummaries = [
-    ...buildLocalConflictSummaries(displayShifts, roster, dayLabels),
-    ...approvedLeaveConflictSummaries,
-  ];
+  });
+  const displayShifts = derived.displayShifts;
+  const visibleStaff = filterStaff(roster, displayShifts, filters, staffSearch);
   const selectedShift = weekDraft.selectedShiftId
     ? (displayShifts.find((shift) => shift.id === weekDraft.selectedShiftId) ?? null)
     : null;
+
+  // The demo store writes synchronously and never toasts per shift, so it is
+  // already the "silent" form the bulk executor needs; only the live path has to
+  // opt out of its per-write toast and refetch.
+  const draftBulkRunners = React.useMemo(
+    () => ({
+      addShift: async (input: Parameters<typeof weekDraft.addShift>[0]) => {
+        weekDraft.addShift(input);
+      },
+      updateShift: async (
+        id: Parameters<typeof weekDraft.updateShift>[0],
+        patch: Parameters<typeof weekDraft.updateShift>[1],
+      ) => {
+        weekDraft.updateShift(id, patch);
+      },
+      removeShift: async (id: Parameters<typeof weekDraft.removeShiftNow>[0]) => {
+        weekDraft.removeShiftNow(id);
+      },
+      refetch: async () => {},
+    }),
+    // The draft store's actions are recreated each render but always write to
+    // the same store; the runners only need to be stable within a bulk run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   return {
     ...weekDraft,
@@ -140,24 +124,26 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
     copyPreviousWeek: liveActions?.copyPreviousWeek ?? weekDraft.copyPreviousWeek,
     markShiftOpen: liveActions?.markShiftOpen ?? weekDraft.markShiftOpen,
     handlePublish: liveActions?.publish ?? weekDraft.handlePublish,
+    /** Toast-free sequential writes plus a single end-of-run refetch. */
+    bulkRunners: liveActions?.bulkRunners ?? draftBulkRunners,
     requestRemoveShift: confirmations.requestRemoveShift,
     requestClearWeek: confirmations.requestClearWeek,
     requestCopyPreviousWeek: confirmations.requestCopyPreviousWeek,
     confirmPendingAction: confirmations.confirmPendingAction,
     clearConfirmation: confirmations.clearConfirmation,
     confirmation: confirmations.confirmation,
-    days,
+    days: derived.days,
     staff: roster,
     assignableStaff,
     leaveRequests,
-    dayIsoDates,
+    dayIsoDates: derived.dayIsoDates,
     roleOptions: Array.from(new Set(roster.map((row) => row.role))),
     filters,
     setFilters,
     staffSearch,
     setStaffSearch,
     draftShifts: displayShifts,
-    staffRows: buildStaffRows(visibleStaff, displayShifts, leaveRequests, dayIsoDates),
+    staffRows: buildStaffRows(visibleStaff, displayShifts, leaveRequests, derived.dayIsoDates),
     openRow: buildOpenRow(displayShifts),
     visibleStaff,
     hasActiveFilters:
@@ -166,11 +152,11 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
       filters.shiftStatus !== "all" ||
       filters.warningType !== "all",
     openShiftCount: countOpenShifts(displayShifts),
-    conflictCount: conflictSummaries.length,
-    approvedLeaveClashCount: approvedLeaveConflictSummaries.length,
+    conflictCount: derived.conflictSummaries.length,
+    approvedLeaveClashCount: derived.approvedLeaveConflictSummaries.length,
     assignedShiftCount: countAssignedShifts(displayShifts),
     plannedShiftCount: countPlannedShifts(displayShifts),
-    conflictSummaries,
+    conflictSummaries: derived.conflictSummaries,
     roleCoverage: buildRoleCoverage(roster, displayShifts),
     coveragePct: coveragePercent(roster, displayShifts),
     scheduledHours: totalScheduledHours(displayShifts),

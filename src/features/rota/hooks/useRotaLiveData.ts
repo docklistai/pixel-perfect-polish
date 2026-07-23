@@ -37,7 +37,7 @@ export type RotaLiveData = {
   locations: LiveRotaLocation[];
   today: string | null;
   setLocationId: (locationId: string) => void;
-  refetchWeek: () => Promise<void>;
+  refetchWeek: () => Promise<readonly DraftShift[] | undefined>;
   /** Re-runs every live read backing this page (staff, week, leave). */
   retry: () => Promise<void>;
   staff: StaffMember[];
@@ -120,7 +120,7 @@ export function useRotaLiveData(
     staleTime: 15_000,
   });
 
-  const isLive = enabled && staffQuery.isSuccess && weekQuery.isSuccess;
+  const isLive = enabled && staffQuery.isSuccess && weekQuery.data !== undefined;
 
   React.useEffect(() => {
     if (routeLocationRef.current === initialLocationId) return;
@@ -135,7 +135,8 @@ export function useRotaLiveData(
   }, [selectedLocationId, weekQuery.data, weekQuery.isSuccess]);
 
   const refetchWeek = React.useCallback(async () => {
-    await weekQuery.refetch();
+    const result = await weekQuery.refetch({ throwOnError: true });
+    return result.data?.shifts;
   }, [weekQuery]);
 
   const retry = React.useCallback(async () => {

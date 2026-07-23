@@ -78,6 +78,10 @@ function RotaPage() {
     hasUnpublishedChanges: rota.hasUnpublishedChanges,
     departmentNameById: departmentWiring.nameById,
   });
+  const bulkRunners = React.useMemo(
+    () => ({ ...rota.bulkRunners, onApplied: history.reset }),
+    [history.reset, rota.bulkRunners],
+  );
 
   return (
     <RoleColoursContext.Provider value={roleColoursConfig}>
@@ -155,6 +159,11 @@ function RotaPage() {
                   hasActiveFilters={rota.hasActiveFilters}
                   scheduleTitleId={SCHEDULE_TITLE_ID}
                   scheduleDescId={SCHEDULE_DESC_ID}
+                  // A different week, data source or location invalidates every
+                  // stored selection key, so the grid drops the rectangle.
+                  selectionResetKey={`${rota.source}|${rota.liveLocationId ?? ""}|${rota.weekLabel}`}
+                  bulkRunners={bulkRunners}
+                  weekIsEditable={rota.liveWeekStatus !== "archived"}
                   onStaffSearchChange={rota.setStaffSearch}
                   onClearFilters={rota.clearFilters}
                   readOnly={readOnly}

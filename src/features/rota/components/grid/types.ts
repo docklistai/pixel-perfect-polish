@@ -1,7 +1,25 @@
+import type * as React from "react";
 import type { DraftShift, DraftShiftInput, ShiftId } from "../../types";
 import type { WorkspaceDepartment } from "../../api/workspaceDepartments";
+import type { RotaCellKey } from "./selection/rotaSelectionModel";
 
 export type MaybePromise<T> = T | Promise<T>;
+
+/**
+ * What a grid cell needs to take part in a rectangular selection. Cells receive
+ * plain answers about themselves and report interactions back; they never hold
+ * or reason about the rectangle.
+ */
+export type RotaCellSelectionApi = {
+  /** False on mobile and coarse-pointer devices: cells render as they always did. */
+  enabled: boolean;
+  isSelected: (cell: RotaCellKey) => boolean;
+  isAnchor: (cell: RotaCellKey) => boolean;
+  onCellMouseDown: (event: React.MouseEvent<HTMLDivElement>, cell: RotaCellKey) => void;
+  onCellFocus: (cell: RotaCellKey) => void;
+  /** Returns true when the grid consumed the key and the cell should stand down. */
+  onCellKeyDown: (event: React.KeyboardEvent<HTMLDivElement>, cell: RotaCellKey) => boolean;
+};
 
 export type RotaGridDay = {
   d: string;

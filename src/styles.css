@@ -1356,6 +1356,43 @@
   .rota-empty-cell {
     font-family: var(--font-mono);
   }
+  /* Rectangular selection. Signalled by shape — an inset outline, and a solid
+     corner marker on the anchor — never by colour alone, because these cells
+     already carry leave, availability and today tints that a selection tint
+     would be indistinguishable from.
+
+     Outline rather than box-shadow keeps selection visually separate from the
+     focus ring (which is a Tailwind box-shadow), and survives forced colours.
+     The !important is load-bearing: the cell carries `outline-none` and
+     `focus-within:ring-1` from the utilities layer, which outrank anything this
+     components-layer rule can say by specificity alone. */
+  .rota-cell-selected {
+    outline: 2px solid var(--brand) !important;
+    outline-offset: -2px !important;
+  }
+  .rota-cell-anchor::after {
+    content: "";
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background: var(--brand);
+    pointer-events: none;
+  }
+  @media (forced-colors: active) {
+    /* Forced colours discard authored colours and box-shadows entirely, so the
+       outline is restated in system colours and widened to stay legible. */
+    .rota-cell-selected {
+      outline: 3px solid Highlight !important;
+      outline-offset: -3px !important;
+    }
+    .rota-cell-anchor::after {
+      background: Highlight;
+      forced-color-adjust: none;
+    }
+  }
   .rota-grid-legend {
     background: color-mix(in srgb, var(--bg-raised) 94%, var(--ink-100));
   }

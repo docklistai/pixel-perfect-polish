@@ -1,11 +1,9 @@
 import { toast } from "sonner";
-import type { DraftShift, RotaDayIndex, RotaGridCell as RotaGridCellData } from "../../types";
+import type { RotaGridCell as RotaGridCellData } from "../../types";
 import type { ShiftActionHandlers } from "./types";
-import {
-  parseInlineCellInput,
-  type InlineCellParseOptions,
-  type ParsedInlineShift,
-} from "./inlineCellParsing";
+import { parseInlineCellInput, type InlineCellParseOptions } from "./inlineCellParsing";
+import { refuseAmbiguousClear, refuseSplitMismatch } from "./inlineCommitRules";
+import { buildShiftPatch, shiftPatchToInput } from "./inlineShiftPatch";
 
 type CommitInlineCellEditInput = {
   value: string;
@@ -44,32 +42,6 @@ export function buildInlineParseOptions({
   };
 }
 
-function buildShiftPatch({
-  parsed,
-  source,
-  staffId,
-  staffRole,
-  openRow,
-}: {
-  parsed: ParsedInlineShift;
-  source?: DraftShift;
-  staffId?: string | null;
-  staffRole?: string;
-  openRow: boolean;
-}) {
-  const open = openRow || parsed.open || !staffId;
-  return {
-    staffId: open ? null : staffId || null,
-    role: parsed.role ?? staffRole ?? source?.role ?? "FOH",
-    start: parsed.start,
-    end: parsed.end,
-    ...(parsed.breakMinutes !== null ? { breakMinutes: parsed.breakMinutes } : {}),
-    status: open ? ("open" as const) : ("scheduled" as const),
-    tone: open ? ("open" as const) : ("info" as const),
-    edited: true,
-  };
-}
-
 export async function commitInlineCellEdit({
   value,
   cell,
@@ -98,26 +70,18 @@ export async function commitInlineCellEdit({
   }
 
   if (command.kind === "clear") {
-    if (cell.shifts.length > 1 && !command.all) {
-      toast.warning("Multiple shifts in this cell", {
-        description: "Open a shift menu to clear one shift, or type clear all to remove both.",
-      });
+    const refusal = refuseAmbiguousClear(cell.shifts.length, command.all);
+    if (refusal) {
+      toast.warning(refusal.title, { description: refusal.description });
       return;
     }
     for (const shift of cell.shifts) await handlers.onShiftClear(shift.id);
     return;
   }
 
-  if (cell.shifts.length > 1 && command.shifts.length === 1) {
-    toast.warning("Choose a specific split shift", {
-      description: "Open a shift pill to edit one shift, or enter matching split ranges.",
-    });
-    return;
-  }
-  if (cell.shifts.length > 1 && command.shifts.length !== cell.shifts.length) {
-    toast.warning("Split edit needs matching ranges", {
-      description: `This cell has ${cell.shifts.length} shifts. Enter ${cell.shifts.length} ranges or edit one shift from its menu.`,
-    });
+  const mismatch = refuseSplitMismatch(cell.shifts.length, command.shifts.length);
+  if (mismatch) {
+    toast.warning(mismatch.title, { description: mismatch.description });
     return;
   }
 
@@ -133,16 +97,7 @@ export async function commitInlineCellEdit({
     }
     for (const parsed of command.shifts.slice(cell.shifts.length)) {
       const patch = buildShiftPatch({ parsed, source: firstShift, staffId, staffRole, openRow });
-      await handlers.onShiftAdd?.({
-        dayIndex: dayIndex as RotaDayIndex,
-        staffId: patch.staffId,
-        role: patch.role,
-        start: patch.start,
-        end: patch.end,
-        breakMinutes: patch.breakMinutes,
-        status: patch.status,
-        tone: patch.tone,
-      });
+      await handlers.onShiftAdd?.(shiftPatchToInput(patch, dayIndex));
     }
     if (!handlers.serverBacked) {
       toast.success(command.shifts.length > 1 ? "Split shift saved" : "Shift updated", {
@@ -154,16 +109,7 @@ export async function commitInlineCellEdit({
 
   for (const parsed of command.shifts) {
     const patch = buildShiftPatch({ parsed, staffId, staffRole, openRow });
-    await handlers.onShiftAdd?.({
-      dayIndex: dayIndex as RotaDayIndex,
-      staffId: patch.staffId,
-      role: patch.role,
-      start: patch.start,
-      end: patch.end,
-      breakMinutes: patch.breakMinutes,
-      status: patch.status,
-      tone: patch.tone,
-    });
+    await handlers.onShiftAdd?.(shiftPatchToInput(patch, dayIndex));
   }
   if (!handlers.serverBacked) {
     toast.success(command.shifts.length > 1 ? "Split shift created" : "Shift created");

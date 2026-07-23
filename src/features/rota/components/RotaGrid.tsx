@@ -8,14 +8,19 @@ import {
   type RotaGridDay,
   type ShiftActionHandlers,
 } from "./grid";
+import { RotaGridDescription } from "./grid/RotaGridDescription";
 import { useRotaGridNavigation } from "./grid/useRotaGridNavigation";
-import type {
-  RotaGridOpenRow,
-  RotaGridStaffRow,
-  DraftShift,
-  DraftShiftInput,
-  ShiftId,
-} from "../types";
+import { useRotaGridKeyboard } from "./grid/useRotaGridKeyboard";
+import { useShiftActionHandlers } from "./grid/useShiftActionHandlers";
+import { useRotaGridSelection } from "./grid/selection/useRotaGridSelection";
+import { useRotaCellSelectionApi } from "./grid/selection/useRotaCellSelectionApi";
+import { useRotaSelectionAnnouncement } from "./grid/selection/useRotaSelectionAnnouncement";
+import { useSelectionCapableViewport } from "./grid/selection/useSelectionCapableViewport";
+import { useRotaGridCopy } from "./grid/clipboard/useRotaGridCopy";
+import { useRotaGridBulk } from "./grid/bulk/useRotaGridBulk";
+import { RotaBulkPreviewDialog } from "./grid/bulk/RotaBulkPreviewDialog";
+import type { RotaBulkRunners } from "./grid/bulk/runRotaBulkPlan";
+import type { RotaGridOpenRow, RotaGridStaffRow } from "../types";
 
 export function RotaGrid({
   days,
@@ -28,6 +33,9 @@ export function RotaGrid({
   hasActiveFilters,
   scheduleTitleId,
   scheduleDescId,
+  selectionResetKey,
+  bulkRunners,
+  weekIsEditable = true,
   onStaffSearchChange,
   onClearFilters,
   readOnly,
@@ -58,6 +66,12 @@ export function RotaGrid({
   hasActiveFilters: boolean;
   scheduleTitleId: string;
   scheduleDescId: string;
+  /** Week, source and location identity — a change invalidates any selection. */
+  selectionResetKey: string;
+  /** Toast-free sequential writes plus one end-of-run refetch, for bulk changes. */
+  bulkRunners: RotaBulkRunners;
+  /** False for archived weeks, which refuse every write server-side anyway. */
+  weekIsEditable?: boolean;
   onStaffSearchChange: (value: string) => void;
   onClearFilters: () => void;
   readOnly: boolean;
@@ -74,74 +88,68 @@ export function RotaGrid({
     maxRowIndex: openRowIndex,
     dayCount: days.length,
   });
-  // The workspace's genuine configured roles: the roles people actually hold,
-  // plus any role the workspace has configured elsewhere.
-  //
-  // Roles seen only on shifts are deliberately excluded. A temporary label such
-  // as Training or Cover, typed onto one shift, must not become "configured"
-  // just because it now appears on the grid — otherwise re-editing it would
-  // stop warning, and the label would look like real workspace configuration.
-  const workspaceRoles = React.useMemo(() => {
-    const roles = new Set<string>();
-    for (const row of staffRows) {
-      if (row.staff.role) roles.add(row.staff.role);
-    }
-    for (const role of configuredRoles ?? []) roles.add(role);
-    return [...roles];
-  }, [staffRows, configuredRoles]);
 
-  const handlers = React.useMemo<ShiftActionHandlers>(
-    () => ({
-      readOnly,
-      serverBacked,
-      workspaceRoles,
-      canCopyShiftAssignment,
-      onReadOnlyAttempt,
-      onShiftOpen,
-      onShiftDuplicate,
-      onShiftRemove,
-      onShiftClear,
-      onShiftMarkOpen,
-      onShiftSetDept,
-      onShiftSetDepartment,
-      departments,
-      onShiftSetColour,
-      onShiftResetColour,
-      onShiftAdd,
-      onShiftUpdate,
-    }),
-    [
-      onShiftDuplicate,
-      onShiftMarkOpen,
-      onShiftOpen,
-      onReadOnlyAttempt,
-      onShiftRemove,
-      onShiftClear,
-      onShiftSetDept,
-      onShiftSetDepartment,
-      departments,
-      onShiftSetColour,
-      onShiftResetColour,
-      onShiftAdd,
-      onShiftUpdate,
-      readOnly,
-      serverBacked,
-      workspaceRoles,
-      canCopyShiftAssignment,
-    ],
-  );
+  const selectionCapable = useSelectionCapableViewport();
+  const selection = useRotaGridSelection({
+    enabled: selectionCapable,
+    staffRows,
+    openRow,
+    dayCount: days.length,
+    resetKey: selectionResetKey,
+  });
+  const handleGridKeyDown = useRotaGridKeyboard({
+    selection,
+    dayCount: days.length,
+    hasStaffRows: staffRows.length > 0,
+  });
+  const announcement = useRotaSelectionAnnouncement(selection.summary);
+  const handleCopy = useRotaGridCopy({
+    enabled: selection.enabled,
+    summary: selection.summary,
+    announce: announcement.announce,
+  });
+
+  const bulk = useRotaGridBulk({
+    selection,
+    staffRows,
+    openRow,
+    dayLabels: React.useMemo(() => days.map((day) => day.d), [days]),
+    workspaceRoles: configuredRoles,
+    runners: bulkRunners,
+    readOnly,
+    weekIsEditable,
+    onBlocked: onReadOnlyAttempt,
+    announce: announcement.announce,
+    onGridKeyDown: handleGridKeyDown,
+  });
+
+  const cellSelection = useRotaCellSelectionApi(selection, bulk.handleCellKeyDown);
+
+  const handlers = useShiftActionHandlers({
+    staffRows,
+    configuredRoles,
+    readOnly,
+    serverBacked,
+    departments,
+    canCopyShiftAssignment,
+    onReadOnlyAttempt,
+    onShiftOpen,
+    onShiftDuplicate,
+    onShiftRemove,
+    onShiftClear,
+    onShiftMarkOpen,
+    onShiftSetDept,
+    onShiftSetDepartment,
+    onShiftSetColour,
+    onShiftResetColour,
+    onShiftAdd,
+    onShiftUpdate,
+  });
   const totalOpenShifts = React.useMemo(
     () => openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0),
     [openRow.cells],
   );
-  const visuallyHidden = React.useMemo(
-    () =>
-      ({
-        clip: "rect(0, 0, 0, 0)",
-        clipPath: "inset(50%)",
-      }) as const,
-    [],
-  );
+
   return (
     <section
       role="region"
@@ -149,23 +157,15 @@ export function RotaGrid({
       aria-describedby={scheduleDescId}
       className="w-full min-w-0"
     >
-      <h2
-        id={scheduleTitleId}
-        className="absolute h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 -m-px"
-        style={visuallyHidden}
-      >
-        Weekly rota matrix
-      </h2>
-      <p
-        id={scheduleDescId}
-        className="absolute h-px w-px overflow-hidden whitespace-nowrap border-0 p-0 -m-px"
-        style={visuallyHidden}
-      >
-        Interactive schedule grid for the week of {weekLabel}. Each shift tile includes the staff
-        member, day, role, and status so screen readers can understand open shifts, conflicts, and
-        days off. Tab enters at staff search. Press Arrow Down to enter the rota cells, then use the
-        arrow keys to move. Press Enter or Space to open or add a shift.
-      </p>
+      <RotaGridDescription
+        titleId={scheduleTitleId}
+        descriptionId={scheduleDescId}
+        weekLabel={weekLabel}
+        selectionEnabled={selection.enabled}
+      />
+      <div aria-live="polite" role="status" className="sr-only">
+        {announcement.message}
+      </div>
 
       <div className="w-full max-w-full min-w-0">
         <div className="max-h-[70dvh] w-full max-w-full min-w-0 overflow-auto overscroll-contain">
@@ -177,7 +177,10 @@ export function RotaGrid({
             aria-describedby={scheduleDescId}
             aria-colcount={days.length + 1}
             aria-rowcount={renderedBodyRows + 3}
+            aria-multiselectable={selection.enabled ? true : undefined}
             onBlurCapture={gridNavigation.handleBlur}
+            onCopy={handleCopy}
+            onPaste={bulk.handlePaste}
             className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]"
           >
             <RotaGridHeader
@@ -199,6 +202,7 @@ export function RotaGrid({
                   row={row}
                   days={days}
                   handlers={handlers}
+                  selection={cellSelection}
                   rowIndex={rowIndex}
                   activeRowIndex={gridNavigation.activeRowIndex}
                   activeDayIndex={gridNavigation.activeDayIndex}
@@ -223,16 +227,23 @@ export function RotaGrid({
               days={days}
               totalOpenShifts={totalOpenShifts}
               handlers={handlers}
+              selection={cellSelection}
               rowIndex={openRowIndex}
               ariaRowIndex={staffRows.length > 0 ? staffRows.length + 2 : 3}
               activeRowIndex={gridNavigation.activeRowIndex}
               activeDayIndex={gridNavigation.activeDayIndex}
               onCellFocus={gridNavigation.setActiveCell}
             />
-            <RotaGridFooter days={days} ariaRowIndex={renderedBodyRows + 3} />
+            <RotaGridFooter
+              days={days}
+              ariaRowIndex={renderedBodyRows + 3}
+              selectionEnabled={selection.enabled}
+            />
           </div>
         </div>
       </div>
+
+      <RotaBulkPreviewDialog {...bulk.dialog} />
     </section>
   );
 }
