@@ -187,8 +187,13 @@ update public.shifts set break_minutes = 30
 where id = '3a000000-0000-4000-8000-000000000011';
 
 -- Employment changes after selection are revalidated at publication.
+-- Phase 45 revoked direct UPDATE on staff_members from authenticated, so this
+-- fixture flip drops to the owning role; the assertion below is unchanged and
+-- still runs as the manager.
+reset role;
 update public.staff_members set employment_status = 'inactive'
 where id = '14000000-0000-4000-8000-000000000004';
+set local role authenticated;
 do $$
 begin
   perform public.rpc_publish_rota_week(
@@ -200,8 +205,10 @@ exception
   when object_not_in_prerequisite_state then
     raise notice 'PASS: publication revalidates active employment';
 end $$;
+reset role;
 update public.staff_members set employment_status = 'active'
 where id = '14000000-0000-4000-8000-000000000004';
+set local role authenticated;
 
 -- Once safe again, republish confirms only the selected request.
 do $$

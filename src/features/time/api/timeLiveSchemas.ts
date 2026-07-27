@@ -49,16 +49,30 @@ export const adjustInput = z.object({
   reason: z.string().trim().min(1).max(2000),
 });
 
-export const exportInput = z
-  .object({
-    startDate: isoDate,
-    endDate: isoDate,
-    departmentId: z.string().uuid().optional(),
-  })
-  .refine((value) => value.startDate <= value.endDate, {
-    message: "startDate must be on or before endDate",
-    path: ["endDate"],
-  });
+const exportScope = z.object({
+  startDate: isoDate,
+  endDate: isoDate,
+  departmentId: z.string().uuid().optional(),
+});
+
+const datesInOrder = (value: { startDate: string; endDate: string }) =>
+  value.startDate <= value.endDate;
+const datesInOrderMessage = {
+  message: "startDate must be on or before endDate",
+  path: ["endDate"] as (string | number)[],
+};
+
+/** Preview scope. Writes no audit event — opening a dialog is not an export. */
+export const exportInput = exportScope.refine(datesInOrder, datesInOrderMessage);
+
+/**
+ * Download scope. Carries the signature of the preview the manager actually
+ * reviewed; the database refuses to audit or return anything if it no longer
+ * matches the current data.
+ */
+export const exportDownloadInput = exportScope
+  .extend({ expectedSignature: z.string().min(1).max(64) })
+  .refine(datesInOrder, datesInOrderMessage);
 
 export type TimeWriteResult = { ok: true } | { ok: false; message: string };
 
@@ -71,6 +85,16 @@ export type ExportRow = {
   approvedHours: number;
 };
 
-export type ExportResult =
-  | { ok: true; rows: ExportRow[] }
+/** Preview adds the signature the download must present back. */
+export type ExportPreviewResult =
+  | { ok: true; rows: ExportRow[]; previewSignature: string }
   | { ok: false; message: string; referenceId?: string };
+
+/**
+ * `staleSignature` means the approved hours changed after the preview: nothing
+ * was audited and nothing was downloaded, and the manager must review a fresh
+ * preview and confirm again.
+ */
+export type ExportDownloadResult =
+  | { ok: true; rows: ExportRow[] }
+  | { ok: false; message: string; referenceId?: string; staleSignature?: boolean };

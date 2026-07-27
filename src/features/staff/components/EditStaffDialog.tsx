@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { Loader2, Pencil } from "lucide-react";
 import { ActionButton, DialogShell, FormRow, FormSection } from "@/components/dl";
 import { updateStaffMemberFn } from "../api/updateStaffMember";
-import { describeStaffWriteError } from "../lib/addStaff";
 import { buildStaffMemberUpdate, type EditStaffFormValues } from "../lib/editStaff";
+import { submitEditStaff } from "../lib/editStaffSubmission";
 import { useWorkspaceDepartments } from "../hooks/useWorkspaceDepartments";
 import { useStaffPayRateField } from "../hooks/useStaffPayRateField";
 import { EditStaffSchedulingFields } from "./EditStaffSchedulingFields";
@@ -32,7 +32,9 @@ function valuesFromMember(member: StaffRow): EditStaffFormValues {
     departmentId: member.departmentId ?? "",
     contractType: member.contractType ?? "",
     hoursPerWeek: minutes != null ? String(minutes / 60) : "",
-    employmentStatus: member.employmentStatus ?? "active",
+    // An offboarded member has no editable status; the field is locked and the
+    // stored 'left' is never carried into the form or written back.
+    employmentStatus: member.employmentStatus === "inactive" ? "inactive" : "active",
   };
 }
 
@@ -42,8 +44,13 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
   const payRate = useStaffPayRateField(member.id, open);
   const [values, setValues] = React.useState<EditStaffFormValues>(() => valuesFromMember(member));
   const [fieldErrors, setFieldErrors] = React.useState<Partial<Record<FieldError, string>>>({});
-  const [formError, setFormError] = React.useState<string | null>(null);
+  const [detailsError, setDetailsError] = React.useState<string | null>(null);
+  const [payError, setPayError] = React.useState<string | null>(null);
+  // Sticky across retries: once the details have persisted, a retry for the pay
+  // rate must not re-send them, and must not re-describe them as unsaved.
+  const [detailsSaved, setDetailsSaved] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const offboarded = member.employmentStatus === "left";
 
   // Re-prefill whenever the dialog opens or the target member changes; clear
   // transient state when it closes.
@@ -51,7 +58,9 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
     if (open) {
       setValues(valuesFromMember(member));
       setFieldErrors({});
-      setFormError(null);
+      setDetailsError(null);
+      setPayError(null);
+      setDetailsSaved(false);
       setSubmitting(false);
     }
   }, [open, member]);
@@ -64,35 +73,41 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
     event.preventDefault();
     if (submitting) return;
 
-    setFormError(null);
-    const built = buildStaffMemberUpdate(values);
+    setDetailsError(null);
+    setPayError(null);
+    const built = buildStaffMemberUpdate(values, { offboarded });
     if (!built.ok) {
       setFieldErrors(built.errors);
       return;
     }
     setFieldErrors({});
     setSubmitting(true);
-    try {
-      const result = await updateStaffMemberFn({ data: { id: member.id, ...built.payload } });
-      if (!result.ok) {
-        setFormError(result.message);
-        return;
-      }
-      const rateResult = await payRate.submit();
-      if (!rateResult.ok) {
-        setFormError(rateResult.message);
-        return;
-      }
-      await queryClient.invalidateQueries({ queryKey: ["staff", "workspace-roster"] });
-      toast.success(`${built.payload.display_name} updated`, {
-        description: "Their scheduling details are up to date.",
+
+    const outcome = await submitEditStaff({
+      detailsAlreadySaved: detailsSaved,
+      saveDetails: () => updateStaffMemberFn({ data: { id: member.id, ...built.payload } }),
+      savePayRate: payRate.submit,
+    });
+    setSubmitting(false);
+    setDetailsError(outcome.detailsError);
+    setPayError(outcome.payError);
+
+    if (outcome.details === "failed") return;
+    if (outcome.details === "saved") setDetailsSaved(true);
+    await queryClient.invalidateQueries({ queryKey: ["staff", "workspace-roster"] });
+
+    // The details are on record either way. A pay-rate failure reports only
+    // itself, and leaves the dialog open so the rate alone can be retried.
+    if (outcome.pay === "failed") {
+      toast.warning(`${built.payload.display_name} updated`, {
+        description: "Their details saved. The hourly rate did not.",
       });
-      onOpenChange(false);
-    } catch {
-      setFormError(describeStaffWriteError(null));
-    } finally {
-      setSubmitting(false);
+      return;
     }
+    toast.success(`${built.payload.display_name} updated`, {
+      description: "Their scheduling details are up to date.",
+    });
+    onOpenChange(false);
   }
 
   return (
@@ -116,12 +131,30 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
       }
     >
       <form id="edit-staff-form" onSubmit={handleSubmit} className="space-y-5">
-        {formError && (
+        {detailsError && (
           <div
             role="alert"
             className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
           >
-            {formError}
+            {detailsError}
+          </div>
+        )}
+
+        {detailsSaved && payError && (
+          <div
+            role="status"
+            className="rounded-xl border border-success/30 bg-success-soft px-3 py-2 text-xs text-success"
+          >
+            Their details are saved. Only the hourly rate below still needs attention.
+          </div>
+        )}
+
+        {payError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
+          >
+            Hourly rate not saved. {payError}
           </div>
         )}
 
@@ -196,6 +229,7 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
           setField={setField}
           departments={departments}
           payRate={payRate}
+          offboarded={offboarded}
         />
       </form>
     </DialogShell>

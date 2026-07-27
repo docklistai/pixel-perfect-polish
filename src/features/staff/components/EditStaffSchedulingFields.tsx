@@ -13,12 +13,15 @@ export function EditStaffSchedulingFields({
   setField,
   departments,
   payRate,
+  offboarded = false,
 }: {
   values: EditStaffFormValues;
   fieldErrors: Partial<Record<FieldError, string>>;
   setField: <K extends keyof EditStaffFormValues>(key: K, value: EditStaffFormValues[K]) => void;
   departments: { id: string; name: string }[];
   payRate: StaffPayRateField;
+  /** True for a member already offboarded; their status is not editable here. */
+  offboarded?: boolean;
 }) {
   return (
     <FormSection title="Scheduling">
@@ -38,22 +41,37 @@ export function EditStaffSchedulingFields({
         </select>
       </FormRow>
 
-      <FormRow label="Status" htmlFor="edit-staff-status">
-        <select
-          id="edit-staff-status"
-          className="dl-select"
-          value={values.employmentStatus}
-          onChange={(e) =>
-            setField("employmentStatus", e.target.value as EditStaffFormValues["employmentStatus"])
-          }
+      {offboarded ? (
+        <FormRow label="Status">
+          <p className="text-xs text-muted-foreground">
+            Left — offboarded. Saving here updates their details only and leaves that unchanged.
+          </p>
+        </FormRow>
+      ) : (
+        <FormRow
+          label="Status"
+          htmlFor="edit-staff-status"
+          hint="Use Offboard to mark someone as left"
         >
-          {STAFF_EMPLOYMENT_STATUS_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </FormRow>
+          <select
+            id="edit-staff-status"
+            className="dl-select"
+            value={values.employmentStatus}
+            onChange={(e) =>
+              setField(
+                "employmentStatus",
+                e.target.value as EditStaffFormValues["employmentStatus"],
+              )
+            }
+          >
+            {STAFF_EMPLOYMENT_STATUS_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </FormRow>
+      )}
 
       <FormRow label="Contract type" htmlFor="edit-staff-contract" hint="Optional">
         <select

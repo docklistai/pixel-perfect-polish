@@ -13,13 +13,17 @@ describe("buildDashboardSetup", () => {
     expect(plan.show).toBe(true);
     expect(plan.mode).toBe("workspace");
     expect(plan.doneCount).toBe(0);
+    // The optional labour budget comes after building and publishing a rota:
+    // scheduling is what the workspace is for, and the budget is not required
+    // to do any of it.
     expect(plan.steps.map((step) => step.id)).toEqual([
       "basics",
       "team",
-      "budget",
       "rota",
       "publish",
+      "budget",
     ]);
+    expect(plan.steps.filter((step) => step.optional).map((step) => step.id)).toEqual(["budget"]);
     expect(plan.showAccessCodesHint).toBe(true);
   });
 

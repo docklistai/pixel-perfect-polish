@@ -11,7 +11,7 @@ import {
   toastResetColourDraft,
 } from "../lib/rotaActionToasts";
 import { buildRepeatShiftFeedback, type RepeatShiftResult } from "../lib/repeatShift";
-import { isShiftCopyAssignable } from "../lib/assignableStaff";
+import { getShiftDuplicateBlockedReason } from "../lib/duplicateShiftRules";
 import { executeDuplicateShiftCopy, executeRepeatShiftCopy } from "../lib/shiftCopyActions";
 import { applyLiveOpenShiftSuggestions } from "../lib/rotaSuggestions";
 import { buildFillSummaryMessage } from "../lib/fillSummary";
@@ -197,8 +197,8 @@ export function useRotaShiftActions(
     setFillSummary,
     block,
     blockDraftOnly,
-    canCopyShiftAssignment: (shift: Pick<DraftShift, "staffId">) =>
-      isShiftCopyAssignable(shift, rota.assignableStaff),
+    duplicateBlockedReason: (shift: Pick<DraftShift, "staffId" | "dayIndex">) =>
+      getShiftDuplicateBlockedReason(shift, rota.assignableStaff),
     handleApplySuggestions,
     handleCopyLastWeek,
     handleDuplicateShift,

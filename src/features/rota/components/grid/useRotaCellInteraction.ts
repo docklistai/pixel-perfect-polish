@@ -95,7 +95,7 @@ export function useRotaCellInteraction({
 
   const menuHandlers = React.useMemo<ShiftMenuHandlers>(
     () => ({
-      canCopyShiftAssignment: handlers.canCopyShiftAssignment,
+      duplicateBlockedReason: handlers.duplicateBlockedReason,
       onEditInline: startEditing,
       onOpen: handlers.onShiftOpen,
       onDuplicate: handlers.onShiftDuplicate,

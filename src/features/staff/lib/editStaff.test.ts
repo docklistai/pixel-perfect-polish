@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildStaffMemberUpdate, updateStaffSchema } from "./editStaff";
+import {
+  buildStaffMemberUpdate,
+  isEmploymentStatus,
+  isOffboardOnlyStatusWrite,
+  STAFF_EMPLOYMENT_STATUS_OPTIONS,
+  updateStaffSchema,
+} from "./editStaff";
 import { describeStaffWriteError } from "./addStaff";
 import type { EditStaffFormValues } from "./editStaff";
 
@@ -70,12 +76,28 @@ describe("buildStaffMemberUpdate", () => {
     });
   });
 
-  it("accepts each employment status: active / inactive / left", () => {
-    for (const status of ["active", "inactive", "left"] as const) {
+  it("accepts each editable employment status: active / inactive", () => {
+    for (const status of ["active", "inactive"] as const) {
       const result = buildStaffMemberUpdate(values({ employmentStatus: status }));
       expect(result.ok).toBe(true);
       if (result.ok) expect(result.payload.employment_status).toBe(status);
     }
+  });
+
+  it("never offers 'left' as an editable status", () => {
+    expect(STAFF_EMPLOYMENT_STATUS_OPTIONS.map((option) => option.value)).toEqual([
+      "active",
+      "inactive",
+    ]);
+    expect(isEmploymentStatus("left")).toBe(false);
+  });
+
+  it("omits employment_status entirely for an already-offboarded member", () => {
+    const result = buildStaffMemberUpdate(values({ employmentStatus: "active" }), {
+      offboarded: true,
+    });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect("employment_status" in result.payload).toBe(false);
   });
 
   it("propagates Add field errors (required name/role, bad email, bad hours)", () => {
@@ -104,6 +126,19 @@ describe("updateStaffSchema", () => {
     expect(() =>
       updateStaffSchema.parse({ ...VALID_INPUT, employment_status: "retired" }),
     ).toThrow();
+  });
+
+  it("rejects a generic write of employment_status='left'", () => {
+    expect(() => updateStaffSchema.parse({ ...VALID_INPUT, employment_status: "left" })).toThrow();
+    expect(isOffboardOnlyStatusWrite({ ...VALID_INPUT, employment_status: "left" })).toBe(true);
+    expect(isOffboardOnlyStatusWrite(VALID_INPUT)).toBe(false);
+    expect(isOffboardOnlyStatusWrite(null)).toBe(false);
+  });
+
+  it("accepts an update that omits employment_status (offboarded member)", () => {
+    const { employment_status: _omitted, ...withoutStatus } = VALID_INPUT;
+    const parsed = updateStaffSchema.parse(withoutStatus);
+    expect(parsed.employment_status).toBeUndefined();
   });
 });
 

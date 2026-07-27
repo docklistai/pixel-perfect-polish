@@ -22,7 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DEPT_COLOUR_PRESETS } from "../../lib/deptColours";
-import { COPY_ASSIGNMENT_BLOCKED_REASON } from "../../lib/assignableStaff";
 import type { DraftShift } from "../../types";
 import type { ShiftMenuHandlers } from "./types";
 
@@ -66,7 +65,10 @@ export function ShiftActionMenu({
 }) {
   const isOpen = shift.staffId === null;
   const hasOverride = Boolean(shift.colourOverride || shift.deptOverride);
-  const canDuplicate = handlers.canCopyShiftAssignment(shift);
+  // Null means the duplicate may proceed; anything else is the exact manager-
+  // facing reason it cannot, shown under the disabled item.
+  const duplicateBlockedReason = handlers.duplicateBlockedReason(shift);
+  const canDuplicate = duplicateBlockedReason === null;
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange}>
@@ -101,9 +103,9 @@ export function ShiftActionMenu({
           <Copy className="h-4 w-4" aria-hidden />
           <span className="flex min-w-0 flex-1 flex-col">
             <span>Duplicate to next day</span>
-            {!canDuplicate && (
+            {duplicateBlockedReason && (
               <span className="whitespace-normal text-[11px] text-muted-foreground">
-                {COPY_ASSIGNMENT_BLOCKED_REASON}
+                {duplicateBlockedReason}
               </span>
             )}
           </span>

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { nextProfileTabIndex } from "../../lib/profileTabKeyboard";
 
 export type ProfileTab =
   | "overview"
@@ -26,13 +27,27 @@ interface StaffProfileTabsProps {
 }
 
 export function StaffProfileTabs({ activeTab, onChange }: StaffProfileTabsProps) {
+  const activeIndex = Math.max(
+    0,
+    TABS.findIndex((tab) => tab.id === activeTab),
+  );
+
+  // Roving tabIndex: the tablist is one Tab stop, and Left/Right/Home/End move
+  // between the tabs inside it — the WAI-ARIA tabs pattern. Selection follows
+  // focus, so the moved-to tab is both focused and shown.
+  const moveTo = (index: number) => {
+    const tab = TABS[index]!;
+    onChange(tab.id);
+    document.getElementById(`staff-profile-tab-${tab.id}`)?.focus();
+  };
+
   return (
     <div
       role="tablist"
       aria-label="Staff profile sections"
       className="mb-6 flex overflow-x-auto border-b border-border"
     >
-      {TABS.map((tab) => (
+      {TABS.map((tab, index) => (
         <button
           key={tab.id}
           id={`staff-profile-tab-${tab.id}`}
@@ -40,12 +55,18 @@ export function StaffProfileTabs({ activeTab, onChange }: StaffProfileTabsProps)
           type="button"
           aria-controls={`staff-profile-panel-${tab.id}`}
           aria-selected={activeTab === tab.id}
+          tabIndex={index === activeIndex ? 0 : -1}
           onClick={() => onChange(tab.id)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               onChange(tab.id);
+              return;
             }
+            const next = nextProfileTabIndex(e.key, index, TABS.length);
+            if (next === null) return;
+            e.preventDefault();
+            moveTo(next);
           }}
           className={cn(
             "border-b-2 px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",

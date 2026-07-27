@@ -36,7 +36,8 @@ export type ShiftActionHandlers = {
   workspaceRoles?: readonly string[];
   /** The workspace's real active departments, for the change-department menu. */
   departments?: readonly WorkspaceDepartment[];
-  canCopyShiftAssignment: (shift: Pick<DraftShift, "staffId">) => boolean;
+  /** Why "Duplicate to next day" is refused for this shift, or null when allowed. */
+  duplicateBlockedReason: (shift: Pick<DraftShift, "staffId" | "dayIndex">) => string | null;
   onReadOnlyAttempt: () => void;
   onShiftOpen: (shiftId: ShiftId) => void;
   /** Duplicate the shift to the next day (prototype ⌘D behaviour). */
@@ -58,7 +59,7 @@ export type ShiftActionHandlers = {
 
 /** Per-shift menu callbacks passed from the grid cell into pills and the action menu. */
 export type ShiftMenuHandlers = {
-  canCopyShiftAssignment: ShiftActionHandlers["canCopyShiftAssignment"];
+  duplicateBlockedReason: ShiftActionHandlers["duplicateBlockedReason"];
   onEditInline: () => void;
   onOpen: (shiftId: ShiftId) => void;
   onDuplicate: (shiftId: ShiftId) => MaybePromise<void>;

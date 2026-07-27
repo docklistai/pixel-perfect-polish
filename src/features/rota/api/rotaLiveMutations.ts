@@ -3,7 +3,6 @@ import { z } from "zod";
 import { reportServerError, toSafeBusinessMessage } from "@/lib/safe-errors";
 import type { DraftShiftInput } from "../types";
 import {
-  addIsoDays,
   buildShiftDateTimeRange,
   dayIndexFromDates,
   formatTimeInTimezone,
@@ -24,10 +23,12 @@ import {
   buildShiftUpdate,
   insertShift,
   loadShiftContext,
-  markWeekDraft,
   resolveActiveStaffAssignment,
 } from "./rotaLiveShiftMapping";
-import { executeLiveRotaShiftDuplicate } from "./duplicateLiveRotaShift";
+import {
+  executeLiveRotaShiftDuplicate,
+  resolveDuplicateTargetDate,
+} from "./duplicateLiveRotaShift";
 
 export {
   copyPreviousLiveRotaWeekFn,
@@ -40,7 +41,6 @@ export const createLiveRotaShiftFn = createServerFn({ method: "POST" })
     const context = await getLiveContext(data, { createWeek: true });
     const week = await ensureWeek(context);
     const shiftId = await insertShift(context, week, data.shift);
-    await markWeekDraft(context.supabase, context.workspaceId, week.id);
     return { rotaWeekId: week.id, shiftId };
   });
 
@@ -58,7 +58,6 @@ export const updateLiveRotaShiftFn = createServerFn({ method: "POST" })
       .eq("workspace_id", workspaceId)
       .eq("id", shift.id);
     if (error) throw error;
-    await markWeekDraft(supabase, workspaceId, week.id);
     return { rotaWeekId: week.id, shiftId: shift.id };
   });
 
@@ -75,7 +74,6 @@ export const removeLiveRotaShiftFn = createServerFn({ method: "POST" })
       .eq("workspace_id", workspaceId)
       .eq("id", shift.id);
     if (error) throw error;
-    await markWeekDraft(supabase, workspaceId, week.id);
     return { rotaWeekId: week.id };
   });
 
@@ -95,7 +93,6 @@ export const markLiveRotaShiftOpenFn = createServerFn({ method: "POST" })
       .eq("workspace_id", workspaceId)
       .eq("id", shift.id);
     if (error) throw error;
-    await markWeekDraft(supabase, workspaceId, week.id);
     return { rotaWeekId: week.id, shiftId: shift.id };
   });
 
@@ -110,9 +107,7 @@ export const duplicateLiveRotaShiftFn = createServerFn({ method: "POST" })
       shift,
       validateAssignment: (staffId) => resolveActiveStaffAssignment(supabase, workspaceId, staffId),
       insertCopy: async (source) => {
-        const nextDay = addIsoDays(source.shift_date, 1);
-        const weekEnd = addIsoDays(week.week_start, 6);
-        const nextDate = nextDay > weekEnd ? weekEnd : nextDay;
+        const nextDate = resolveDuplicateTargetDate(source.shift_date, week.week_start);
         const range = buildShiftDateTimeRange({
           weekStart: week.week_start,
           dayIndex: dayIndexFromDates(week.week_start, nextDate),
@@ -141,7 +136,6 @@ export const duplicateLiveRotaShiftFn = createServerFn({ method: "POST" })
         return (inserted as { id: string }).id;
       },
     });
-    await markWeekDraft(supabase, workspaceId, week.id);
     return { rotaWeekId: week.id, shiftId };
   });
 
@@ -156,7 +150,6 @@ export const clearLiveRotaWeekFn = createServerFn({ method: "POST" })
       .eq("workspace_id", context.workspaceId)
       .eq("rota_week_id", week.id);
     if (error) throw error;
-    await markWeekDraft(context.supabase, context.workspaceId, week.id);
     return { rotaWeekId: week.id };
   });
 

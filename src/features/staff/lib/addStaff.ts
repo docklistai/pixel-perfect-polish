@@ -155,6 +155,7 @@ export function describeStaffWriteError(sqlState: string | null): string {
     case "42501": // insufficient_privilege — RLS denied
       return "You don't have permission to add staff to this workspace.";
     case "PGRST116": // no row returned — update target not in this workspace
+    case "P0002": // no_data_found — the update RPC's "not in this workspace"
       return "That staff member could not be found in this workspace.";
     default:
       return "We couldn't save this staff member. Please try again.";

@@ -40,20 +40,13 @@ export {
   resolveActiveStaffAssignment,
 } from "./departmentAuthority";
 
-export async function markWeekDraft(
-  supabase: SupabaseClient,
-  workspaceId: string,
-  rotaWeekId: string,
-): Promise<void> {
-  const { error } = await supabase
-    .from("rota_weeks")
-    .update({ status: "draft" })
-    .eq("workspace_id", workspaceId)
-    .eq("id", rotaWeekId)
-    .neq("status", "draft");
-  if (error) throw error;
-}
-
+/**
+ * Phase 44: the `shifts_90_mark_rota_week_draft` trigger performs the
+ * unpublished-change transition inside the same transaction as the shift write
+ * itself, so no caller issues a separate `rota_weeks` update any more. The
+ * former `markWeekDraft` helper is deliberately gone rather than left unused —
+ * a second request could only ever reintroduce the divergence it now prevents.
+ */
 export async function insertShift(
   context: LiveMutationContext,
   week: RotaWeekRow,
@@ -92,7 +85,6 @@ export async function insertShift(
     .select("id")
     .single();
   if (error) throw error;
-  await markWeekDraft(context.supabase, context.workspaceId, week.id);
   return (data as { id: string }).id;
 }
 

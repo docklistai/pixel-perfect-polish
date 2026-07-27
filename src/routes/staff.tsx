@@ -89,7 +89,10 @@ function StaffListPage() {
         title="Staff"
         subtitle="Manage your team, roles, and access in one place."
         actions={
-          <div className="flex items-center gap-2">
+          // Four actions do not fit one row on a 320px screen. Wrapping keeps
+          // Bulk add and Add staff on screen and reachable instead of pushing
+          // them off the right edge and scrolling the whole document.
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             <ActionButton
               variant="secondary"
               icon={Building2}

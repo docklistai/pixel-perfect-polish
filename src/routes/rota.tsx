@@ -168,7 +168,7 @@ function RotaPage() {
                   onClearFilters={rota.clearFilters}
                   readOnly={readOnly}
                   serverBacked={rota.source === "live"}
-                  canCopyShiftAssignment={actions.canCopyShiftAssignment}
+                  duplicateBlockedReason={actions.duplicateBlockedReason}
                   onReadOnlyAttempt={actions.block}
                   onShiftOpen={rota.setSelectedShiftId}
                   onShiftDuplicate={actions.handleDuplicateShift}

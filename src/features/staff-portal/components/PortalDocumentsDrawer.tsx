@@ -6,14 +6,15 @@ export function PortalDocumentsDrawer({ open, onClose }: { open: boolean; onClos
       open={open}
       onOpenChange={(o) => !o && onClose()}
       title="Documents"
-      description="Read-only document preview."
+      description="Not available during the pilot."
       width="lg"
     >
       <div className="space-y-4">
         <DashboardCard className="p-5 text-center">
-          <div className="text-sm font-semibold">No documents yet</div>
+          <div className="text-sm font-semibold">Documents aren't available yet</div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Your required documents and certificates will appear here once uploaded by a manager.
+            Document management is switched off for the pilot, so nothing can be uploaded, shared or
+            stored here. Ask your manager for anything you need in the meantime.
           </p>
         </DashboardCard>
       </div>

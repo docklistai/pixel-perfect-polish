@@ -38,6 +38,8 @@ export interface DashboardSetupStep {
   cta: string;
   intent?: IntentName;
   icon: LucideIcon;
+  /** Marked in the panel; nothing about scheduling depends on it. */
+  optional?: boolean;
 }
 
 export interface DashboardSetupPlan {
@@ -91,20 +93,6 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
       intent: "staff.add",
       icon: UserPlus,
     },
-    // Optional but recommended: only offered once we know its real state.
-    ...(hasLabourTargets === null
-      ? []
-      : [
-          {
-            id: "budget" as const,
-            title: "Set your labour budget",
-            description: "Weekly hours budget and cost assumptions power live budget warnings.",
-            done: hasLabourTargets,
-            route: "/settings" as const,
-            cta: "Set targets",
-            icon: PiggyBank,
-          },
-        ]),
     {
       id: "rota",
       title: "Build this week's rota",
@@ -125,6 +113,24 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
       intent: "rota.publish",
       icon: Send,
     },
+    // Deliberately last and marked optional. Nothing about building or
+    // publishing a rota needs a labour budget, and a manager who treated this
+    // as a required setup step was being sent to Settings before they had
+    // scheduled anyone. Only offered once we know its real state.
+    ...(hasLabourTargets === null
+      ? []
+      : [
+          {
+            id: "budget" as const,
+            title: "Set your labour budget",
+            description: "Weekly hours budget and cost assumptions power live budget warnings.",
+            done: hasLabourTargets,
+            route: "/settings" as const,
+            cta: "Set targets",
+            icon: PiggyBank,
+            optional: true,
+          },
+        ]),
   ];
 
   const mode: DashboardSetupPlan["mode"] = teamDone ? "week" : "workspace";

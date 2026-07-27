@@ -118,7 +118,7 @@ export function TimeTab() {
                 )}
                 <span className="text-[22px] font-bold leading-none">
                   {clock.isActionPending
-                    ? "Savingâ€¦"
+                    ? "Saving…"
                     : !displayShift
                       ? "No shift"
                       : clockedIn

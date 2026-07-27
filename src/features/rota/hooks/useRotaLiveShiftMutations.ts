@@ -86,7 +86,7 @@ export function useRotaLiveShiftMutations(
   const markShiftOpen = React.useCallback(
     async (shiftId: ShiftId) => {
       await runMutation("Shift not opened", async () =>
-        markLiveRotaShiftOpenFn({ data: { shiftId } }),
+        validateLiveRotaShiftResult(await markLiveRotaShiftOpenFn({ data: { shiftId } })),
       );
       toast.success("Shift opened", { description: "Saved to the live draft." });
     },
@@ -96,7 +96,7 @@ export function useRotaLiveShiftMutations(
   const duplicateShiftToNextDay = React.useCallback(
     async (shiftId: ShiftId): Promise<ShiftId | null> => {
       const result = await runMutation("Shift not duplicated", async () =>
-        duplicateLiveRotaShiftFn({ data: { shiftId } }),
+        validateLiveRotaShiftResult(await duplicateLiveRotaShiftFn({ data: { shiftId } })),
       );
       toast.success("Shift duplicated", { description: "Saved to the live draft." });
       return result.shiftId;

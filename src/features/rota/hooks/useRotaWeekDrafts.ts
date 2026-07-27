@@ -11,6 +11,7 @@ import {
   makeDraftShift,
 } from "../lib/draftRota";
 import { copyShiftToNextDay, duplicateDraftShiftAsOpen } from "../lib/draftActions";
+import { isLastRotaWeekDay } from "../lib/duplicateShiftRules";
 import { createWeekDraft, type WeekDraftState } from "../lib/weekDraftState";
 import { getWeekDateIsoLabels, getWeekLabel } from "../lib/weekHelpers";
 import { useRotaConfirmations } from "./useRotaConfirmations";
@@ -76,6 +77,9 @@ export function useRotaWeekDrafts() {
   const duplicateShiftToNextDay = (id: ShiftId): ShiftId | null => {
     const source = currentDraft.shifts.find((shift) => shift.id === id);
     if (!source) return null;
+    // Defence in depth — the action is already blocked before it gets here, but
+    // a final-day source has no next day and must never produce a same-day copy.
+    if (isLastRotaWeekDay(source.dayIndex)) return null;
     const copy = copyShiftToNextDay(source);
     mutateShifts((current) => [...current, copy]);
     return copy.id;

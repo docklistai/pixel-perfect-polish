@@ -35,8 +35,15 @@ values ('81000000-0000-4000-8000-000000004101', '85000000-0000-4000-8000-0000000
 
 -- A future week with a draft shift assigned to the waiter, published once
 -- while the waiter was still active.
+--
+-- Phase 44 note: every write to public.shifts now marks its published rota
+-- week draft in the same transaction, so this fixture seeds the week draft,
+-- writes the shift, and only then marks it published — the real order a
+-- manager reaches this state in. Each later assertion below that writes a
+-- shift and then tests the publish preflight re-publishes the week for the
+-- same reason.
 insert into public.rota_weeks (id, workspace_id, location_id, week_start, status)
-values ('86000000-0000-4000-8000-000000004101', '81000000-0000-4000-8000-000000004101', '82000000-0000-4000-8000-000000004101', (current_date + 7)::date, 'published');
+values ('86000000-0000-4000-8000-000000004101', '81000000-0000-4000-8000-000000004101', '82000000-0000-4000-8000-000000004101', (current_date + 7)::date, 'draft');
 
 insert into public.shifts (
   id, workspace_id, rota_week_id, location_id, department_id, staff_member_id,
@@ -44,6 +51,9 @@ insert into public.shifts (
 ) values
   ('87000000-0000-4000-8000-000000004101','81000000-0000-4000-8000-000000004101','86000000-0000-4000-8000-000000004101','82000000-0000-4000-8000-000000004101','83000000-0000-4000-8000-000000004101','85000000-0000-4000-8000-000000004101',
    (current_date + 8)::date, (current_date + 8)::timestamptz + interval '9 hours', (current_date + 8)::timestamptz + interval '17 hours', 30, 'Waiter', 'scheduled');
+
+update public.rota_weeks set status = 'published'
+where id = '86000000-0000-4000-8000-000000004101';
 
 insert into public.published_rota_snapshots (id, workspace_id, rota_week_id, version, published_at, published_by_membership_id)
 values ('88000000-0000-4000-8000-000000004101', '81000000-0000-4000-8000-000000004101', '86000000-0000-4000-8000-000000004101', 1, now(), '84000000-0000-4000-8000-000000004101');
@@ -236,6 +246,8 @@ begin
     (current_date + 9)::timestamptz + interval '17 hours',
     30, 'Host', 'scheduled'
   );
+  update public.rota_weeks set status = 'published'
+  where id = '86000000-0000-4000-8000-000000004101';
   begin
     insert into public.published_rota_snapshots (
       workspace_id, rota_week_id, version, published_at, published_by_membership_id
@@ -288,6 +300,8 @@ begin
     (current_date + 10)::timestamptz + interval '17 hours',
     30, 'Runner', 'scheduled'
   );
+  update public.rota_weeks set status = 'published'
+  where id = '86000000-0000-4000-8000-000000004101';
   begin
     insert into public.published_rota_snapshots (
       workspace_id, rota_week_id, version, published_at, published_by_membership_id
@@ -306,6 +320,8 @@ begin
   end;
   update public.shifts set staff_member_id = null, assignment_status = 'open'
   where id = '87000000-0000-4000-8000-000000004104';
+  update public.rota_weeks set status = 'published'
+  where id = '86000000-0000-4000-8000-000000004101';
 
   insert into public.published_rota_snapshots (id, workspace_id, rota_week_id, version, published_at, published_by_membership_id)
   values ('88000000-0000-4000-8000-000000004102', '81000000-0000-4000-8000-000000004101', '86000000-0000-4000-8000-000000004101', 2, now(), '84000000-0000-4000-8000-000000004101');

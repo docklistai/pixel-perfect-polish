@@ -1,5 +1,6 @@
 import type { DraftShift, DraftShiftInput, ShiftId, StaffMember } from "../types";
 import { getShiftCopyBlockedReason } from "./assignableStaff";
+import { getShiftDuplicateBlockedReason } from "./duplicateShiftRules";
 import { executeRepeatShiftPlan, planRepeatShift, type RepeatShiftResult } from "./repeatShift";
 
 type DuplicateShiftCopyResult =
@@ -15,7 +16,9 @@ export async function executeDuplicateShiftCopy(
   assignableStaff: StaffMember[],
   duplicate: (shiftId: ShiftId) => ShiftId | null | Promise<ShiftId | null>,
 ): Promise<DuplicateShiftCopyResult> {
-  const blockedReason = getShiftCopyBlockedReason(source, assignableStaff);
+  // The single gate for both the draft store and the live rota, so neither can
+  // duplicate a final-day shift onto itself and report it as the next day.
+  const blockedReason = getShiftDuplicateBlockedReason(source, assignableStaff);
   if (blockedReason) return { status: "blocked", reason: blockedReason };
   return { status: "completed", shiftId: await duplicate(source!.id) };
 }

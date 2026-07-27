@@ -1,10 +1,11 @@
+import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { Download, Info, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ActionButton, DialogShell } from "@/components/dl";
-import { exportApprovedHoursFn } from "../api/timeLiveData";
-import { approvedRowsForExport } from "../lib/timeExport";
+import { downloadApprovedHoursFn, previewApprovedHoursFn } from "../api/timeLiveData";
+import { approvedRowsForExport, buildApprovedHoursCsv } from "../lib/timeExport";
 import { periodFilename, type ReviewPeriod } from "../lib/reviewPeriod";
 import type { StoredTimesheetRow } from "../types";
 
@@ -28,10 +29,6 @@ interface PreviewRow {
 
 const rootRouteApi = getRouteApi("__root__");
 
-function csvCell(value: string): string {
-  return `"${value.replaceAll('"', '""')}"`;
-}
-
 function triggerCsvDownload(content: string, filename: string): void {
   const url = URL.createObjectURL(new Blob([content], { type: "text/csv;charset=utf-8" }));
   const link = document.createElement("a");
@@ -54,6 +51,8 @@ export function TimeExportDialog({
   const { auth } = rootRouteApi.useRouteContext();
   const principalId = auth.status === "signed-out" ? null : auth.userId;
   const workspaceId = auth.status === "member" ? auth.workspaceId : null;
+  // Preview only — this writes no audit event, so opening the dialog, letting
+  // it refetch, or cancelling records nothing.
   const livePreview = useQuery({
     queryKey: [
       "approved-hours-export-preview",
@@ -64,7 +63,7 @@ export function TimeExportDialog({
       departmentId,
     ],
     queryFn: () =>
-      exportApprovedHoursFn({
+      previewApprovedHoursFn({
         data: {
           startDate: period.startIso,
           endDate: period.endIso,
@@ -74,6 +73,12 @@ export function TimeExportDialog({
     enabled: open && isLive && workspaceId !== null,
     staleTime: 0,
   });
+  const [downloading, setDownloading] = React.useState(false);
+  const [staleNotice, setStaleNotice] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (open) setStaleNotice(null);
+  }, [open, period.startIso, period.endIso, departmentId]);
 
   const demoPreview: PreviewRow[] = approvedRowsForExport(rows).map((row) => ({
     id: row.id,
@@ -99,24 +104,72 @@ export function TimeExportDialog({
   const previewPending = isLive && livePreview.isPending;
   const nothingApproved = !previewPending && !previewError && previewRows.length === 0;
 
-  const handleDownload = () => {
+  const finishDownload = (rows: PreviewRow[]) => {
+    triggerCsvDownload(buildApprovedHoursCsv(rows), periodFilename(period));
+    onOpenChange(false);
+    toast.success("CSV ready", {
+      description: `${rows.length} approved staff exported for ${period.label}.`,
+    });
+  };
+
+  const handleDownload = async () => {
+    // Re-entry guard: the audit records one export per confirmed download, and
+    // a second click while the first is in flight is not a second export.
+    if (downloading) return;
     if (previewRows.length === 0) {
       toast.info("Nothing to export", {
         description: `No approved hours in ${period.label} yet.`,
       });
       return;
     }
-    const content = [
-      ["Employee ID", "Name", "Approved Hours", "Role", "Department"],
-      ...previewRows.map((row) => [row.id, row.name, row.approvedHours, row.role, row.department]),
-    ]
-      .map((line) => line.map(csvCell).join(","))
-      .join("\n");
-    triggerCsvDownload(content, periodFilename(period));
-    onOpenChange(false);
-    toast.success("CSV ready", {
-      description: `${previewRows.length} approved staff exported for ${period.label}.`,
-    });
+    if (!isLive) {
+      finishDownload(previewRows);
+      return;
+    }
+    if (!liveResult?.ok) return;
+
+    setDownloading(true);
+    setStaleNotice(null);
+    try {
+      // This is the only call that writes an audit event, and only because the
+      // manager pressed Download on the figures identified by this signature.
+      const result = await downloadApprovedHoursFn({
+        data: {
+          startDate: period.startIso,
+          endDate: period.endIso,
+          ...(departmentId ? { departmentId } : {}),
+          expectedSignature: liveResult.previewSignature,
+        },
+      });
+      if (!result.ok) {
+        if (result.staleSignature) {
+          // Nothing audited, nothing downloaded. Show the refreshed figures and
+          // make the manager confirm the export they can now actually see.
+          setStaleNotice(result.message);
+          await livePreview.refetch();
+          return;
+        }
+        toast.error("Export failed", { description: result.message });
+        return;
+      }
+      finishDownload(
+        result.rows.map((row) => ({
+          id: row.staffMemberId,
+          name: row.displayName,
+          approvedHours: row.approvedHours.toFixed(2),
+          role: row.roleName,
+          department: row.departmentName,
+        })),
+      );
+    } catch {
+      // A transport failure resolves nothing, so without this the button would
+      // simply re-enable and the manager would be left guessing.
+      toast.error("Export failed", {
+        description: "The download could not be completed. Nothing was exported — try again.",
+      });
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -135,9 +188,14 @@ export function TimeExportDialog({
           <ActionButton
             size="sm"
             onClick={handleDownload}
-            disabled={previewPending || Boolean(previewError) || nothingApproved}
+            disabled={previewPending || Boolean(previewError) || nothingApproved || downloading}
           >
-            <Download className="mr-1.5 h-3.5 w-3.5" /> Download CSV
+            {downloading ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" aria-hidden />
+            ) : (
+              <Download className="mr-1.5 h-3.5 w-3.5" aria-hidden />
+            )}
+            {downloading ? "Preparing…" : "Download CSV"}
           </ActionButton>
         </>
       }
@@ -162,6 +220,14 @@ export function TimeExportDialog({
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Calculating approved hours…
         </div>
       )}
+      {staleNotice && (
+        <div
+          role="alert"
+          className="mb-4 rounded-xl border border-warning/40 bg-warning-soft p-3 text-xs text-warning"
+        >
+          {staleNotice}
+        </div>
+      )}
       {previewError && (
         <div
           role="alert"
@@ -179,7 +245,7 @@ export function TimeExportDialog({
             <table className="w-full border-collapse text-left text-xs">
               <thead>
                 <tr className="border-b border-border bg-muted/20 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  <th className="px-3 py-2">Employee ID</th>
+                  <th className="px-3 py-2">Staff record ID</th>
                   <th className="px-3 py-2">Name</th>
                   <th className="px-3 py-2">Approved hours</th>
                   <th className="px-3 py-2">Department</th>
@@ -208,8 +274,9 @@ export function TimeExportDialog({
       <div className="mt-4 flex gap-2.5 rounded-xl bg-muted/10 p-2.5 text-[11px] text-muted-foreground">
         <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <span>
-          This preview is the exact data used for the download. Only approved entries with complete
-          clock times are included; this is not a payroll export.
+          This preview is the exact data used for the download, and nothing is recorded until you
+          press Download. Only approved entries with complete clock times are included; this is not
+          a payroll export.
         </span>
       </div>
     </DialogShell>

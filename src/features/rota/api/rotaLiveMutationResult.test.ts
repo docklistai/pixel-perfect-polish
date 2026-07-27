@@ -42,4 +42,33 @@ describe("live rota mutation result validation", () => {
       expect(() => validateLiveRotaRemoveResult(value)).toThrow(/invalid mutation result/i);
     },
   );
+
+  /**
+   * Mark open and Duplicate previously used their resolved payload unchecked:
+   * mark open toasted success for any resolved value, and duplicate returned
+   * `result.shiftId` off an unvalidated object. Both now go through the same
+   * validator, so these are the exact shapes that must fail closed.
+   */
+  describe("mark open and duplicate payloads", () => {
+    it.each([
+      ["raw JSON 500 body", { error: "Database write failed" }],
+      ["error-shaped body", { message: "Internal Server Error" }],
+      ["empty object", {}],
+      ["null", null],
+      ["undefined", undefined],
+      ["missing shiftId (remove-shaped)", { rotaWeekId: weekId }],
+      ["null shiftId", { rotaWeekId: weekId, shiftId: null }],
+      ["empty-string shiftId", { rotaWeekId: weekId, shiftId: "" }],
+      ["non-uuid shiftId", { rotaWeekId: weekId, shiftId: "copy-1" }],
+    ])("fails closed for a %s", (_name, value) => {
+      expect(() => validateLiveRotaShiftResult(value)).toThrow(/invalid mutation result/i);
+    });
+
+    it("accepts the genuine mark-open / duplicate envelope", () => {
+      expect(validateLiveRotaShiftResult({ rotaWeekId: weekId, shiftId })).toEqual({
+        rotaWeekId: weekId,
+        shiftId,
+      });
+    });
+  });
 });

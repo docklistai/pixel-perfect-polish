@@ -62,11 +62,16 @@ export function DashboardSetupPanel({ plan }: Props) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div
-                    className={`text-sm font-medium leading-snug ${
+                    className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium leading-snug ${
                       step.done ? "text-muted-foreground line-through decoration-border" : ""
                     }`}
                   >
                     {step.title}
+                    {step.optional && (
+                      <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground no-underline">
+                        Optional
+                      </span>
+                    )}
                   </div>
                   {!step.done && (
                     <div className="text-xs text-muted-foreground">{step.description}</div>
