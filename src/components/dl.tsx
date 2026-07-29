@@ -32,6 +32,7 @@ import {
 import { Sidebar } from "./layout/Sidebar";
 import { Topbar } from "./layout/Topbar";
 import { cn } from "@/lib/utils";
+import { runDialogCloseFocus } from "@/lib/dialogFocusReturn";
 
 /* ------------------------------------------------------------------ */
 /* Tokens                                                              */
@@ -796,6 +797,18 @@ export interface DrawerShellProps {
   side?: "right" | "left";
   width?: "sm" | "md" | "lg" | "xl";
   children: React.ReactNode;
+  /**
+   * Forwarded to the Radix Sheet content, and called *before* the shared focus
+   * restoration below. Calling `preventDefault()` here takes ownership of where
+   * focus lands and switches the shared restoration off for that close.
+   */
+  onCloseAutoFocus?: (event: Event) => void;
+  /**
+   * Forwarded to the Radix Sheet content, and called *after* the opener has been
+   * recorded — so a consumer may move initial focus without destroying the
+   * record of who opened the drawer.
+   */
+  onOpenAutoFocus?: (event: Event) => void;
 }
 
 const drawerWidths: Record<NonNullable<DrawerShellProps["width"]>, string> = {
@@ -806,6 +819,14 @@ const drawerWidths: Record<NonNullable<DrawerShellProps["width"]>, string> = {
 };
 
 /** Right-side drawer using prototype `.drawer` chrome wrapped over Radix Sheet. */
+/**
+ * Side drawer over the Radix Sheet primitive — which is `@radix-ui/react-dialog`,
+ * the same primitive `DialogShell` uses, so it carries the same focus contract
+ * and the same defect without it: rendered as a sibling of its opener rather
+ * than wrapped in a trigger, Radix has nothing to restore to and drops focus on
+ * `<body>`. Capture happens in `onOpenAutoFocus` rather than an effect, for the
+ * same reason as `DialogShell`.
+ */
 export function DrawerShell({
   open,
   onOpenChange,
@@ -816,12 +837,27 @@ export function DrawerShell({
   side = "right",
   width = "md",
   children,
+  onCloseAutoFocus,
+  onOpenAutoFocus,
 }: DrawerShellProps) {
+  const openerRef = React.useRef<Element | null>(null);
+
+  function handleOpenAutoFocus(event: Event) {
+    openerRef.current = document.activeElement;
+    onOpenAutoFocus?.(event);
+  }
+
+  function handleCloseAutoFocus(event: Event) {
+    runDialogCloseFocus(openerRef, event, onCloseAutoFocus);
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={side}
         hideCloseButton
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
         className={cn(
           "drawer !flex w-full flex-col gap-0 overflow-hidden p-0 !rounded-none !border-l",
           drawerWidths[width],
@@ -872,6 +908,18 @@ export interface DialogShellProps {
   footer?: React.ReactNode;
   size?: "sm" | "md" | "lg";
   children?: React.ReactNode;
+  /**
+   * Forwarded to Radix `DialogContent`, and called *before* the shared focus
+   * restoration below. Calling `preventDefault()` here takes ownership of where
+   * focus lands and switches the shared restoration off for that close.
+   */
+  onCloseAutoFocus?: (event: Event) => void;
+  /**
+   * Forwarded to Radix `DialogContent`, and called *after* the opener has been
+   * recorded — so a consumer may move initial focus without destroying the
+   * record of who opened the dialog.
+   */
+  onOpenAutoFocus?: (event: Event) => void;
 }
 
 const dialogSizes: Record<NonNullable<DialogShellProps["size"]>, string> = {
@@ -880,7 +928,21 @@ const dialogSizes: Record<NonNullable<DialogShellProps["size"]>, string> = {
   lg: "sm:!max-w-[560px]",
 };
 
-/** Centred modal dialog using prototype `.modal` chrome wrapped over Radix Dialog. */
+/**
+ * Centred modal dialog using prototype `.modal` chrome wrapped over Radix Dialog.
+ *
+ * Focus restoration: these dialogs are rendered as siblings of their openers
+ * rather than wrapped in a `DialogTrigger`, so Radix has no trigger to hand
+ * focus back to and drops it on `<body>` — leaving a keyboard user at the top of
+ * the document, and, for a dialog opened from inside a drawer, outside a surface
+ * that is still open. Recording the opener here fixes every consumer at once and
+ * makes new dialogs correct by default.
+ *
+ * Capture happens in `onOpenAutoFocus`, which Radix fires while focus is still
+ * on the opener, rather than in an effect keyed on `open` — effect ordering
+ * against Radix's own focus move is not guaranteed, and this callback is the
+ * exact mirror of the restore below.
+ */
 export function DialogShell({
   open,
   onOpenChange,
@@ -891,10 +953,27 @@ export function DialogShell({
   footer,
   size = "md",
   children,
+  onCloseAutoFocus,
+  onOpenAutoFocus,
 }: DialogShellProps) {
+  const openerRef = React.useRef<Element | null>(null);
+
+  function handleOpenAutoFocus(event: Event) {
+    // Before the consumer runs: it may move focus itself, and that must not
+    // destroy the record of who opened the dialog.
+    openerRef.current = document.activeElement;
+    onOpenAutoFocus?.(event);
+  }
+
+  function handleCloseAutoFocus(event: Event) {
+    runDialogCloseFocus(openerRef, event, onCloseAutoFocus);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
         className={cn(
           "modal flex max-h-[calc(100dvh-32px)] flex-col p-0 !overflow-hidden !border !rounded-[16px]",
           dialogSizes[size],

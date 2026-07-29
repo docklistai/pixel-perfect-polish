@@ -10,6 +10,7 @@ import {
 import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalClock } from "../hooks/usePortalClock";
 import { formatPortalElapsed } from "../lib/portalElapsed";
+import { nextPublishedShiftEmptyText } from "../lib/portalShiftCopy";
 import { PortalClockFeedback } from "./PortalClockFeedback";
 import { PortalRotaReadState } from "./PortalRotaReadState";
 
@@ -18,7 +19,7 @@ export function TimeTab() {
   const { clockedIn, onBreak, startedAtMs, sinceLabel, entries, clockIn, clockOut, toggleBreak } =
     clock;
   const rota = usePortalRota();
-  const { nextShift, activeShift } = rota;
+  const { nextShift, activeShift, hasPublished } = rota;
   const [now, setNow] = React.useState(() => Date.now());
 
   React.useEffect(() => {
@@ -83,7 +84,12 @@ export function TimeTab() {
             </div>
           </>
         ) : (
-          <div className="mt-2 text-sm text-muted-foreground">No published rota yet.</div>
+          // Shares the Home/Shifts helper so this card can never be the one
+          // surface that tells a member nothing was published when a rota
+          // actually was — they simply have no upcoming shift in it.
+          <div className="mt-2 text-sm text-muted-foreground">
+            {nextPublishedShiftEmptyText(hasPublished)}
+          </div>
         )}
       </DashboardCard>
 

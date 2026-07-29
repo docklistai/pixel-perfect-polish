@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { runDialogCloseFocus, shouldRestoreDialogFocus } from "@/lib/dialogFocusReturn";
 import {
   offboardStaffMemberFn,
   type OffboardFutureAssignment,
@@ -46,11 +47,19 @@ export function OffboardStaffDialog({
   onOpenChange,
   staffMemberId,
   staffName,
+  fallbackFocusRef,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   staffMemberId: string;
   staffName: string;
+  /**
+   * Where focus goes when the offboard succeeded. Success flips the member to
+   * `left`, which unmounts the Offboard button that opened this dialog, so
+   * there is no opener left to return to. The parent passes its adjacent
+   * `Edit details` button rather than this component hunting for one.
+   */
+  fallbackFocusRef?: React.RefObject<HTMLElement | null>;
 }) {
   const queryClient = useQueryClient();
   const [reason, setReason] = React.useState("");
@@ -58,6 +67,35 @@ export function OffboardStaffDialog({
     OffboardStaffMemberResult,
     { ok: true }
   > | null>(null);
+
+  // Which element focus returns to on close.
+  //
+  // `outcome` cannot answer this: closing the success step calls `close(false)`,
+  // which resets `outcome` to null, and Radix only fires `onCloseAutoFocus`
+  // later, on unmount after the close animation — by which time the success
+  // signal would be gone. A ref survives that reset.
+  const openerRef = React.useRef<Element | null>(null);
+  const succeededRef = React.useRef(false);
+
+  function handleOpenAutoFocus() {
+    openerRef.current = document.activeElement;
+    succeededRef.current = false;
+  }
+
+  function handleCloseAutoFocus(event: Event) {
+    runDialogCloseFocus(openerRef, event, (closeEvent) => {
+      // Ordinary closes (Escape, Cancel, Escape after a failure) leave the
+      // Offboard button mounted, so the shared restoration handles them.
+      if (!succeededRef.current) return;
+      // A success unmounted the opener. Use the destination the parent gave us,
+      // and only if it is still a sane thing to focus — otherwise fall through
+      // and let the shared helper, then Radix, decide.
+      const fallback = fallbackFocusRef?.current;
+      if (!shouldRestoreDialogFocus(fallback)) return;
+      closeEvent.preventDefault();
+      fallback.focus();
+    });
+  }
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -68,6 +106,7 @@ export function OffboardStaffDialog({
       return result;
     },
     onSuccess: (result) => {
+      succeededRef.current = true;
       setOutcome(result);
       void queryClient.invalidateQueries({ queryKey: ["staff"] });
       toast.success(
@@ -101,7 +140,11 @@ export function OffboardStaffDialog({
 
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="max-w-md">
+      <DialogContent
+        className="max-w-md"
+        onOpenAutoFocus={handleOpenAutoFocus}
+        onCloseAutoFocus={handleCloseAutoFocus}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserX className="h-4 w-4 text-danger" aria-hidden />

@@ -47,6 +47,9 @@ export function AddStaffDialog({
   const [formError, setFormError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
+  // Focus returns to whichever opener was used — the page header button or the
+  // staff-table empty-state button — via the shared DialogShell behaviour.
+
   // Reset to a clean form whenever the dialog closes.
   React.useEffect(() => {
     if (!open) {

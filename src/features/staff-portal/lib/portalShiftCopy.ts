@@ -27,3 +27,16 @@ export function noUpcomingShiftsCopy(hasPublishedRota: boolean): PortalEmptyCopy
     description: "Once your manager publishes the rota, your next shift will appear here.",
   };
 }
+
+/**
+ * Empty text for the Time tab's "Next published shift" card.
+ *
+ * That card hard-coded "No published rota yet." regardless of state, so a
+ * member whose rota *was* published but whose shifts had all passed was told
+ * their manager had published nothing — while Home and Shifts, on the same
+ * data, correctly said they had no upcoming shifts. Routing this surface
+ * through the shared decision keeps the three consistent by construction.
+ */
+export function nextPublishedShiftEmptyText(hasPublishedRota: boolean): string {
+  return noUpcomingShiftsCopy(hasPublishedRota).title;
+}

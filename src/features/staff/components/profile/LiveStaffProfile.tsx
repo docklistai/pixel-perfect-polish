@@ -123,6 +123,11 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
   const [activeTab, setActiveTab] = React.useState<ProfileTab>(initialTab);
   const [editOpen, setEditOpen] = React.useState(false);
   const [offboardOpen, setOffboardOpen] = React.useState(false);
+  // A successful offboard flips this member to `left`, which unmounts the
+  // Offboard button below — so the dialog cannot hand focus back to the control
+  // that opened it. This button is the adjacent action and has no status
+  // condition, making it the nearest still-valid destination.
+  const editDetailsRef = React.useRef<HTMLButtonElement | null>(null);
   const firstName = member.n.split(" ")[0] || member.n;
   const ops = useLiveStaffProfileOps(member.id);
 
@@ -194,6 +199,7 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
                 </button>
               )}
               <button
+                ref={editDetailsRef}
                 type="button"
                 onClick={() => setEditOpen(true)}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold transition-colors hover:bg-muted/50"
@@ -212,6 +218,7 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
         onOpenChange={setOffboardOpen}
         staffMemberId={member.id}
         staffName={member.n}
+        fallbackFocusRef={editDetailsRef}
       />
 
       <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} />
