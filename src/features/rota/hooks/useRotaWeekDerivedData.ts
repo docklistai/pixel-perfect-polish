@@ -45,7 +45,7 @@ export function useRotaWeekDerivedData({
   const displayShifts = React.useMemo(
     () =>
       withApprovedLeaveConflictStatus(
-        withLocalConflictStatus(sourceShifts),
+        withLocalConflictStatus(sourceShifts, dayIsoDates),
         leaveRequests,
         dayIsoDates,
       ),
@@ -81,7 +81,7 @@ export function useRotaWeekDerivedData({
     dayLabels,
   );
   const conflictSummaries: ConflictSummary[] = [
-    ...buildLocalConflictSummaries(displayShifts, roster, dayLabels),
+    ...buildLocalConflictSummaries(displayShifts, roster, dayLabels, dayIsoDates),
     ...approvedLeaveConflictSummaries,
   ];
 

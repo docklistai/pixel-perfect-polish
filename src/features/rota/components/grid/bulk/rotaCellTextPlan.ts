@@ -10,7 +10,8 @@ export type RotaCellTextPlan =
   | { ok: true; plan: RotaBulkCellPlan }
   | { ok: false; blocker: RotaBulkBlocker };
 
-function leaveWarning(target: RotaBulkTarget): string | null {
+/** Shared with the structured planner so both surfaces warn identically. */
+export function targetLeaveWarning(target: RotaBulkTarget): string | null {
   if (target.openRow) return null;
   if (target.cell.leaveState === "approved") return "has approved leave — this will be a conflict";
   if (target.cell.leaveState === "pending") return "has a pending leave request";
@@ -106,13 +107,17 @@ export function planRotaCellFromText({
       return refuse(`The pasted role cannot be stored: ${SLASH_ROLE_MESSAGE}`);
     }
     const source = existing[index];
-    const patch = buildShiftPatch({
+    const built = buildShiftPatch({
       parsed: shift,
       source,
       staffId: target.staffId,
       staffRole: target.staffRole,
       openRow: target.openRow,
     });
+    // A role that cannot be resolved is a refusal, not a hardcoded default. In
+    // bulk it becomes a blocker the manager reads before confirming anything.
+    if (!built.ok) return refuse(built.message);
+    const patch = built.patch;
     if (source) ops.push({ kind: "update", shiftId: source.id, patch });
     else ops.push({ kind: "create", input: shiftPatchToInput(patch, target.key.day) });
 
@@ -128,7 +133,7 @@ export function planRotaCellFromText({
     ops.push({ kind: "remove", shiftId: shift.id });
   }
 
-  const constraint = ops.some((op) => op.kind !== "remove") ? leaveWarning(target) : null;
+  const constraint = ops.some((op) => op.kind !== "remove") ? targetLeaveWarning(target) : null;
   if (constraint) warnings.push(constraint);
 
   return {

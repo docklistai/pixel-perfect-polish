@@ -25,6 +25,33 @@ describe("parseBulkStaff — valid rows", () => {
     });
   });
 
+  it("keeps a comma inside a quoted name instead of splitting on it", () => {
+    // The quote-blind split read this as the name `"Smith` and the role ` John"`,
+    // silently creating a staff member nobody asked for.
+    const text = '"Smith, John", Waiter, Kitchen';
+    const result = parseBulkStaff(text, DEPARTMENTS);
+
+    expect(result.validCount).toBe(1);
+    expect(result.rows[0]!.payload?.display_name).toBe("Smith, John");
+    expect(result.rows[0]!.payload?.role_name).toBe("Waiter");
+    expect(result.rows[0]!.payload?.department_id).toBe("dept-kitchen");
+  });
+
+  it("picks one delimiter for the whole paste, not per line", () => {
+    // A stray tab in one CSV row must not make that row split differently.
+    const text = ["Ava Bennett, Waiter, Kitchen", "Ben\tCarter, Runner, Kitchen"].join("\n");
+    const result = parseBulkStaff(text, DEPARTMENTS);
+
+    expect(result.rows).toHaveLength(2);
+    expect(result.rows[1]!.payload?.display_name).toBe("Ben\tCarter");
+  });
+
+  it("reports malformed quoting instead of silently dropping the paste", () => {
+    const result = parseBulkStaff('"Smith, John, Waiter', DEPARTMENTS);
+    expect(result.readError).toMatch(/quote/i);
+    expect(result.rows).toEqual([]);
+  });
+
   it("accepts tab-separated rows and skips a header line", () => {
     const text = ["Name\tRole\tDepartment", "Ben Carter\tHead Chef\tKitchen"].join("\n");
     const result = parseBulkStaff(text, DEPARTMENTS);

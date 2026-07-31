@@ -3,7 +3,7 @@ import type { RotaGridCell as RotaGridCellData } from "../../types";
 import type { ShiftActionHandlers } from "./types";
 import { parseInlineCellInput, type InlineCellParseOptions } from "./inlineCellParsing";
 import { refuseAmbiguousClear, refuseSplitMismatch } from "./inlineCommitRules";
-import { buildShiftPatch, shiftPatchToInput } from "./inlineShiftPatch";
+import { buildShiftPatch, shiftPatchToInput, type InlineShiftPatch } from "./inlineShiftPatch";
 
 type CommitInlineCellEditInput = {
   value: string;
@@ -85,18 +85,33 @@ export async function commitInlineCellEdit({
     return;
   }
 
-  if (cell.shifts.length > 0) {
-    const sorted = [...cell.shifts].sort((a, b) => a.start.localeCompare(b.start));
-    for (const [index, shift] of sorted.entries()) {
-      const parsed = command.shifts[index];
-      if (!parsed) continue;
-      await handlers.onShiftUpdate?.(
-        shift.id,
-        buildShiftPatch({ parsed, source: shift, staffId, staffRole, openRow }),
-      );
+  // Every patch is built before anything is written, so a cell that cannot supply
+  // a role for one of its segments refuses as a whole rather than half-saving.
+  const built: { source?: RotaGridCellData["shifts"][number]; patch: InlineShiftPatch }[] = [];
+  const sorted = [...cell.shifts].sort((a, b) => a.start.localeCompare(b.start));
+  for (const [index, parsed] of command.shifts.entries()) {
+    const source = sorted[index];
+    const result = buildShiftPatch({
+      parsed,
+      source: source ?? (cell.shifts.length > 0 ? firstShift : undefined),
+      staffId,
+      staffRole,
+      openRow,
+    });
+    if (!result.ok) {
+      toast.warning("Nothing saved", { description: result.message });
+      return;
     }
-    for (const parsed of command.shifts.slice(cell.shifts.length)) {
-      const patch = buildShiftPatch({ parsed, source: firstShift, staffId, staffRole, openRow });
+    built.push({ source, patch: result.patch });
+  }
+
+  if (cell.shifts.length > 0) {
+    for (const { source, patch } of built) {
+      if (!source) continue;
+      await handlers.onShiftUpdate?.(source.id, patch);
+    }
+    for (const { source, patch } of built) {
+      if (source) continue;
       await handlers.onShiftAdd?.(shiftPatchToInput(patch, dayIndex));
     }
     if (!handlers.serverBacked) {
@@ -107,8 +122,7 @@ export async function commitInlineCellEdit({
     return;
   }
 
-  for (const parsed of command.shifts) {
-    const patch = buildShiftPatch({ parsed, staffId, staffRole, openRow });
+  for (const { patch } of built) {
     await handlers.onShiftAdd?.(shiftPatchToInput(patch, dayIndex));
   }
   if (!handlers.serverBacked) {

@@ -92,9 +92,9 @@ export function useRotaBulkOperations({
     (direction: "down" | "right") => {
       if (!canOperate || !guard()) return;
       planRectRef.current = targets.rect;
-      openPlan(buildRotaFillPlan({ rows: targets.rows, direction, workspaceRoles }));
+      openPlan(buildRotaFillPlan({ rows: targets.rows, direction }));
     },
-    [canOperate, guard, openPlan, targets, workspaceRoles],
+    [canOperate, guard, openPlan, targets],
   );
 
   const requestPaste = React.useCallback(

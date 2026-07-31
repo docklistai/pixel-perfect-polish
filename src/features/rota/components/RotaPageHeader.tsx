@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CopyPlus, Eraser, LayoutTemplate, Printer, Send } from "lucide-react";
+import { CopyPlus, Eraser, FileUp, LayoutTemplate, Printer, Send } from "lucide-react";
 import { ActionButton } from "@/components/dl";
 import { RowActionMenu } from "@/components/RowActionMenu";
 
@@ -21,6 +21,7 @@ export function RotaPageHeader({
   onClearWeek,
   onOpenTemplates,
   onCopyDay,
+  onImportSchedule,
   onPublish,
 }: {
   weekLabel: string;
@@ -38,6 +39,7 @@ export function RotaPageHeader({
   onClearWeek: () => void;
   onOpenTemplates: () => void;
   onCopyDay: () => void;
+  onImportSchedule: () => void;
   onPublish: () => void;
 }) {
   const showLocationSelector = locations.length > 1 && Boolean(onLocationChange);
@@ -104,6 +106,7 @@ export function RotaPageHeader({
             { kind: "label", text: "Planning" },
             { label: "Copy or clear a day", icon: CopyPlus, onSelect: onCopyDay },
             { label: "Rota templates", icon: LayoutTemplate, onSelect: onOpenTemplates },
+            { label: "Import a schedule", icon: FileUp, onSelect: onImportSchedule },
             { label: "Print rota", icon: Printer, onSelect: onPrintRota },
 
             { kind: "separator" },

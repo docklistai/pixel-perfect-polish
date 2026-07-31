@@ -1,8 +1,6 @@
-import { serialiseRotaCell } from "../clipboard/rotaCellSerializer";
-import { planRotaCellFromText } from "./rotaCellTextPlan";
+import { planRotaCellFromShifts } from "./rotaCellShiftPlan";
 import { DEPARTMENT_NOTE } from "./rotaPastePlan";
 import { CLEAR_RETURNS_TO_DRAFT } from "./rotaClearPlan";
-import { roleHasAmbiguousSlash, SLASH_ROLE_MESSAGE } from "./rotaSlashRoleGuard";
 import {
   buildBulkPlan,
   type RotaBulkBlocker,
@@ -22,20 +20,22 @@ export const EMPTY_SOURCE_NOTE =
  * source is a real instruction — Excel blanks the range — so it clears the
  * targets, and says so before it does.
  *
- * The source cell is re-serialised into cell text and replanned against each
- * target, which is what makes assignment follow the target: a staff shift filled
- * into the open row becomes an open shift, and an open shift filled onto a staff
- * row is assigned to that staff member.
+ * The source cell's shifts are replanned against each target **structurally**.
+ * That is what makes assignment follow the target — a staff shift filled into the
+ * open row becomes an open shift, and an open shift filled onto a staff row is
+ * assigned to that staff member — without the source ever passing through a text
+ * format that cannot represent every field it carries.
+ *
+ * It follows that this takes no `workspaceRoles`: there is no typed text here to
+ * resolve a role name against. That parameter belongs to the paste path alone.
  */
 export function buildRotaFillPlan({
   rows,
   direction,
-  workspaceRoles,
 }: {
   /** Selected cells, row-major. */
   rows: RotaBulkTarget[][];
   direction: "down" | "right";
-  workspaceRoles?: readonly string[];
 }): RotaBulkPlan {
   const kind = direction === "down" ? "fill-down" : "fill-right";
   const targets = rows.flat();
@@ -67,28 +67,18 @@ export function buildRotaFillPlan({
     );
   }
 
-  const sourceTexts = sources.map((source) => {
-    if (source.cell.shifts.some((shift) => roleHasAmbiguousSlash(shift.role))) {
-      blockers.push({
-        label: source.label,
-        message: `This cell cannot be used as a fill source: ${SLASH_ROLE_MESSAGE}`,
-      });
-      return "";
-    }
-    // Assignment follows the target: an open source filled onto a staff row is
-    // assigned there, so the "open" token is dropped and the target's own
-    // staffId decides. The open row still forces its targets open.
-    return serialiseRotaCell(source.cell.shifts, { omitOpenToken: true });
-  });
+  // Shifts, not text. A role containing "/" needs no special handling here,
+  // because nothing is re-read through the split-shift grammar.
+  const sourceShifts = sources.map((source) => source.cell.shifts);
 
   const notes = [DEPARTMENT_NOTE, CLEAR_RETURNS_TO_DRAFT];
-  if (sourceTexts.every((text) => text === "")) notes.unshift(EMPTY_SOURCE_NOTE);
+  if (sourceShifts.every((shifts) => shifts.length === 0)) notes.unshift(EMPTY_SOURCE_NOTE);
 
   followers.forEach((row, rowOffset) => {
     row.forEach((target, columnOffset) => {
-      const text = direction === "down" ? sourceTexts[columnOffset] : sourceTexts[rowOffset];
-      if (text === undefined) return;
-      const planned = planRotaCellFromText({ target, text, workspaceRoles });
+      const shifts = direction === "down" ? sourceShifts[columnOffset] : sourceShifts[rowOffset];
+      if (shifts === undefined) return;
+      const planned = planRotaCellFromShifts({ target, sourceShifts: shifts });
       if (planned.ok) cells.push(planned.plan);
       else blockers.push(planned.blocker);
     });

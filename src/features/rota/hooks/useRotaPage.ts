@@ -39,7 +39,7 @@ export function useRotaPage(week: number | undefined, location: string | undefin
   const liveLocationId = rota.source === "live" ? rota.liveLocationId : null;
   const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
-  const actions = useRotaShiftActions(history.controller, availability.constraints);
+  const actions = useRotaShiftActions(history.controller);
   const [showInsights, setShowInsights] = React.useState(true);
   const [recoverySelection, setRecoverySelection] = React.useState<{
     shiftId: ShiftId;
@@ -53,7 +53,6 @@ export function useRotaPage(week: number | undefined, location: string | undefin
     setLiveLocationId: rota.setLiveLocationId,
     clearSelectedShift: () => rota.setSelectedShiftId(null),
     clearRecovery: () => setRecoverySelection(null),
-    clearFillSummary: () => actions.setFillSummary(null),
     clearConfirmation: rota.clearConfirmation,
     closeOverlays: overlays.closeAll,
   });
@@ -86,7 +85,9 @@ export function useRotaPage(week: number | undefined, location: string | undefin
   }).requestPublish;
 
   useIntentHandler("rota.publish", requestPublish);
-  useIntentHandler("rota.generate", () => openOverlay("generate"));
+  // The former "generate" intent filled open shifts directly; it now opens the
+  // reviewed Build flow, which does the same work as one previewed proposal.
+  useIntentHandler("rota.generate", () => openOverlay("buildWeek"));
   useIntentHandler("rota.addShift", () => openOverlay("addShift"));
 
   const handleChooseRecoveryCandidate = React.useCallback(

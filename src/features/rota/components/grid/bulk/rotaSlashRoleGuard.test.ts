@@ -34,12 +34,28 @@ describe("slash role blocking in operations", () => {
     expect(plan.blockers[0]!.message).toMatch(/reserved for split shifts/i);
   });
 
-  it("fill blocks a source cell that holds a slash role", () => {
+  it("fill carries a slash role through, because it never passes through text", () => {
+    // The slash restriction exists only because "/" separates the halves of a
+    // split shift in the cell grammar. Fill reads the source shifts directly, so
+    // a role named "Bar/Grill" survives instead of being refused.
     const plan = buildRotaFillPlan({
       rows: makeTargetGrid([[makeCell([makeShift({ role: "Bar/Grill" })])], [makeCell()]]),
       direction: "down",
     });
-    expect(plan.blockers.some((b) => /fill source/i.test(b.message))).toBe(true);
+    expect(plan.blockers).toEqual([]);
+    expect(plan.counts.created).toBe(1);
+    const created = plan.cells[0]!.ops[0]!;
+    expect(created.kind).toBe("create");
+    expect(created.kind === "create" && created.input.role).toBe("Bar/Grill");
+  });
+
+  it("paste still refuses a slash role, because clipboard text really is TSV", () => {
+    const plan = buildRotaPastePlan({
+      geometry: { rows: makeTargetGrid([[makeCell()]]) },
+      pasted: [["9-17 Bar / Kitchen"]],
+    });
+    expect(plan.blockers).toHaveLength(1);
+    expect(plan.blockers[0]!.message).toMatch(/reserved for split shifts/i);
   });
 });
 

@@ -8,7 +8,23 @@ export type StaffMember = {
   id: StaffId;
   name: string;
   role: string;
+  /**
+   * Display-only contracted-hours label ("40h", "—").
+   *
+   * @deprecated Never compare this. It is a formatted string, and comparing it
+   * literally is how a 37.5h contract came to be invisible to scheduling. Use
+   * {@link StaffMember.contractedMinutesPerWeek} for any decision.
+   */
   hrs: string;
+  /**
+   * Contracted minutes per week from `staff_members.contracted_minutes_per_week`.
+   *
+   * A **soft balancing signal only**: it reorders equally-eligible candidates and
+   * can never exclude anyone. `null` means no recorded target and is treated as
+   * neutral, never as zero. This is not a working-time limit and carries no
+   * compliance or payroll meaning.
+   */
+  contractedMinutesPerWeek?: number | null;
   img: number;
   tone: ShiftTone;
   /**

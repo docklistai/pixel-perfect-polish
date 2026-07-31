@@ -71,7 +71,9 @@ describe("buildRotaRecoveryOptions", () => {
     expect(result.map((option) => option.staffId)).toEqual(["b", "c", "a"]);
     expect(result[0]?.note).toContain("No shifts yet this week");
     expect(result[1]?.note).toContain("No shifts yet this week");
-    expect(result[2]?.note).toContain("2 shifts this week");
+    // Load is reported in hours, matching the balancing signal that produced the
+    // order. Counting shifts made two 4-hour shifts outrank one 12-hour shift.
+    expect(result[2]?.note).toContain("16h scheduled this week");
   });
 
   it("returns approved-leave conflict options and excludes blocked staff", () => {

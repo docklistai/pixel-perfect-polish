@@ -1,4 +1,4 @@
-import { Copy, Filter, Keyboard, Plus, Redo2, Sparkles, Undo2, Wand2 } from "lucide-react";
+import { Copy, Filter, Keyboard, Plus, Redo2, Undo2, Wand2 } from "lucide-react";
 import { ActionButton, IconButton } from "@/components/dl";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useSelectionCapableViewport } from "./grid/selection/useSelectionCapableViewport";
@@ -10,7 +10,6 @@ export function RotaGridToolbar({
   coveragePct,
   onFilter,
   onBuildWeek,
-  onGenerateRota,
   onAddShift,
   onViewConflicts,
   onViewWorkingTime,
@@ -26,7 +25,6 @@ export function RotaGridToolbar({
   coveragePct: number;
   onFilter: () => void;
   onBuildWeek: () => void;
-  onGenerateRota: () => void;
   onAddShift: () => void;
   onViewConflicts: () => void;
   onViewWorkingTime: () => void;
@@ -140,7 +138,7 @@ export function RotaGridToolbar({
             size="sm"
             icon={Wand2}
             onClick={onBuildWeek}
-            title="Start this week from last week, a saved template, or an empty draft — then fill open shifts"
+            title="Choose what this week needs, review one proposal, then apply it in a single step"
           >
             Build this week
           </ActionButton>
@@ -153,20 +151,9 @@ export function RotaGridToolbar({
           >
             Copy last week
           </ActionButton>
-          <ActionButton
-            variant="outline"
-            size="sm"
-            icon={Sparkles}
-            onClick={onGenerateRota}
-            disabled={openShiftCount === 0}
-            title={
-              openShiftCount === 0
-                ? "No open shifts to fill yet — add open shifts, or use Copy last week to start."
-                : "Suggest a colleague for every open shift (draft only, never auto-published)"
-            }
-          >
-            Fill open shifts
-          </ActionButton>
+          {/* Filling open shifts is no longer its own button: it is what Build
+              the Week does when the demand source is "this week's existing
+              shifts", reviewed as one proposal rather than applied on click. */}
           <IconButton icon={Plus} label="Add shift" onClick={onAddShift} />
         </div>
       </div>

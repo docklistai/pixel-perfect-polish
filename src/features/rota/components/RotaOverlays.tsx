@@ -3,12 +3,12 @@ import type { useRotaDraftController } from "../hooks/useRotaDraftController";
 import type { RotaOverlaysState } from "../hooks/useRotaOverlays";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { RotaPublishEligibility } from "../lib/publishEligibility";
-import type { ApprovedAvailabilityConstraints } from "../lib/availabilityConstraints";
 import type { ShiftId } from "../types";
 
 import { AddShiftDrawer } from "./AddShiftDrawer";
 import { ConflictDrawer } from "./ConflictDrawer";
-import { GenerateRotaDialog } from "./GenerateRotaDialog";
+import { BuildWeekDrawer } from "./buildWeek/BuildWeekDrawer";
+import { ImportScheduleDrawer } from "./buildWeek/ImportScheduleDrawer";
 import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 import { RotaFiltersDrawer } from "./RotaFiltersDrawer";
 import { CoverageDetailsDrawer } from "./CoverageDetailsDrawer";
@@ -16,7 +16,6 @@ import { WorkingTimeDetailsDrawer } from "./WorkingTimeDetailsDrawer";
 import { PublishRotaDialog } from "./PublishRotaDialog";
 import { DemandTemplatesDrawer } from "./DemandTemplatesDrawer";
 import { CopyDayDialog } from "./CopyDayDialog";
-import { BuildThisWeekDialog } from "./BuildThisWeekDialog";
 import type { MaybePromise } from "./grid";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
@@ -29,28 +28,29 @@ type RotaController = ReturnType<typeof useRotaDraftController>;
 export function RotaOverlays({
   rota,
   overlays,
+  locationName,
+  weekOffset,
+  onBuildApplied,
   onPublishConfirm,
-  onApplySuggestions,
-  onCopyLastWeek,
   onMarkShiftOpen,
   onRepeatShift,
   publishEligibility,
   constraintClashCount,
-  availabilityConstraints,
   availabilityDataState,
   suggestedAssignTo,
   onClearRecoverySelection,
 }: {
   rota: RotaController;
   overlays: RotaOverlaysState;
+  locationName: string;
+  weekOffset: number;
+  /** Fired after Build applies, so the route can reset undo history. */
+  onBuildApplied: () => void;
   onPublishConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
-  onApplySuggestions: () => void;
-  onCopyLastWeek: () => void;
   onMarkShiftOpen: (shiftId: ShiftId) => MaybePromise<void>;
   onRepeatShift: (shiftId: ShiftId, dayIndexes: number[]) => Promise<RepeatShiftResult | null>;
   publishEligibility: RotaPublishEligibility;
   constraintClashCount: number;
-  availabilityConstraints?: ApprovedAvailabilityConstraints;
   availabilityDataState: "ready" | "loading" | "error";
   suggestedAssignTo: string | null;
   onClearRecoverySelection: () => void;
@@ -115,29 +115,29 @@ export function RotaOverlays({
         publishBlockedReason={publishEligibility.blockedReason}
         onConfirm={onPublishConfirm}
       />
-      <BuildThisWeekDialog
+      <ImportScheduleDrawer
+        open={openOverlays.importSchedule}
+        onOpenChange={(open) => setOverlay("importSchedule", open)}
+        weekLabel={rota.weekLabel}
+        weekOffset={weekOffset}
+        locationId={rota.source === "live" ? rota.liveLocationId : null}
+        serverBacked={rota.source === "live"}
+        canEdit={!rota.readOnly && rota.source === "live"}
+        onApplied={onBuildApplied}
+      />
+      <BuildWeekDrawer
         open={openOverlays.buildWeek}
         onOpenChange={(open) => setOverlay("buildWeek", open)}
         weekLabel={rota.weekLabel}
-        openShiftCount={rota.openShiftCount}
+        locationName={locationName}
+        weekOffset={weekOffset}
+        locationId={rota.source === "live" ? rota.liveLocationId : null}
         plannedShiftCount={rota.plannedShiftCount}
-        canEdit={!rota.readOnly}
-        onCopyLastWeek={onCopyLastWeek}
-        onOpenTemplates={() => setOverlay("templates", true)}
-        onClearWeek={rota.requestClearWeek}
-        onFillOpenShifts={() => setOverlay("generate", true)}
-      />
-      <GenerateRotaDialog
-        open={openOverlays.generate}
-        onOpenChange={(open) => setOverlay("generate", open)}
-        weekLabel={rota.weekLabel}
-        days={rota.days}
-        shifts={rota.draftShifts}
-        staff={rota.assignableStaff}
-        leaveRequests={rota.leaveRequests}
-        dayIsoDates={rota.dayIsoDates}
-        constraints={availabilityConstraints}
-        onApplySuggestions={onApplySuggestions}
+        assignedShiftCount={rota.assignedShiftCount}
+        openShiftCount={rota.openShiftCount}
+        canEdit={!rota.readOnly && rota.source === "live"}
+        serverBacked={rota.source === "live"}
+        onApplied={onBuildApplied}
       />
       <RotaFiltersDrawer
         open={openOverlays.filters}

@@ -9,7 +9,6 @@ interface RotaLocationSelectionOptions {
   setLiveLocationId: (locationId: string) => void;
   clearSelectedShift: () => void;
   clearRecovery: () => void;
-  clearFillSummary: () => void;
   clearConfirmation: () => void;
   closeOverlays: () => void;
 }
@@ -55,7 +54,6 @@ export function useRotaLocationSelection({
   setLiveLocationId,
   clearSelectedShift,
   clearRecovery,
-  clearFillSummary,
   clearConfirmation,
   closeOverlays,
 }: RotaLocationSelectionOptions): (locationId: string) => void {
@@ -86,18 +84,10 @@ export function useRotaLocationSelection({
     if (transition.changed) {
       clearSelectedShift();
       clearRecovery();
-      clearFillSummary();
       clearConfirmation();
       closeOverlays();
     }
-  }, [
-    clearConfirmation,
-    clearFillSummary,
-    clearRecovery,
-    clearSelectedShift,
-    closeOverlays,
-    liveLocationId,
-  ]);
+  }, [clearConfirmation, clearRecovery, clearSelectedShift, closeOverlays, liveLocationId]);
 
   return React.useCallback(
     (locationId: string) => {

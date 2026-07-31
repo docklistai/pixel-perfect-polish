@@ -12,6 +12,8 @@
  * member's own profile role. A temporary role lives on the one shift.
  */
 
+import { normaliseRoleKey } from "./scheduling/shiftSignature";
+
 /** Free-text roles are labels on a shift, so keep them short and clean. */
 export const MAX_SHIFT_ROLE_LENGTH = 120;
 
@@ -25,6 +27,15 @@ export type ShiftRoleResolution = {
   warning: string | null;
 };
 
+/**
+ * Loose token form: punctuation collapsed to spaces.
+ *
+ * Used only by the ambiguity-guarded second matching stage below. It is **not**
+ * role identity — it treats "Bar/Kitchen" and "Bar Kitchen" as the same token,
+ * which is exactly why any match it produces must be unique before it is trusted.
+ * Demand signatures and eligibility use `normaliseRoleKey` from
+ * `scheduling/shiftSignature`, which preserves punctuation.
+ */
 export function normaliseRoleToken(value: string): string {
   return value
     .toLowerCase()
@@ -64,10 +75,44 @@ function toLabel(value: string): string {
 }
 
 /**
- * Matches typed text against the configured roles, tolerating case and
- * punctuation. Anything unmatched becomes a temporary label rather than an
- * error.
+ * Matches typed text against the configured roles. Anything unmatched becomes a
+ * temporary label rather than an error.
+ *
+ * **Substring matching is gone.** It silently rewrote a manager's role: with
+ * "Barista" configured, typing "Bar" produced a Barista shift, and the person
+ * whose role actually was "Bar" could then never be suggested for it. Which role
+ * won also depended on the order the configured list happened to arrive in.
+ *
+ * Matching now runs in two stages, and neither can ever match a shorter role to a
+ * longer one:
+ *
+ * 1. exact on `normaliseRoleKey` — case and spacing only, the same identity the
+ *    scheduling planner uses, so typing a role and being eligible for it agree;
+ * 2. separator-tolerant, so "kitchen-porter" still finds "Kitchen Porter" — but
+ *    **only when exactly one** configured role matches. Two roles that differ
+ *    only in punctuation ("Bar/Kitchen" and "Bar Kitchen") are genuinely
+ *    ambiguous, so nothing is guessed and the text becomes a temporary label.
+ *
+ * Stage 2 matters for correctness, not just convenience: without it a manager
+ * typing a real role with a hyphen would mint a temporary role no staff member
+ * holds, which exact eligibility could then never staff — the same failure the
+ * removed "FOH" fallback used to cause.
  */
+/**
+ * The single configured role whose words match ignoring separators, or undefined
+ * when none or more than one does. Never matches a shorter role to a longer one:
+ * the whole token has to be equal, only the punctuation between words is ignored.
+ */
+function findUnambiguousBySeparator(
+  cleaned: string,
+  configuredRoles: readonly string[],
+): string | undefined {
+  const token = normaliseRoleToken(cleaned);
+  if (!token) return undefined;
+  const matches = configuredRoles.filter((role) => normaliseRoleToken(role) === token);
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
 export function resolveShiftRole({
   input,
   configuredRoles = [],
@@ -80,19 +125,15 @@ export function resolveShiftRole({
   const cleaned = sanitiseShiftRole(input);
   if (!cleaned) return null;
 
-  const key = normaliseRoleToken(cleaned);
+  const key = normaliseRoleKey(cleaned);
   if (!key) return null;
 
-  const configured =
-    configuredRoles.find((role) => normaliseRoleToken(role) === key) ??
-    configuredRoles.find((role) => {
-      const roleKey = normaliseRoleToken(role);
-      return roleKey.length > 2 && (key.includes(roleKey) || roleKey.includes(key));
-    });
+  const exact = configuredRoles.find((role) => normaliseRoleKey(role) === key);
+  const configured = exact ?? findUnambiguousBySeparator(cleaned, configuredRoles);
 
   if (configured) {
     const differsFromProfile =
-      Boolean(profileRole) && normaliseRoleToken(profileRole!) !== normaliseRoleToken(configured);
+      Boolean(profileRole) && normaliseRoleKey(profileRole!) !== normaliseRoleKey(configured);
     return {
       role: configured,
       kind: "configured",

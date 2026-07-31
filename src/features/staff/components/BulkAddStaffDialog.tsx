@@ -166,7 +166,18 @@ export function BulkAddStaffDialog({ open, onOpenChange, source }: BulkAddStaffD
           </div>
         )}
 
-        {parsed && <BulkStaffPreviewTable result={parsed} />}
+        {/* A paste that could not be decoded at all has no rows to preview, so
+            the reason has to be shown here or it would vanish silently. */}
+        {parsed?.readError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-danger/30 bg-danger-soft/40 p-3 text-sm"
+          >
+            <div className="font-semibold">That paste could not be read</div>
+            <p className="mt-0.5 text-xs text-muted-foreground">{parsed.readError}</p>
+          </div>
+        )}
+        {parsed && !parsed.readError && <BulkStaffPreviewTable result={parsed} />}
       </div>
     </DialogShell>
   );

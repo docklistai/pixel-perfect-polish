@@ -4,25 +4,25 @@ export type RotaOverlayKey =
   | "addShift"
   | "publish"
   | "conflicts"
-  | "generate"
   | "filters"
   | "coverageDetails"
   | "workingTime"
   | "templates"
   | "copyDay"
-  | "buildWeek";
+  | "buildWeek"
+  | "importSchedule";
 
 const CLOSED_OVERLAYS: Record<RotaOverlayKey, boolean> = {
   addShift: false,
   publish: false,
   conflicts: false,
-  generate: false,
   filters: false,
   coverageDetails: false,
   workingTime: false,
   templates: false,
   copyDay: false,
   buildWeek: false,
+  importSchedule: false,
 };
 
 /** Open/closed state for every rota drawer and dialog. */

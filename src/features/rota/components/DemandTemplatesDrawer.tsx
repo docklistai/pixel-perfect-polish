@@ -96,7 +96,7 @@ export function DemandTemplatesDrawer({
       return;
     }
     toast.success("Template applied", {
-      description: `Added ${result.openShiftsCreated ?? 0} open shifts to ${weekLabel}. Assign them or use Fill open shifts.`,
+      description: `Added ${result.openShiftsCreated ?? 0} open shifts to ${weekLabel}. Assign them, or use Build this week with "This week's existing shifts".`,
     });
   };
 

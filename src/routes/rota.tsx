@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, Card, FeedbackBanner } from "@/components/dl";
+import { AppShell, Card } from "@/components/dl";
 import { useRotaPage } from "@/features/rota/hooks/useRotaPage";
 
 import { RotaPageHeader } from "@/features/rota/components/RotaPageHeader";
@@ -109,18 +109,9 @@ function RotaPage() {
             onClearWeek={guardedRota.requestClearWeek}
             onOpenTemplates={() => openOverlay("templates")}
             onCopyDay={() => openOverlay("copyDay")}
+            onImportSchedule={() => openOverlay("importSchedule")}
             onPublish={requestPublish}
           />
-
-          {actions.fillSummary && (
-            <FeedbackBanner
-              tone="info"
-              title="Open shifts updated"
-              description={actions.fillSummary}
-              className="mb-4"
-              onDismiss={() => actions.setFillSummary(null)}
-            />
-          )}
 
           {readOnly ? (
             // Live workspace, reads not settled: a dedicated loading/error
@@ -138,7 +129,6 @@ function RotaPage() {
                   coveragePct={rota.coveragePct}
                   onFilter={() => openOverlay("filters")}
                   onBuildWeek={() => openOverlay("buildWeek")}
-                  onGenerateRota={() => openOverlay("generate")}
                   onAddShift={() => openOverlay("addShift")}
                   onViewConflicts={() => openOverlay("conflicts")}
                   onViewWorkingTime={() => openOverlay("workingTime")}
@@ -212,14 +202,14 @@ function RotaPage() {
         <RotaOverlays
           rota={guardedRota}
           overlays={overlays}
+          locationName={locationName}
+          weekOffset={rota.weekOffset}
+          onBuildApplied={history.reset}
           onPublishConfirm={handlePublish}
-          onApplySuggestions={actions.handleApplySuggestions}
-          onCopyLastWeek={actions.handleCopyLastWeek}
           onMarkShiftOpen={actions.handleMarkShiftOpen}
           onRepeatShift={actions.handleRepeatShift}
           publishEligibility={publishEligibility}
           constraintClashCount={availability.clashes.length}
-          availabilityConstraints={availability.constraints}
           availabilityDataState={availability.dataState}
           suggestedAssignTo={
             recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null

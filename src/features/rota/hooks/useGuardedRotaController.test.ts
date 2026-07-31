@@ -13,7 +13,6 @@ const MUTATING_METHODS = [
   "previewCopyPreviousWeek",
   "copyPreviousWeek",
   "requestCopyPreviousWeek",
-  "applyOpenShiftSuggestions",
   "handlePublish",
   "requestRemoveShift",
   "requestClearWeek",
@@ -64,10 +63,6 @@ describe("buildGuardedRotaController", () => {
 
     expect(guarded.confirmation).toBeNull();
     expect((guarded.duplicateShiftToNextDay as (id: string) => unknown)("shift-1")).toBeNull();
-    expect((guarded.applyOpenShiftSuggestions as () => unknown)()).toEqual({
-      suggestions: [],
-      unfilled: [],
-    });
     await expect((guarded.previewCopyPreviousWeek as () => Promise<unknown>)()).rejects.toThrow(
       "Live rota is unavailable.",
     );

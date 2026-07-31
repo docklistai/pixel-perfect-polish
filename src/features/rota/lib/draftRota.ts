@@ -17,6 +17,3 @@ export {
   formatShiftTime,
   isStartBeforeEnd,
 } from "./rotaTimeUtils";
-
-export type { OpenShiftSuggestion } from "./rotaSuggestions";
-export { fillOpenShiftsWithSuggestions } from "./rotaSuggestions";

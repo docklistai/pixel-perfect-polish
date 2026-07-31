@@ -47,8 +47,12 @@ describe("scheduling copy states only what is modelled", () => {
   const rotaCopy = [
     "src/features/rota/components/RotaGridToolbar.tsx",
     "src/features/rota/components/WorkingTimeDetailsDrawer.tsx",
-    "src/features/rota/components/GenerateRotaDialog.tsx",
-    "src/features/rota/components/BuildThisWeekDialog.tsx",
+    // The former GenerateRotaDialog and BuildThisWeekDialog were replaced by the
+    // reviewed Build flow; the same honesty rules apply to its copy.
+    "src/features/rota/components/buildWeek/BuildWeekDrawer.tsx",
+    "src/features/rota/components/buildWeek/BuildWeekSourceStep.tsx",
+    "src/features/rota/components/buildWeek/BuildWeekReviewStep.tsx",
+    "src/features/rota/components/buildWeek/BuildWeekStepActions.tsx",
   ]
     .map(source)
     .join("\n");

@@ -1,30 +1,17 @@
 import * as React from "react";
 import { toast } from "sonner";
 import type { useRotaDraftController } from "./useRotaDraftController";
-import type { DraftShift, ShiftId } from "../types";
-import {
-  toastClearedDraft,
-  toastColourDraft,
-  toastDepartmentDraft,
-  toastDuplicateDraft,
-  toastMarkedOpenDraft,
-  toastResetColourDraft,
-} from "../lib/rotaActionToasts";
+import type { DraftShift } from "../types";
+import { useRotaShiftEditActions } from "./useRotaShiftEditActions";
+import { toastDuplicateDraft } from "../lib/rotaActionToasts";
 import { buildRepeatShiftFeedback, type RepeatShiftResult } from "../lib/repeatShift";
 import { getShiftDuplicateBlockedReason } from "../lib/duplicateShiftRules";
 import { executeDuplicateShiftCopy, executeRepeatShiftCopy } from "../lib/shiftCopyActions";
-import { applyLiveOpenShiftSuggestions } from "../lib/rotaSuggestions";
-import { buildFillSummaryMessage } from "../lib/fillSummary";
-import type { ApprovedAvailabilityConstraints } from "../lib/availabilityConstraints";
 import { requestLiveCopyPreviousWeekConfirmation } from "../lib/copyPreviousWeekAction";
 
 type RotaController = ReturnType<typeof useRotaDraftController>;
 
-export function useRotaShiftActions(
-  rota: RotaController,
-  constraints?: ApprovedAvailabilityConstraints,
-) {
-  const [fillSummary, setFillSummary] = React.useState<string | null>(null);
+export function useRotaShiftActions(rota: RotaController) {
   const readOnly = rota.readOnly;
   const isLive = rota.source === "live";
 
@@ -39,24 +26,9 @@ export function useRotaShiftActions(
     });
   }, []);
 
-  const findShift = (shiftId: string) => rota.draftShifts.find((s) => s.id === shiftId);
+  const editActions = useRotaShiftEditActions(rota, block);
 
-  const handleApplySuggestions = async () => {
-    if (readOnly) return block();
-    if (isLive) {
-      const result = await applyLiveOpenShiftSuggestions({
-        shifts: rota.draftShifts,
-        staff: rota.assignableStaff,
-        leaveRequests: rota.leaveRequests,
-        dayIsoDates: rota.dayIsoDates,
-        constraints,
-        updateShift: rota.updateShift,
-      });
-      setFillSummary(buildFillSummaryMessage(result));
-      return;
-    }
-    setFillSummary(buildFillSummaryMessage(rota.applyOpenShiftSuggestions()));
-  };
+  const findShift = (shiftId: string) => rota.draftShifts.find((s) => s.id === shiftId);
 
   const handleCopyLastWeek = async () => {
     if (readOnly) return block();
@@ -127,86 +99,14 @@ export function useRotaShiftActions(
     return result;
   };
 
-  const handleMarkShiftOpen = async (shiftId: string) => {
-    if (readOnly) return block();
-    const prev = findShift(shiftId);
-    try {
-      await rota.markShiftOpen(shiftId);
-    } catch {
-      return;
-    }
-    if (isLive) return;
-    toastMarkedOpenDraft(rota, shiftId, prev);
-  };
-
-  const handleClearShift = async (shiftId: string) => {
-    if (readOnly) return block();
-    const prev = findShift(shiftId);
-    if (!prev) return;
-    const restored = {
-      ...prev,
-      status: prev.staffId ? ("scheduled" as const) : ("open" as const),
-    };
-    try {
-      await rota.removeShiftNow(shiftId);
-    } catch {
-      return;
-    }
-    if (isLive) return;
-    toastClearedDraft(rota, restored);
-  };
-
-  const handleSetShiftDept = async (shiftId: string, dept: string) => {
-    if (readOnly) return block();
-    const prev = findShift(shiftId)?.deptOverride;
-    try {
-      await rota.updateShift(shiftId, { deptOverride: dept, edited: true });
-    } catch {
-      return;
-    }
-    if (isLive) return;
-    toastDepartmentDraft(rota, shiftId, dept, prev);
-  };
-
-  const handleSetShiftColour = async (shiftId: string, presetId: string) => {
-    if (readOnly) return block();
-    const prev = findShift(shiftId)?.colourOverride;
-    try {
-      await rota.updateShift(shiftId, { colourOverride: presetId });
-    } catch {
-      return;
-    }
-    if (isLive) return;
-    toastColourDraft(rota, shiftId, presetId, prev);
-  };
-
-  const handleResetShiftColour = async (shiftId: string) => {
-    if (readOnly) return block();
-    const prev = findShift(shiftId);
-    try {
-      await rota.updateShift(shiftId, { colourOverride: undefined, deptOverride: undefined });
-    } catch {
-      return;
-    }
-    if (isLive) return;
-    toastResetColourDraft(rota, shiftId, prev);
-  };
-
   return {
-    fillSummary,
-    setFillSummary,
     block,
     blockDraftOnly,
     duplicateBlockedReason: (shift: Pick<DraftShift, "staffId" | "dayIndex">) =>
       getShiftDuplicateBlockedReason(shift, rota.assignableStaff),
-    handleApplySuggestions,
     handleCopyLastWeek,
     handleDuplicateShift,
     handleRepeatShift,
-    handleMarkShiftOpen: handleMarkShiftOpen as (shiftId: ShiftId) => Promise<void>,
-    handleClearShift,
-    handleSetShiftDept,
-    handleSetShiftColour,
-    handleResetShiftColour,
+    ...editActions,
   };
 }

@@ -1,41 +1,43 @@
 import type { ConflictSummary, DraftShift, ShiftId, StaffMember } from "../types";
-import { formatShiftTime, getShiftDurationMinutes, parseHHMMToMinutes } from "./draftRota";
+import { formatShiftTime } from "./draftRota";
+import { intervalConflict } from "./scheduling/calendarInterval";
+import { draftShiftTimes } from "./scheduling/draftShiftAdapter";
+
+/**
+ * Double-booking detection for the grid and the publish boundary.
+ *
+ * Overlap is decided by the shared interval engine
+ * (`scheduling/calendarInterval.ts`) rather than by comparing minutes within one
+ * day index, so a shift that runs past midnight is compared against the next
+ * day's shifts as well. Two of this feature's four former overlap
+ * implementations also disagreed about unreadable times; the engine settles that
+ * centrally by reporting them as a conflict.
+ */
 
 type ConflictPair = {
   base: DraftShift;
   overlapping: DraftShift;
 };
 
-function shiftStartMinutes(shift: DraftShift): number | null {
-  return parseHHMMToMinutes(shift.start);
-}
-
-function shiftEndMinutes(shift: DraftShift): number | null {
-  const start = shiftStartMinutes(shift);
-  const duration = getShiftDurationMinutes(shift.start, shift.end);
-  if (start === null || duration === null) return null;
-  return start + duration;
-}
-
-function shiftsOverlap(first: DraftShift, second: DraftShift): boolean {
-  if (first.dayIndex !== second.dayIndex || first.staffId === null || second.staffId === null) {
-    return false;
-  }
+/**
+ * `dayIsoDates` is optional. Real dates are used when the caller has them;
+ * otherwise the adapter substitutes a synthetic week, which is sufficient because
+ * overlap only depends on the distance between two days.
+ */
+function shiftsOverlap(
+  first: DraftShift,
+  second: DraftShift,
+  dayIsoDates?: readonly string[],
+): boolean {
+  if (first.staffId === null || second.staffId === null) return false;
   if (first.staffId !== second.staffId) return false;
-
-  const firstStart = shiftStartMinutes(first);
-  const firstEnd = shiftEndMinutes(first);
-  const secondStart = shiftStartMinutes(second);
-  const secondEnd = shiftEndMinutes(second);
-
-  if (firstStart === null || firstEnd === null || secondStart === null || secondEnd === null) {
-    return false;
-  }
-
-  return firstStart < secondEnd && secondStart < firstEnd;
+  return (
+    intervalConflict(draftShiftTimes(first, dayIsoDates), draftShiftTimes(second, dayIsoDates)) !==
+    null
+  );
 }
 
-function localConflictPairs(shifts: DraftShift[]): ConflictPair[] {
+function localConflictPairs(shifts: DraftShift[], dayIsoDates?: readonly string[]): ConflictPair[] {
   const assigned = shifts.filter((shift) => shift.staffId !== null);
   const pairs: ConflictPair[] = [];
 
@@ -43,7 +45,7 @@ function localConflictPairs(shifts: DraftShift[]): ConflictPair[] {
     for (let j = i + 1; j < assigned.length; j += 1) {
       const first = assigned[i]!;
       const second = assigned[j]!;
-      if (!shiftsOverlap(first, second)) continue;
+      if (!shiftsOverlap(first, second, dayIsoDates)) continue;
       pairs.push({ base: first, overlapping: second });
       pairs.push({ base: second, overlapping: first });
     }
@@ -52,12 +54,18 @@ function localConflictPairs(shifts: DraftShift[]): ConflictPair[] {
   return pairs;
 }
 
-export function localConflictShiftIds(shifts: DraftShift[]): Set<ShiftId> {
-  return new Set(localConflictPairs(shifts).map((pair) => pair.base.id));
+export function localConflictShiftIds(
+  shifts: DraftShift[],
+  dayIsoDates?: readonly string[],
+): Set<ShiftId> {
+  return new Set(localConflictPairs(shifts, dayIsoDates).map((pair) => pair.base.id));
 }
 
-export function withLocalConflictStatus(shifts: DraftShift[]): DraftShift[] {
-  const conflictIds = localConflictShiftIds(shifts);
+export function withLocalConflictStatus(
+  shifts: DraftShift[],
+  dayIsoDates?: readonly string[],
+): DraftShift[] {
+  const conflictIds = localConflictShiftIds(shifts, dayIsoDates);
   return shifts.map((shift) => {
     if (shift.staffId === null) return { ...shift, status: "open", tone: "open" };
     return {
@@ -71,18 +79,27 @@ export function buildLocalConflictSummaries(
   shifts: DraftShift[],
   staff: StaffMember[],
   dayLabels: string[],
+  dayIsoDates?: readonly string[],
 ): ConflictSummary[] {
-  return localConflictPairs(shifts)
+  return localConflictPairs(shifts, dayIsoDates)
     .filter(({ base, overlapping }) => base.id < overlapping.id)
     .map(({ base, overlapping }) => {
       const staffName = staff.find((member) => member.id === base.staffId)?.name ?? "Unknown";
+      // An overnight pair spans two columns, so the day label alone would read as
+      // if both shifts were on the same day. Naming both days keeps it honest.
+      const sameDay = base.dayIndex === overlapping.dayIndex;
+      const overlappingDay = dayLabels[overlapping.dayIndex] ?? "";
 
       return {
         id: base.id,
         staff: staffName,
         day: dayLabels[base.dayIndex] ?? "",
-        detail: `${base.role} · ${formatShiftTime(base.start, base.end)} and ${formatShiftTime(overlapping.start, overlapping.end)}`,
-        cause: `${staffName} has two overlapping shifts.`,
+        detail: sameDay
+          ? `${base.role} · ${formatShiftTime(base.start, base.end)} and ${formatShiftTime(overlapping.start, overlapping.end)}`
+          : `${base.role} · ${formatShiftTime(base.start, base.end)} runs into ${overlappingDay} ${formatShiftTime(overlapping.start, overlapping.end)}`,
+        cause: sameDay
+          ? `${staffName} has two overlapping shifts.`
+          : `${staffName} has a shift that runs past midnight into another shift.`,
         guidance: "Review the times or assign one shift to another staff member.",
       };
     });

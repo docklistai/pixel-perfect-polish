@@ -5,6 +5,7 @@ import {
   type StaffMemberInsert,
 } from "./addStaff";
 import type { StaffContractType, WorkspaceDepartment } from "../types";
+import { readDelimited } from "@/features/scheduling/parsing/delimitedReader";
 
 /**
  * Pure parser for the "paste staff list" bulk-add path. Turns pasted
@@ -47,6 +48,11 @@ export interface ParseBulkStaffResult {
   rows: ParsedStaffRow[];
   validCount: number;
   errorCount: number;
+  /**
+   * Set when the text could not be decoded at all — malformed quoting, or
+   * nothing to read. No rows are returned, and nothing is silently dropped.
+   */
+  readError?: string;
 }
 
 const CONTRACT_LABEL = new Map(STAFF_CONTRACT_OPTIONS.map((o) => [o.value, o.label]));
@@ -67,12 +73,6 @@ function normalizeContract(raw: string): { value: StaffContractType | ""; error?
   };
 }
 
-/** Split a single line by tab (spreadsheet paste) or comma (CSV paste). */
-function splitRow(line: string): string[] {
-  const delimiter = line.includes("\t") ? "\t" : ",";
-  return line.split(delimiter).map((cell) => cell.trim());
-}
-
 function looksLikeHeader(cells: string[]): boolean {
   const first = (cells[0] ?? "").toLowerCase();
   const second = (cells[1] ?? "").toLowerCase();
@@ -90,15 +90,35 @@ export function parseBulkStaff(
   const departmentByName = new Map(departments.map((d) => [d.name.trim().toLowerCase(), d]));
   const seenEmails = new Map<string, number>();
 
-  const lines = text.split(/\r?\n/);
   const rows: ParsedStaffRow[] = [];
 
-  lines.forEach((rawLine, index) => {
-    if (rawLine.trim() === "") return;
-    const cells = splitRow(rawLine);
+  // Quote-aware, with the delimiter chosen once for the whole paste. The former
+  // hand-rolled split picked a delimiter per line and ignored quoting entirely,
+  // so a CSV row like `"Smith, John",Chef,Kitchen` was read as the name `"Smith`
+  // and the role ` John"`, and one stray tab could split a single row differently
+  // from its neighbours.
+  const read = readDelimited(text, { allowRagged: true });
+  if (!read.ok) {
+    return {
+      rows: [],
+      validCount: 0,
+      errorCount: 0,
+      readError: read.diagnostics[0]?.message ?? "That text could not be read.",
+    };
+  }
+
+  const delimiter = read.delimiter;
+  read.rows.forEach((rawCells, index) => {
+    const cells = rawCells.map((cell) => cell.trim());
+    // A blank *line* is nothing. A row of blank *fields* (", , ") is a row the
+    // manager actually has, so it is reported as an error rather than dropped.
+    if (rawCells.length <= 1 && (rawCells[0] ?? "").trim() === "") return;
     if (rows.length === 0 && looksLikeHeader(cells)) return;
 
+    // Row number, not physical line number: a quoted field may legitimately
+    // contain a newline, and "row 3" is what a manager sees in their spreadsheet.
     const line = index + 1;
+    const rawLine = rawCells.join(delimiter);
     const [name = "", role = "", departmentName = "", contractRaw = "", hours = "", email = ""] =
       cells;
     const errors: string[] = [];

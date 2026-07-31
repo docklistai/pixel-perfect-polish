@@ -13,7 +13,6 @@ describe("buildRotaFillPlan — down", () => {
         [makeCell()],
       ]),
       direction: "down",
-      workspaceRoles: ROLES,
     });
     expect(plan.counts.created).toBe(2);
     expect(plan.blockers).toEqual([]);
@@ -23,7 +22,6 @@ describe("buildRotaFillPlan — down", () => {
     const plan = buildRotaFillPlan({
       rows: makeTargetGrid([[makeCell([makeShift({ id: "src" })])], [makeCell()]]),
       direction: "down",
-      workspaceRoles: ROLES,
     });
     // Only the follower row is planned.
     expect(plan.cells).toHaveLength(1);
@@ -33,7 +31,6 @@ describe("buildRotaFillPlan — down", () => {
     const plan = buildRotaFillPlan({
       rows: makeTargetGrid([[makeCell()], [makeCell([makeShift({ id: "wipe" })])]]),
       direction: "down",
-      workspaceRoles: ROLES,
     });
     expect(plan.counts.cleared).toBe(1);
     expect(plan.notes.some((n) => /clear every target/i.test(n))).toBe(true);
@@ -43,7 +40,6 @@ describe("buildRotaFillPlan — down", () => {
     const plan = buildRotaFillPlan({
       rows: makeTargetGrid([[makeCell([makeShift()])]]),
       direction: "down",
-      workspaceRoles: ROLES,
     });
     expect(plan.blockers).toHaveLength(1);
   });
@@ -56,7 +52,6 @@ describe("buildRotaFillPlan — right", () => {
         [makeCell([makeShift({ id: "src", role: "Bar" })]), makeCell(), makeCell()],
       ]),
       direction: "right",
-      workspaceRoles: ROLES,
     });
     expect(plan.counts.created).toBe(2);
   });
@@ -69,7 +64,6 @@ describe("buildRotaFillPlan — open/assigned conversion", () => {
         rowKeys: ["staff:0", "open"],
       }),
       direction: "down",
-      workspaceRoles: ROLES,
     });
     const op = plan.cells[0]!.ops[0]!;
     expect(op.kind).toBe("create");
@@ -86,7 +80,6 @@ describe("buildRotaFillPlan — open/assigned conversion", () => {
         { rowKeys: ["open", "staff:1"] },
       ),
       direction: "down",
-      workspaceRoles: ROLES,
     });
     const op = plan.cells[0]!.ops[0]!;
     expect(op.kind).toBe("create");
@@ -94,13 +87,51 @@ describe("buildRotaFillPlan — open/assigned conversion", () => {
   });
 });
 
-describe("buildRotaFillPlan — blocking", () => {
-  it("one invalid target does not arise from fill, but a slash source blocks all", () => {
+describe("buildRotaFillPlan — structured, not reparsed", () => {
+  it("carries a role the cell grammar cannot represent", () => {
     const plan = buildRotaFillPlan({
       rows: makeTargetGrid([[makeCell([makeShift({ role: "Bar/Grill" })])], [makeCell()]]),
       direction: "down",
-      workspaceRoles: ROLES,
     });
-    expect(plan.blockers.length).toBeGreaterThan(0);
+    expect(plan.blockers).toEqual([]);
+    const op = plan.cells[0]!.ops[0]!;
+    expect(op.kind === "create" && op.input.role).toBe("Bar/Grill");
+  });
+
+  it("carries a role that the text grammar would consume as a keyword", () => {
+    // Serialising "Open" into the cell grammar made the shift unassigned and
+    // stripped its role on the way back.
+    const plan = buildRotaFillPlan({
+      rows: makeTargetGrid([[makeCell([makeShift({ role: "Open" })])], [makeCell()]]),
+      direction: "down",
+    });
+    expect(plan.blockers).toEqual([]);
+    const op = plan.cells[0]!.ops[0]!;
+    expect(op.kind === "create" && op.input.role).toBe("Open");
+    expect(op.kind === "create" && op.input.staffId).not.toBeNull();
+  });
+
+  it("carries the chip colour, which text could not represent at all", () => {
+    const plan = buildRotaFillPlan({
+      rows: makeTargetGrid([
+        [makeCell([makeShift({ role: "Bar", colourOverride: "teal" })])],
+        [makeCell()],
+      ]),
+      direction: "down",
+    });
+    const op = plan.cells[0]!.ops[0]!;
+    expect(op.kind === "create" && op.input.colourOverride).toBe("teal");
+  });
+
+  it("preserves an exact break rather than resetting it to the default", () => {
+    const plan = buildRotaFillPlan({
+      rows: makeTargetGrid([
+        [makeCell([makeShift({ role: "Bar", breakMinutes: 45 })])],
+        [makeCell()],
+      ]),
+      direction: "down",
+    });
+    const op = plan.cells[0]!.ops[0]!;
+    expect(op.kind === "create" && op.input.breakMinutes).toBe(45);
   });
 });

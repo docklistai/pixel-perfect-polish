@@ -1,6 +1,7 @@
 import type { DraftShift, DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
 import { isShiftCopyAssignable } from "./assignableStaff";
-import { getShiftDurationMinutes, parseHHMMToMinutes } from "./draftRota";
+import { intervalConflict } from "./scheduling/calendarInterval";
+import { draftShiftTimes } from "./scheduling/draftShiftAdapter";
 
 export interface RepeatShiftPlan {
   inputs: DraftShiftInput[];
@@ -19,33 +20,41 @@ export interface RepeatShiftFeedback {
   description?: string;
 }
 
-function shiftsOverlap(first: DraftShift, second: DraftShift): boolean {
-  const firstStart = parseHHMMToMinutes(first.start);
-  const secondStart = parseHHMMToMinutes(second.start);
-  const firstDuration = getShiftDurationMinutes(first.start, first.end);
-  const secondDuration = getShiftDurationMinutes(second.start, second.end);
-  if (
-    firstStart === null ||
-    secondStart === null ||
-    firstDuration === null ||
-    secondDuration === null
-  ) {
-    return true;
-  }
-  return firstStart < secondStart + secondDuration && secondStart < firstStart + firstDuration;
-}
-
-function isCollision(source: DraftShift, dayIndex: number, shifts: DraftShift[]): boolean {
-  const sameDay = shifts.filter((shift) => shift.dayIndex === dayIndex);
+/**
+ * Whether repeating `source` onto `dayIndex` would collide.
+ *
+ * Two different questions, deliberately answered differently:
+ *
+ * - An **assigned** shift collides when the person would be double-booked. That is
+ *   an interval question, so it goes through the shared engine and is therefore
+ *   correct across midnight — repeating a 22:00–02:00 shift onto Tuesday now sees
+ *   Wednesday's early shift.
+ * - An **open** shift collides only when identical demand already exists on that
+ *   day. This is not an interval question: identical open demand is legitimate in
+ *   general, but repeating a shift onto a day that already has the same one is
+ *   what the manager almost certainly did not mean.
+ */
+function isCollision(
+  source: DraftShift,
+  dayIndex: number,
+  shifts: DraftShift[],
+  dayIsoDates?: readonly string[],
+): boolean {
   if (source.staffId !== null) {
-    return sameDay.some(
+    const candidate = { ...source, dayIndex: dayIndex as RotaDayIndex };
+    return shifts.some(
       (shift) =>
         shift.staffId === source.staffId &&
-        shiftsOverlap(source, { ...shift, dayIndex: source.dayIndex }),
+        shift.id !== source.id &&
+        intervalConflict(
+          draftShiftTimes(candidate, dayIsoDates),
+          draftShiftTimes(shift, dayIsoDates),
+        ) !== null,
     );
   }
-  return sameDay.some(
+  return shifts.some(
     (shift) =>
+      shift.dayIndex === dayIndex &&
       shift.staffId === null &&
       shift.role === source.role &&
       shift.start === source.start &&
@@ -78,13 +87,16 @@ export function planRepeatShift(
   source: DraftShift,
   dayIndexes: number[],
   shifts: DraftShift[],
+  dayIsoDates?: readonly string[],
 ): RepeatShiftPlan {
   const inputs: DraftShiftInput[] = [];
   let skippedCount = 0;
 
-  for (const dayIndex of new Set(dayIndexes)) {
+  // Sorted so the plan — and the "N skipped" feedback — is identical whatever
+  // order the day checkboxes were ticked in.
+  for (const dayIndex of [...new Set(dayIndexes)].sort((a, b) => a - b)) {
     if (dayIndex === source.dayIndex || dayIndex < 0 || dayIndex > 6) continue;
-    if (isCollision(source, dayIndex, shifts)) {
+    if (isCollision(source, dayIndex, shifts, dayIsoDates)) {
       skippedCount += 1;
       continue;
     }
@@ -99,9 +111,10 @@ export function planAssignableRepeatShift(
   dayIndexes: number[],
   shifts: DraftShift[],
   assignableStaff: StaffMember[],
+  dayIsoDates?: readonly string[],
 ): RepeatShiftPlan | null {
   if (!isShiftCopyAssignable(source, assignableStaff)) return null;
-  return planRepeatShift(source, dayIndexes, shifts);
+  return planRepeatShift(source, dayIndexes, shifts, dayIsoDates);
 }
 
 export async function executeRepeatShiftPlan(
