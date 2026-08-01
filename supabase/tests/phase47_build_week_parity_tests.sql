@@ -307,15 +307,27 @@ begin
   if has_function_privilege('authenticated', 'public.rpc_internal_build_week_digest(jsonb)', 'execute') then
     raise exception 'FAIL: authenticated can execute the digest function directly';
   end if;
+  -- Phase 48 re-signatured this one: the jsonb signature argument became a
+  -- parsed role key, and the staff lock moved out to the caller.
   if has_function_privilege('authenticated',
-      'public.rpc_internal_assert_build_week_assignable(uuid, uuid, jsonb, timestamptz, timestamptz, uuid)', 'execute') then
+      'public.rpc_internal_assert_build_week_assignable(uuid, uuid, text, timestamptz, timestamptz, text, uuid)', 'execute') then
     raise exception 'FAIL: authenticated can execute the assignability check directly';
   end if;
   if has_function_privilege('authenticated', 'public.rpc_internal_normalise_role_key(text)', 'execute') then
     raise exception 'FAIL: authenticated can execute the role-key helper directly';
   end if;
-  if has_function_privilege('authenticated', 'public.rpc_internal_proposal_signature_text(jsonb)', 'execute') then
-    raise exception 'FAIL: authenticated can execute the proposal signature helper directly';
+  -- Phase 48 replaced rpc_internal_proposal_signature_text(jsonb) with the
+  -- typed canonical renderer. It must be revoked for the same reason.
+  if has_function_privilege('authenticated',
+      'public.rpc_internal_signature_text(date, time, time, boolean, uuid, uuid, integer, text)', 'execute') then
+    raise exception 'FAIL: authenticated can execute the canonical signature renderer directly';
+  end if;
+  if has_function_privilege('authenticated',
+      'public.rpc_internal_shift_signature_text(date, timestamptz, timestamptz, text, uuid, uuid, integer, text)', 'execute') then
+    raise exception 'FAIL: authenticated can execute the stored-shift signature helper directly';
+  end if;
+  if to_regprocedure('public.rpc_internal_proposal_signature_text(jsonb)') is not null then
+    raise exception 'FAIL: the phase 47 raw-text proposal signature comparator still exists';
   end if;
   if has_function_privilege('anon',
       'public.rpc_build_week_proposal_stamp(uuid, uuid, jsonb, jsonb)', 'execute') then

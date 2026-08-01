@@ -16,10 +16,17 @@ import type {
  *
  * These are the refusals the RPC raises before it looks at anything in the
  * database — week bounds, location, break length, overnight agreement, role
- * identity, allowed kinds — plus the ascending-staff emission order the phase 31
- * lock protocol depends on. Every one of them is a pure function of the
- * proposal, so a planner change that would be refused at apply time fails here
- * instead, without a database.
+ * identity, allowed kinds — plus the deterministic ascending-staff emission
+ * order. Every one of them is a pure function of the proposal, so a planner
+ * change that would be refused at apply time fails here instead, without a
+ * database.
+ *
+ * That emission order is presentation and digest stability, NOT a
+ * database-safety mechanism. Phase 47 relied on it for lock ordering; phase 48
+ * removed the dependency. `rpc_apply_build_week_proposal` now collects every
+ * affected staff member from the parsed proposal and locks memberships and then
+ * staff in canonical ascending uuid order before any validation write, so
+ * reordering these operations cannot change lock acquisition order.
  *
  * Who may work a shift is the other half, in `buildWeekApplyParity.test.ts`.
  */
@@ -131,7 +138,15 @@ function sqlPreconditionFailures(body: BuildWeekProposalBody): string[] {
   return failures;
 }
 
-/** Phase 31 lock order: assignments first, then creations, staff id ascending. */
+/**
+ * Canonical emission order: assignments first, then creations, staff id
+ * ascending.
+ *
+ * The name is historical — this order served the phase 31 lock protocol until
+ * phase 48 made lock acquisition independent of the operation list. A violation
+ * here is now a determinism and digest-stability regression, not a deadlock
+ * risk.
+ */
 function lockOrderViolations(body: BuildWeekProposalBody): string[] {
   const rank = (op: ProposalOperation) => (op.kind === "assign-open" ? 0 : 1);
   const staffOf = (op: ProposalOperation) => (op.kind === "create-open" ? "" : op.staffId);
@@ -182,7 +197,7 @@ describe("the contract checks themselves detect a bad proposal", () => {
     ]);
   });
 
-  it("catches operations emitted out of the lock order", () => {
+  it("catches operations emitted out of the canonical order", () => {
     const body = plan({ demand: [demand(2)], staff: [staff("s1"), staff("s2")] });
     const reversed: BuildWeekProposalBody = {
       ...body,
@@ -266,8 +281,8 @@ describe("contracted minutes are neutral when null", () => {
       existingShifts: [existing("busy", "s1", { start: "05:00", end: "08:00" })],
       staff: [staff("s1"), staff("s2")],
     });
-    // Operations are emitted in lock order, not assignment order, so this is
-    // asserted per shift rather than by position.
+    // Operations are emitted in the planner's canonical order, not assignment
+    // order, so this is asserted per shift rather than by position.
     const assignmentFor = (start: string) =>
       body.sections.proposedAssignments.find((entry) => entry.signature.startLocal === start)
         ?.staffId;
@@ -289,7 +304,7 @@ describe("contracted minutes are neutral when null", () => {
 });
 
 describe("the proposal a manager approves is one SQL can apply", () => {
-  it("emits only the three allowed kinds, in lock order", () => {
+  it("emits only the three allowed kinds, in the canonical order", () => {
     // Four of the day shift against three people, so the last has nobody left
     // and must be created open — all three kinds in one proposal.
     const body = plan({

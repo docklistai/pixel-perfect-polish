@@ -5,14 +5,18 @@ import type { ProposalOperation } from "./buildWeekProposal";
  * Apply order: existing-shift assignments first, then creations, each by staff id
  * ascending with unassigned first.
  *
- * The staff ordering is not cosmetic. The database takes a per-staff eligibility
- * lock on any write that assigns somebody (phase 31), and every multi-person
- * writer acquires those locks in ascending staff order. Emitting operations in
- * that order is what keeps this apply inside the existing deadlock-free protocol.
+ * This order is presentation and determinism, NOT a database-safety mechanism.
+ * Phase 47 relied on it for lock ordering, which was wrong twice over: nothing
+ * in SQL validated the order, and ranking assign-open ahead of creations meant
+ * the sequence was ascending only within a rank group. Phase 48 removed that
+ * dependency — rpc_apply_build_week_proposal now collects every affected staff
+ * member from the parsed operations and locks the whole set once, in canonical
+ * ascending order, before it validates or writes anything. Reordering this list
+ * can no longer cause a deadlock.
  *
- * It lives in its own file for the same reason: this is a database-protocol
- * constraint, not a presentation choice, and it must not be reordered by someone
- * tidying the planner.
+ * What it still buys: the same inputs always produce the same sequence, so the
+ * proposal digest is stable between preview and apply, and operations are
+ * applied in the order the manager reviewed them.
  */
 export function sortOperations(operations: readonly ProposalOperation[]): ProposalOperation[] {
   const staffOf = (op: ProposalOperation): string => (op.kind === "create-open" ? "" : op.staffId);

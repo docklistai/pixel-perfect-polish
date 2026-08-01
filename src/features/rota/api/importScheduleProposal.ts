@@ -147,8 +147,10 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
       };
     }
 
-    // Imported rows become the same operation kinds Build produces, ordered by
-    // ascending staff id so the apply stays inside the database lock protocol.
+    // Imported rows become the same operation kinds Build produces. The sort is
+    // for a stable digest between preview and apply, not for lock safety: since
+    // phase 48 the apply derives its own canonical lock order from the parsed
+    // operations rather than trusting the order they arrive in.
     const operations: ProposalOperation[] = preview.rows
       .filter((row) => row.ok && row.shift)
       .map((row) =>

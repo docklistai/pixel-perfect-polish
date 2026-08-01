@@ -262,7 +262,7 @@ describe("determinism", () => {
     if (firstCreate !== -1 && lastAssign !== -1) expect(lastAssign).toBeLessThan(firstCreate);
   });
 
-  it("orders operations by ascending staff id, matching the database lock protocol", () => {
+  it("orders operations by ascending staff id, for a stable proposal digest", () => {
     const result = plan({
       demand: [demand(1, { workDate: WEEK[3] })],
       staff: [staff("z"), staff("a")],
