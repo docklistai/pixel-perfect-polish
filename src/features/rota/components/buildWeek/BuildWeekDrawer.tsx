@@ -2,6 +2,7 @@ import * as React from "react";
 import { MapPin } from "lucide-react";
 import { DrawerShell, FormSection } from "@/components/dl";
 import { useDemandTemplates } from "../../hooks/useDemandTemplates";
+import { useWorkspaceDepartments } from "../../hooks/useWorkspaceDepartments";
 import { useBuildWeekProposal, type BuildWeekSourceChoice } from "../../hooks/useBuildWeekProposal";
 import { buildWeekAvailability } from "../../lib/serverActionAvailability";
 import { BuildWeekSourceStep } from "./BuildWeekSourceStep";
@@ -56,6 +57,9 @@ export function BuildWeekDrawer({
   const templates = useDemandTemplates();
   const build = useBuildWeekProposal({ weekOffset, locationId, onApplied });
   const availability = buildWeekAvailability({ serverBacked, canEdit });
+  // Build groups demand by department; say so plainly rather than silently
+  // producing a weaker proposal when the workspace has none.
+  const departmentsState = useWorkspaceDepartments();
 
   React.useEffect(() => {
     if (open) return;
@@ -129,6 +133,12 @@ export function BuildWeekDrawer({
               </div>
             </dl>
           </div>
+          {departmentsState.isEmpty && (
+            <p className="mt-2 text-xs text-warning">
+              This workspace has no active department yet. Build still works, but it groups demand
+              by department — add one from Staff → Departments to get the most out of it.
+            </p>
+          )}
           {!availability.available && (
             <p className="mt-2 text-xs text-muted-foreground">{availability.reason}</p>
           )}

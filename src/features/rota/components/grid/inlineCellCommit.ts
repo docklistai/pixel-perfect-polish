@@ -69,6 +69,20 @@ export async function commitInlineCellEdit({
     return;
   }
 
+  // Hands off to the shared record-absence dialog. The cell is left exactly as
+  // it is: recording an absence never edits or removes the rota shift.
+  if (command.kind === "record-absence") {
+    // The open-shifts row has no person, so there is nobody to record against.
+    if (!handlers.onRecordAbsence || !staffId) {
+      toast.info("Nothing saved", {
+        description: "Use Leave to record an absence for a team member",
+      });
+      return;
+    }
+    handlers.onRecordAbsence({ staffId, dayIndex, leaveType: command.leaveType });
+    return;
+  }
+
   if (command.kind === "clear") {
     const refusal = refuseAmbiguousClear(cell.shifts.length, command.all);
     if (refusal) {

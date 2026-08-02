@@ -19,6 +19,8 @@ export type InlineCellParseResult =
   | { kind: "shifts"; shifts: ParsedInlineShift[] }
   /** A recognised command this pilot deliberately does not record. Saves nothing. */
   | { kind: "blocked"; message: string }
+  /** Hands off to the shared record-absence dialog. Saves nothing to the cell. */
+  | { kind: "record-absence"; leaveType: "sick" }
   | { kind: "error"; message: string };
 
 export type InlineCellParseOptions = {

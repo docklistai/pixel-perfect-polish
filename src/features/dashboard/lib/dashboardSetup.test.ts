@@ -9,6 +9,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: false,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.show).toBe(true);
     expect(plan.mode).toBe("workspace");
@@ -34,6 +36,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(unknown.steps.some((step) => step.id === "basics")).toBe(false);
 
@@ -43,6 +47,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: false,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     // Basics is a first-run step only — an established team doesn't get nagged.
     expect(staffed.steps.some((step) => step.id === "basics")).toBe(false);
@@ -55,6 +61,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: true,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.steps.find((step) => step.id === "basics")).toMatchObject({ done: true });
   });
@@ -66,6 +74,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: null,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.steps.map((step) => step.id)).toEqual(["team", "rota", "publish"]);
   });
@@ -77,6 +87,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: true,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.steps.find((step) => step.id === "budget")).toMatchObject({ done: true });
   });
@@ -88,6 +100,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.show).toBe(true);
     expect(plan.mode).toBe("week");
@@ -103,6 +117,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.show).toBe(false);
   });
@@ -114,6 +130,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: true,
       hasLabourTargets: false,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.show).toBe(false);
   });
@@ -125,6 +143,8 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: true,
       hasLabourTargets: false,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.show).toBe(false);
   });
@@ -136,9 +156,90 @@ describe("buildDashboardSetup", () => {
       hasPublishedSnapshot: false,
       hasLabourTargets: false,
       hasBusinessBasics: null,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
     });
     expect(plan.show).toBe(true);
     expect(plan.mode).toBe("workspace");
     expect(plan.steps.find((step) => step.id === "rota")).toMatchObject({ done: true });
+  });
+
+  describe("location and department structure", () => {
+    const configuredWorkspace = {
+      staffCount: 4,
+      plannedShiftCount: 6,
+      hasPublishedSnapshot: true,
+      hasLabourTargets: true,
+      hasBusinessBasics: true,
+    };
+
+    it("guides a brand-new workspace through location and department first", () => {
+      const plan = buildDashboardSetup({
+        staffCount: 0,
+        plannedShiftCount: 0,
+        hasPublishedSnapshot: false,
+        hasLabourTargets: false,
+        hasBusinessBasics: false,
+        activeLocationCount: 0,
+        activeDepartmentCount: 0,
+      });
+      expect(plan.steps.map((step) => step.id)).toEqual([
+        "basics",
+        "location",
+        "department",
+        "team",
+        "rota",
+        "publish",
+        "budget",
+      ]);
+      expect(plan.steps.find((step) => step.id === "location")).toMatchObject({ done: false });
+      expect(plan.steps.find((step) => step.id === "department")).toMatchObject({ done: false });
+    });
+
+    it("sends the department step to the real Staff dialog", () => {
+      const plan = buildDashboardSetup({
+        ...configuredWorkspace,
+        activeLocationCount: 1,
+        activeDepartmentCount: 0,
+      });
+      expect(plan.steps.find((step) => step.id === "department")).toMatchObject({
+        route: "/staff",
+        intent: "staff.departments",
+      });
+    });
+
+    it("re-opens the panel when a busy workspace loses its last department", () => {
+      const plan = buildDashboardSetup({
+        ...configuredWorkspace,
+        activeLocationCount: 1,
+        activeDepartmentCount: 0,
+      });
+      // Nothing else is outstanding, so only the missing structure can be
+      // keeping the panel open.
+      expect(plan.show).toBe(true);
+      expect(plan.steps.some((step) => step.id === "department")).toBe(true);
+    });
+
+    it("hides both structure steps once they exist and the workspace is staffed", () => {
+      const plan = buildDashboardSetup({
+        ...configuredWorkspace,
+        activeLocationCount: 1,
+        activeDepartmentCount: 2,
+      });
+      expect(plan.show).toBe(false);
+      expect(plan.steps.some((step) => step.id === "location")).toBe(false);
+      expect(plan.steps.some((step) => step.id === "department")).toBe(false);
+    });
+
+    it("never reports missing structure while the counts are still loading", () => {
+      const plan = buildDashboardSetup({
+        ...configuredWorkspace,
+        activeLocationCount: null,
+        activeDepartmentCount: null,
+      });
+      expect(plan.show).toBe(false);
+      expect(plan.steps.some((step) => step.id === "location")).toBe(false);
+      expect(plan.steps.some((step) => step.id === "department")).toBe(false);
+    });
   });
 });

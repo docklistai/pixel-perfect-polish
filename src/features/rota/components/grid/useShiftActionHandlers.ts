@@ -41,6 +41,7 @@ export function useShiftActionHandlers({
   onShiftResetColour,
   onShiftAdd,
   onShiftUpdate,
+  onRecordAbsence,
 }: ShiftActionHandlerInput): ShiftActionHandlers {
   const workspaceRoles = React.useMemo(() => {
     const roles = new Set<string>();
@@ -70,6 +71,7 @@ export function useShiftActionHandlers({
       onShiftResetColour,
       onShiftAdd,
       onShiftUpdate,
+      onRecordAbsence,
     }),
     [
       duplicateBlockedReason,
@@ -86,6 +88,7 @@ export function useShiftActionHandlers({
       onShiftSetDepartment,
       onShiftSetDept,
       onShiftUpdate,
+      onRecordAbsence,
       readOnly,
       serverBacked,
       workspaceRoles,

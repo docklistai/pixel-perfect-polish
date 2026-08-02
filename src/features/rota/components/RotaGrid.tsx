@@ -11,6 +11,7 @@ import {
 import { RotaGridDescription } from "./grid/RotaGridDescription";
 import { useRotaGridNavigation } from "./grid/useRotaGridNavigation";
 import { useRotaGridKeyboard } from "./grid/useRotaGridKeyboard";
+import { countOpenShifts } from "./grid/rotaGridMetrics";
 import { useShiftActionHandlers } from "./grid/useShiftActionHandlers";
 import { useRotaGridSelection } from "./grid/selection/useRotaGridSelection";
 import { useRotaCellSelectionApi } from "./grid/selection/useRotaCellSelectionApi";
@@ -54,6 +55,7 @@ export function RotaGrid({
   onShiftResetColour,
   onShiftAdd,
   onShiftUpdate,
+  onRecordAbsence,
   serverBacked = false,
 }: {
   days: RotaGridDay[];
@@ -144,11 +146,9 @@ export function RotaGrid({
     onShiftResetColour,
     onShiftAdd,
     onShiftUpdate,
+    onRecordAbsence,
   });
-  const totalOpenShifts = React.useMemo(
-    () => openRow.cells.reduce((acc, cell) => acc + cell.shifts.length, 0),
-    [openRow.cells],
-  );
+  const totalOpenShifts = React.useMemo(() => countOpenShifts(openRow.cells), [openRow.cells]);
 
   return (
     <section

@@ -9,7 +9,7 @@ import {
   UserX,
   type LucideIcon,
 } from "lucide-react";
-import { AppShell, Card, StatusBadge, type Tone } from "@/components/dl";
+import { AppShell, Card, StatusBadge } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
 import { EditStaffDialog } from "../EditStaffDialog";
 import { OffboardStaffDialog } from "./OffboardStaffDialog";
@@ -17,28 +17,14 @@ import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileEmptyPanel } from "./ProfileEmptyPanel";
 import { LiveOperationalCards } from "./LiveOperationalCards";
 import { LiveScheduleList } from "./LiveScheduleList";
-import { LiveLeaveList } from "./LiveLeaveList";
+import { LiveProfileLeaveTab } from "./LiveProfileLeaveTab";
 import { LiveTimeList } from "./LiveTimeList";
-import { StaffRecurringDaysOffCard } from "./StaffRecurringDaysOffCard";
-import { StaffOneOffUnavailabilityCard } from "./StaffOneOffUnavailabilityCard";
 import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
+import { statusTone, portalTone } from "./profileTones";
 import { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
 import type { StaffRow } from "../../types";
 
 const NOT_RECORDED = "Not recorded";
-
-function statusTone(status: string): Tone {
-  if (status === "Active") return "success";
-  if (status === "On Leave") return "purple";
-  if (status === "Probation") return "info";
-  return "muted";
-}
-
-function portalTone(status: string | undefined): Tone {
-  if (status === "Claimed") return "success";
-  if (status === "Pending") return "warning";
-  return "muted";
-}
 
 /**
  * Tab → honest empty-state copy for live members on the tabs that have no live
@@ -236,11 +222,7 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
         )}
         {activeTab === "schedule" && <LiveScheduleList ops={ops} firstName={firstName} />}
         {activeTab === "leave" && (
-          <div className="grid gap-5">
-            <LiveLeaveList ops={ops} firstName={firstName} />
-            <StaffRecurringDaysOffCard staffMemberId={member.id} firstName={firstName} />
-            <StaffOneOffUnavailabilityCard staffMemberId={member.id} firstName={firstName} />
-          </div>
+          <LiveProfileLeaveTab staffMemberId={member.id} firstName={firstName} ops={ops} />
         )}
         {activeTab === "time" && <LiveTimeList ops={ops} firstName={firstName} />}
         {empty && (

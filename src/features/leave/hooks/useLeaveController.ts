@@ -17,6 +17,8 @@ type ControllerArgs = {
   onSelectRequest: (id: string) => void;
   onCloseDecision: () => void;
   onCloseNewRequest: () => void;
+  /** Live mode opens the shared record-absence dialog instead of the demo form. */
+  onRecordAbsence: () => void;
 };
 
 export type LeaveController = {
@@ -37,10 +39,9 @@ export type LeaveController = {
  * Leave inbox + decisions for the Leave page. Prefers a live, manager-scoped
  * read and routes approve/decline/reopen through `rpc_decide_leave_request`
  * when authenticated; otherwise drives the demo WorkspaceStore so Harbour View
- * keeps working offline. There is no manager-side leave-creation RPC (only
- * staff submission), so in live mode manager-create is surfaced as "not
- * available yet" rather than echoing to the unused demo store with a false
- * "Request created" success.
+ * keeps working offline. In live mode manager-create opens the shared
+ * record-absence dialog (`rpc_manager_record_absence`), which writes an already
+ * approved absence rather than simulating a staff submission.
  */
 export function useLeaveController(args: ControllerArgs): LeaveController {
   const { auth } = leaveRouteApi.useRouteContext();
@@ -160,10 +161,8 @@ export function useLeaveController(args: ControllerArgs): LeaveController {
         "The reason was saved, the team member was notified, and any published-week inconsistency was flagged.",
       ),
     reopen: (id) => decide(id, "pending", "", "Reopened", "Request returned to the review queue."),
-    // No manager-side leave-creation RPC: do not echo to the demo store or fake success.
-    createRequest: () =>
-      toast.info("Not available in live mode yet", {
-        description: "Manager-created leave isn't wired to the live workspace yet.",
-      }),
+    // Manager-side creation is a recorded absence, not a simulated staff
+    // submission — it opens the shared dialog backed by rpc_manager_record_absence.
+    createRequest: () => args.onRecordAbsence(),
   };
 }

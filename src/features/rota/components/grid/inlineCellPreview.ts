@@ -36,6 +36,11 @@ export function buildInlineCellPreview(
 
   if (result.kind === "blocked") return { tone: "blocked", summary: result.message };
 
+  // Understood, and it does open a real action — but nothing is written to the
+  // cell itself, so the shift stays until the manager decides what to do.
+  if (result.kind === "record-absence")
+    return { tone: "ok", summary: "Opens Record absence — the shift is not changed" };
+
   if (result.kind === "clear") {
     return {
       tone: "ok",

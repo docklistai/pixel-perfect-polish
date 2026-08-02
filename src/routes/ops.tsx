@@ -20,6 +20,7 @@ import {
   OPS_PREVIEW_BANNER_TITLE,
   OPS_PREVIEW_BANNER_DESCRIPTION,
   notifyOpsPreview,
+  opsLocalChangeMessage,
 } from "@/features/ops/lib/opsPreview";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsRiskPanel } from "@/features/ops/components/OpsRiskPanel";
@@ -100,7 +101,9 @@ function OpsPage() {
       }),
     };
     setEntries((es) => [entry, ...es]);
-    toast.success("Entry logged", { description: "Added to the operations timeline" });
+    toast.info("Added to this preview", {
+      description: opsLocalChangeMessage(`"${title}" appears in the sample timeline`),
+    });
   };
 
   const handleChangeStatus = (id: string, status: string, options: { close?: boolean } = {}) => {
@@ -113,18 +116,22 @@ function OpsPage() {
       ),
     );
     if (options.close && status === "Done") {
-      toast.success("Marked done", {
-        description: `${target.title} closed out`,
+      toast.info("Shown as done in this preview", {
+        description: opsLocalChangeMessage(`"${target.title}" now reads as Done`),
         action: {
           label: "Undo",
           onClick: () => {
             setEntries((es) => es.map((e) => (e.id === id ? { ...e, ...prev } : e)));
-            toast.info("Undone", { description: "Status restored" });
+            toast.info("Reverted in this preview", {
+              description: opsLocalChangeMessage("The sample status is back as it was"),
+            });
           },
         },
       });
     } else {
-      toast.info("Status updated", { description: `${target.title} → ${status}` });
+      toast.info("Shown differently in this preview", {
+        description: opsLocalChangeMessage(`"${target.title}" now reads as ${status}`),
+      });
     }
   };
 
@@ -132,13 +139,15 @@ function OpsPage() {
     const removed = entries.find((e) => e.id === id);
     if (!removed) return;
     setEntries((es) => es.filter((e) => e.id !== id));
-    toast.warning("Deleted", {
-      description: removed.title,
+    toast.info("Hidden in this preview", {
+      description: opsLocalChangeMessage(`"${removed.title}" is no longer listed`),
       action: {
         label: "Undo",
         onClick: () => {
           setEntries((es) => [removed, ...es]);
-          toast.info("Restored", { description: `${removed.title} restored` });
+          toast.info("Back in this preview", {
+            description: opsLocalChangeMessage(`"${removed.title}" is listed again`),
+          });
         },
       },
     });

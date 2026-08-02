@@ -78,8 +78,6 @@ describe("buildInlineCellPreview", () => {
     ["annual leave", "Use Leave to record or approve holiday"],
     ["leave", "Use Leave to record or approve holiday"],
     ["unavailable", "Use staff unavailability to record this"],
-    ["sick", "Sickness recording is not available in this pilot"],
-    ["sickness", "Sickness recording is not available in this pilot"],
   ])("redirects %s to the surface that owns the record", (input, message) => {
     const preview = buildInlineCellPreview(input, options);
     // "blocked", not "error": the manager typed something meaningful.
@@ -89,6 +87,13 @@ describe("buildInlineCellPreview", () => {
 
   it("treats blocked commands case- and punctuation-insensitively", () => {
     expect(buildInlineCellPreview("Annual Leave", options).tone).toBe("blocked");
-    expect(buildInlineCellPreview("SICK", options).tone).toBe("blocked");
+  });
+
+  it("previews an absence word as an action that leaves the shift alone", () => {
+    const preview = buildInlineCellPreview("SICK", options);
+    expect(preview.tone).toBe("ok");
+    expect(preview.summary).toContain("Record absence");
+    // The manager must not think the shift is about to be cleared.
+    expect(preview.summary).toContain("not changed");
   });
 });

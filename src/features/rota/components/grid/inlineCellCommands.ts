@@ -11,11 +11,13 @@
 
 export type InlineCellCommand =
   | { kind: "clear"; all: boolean }
-  | { kind: "blocked"; message: string };
+  | { kind: "blocked"; message: string }
+  // Opens the shared record-absence dialog for that person and day. Typing it
+  // never edits the cell — the shift stays until the manager decides.
+  | { kind: "record-absence"; leaveType: "sick" };
 
 const LEAVE_MESSAGE = "Use Leave to record or approve holiday";
 const UNAVAILABLE_MESSAGE = "Use staff unavailability to record this";
-const SICKNESS_MESSAGE = "Sickness recording is not available in this pilot";
 
 /** What clearing a cell does — and, explicitly, what it does not do. */
 export const CLEAR_CELL_SUMMARY =
@@ -29,9 +31,10 @@ const BLOCKED_COMMANDS = new Map<string, string>([
   ["annual leave", LEAVE_MESSAGE],
   ["leave", LEAVE_MESSAGE],
   ["unavailable", UNAVAILABLE_MESSAGE],
-  ["sick", SICKNESS_MESSAGE],
-  ["sickness", SICKNESS_MESSAGE],
 ]);
+
+/** Words that open the record-absence dialog rather than editing the cell. */
+const ABSENCE_COMMANDS = new Set(["sick", "sickness", "off sick", "absent"]);
 
 /** Lowercase, with punctuation and repeated spaces collapsed to single spaces. */
 function normaliseCommand(value: string): string {
@@ -52,6 +55,8 @@ export function matchInlineCellCommand(input: string): InlineCellCommand | null 
 
   if (CLEAR_ALL_COMMANDS.has(key)) return { kind: "clear", all: true };
   if (CLEAR_COMMANDS.has(key)) return { kind: "clear", all: false };
+
+  if (ABSENCE_COMMANDS.has(key)) return { kind: "record-absence", leaveType: "sick" };
 
   const blocked = BLOCKED_COMMANDS.get(key);
   if (blocked) return { kind: "blocked", message: blocked };

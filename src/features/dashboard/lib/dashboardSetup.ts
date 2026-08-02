@@ -1,6 +1,7 @@
 import { CalendarPlus, PiggyBank, Send, Store, UserPlus, type LucideIcon } from "lucide-react";
 import type { IntentName } from "@/lib/interactionIntents";
 import type { AppRoute } from "../types";
+import { buildStructureSteps, isStructureMissing } from "./dashboardSetupStructure";
 
 /**
  * Pure derivation of the dashboard's "get set up" panel from live workspace
@@ -27,10 +28,21 @@ export interface DashboardSetupInput {
    * unknown/loading — the optional basics step is omitted rather than flashed.
    */
   hasBusinessBasics: boolean | null;
+  /**
+   * Active locations in the workspace. Null while unknown/loading. Bootstrap
+   * creates one, so this is normally satisfied — it is surfaced because a rota
+   * week cannot exist without it.
+   */
+  activeLocationCount: number | null;
+  /**
+   * Active departments. Null while unknown/loading. Bootstrap creates one, but
+   * it can be archived later, and Build the Week needs one to group demand.
+   */
+  activeDepartmentCount: number | null;
 }
 
 export interface DashboardSetupStep {
-  id: "basics" | "team" | "budget" | "rota" | "publish";
+  id: "basics" | "location" | "department" | "team" | "budget" | "rota" | "publish";
   title: string;
   description: string;
   done: boolean;
@@ -62,6 +74,8 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
     hasPublishedSnapshot,
     hasLabourTargets,
     hasBusinessBasics,
+    activeLocationCount,
+    activeDepartmentCount,
   } = input;
   const teamDone = staffCount > 0;
   const rotaDone = plannedShiftCount > 0;
@@ -83,6 +97,8 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
             icon: Store,
           },
         ]),
+    // Location and department — see dashboardSetupStructure.
+    ...buildStructureSteps(activeLocationCount, activeDepartmentCount),
     {
       id: "team",
       title: "Add your team",
@@ -134,9 +150,12 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
   ];
 
   const mode: DashboardSetupPlan["mode"] = teamDone ? "week" : "workspace";
+  // Missing structure is surfaced even in an otherwise busy workspace: without a
+  // location or department the rota cannot be built, so it is not "noise".
+  const structureMissing = isStructureMissing(activeLocationCount, activeDepartmentCount);
   // Only genuinely empty states show the panel; a week that is being drafted
   // (or already published) hands over to the publish card and attention rail.
-  const show = !teamDone || (!rotaDone && !publishDone);
+  const show = !teamDone || (!rotaDone && !publishDone) || structureMissing;
 
   return {
     show,

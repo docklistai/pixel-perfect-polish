@@ -29,6 +29,7 @@ import { LeaveCalendarDrawer } from "@/features/leave/components/LeaveCalendarPa
 import { LeaveDetailPanel } from "@/features/leave/components/LeaveDetailPanel";
 import { LeaveBottomCards } from "@/features/leave/components/LeaveBottomCards";
 import { LeaveActionDialogs } from "@/features/leave/components/LeaveActionDialogs";
+import { RecordAbsenceDialog } from "@/features/leave/components/RecordAbsenceDialog";
 import { LeaveImpactSummaryCard } from "@/features/leave/components/LeaveImpactSummaryCard";
 import { LeaveRotaImpactCard } from "@/features/leave/components/LeaveRotaImpactCard";
 import { LeaveRiskDrawer } from "@/features/leave/components/LeaveRiskDrawer";
@@ -81,6 +82,9 @@ function LeavePage() {
     null,
   );
   const [riskOpen, setRiskOpen] = React.useState(false);
+  const [absenceOpen, setAbsenceOpen] = React.useState(false);
+  const { auth } = Route.useRouteContext();
+  const workspaceId = auth.status === "member" ? auth.workspaceId : null;
 
   useIntentHandler("leave.new", () => setNewRequestOpen(true));
 
@@ -99,6 +103,7 @@ function LeavePage() {
     onSelectRequest: setActiveId,
     onCloseDecision: closeDecision,
     onCloseNewRequest: () => setNewRequestOpen(false),
+    onRecordAbsence: () => setAbsenceOpen(true),
   });
   const requests = actions.requests;
   const source = actions.source;
@@ -164,8 +169,11 @@ function LeavePage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <ActionButton icon={Plus} onClick={() => setNewRequestOpen(true)}>
-              New request
+            <ActionButton
+              icon={Plus}
+              onClick={() => (source === "live" ? setAbsenceOpen(true) : setNewRequestOpen(true))}
+            >
+              {source === "live" ? "Record absence" : "New request"}
             </ActionButton>
           </>
         }
@@ -274,6 +282,11 @@ function LeavePage() {
         onDecline={actions.decline}
         onCancel={actions.cancel}
         onCreateRequest={actions.createRequest}
+      />
+      <RecordAbsenceDialog
+        open={absenceOpen}
+        onOpenChange={setAbsenceOpen}
+        workspaceId={workspaceId}
       />
     </AppShell>
   );

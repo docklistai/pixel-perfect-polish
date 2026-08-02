@@ -22,6 +22,7 @@ export type IntentName =
   | "rota.addShift"
   | "staff.add"
   | "staff.accessCodes"
+  | "staff.departments"
   | "leave.new";
 
 type Handler = () => void;

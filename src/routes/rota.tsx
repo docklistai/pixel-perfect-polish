@@ -16,6 +16,8 @@ import { PrintableRota } from "@/features/rota/print/PrintableRota";
 import { useRotaPrintDocument } from "@/features/rota/hooks/useRotaPrintDocument";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
+import { RecordAbsenceDialog } from "@/features/leave/components/RecordAbsenceDialog";
+import { useAbsenceDialogState } from "@/features/leave/hooks/useAbsenceDialogState";
 import { useRotaDepartmentWiring } from "@/features/rota/hooks/useRotaDepartmentWiring";
 import { parseRotaWeekSearch } from "@/features/rota/lib/rotaSearch";
 
@@ -59,7 +61,9 @@ function RotaPage() {
     history,
   } = useRotaPage(week, location);
 
-  const { workspaceName } = useManagerIdentity();
+  const { workspaceName, workspaceId } = useManagerIdentity();
+  // Typing "sick" in a staff cell opens this; the shift itself is never changed.
+  const absence = useAbsenceDialogState(rota.liveWeekStart);
   const departmentWiring = useRotaDepartmentWiring({
     staff: rota.staff,
     updateShift: guardedRota.updateShift,
@@ -173,6 +177,7 @@ function RotaPage() {
                   onShiftResetColour={actions.handleResetShiftColour}
                   onShiftAdd={guardedRota.addShift}
                   onShiftUpdate={guardedRota.updateShift}
+                  onRecordAbsence={absence.open}
                 />
                 <RotaGridLegendBar
                   staffCount={rota.visibleStaff.length}
@@ -216,6 +221,8 @@ function RotaPage() {
           }
           onClearRecoverySelection={() => setRecoverySelection(null)}
         />
+
+        <RecordAbsenceDialog {...absence.props} workspaceId={workspaceId} />
 
         {/* Print-only document. Renders nothing on screen; @media print hides
             every other body child so no app chrome can reach paper. */}

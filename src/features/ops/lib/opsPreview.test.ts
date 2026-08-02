@@ -1,8 +1,11 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  OPS_LOCAL_ONLY_SUFFIX,
   OPS_PREVIEW_BANNER_DESCRIPTION,
   OPS_PREVIEW_BANNER_TITLE,
   OPS_PREVIEW_TOAST_TITLE,
+  opsLocalChangeMessage,
   opsPreviewMessage,
 } from "./opsPreview";
 
@@ -39,6 +42,26 @@ describe("opsPreview honesty copy", () => {
 
   it("falls back to honest generic copy with no action", () => {
     expect(opsPreviewMessage().toLowerCase()).toContain("isn't available");
+  });
+
+  it("local-only change copy always says nothing is saved", () => {
+    expect(OPS_LOCAL_ONLY_SUFFIX.toLowerCase()).toContain("nothing is saved");
+    const msg = opsLocalChangeMessage('"Fridge check" appears in the sample timeline');
+    expect(msg.toLowerCase()).toContain("nothing is saved");
+    expect(msg.toLowerCase()).toContain("preview only");
+  });
+
+  it("the Ops route never claims an entry was logged, saved or deleted", () => {
+    const route = readFileSync("src/routes/ops.tsx", "utf8");
+    // These read as persistence to a manager and Ops writes nothing at all.
+    expect(route).not.toContain("Entry logged");
+    expect(route).not.toContain("Added to the operations timeline");
+    expect(route).not.toContain("Marked done");
+    expect(route).not.toContain("closed out");
+    expect(route).not.toMatch(/toast\.success\(/);
+    expect(route).not.toMatch(/toast\.warning\("Deleted"/);
+    // Every local-only interaction routes through the honest helper.
+    expect(route).toContain("opsLocalChangeMessage");
   });
 
   it("never claims a persistence/delivery effect occurred", () => {

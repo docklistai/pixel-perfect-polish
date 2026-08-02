@@ -7,7 +7,8 @@ import { useIntents, type IntentName } from "@/lib/interactionIntents";
 import { Sparkles, MoreHorizontal, Plus, ChevronDown } from "lucide-react";
 import { DashboardAISummaryCard } from "@/features/dashboard/components/DashboardAISummaryCard";
 import { DashboardSetupPanel } from "@/features/dashboard/components/DashboardSetupPanel";
-import { buildDashboardSetup } from "@/features/dashboard/lib/dashboardSetup";
+import { useDashboardSetupPlan } from "@/features/dashboard/hooks/useDashboardSetupPlan";
+import { useDismissOnOutside } from "@/features/dashboard/hooks/useDismissOnOutside";
 import { DashboardKpiCards } from "@/features/dashboard/components/DashboardKpiCards";
 import { DashboardAttentionPanel } from "@/features/dashboard/components/DashboardAttentionPanel";
 import { DashboardLabourWatchLive } from "@/features/dashboard/components/DashboardLabourWatchLive";
@@ -58,31 +59,31 @@ function Home() {
   const quickRef = React.useRef<HTMLDivElement>(null);
   const moreRef = React.useRef<HTMLDivElement>(null);
   const dashboard = useDashboardData();
-  const { workspaceName } = useManagerIdentity();
+  const { workspaceName, workspaceId } = useManagerIdentity();
   const greeting = useGreeting();
   const labourSettings = useWorkspaceLabourSettings();
   const workspaceProfile = useWorkspaceProfile();
   const isLiveDashboard = dashboard.source === "live";
   const liveReadsPending = isLiveDashboard && (dashboard.isLiveLoading || dashboard.isLiveError);
   // Live-only setup/readiness checklist; demo workspaces are always populated.
-  const setupPlan =
-    dashboard.source === "live" && dashboard.liveReady
-      ? buildDashboardSetup({
-          staffCount: dashboard.staffCount,
-          plannedShiftCount: dashboard.plannedShiftCount,
-          hasPublishedSnapshot: dashboard.nextPublished,
-          hasLabourTargets: labourSettings.isUnset
-            ? false
-            : labourSettings.settings
-              ? labourSettings.settings.weeklyBudgetMinutes !== null ||
-                labourSettings.settings.avgHourlyCostPence !== null
-              : null,
-          hasBusinessBasics:
-            !workspaceProfile.enabled || workspaceProfile.isLoading
-              ? null
-              : workspaceProfile.openWeekdaysMask !== null,
-        })
-      : null;
+  const setupPlan = useDashboardSetupPlan({
+    workspaceId,
+    isLive: isLiveDashboard,
+    liveReady: dashboard.liveReady,
+    staffCount: dashboard.staffCount,
+    plannedShiftCount: dashboard.plannedShiftCount,
+    hasPublishedSnapshot: dashboard.nextPublished,
+    hasLabourTargets: labourSettings.isUnset
+      ? false
+      : labourSettings.settings
+        ? labourSettings.settings.weeklyBudgetMinutes !== null ||
+          labourSettings.settings.avgHourlyCostPence !== null
+        : null,
+    hasBusinessBasics:
+      !workspaceProfile.enabled || workspaceProfile.isLoading
+        ? null
+        : workspaceProfile.openWeekdaysMask !== null,
+  });
   const showSetupPanel = setupPlan?.show ?? false;
   const visibleQuickActionItems = React.useMemo(
     () => (isLiveDashboard ? quickActionItems.filter((item) => !item.preview) : quickActionItems),
@@ -98,37 +99,8 @@ function Home() {
     [navigate, requestIntent],
   );
 
-  React.useEffect(() => {
-    if (!quickOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (quickRef.current && !quickRef.current.contains(e.target as Node)) setQuickOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setQuickOpen(false);
-    };
-    document.addEventListener("click", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("click", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [quickOpen]);
-
-  React.useEffect(() => {
-    if (!moreOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMoreOpen(false);
-    };
-    document.addEventListener("click", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("click", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [moreOpen]);
+  useDismissOnOutside(quickRef, quickOpen, () => setQuickOpen(false));
+  useDismissOnOutside(moreRef, moreOpen, () => setMoreOpen(false));
 
   return (
     <AppShell>

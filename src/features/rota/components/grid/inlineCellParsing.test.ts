@@ -265,8 +265,6 @@ describe("open shifts and clear commands", () => {
     ["annual leave", "Use Leave to record or approve holiday"],
     ["leave", "Use Leave to record or approve holiday"],
     ["unavailable", "Use staff unavailability to record this"],
-    ["sick", "Sickness recording is not available in this pilot"],
-    ["sickness", "Sickness recording is not available in this pilot"],
   ])("blocks %s and records nothing", (input, message) => {
     // The point of this matrix: these words must never become a shift, and must
     // never be turned into a leave, sickness or availability record.
@@ -274,6 +272,23 @@ describe("open shifts and clear commands", () => {
       kind: "blocked",
       message,
     });
+  });
+
+  it.each(["sick", "sickness", "off sick", "absent", "SICK", "Off Sick"])(
+    "hands %s to the record-absence dialog without touching the cell",
+    (input) => {
+      expect(parseInlineCellInput(input, { roleOptions: ROLES })).toEqual({
+        kind: "record-absence",
+        leaveType: "sick",
+      });
+    },
+  );
+
+  it("never turns an absence word carrying times into a command", () => {
+    // A real shift must still win: "sick 9-5" is not a whole-cell command.
+    expect(parseInlineCellInput("sick 9-5", { roleOptions: ROLES }).kind).not.toBe(
+      "record-absence",
+    );
   });
 
   it("fails safely on malformed and ambiguous input", () => {

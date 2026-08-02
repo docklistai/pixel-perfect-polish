@@ -69,6 +69,7 @@ function StaffListPage() {
 
   useIntentHandler("staff.add", () => setAddStaffOpen(true));
   useIntentHandler("staff.accessCodes", () => setAccessCodesOpen(true));
+  useIntentHandler("staff.departments", () => setDepartmentsOpen(true));
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   // No demo fallback: an empty live roster has no member to preview, so the
   // panel stays closed rather than surfacing seed data.

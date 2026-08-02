@@ -25,3 +25,17 @@ export function opsPreviewMessage(action?: string): string {
 export function notifyOpsPreview(action?: string): void {
   toast.info(OPS_PREVIEW_TOAST_TITLE, { description: opsPreviewMessage(action) });
 }
+
+/**
+ * Copy for an Ops interaction that only changes what is on screen.
+ *
+ * These interactions are real in the sense that the preview updates, but nothing
+ * is written anywhere. The wording must therefore never read as persistence —
+ * no "logged", "saved", "added to the timeline", "closed out" or "deleted".
+ * `opsPreview.test.ts` locks that.
+ */
+export const OPS_LOCAL_ONLY_SUFFIX = "Preview only — nothing is saved.";
+
+export function opsLocalChangeMessage(detail: string): string {
+  return `${detail}. ${OPS_LOCAL_ONLY_SUFFIX}`;
+}

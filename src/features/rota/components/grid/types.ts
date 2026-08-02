@@ -55,6 +55,11 @@ export type ShiftActionHandlers = {
   onShiftResetColour: (shiftId: ShiftId) => MaybePromise<void>;
   onShiftAdd?: (input: DraftShiftInput) => MaybePromise<void>;
   onShiftUpdate?: (shiftId: ShiftId, patch: Partial<DraftShift>) => MaybePromise<void>;
+  /**
+   * Opens the shared record-absence dialog for a person and day. Absent in demo
+   * mode, where no absence can be recorded. Never edits the cell.
+   */
+  onRecordAbsence?: (input: { staffId: string; dayIndex: number; leaveType: "sick" }) => void;
 };
 
 /** Per-shift menu callbacks passed from the grid cell into pills and the action menu. */

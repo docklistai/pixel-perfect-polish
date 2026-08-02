@@ -91,6 +91,11 @@ export function planRotaCellFromText({
   if (parsed.kind === "blocked")
     return refuse(`"${trimmed}" is not saved from the rota. ${parsed.message}.`);
 
+  // Recording an absence is a single deliberate action, never a bulk paste
+  // side effect, so it refuses the whole apply rather than writing anything.
+  if (parsed.kind === "record-absence")
+    return refuse(`"${trimmed}" opens Record absence — it cannot be pasted into cells.`);
+
   if (parsed.kind === "clear") {
     const refusal = refuseAmbiguousClear(existing.length, parsed.all);
     if (refusal) return refuse(refusal.description);
