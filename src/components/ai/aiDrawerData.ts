@@ -1,5 +1,6 @@
 import { AlertTriangle, Plane, Clock, type LucideIcon } from "lucide-react";
 import { TIME_OPERATIONAL_LOOKBACK_DAYS } from "@/features/time/lib/timeQueryRange";
+import { buildOpsSupportTopics, type OpsSupportContext } from "./opsSupportTopics";
 
 export type SupportState = "ready" | "loading" | "unavailable" | "error";
 
@@ -20,9 +21,10 @@ export interface AiWorkspaceContext {
     pendingTimeCount: number | null;
     approvedTimeCount: number | null;
   };
+  ops?: OpsSupportContext;
 }
 
-export type SupportRoute = "/rota" | "/leave" | "/time";
+export type SupportRoute = "/rota" | "/leave" | "/time" | "/ops";
 
 /**
  * A single bounded manager-support topic: a fixed label, a deterministic
@@ -67,14 +69,16 @@ export function buildSupportStatusMessage(context: AiWorkspaceContext): string {
   if (
     context.rota.state === "loading" ||
     context.leave.state === "loading" ||
-    context.time.state === "loading"
+    context.time.state === "loading" ||
+    context.ops?.state === "loading"
   ) {
     return "Live workspace counts are still loading.";
   }
   if (
     context.rota.state !== "ready" ||
     context.leave.state !== "ready" ||
-    context.time.state !== "ready"
+    context.time.state !== "ready" ||
+    (context.ops !== undefined && context.ops.state !== "ready")
   ) {
     return "One or more live counts are unavailable right now. The links below still open the live screens.";
   }
@@ -93,6 +97,7 @@ export function buildSupportTopics(context: AiWorkspaceContext): SupportTopic[] 
   const approvedTimeCount = context.time.approvedTimeCount;
 
   return [
+    ...(context.ops ? buildOpsSupportTopics(context.ops) : []),
     {
       id: "rota-review",
       icon: AlertTriangle,

@@ -1,106 +1,175 @@
 import * as React from "react";
-import { ArrowRight, FileText, FilePlus2, Send, User } from "lucide-react";
-import { toast } from "sonner";
-import { DialogShell, ActionButton, StatusBadge } from "@/components/dl";
-import { RowActionMenu } from "@/components/RowActionMenu";
-import { handoverRecipients, handoverAiDraft } from "../data/opsOverlayData";
-import { notifyOpsPreview } from "../lib/opsPreview";
+import { FilePlus2, FileText, Send } from "lucide-react";
+import { ActionButton, DialogShell, FormRow } from "@/components/dl";
+import type {
+  OpsHandover,
+  OpsLinkableEntry,
+  OpsLocation,
+  OpsManagerOption,
+  OpsRisk,
+} from "../types";
+import { OpsHandoverHistory } from "./OpsHandoverHistory";
+import { OpsEntryPicker, OpsManagerRecipientPicker } from "./OpsCollaborationPickers";
+import { localDateInTimezone } from "../lib/opsDates";
 
-interface OpsHandoverModalProps {
+interface Props {
   open: boolean;
   onClose: () => void;
+  locations: OpsLocation[];
+  managers: OpsManagerOption[];
+  entries: OpsLinkableEntry[];
+  risks: OpsRisk[];
+  pending: boolean;
+  handovers: OpsHandover[];
+  actorMembershipId: string;
+  selectedHandoverId?: string | null;
+  onAcknowledge: (id: string) => Promise<boolean>;
+  onSave: (value: {
+    locationId: string;
+    handoverDate: string;
+    rotaWeekId: string | null;
+    notes: string;
+    recipientMembershipIds: string[];
+    entryIds: string[];
+  }) => Promise<boolean>;
 }
 
-/** "Write handover note" modal — prototype parity. Demo-only, nothing is delivered. */
-export function OpsHandoverModal({ open, onClose }: OpsHandoverModalProps) {
-  const [recipient, setRecipient] = React.useState(handoverRecipients[0].name);
+export function OpsHandoverModal(props: Props) {
+  const recipients = React.useMemo(
+    () => props.managers.filter((manager) => !manager.isSelf),
+    [props.managers],
+  );
+  const [locationId, setLocationId] = React.useState(props.locations[0]?.id ?? "");
+  const [recipientIds, setRecipientIds] = React.useState<string[]>([]);
+  const [entryIds, setEntryIds] = React.useState<string[]>([]);
   const [notes, setNotes] = React.useState("");
-
-  const handleHandOver = () => {
-    onClose();
-    notifyOpsPreview("Handing over notes");
+  const location = props.locations.find((item) => item.id === locationId);
+  const entries = React.useMemo(
+    () =>
+      props.entries.filter(
+        (entry) =>
+          entry.locationId === locationId && ["open", "in_progress"].includes(entry.status),
+      ),
+    [locationId, props.entries],
+  );
+  React.useEffect(() => {
+    if (props.open) {
+      setRecipientIds(recipients.map((manager) => manager.id));
+      setEntryIds(entries.map((entry) => entry.id));
+    }
+  }, [props.open, recipients, entries]);
+  const draft = () => {
+    const selected = entries.filter((entry) => entryIds.includes(entry.id));
+    const lines = selected.map(
+      (entry) => `• ${entry.title} — ${entry.status.replace("_", " ")}, ${entry.priority} priority`,
+    );
+    const riskCount = props.risks.filter(
+      (risk) => risk.entryId && entryIds.includes(risk.entryId),
+    ).length;
+    setNotes(
+      [
+        `${selected.length} unresolved operational item${selected.length === 1 ? "" : "s"} attached.`,
+        riskCount
+          ? `${riskCount} deterministic risk${riskCount === 1 ? "" : "s"} require attention.`
+          : "No attached items currently trigger an Ops risk rule.",
+        ...lines,
+      ].join("\n"),
+    );
   };
-
+  const submit = async () => {
+    if (!location || !notes.trim() || recipientIds.length === 0) return;
+    if (
+      await props.onSave({
+        locationId,
+        handoverDate: localDateInTimezone(location.timezone),
+        rotaWeekId: entries.find((entry) => entry.rotaWeekId)?.rotaWeekId ?? null,
+        notes,
+        recipientMembershipIds: recipientIds,
+        entryIds,
+      })
+    )
+      props.onClose();
+  };
   return (
     <DialogShell
-      open={open}
-      onOpenChange={(o) => !o && onClose()}
+      open={props.open}
+      onOpenChange={(open) => !open && props.onClose()}
       title="Write handover note"
-      description="Snapshot for the next manager on duty"
+      description="Retained manager-to-manager operational handover"
       icon={FileText}
       iconTone="purple"
       size="lg"
       footer={
         <>
-          <ActionButton variant="ghost" onClick={onClose}>
+          <ActionButton variant="ghost" onClick={props.onClose}>
             Cancel
           </ActionButton>
-          <ActionButton variant="outline" onClick={() => setNotes(handoverAiDraft)}>
-            <FilePlus2 className="mr-1.5 h-3 w-3" /> Use sample draft
+          <ActionButton variant="outline" onClick={draft}>
+            <FilePlus2 className="mr-1.5 size-3" />
+            Draft from live Ops
           </ActionButton>
-          <ActionButton onClick={handleHandOver}>
-            <Send className="mr-1.5 h-3 w-3" /> Hand over to next manager
+          <ActionButton
+            onClick={submit}
+            disabled={props.pending || !notes.trim() || recipientIds.length === 0}
+          >
+            <Send className="mr-1.5 size-3" />
+            Issue handover
           </ActionButton>
         </>
       }
     >
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <StatusBadge tone="brand">
-          <User className="h-2.5 w-2.5" aria-hidden /> From Alex Thompson
-        </StatusBadge>
-        <StatusBadge tone="muted">
-          <ArrowRight className="h-2.5 w-2.5" aria-hidden /> {recipient} · sample recipient
-        </StatusBadge>
-        <RowActionMenu
-          triggerLabel="Change handover recipient"
-          trigger={
-            <button type="button" className="link text-xs">
-              Change
-            </button>
-          }
-          items={[
-            { kind: "label", text: "Sample recipients" },
-            ...handoverRecipients.map((r) => ({
-              label: `${r.name} · ${r.role}`,
-              onSelect: () => {
-                if (r.name !== recipient) {
-                  setRecipient(r.name);
-                  toast.info("Recipient updated", {
-                    description: `Showing ${r.name} as the sample recipient`,
-                  });
-                }
-              },
-            })),
-          ]}
-        />
-        <div className="grow" />
-        <span className="text-xs text-muted-foreground">Sample handover · not saved</span>
-      </div>
-
-      <div className="field">
-        <label htmlFor="ops-handover-notes">Notes</label>
-        <textarea
-          id="ops-handover-notes"
-          className="textarea w-full"
-          rows={9}
-          placeholder="What happened on your shift, what to keep an eye on, and anything pending…"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <FormRow label="Location" htmlFor="ops-handover-location">
+          <select
+            id="ops-handover-location"
+            className="select w-full"
+            value={locationId}
+            onChange={(e) => setLocationId(e.target.value)}
+          >
+            {props.locations.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </FormRow>
+        <OpsManagerRecipientPicker
+          managers={recipients}
+          selectedIds={recipientIds}
+          onChange={setRecipientIds}
+          label="Recipients"
         />
       </div>
-
-      <div
-        className="card mt-3 rounded-xl border p-0"
-        style={{ background: "var(--st-teal-bg)", borderColor: "var(--st-teal-line)" }}
-      >
-        <div className="flex items-start gap-3 p-3.5">
-          <FilePlus2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden />
-          <p className="grow text-[13px] leading-normal text-muted-foreground">
-            Start from a sample draft covering open incidents, follow-ups, and tonight&apos;s
-            events. This is preview content — nothing is shared.
-          </p>
-        </div>
+      <OpsEntryPicker
+        entries={entries}
+        selectedIds={entryIds}
+        onChange={setEntryIds}
+        label="Unresolved items"
+        emptyText="No unresolved items at this location."
+        showPriority
+      />
+      <div className="mt-3">
+        <FormRow label="Notes" htmlFor="ops-handover-notes">
+          <textarea
+            id="ops-handover-notes"
+            className="textarea w-full"
+            rows={8}
+            maxLength={4000}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </FormRow>
       </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        The draft uses only the selected unresolved items and deterministic risk rules. Review it
+        before issuing.
+      </p>
+      <OpsHandoverHistory
+        handovers={props.handovers}
+        actorMembershipId={props.actorMembershipId}
+        selectedHandoverId={props.selectedHandoverId}
+        onAcknowledge={props.onAcknowledge}
+      />
     </DialogShell>
   );
 }

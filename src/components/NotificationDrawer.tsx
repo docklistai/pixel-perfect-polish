@@ -77,6 +77,8 @@ export function NotificationDrawer({
         params: { staffId: n.staffId },
         search: n.staffSearch,
       });
+    } else if (n.opsSearch) {
+      navigate({ to: "/ops", search: n.opsSearch });
     } else if (n.rotaSearch) {
       navigate({ to: "/rota", search: n.rotaSearch });
     } else {

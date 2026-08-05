@@ -53,15 +53,14 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
   { label: "Time", to: "/time", icon: Clock, shortcut: "G T" },
   { label: "Leave", to: "/leave", icon: CalendarOff, shortcut: "G L" },
   { label: "Team", to: "/team", icon: MessageSquare, preview: true },
-  { label: "Ops", to: "/ops", icon: Wrench, preview: true },
+  { label: "Ops", to: "/ops", icon: Wrench },
   { label: "Reports", to: "/reports", icon: BarChart3, preview: true },
   { label: "Settings", to: "/settings", icon: SettingsIcon },
 ];
 
 /**
- * Every manager route is listed. Preview routes stay reachable for testers and
- * carry a "Preview" label in the palette so they are never mistaken for live
- * pilot features.
+ * Every manager route is listed. Team and Reports remain explicitly labelled
+ * preview surfaces; Ops is a live manager workspace surface.
  */
 export const COMMAND_PREVIEW_ROUTES: readonly NavTarget[] = COMMAND_NAV_ITEMS.filter(
   (item) => item.preview,

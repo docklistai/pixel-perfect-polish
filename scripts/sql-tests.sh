@@ -39,13 +39,33 @@ fi
 shopt -s nullglob
 fail=0
 ran=0
+
+# Expand repository-local psql \i includes before streaming into the container.
+# The database container cannot read host paths itself; tests can still share
+# fixture setup without duplicating hundreds of lines.
+expand_sql_includes() {
+  local source="$1" line include
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" == '\i '* ]]; then
+      include="${line#'\i '}"
+      if [[ "$include" != supabase/tests/* || ! -f "$include" ]]; then
+        echo "Unsafe or missing SQL include: $include" >&2
+        return 1
+      fi
+      cat "$include"
+    else
+      printf '%s\n' "$line"
+    fi
+  done <"$source"
+}
+
 for sql in "$TESTS_DIR"/*.sql; do
   base="$(basename "$sql")"
   if [[ -n "$FILTER" && "$base" != *"$FILTER"* ]]; then
     continue
   fi
   echo "── $base"
-  if docker exec -i "$DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q <"$sql" >/tmp/sql-test-out 2>&1; then
+  if expand_sql_includes "$sql" | docker exec -i "$DB_CONTAINER" psql -U postgres -d postgres -v ON_ERROR_STOP=1 -q >/tmp/sql-test-out 2>&1; then
     echo "   PASS"
   else
     echo "   FAIL"

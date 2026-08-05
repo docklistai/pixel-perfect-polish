@@ -30,6 +30,7 @@ export function RotaOverlays({
   overlays,
   locationName,
   weekOffset,
+  locationId,
   onBuildApplied,
   onPublishConfirm,
   onMarkShiftOpen,
@@ -44,6 +45,7 @@ export function RotaOverlays({
   overlays: RotaOverlaysState;
   locationName: string;
   weekOffset: number;
+  locationId: string | null;
   /** Fired after Build applies, so the route can reset undo history. */
   onBuildApplied: () => void;
   onPublishConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
@@ -183,6 +185,7 @@ export function RotaOverlays({
         dayIsoDates={rota.dayIsoDates}
         suggestedAssignTo={suggestedAssignTo}
         liveRotaWeekId={rota.source === "live" ? rota.liveRotaWeekId : null}
+        liveLocationId={locationId}
         onClose={() => {
           onClearRecoverySelection();
           rota.closeShiftDetail();

@@ -8,6 +8,8 @@ export interface RotaSearch {
   week?: number;
   /** Optional deep-link rota location id (multi-location workspaces only). */
   location?: string;
+  /** Optional exact shift id to open after the requested live week loads. */
+  shift?: string;
 }
 
 /**
@@ -32,6 +34,8 @@ export function parseRotaWeekSearch(search: Record<string, unknown>): RotaSearch
   if (typeof rawLocation === "string" && UUID_RE.test(rawLocation)) {
     result.location = rawLocation.toLowerCase();
   }
+  const rawShift = search.shift;
+  if (typeof rawShift === "string" && UUID_RE.test(rawShift)) result.shift = rawShift.toLowerCase();
 
   return result;
 }

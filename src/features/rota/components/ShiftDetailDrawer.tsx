@@ -15,6 +15,7 @@ import { ShiftEditFormFields, type ShiftEditFormState } from "./ShiftEditFormFie
 import { ShiftPendingLeaveHint } from "./ShiftPendingLeaveHint";
 import { ShiftRecoveryOptionsSection } from "./ShiftRecoveryOptionsSection";
 import { ShiftReleaseRequestSection } from "./ShiftReleaseRequestSection";
+import { ShiftOpsAction } from "./ShiftOpsAction";
 
 type DayEntry = { d: string };
 
@@ -42,6 +43,7 @@ export function ShiftDetailDrawer({
   dayIsoDates,
   suggestedAssignTo,
   liveRotaWeekId = null,
+  liveLocationId = null,
 }: {
   shift: DraftShift | null;
   staff: StaffMember[];
@@ -58,6 +60,7 @@ export function ShiftDetailDrawer({
   suggestedAssignTo?: string | null;
   /** Live rota week id; enables the open-shift applicants review (live mode only). */
   liveRotaWeekId?: string | null;
+  liveLocationId?: string | null;
 }) {
   const [form, setForm] = React.useState<ShiftEditFormState>(() =>
     shift ? formStateFromShift(shift) : { role: "", start: "", end: "", assignTo: "" },
@@ -227,6 +230,7 @@ export function ShiftDetailDrawer({
 
       <FormSection title="Quick actions">
         <div className="flex flex-wrap gap-2">
+          <ShiftOpsAction shift={shift} rotaWeekId={liveRotaWeekId} locationId={liveLocationId} />
           {!isOpen && (
             <ActionButton
               variant="secondary"

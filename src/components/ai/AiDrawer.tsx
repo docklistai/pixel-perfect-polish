@@ -18,6 +18,8 @@ import {
   timeQueryKeys,
 } from "@/features/time/lib/timeQueryRange";
 import { countOpenShifts } from "@/features/rota/lib/rotaSummaries";
+import { fetchOpsPageFn } from "@/features/ops/api/opsRead";
+import { suggestOpsPriority } from "./opsSupportTopics";
 
 function resolveSupportState({
   enabled,
@@ -74,6 +76,26 @@ export function AiDrawer({
     enabled,
     staleTime: 15_000,
   });
+  const opsQuery = useQuery({
+    queryKey: ["ops", workspaceId, "manager-support"],
+    queryFn: () =>
+      fetchOpsPageFn({
+        data: {
+          search: "",
+          entryType: null,
+          status: null,
+          priority: null,
+          locationId: null,
+          tab: "timeline",
+          sort: "priority_desc",
+          page: 1,
+          pageSize: 20,
+          selectedEntryId: null,
+        },
+      }),
+    enabled,
+    staleTime: 10_000,
+  });
 
   const supportContext = React.useMemo(
     () => ({
@@ -104,6 +126,28 @@ export function AiDrawer({
         pendingTimeCount: timeQuery.data?.awaitingReview ?? null,
         approvedTimeCount: timeQuery.data?.approvedInWindow ?? null,
       },
+      ops: {
+        state: resolveSupportState({
+          enabled,
+          isLoading: opsQuery.isLoading,
+          isError: opsQuery.isError,
+        }),
+        openItems: opsQuery.data
+          ? opsQuery.data.facets.open + opsQuery.data.facets.inProgress
+          : null,
+        riskCount: opsQuery.data?.risks.length ?? null,
+        criticalCount: opsQuery.data?.risks.filter((risk) => risk.tone === "danger").length ?? null,
+        overdueCount:
+          opsQuery.data?.risks.filter((risk) => risk.kind === "overdue_entry").length ?? null,
+        unassignedCount:
+          opsQuery.data?.risks.filter((risk) => risk.kind === "unassigned_priority").length ?? null,
+        prioritySuggestions: (opsQuery.data?.linkableEntries ?? [])
+          .filter((entry) => entry.status === "open" || entry.status === "in_progress")
+          .map((entry) => ({
+            title: entry.title,
+            priority: suggestOpsPriority(entry, Date.now()),
+          })),
+      },
     }),
     [
       enabled,
@@ -116,6 +160,9 @@ export function AiDrawer({
       timeQuery.data,
       timeQuery.isError,
       timeQuery.isLoading,
+      opsQuery.data,
+      opsQuery.isError,
+      opsQuery.isLoading,
     ],
   );
 
@@ -126,7 +173,7 @@ export function AiDrawer({
   );
 
   const goTo = React.useCallback(
-    (to: "/rota" | "/leave" | "/time") => {
+    (to: "/rota" | "/leave" | "/time" | "/ops") => {
       onOpenChange(false);
       void navigate({ to });
     },

@@ -15,7 +15,8 @@
     "quality": "bash scripts/quality-greps.sh",
     "test:sql": "bash scripts/sql-tests.sh",
     "test:sql:concurrency": "bash scripts/concurrency-tests.sh",
-    "predeploy": "npm run typecheck && npm run lint && npm run build && npm run quality && npm run test"
+    "test:ops:http": "bash scripts/ops-http-tests.sh",
+    "predeploy": "npm run typecheck && npm run lint && npm run build && npm run quality && npm run test && npm run test:ops:http"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

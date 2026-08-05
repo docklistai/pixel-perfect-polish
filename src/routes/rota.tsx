@@ -32,7 +32,7 @@ const SCHEDULE_TITLE_ID = "rota-schedule-title";
 const SCHEDULE_DESC_ID = "rota-schedule-desc";
 
 function RotaPage() {
-  const { week, location } = Route.useSearch();
+  const { week, location, shift } = Route.useSearch();
   const {
     rota,
     actions,
@@ -60,6 +60,16 @@ function RotaPage() {
     roleColoursConfig,
     history,
   } = useRotaPage(week, location);
+
+  React.useEffect(() => {
+    if (
+      shift &&
+      rota.draftShifts.some((item) => item.id === shift) &&
+      rota.selectedShiftId !== shift
+    ) {
+      rota.setSelectedShiftId(shift);
+    }
+  }, [rota, shift]);
 
   const { workspaceName, workspaceId } = useManagerIdentity();
   // Typing "sick" in a staff cell opens this; the shift itself is never changed.
@@ -209,6 +219,7 @@ function RotaPage() {
           overlays={overlays}
           locationName={locationName}
           weekOffset={rota.weekOffset}
+          locationId={rota.source === "live" ? rota.liveLocationId : null}
           onBuildApplied={history.reset}
           onPublishConfirm={handlePublish}
           onMarkShiftOpen={actions.handleMarkShiftOpen}

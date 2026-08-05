@@ -17,6 +17,12 @@ type Presentation = {
 
 function presentationFor(record: ManagerNotificationRecord): Presentation {
   switch (record.relatedEntityType) {
+    case "ops_entry":
+      return { icon: AlertTriangle, tone: "amber", action: "Open Ops item", to: "/ops" };
+    case "ops_handover":
+      return { icon: AlertCircle, tone: "blue", action: "Review handover", to: "/ops" };
+    case "ops_briefing":
+      return { icon: CheckCircle, tone: "purple", action: "Read briefing", to: "/ops" };
     case "leave_request":
       return { icon: CalendarOff, tone: "purple", action: "Review leave", to: "/leave" };
     case "shift_release_request":
@@ -64,5 +70,14 @@ export function presentManagerNotification(record: ManagerNotificationRecord): M
       record.rotaWeekOffset !== null && record.rotaLocationId
         ? { week: record.rotaWeekOffset, location: record.rotaLocationId }
         : undefined,
+    opsSearch: record.relatedEntityId
+      ? record.relatedEntityType === "ops_entry"
+        ? { selected: record.relatedEntityId }
+        : record.relatedEntityType === "ops_handover"
+          ? { handover: record.relatedEntityId }
+          : record.relatedEntityType === "ops_briefing"
+            ? { briefing: record.relatedEntityId }
+            : undefined
+      : undefined,
   };
 }

@@ -23,6 +23,7 @@ export interface ManagerNotification {
   staffId?: string;
   staffSearch?: { tab: "leave" };
   rotaSearch?: { week: number; location: string };
+  opsSearch?: { selected?: string; handover?: string; briefing?: string };
 }
 
 export type MockNotification = ManagerNotification;

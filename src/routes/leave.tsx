@@ -40,8 +40,16 @@ import { weekOffsetForDate } from "@/features/leave/lib/leaveRotaImpact";
 import { useIntentHandler } from "@/lib/interactionIntents";
 import { requireManagerAccess } from "@/features/auth";
 
+function parseLeaveSearch(search: Record<string, unknown>): { request?: string } {
+  const request = search.request;
+  return typeof request === "string" && /^[0-9a-f-]{36}$/i.test(request)
+    ? { request: request.toLowerCase() }
+    : {};
+}
+
 export const Route = createFileRoute("/leave")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  validateSearch: parseLeaveSearch,
   head: () => ({ meta: [{ title: "Leave — Docklist" }] }),
   component: LeavePage,
 });
@@ -73,7 +81,8 @@ function matchesLeaveFilter(request: LeaveRequest, filter: LeaveFilter): boolean
 
 function LeavePage() {
   const navigate = useNavigate();
-  const [activeId, setActiveId] = React.useState("l3");
+  const { request: linkedRequestId } = Route.useSearch();
+  const [activeId, setActiveId] = React.useState(linkedRequestId ?? "l3");
   const [filter, setFilter] = React.useState<LeaveFilter>("all");
   const [calendarOpen, setCalendarOpen] = React.useState(false);
   const [newRequestOpen, setNewRequestOpen] = React.useState(false);
@@ -106,6 +115,12 @@ function LeavePage() {
     onRecordAbsence: () => setAbsenceOpen(true),
   });
   const requests = actions.requests;
+  React.useEffect(() => {
+    if (linkedRequestId && requests.some((request) => request.id === linkedRequestId)) {
+      setActiveId(linkedRequestId);
+      setFilter("all");
+    }
+  }, [linkedRequestId, requests]);
   const source = actions.source;
   // Real workspace date drives live "today"/"this week"; demo pins the demo week.
   const todayIso = source === "live" ? new Date().toISOString().slice(0, 10) : DEMO_WORLD.todayIso;

@@ -1,266 +1,254 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, IconButton, AlertCard } from "@/components/dl";
-import { RowActionMenu } from "@/components/RowActionMenu";
-import { useOverlays } from "@/components/AppShortcuts";
-import {
-  Check,
-  Download,
-  FileText,
-  Filter,
-  Info,
-  ListChecks,
-  MoreHorizontal,
-  Plus,
-  Settings,
-  Sparkles,
-} from "lucide-react";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
-import {
-  OPS_PREVIEW_BANNER_TITLE,
-  OPS_PREVIEW_BANNER_DESCRIPTION,
-  notifyOpsPreview,
-  opsLocalChangeMessage,
-} from "@/features/ops/lib/opsPreview";
+import { AppShell, PageHeader, Card, EmptyState } from "@/components/dl";
+import { useOverlays } from "@/components/AppShortcuts";
+import { requireManagerAccess } from "@/features/auth";
 import { OpsStatCards } from "@/features/ops/components/OpsStatCards";
 import { OpsRiskPanel } from "@/features/ops/components/OpsRiskPanel";
 import { OpsTimeline } from "@/features/ops/components/OpsTimeline";
 import { OpsRightRail } from "@/features/ops/components/OpsRightRail";
-import { OpsLogEntryModal } from "@/features/ops/components/OpsLogEntryModal";
-import { OpsHandoverModal } from "@/features/ops/components/OpsHandoverModal";
-import { OpsDetailDrawer } from "@/features/ops/components/OpsDetailDrawer";
-import { opsTimeline } from "@/features/ops/data/opsDemoData";
-import type { OpsEntry } from "@/features/ops/types";
-import { requirePreviewSurface } from "@/features/auth";
+import { OpsFilterBar } from "@/features/ops/components/OpsFilterBar";
+import { OpsPageOverlays } from "@/features/ops/components/OpsPageOverlays";
+import { OpsPageHeaderActions } from "@/features/ops/components/OpsPageHeaderActions";
+import { useOpsPage } from "@/features/ops/hooks/useOpsPage";
+import { useOpsEntryCommands } from "@/features/ops/hooks/useOpsEntryCommands";
+import { useOpsCollaborationCommands } from "@/features/ops/hooks/useOpsCollaborationCommands";
+import { useOpsChecklistCommands } from "@/features/ops/hooks/useOpsChecklistCommands";
+import { parseOpsSearch, searchFromFilters } from "@/features/ops/lib/opsSearch";
+import {
+  OPS_BRIEFING_PRINT_AMBIGUOUS,
+  OPS_BRIEFING_PRINT_NONE,
+  printOpsBriefing,
+  selectPrintableBriefing,
+} from "@/features/ops/lib/opsPrint";
+import type { OpsBriefing, OpsEntry, OpsFilters, OpsRisk } from "@/features/ops/types";
 
 export const Route = createFileRoute("/ops")({
-  beforeLoad: ({ context }) => requirePreviewSurface(context.auth),
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  validateSearch: parseOpsSearch,
   head: () => ({ meta: [{ title: "Operations — Docklist" }] }),
   component: OpsPage,
 });
 
-const STATUS_TONE: Record<string, OpsEntry["stTone"]> = {
-  Open: "warning",
-  "In progress": "info",
-  Done: "success",
-  Closed: "info",
-};
-
-const FILTER_SCOPES = ["All entries", "Open only", "High priority only"] as const;
-type FilterScope = (typeof FILTER_SCOPES)[number];
-
-function matchesFilterScope(entry: OpsEntry, scope: FilterScope): boolean {
-  switch (scope) {
-    case "All entries":
-      return true;
-    case "Open only":
-      return entry.st === "Open" || entry.st === "In progress";
-    case "High priority only":
-      return entry.prio === "High";
-  }
-}
-
 function OpsPage() {
   const navigate = useNavigate();
+  const search = Route.useSearch();
   const { openAiDrawer } = useOverlays();
-  const [entries, setEntries] = React.useState<OpsEntry[]>(() =>
-    opsTimeline.map((e, i) => ({ ...e, id: `op-${i}` })),
+  const page = useOpsPage(search);
+  const data = page.query.data;
+  const entries = useOpsEntryCommands(page.actions.run, page.actions.runOptimistic);
+  const collaboration = useOpsCollaborationCommands(page.actions.run);
+  const checklists = useOpsChecklistCommands(page.actions.run, page.actions.runForResult);
+  const [editEntry, setEditEntry] = React.useState<OpsEntry | null>(null);
+  const [seedEntry, setSeedEntry] = React.useState<OpsEntry | null>(null);
+  const [archiveEntry, setArchiveEntry] = React.useState<OpsEntry | null>(null);
+  const [briefingId, setBriefingId] = React.useState<string | null>(search.briefing ?? null);
+  const [checklistRunId, setChecklistRunId] = React.useState<string | null>(null);
+  const filtersRef = React.useRef(page.filters);
+  const hasFilters = Boolean(
+    page.filters.search ||
+    page.filters.entryType ||
+    page.filters.status ||
+    page.filters.priority ||
+    page.filters.locationId ||
+    page.filters.sort !== "time_desc",
   );
-  const [logEntryOpen, setLogEntryOpen] = React.useState(false);
-  const [handoverOpen, setHandoverOpen] = React.useState(false);
-  const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const [filterScope, setFilterScope] = React.useState<FilterScope>(FILTER_SCOPES[0]);
-
-  const selectedEntry = entries.find((e) => e.id === selectedId) ?? null;
-  const visibleEntries = React.useMemo(
-    () => entries.filter((entry) => matchesFilterScope(entry, filterScope)),
-    [entries, filterScope],
-  );
-
-  const handleAddEntry = ({
-    title,
-    severity,
-  }: {
-    title: string;
-    type: string;
-    severity: string;
-  }) => {
-    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const entry: OpsEntry = {
-      id: `new-${Date.now()}`,
-      t: now,
-      title,
-      area: "Logged just now",
-      st: "Open",
-      stTone: "warning",
-      dot: "info",
-      icon: ListChecks,
-      ...(severity !== "Low" && {
-        prio: severity,
-        prioTone: severity === "Medium" ? "warning" : "danger",
-      }),
-    };
-    setEntries((es) => [entry, ...es]);
-    toast.info("Added to this preview", {
-      description: opsLocalChangeMessage(`"${title}" appears in the sample timeline`),
-    });
+  const [filtersOpen, setFiltersOpen] = React.useState(hasFilters);
+  React.useEffect(() => setBriefingId(search.briefing ?? null), [search.briefing]);
+  React.useEffect(() => {
+    filtersRef.current = page.filters;
+  }, [page.filters]);
+  const updateFilters = (change: Partial<OpsFilters>) => {
+    const next = { ...filtersRef.current, ...change };
+    filtersRef.current = next;
+    void navigate({ to: "/ops", search: searchFromFilters(next), replace: true });
+  };
+  const openNew = (seed: OpsEntry | null = null, edit: OpsEntry | null = null) => {
+    setSeedEntry(seed);
+    setEditEntry(edit);
+    page.setLogEntryOpen(true);
+  };
+  const openBriefing = (id: string | null) => {
+    setBriefingId(id);
+    page.setBriefingOpen(true);
+  };
+  const openChecklist = (id?: string) => {
+    setChecklistRunId(id ?? null);
+    page.setChecklistOpen(true);
+  };
+  const printBriefing = (briefings: OpsBriefing[]) => {
+    const target = selectPrintableBriefing(briefings, page.filters.locationId);
+    if (target.status === "none") return toast.error(OPS_BRIEFING_PRINT_NONE);
+    if (target.status === "ambiguous") return toast.error(OPS_BRIEFING_PRINT_AMBIGUOUS);
+    printOpsBriefing(target.briefing);
   };
 
-  const handleChangeStatus = (id: string, status: string, options: { close?: boolean } = {}) => {
-    const target = entries.find((e) => e.id === id);
-    if (!target) return;
-    const prev = { st: target.st, stTone: target.stTone };
-    setEntries((es) =>
-      es.map((e) =>
-        e.id === id ? { ...e, st: status, stTone: STATUS_TONE[status] ?? "info" } : e,
-      ),
+  if (!page.enabled)
+    return (
+      <OpsShell>
+        <EmptyState
+          title="Ops needs a live workspace connection"
+          description="Configure Supabase and sign in as a manager to use the operational log."
+        />
+      </OpsShell>
     );
-    if (options.close && status === "Done") {
-      toast.info("Shown as done in this preview", {
-        description: opsLocalChangeMessage(`"${target.title}" now reads as Done`),
-        action: {
-          label: "Undo",
-          onClick: () => {
-            setEntries((es) => es.map((e) => (e.id === id ? { ...e, ...prev } : e)));
-            toast.info("Reverted in this preview", {
-              description: opsLocalChangeMessage("The sample status is back as it was"),
-            });
-          },
+  if (page.query.isError)
+    return (
+      <OpsShell>
+        <EmptyState
+          title="Ops couldn't be loaded"
+          description="Try again; no sample data has been substituted."
+          action={
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={() => void page.query.refetch()}
+            >
+              Retry
+            </button>
+          }
+        />
+      </OpsShell>
+    );
+  if (page.query.isLoading || !data)
+    return (
+      <OpsShell>
+        <Card className="p-8 text-center text-sm text-muted-foreground">
+          Loading live operations…
+        </Card>
+      </OpsShell>
+    );
+
+  const openRisk = (risk: OpsRisk) => {
+    if (risk.entryId) page.setSelectedId(risk.entryId);
+    else if (risk.shiftId)
+      void navigate({
+        to: "/rota",
+        search: {
+          location: risk.locationId,
+          week: risk.rotaWeekOffset,
+          shift: risk.shiftId,
         },
       });
-    } else {
-      toast.info("Shown differently in this preview", {
-        description: opsLocalChangeMessage(`"${target.title}" now reads as ${status}`),
-      });
-    }
+    else if (risk.leaveRequestId)
+      void navigate({ to: "/leave", search: { request: risk.leaveRequestId } });
+    else if (risk.handoverId) page.setHandoverOpen(true);
+    else if (risk.checklistRunId) openChecklist(risk.checklistRunId);
   };
-
-  const handleDelete = (id: string) => {
-    const removed = entries.find((e) => e.id === id);
-    if (!removed) return;
-    setEntries((es) => es.filter((e) => e.id !== id));
-    toast.info("Hidden in this preview", {
-      description: opsLocalChangeMessage(`"${removed.title}" is no longer listed`),
-      action: {
-        label: "Undo",
-        onClick: () => {
-          setEntries((es) => [removed, ...es]);
-          toast.info("Back in this preview", {
-            description: opsLocalChangeMessage(`"${removed.title}" is listed again`),
-          });
-        },
-      },
-    });
-  };
-
   return (
     <AppShell>
       <PageHeader
         title="Ops"
         subtitle="Today's handover, incidents, tasks, and maintenance — in one operational log."
         actions={
-          <>
-            <RowActionMenu
-              triggerLabel="Filter entries"
-              trigger={
-                <button type="button" className="btn secondary">
-                  <Filter className="h-3.5 w-3.5" aria-hidden />{" "}
-                  {filterScope === "All entries" ? "Filters" : filterScope}
-                </button>
-              }
-              items={[
-                { kind: "label", text: "Show in timeline" },
-                ...FILTER_SCOPES.map((s) => ({
-                  label: s,
-                  icon: filterScope === s ? Check : undefined,
-                  onSelect: () => setFilterScope(s),
-                })),
-              ]}
-            />
-            <ActionButton variant="outline" icon={Sparkles} onClick={openAiDrawer}>
-              Manager support
-            </ActionButton>
-            <ActionButton variant="secondary" icon={FileText} onClick={() => setHandoverOpen(true)}>
-              Handover note
-            </ActionButton>
-            <ActionButton icon={Plus} onClick={() => setLogEntryOpen(true)}>
-              Log entry
-            </ActionButton>
-            <RowActionMenu
-              triggerLabel="More actions"
-              trigger={<IconButton icon={MoreHorizontal} label="More actions" />}
-              items={[
-                {
-                  label: "Export today's log",
-                  icon: Download,
-                  onSelect: () => notifyOpsPreview("Exporting the log"),
-                },
-                {
-                  label: "Print briefing",
-                  icon: FileText,
-                  onSelect: () => notifyOpsPreview("Printing the briefing"),
-                },
-                { kind: "separator" },
-                {
-                  label: "Settings",
-                  icon: Settings,
-                  onSelect: () => navigate({ to: "/settings" }),
-                },
-              ]}
-            />
-          </>
+          <OpsPageHeaderActions
+            filtersOpen={filtersOpen}
+            hasFilters={hasFilters}
+            onToggleFilters={() => setFiltersOpen((open) => !open)}
+            onManagerSupport={openAiDrawer}
+            onHandover={() => page.setHandoverOpen(true)}
+            onLogEntry={() => openNew()}
+            onExport={() => void entries.exportCsv(page.filters.locationId)}
+            onPrintBriefing={() => printBriefing(data.briefings)}
+            onSettings={() => void navigate({ to: "/settings" })}
+          />
         }
       />
-
-      <AlertCard
-        className="mb-4"
-        tone="warning"
-        title={OPS_PREVIEW_BANNER_TITLE}
-        description={OPS_PREVIEW_BANNER_DESCRIPTION}
-      />
-
       <div className="guidance-note mb-4">
-        <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Clear open risks before handover — use the risk panel to review what needs attention.
+        <Info className="size-3 shrink-0" aria-hidden />
+        Clear open risks before handover — every rule below is deterministic and based on live
+        records.
       </div>
-
-      <OpsStatCards />
-
+      {filtersOpen && (
+        <OpsFilterBar
+          filters={page.filters}
+          locations={data.locations}
+          onChange={updateFilters}
+          onClear={() =>
+            updateFilters({
+              search: "",
+              entryType: null,
+              status: null,
+              priority: null,
+              locationId: null,
+              sort: "time_desc",
+              page: 1,
+            })
+          }
+        />
+      )}
+      <OpsStatCards metrics={data.metrics} />
       <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-3">
           <OpsRiskPanel
-            entries={entries}
-            onOpenEntry={(entry) => setSelectedId(entry.id)}
-            onOpenBriefing={() => notifyOpsPreview("Opening briefings")}
-            onUseInHandover={() => setHandoverOpen(true)}
+            risks={data.risks}
+            onOpenRisk={openRisk}
+            onUseInHandover={() => page.setHandoverOpen(true)}
             onOpenAssistant={openAiDrawer}
           />
           <OpsTimeline
-            entries={visibleEntries}
-            onOpenEntry={(entry) => setSelectedId(entry.id)}
-            onMarkDone={(id) => handleChangeStatus(id, "Done", { close: true })}
-            onDelete={handleDelete}
-            onOpenLogEntry={() => setLogEntryOpen(true)}
-            onClearFilter={
-              filterScope !== "All entries" ? () => setFilterScope("All entries") : null
+            tab={page.tab}
+            onTabChange={(tab) => {
+              page.setTab(tab);
+              updateFilters({ page: 1 });
+            }}
+            timeline={data.timeline}
+            timelineTruncated={data.timelineTruncated}
+            timelineEntryEventLimit={data.timelineEntryEventLimit}
+            entries={data.entries}
+            briefings={data.briefings}
+            checklistRuns={data.checklistRuns}
+            onOpenEntry={page.setSelectedId}
+            onOpenBriefing={(id) => openBriefing(id)}
+            onOpenChecklist={openChecklist}
+            onNewBriefing={() => openBriefing(null)}
+            onOpenHandover={() => page.setHandoverOpen(true)}
+            onMarkDone={(entryId) => void entries.status(entryId, "resolved")}
+            facets={data.facets}
+            onClearFilter={() =>
+              updateFilters({ search: "", entryType: null, status: null, priority: null, page: 1 })
             }
+            onPageChange={(pageNumber) => updateFilters({ page: pageNumber })}
+            page={page.filters.page}
+            total={data.total}
+            pageSize={page.filters.pageSize}
           />
         </div>
-        <OpsRightRail />
+        <OpsRightRail
+          metrics={data.metrics}
+          departments={data.departments}
+          staff={data.staff}
+          briefings={data.briefings}
+          checklistRuns={data.checklistRuns}
+          onOpenBriefing={(id) => openBriefing(id)}
+          onOpenChecklist={openChecklist}
+        />
       </div>
+      <OpsPageOverlays
+        page={page}
+        data={data}
+        entries={entries}
+        collaboration={collaboration}
+        checklists={checklists}
+        editEntry={editEntry}
+        seedEntry={seedEntry}
+        archiveEntry={archiveEntry}
+        briefingId={briefingId}
+        checklistRunId={checklistRunId}
+        openNew={openNew}
+        setArchiveEntry={setArchiveEntry}
+      />
+    </AppShell>
+  );
+}
 
-      <OpsLogEntryModal
-        open={logEntryOpen}
-        onClose={() => setLogEntryOpen(false)}
-        onSave={handleAddEntry}
-      />
-      <OpsHandoverModal open={handoverOpen} onClose={() => setHandoverOpen(false)} />
-      <OpsDetailDrawer
-        entry={selectedEntry}
-        onOpenChange={(open) => !open && setSelectedId(null)}
-        onChangeStatus={handleChangeStatus}
-        onDelete={handleDelete}
-      />
+function OpsShell({ children }: { children: React.ReactNode }) {
+  return (
+    <AppShell>
+      <PageHeader title="Ops" subtitle="Today's operational log." />
+      {children}
     </AppShell>
   );
 }

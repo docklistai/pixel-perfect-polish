@@ -2,7 +2,7 @@ import { redirect } from "@tanstack/react-router";
 import type { AuthState } from "./types";
 
 /**
- * Preview surfaces (Team, Ops, Reports) show sample content only — no live
+ * Preview surfaces (Team and Reports) show sample content only — no live
  * workspace reads, no writes, no backend. They carry page-level preview banners
  * and sample labels (locked by `src/features/preview/previewHonesty.test.ts`),
  * so a manager tester may open them directly under the same manager access

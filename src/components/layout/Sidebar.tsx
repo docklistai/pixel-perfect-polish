@@ -29,6 +29,7 @@ interface NavItem {
   group: "live" | "preview" | "admin";
   flagship?: boolean;
   preview?: boolean; // sample-content surface — labelled Preview, never live-wired
+  mobileOverflow?: boolean;
   badge?: {
     count: number;
     kind: "amber" | "neutral" | "red";
@@ -57,7 +58,7 @@ const navItems: readonly NavItem[] = [
     group: "live",
   },
   { to: "/team", label: "Team", icon: MessageSquare, group: "preview", preview: true },
-  { to: "/ops", label: "Ops", icon: Briefcase, group: "preview", preview: true },
+  { to: "/ops", label: "Ops", icon: Briefcase, group: "live", mobileOverflow: true },
   { to: "/reports", label: "Reports", icon: BarChart3, group: "preview", preview: true },
   { to: "/settings", label: "Settings", icon: Settings, group: "admin" },
 ];
@@ -70,7 +71,7 @@ const NAV_GROUPS = [
 
 // Preview surfaces stay reachable for manager testers, always under the Preview
 // group and pill so they are never read as active pilot features.
-const overflowNavItems = navItems.filter((item) => item.group !== "live");
+const overflowNavItems = navItems.filter((item) => item.group !== "live" || item.mobileOverflow);
 
 export function Sidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
@@ -132,7 +133,7 @@ export function Sidebar() {
                         to={item.to}
                         aria-current={active ? "page" : undefined}
                         title={item.label}
-                        className={`nav-item ${active ? "active" : ""}`}
+                        className={`nav-item ${item.mobileOverflow ? "max-md:hidden" : ""} ${active ? "active" : ""}`}
                       >
                         <Icon className="h-[17px] w-[17px]" strokeWidth={active ? 2.2 : 1.8} />
                         <span>{item.label}</span>

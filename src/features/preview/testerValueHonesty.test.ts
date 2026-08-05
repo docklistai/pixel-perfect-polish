@@ -24,6 +24,8 @@ describe("preview surfaces stay reachable and labelled", () => {
     expect(sidebar).not.toContain("isPilotSurface");
     // The Preview pill survives.
     expect(sidebar).toContain("Preview");
+    expect(sidebar).toContain('{ to: "/ops", label: "Ops", icon: Briefcase, group: "live"');
+    expect(sidebar).not.toContain('{ to: "/ops", label: "Ops", icon: Briefcase, group: "preview"');
   });
 
   it("keeps every preview route in the command palette", () => {

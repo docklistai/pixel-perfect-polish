@@ -55,4 +55,12 @@ describe("presentManagerNotification", () => {
       rotaSearch: { week: 2, location: "33333333-3333-4333-8333-333333333333" },
     });
   });
+
+  it.each([
+    ["ops_entry", { selected: "22222222-2222-4222-8222-222222222222" }],
+    ["ops_handover", { handover: "22222222-2222-4222-8222-222222222222" }],
+    ["ops_briefing", { briefing: "22222222-2222-4222-8222-222222222222" }],
+  ] as const)("deep-links %s notifications to the exact Ops record", (entity, opsSearch) => {
+    expect(presentManagerNotification(record(entity))).toMatchObject({ to: "/ops", opsSearch });
+  });
 });
