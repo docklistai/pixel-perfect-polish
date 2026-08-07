@@ -174,3 +174,13 @@ export type BuildWeekPlannerInput = {
  * deploy is rejected rather than applied under new rules.
  */
 export const PLANNER_RULE_VERSION = "build-week/1";
+
+/**
+ * The most operations one proposal can apply in a single transaction.
+ *
+ * This is not a display preference — `rpc_apply_build_week_proposal` refuses a
+ * longer list outright. It lives here so a preview can say "504 of a maximum
+ * 500" before the manager presses anything, rather than showing a ready
+ * proposal that the database was always going to refuse.
+ */
+export const MAX_PROPOSAL_OPERATIONS = 500;

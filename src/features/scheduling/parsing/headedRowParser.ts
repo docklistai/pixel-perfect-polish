@@ -1,9 +1,9 @@
 import { errorDiagnostic, type ParseDiagnostic } from "./parseDiagnostics";
 import { readDate } from "./explicitDateFormat";
-import { describeResolution, resolveDepartmentByName, resolveStaffByName } from "./exactResolvers";
 import { buildShiftSignature } from "@/features/rota/lib/scheduling/shiftSignature";
-import { parseLocalTimeToMinutes } from "@/features/rota/lib/scheduling/calendarInterval";
 import { cellReader, type ColumnMapping } from "./headedColumnMap";
+import { checkStaffRole, readBreakMinutes, readDepartment, readStaff } from "./headedRowFields";
+import { readTimes } from "./headedTimeField";
 import type { HeadedImportOptions, ImportedShift } from "./headedImportTypes";
 
 /**
@@ -13,26 +13,14 @@ import type { HeadedImportOptions, ImportedShift } from "./headedImportTypes";
  * rather than stopping at the first: a manager fixing a paste wants the whole
  * list of what is wrong with a row, not one item per attempt.
  *
- * A blank staff cell is a deliberate open shift, never a missing value. That
- * distinction is the difference between importing an unfilled shift and
- * refusing the row.
+ * Times are read through the shared scheduling vocabulary, so a row written
+ * "9am"–"5pm" imports exactly as it would type into a rota cell. There is one
+ * definition of what a written time means, not one per surface.
  */
 
 export type RowParseOutcome =
   | { ok: true; shift: ImportedShift; diagnostics: ParseDiagnostic[] }
   | { ok: false; diagnostics: ParseDiagnostic[] };
-
-function readTime(value: string, label: string, row: number): string | ParseDiagnostic {
-  const trimmed = value.trim();
-  const minutes = parseLocalTimeToMinutes(trimmed);
-  if (minutes === null) {
-    return errorDiagnostic("invalid-value", `"${trimmed}" is not a time like 09:00.`, {
-      row,
-      field: label,
-    });
-  }
-  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-}
 
 export function parseHeadedRow({
   rawRow,
@@ -49,6 +37,7 @@ export function parseHeadedRow({
 }): RowParseOutcome {
   const cellAt = cellReader(mapping);
   const diagnostics: ParseDiagnostic[] = [];
+  const warnings: ParseDiagnostic[] = [];
 
   const date = readDate(cellAt(rawRow, "date"), options.dateOrder);
   if (!date.ok) {
@@ -72,10 +61,9 @@ export function parseHeadedRow({
     );
   }
 
-  const start = readTime(cellAt(rawRow, "start"), "start", rowNumber);
-  if (typeof start !== "string") diagnostics.push(start);
-  const end = readTime(cellAt(rawRow, "end"), "end", rowNumber);
-  if (typeof end !== "string") diagnostics.push(end);
+  const times = readTimes(cellAt(rawRow, "start"), cellAt(rawRow, "end"), rowNumber);
+  if (!times.ok) diagnostics.push(...times.diagnostics);
+  else warnings.push(...times.diagnostics);
 
   const roleName = cellAt(rawRow, "role").trim();
   if (!roleName) {
@@ -87,65 +75,35 @@ export function parseHeadedRow({
     );
   }
 
-  // A blank staff cell is a deliberate open shift, not a missing value.
-  let staffId: string | null = null;
-  const staffCell = cellAt(rawRow, "staff").trim();
-  if (staffCell) {
-    const resolved = resolveStaffByName(staffCell, options.staff);
-    if (resolved.kind === "resolved") staffId = resolved.value.id;
-    else {
-      diagnostics.push(
-        errorDiagnostic(
-          resolved.kind === "ambiguous" ? "ambiguous-reference" : "unresolved-reference",
-          describeResolution(resolved, "staff member", staffCell)!,
-          { row: rowNumber, field: "staff" },
-        ),
-      );
-    }
+  const staff = readStaff(cellAt(rawRow, "staff"), options, rowNumber);
+  if (staff.diagnostic) diagnostics.push(staff.diagnostic);
+  if (staff.member && roleName) {
+    const roleClash = checkStaffRole(staff.member, roleName, rowNumber);
+    if (roleClash) diagnostics.push(roleClash);
   }
 
-  let departmentId = options.defaultDepartmentId;
-  const departmentCell = cellAt(rawRow, "department").trim();
-  if (departmentCell) {
-    const resolved = resolveDepartmentByName(departmentCell, options.departments);
-    if (resolved.kind === "resolved") departmentId = resolved.value.id;
-    else {
-      diagnostics.push(
-        errorDiagnostic(
-          resolved.kind === "ambiguous" ? "ambiguous-reference" : "unresolved-reference",
-          describeResolution(resolved, "department", departmentCell)!,
-          { row: rowNumber, field: "department" },
-        ),
-      );
-    }
-  }
+  const department = readDepartment(cellAt(rawRow, "department"), options, rowNumber);
+  if (department.diagnostic) diagnostics.push(department.diagnostic);
 
-  let breakMinutes = options.defaultBreakMinutes ?? 30;
-  const breakCell = cellAt(rawRow, "breakMinutes").trim();
-  if (breakCell) {
-    const parsed = Number(breakCell);
-    if (!Number.isInteger(parsed) || parsed < 0 || parsed > 1440) {
-      diagnostics.push(
-        errorDiagnostic("invalid-value", `"${breakCell}" is not a break length in minutes.`, {
-          row: rowNumber,
-          field: "break",
-        }),
-      );
-    } else breakMinutes = parsed;
-  }
+  const breakRead = readBreakMinutes(
+    cellAt(rawRow, "breakMinutes"),
+    options.defaultBreakMinutes ?? 30,
+    rowNumber,
+  );
+  if (breakRead.diagnostic) diagnostics.push(breakRead.diagnostic);
 
-  if (diagnostics.length > 0 || !date.ok || typeof start !== "string" || typeof end !== "string") {
+  if (diagnostics.length > 0 || !date.ok || !times.ok) {
     return { ok: false, diagnostics };
   }
 
   const signature = buildShiftSignature({
     workDate: date.isoDate,
-    start,
-    end,
+    start: times.start,
+    end: times.end,
     role: roleName,
-    departmentId,
+    departmentId: department.id ?? options.defaultDepartmentId,
     locationId: options.locationId,
-    breakMinutes,
+    breakMinutes: breakRead.minutes,
   });
 
   // An explicit overnight column must agree with the times, rather than
@@ -159,7 +117,7 @@ export function parseHeadedRow({
         diagnostics: [
           errorDiagnostic(
             "invalid-value",
-            `This row says overnight is "${overnightCell}", but ${start}–${end} ${signature.overnight ? "does" : "does not"} cross midnight.`,
+            `This row says overnight is "${overnightCell}", but ${times.start}–${times.end} ${signature.overnight ? "does" : "does not"} cross midnight.`,
             { row: rowNumber, field: "overnight" },
           ),
         ],
@@ -167,5 +125,9 @@ export function parseHeadedRow({
     }
   }
 
-  return { ok: true, shift: { signature, roleName, staffId }, diagnostics };
+  return {
+    ok: true,
+    shift: { signature, roleName, staffId: staff.member?.id ?? null },
+    diagnostics: warnings,
+  };
 }

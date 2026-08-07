@@ -94,8 +94,11 @@ export function ImportScheduleDrawer({
       }
       await queryClient.invalidateQueries({ queryKey: ["rota", "workspace-week"] });
       onApplied();
+      const added = applied.createdOpen + applied.createdAssigned;
       toast.success("Schedule imported", {
-        description: `${applied.createdOpen + applied.createdAssigned} shifts added to ${weekLabel}. This is still a draft — nothing is published.`,
+        description: applied.weekCreated
+          ? `${weekLabel} was created as a draft with ${added} shifts. Nothing is published.`
+          : `${added} shifts added to ${weekLabel}. This is still a draft — nothing is published.`,
       });
       onOpenChange(false);
     } catch {
@@ -108,7 +111,7 @@ export function ImportScheduleDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Import a schedule"
-      description={`Paste a headed CSV or TSV for ${weekLabel}. You review everything before it is written.`}
+      description={`Paste a headed CSV or TSV for ${weekLabel}. You review everything before it is written, and the week does not have to exist yet — importing into an empty week creates it as a draft.`}
       width="lg"
       footer={
         <>

@@ -38,7 +38,20 @@ export function resolveExact<T>(
   return { kind: "resolved", value: matches[0]! };
 }
 
-export type StaffCandidate = { id: string; name: string; active: boolean };
+export type StaffCandidate = {
+  id: string;
+  name: string;
+  active: boolean;
+  /**
+   * The role this person holds, when the caller knows it.
+   *
+   * Present so an import can refuse a mismatched row while the manager is still
+   * reviewing it: the apply RPC assigns nobody to a shift whose role they do not
+   * hold, and finding that out after pressing Import means the whole paste is
+   * refused for one row.
+   */
+  roleName?: string | null;
+};
 export type DepartmentCandidate = { id: string; name: string; active: boolean };
 
 /**

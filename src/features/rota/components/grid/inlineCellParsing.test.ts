@@ -16,21 +16,31 @@ function times(input: string, roleOptions: string[] = ROLES): string[] {
   return shiftsOf(input, roleOptions).map((shift) => `${shift.start}-${shift.end}`);
 }
 
+const UNAMBIGUOUS = { ambiguousBareHours: false };
+
 describe("parseTimeRange", () => {
   it("keeps end-before-start 24-hour inputs as overnight shifts", () => {
-    expect(parseTimeRange("22:00-02:00")).toEqual({ start: "22:00", end: "02:00" });
+    expect(parseTimeRange("22:00-02:00")).toEqual({
+      start: "22:00",
+      end: "02:00",
+      ...UNAMBIGUOUS,
+    });
   });
 
   it("keeps common day shorthand deterministic", () => {
-    expect(parseTimeRange("7-3")).toEqual({ start: "07:00", end: "15:00" });
-    expect(parseTimeRange("12-8")).toEqual({ start: "12:00", end: "20:00" });
+    expect(parseTimeRange("7-3")).toEqual({ start: "07:00", end: "15:00", ...UNAMBIGUOUS });
+    expect(parseTimeRange("12-8")).toEqual({ start: "12:00", end: "20:00", ...UNAMBIGUOUS });
   });
 
   it("supports dot times, compact HHMM, till, and overnight suffixes", () => {
-    expect(parseTimeRange("7.30-3.30")).toEqual({ start: "07:30", end: "15:30" });
-    expect(parseTimeRange("0730-1530")).toEqual({ start: "07:30", end: "15:30" });
-    expect(parseTimeRange("7 till 3")).toEqual({ start: "07:00", end: "15:00" });
-    expect(parseTimeRange("9pm-2am overnight")).toEqual({ start: "21:00", end: "02:00" });
+    expect(parseTimeRange("7.30-3.30")).toEqual({ start: "07:30", end: "15:30", ...UNAMBIGUOUS });
+    expect(parseTimeRange("0730-1530")).toEqual({ start: "07:30", end: "15:30", ...UNAMBIGUOUS });
+    expect(parseTimeRange("7 till 3")).toEqual({ start: "07:00", end: "15:00", ...UNAMBIGUOUS });
+    expect(parseTimeRange("9pm-2am overnight")).toEqual({
+      start: "21:00",
+      end: "02:00",
+      ...UNAMBIGUOUS,
+    });
   });
 
   it("rejects same-start-end and overlong ranges", () => {
@@ -116,6 +126,7 @@ describe("break syntax", () => {
         breakMinutes: null,
         open: false,
         roleWarning: null,
+        timeWarning: null,
       },
       {
         start: "17:00",
@@ -124,6 +135,7 @@ describe("break syntax", () => {
         breakMinutes: 30,
         open: false,
         roleWarning: null,
+        timeWarning: null,
       },
     ]);
   });
@@ -212,6 +224,7 @@ describe("open shifts and clear commands", () => {
           breakMinutes: null,
           open: true,
           roleWarning: null,
+          timeWarning: null,
         },
       ],
     });
@@ -225,6 +238,7 @@ describe("open shifts and clear commands", () => {
           breakMinutes: null,
           open: true,
           roleWarning: null,
+          timeWarning: null,
         },
       ],
     });
@@ -242,6 +256,7 @@ describe("open shifts and clear commands", () => {
             breakMinutes: null,
             open: true,
             roleWarning: null,
+            timeWarning: null,
           },
         ],
       });

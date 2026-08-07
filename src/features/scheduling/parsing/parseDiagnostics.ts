@@ -24,6 +24,10 @@ export type ParseDiagnosticCode =
   | "invalid-value"
   /** A date whose format cannot be known without being told. */
   | "ambiguous-date"
+  /** A time that was read one way when it could have been read another. */
+  | "ambiguous-time"
+  /** More shifts than one import can write in a single transaction. */
+  | "too-many-operations"
   /** Text that matched nothing. */
   | "unresolved-reference"
   /** Text that matched more than one thing, so picking one would be a guess. */

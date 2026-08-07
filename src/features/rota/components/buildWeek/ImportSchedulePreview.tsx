@@ -1,6 +1,10 @@
 import { AlertTriangle, Info } from "lucide-react";
 import { FormSection } from "@/components/dl";
-import { previewRows, type ImportDrawerState } from "./importScheduleDrawerState";
+import {
+  operationCountLabel,
+  previewRows,
+  type ImportDrawerState,
+} from "./importScheduleDrawerState";
 
 /**
  * The review section of the import drawer.
@@ -14,12 +18,24 @@ export function ImportSchedulePreview({ state }: { state: ImportDrawerState }) {
   if (!preview) return null;
   const rows = previewRows(state);
   const result = state.result;
+  const overLimit = preview.operationCount > preview.operationLimit;
 
   return (
     <FormSection
-      title={`3. Review (${preview.validCount} ready, ${preview.errorCount} cannot be imported)`}
-      description="Every row you pasted is listed. Anything that will not be imported says why."
+      // The count is stated against the limit, always — a paste over the ceiling
+      // must never read as "ready" when the apply would refuse it outright.
+      title={`3. Review — ${operationCountLabel(state)}`}
+      description={`${preview.validCount} rows will be imported and ${preview.errorCount} will be left out. Every row you pasted is listed, and anything that will not be imported says why.`}
     >
+      {overLimit && (
+        <p
+          role="alert"
+          className="mb-2 rounded-lg border border-danger/30 bg-danger-soft/30 p-2 text-xs"
+        >
+          An import writes at most {preview.operationLimit} shifts in one go, and this paste has{" "}
+          {preview.operationCount}. Nothing can be imported until it is split into smaller pastes.
+        </p>
+      )}
       {preview.diagnostics.length > 0 && (
         <ul className="mb-2 flex flex-col gap-1.5">
           {preview.diagnostics.map((entry, index) => (

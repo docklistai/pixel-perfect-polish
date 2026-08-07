@@ -4,9 +4,10 @@ import {
   importHeadedSchedule,
   type HeadedScheduleImportResult,
 } from "@/features/scheduling/parsing/headedScheduleImport";
-import { buildShiftSignature, signatureKey } from "../lib/scheduling/shiftSignature";
+import { signatureKey } from "../lib/scheduling/shiftSignature";
 import { PLANNER_RULE_VERSION, type ProposalOperation } from "../lib/scheduling/buildWeekProposal";
-import { addIsoDays, formatTimeInTimezone } from "../lib/liveRotaDates";
+import { addIsoDays } from "../lib/liveRotaDates";
+import { loadImportFacts } from "./importScheduleFacts";
 import type { BuildWeekApplySource } from "./buildWeekApplySource";
 
 /**
@@ -16,6 +17,11 @@ import type { BuildWeekApplySource } from "./buildWeekApplySource";
  * an import is applied by the same atomic RPC, validated the same way, and
  * audited the same way. A second write path would be a second set of rules to
  * keep in step; there is only one.
+ *
+ * The week does not have to exist. Importing onto a fresh week is the most
+ * common moment to import at all, so a missing week is previewed against its own
+ * absence: the proposal is stamped over (location, week start, "no week"), and
+ * the apply creates the week and the shifts in one transaction or neither.
  *
  * Read-only. Nothing here writes, and every source row comes back in the preview
  * whether or not it can be imported.
@@ -31,7 +37,11 @@ const inputSchema = z.object({
 export type ImportScheduleResult =
   | {
       ok: true;
-      rotaWeekId: string;
+      /** Null when the week does not exist yet and applying will create it. */
+      rotaWeekId: string | null;
+      /** Both are echoed to apply so a fresh week is created at the right place. */
+      locationId: string;
+      weekStart: string;
       inputFingerprint: string;
       proposalDigest: string;
       /** Echoed back to apply unchanged; the fingerprint covers it. */
@@ -40,18 +50,6 @@ export type ImportScheduleResult =
       preview: HeadedScheduleImportResult;
     }
   | { ok: false; message: string; preview?: HeadedScheduleImportResult };
-
-interface ShiftRow {
-  id: string;
-  staff_member_id: string | null;
-  department_id: string;
-  location_id: string;
-  shift_date: string;
-  starts_at: string;
-  ends_at: string;
-  break_minutes: number;
-  role_name: string;
-}
 
 export const importScheduleProposalFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => inputSchema.parse(input))
@@ -64,85 +62,47 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
       { weekOffset: data.weekOffset, ...(data.locationId ? { locationId: data.locationId } : {}) },
       { createWeek: false },
     );
-    if (!context.week) {
-      return { ok: false, message: "Open a saved draft week before importing into it." };
-    }
-    if (context.week.status !== "draft") {
-      return { ok: false, message: "Schedules can only be imported into a draft week." };
+    // A published or archived week is refused; a missing one is not. Creating it
+    // is part of what applying this proposal does.
+    if (context.week && context.week.status !== "draft") {
+      return {
+        ok: false,
+        message:
+          context.week.status === "archived"
+            ? "This week is archived, so nothing can be imported into it."
+            : "This week is published. Move it back to draft before importing into it.",
+      };
     }
 
-    const timezone = context.location.timezone;
     const weekIsoDates = Array.from({ length: 7 }, (_, index) =>
       addIsoDays(context.weekStart, index),
     );
 
-    const [shiftsRes, staffRes, deptRes] = await Promise.all([
-      supabase
-        .from("shifts")
-        .select(
-          "id, staff_member_id, department_id, location_id, shift_date, starts_at, ends_at, break_minutes, role_name",
-        )
-        .eq("workspace_id", context.workspaceId)
-        .eq("rota_week_id", context.week.id),
-      supabase
-        .from("staff_members")
-        .select("id, display_name, employment_status")
-        .eq("workspace_id", context.workspaceId),
-      supabase
-        .from("departments")
-        .select("id, name, status")
-        .eq("workspace_id", context.workspaceId),
-    ]);
-    if (shiftsRes.error) throw shiftsRes.error;
-    if (staffRes.error) throw staffRes.error;
-    if (deptRes.error) throw deptRes.error;
-
-    const departments = (
-      (deptRes.data as { id: string; name: string; status: string }[] | null) ?? []
-    ).map((row) => ({ id: row.id, name: row.name, active: row.status === "active" }));
-    const defaultDepartment = departments.find((department) => department.active);
-    if (!defaultDepartment) {
+    const facts = await loadImportFacts({
+      supabase,
+      workspaceId: context.workspaceId,
+      rotaWeekId: context.week?.id ?? null,
+      timezone: context.location.timezone,
+    });
+    if (!facts.defaultDepartmentId) {
       return { ok: false, message: "Add a department to this workspace before importing shifts." };
     }
-
-    const existingSignatureKeys = new Set(
-      ((shiftsRes.data as ShiftRow[] | null) ?? []).map((row) =>
-        signatureKey(
-          buildShiftSignature({
-            workDate: row.shift_date,
-            start: formatTimeInTimezone(row.starts_at, timezone),
-            end: formatTimeInTimezone(row.ends_at, timezone),
-            role: row.role_name,
-            departmentId: row.department_id,
-            locationId: row.location_id,
-            breakMinutes: row.break_minutes,
-          }),
-        ),
-      ),
-    );
 
     const preview = importHeadedSchedule(data.text, {
       dateOrder: data.dateOrder,
       weekIsoDates,
       locationId: context.location.id,
-      staff: (
-        (staffRes.data as
-          | { id: string; display_name: string; employment_status: string }[]
-          | null) ?? []
-      ).map((row) => ({
-        id: row.id,
-        name: row.display_name,
-        active: row.employment_status === "active",
-      })),
-      departments,
-      defaultDepartmentId: defaultDepartment.id,
-      existingSignatureKeys,
+      staff: facts.staff,
+      departments: facts.departments,
+      defaultDepartmentId: facts.defaultDepartmentId,
+      existingSignatureKeys: facts.existingSignatureKeys,
+      knownRoleNames: facts.knownRoleNames,
     });
 
     if (!preview.ok) {
       return {
         ok: false,
-        message: preview.diagnostics[0]?.message ?? "Nothing in that paste could be imported.",
+        message: previewRefusalMessage(preview),
         preview,
       };
     }
@@ -182,19 +142,43 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
       contentVersion: `rows:${operations.length}`,
       plannerRuleVersion: PLANNER_RULE_VERSION,
     };
-    // Same manager-guarded stamp Build uses; the internals stay revoked.
-    const { data: stamp, error: stampError } = await supabase.rpc("rpc_build_week_proposal_stamp", {
-      p_workspace_id: context.workspaceId,
-      p_rota_week_id: context.week.id,
-      p_source: applySource,
-      p_operations: operations,
-    });
-    if (stampError) throw stampError;
-    const { fingerprint, digest } = stamp as { fingerprint: string; digest: string };
+
+    // Two stamps, one contract. An existing week is fingerprinted by its row;
+    // a missing one by its absence, which is what makes a week appearing before
+    // apply a refusal rather than a silent merge into somebody else's draft.
+    // Both keep the internals revoked behind a manager-guarded wrapper.
+    const stamp = context.week
+      ? await supabase.rpc("rpc_build_week_proposal_stamp", {
+          p_workspace_id: context.workspaceId,
+          p_rota_week_id: context.week.id,
+          p_source: applySource,
+          p_operations: operations,
+        })
+      : await supabase.rpc("rpc_import_schedule_proposal_stamp", {
+          p_workspace_id: context.workspaceId,
+          p_location_id: context.location.id,
+          p_week_start: context.weekStart,
+          p_source: applySource,
+          p_operations: operations,
+        });
+    if (stamp.error) {
+      const { toSafeBusinessMessage } = await import("@/lib/safe-errors");
+      return {
+        ok: false,
+        message: toSafeBusinessMessage(
+          stamp.error,
+          "This week could not be prepared for import. Reopen the week and preview again.",
+        ),
+        preview,
+      };
+    }
+    const { fingerprint, digest } = stamp.data as { fingerprint: string; digest: string };
 
     return {
       ok: true,
-      rotaWeekId: context.week.id,
+      rotaWeekId: context.week?.id ?? null,
+      locationId: context.location.id,
+      weekStart: context.weekStart,
       inputFingerprint: fingerprint,
       proposalDigest: digest,
       applySource,
@@ -202,3 +186,19 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
       preview,
     };
   });
+
+/**
+ * Why a parsed paste cannot be imported, in the manager's terms.
+ *
+ * A refusal always says what happens to the rows that *were* readable, because
+ * "3 of 40 rows are wrong" and "nothing can be imported" are very different
+ * situations and the old message could not tell them apart.
+ */
+function previewRefusalMessage(preview: HeadedScheduleImportResult): string {
+  const blocking = preview.diagnostics.find((entry) => entry.severity === "error");
+  if (blocking) return blocking.message;
+  if (preview.validCount === 0 && preview.errorCount > 0) {
+    return `None of the ${preview.errorCount} rows in that paste could be read. Each row below says why.`;
+  }
+  return "Nothing in that paste could be imported.";
+}

@@ -1,5 +1,6 @@
 import type { Dispatch } from "react";
 import { FormSection } from "@/components/dl";
+import { SUPPORTED_TIME_FORMATS } from "@/features/rota/lib/scheduling/shiftTimeVocabulary";
 import {
   DATE_ORDERS,
   type ImportDrawerEvent,
@@ -38,6 +39,20 @@ export function ImportScheduleForm({
           placeholder={"Date,Staff,Role,Start,End\n2026-08-03,Ana Chef,Chef,09:00,17:00"}
           className="w-full rounded-xl border border-border bg-card px-3 py-2 font-mono text-xs"
         />
+        <p className="mt-2 text-xs text-muted-foreground">
+          Times can be written{" "}
+          {SUPPORTED_TIME_FORMATS.map((format) => (
+            <code key={format} className="mx-0.5 rounded bg-muted/50 px-1 font-mono">
+              {format}
+            </code>
+          ))}{" "}
+          — the same as typing into a rota cell. A shift that ends before it starts, such as{" "}
+          <code className="rounded bg-muted/50 px-1 font-mono">9pm</code> to{" "}
+          <code className="rounded bg-muted/50 px-1 font-mono">2am</code>, is read as overnight.
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Rows that cannot be read are listed and left out. Everything else is still imported.
+        </p>
       </FormSection>
 
       <FormSection

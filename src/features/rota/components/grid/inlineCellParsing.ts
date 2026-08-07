@@ -1,6 +1,7 @@
 import { endMinutesOf, parseTimeRange, RANGE_PATTERN } from "./shiftTimeTokens";
 import { matchInlineCellCommand } from "./inlineCellCommands";
-import { resolveShiftRole } from "../../lib/shiftRole";
+import { extractBreakMinutes, resolveRole, TIME_HELP } from "./inlineCellSegmentFields";
+import { describeResolvedTimes } from "../../lib/scheduling/shiftTimeVocabulary";
 
 export { parseTimeRange } from "./shiftTimeTokens";
 
@@ -12,6 +13,11 @@ export type ParsedInlineShift = {
   open: boolean;
   /** Calm note when the role is unusual or temporary. Never blocks saving. */
   roleWarning?: string | null;
+  /**
+   * Read-back for a bare-hour range that could have meant the evening. Never
+   * blocks saving either — the times stand as written and this says so.
+   */
+  timeWarning?: string | null;
 };
 
 export type InlineCellParseResult =
@@ -30,69 +36,6 @@ export type InlineCellParseOptions = {
   /** The staff member's own role, used only to explain an unusual choice. */
   profileRole?: string | null;
 };
-
-const TIME_HELP = "Use times like 9-5, 22:00-02:00, open 6pm-11pm bar, or 9-12 / 17-22.";
-
-/** "break 30", "30m break", "30 min break", "30 minutes break", "no break". */
-const BREAK_PREFIX = /\b(?:break|brk)\s*(\d{1,3})\s*(?:m|mins?|minutes?)?\b/i;
-const BREAK_SUFFIX = /\b(\d{1,3})\s*(?:m|mins?|minutes?)?\s*(?:break|brk)\b/i;
-
-function normaliseToken(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
-}
-
-function extractBreakMinutes(input: string): { text: string; breakMinutes: number | null } {
-  if (/\bno\s+break\b/i.test(input)) {
-    return { text: input.replace(/\bno\s+break\b/gi, " "), breakMinutes: 0 };
-  }
-  const match = input.match(BREAK_PREFIX) ?? input.match(BREAK_SUFFIX);
-  if (!match) return { text: input, breakMinutes: null };
-  const minutes = Number(match[1]);
-  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 240) {
-    return { text: input, breakMinutes: null };
-  }
-  return { text: input.replace(match[0], " "), breakMinutes: minutes };
-}
-
-/**
- * Resolves the leftover text into a role for this shift.
- *
- * Unknown text is accepted as a temporary shift label rather than rejected —
- * managers legitimately schedule Training, Cover or a one-off role. Nothing
- * here creates a workspace role; the label lives on the shift alone.
- */
-function resolveRole(
-  text: string,
-  options: InlineCellParseOptions,
-): { ok: true; role: string | null; warning: string | null } | { ok: false; message: string } {
-  const cleaned = text.replace(/\bovernight\b/gi, " ").trim();
-  if (!cleaned) return { ok: true, role: null, warning: null };
-
-  // Free-text roles are allowed, but leftovers that are plainly mistyped input
-  // rather than a role must still be rejected — otherwise "9-5 30" silently
-  // becomes a shift labelled "30", and "9-5 break 900" one labelled
-  // "Break 900".
-  if (/^\d+$/.test(cleaned)) {
-    return { ok: false, message: `"${cleaned}" is not a role. ${TIME_HELP}` };
-  }
-  if (/\b(?:break|brk)\b/i.test(cleaned)) {
-    return {
-      ok: false,
-      message: "That break isn't readable. Use something like 30m break, or no break.",
-    };
-  }
-
-  const resolved = resolveShiftRole({
-    input: cleaned,
-    configuredRoles: options.roleOptions ?? [],
-    profileRole: options.profileRole ?? null,
-  });
-  if (!resolved) return { ok: true, role: null, warning: null };
-  return { ok: true, role: resolved.role, warning: resolved.warning };
-}
 
 type SegmentResult = { ok: true; shift: ParsedInlineShift } | { ok: false; message: string };
 
@@ -120,7 +63,15 @@ function parseShiftSegment(
 
   return {
     ok: true,
-    shift: { ...range, role: role.role, breakMinutes, open, roleWarning: role.warning },
+    shift: {
+      start: range.start,
+      end: range.end,
+      role: role.role,
+      breakMinutes,
+      open,
+      roleWarning: role.warning,
+      timeWarning: range.ambiguousBareHours ? describeResolvedTimes(range.start, range.end) : null,
+    },
   };
 }
 

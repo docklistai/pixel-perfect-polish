@@ -18,6 +18,11 @@ export type HeadedImportOptions = {
   defaultBreakMinutes?: number;
   /** Signature keys already in the week, for duplicate analysis. */
   existingSignatureKeys?: ReadonlySet<string>;
+  /**
+   * Role labels this workspace already uses, so an import joins the rota's own
+   * spelling instead of introducing a second one.
+   */
+  knownRoleNames?: readonly string[];
 };
 
 export type ImportedShift = {
@@ -44,4 +49,13 @@ export type HeadedScheduleImportResult = {
   errorCount: number;
   duplicatesInFile: number;
   duplicatesOfExisting: number;
+  /**
+   * Operations this paste would generate, and the ceiling the apply enforces.
+   *
+   * Counted here rather than at apply time so a paste that is too large is
+   * refused while the manager is still looking at it. One valid row is one
+   * operation; invalid rows generate none.
+   */
+  operationCount: number;
+  operationLimit: number;
 };

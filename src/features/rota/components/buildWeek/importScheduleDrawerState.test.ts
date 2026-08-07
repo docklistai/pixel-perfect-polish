@@ -59,16 +59,24 @@ function parse(text: string, dateOrder: "iso" | "day-first" | "month-first" = "i
   });
 }
 
-/** Builds the server result the drawer would receive for a given paste. */
+/**
+ * Builds the server result the drawer would receive for a given paste.
+ *
+ * `rotaWeekId` is null for the fresh-week case, exactly as the server function
+ * returns it when no rota_weeks row exists yet.
+ */
 function serverResult(
   text: string,
   dateOrder?: "iso" | "day-first" | "month-first",
+  rotaWeekId: string | null = "week-1",
 ): ImportScheduleResult {
   const preview = parse(text, dateOrder);
   if (!preview.ok) {
     return {
       ok: false,
-      message: preview.diagnostics[0]?.message ?? "Nothing in that paste could be imported.",
+      message:
+        preview.diagnostics.find((entry) => entry.severity === "error")?.message ??
+        "Nothing in that paste could be imported.",
       preview,
     };
   }
@@ -92,7 +100,9 @@ function serverResult(
     );
   return {
     ok: true,
-    rotaWeekId: "week-1",
+    rotaWeekId,
+    locationId: "loc-1",
+    weekStart: "2026-08-03",
     inputFingerprint: "fingerprint-abc",
     proposalDigest: "digest-xyz",
     applySource: {

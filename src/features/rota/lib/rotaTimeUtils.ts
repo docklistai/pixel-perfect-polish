@@ -1,5 +1,14 @@
 import { MAX_SHIFT_DURATION_MINUTES } from "./draftShiftCore";
 
+/**
+ * The longest a single shift may be, on every surface that creates one.
+ *
+ * Re-exported here so the rule and the arithmetic that applies it travel
+ * together: the headed schedule import reads both from this module, and cannot
+ * end up enforcing a different ceiling from the rota grid.
+ */
+export { MAX_SHIFT_DURATION_MINUTES };
+
 export function parseHHMMToMinutes(value: string): number | null {
   const [hStr, mStr] = value.split(":");
   if (!hStr) return null;

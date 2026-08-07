@@ -34,6 +34,9 @@ export function InlineCellEditor({
   const invalid = preview.tone === "error";
   const unsupported = preview.tone === "blocked";
   const blocked = invalid || unsupported;
+  // Deliberately not part of `blocked`: an ambiguous bare-hour range is saved on
+  // Enter exactly like any other, it is simply read back in full first.
+  const ambiguous = preview.tone === "warning";
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -79,7 +82,13 @@ export function InlineCellEditor({
         role="status"
         aria-live="polite"
         className={`mt-1 px-0.5 text-[9px] leading-snug ${
-          invalid ? "text-danger" : unsupported ? "text-muted-foreground" : "text-brand"
+          invalid
+            ? "text-danger"
+            : unsupported
+              ? "text-muted-foreground"
+              : ambiguous
+                ? "text-warning"
+                : "text-brand"
         }`}
       >
         {preview.tone === "idle" ? "" : preview.summary}

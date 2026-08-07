@@ -6,8 +6,13 @@ export type InlineCellPreview = {
    * "idle" renders nothing. "error" blocks saving because the input could not be
    * understood. "blocked" also saves nothing, but the input was understood and
    * is simply not something this pilot records — it is not a mistake to fix.
+   *
+   * "warning" saves exactly like "ok". It means the input was understood but had
+   * more than one reasonable reading, so the one that was chosen is stated back.
+   * Enter still commits: a manager who meant what was read should not have to
+   * dismiss anything, and a manager who did not can see it before pressing it.
    */
-  tone: "idle" | "ok" | "error" | "blocked";
+  tone: "idle" | "ok" | "warning" | "error" | "blocked";
   summary: string;
 };
 
@@ -67,13 +72,23 @@ export function buildInlineCellPreview(
 
   const summary = [segments.join(" + "), ...trailing].join(` ${DOT} `);
 
+  // A bare-hour range that was read as a morning shift says so explicitly, in
+  // full resolved times. The tone rises to "warning" so it is visibly a decision
+  // rather than a detail, but nothing is blocked — Enter and blur still commit.
+  const timeWarnings = [
+    ...new Set(result.shifts.map((shift) => shift.timeWarning).filter(Boolean)),
+  ];
+
   // An unusual or temporary role is worth saying out loud, but it saves
   // normally — the tone stays "ok" so Enter and blur still commit.
   const roleWarnings = [
     ...new Set(result.shifts.map((shift) => shift.roleWarning).filter(Boolean)),
   ];
-  if (roleWarnings.length > 0) {
-    return { tone: "ok", summary: `${summary} — ${roleWarnings.join(" · ")}` };
-  }
-  return { tone: "ok", summary };
+
+  const notes = [...timeWarnings, ...roleWarnings];
+  if (notes.length === 0) return { tone: "ok", summary };
+  return {
+    tone: timeWarnings.length > 0 ? "warning" : "ok",
+    summary: `${summary} — ${notes.join(" · ")}`,
+  };
 }

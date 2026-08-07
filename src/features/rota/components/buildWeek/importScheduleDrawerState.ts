@@ -20,10 +20,19 @@ import type { ServerActionAvailability } from "../../lib/serverActionAvailabilit
 export type DateOrder = "iso" | "day-first" | "month-first";
 
 export const DATE_ORDERS: { value: DateOrder; label: string }[] = [
-  { value: "iso", label: "2026-08-03 (year first)" },
   { value: "day-first", label: "03/08/2026 (day first)" },
   { value: "month-first", label: "08/03/2026 (month first)" },
+  { value: "iso", label: "2026-08-03 (year first)" },
 ];
+
+/**
+ * Day first, because this is a UK product and 03/08/2026 is 3 August here.
+ *
+ * The default only decides how a *numeric* date is read. An explicit ISO date is
+ * always accepted whatever is selected, so a paste that already writes
+ * 2026-08-03 is unaffected by this choice.
+ */
+export const DEFAULT_DATE_ORDER: DateOrder = "day-first";
 
 export type ImportDrawerState = {
   text: string;
@@ -45,10 +54,13 @@ export type ImportDrawerEvent =
   | { type: "closed" };
 
 export const PREVIEW_FAILURE_MESSAGE =
-  "That schedule could not be read. Check the file and try again.";
-export const APPLY_FAILURE_MESSAGE = "Nothing was imported. Try again.";
+  "That schedule could not be read, so nothing was previewed. Your paste is still here — check the header row and the date format, then preview again.";
+export const APPLY_FAILURE_MESSAGE =
+  "The import did not reach your rota. No week and no shifts were created, and your reviewed rows are still below — press Import to draft to try again.";
 
-export function initialImportDrawerState(dateOrder: DateOrder = "iso"): ImportDrawerState {
+export function initialImportDrawerState(
+  dateOrder: DateOrder = DEFAULT_DATE_ORDER,
+): ImportDrawerState {
   return { text: "", dateOrder, result: null, busy: false, error: null };
 }
 
@@ -123,6 +135,24 @@ export function previewRows(state: ImportDrawerState): ImportedShiftRow[] {
   return state.result?.preview?.rows ?? [];
 }
 
+/**
+ * What this paste would write, against what an import is allowed to write.
+ *
+ * Read from the preview rather than from a successful proposal, so it is
+ * available in exactly the case it matters most: a paste that is over the
+ * ceiling and therefore has no proposal at all. A preview that says "504 of a
+ * maximum 500" is the honest version of the old "504 ready" followed by a
+ * refusal nobody could have predicted.
+ */
+export function operationCountLabel(state: ImportDrawerState): string | null {
+  const preview = state.result?.preview;
+  if (!preview) return null;
+  if (preview.operationCount > preview.operationLimit) {
+    return `${preview.operationCount} shifts — more than the ${preview.operationLimit} one import can write`;
+  }
+  return `${preview.operationCount} of a maximum ${preview.operationLimit} shifts`;
+}
+
 export function previewLabel(state: ImportDrawerState): string {
   return state.busy && !state.result ? "Reading…" : "Preview";
 }
@@ -144,6 +174,10 @@ export function applyRequestFor(
 ): ApplyBuildWeekProposalInput {
   return {
     rotaWeekId: result.rotaWeekId,
+    // Carried whether or not the week exists. When it does not, these are the
+    // coordinates the apply creates it at; when it does, they are ignored.
+    locationId: result.locationId,
+    weekStart: result.weekStart,
     inputFingerprint: result.inputFingerprint,
     proposalDigest: result.proposalDigest,
     source: result.applySource,
