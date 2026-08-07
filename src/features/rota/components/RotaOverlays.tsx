@@ -110,6 +110,7 @@ export function RotaOverlays({
         leaveDataState={leaveDataState}
         constraintClashCount={constraintClashCount}
         approvedLeaveClashCount={rota.approvedLeaveClashCount}
+        overlappingShiftCount={rota.overlappingShiftCount}
         availabilityDataState={availabilityDataState}
         published={rota.published}
         hasUnpublishedChanges={rota.hasUnpublishedChanges}

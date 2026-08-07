@@ -1,7 +1,11 @@
 import * as React from "react";
 import * as liveDates from "../lib/liveRotaDates";
 import { getCurrentWeekDayIndex, getWeekDayLabels, getWeekDateIsoLabels } from "../lib/weekHelpers";
-import { buildLocalConflictSummaries, withLocalConflictStatus } from "../lib/localConflicts";
+import {
+  buildLocalConflictSummaries,
+  localConflictShiftIds,
+  withLocalConflictStatus,
+} from "../lib/localConflicts";
 import { buildDayStats } from "../lib/rotaSummaries";
 import {
   buildApprovedLeaveConflictSummaries,
@@ -92,5 +96,10 @@ export function useRotaWeekDerivedData({
     displayShifts,
     conflictSummaries,
     approvedLeaveConflictSummaries,
+    // Unique overlapping SHIFTS, not overlapping pairs — this is the mirror of
+    // the RPC's `overlapping_shift` clash kind, which emits one row per shift.
+    // `conflictSummaries.length` cannot be reused here: it counts pairs and
+    // also folds in approved-leave conflicts, which are acknowledged separately.
+    overlappingShiftCount: localConflictShiftIds(displayShifts, dayIsoDates).size,
   };
 }

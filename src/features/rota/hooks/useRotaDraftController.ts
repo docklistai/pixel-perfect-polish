@@ -154,6 +154,7 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
     openShiftCount: countOpenShifts(displayShifts),
     conflictCount: derived.conflictSummaries.length,
     approvedLeaveClashCount: derived.approvedLeaveConflictSummaries.length,
+    overlappingShiftCount: derived.overlappingShiftCount,
     assignedShiftCount: countAssignedShifts(displayShifts),
     plannedShiftCount: countPlannedShifts(displayShifts),
     conflictSummaries: derived.conflictSummaries,

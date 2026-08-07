@@ -27,6 +27,7 @@ export function PublishRotaDialog({
   leaveDataState,
   constraintClashCount,
   approvedLeaveClashCount,
+  overlappingShiftCount,
   availabilityDataState,
   published,
   hasUnpublishedChanges,
@@ -52,6 +53,13 @@ export function PublishRotaDialog({
    * the same conflict to the issue tally twice.
    */
   approvedLeaveClashCount: number;
+  /**
+   * Unique overlapping assigned shifts, mirroring the RPC's `overlapping_shift`
+   * clash kind. Already counted inside `conflictCount` for the issue tally, so
+   * it is passed separately purely to drive the acknowledgement override — the
+   * same split `approvedLeaveClashCount` uses, and for the same reason.
+   */
+  overlappingShiftCount: number;
   availabilityDataState: "ready" | "loading" | "error";
   published: boolean;
   hasUnpublishedChanges: boolean;
@@ -89,6 +97,7 @@ export function PublishRotaDialog({
           {
             availabilityClashCount: constraintClashCount,
             approvedLeaveClashCount,
+            overlappingShiftCount,
           },
           issuesAcknowledged,
         ),
