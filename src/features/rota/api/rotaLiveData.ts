@@ -2,11 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { DraftShift, ShiftTone } from "../types";
 import {
+  addIsoDays,
   dateIsoInTimezone,
   dayIndexFromDates,
   formatTimeInTimezone,
   weekStartForOffset,
 } from "../lib/liveRotaDates";
+import { fetchBoundaryOverlaps, type BoundaryOverlap } from "./boundaryOverlaps";
+import { hasUnpublishedWork } from "./unpublishedChanges";
 
 /**
  * Manager-side live rota reads. Runs as a server function bound to the caller's
@@ -41,10 +44,17 @@ export type LiveRotaWeek = {
   locations: LiveRotaLocation[];
   today: string;
   shifts: DraftShift[];
+  /**
+   * Overlaps between this week's assigned shifts and assigned shifts outside
+   * it — another rota week, another location, or both. Conflict context only:
+   * these are never mapped into `shifts` and never become grid rows.
+   */
+  boundaryOverlaps: BoundaryOverlap[];
 };
 
 interface LocationRow extends LiveRotaLocation {
   timezone: string;
+  status: string;
 }
 
 interface ShiftRow {
@@ -100,31 +110,6 @@ function mapShift(
   };
 }
 
-function latestShiftChangeAt(shifts: ShiftRow[], weekUpdatedAt: string): string {
-  return shifts.reduce((latest, shift) => {
-    const shiftLatest = shift.updated_at > shift.created_at ? shift.updated_at : shift.created_at;
-    return shiftLatest > latest ? shiftLatest : latest;
-  }, weekUpdatedAt);
-}
-
-function timestampValue(value: string): number {
-  const time = new Date(value).getTime();
-  return Number.isFinite(time) ? time : 0;
-}
-
-function hasDraftChangedSincePublish(
-  week: WeekRow,
-  shifts: ShiftRow[],
-  latestSnapshot: SnapshotRow | null,
-): boolean {
-  if (!latestSnapshot) return false;
-  if (week.status !== "published") return true;
-  return (
-    timestampValue(latestShiftChangeAt(shifts, week.updated_at)) >
-    timestampValue(latestSnapshot.published_at)
-  );
-}
-
 /**
  * The manager's live draft shifts for one week. Returns `hasWeek: false` (and an
  * empty shift list) when no rota_weeks row exists for that week, so the caller can
@@ -139,17 +124,22 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
 
+    // Every location, not just active ones — a boundary overlap may sit at a
+    // since-deactivated location whose name and timezone must still resolve,
+    // the same reason departments below are read unfiltered. Selection and the
+    // location picker keep using the active subset only, so which rota a
+    // manager lands on is unchanged.
     const { data: locationsData, error: locationsError } = await supabase
       .from("locations")
-      .select("id, name, timezone")
+      .select("id, name, timezone, status")
       .eq("workspace_id", workspaceId)
-      .eq("status", "active")
       .order("name", { ascending: true })
       .order("id", { ascending: true });
 
     if (locationsError) throw locationsError;
 
-    const locations = (locationsData as LocationRow[] | null) ?? [];
+    const allLocations = (locationsData as LocationRow[] | null) ?? [];
+    const locations = allLocations.filter((row) => row.status === "active");
     const location =
       (data.locationId && locations.find((row) => row.id === data.locationId)) || locations[0];
     if (!location) throw new Error("No active rota location is available");
@@ -184,6 +174,7 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
         hasPublishedSnapshot: false,
         hasUnpublishedChanges: false,
         shifts: [],
+        boundaryOverlaps: [],
       };
     }
 
@@ -235,6 +226,22 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       ),
     );
 
+    // Dependent on the shift rows above (it needs their staff ids and time
+    // envelope), so it cannot join the Promise.all. Skipped entirely when the
+    // week has no assigned shifts.
+    const boundary = await fetchBoundaryOverlaps({
+      supabase,
+      workspaceId,
+      rotaWeekId: weekRow.id,
+      currentLocationId: location.id,
+      weekStart,
+      weekEnd: addIsoDays(weekStart, 6),
+      shifts: shiftRows,
+      locations: new Map(
+        allLocations.map((row) => [row.id, { name: row.name, timezone: row.timezone }]),
+      ),
+    });
+
     return {
       ...resultBase,
       hasWeek: true,
@@ -242,12 +249,18 @@ export const fetchWorkspaceRotaWeekFn = createServerFn({ method: "GET" })
       status: weekRow.status,
       hasPublishedSnapshot: Boolean(snapshotRow),
       // Leave approval/cancellation can require an explicit new publication
-      // even when the draft shift rows are otherwise identical. Treating the
-      // persistent issue as unpublished work keeps Republish available until
-      // the publication transaction resolves it.
-      hasUnpublishedChanges:
-        (openOperationalIssueCount ?? 0) > 0 ||
-        hasDraftChangedSincePublish(weekRow, shiftRows, snapshotRow),
+      // even when the draft shift rows are otherwise identical, and since
+      // phase 53 so can a shift in another week or at another location that
+      // now overlaps this one. Both keep Republish available until the
+      // publication transaction resolves them.
+      hasUnpublishedChanges: hasUnpublishedWork({
+        week: weekRow,
+        shifts: shiftRows,
+        openIssueCount: openOperationalIssueCount ?? 0,
+        latestPublishedAt: snapshotRow?.published_at ?? null,
+        partnerChangeAt: boundary.partnerChangeAt,
+      }),
       shifts: shiftRows.map((row) => mapShift(row, weekStart, location.timezone, departmentNames)),
+      boundaryOverlaps: boundary.overlaps,
     };
   });

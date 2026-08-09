@@ -76,7 +76,13 @@ values
   ('45000000-0000-4000-8000-000000000108', '10000000-0000-4000-8000-000000000001',
    '45000000-0000-4000-8000-000000000012', '45000000-0000-4000-8000-000000000002',
    '12000000-0000-4000-8000-000000000003', '14000000-0000-4000-8000-000000000004',
-   '2099-08-10', '2099-08-10 09:00 America/New_York', '2099-08-10 17:00 America/New_York', 30, 'Bartender', 'scheduled');
+   -- 13:00-21:00 New York is 17:00-01:00 UTC, an hour after shift 107 ends at
+   -- 16:00 UTC. Phase 53: overlap is now detected workspace-wide, so the same
+   -- person scheduled at two locations at the same instant is a publish clash.
+   -- These two shifts previously overlapped 13:00-16:00 UTC by accident. The
+   -- assertion below is unaffected — it turns on the matcher's +/-4h START
+   -- window, which excluded shift 107 then and still does.
+   '2099-08-10', '2099-08-10 13:00 America/New_York', '2099-08-10 21:00 America/New_York', 30, 'Bartender', 'scheduled');
 
 insert into public.shifts (
   id, workspace_id, rota_week_id, location_id, department_id, staff_member_id,
@@ -127,7 +133,7 @@ begin
   if matched <> '45000000-0000-4000-8000-000000000104' then raise exception 'FAIL: overnight match %', matched; end if;
   select shift_id into matched from public.rpc_internal_match_published_shift_for_clock(
     '10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000004',
-    '2099-08-10 09:00 America/New_York');
+    '2099-08-10 13:00 America/New_York');
   if matched <> '45000000-0000-4000-8000-000000000108' then raise exception 'FAIL: cross-location match %', matched; end if;
   if exists (select 1 from public.rpc_internal_match_published_shift_for_clock(
       '10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000004',

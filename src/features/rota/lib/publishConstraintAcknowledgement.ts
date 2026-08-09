@@ -16,10 +16,19 @@
  * dialog can never acknowledge, hard-blocking the manager. Any change to the
  * RPC's clash set must change this sum in the same commit, and vice versa.
  *
- * `overlappingShiftCount` counts unique affected SHIFTS (the size of
- * `localConflictShiftIds`), not overlapping pairs, because that is what the
- * RPC's `overlapping_shift` kind emits — one row per shift, deduplicated. Two
- * mutually overlapping shifts are therefore two, not one.
+ * `overlappingShiftCount` counts unique affected SHIFTS, not overlapping pairs,
+ * because that is what the RPC's `overlapping_shift` kind emits — one row per
+ * shift, deduplicated. Two mutually overlapping shifts are therefore two, not
+ * one.
+ *
+ * Phase 53: that count is the UNION of two detectors —
+ * `localConflictShiftIds` (partners inside this rota week, decided by the
+ * frontend interval engine) and `boundaryConflictShiftIds` (partners in another
+ * rota week or at another location, decided server-side on raw timestamptz
+ * instants). Both yield shift ids belonging to the week being published, which
+ * is exactly the side the RPC counts — its `shift` half stays pinned to
+ * `p_rota_week_id` while its `other` half is workspace-wide. The external half
+ * of a boundary pair is never counted on either side.
  *
  * The counts come from the existing detectors; approved-leave conflicts stay in
  * the conflict list alone and are never copied into the availability clashes.

@@ -5,74 +5,15 @@ import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceStaffFn } from "@/features/staff/api/staffLiveData";
 import { getAssignableStaffRows } from "../lib/assignableStaff";
 import { toRotaStaffMember } from "../lib/rotaLiveStaff";
-import {
-  fetchWorkspaceRotaWeekFn,
-  type LiveRotaLocation,
-  type LiveWeekStatus,
-} from "../api/rotaLiveData";
-import type { DraftShift, StaffMember } from "../types";
+import { fetchWorkspaceRotaWeekFn } from "../api/rotaLiveData";
+import { DEMO_ROTA_LIVE_DATA as DEMO, type RotaLiveData } from "./rotaLiveDataShape";
+import type { DraftShift } from "../types";
 import { fetchRotaLeaveFn } from "@/features/leave/api/leaveLiveData";
 import { leaveQueryKeys, rotaLeaveRange } from "@/features/leave/lib/leaveQueryRange";
-import type { LeaveRequest } from "@/features/leave/types";
 
 const rotaRouteApi = getRouteApi("/rota");
 
-export type RotaLiveData = {
-  workspaceId: string | null;
-  enabled: boolean;
-  isLive: boolean;
-  source: "live" | "demo";
-  isLoading: boolean;
-  isError: boolean;
-  isLeaveLoading: boolean;
-  isLeaveError: boolean;
-  hasWeek: boolean;
-  rotaWeekId: string | null;
-  weekStatus: LiveWeekStatus | null;
-  hasPublishedSnapshot: boolean;
-  hasUnpublishedChanges: boolean;
-  weekStart: string | null;
-  locationId: string | null;
-  locationName: string | null;
-  locations: LiveRotaLocation[];
-  today: string | null;
-  setLocationId: (locationId: string) => void;
-  refetchWeek: () => Promise<readonly DraftShift[] | undefined>;
-  /** Re-runs every live read backing this page (staff, week, leave). */
-  retry: () => Promise<void>;
-  staff: StaffMember[];
-  assignableStaff: StaffMember[];
-  shifts: DraftShift[];
-  leaveRequests: LeaveRequest[];
-};
-
-const DEMO: RotaLiveData = {
-  workspaceId: null,
-  enabled: false,
-  isLive: false,
-  source: "demo",
-  isLoading: false,
-  isError: false,
-  isLeaveLoading: false,
-  isLeaveError: false,
-  hasWeek: false,
-  rotaWeekId: null,
-  weekStatus: null,
-  hasPublishedSnapshot: false,
-  hasUnpublishedChanges: false,
-  weekStart: null,
-  locationId: null,
-  locationName: null,
-  locations: [],
-  today: null,
-  setLocationId: () => undefined,
-  refetchWeek: async () => undefined,
-  retry: async () => undefined,
-  staff: [],
-  assignableStaff: [],
-  shifts: [],
-  leaveRequests: [],
-};
+export type { RotaLiveData };
 
 /** Manager-scoped live rota source, aligned with the route location selection. */
 export function useRotaLiveData(
@@ -183,6 +124,7 @@ export function useRotaLiveData(
     staff: (staffQuery.data ?? []).map(toRotaStaffMember),
     assignableStaff: getAssignableStaffRows(staffQuery.data ?? []).map(toRotaStaffMember),
     shifts: weekQuery.data.shifts,
+    boundaryOverlaps: weekQuery.data.boundaryOverlaps,
     leaveRequests: leaveQuery.data ?? [],
   };
 }

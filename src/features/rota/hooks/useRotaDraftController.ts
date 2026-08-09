@@ -52,6 +52,7 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
     sourceShifts,
     leaveRequests,
     roster,
+    boundaryOverlaps: live.boundaryOverlaps,
   });
   const displayShifts = derived.displayShifts;
   const visibleStaff = filterStaff(roster, displayShifts, filters, staffSearch);
