@@ -139,6 +139,13 @@ export function WorkspaceRotaStartDayField() {
           </option>
         ))}
       </SelectField>
+      {/* Nothing records that a manager "confirmed" this, and nothing should.
+          The only honest signal before the lock lands is to say when it lands. */}
+      {editable && (
+        <p className="text-[11px] text-muted-foreground">
+          Check this before you build your first rota — it locks for good once a rota week exists.
+        </p>
+      )}
       {profile.enabled && profile.hasRotas && (
         <p className="text-[11px] text-muted-foreground">
           Locked — you&apos;ve already built rotas. Set this during first-run setup.
@@ -152,7 +159,8 @@ export function WorkspaceRotaStartDayField() {
 export function WorkspaceTimezoneField() {
   const profile = useWorkspaceProfile();
   const location = profile.primaryLocation;
-  const editable = profile.enabled && location !== null;
+  const locked = location?.timezoneLocked ?? false;
+  const editable = profile.enabled && location !== null && !locked;
   const current = location?.timezone ?? "Europe/London";
   const options = COMMON_TIMEZONES.includes(current)
     ? COMMON_TIMEZONES
@@ -184,6 +192,12 @@ export function WorkspaceTimezoneField() {
           </option>
         ))}
       </SelectField>
+      {locked && (
+        <p className="text-[11px] text-muted-foreground">
+          Locked — shifts are already scheduled here. Changing the zone would restate their times on
+          the rota and in the staff portal.
+        </p>
+      )}
     </label>
   );
 }

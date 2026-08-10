@@ -30,3 +30,21 @@ export function isOpenOnWeekday(mask: number | null, weekday: number): boolean {
   if (mask === null) return true;
   return (mask & (1 << weekday)) !== 0;
 }
+
+export const NO_OPEN_DAYS_MESSAGE =
+  "Keep at least one trading day open. A week with no open days flags every shift as scheduled on a closed day.";
+
+/**
+ * True when a saved mask leaves at least one trading day.
+ *
+ * An all-closed mask (0) is storable — the column's CHECK allows 0..127 — but it
+ * is never a real answer: it makes `findClosedDayShifts` flag every shift in the
+ * rota, so the closed-day warning stops meaning anything. Null is the separate
+ * "not configured" state and is not a save this can produce.
+ *
+ * Shared by the toggle UI and the write handler so the refusal is authoritative
+ * rather than cosmetic; a disabled button is not a validation boundary.
+ */
+export function hasAnyOpenDay(mask: number): boolean {
+  return mask > 0;
+}

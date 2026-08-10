@@ -4,6 +4,8 @@ import { Upload } from "lucide-react";
 import { isPilotSurface } from "@/config/pilot";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { OpeningDaysSection } from "./OpeningDaysSection";
+import { NoActiveLocationNotice } from "./NoActiveLocationNotice";
+import { useWorkspaceProfile } from "../hooks/useWorkspaceProfile";
 import {
   WorkspaceLocationField,
   WorkspaceNameField,
@@ -19,6 +21,7 @@ function monogram(name: string): string {
 
 export function WorkspaceTab(_props: { onDirty: () => void }) {
   const pilot = isPilotSurface();
+  const profile = useWorkspaceProfile();
   const { workspaceName, email, roleLabel, initials } = useManagerIdentity();
   return (
     <div className="space-y-4">
@@ -55,8 +58,16 @@ export function WorkspaceTab(_props: { onDirty: () => void }) {
         </div>
 
         <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <WorkspaceLocationField />
-          <WorkspaceTimezoneField />
+          {/* Both fields describe a location. With none, show why rather than a
+              disabled form that implies typing a name would create one. */}
+          {profile.hasNoActiveLocation ? (
+            <NoActiveLocationNotice className="md:col-span-2" />
+          ) : (
+            <>
+              <WorkspaceLocationField />
+              <WorkspaceTimezoneField />
+            </>
+          )}
           <WorkspaceRotaStartDayField />
         </div>
       </SectionCard>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isOpenOnWeekday, maskToOpenDays, openDaysToMask } from "./openingDays";
+import { hasAnyOpenDay, isOpenOnWeekday, maskToOpenDays, openDaysToMask } from "./openingDays";
 
 describe("openingDays", () => {
   it("treats a null mask as open every day", () => {
@@ -20,5 +20,26 @@ describe("openingDays", () => {
     expect(isOpenOnWeekday(mask, 0)).toBe(false); // Monday closed
     expect(isOpenOnWeekday(mask, 1)).toBe(true); // Tuesday open
     expect(isOpenOnWeekday(mask, 6)).toBe(false); // Sunday closed
+  });
+
+  describe("hasAnyOpenDay", () => {
+    it("rejects an all-closed week", () => {
+      const allClosed = openDaysToMask([false, false, false, false, false, false, false]);
+      expect(allClosed).toBe(0);
+      expect(hasAnyOpenDay(allClosed)).toBe(false);
+    });
+
+    it("accepts a week with a single trading day", () => {
+      expect(hasAnyOpenDay(openDaysToMask([false, false, false, false, false, false, true]))).toBe(
+        true,
+      );
+      expect(hasAnyOpenDay(openDaysToMask([true, false, false, false, false, false, false]))).toBe(
+        true,
+      );
+    });
+
+    it("accepts a full trading week", () => {
+      expect(hasAnyOpenDay(openDaysToMask(maskToOpenDays(null)))).toBe(true);
+    });
   });
 });

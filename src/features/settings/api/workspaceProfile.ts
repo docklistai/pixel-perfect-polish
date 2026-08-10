@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { hasAnyOpenDay, NO_OPEN_DAYS_MESSAGE } from "../lib/openingDays";
+import { locationHasScheduleData } from "./locationScheduleLock";
 
 /**
  * Workspace profile settings. The business name is the one identity field the
@@ -17,8 +19,19 @@ export type WorkspaceProfile = {
   openTime: string | null;
   /** Default closing time "HH:MM", or null when unconfigured. */
   closeTime: string | null;
-  /** The workspace's primary (first active) location, or null if none. */
-  primaryLocation: { id: string; name: string; timezone: string } | null;
+  /**
+   * The workspace's primary (first active) location, or null if none.
+   *
+   * `timezoneLocked` mirrors the server-side refusal in
+   * `updateLocationTimezoneFn` so the field can be disabled with an honest
+   * reason. The lock is authoritative there, not here.
+   */
+  primaryLocation: {
+    id: string;
+    name: string;
+    timezone: string;
+    timezoneLocked: boolean;
+  } | null;
   /** First weekday of the rota week: 0 = Monday .. 6 = Sunday. */
   rotaStartWeekday: number;
   /** True once any rota week exists — the start day is locked from then on. */
@@ -69,12 +82,17 @@ export const fetchWorkspaceProfileFn = createServerFn({ method: "GET" }).handler
     const location =
       ((locationRes.data as { id: string; name: string; timezone: string }[] | null) ?? [])[0] ??
       null;
+    // Only asked once a location exists; there is nothing to lock otherwise.
+    const timezoneLocked =
+      location === null
+        ? false
+        : await locationHasScheduleData({ supabase, workspaceId, locationId: location.id });
     return {
       name: row.name,
       openWeekdaysMask: row.open_weekdays_mask,
       openTime: toHhmm(row.default_open_time),
       closeTime: toHhmm(row.default_close_time),
-      primaryLocation: location,
+      primaryLocation: location === null ? null : { ...location, timezoneLocked },
       rotaStartWeekday: row.rota_start_weekday ?? 0,
       hasRotas: ((rotaWeekRes.data as { id: string }[] | null) ?? []).length > 0,
     };
@@ -154,66 +172,6 @@ export const updateOpeningTimesFn = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-const locationSchema = z.object({
-  locationId: z.string().uuid(),
-  name: z.string().trim().min(1).max(120),
-});
-
-export const updateLocationNameFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => locationSchema.parse(input))
-  .handler(async ({ data }): Promise<UpdateWorkspaceNameResult> => {
-    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } =
-      await import("@/features/auth/api/activeManagerWorkspace");
-    const supabase = getSupabaseServerClient();
-    const workspaceId = await requireActiveManagerWorkspaceId(supabase);
-    const { error } = await supabase
-      .from("locations")
-      .update({ name: data.name })
-      .eq("workspace_id", workspaceId)
-      .eq("id", data.locationId);
-    if (error) {
-      return {
-        ok: false,
-        message:
-          error.code === "42501"
-            ? "Only an owner or manager can rename the location."
-            : "Couldn't save the location name. Please try again.",
-      };
-    }
-    return { ok: true };
-  });
-
-const timezoneSchema = z.object({
-  locationId: z.string().uuid(),
-  timezone: z.string().trim().min(1).max(60),
-});
-
-export const updateLocationTimezoneFn = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => timezoneSchema.parse(input))
-  .handler(async ({ data }): Promise<UpdateWorkspaceNameResult> => {
-    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
-    const { requireActiveManagerWorkspaceId } =
-      await import("@/features/auth/api/activeManagerWorkspace");
-    const supabase = getSupabaseServerClient();
-    const workspaceId = await requireActiveManagerWorkspaceId(supabase);
-    const { error } = await supabase
-      .from("locations")
-      .update({ timezone: data.timezone })
-      .eq("workspace_id", workspaceId)
-      .eq("id", data.locationId);
-    if (error) {
-      return {
-        ok: false,
-        message:
-          error.code === "42501"
-            ? "Only an owner or manager can change the time zone."
-            : "Couldn't save the time zone. Please try again.",
-      };
-    }
-    return { ok: true };
-  });
-
 const openingDaysSchema = z.object({ openWeekdaysMask: z.number().int().min(0).max(127) });
 
 export const updateOpeningDaysFn = createServerFn({ method: "POST" })
@@ -224,6 +182,14 @@ export const updateOpeningDaysFn = createServerFn({ method: "POST" })
       await import("@/features/auth/api/activeManagerWorkspace");
     const supabase = getSupabaseServerClient();
     const workspaceId = await requireActiveManagerWorkspaceId(supabase);
+
+    // The column's CHECK admits 0, but an all-closed week is never a real answer:
+    // it would flag every scheduled shift as a closed-day shift. Refused here so
+    // the rule holds for a direct server-function call too, not just the toggles.
+    if (!hasAnyOpenDay(data.openWeekdaysMask)) {
+      return { ok: false, message: NO_OPEN_DAYS_MESSAGE };
+    }
+
     const { error } = await supabase
       .from("workspaces")
       .update({ open_weekdays_mask: data.openWeekdaysMask })

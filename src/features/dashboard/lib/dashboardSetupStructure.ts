@@ -19,11 +19,14 @@ export function buildStructureSteps(
   if (activeLocationCount !== null && activeLocationCount === 0) {
     steps.push({
       id: "location",
-      title: "Add an active location",
-      description: "A rota week is scheduled against a site, so one active location is needed.",
+      // Settings cannot create a location — bootstrap makes the first one — so
+      // this no longer says "Add" or offers a CTA that implies it can. It routes
+      // to the one screen that explains the state and how to get it restored.
+      title: "No active location",
+      description: "A rota is scheduled against a site. Settings explains how to restore yours.",
       done: false,
       route: "/settings",
-      cta: "Open settings",
+      cta: "See what to do",
       icon: MapPin,
     });
   }

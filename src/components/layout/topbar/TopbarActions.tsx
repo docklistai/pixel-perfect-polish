@@ -139,8 +139,10 @@ export function TopbarActions({
               type="button"
               onClick={() => {
                 setUserOpen(false);
-                toast.info("Profile settings", {
-                  description: "Manage your profile from Settings → General for now.",
+                // Settings → General holds only the device theme preference —
+                // there is no profile management there to point at.
+                toast.info("Profile", {
+                  description: "Profile management arrives in a later update.",
                 });
               }}
               className="menu-item"

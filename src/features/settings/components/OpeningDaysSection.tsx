@@ -3,7 +3,13 @@ import { toast } from "sonner";
 import { ActionButton } from "@/components/dl";
 import { SectionCard } from "./SettingsPrimitives";
 import { useWorkspaceProfile } from "../hooks/useWorkspaceProfile";
-import { maskToOpenDays, openDaysToMask, WEEKDAY_SHORT } from "../lib/openingDays";
+import {
+  hasAnyOpenDay,
+  maskToOpenDays,
+  NO_OPEN_DAYS_MESSAGE,
+  openDaysToMask,
+  WEEKDAY_SHORT,
+} from "../lib/openingDays";
 
 /**
  * Which weekdays the business is open and its default trading hours. Live for
@@ -24,7 +30,14 @@ export function OpeningDaysSection() {
   };
 
   const handleSave = async () => {
-    const result = await profile.saveOpeningDays(openDaysToMask(days));
+    const mask = openDaysToMask(days);
+    // Mirrors the write handler's refusal so the manager is told before the round
+    // trip; the server check is the one that actually decides.
+    if (!hasAnyOpenDay(mask)) {
+      toast.error("Not saved", { description: NO_OPEN_DAYS_MESSAGE });
+      return;
+    }
+    const result = await profile.saveOpeningDays(mask);
     if (!result.ok) {
       toast.error("Not saved", { description: result.message });
       return;

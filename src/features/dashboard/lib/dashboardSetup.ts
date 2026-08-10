@@ -90,7 +90,13 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
           {
             id: "basics" as const,
             title: "Set your business basics",
-            description: "Confirm your business name and the days you trade.",
+            // Names the rota start day explicitly: it is the one setting that
+            // locks permanently at the first rota week, and a manager who never
+            // opens Settings first can only discover that too late. Done-ness
+            // still tracks the trading days — nothing here records a
+            // "confirmed" start day, because nothing stores one.
+            description:
+              "Confirm the days you trade, and check your rota start day — it locks once you build your first rota.",
             done: hasBusinessBasics,
             route: "/settings" as const,
             cta: "Open settings",

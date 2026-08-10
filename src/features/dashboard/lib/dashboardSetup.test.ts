@@ -67,6 +67,37 @@ describe("buildDashboardSetup", () => {
     expect(plan.steps.find((step) => step.id === "basics")).toMatchObject({ done: true });
   });
 
+  it("tells managers to check the rota start day before the first rota", () => {
+    const plan = buildDashboardSetup({
+      staffCount: 0,
+      plannedShiftCount: 0,
+      hasPublishedSnapshot: false,
+      hasLabourTargets: false,
+      hasBusinessBasics: false,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
+    });
+    const basics = plan.steps.find((step) => step.id === "basics");
+    expect(basics?.description).toMatch(/rota start day/i);
+    expect(basics?.description).toMatch(/locks/i);
+    expect(basics?.route).toBe("/settings");
+  });
+
+  it("keeps basics done-ness tied to trading days, inventing no confirmation state", () => {
+    // Nothing stores "the manager confirmed their start day", so done-ness must
+    // still be exactly `hasBusinessBasics` — the copy warns, it does not track.
+    const configured = buildDashboardSetup({
+      staffCount: 0,
+      plannedShiftCount: 0,
+      hasPublishedSnapshot: false,
+      hasLabourTargets: false,
+      hasBusinessBasics: true,
+      activeLocationCount: 1,
+      activeDepartmentCount: 1,
+    });
+    expect(configured.steps.find((step) => step.id === "basics")).toMatchObject({ done: true });
+  });
+
   it("omits the budget step while its state is unknown", () => {
     const plan = buildDashboardSetup({
       staffCount: 0,
@@ -194,6 +225,20 @@ describe("buildDashboardSetup", () => {
       ]);
       expect(plan.steps.find((step) => step.id === "location")).toMatchObject({ done: false });
       expect(plan.steps.find((step) => step.id === "department")).toMatchObject({ done: false });
+    });
+
+    it("does not offer the location step as something Settings can create", () => {
+      const plan = buildDashboardSetup({
+        ...configuredWorkspace,
+        activeLocationCount: 0,
+        activeDepartmentCount: 1,
+      });
+      const step = plan.steps.find((s) => s.id === "location");
+      // Nothing in the app creates a location outside workspace bootstrap, so
+      // the step must not read as an "add it here" action.
+      expect(step?.title).not.toMatch(/^Add/);
+      expect(step?.cta).not.toMatch(/add/i);
+      expect(step).toMatchObject({ route: "/settings", done: false });
     });
 
     it("sends the department step to the real Staff dialog", () => {
