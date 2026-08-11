@@ -1,132 +1,71 @@
 import * as React from "react";
-import { DrawerShell, ActionButton, StatusBadge, DialogShell } from "@/components/dl";
-import { Bell, Check, Download, Users, MessageSquare, Send } from "lucide-react";
+import { DrawerShell, ActionButton, StatusBadge } from "@/components/dl";
+import { Bell, Check, Users } from "lucide-react";
 import { toast } from "sonner";
+import { fetchTeamAnnouncementRosterFn } from "../api/teamRead";
+import { downloadRosterCsv } from "../lib/teamExport";
+import { formatDate } from "../lib/teamFormatting";
+import { TeamAnnouncementComments } from "./TeamAnnouncementComments";
+import { TeamAnnouncementReadStatus } from "./TeamAnnouncementReadStatus";
+import { TeamAnnouncementRosterDialog } from "./TeamAnnouncementRosterDialog";
 import type { TeamAnnouncement } from "../types";
 
 interface Props {
   announcement: TeamAnnouncement | null;
+  pending: boolean;
   onOpenChange: (open: boolean) => void;
+  onAddComment: (announcementId: string, body: string) => Promise<boolean>;
+  onRemind: (announcementId: string) => Promise<boolean>;
+  onAcknowledge: (announcementId: string) => Promise<boolean>;
 }
 
-interface Comment {
-  name: string;
-  body: string;
-  when: string;
-  avatarColor: string;
-}
-
-const CANONICAL_STAFF = [
-  { name: "Sophie Carter", role: "FOH Supervisor" },
-  { name: "Daniel Mitchell", role: "Kitchen Supervisor" },
-  { name: "Priya Patel", role: "Head Chef" },
-  { name: "James Walker", role: "Waiter" },
-  { name: "Amelia Stone", role: "Housekeeper" },
-  { name: "Noah Evans", role: "Porter" },
-  { name: "Liam O'Connor", role: "Bartender" },
-  { name: "Olivia Bennett", role: "Barista" },
-] as const;
-
-function Avatar({
-  name,
-  size = "sm",
-  colorClass,
-}: {
-  name: string;
-  size?: "sm" | "md";
-  colorClass?: string;
-}) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-  const sizeCls = size === "sm" ? "sm" : "";
-  return (
-    <div className={`av ${sizeCls} ${colorClass || "av-c2"}`} aria-hidden>
-      {initials}
-    </div>
-  );
-}
-
-export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Props) {
-  const [comments, setComments] = React.useState<Comment[]>([
-    {
-      name: "Daniel Mitchell",
-      body: "Got it — I'll print the new menu before service.",
-      when: "2h ago",
-      avatarColor: "av-c1",
-    },
-    {
-      name: "Sophie Carter",
-      body: "Will brief the FOH team at handover.",
-      when: "3h ago",
-      avatarColor: "av-c3",
-    },
-    {
-      name: "Liam O'Connor",
-      body: "Any update on the cocktail station?",
-      when: "5h ago",
-      avatarColor: "av-c4",
-    },
-  ]);
-  const [newComment, setNewComment] = React.useState("");
-  const [showAckList, setShowAckList] = React.useState(false);
-  const [acked, setAcked] = React.useState(false);
+export function TeamAnnouncementDetailDrawer({
+  announcement,
+  pending,
+  onOpenChange,
+  onAddComment,
+  onRemind,
+  onAcknowledge,
+}: Props) {
+  const [rosterOpen, setRosterOpen] = React.useState(false);
+  const [exporting, setExporting] = React.useState(false);
 
   React.useEffect(() => {
-    if (announcement) {
-      setAcked(false);
-    }
+    if (!announcement) setRosterOpen(false);
   }, [announcement]);
 
   if (!announcement) return null;
 
-  const handleSendComment = () => {
-    if (!newComment.trim()) return;
-    setComments([
-      ...comments,
-      {
-        name: "Alex Thompson",
-        body: newComment.trim(),
-        when: "Just now",
-        avatarColor: "av-c2",
-      },
-    ]);
-    setNewComment("");
-    toast.info("Preview only", {
-      description: "Sample manager notes stay local to this drawer and are not saved or sent.",
-    });
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const rows = await fetchTeamAnnouncementRosterFn({
+        data: { announcementId: announcement.id },
+      });
+      if (rows.length === 0) {
+        toast.error("There is nobody on this announcement to export.");
+        return;
+      }
+      downloadRosterCsv(rows, announcement.title);
+      toast.success(`Exported ${rows.length} ${rows.length === 1 ? "person" : "people"}.`);
+    } catch {
+      toast.error("We couldn't prepare that export. Please try again.");
+    } finally {
+      setExporting(false);
+    }
   };
 
-  const handleAcknowledge = () => {
-    setAcked(true);
-    toast.info("Preview only", {
-      description: "Sample acknowledgement state changed locally; no staff record was updated.",
-    });
-  };
-
-  const handleRemindNonReaders = () => {
-    toast.info("Reminder prepared", {
-      description: "Sample reminder preview only. No staff message was prepared or sent.",
-    });
-  };
-
-  const handleExportAcks = () => {
-    toast.info("Preview only", {
-      description: "Sample acknowledgement export is unavailable. No file was prepared.",
-    });
-  };
+  const unread = announcement.recipientCount - announcement.readCount;
 
   return (
     <>
       <DrawerShell
-        open={announcement !== null}
-        onOpenChange={(o) => !o && onOpenChange(false)}
-        title={announcement.t}
-        description="Sample announcement · not sent to staff"
+        open
+        onOpenChange={(open) => !open && onOpenChange(false)}
+        title={announcement.title}
+        description={`${announcement.audienceLabel} · ${formatDate(announcement.publishedAt)}`}
         meta={<StatusBadge tone="brand">Announcement</StatusBadge>}
+        width="lg"
         footer={
           <div className="flex w-full items-center justify-end gap-2">
             <ActionButton variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
@@ -136,176 +75,65 @@ export function TeamAnnouncementDetailDrawer({ announcement, onOpenChange }: Pro
               variant="secondary"
               size="sm"
               icon={Bell}
-              onClick={handleRemindNonReaders}
+              disabled={pending || unread === 0}
+              onClick={() => void onRemind(announcement.id)}
             >
-              Preview reminder
+              {unread === 0 ? "All read" : `Remind ${unread}`}
             </ActionButton>
-            <ActionButton size="sm" icon={Check} onClick={handleAcknowledge} disabled={acked}>
-              {acked ? "Sample acknowledged" : "Preview ack"}
-            </ActionButton>
+            {announcement.viewerIsRecipient && announcement.requiresAcknowledgement && (
+              <ActionButton
+                size="sm"
+                icon={Check}
+                disabled={pending || announcement.viewerAcknowledged}
+                onClick={() => void onAcknowledge(announcement.id)}
+              >
+                {announcement.viewerAcknowledged ? "Acknowledged" : "Acknowledge"}
+              </ActionButton>
+            )}
           </div>
         }
-        width="lg"
       >
         <div className="space-y-5">
-          {/* Announcement Message Section */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-brand-soft text-brand shrink-0">
+              <div className="p-2.5 rounded-xl bg-brand-soft text-brand shrink-0" aria-hidden>
                 <Users className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-sm font-semibold leading-tight">{announcement.t}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Sample date · not live</div>
+                <div className="text-sm font-semibold leading-tight">{announcement.title}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {announcement.authorName
+                    ? `Posted by ${announcement.authorName}`
+                    : "Posted by a manager"}{" "}
+                  · {formatDate(announcement.publishedAt)}
+                </div>
               </div>
             </div>
-            <p className="text-sm text-foreground/90 leading-relaxed bg-muted/10 p-3.5 border border-border/50 rounded-xl">
+            <p className="text-sm text-foreground/90 leading-relaxed bg-muted/10 p-3.5 border border-border/50 rounded-xl whitespace-pre-wrap">
               {announcement.body}
             </p>
           </div>
 
-          {/* Acknowledgements Status Card */}
-          <div className="card p-4 space-y-3.5 bg-muted/20 border border-border rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Sample read indicators
-              </div>
-              <span className="text-sm font-bold text-foreground">
-                {announcement.ackDone} / {announcement.ackTotal}
-              </span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full bg-brand rounded-full transition-all"
-                style={{ width: `${(announcement.ackDone / announcement.ackTotal) * 100}%` }}
-              />
-            </div>
-            <div className="flex gap-2.5 pt-1">
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                icon={Users}
-                onClick={() => setShowAckList(true)}
-              >
-                Sample list
-              </ActionButton>
-              <ActionButton
-                variant="secondary"
-                size="sm"
-                icon={Download}
-                onClick={handleExportAcks}
-              >
-                Export
-              </ActionButton>
-            </div>
-          </div>
+          <TeamAnnouncementReadStatus
+            announcement={announcement}
+            exporting={exporting}
+            onOpenRoster={() => setRosterOpen(true)}
+            onExport={() => void handleExport()}
+          />
 
-          {/* Comments Section */}
-          <div className="space-y-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Sample manager notes ({comments.length})
-            </div>
-            <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-              {comments.map((c, i) => (
-                <div
-                  key={i}
-                  className="flex gap-3 p-3 bg-muted/25 border border-border/60 rounded-xl items-start"
-                >
-                  <Avatar name={c.name} size="sm" colorClass={c.avatarColor} />
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-foreground">{c.name}</span>
-                      <span className="text-[10px] text-muted-foreground">· {c.when}</span>
-                    </div>
-                    <div className="text-xs text-muted-foreground/90">{c.body}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Comment Input */}
-            <div className="flex gap-2 items-center bg-card border border-input rounded-xl p-2 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1">
-              <MessageSquare className="h-4 w-4 text-muted-foreground/60 shrink-0 ml-2" />
-              <input
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a sample manager note..."
-                className="flex-1 bg-transparent border-0 outline-none text-xs px-2 placeholder:text-muted-foreground/60"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSendComment();
-                }}
-              />
-              <button
-                type="button"
-                aria-label="Add sample manager note"
-                onClick={handleSendComment}
-                disabled={!newComment.trim()}
-                className="p-1.5 rounded-lg text-brand hover:bg-brand-soft/20 disabled:opacity-40 transition-all shrink-0"
-              >
-                <Send className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
+          <TeamAnnouncementComments
+            comments={announcement.comments}
+            pending={pending}
+            onAdd={(body) => onAddComment(announcement.id, body)}
+          />
         </div>
       </DrawerShell>
 
-      {/* Sample acknowledgement modal */}
-      <DialogShell
-        open={showAckList}
-        onOpenChange={setShowAckList}
-        icon={Users}
-        iconTone="brand"
-        title="Sample acknowledgement details"
-        description={`${announcement.ackDone} of ${announcement.ackTotal} sample staff are shown as acknowledged. This is not a read receipt or monitoring record.`}
-        size="md"
-        footer={
-          <ActionButton size="sm" onClick={() => setShowAckList(false)}>
-            Done
-          </ActionButton>
-        }
-      >
-        <div className="space-y-4">
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Sample acknowledged ({announcement.ackDone})
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {CANONICAL_STAFF.slice(0, announcement.ackDone).map((staff) => (
-                <div
-                  key={staff.name}
-                  className="flex items-center gap-2 p-2 bg-muted/10 border border-border/40 rounded-lg"
-                >
-                  <Check className="h-3.5 w-3.5 text-success shrink-0" />
-                  <div>
-                    <div className="text-xs font-semibold text-foreground">{staff.name}</div>
-                    <div className="text-[10px] text-muted-foreground">{staff.role}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Sample pending ({announcement.ackTotal - announcement.ackDone})
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {CANONICAL_STAFF.slice(announcement.ackDone, announcement.ackTotal).map((staff) => (
-                <div
-                  key={staff.name}
-                  className="flex items-center gap-2 p-2 bg-muted/10 border border-border/40 rounded-lg"
-                >
-                  <div className="h-3.5 w-3.5 rounded-full border border-warning shrink-0" />
-                  <div>
-                    <div className="text-xs font-semibold text-foreground">{staff.name}</div>
-                    <div className="text-[10px] text-muted-foreground">{staff.role}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </DialogShell>
+      <TeamAnnouncementRosterDialog
+        announcement={announcement}
+        open={rosterOpen}
+        onOpenChange={setRosterOpen}
+      />
     </>
   );
 }

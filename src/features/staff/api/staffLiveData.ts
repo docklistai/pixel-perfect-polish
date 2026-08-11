@@ -19,6 +19,8 @@ interface StaffMemberRow {
   employment_status: "active" | "inactive" | "left";
   contract_type: "full_time" | "part_time" | "casual" | "fixed_term" | null;
   contracted_minutes_per_week: number | null;
+  birth_day: number | null;
+  birth_month: number | null;
   membership_id: string | null;
   department_id: string | null;
   primary_location_id: string | null;
@@ -87,6 +89,8 @@ function mapStaffRow(
     departmentId: row.department_id,
     contractType: row.contract_type,
     contractedMinutesPerWeek: row.contracted_minutes_per_week,
+    birthDay: row.birth_day,
+    birthMonth: row.birth_month,
     employmentStatus: row.employment_status,
     timezone,
   };
@@ -114,7 +118,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       supabase
         .from("staff_members")
         .select(
-          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id, primary_location_id",
+          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id, primary_location_id, birth_day, birth_month",
         )
         .eq("workspace_id", workspaceId)
         .order("display_name", { ascending: true }),

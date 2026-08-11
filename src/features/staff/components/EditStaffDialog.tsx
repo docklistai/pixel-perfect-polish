@@ -8,6 +8,8 @@ import { buildStaffMemberUpdate, type EditStaffFormValues } from "../lib/editSta
 import { submitEditStaff } from "../lib/editStaffSubmission";
 import { useWorkspaceDepartments } from "../hooks/useWorkspaceDepartments";
 import { useStaffPayRateField } from "../hooks/useStaffPayRateField";
+import { useStaffBirthdayField } from "../hooks/useStaffBirthdayField";
+import { StaffBirthdayFields } from "./StaffBirthdayFields";
 import { EditStaffSchedulingFields } from "./EditStaffSchedulingFields";
 import type { AddStaffFormValues } from "../lib/addStaff";
 import type { StaffRow } from "../types";
@@ -42,10 +44,12 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
   const queryClient = useQueryClient();
   const { departments } = useWorkspaceDepartments({ enabled: open });
   const payRate = useStaffPayRateField(member.id, open);
+  const birthday = useStaffBirthdayField(member, open);
   const [values, setValues] = React.useState<EditStaffFormValues>(() => valuesFromMember(member));
   const [fieldErrors, setFieldErrors] = React.useState<Partial<Record<FieldError, string>>>({});
   const [detailsError, setDetailsError] = React.useState<string | null>(null);
   const [payError, setPayError] = React.useState<string | null>(null);
+  const [birthdayError, setBirthdayError] = React.useState<string | null>(null);
   // Sticky across retries: once the details have persisted, a retry for the pay
   // rate must not re-send them, and must not re-describe them as unsaved.
   const [detailsSaved, setDetailsSaved] = React.useState(false);
@@ -60,6 +64,7 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
       setFieldErrors({});
       setDetailsError(null);
       setPayError(null);
+      setBirthdayError(null);
       setDetailsSaved(false);
       setSubmitting(false);
     }
@@ -75,6 +80,7 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
 
     setDetailsError(null);
     setPayError(null);
+    setBirthdayError(null);
     const built = buildStaffMemberUpdate(values, { offboarded });
     if (!built.ok) {
       setFieldErrors(built.errors);
@@ -94,13 +100,30 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
 
     if (outcome.details === "failed") return;
     if (outcome.details === "saved") setDetailsSaved(true);
-    await queryClient.invalidateQueries({ queryKey: ["staff", "workspace-roster"] });
+
+    // A third independent write, like the pay rate: it goes to its own
+    // audited RPC and reports only itself, so a birthday problem never
+    // re-describes saved details as failed.
+    const birthdayResult = await birthday.submit();
+    if (!birthdayResult.ok) setBirthdayError(birthdayResult.message);
+
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["staff", "workspace-roster"] }),
+      // Team reads birthdays from the same rows; keep its rail in step.
+      queryClient.invalidateQueries({ queryKey: ["team"] }),
+    ]);
 
     // The details are on record either way. A pay-rate failure reports only
     // itself, and leaves the dialog open so the rate alone can be retried.
     if (outcome.pay === "failed") {
       toast.warning(`${built.payload.display_name} updated`, {
         description: "Their details saved. The hourly rate did not.",
+      });
+      return;
+    }
+    if (!birthdayResult.ok) {
+      toast.warning(`${built.payload.display_name} updated`, {
+        description: "Their details saved. The birthday did not.",
       });
       return;
     }
@@ -155,6 +178,15 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
             className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
           >
             Hourly rate not saved. {payError}
+          </div>
+        )}
+
+        {birthdayError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
+          >
+            Birthday not saved. {birthdayError}
           </div>
         )}
 
@@ -221,6 +253,8 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
               </p>
             )}
           </FormRow>
+
+          <StaffBirthdayFields field={birthday} />
         </FormSection>
 
         <EditStaffSchedulingFields

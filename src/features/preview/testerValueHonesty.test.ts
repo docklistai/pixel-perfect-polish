@@ -35,12 +35,30 @@ describe("preview surfaces stay reachable and labelled", () => {
     expect(palette).toContain("Preview");
   });
 
-  it("keeps the existing preview banners in place", () => {
+  it("keeps the preview banner on the surfaces that are still preview", () => {
     expect(source("src/routes/reports.tsx")).toContain(
       "Preview — Reports uses sample reporting content",
     );
-    expect(source("src/routes/team.tsx")).toContain(
-      "Preview — Team uses sample communication content",
+  });
+
+  it("no longer marks Team as preview anywhere in navigation", () => {
+    // Phase 55 made Team live. Its guard, group, pill and palette flag all move
+    // together — a half-promoted surface is what misleads a tester.
+    expect(source("src/routes/team.tsx")).toContain("requireManagerAccess");
+    expect(source("src/routes/team.tsx")).not.toContain("requirePreviewSurface");
+    expect(source("src/routes/team.tsx")).not.toMatch(/Preview — Team/);
+    expect(source("src/components/layout/Sidebar.tsx")).toContain(
+      '{ to: "/team", label: "Team", icon: MessageSquare, group: "live"',
+    );
+    expect(source("src/components/commandPaletteData.ts")).toContain(
+      '{ label: "Team", to: "/team", icon: MessageSquare }',
+    );
+  });
+
+  it("still marks Reports as preview, so the promotion was Team-only", () => {
+    expect(source("src/routes/reports.tsx")).toContain("requirePreviewSurface");
+    expect(source("src/components/layout/Sidebar.tsx")).toContain(
+      '{ to: "/reports", label: "Reports", icon: BarChart3, group: "preview", preview: true }',
     );
   });
 });

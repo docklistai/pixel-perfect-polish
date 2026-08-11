@@ -188,10 +188,8 @@ function Home() {
                 >
                   Log a leave request…
                 </button>
-                {/* Preview routes stay reachable, always labelled — they open
-                    sample-content pages, never a live workspace action. */}
                 <button type="button" className="menu-item" onClick={() => runQuickAction("/team")}>
-                  Compose announcement… (preview)
+                  Compose announcement…
                 </button>
                 <button type="button" className="menu-item" onClick={() => runQuickAction("/ops")}>
                   Log an incident… (preview)

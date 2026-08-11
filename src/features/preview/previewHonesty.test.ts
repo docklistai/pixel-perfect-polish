@@ -19,14 +19,20 @@ const reportsSource = [
   .map(source)
   .join("\n");
 
+// Team went live in Phase 55. These are the same files, minus the deleted
+// fixture — they are now asserted to contain NO preview content at all.
 const teamSource = [
   "src/routes/team.tsx",
   "src/features/team/components/TeamAnnouncementDetailDrawer.tsx",
+  "src/features/team/components/TeamAnnouncementComments.tsx",
+  "src/features/team/components/TeamAnnouncementReadStatus.tsx",
+  "src/features/team/components/TeamAnnouncementRosterDialog.tsx",
   "src/features/team/components/TeamComposeDrawer.tsx",
   "src/features/team/components/TeamTrainingDetailDrawer.tsx",
+  "src/features/team/components/TeamBirthdayDialog.tsx",
   "src/features/team/components/TeamRightRail.tsx",
   "src/features/team/components/TeamAnnouncementList.tsx",
-  "src/features/team/data/teamDemoData.ts",
+  "src/features/team/components/TeamKpiCards.tsx",
 ]
   .map(source)
   .join("\n");
@@ -43,12 +49,9 @@ const settingsSource = [
   .join("\n");
 
 describe("preview containment honesty", () => {
-  it("renders page-level preview banners for Reports, Team, and Settings", () => {
+  it("renders page-level preview banners for the surfaces that are still preview", () => {
     expect(source("src/routes/reports.tsx")).toContain(
       "Preview — Reports uses sample reporting content",
-    );
-    expect(source("src/routes/team.tsx")).toContain(
-      "Preview — Team uses sample communication content",
     );
     expect(source("src/routes/settings.tsx")).toContain(
       "Preview — most settings are not live-wired yet",
@@ -69,13 +72,29 @@ describe("preview containment honesty", () => {
     );
   });
 
-  it("keeps Team communication as sample preview, not chat, monitoring, or LMS persistence", () => {
-    expect(teamSource).toContain("Sample read indicators");
-    expect(teamSource).toContain("Sample manager notes");
-    expect(teamSource).toContain("Sample training reminders");
-    expect(teamSource).not.toMatch(/Comment saved|Your acknowledgement is recorded|Exported/i);
-    expect(teamSource).not.toMatch(/Reply to all|See who|track who's read what|staff app feed/i);
-    expect(teamSource).not.toMatch(/Marked completed|Note added to training record|detail opened/i);
+  it("carries no preview or sample content on the now-live Team surface", () => {
+    // The banner, every "Sample …" label and every "Preview only" toast are
+    // gone because the underlying behaviour is real, not because the wording
+    // was quietly softened.
+    expect(teamSource).not.toMatch(/Preview — Team/);
+    expect(teamSource).not.toMatch(/\bSample\b/);
+    expect(teamSource).not.toMatch(/Preview only|Preview ack|Preview reminder|Preview publish/);
+    expect(teamSource).not.toMatch(/nothing is saved|not saved or sent|no file was prepared/i);
+  });
+
+  it("drives Team from the live read model, never from a fixture", () => {
+    expect(() => source("src/features/team/data/teamDemoData.ts")).toThrow();
+    expect(teamSource).not.toMatch(/teamDemoData|CANONICAL_STAFF|TOTAL_STAFF/);
+    expect(source("src/routes/team.tsx")).toContain("useTeamPage");
+    expect(source("src/features/team/hooks/useTeamPage.ts")).toContain("fetchTeamPageFn");
+    // An unresolved or failed live read must not borrow sample content.
+    expect(source("src/features/team/hooks/useTeamPage.ts")).toContain("EMPTY_TEAM_PAGE");
+  });
+
+  it("keeps Team's staff-broadcast scope — no chat, LMS or engagement drift", () => {
+    expect(teamSource).not.toMatch(/direct message|\bDM\b|channel|reaction|emoji picker/i);
+    expect(teamSource).not.toMatch(/course|module|lesson|certificate|assessment|quiz/i);
+    expect(teamSource).not.toMatch(/RSVP|attendance|book a place/i);
   });
 
   it("keeps Settings changes as preview and removes fake RBAC, security, billing, and export claims", () => {

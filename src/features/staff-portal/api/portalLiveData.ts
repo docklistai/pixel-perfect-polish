@@ -117,6 +117,8 @@ const NOTIFICATION_KIND_MAP: Record<string, PortalNotification["kind"]> = {
   shift_changed: "shift-changed",
   timesheet_reminder: "timesheet-reminder",
   announcement: "announcement",
+  announcement_reminder: "announcement-reminder",
+  team_training_reminder: "training-reminder",
   open_shift_update: "open-shift-update",
   shift_release_update: "shift-release-update",
   unavailability_update: "unavailability-update",

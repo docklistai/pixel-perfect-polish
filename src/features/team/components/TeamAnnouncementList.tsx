@@ -1,14 +1,22 @@
 import * as React from "react";
-import { Pin, MoreHorizontal, Users, ChevronDown, Shield } from "lucide-react";
+import { Pin, Users, ChevronDown } from "lucide-react";
 import { StatusBadge, EmptyState } from "@/components/dl";
 import { cn } from "@/lib/utils";
-import { toneBg } from "../types";
-import { audienceOptions } from "../data/teamDemoData";
-import type { TeamAnnouncement, TabKey } from "../types";
+import { toneBg, ALL_AUDIENCES } from "../types";
+import {
+  countByTab,
+  filterAnnouncements,
+  isAwaitingAcknowledgement,
+} from "../lib/teamPresentation";
+import { announcementIcon, announcementTone } from "../lib/teamVisuals";
+import { formatDate } from "../lib/teamFormatting";
+import type { TabKey, TeamAnnouncement, TeamAudience } from "../types";
 
 interface Props {
   announcements: TeamAnnouncement[];
-  onSelect: (a: TeamAnnouncement) => void;
+  audiences: TeamAudience[];
+  onSelect: (announcement: TeamAnnouncement) => void;
+  onCompose: () => void;
 }
 
 interface TabSpec {
@@ -20,30 +28,25 @@ interface TabSpec {
 const tabs: TabSpec[] = [
   { key: "all", label: "All" },
   { key: "pinned", label: "Pinned", tone: "purple" },
-  { key: "myAck", label: "Sample ack", tone: "warning" },
+  { key: "awaitingAck", label: "Awaiting ack", tone: "warning" },
 ];
 
-export function TeamAnnouncementList({ announcements, onSelect }: Props) {
+export function TeamAnnouncementList({ announcements, audiences, onSelect, onCompose }: Props) {
   const [tab, setTab] = React.useState<TabKey>("all");
-  const [audience, setAudience] = React.useState("All audiences");
+  const [audience, setAudience] = React.useState(ALL_AUDIENCES);
 
-  const counts = React.useMemo(() => {
-    return {
-      all: announcements.length,
-      pinned: announcements.filter((a) => a.pinned).length,
-      myAck: announcements.filter((a) => !a.myAck).length,
-    } as Record<TabKey, number>;
-  }, [announcements]);
+  const counts = React.useMemo(() => countByTab(announcements), [announcements]);
+  const visible = React.useMemo(
+    () => filterAnnouncements(announcements, tab, audience),
+    [announcements, tab, audience],
+  );
 
-  const visible = React.useMemo(() => {
-    return announcements
-      .filter((a) => {
-        if (tab === "pinned") return a.pinned;
-        if (tab === "myAck") return !a.myAck;
-        return true;
-      })
-      .filter((a) => audience === "All audiences" || a.audiences.includes(audience));
-  }, [announcements, tab, audience]);
+  // Audience options come from the live read model, so the list only ever
+  // offers audiences that actually exist in this workspace.
+  const audienceOptions = React.useMemo(
+    () => [ALL_AUDIENCES, ...audiences.map((item) => item.label)],
+    [audiences],
+  );
 
   return (
     <div className="card overflow-hidden">
@@ -86,12 +89,12 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
           <select
             id="team-audience-filter"
             value={audience}
-            onChange={(e) => setAudience(e.target.value)}
+            onChange={(event) => setAudience(event.target.value)}
             className="dl-select appearance-none !w-auto pl-8 pr-7 !py-1.5 text-xs"
           >
-            {audienceOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
+            {audienceOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
               </option>
             ))}
           </select>
@@ -99,69 +102,87 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
       </div>
 
       {visible.length === 0 ? (
-        <EmptyState
-          title="No announcements"
-          description="No announcements match the current filter."
-        />
+        announcements.length === 0 ? (
+          <EmptyState
+            title="No announcements yet"
+            description="Publish your first update and it will appear here with read and acknowledgement tracking."
+            action={
+              <button type="button" className="btn primary sm" onClick={onCompose}>
+                Compose announcement
+              </button>
+            }
+          />
+        ) : (
+          <EmptyState
+            title="Nothing matches this filter"
+            description="No announcements match the current tab and audience."
+          />
+        )
       ) : (
-        visible.map((a) => (
-          <button
-            key={a.id}
-            type="button"
-            onClick={() => onSelect(a)}
-            className="block w-full text-left border-t border-border/40 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
-          >
-            {a.pinned && (
-              <div className="mb-2">
-                <StatusBadge tone="purple">
-                  <Pin className="h-3 w-3" aria-hidden /> Pinned
-                </StatusBadge>
-              </div>
-            )}
-            <div className="flex items-start gap-3">
-              <div
-                className={cn(
-                  "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
-                  toneBg[a.tone],
-                )}
-                aria-hidden
-              >
-                <a.icon className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 font-semibold text-[14.5px]">
-                  {a.t} <span aria-hidden>{a.emoji}</span>
-                  {a.id === "food-safety" && (
-                    <Shield className="h-4 w-4 text-success" aria-hidden />
+        visible.map((announcement) => {
+          const Icon = announcementIcon(announcement);
+          const readPercent =
+            announcement.recipientCount === 0
+              ? 0
+              : (announcement.readCount / announcement.recipientCount) * 100;
+          return (
+            <button
+              key={announcement.id}
+              type="button"
+              onClick={() => onSelect(announcement)}
+              className="block w-full text-left border-t border-border/40 px-5 py-4 hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand transition"
+            >
+              {announcement.pinned && (
+                <div className="mb-2">
+                  <StatusBadge tone="purple">
+                    <Pin className="h-3 w-3" aria-hidden /> Pinned
+                  </StatusBadge>
+                </div>
+              )}
+              <div className="flex items-start gap-3">
+                <div
+                  className={cn(
+                    "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+                    toneBg[announcementTone(announcement)],
                   )}
-                  {!a.myAck && (
-                    <span className="ml-auto">
-                      <StatusBadge tone="warning">Sample ack</StatusBadge>
-                    </span>
-                  )}
+                  aria-hidden
+                >
+                  <Icon className="h-5 w-5" />
                 </div>
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{a.body}</p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {a.tags.map((tg) => (
-                    <span key={tg} className="badge outline">
-                      {tg}
-                    </span>
-                  ))}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 font-semibold text-[14.5px]">
+                    {announcement.title}
+                    {isAwaitingAcknowledgement(announcement) && (
+                      <span className="ml-auto">
+                        <StatusBadge tone="warning">Awaiting ack</StatusBadge>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {announcement.body}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="badge outline">{announcement.audienceLabel}</span>
+                    {announcement.requiresAcknowledgement && (
+                      <span className="badge outline">Acknowledgement asked</span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right text-xs shrink-0 min-w-[120px]">
+                  <div className="font-semibold">
+                    {announcement.readCount} / {announcement.recipientCount} read
+                  </div>
+                  <div className="text-muted-foreground">
+                    {formatDate(announcement.publishedAt)}
+                  </div>
+                  <div className="bar mt-2 ml-auto" style={{ width: 110, height: 4 }}>
+                    <i style={{ width: `${readPercent}%` }} />
+                  </div>
                 </div>
               </div>
-              <div className="text-right text-xs shrink-0 min-w-[120px]">
-                <div className="font-semibold">
-                  {a.ackDone} / {a.ackTotal} sample read
-                </div>
-                <div className="text-muted-foreground">{a.date}</div>
-                <div className="bar mt-2 ml-auto" style={{ width: 110, height: 4 }}>
-                  <i style={{ width: `${(a.ackDone / a.ackTotal) * 100}%` }} />
-                </div>
-              </div>
-              <MoreHorizontal className="h-4 w-4 text-muted-foreground shrink-0 mt-1" aria-hidden />
-            </div>
-          </button>
-        ))
+            </button>
+          );
+        })
       )}
 
       {visible.length > 0 && (
@@ -169,10 +190,6 @@ export function TeamAnnouncementList({ announcements, onSelect }: Props) {
           <span className="text-xs text-muted-foreground">
             Showing {visible.length} of {announcements.length}
           </span>
-          <div className="flex-1" />
-          <button type="button" className="btn ghost sm" disabled>
-            Preview list
-          </button>
         </div>
       )}
     </div>

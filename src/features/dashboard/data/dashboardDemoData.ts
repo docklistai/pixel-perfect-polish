@@ -94,7 +94,6 @@ export const quickActionItems: QuickActionItem[] = [
     s: "To a department or everyone",
     icon: Megaphone,
     route: "/team",
-    preview: true,
   },
   {
     t: "Log incident",

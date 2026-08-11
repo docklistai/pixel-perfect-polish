@@ -131,6 +131,69 @@ export const staffClockEventFn = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export type AnnouncementActionResult = { ok: true } | { ok: false; message: string };
+
+const announcementSchema = z.object({
+  workspaceId: z.string().uuid(),
+  announcementId: z.string().uuid(),
+});
+
+function describeAnnouncementError(sqlState: string | null): string {
+  switch (sqlState) {
+    case "42501":
+      // The RPC resolves the recipient from auth.uid(); a non-recipient can
+      // never move a delivery row, including their own manager's.
+      return "This announcement wasn't sent to you.";
+    case "55000":
+      return "This announcement doesn't ask for a confirmation.";
+    default:
+      return "We couldn't update this announcement. Please try again.";
+  }
+}
+
+/**
+ * Marks the signed-in recipient's OWN delivery row read via
+ * `rpc_team_mark_announcement_read`. Read state is write-once server-side and
+ * scoped to the caller, so this can never touch another member's row.
+ */
+export const markPortalAnnouncementReadFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => announcementSchema.parse(input))
+  .handler(async ({ data }): Promise<AnnouncementActionResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const supabase = getSupabaseServerClient();
+
+    const { error } = await supabase.rpc("rpc_team_mark_announcement_read", {
+      p_workspace_id: data.workspaceId,
+      p_request_id: crypto.randomUUID(),
+      p_announcement_id: data.announcementId,
+    });
+
+    if (error) return { ok: false, message: describeAnnouncementError(error.code ?? null) };
+    return { ok: true };
+  });
+
+/**
+ * Records the recipient's own acknowledgement via
+ * `rpc_team_acknowledge_announcement`. It runs under the caller's membership —
+ * a manager cannot acknowledge on a staff member's behalf — and is idempotent:
+ * a repeat call returns `changed: false` rather than failing.
+ */
+export const acknowledgePortalAnnouncementFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => announcementSchema.parse(input))
+  .handler(async ({ data }): Promise<AnnouncementActionResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const supabase = getSupabaseServerClient();
+
+    const { error } = await supabase.rpc("rpc_team_acknowledge_announcement", {
+      p_workspace_id: data.workspaceId,
+      p_request_id: crypto.randomUUID(),
+      p_announcement_id: data.announcementId,
+    });
+
+    if (error) return { ok: false, message: describeAnnouncementError(error.code ?? null) };
+    return { ok: true };
+  });
+
 export type OpenShiftActionResult = { ok: true } | { ok: false; message: string };
 
 const requestOpenShiftSchema = z.object({

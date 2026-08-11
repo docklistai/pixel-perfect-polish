@@ -109,6 +109,11 @@ export type NotificationKind =
   | "leave-declined"
   | "leave-cancelled"
   | "announcement"
+  // Phase 55 emits these to staff: a nudge for an unread announcement, and a
+  // due training reminder. They are labelled distinctly so a training nudge is
+  // never presented as a new announcement.
+  | "announcement-reminder"
+  | "training-reminder"
   | "timesheet-reminder"
   | "open-shift-update"
   | "shift-release-update"

@@ -21,12 +21,14 @@ describe("command palette preview routes", () => {
   it("labels preview-only manager routes", () => {
     const previewRoutes = COMMAND_NAV_ITEMS.filter((item) => item.preview).map((item) => item.to);
 
-    expect(previewRoutes).toEqual(["/team", "/reports"]);
+    // Team went live in Phase 55; Reports is the remaining preview surface.
+    expect(previewRoutes).toEqual(["/reports"]);
     expect(COMMAND_NAV_ITEMS.find((item) => item.to === "/ops")?.preview).toBeUndefined();
+    expect(COMMAND_NAV_ITEMS.find((item) => item.to === "/team")?.preview).toBeUndefined();
   });
 
   it("keeps preview routes reachable everywhere, labelled rather than hidden", () => {
-    expect(COMMAND_PREVIEW_ROUTES).toEqual(["/team", "/reports"]);
+    expect(COMMAND_PREVIEW_ROUTES).toEqual(["/reports"]);
     expect(COMMAND_NAV_ITEMS.map((item) => item.to)).toEqual([
       "/",
       "/rota",

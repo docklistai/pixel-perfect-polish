@@ -57,7 +57,7 @@ const navItems: readonly NavItem[] = [
     icon: Plane,
     group: "live",
   },
-  { to: "/team", label: "Team", icon: MessageSquare, group: "preview", preview: true },
+  { to: "/team", label: "Team", icon: MessageSquare, group: "live", mobileOverflow: true },
   { to: "/ops", label: "Ops", icon: Briefcase, group: "live", mobileOverflow: true },
   { to: "/reports", label: "Reports", icon: BarChart3, group: "preview", preview: true },
   { to: "/settings", label: "Settings", icon: Settings, group: "admin" },

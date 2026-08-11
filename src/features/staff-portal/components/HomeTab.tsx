@@ -5,6 +5,7 @@ import { usePortalProfile } from "../hooks/usePortalProfile";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalTab } from "../types";
 import { PortalRotaReadState } from "./PortalRotaReadState";
+import { PortalTeamUpdatesCard } from "./PortalTeamUpdatesCard";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const rota = usePortalRota();
@@ -98,19 +99,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </div>
       </DashboardCard>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between px-1">
-          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            Latest from your team
-          </div>
-        </div>
-        <DashboardCard className="p-5 text-center">
-          <div className="text-sm font-semibold">Nothing here yet</div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Team announcements and documents will appear here.
-          </p>
-        </DashboardCard>
-      </div>
+      <PortalTeamUpdatesCard />
 
       <div className="space-y-2">
         <div className="px-1 text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">

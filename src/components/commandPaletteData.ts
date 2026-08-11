@@ -52,7 +52,7 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
   { label: "Staff", to: "/staff", icon: Users, shortcut: "G S" },
   { label: "Time", to: "/time", icon: Clock, shortcut: "G T" },
   { label: "Leave", to: "/leave", icon: CalendarOff, shortcut: "G L" },
-  { label: "Team", to: "/team", icon: MessageSquare, preview: true },
+  { label: "Team", to: "/team", icon: MessageSquare },
   { label: "Ops", to: "/ops", icon: Wrench },
   { label: "Reports", to: "/reports", icon: BarChart3, preview: true },
   { label: "Settings", to: "/settings", icon: SettingsIcon },

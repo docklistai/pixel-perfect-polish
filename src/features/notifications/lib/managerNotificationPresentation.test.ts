@@ -64,3 +64,36 @@ describe("presentManagerNotification", () => {
     expect(presentManagerNotification(record(entity))).toMatchObject({ to: "/ops", opsSearch });
   });
 });
+
+describe("Phase 55 Team notifications", () => {
+  it("routes an announcement to Team, not the dashboard", () => {
+    expect(presentManagerNotification(record("team_announcement"))).toMatchObject({
+      to: "/team",
+      action: "Open Team",
+    });
+  });
+
+  it("routes a training reminder to Team", () => {
+    expect(presentManagerNotification(record("team_training_reminder"))).toMatchObject({
+      to: "/team",
+      action: "Open Team",
+    });
+  });
+
+  it.each(["announcement", "announcement_reminder", "team_training_reminder"] as const)(
+    "routes the %s kind to Team even without a related entity",
+    (kind) => {
+      // The regression this guards: before Phase 55 every Team notification fell
+      // through the default branch and opened "/" with a generic "Open".
+      const presented = presentManagerNotification(record(null, { kind, relatedEntityId: null }));
+      expect(presented.to).toBe("/team");
+      expect(presented.action).not.toBe("Open");
+    },
+  );
+
+  it("leaves unrelated kinds on their existing routes", () => {
+    expect(presentManagerNotification(record("leave_request")).to).toBe("/leave");
+    expect(presentManagerNotification(record("ops_briefing")).to).toBe("/ops");
+    expect(presentManagerNotification(record(null, { kind: "timesheet_reminder" })).to).toBe("/");
+  });
+});

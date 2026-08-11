@@ -3,6 +3,8 @@ import {
   AlertTriangle,
   CalendarOff,
   CheckCircle,
+  GraduationCap,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 import type { ManagerNotificationRecord } from "../api/managerNotifications";
@@ -31,9 +33,22 @@ function presentationFor(record: ManagerNotificationRecord): Presentation {
       return { icon: CalendarOff, tone: "purple", action: "Review request", to: "/staff" };
     case "rota_week":
       return { icon: AlertCircle, tone: "red", action: "Update rota", to: "/rota" };
+    case "team_announcement":
+      return { icon: Megaphone, tone: "blue", action: "Open Team", to: "/team" };
+    case "team_training_reminder":
+      return { icon: GraduationCap, tone: "amber", action: "Open Team", to: "/team" };
     default:
       if (record.kind === "rota_update_required") {
         return { icon: AlertCircle, tone: "red", action: "Update rota", to: "/rota" };
+      }
+      // Phase 55 kinds are matched on kind too, so a Team notification whose
+      // related entity was not recorded still lands on Team rather than falling
+      // through to the dashboard.
+      if (record.kind === "announcement" || record.kind === "announcement_reminder") {
+        return { icon: Megaphone, tone: "blue", action: "Open Team", to: "/team" };
+      }
+      if (record.kind === "team_training_reminder") {
+        return { icon: GraduationCap, tone: "amber", action: "Open Team", to: "/team" };
       }
       return { icon: CheckCircle, tone: "blue", action: "Open", to: "/" };
   }

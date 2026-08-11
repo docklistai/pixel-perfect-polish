@@ -75,6 +75,12 @@ export interface StaffRow {
   employmentStatus?: StaffEmploymentStatus;
   /** Primary-location timezone for manager scheduling/time-entry forms. */
   timezone?: string;
+  /**
+   * Birthday day + month. Manager-only lightweight HR data; the birth YEAR
+   * is never stored or read, so no age can be derived (ADR-0004).
+   */
+  birthDay?: number | null;
+  birthMonth?: number | null;
 }
 
 // Extended manager-only profile data — never exposed to staff portal

@@ -141,6 +141,10 @@ function kindLabel(k: PortalNotification["kind"]) {
       return "Leave";
     case "announcement":
       return "Announcement";
+    case "announcement-reminder":
+      return "Reminder";
+    case "training-reminder":
+      return "Training";
     case "timesheet-reminder":
       return "Timesheet";
     case "open-shift-update":
