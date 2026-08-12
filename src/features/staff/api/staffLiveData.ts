@@ -19,11 +19,15 @@ interface StaffMemberRow {
   employment_status: "active" | "inactive" | "left";
   contract_type: "full_time" | "part_time" | "casual" | "fixed_term" | null;
   contracted_minutes_per_week: number | null;
-  birth_day: number | null;
-  birth_month: number | null;
   membership_id: string | null;
   department_id: string | null;
   primary_location_id: string | null;
+}
+
+interface StaffBirthdayRow {
+  staff_member_id: string;
+  birth_day: number | null;
+  birth_month: number | null;
 }
 
 const STATUS_LABEL: Record<StaffMemberRow["employment_status"], string> = {
@@ -65,6 +69,7 @@ function mapStaffRow(
   departmentName: string | null,
   userIdByMembership: Map<string, string | null>,
   timezone: string,
+  birthday: StaffBirthdayRow | undefined,
 ): StaffRow {
   const dept = departmentName ?? "Unassigned";
   const hoursPerWeek = row.contracted_minutes_per_week;
@@ -89,8 +94,8 @@ function mapStaffRow(
     departmentId: row.department_id,
     contractType: row.contract_type,
     contractedMinutesPerWeek: row.contracted_minutes_per_week,
-    birthDay: row.birth_day,
-    birthMonth: row.birth_month,
+    birthDay: birthday?.birth_day ?? null,
+    birthMonth: birthday?.birth_month ?? null,
     employmentStatus: row.employment_status,
     timezone,
   };
@@ -114,11 +119,12 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       { data: memberships, error: membershipError },
       { data: locations, error: locationError },
       { data: workspace, error: workspaceError },
+      { data: birthdays, error: birthdaysError },
     ] = await Promise.all([
       supabase
         .from("staff_members")
         .select(
-          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id, primary_location_id, birth_day, birth_month",
+          "id, display_name, email, phone, role_name, employment_status, contract_type, contracted_minutes_per_week, membership_id, department_id, primary_location_id",
         )
         .eq("workspace_id", workspaceId)
         .order("display_name", { ascending: true }),
@@ -127,6 +133,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       supabase.from("workspace_memberships").select("id, user_id").eq("workspace_id", workspaceId),
       supabase.from("locations").select("id, timezone").eq("workspace_id", workspaceId),
       supabase.from("workspaces").select("timezone").eq("id", workspaceId).single(),
+      supabase.rpc("rpc_team_read_staff_birthdays", { p_workspace_id: workspaceId }),
     ]);
 
     if (staffError) throw staffError;
@@ -134,6 +141,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
     if (membershipError) throw membershipError;
     if (locationError) throw locationError;
     if (workspaceError) throw workspaceError;
+    if (birthdaysError) throw birthdaysError;
 
     const departmentNames = new Map(
       ((departments as { id: string; name: string }[] | null) ?? []).map((d) => [d.id, d.name]),
@@ -151,6 +159,12 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         location.timezone ?? workspaceTimezone,
       ]),
     );
+    const birthdayByStaffId = new Map(
+      ((birthdays as StaffBirthdayRow[] | null) ?? []).map((birthday) => [
+        birthday.staff_member_id,
+        birthday,
+      ]),
+    );
 
     return ((staff as StaffMemberRow[] | null) ?? []).map((row) =>
       mapStaffRow(
@@ -159,6 +173,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         userIdByMembership,
         (row.primary_location_id ? locationTimezones.get(row.primary_location_id) : null) ??
           workspaceTimezone,
+        birthdayByStaffId.get(row.id),
       ),
     );
   },

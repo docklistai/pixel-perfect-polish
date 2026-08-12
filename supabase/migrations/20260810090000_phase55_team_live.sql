@@ -49,6 +49,30 @@ alter table public.staff_members
   add column birth_day smallint,
   add column birth_month smallint;
 
+-- The historical authenticated table grant predates birthday data. RLS still
+-- decides which rows a caller may see, while this explicit column allowlist
+-- prevents staff (and future authenticated clients) from selecting private or
+-- newly-added columns unless they are deliberately granted here.
+revoke select on table public.staff_members from authenticated;
+grant select (
+  id,
+  workspace_id,
+  membership_id,
+  primary_location_id,
+  department_id,
+  display_name,
+  email,
+  phone,
+  role_name,
+  employment_status,
+  contract_type,
+  contracted_minutes_per_week,
+  start_date,
+  end_date,
+  created_at,
+  updated_at
+) on public.staff_members to authenticated;
+
 alter table public.staff_members
   add constraint staff_members_birthday_pair_check
     check ((birth_day is null) = (birth_month is null)),
@@ -541,6 +565,31 @@ comment on function public.rpc_internal_team_audience(uuid, text, uuid) is
 -- ---------------------------------------------------------------------------
 -- 9. Write RPCs.
 -- ---------------------------------------------------------------------------
+
+-- The manager Staff editor needs the day/month values without restoring broad
+-- birthday-column authority on staff_members. Workspace authority is resolved
+-- from the caller's JWT before any row is returned.
+create or replace function public.rpc_team_read_staff_birthdays(p_workspace_id uuid)
+returns table (
+  staff_member_id uuid,
+  birth_day smallint,
+  birth_month smallint
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  perform public.rpc_internal_require_manager(p_workspace_id);
+
+  return query
+  select staff.id, staff.birth_day, staff.birth_month
+  from public.staff_members as staff
+  where staff.workspace_id = p_workspace_id
+  order by staff.id;
+end;
+$$;
 
 create or replace function public.rpc_team_create_announcement(
   p_workspace_id uuid, p_request_id uuid, p_title text, p_body text,
@@ -1372,6 +1421,7 @@ revoke all on function public.guard_team_announcement_recipient_change() from pu
 revoke all on function public.guard_team_training_completion_change() from public, anon, authenticated;
 revoke all on function public.rpc_internal_team_audience(uuid, text, uuid) from public, anon, authenticated;
 
+revoke all on function public.rpc_team_read_staff_birthdays(uuid) from public, anon;
 revoke all on function public.rpc_team_create_announcement(uuid, uuid, text, text, text, uuid, boolean, boolean, boolean) from public, anon;
 revoke all on function public.rpc_team_mark_announcement_read(uuid, uuid, uuid) from public, anon;
 revoke all on function public.rpc_team_acknowledge_announcement(uuid, uuid, uuid) from public, anon;
@@ -1387,6 +1437,7 @@ revoke all on function public.rpc_team_acknowledge_birthday(uuid, uuid, uuid, sm
 revoke all on function public.rpc_team_export_announcement_roster(uuid, uuid) from public, anon;
 revoke all on function public.rpc_team_read_page(uuid) from public, anon;
 
+grant execute on function public.rpc_team_read_staff_birthdays(uuid) to authenticated;
 grant execute on function public.rpc_team_create_announcement(uuid, uuid, text, text, text, uuid, boolean, boolean, boolean) to authenticated;
 grant execute on function public.rpc_team_mark_announcement_read(uuid, uuid, uuid) to authenticated;
 grant execute on function public.rpc_team_acknowledge_announcement(uuid, uuid, uuid) to authenticated;
@@ -1414,5 +1465,8 @@ comment on table public.team_staff_events is
   'Informational manager rail of upcoming staff events. No RSVP, booking, calendar integration or attendance (ADR-0004).';
 comment on table public.team_birthday_acknowledgements is
   'Manager-only record that a birthday was dealt with. Never shared with the staff member.';
+
+comment on function public.rpc_team_read_staff_birthdays(uuid) is
+  'Manager-only day/month birthday projection for one authorised workspace. Returns no general private staff data.';
 
 notify pgrst, 'reload schema';
