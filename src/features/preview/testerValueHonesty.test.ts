@@ -6,10 +6,9 @@ function source(path: string): string {
 }
 
 describe("preview surfaces stay reachable and labelled", () => {
-  it("no longer redirects preview routes away from manager testers", () => {
+  it("keeps the preview guard manager-protected", () => {
     const guards = source("src/features/auth/guards.ts");
     expect(guards).toContain("export function requirePreviewSurface");
-    // Manager protection stays; the pilot bounce is gone.
     expect(guards).not.toContain("isPilotSurface");
     const previewGuard = guards.slice(guards.indexOf("export function requirePreviewSurface"));
     const body = previewGuard.slice(0, previewGuard.indexOf("}"));
@@ -17,36 +16,23 @@ describe("preview surfaces stay reachable and labelled", () => {
     expect(body).not.toContain("redirect");
   });
 
-  it("groups navigation as Live and Preview without hiding preview routes", () => {
+  it("keeps navigation grouping without hiding routes", () => {
     const sidebar = source("src/components/layout/Sidebar.tsx");
     expect(sidebar).toContain('{ key: "live", label: "Live"');
     expect(sidebar).toContain('{ key: "preview", label: "Preview"');
     expect(sidebar).not.toContain("isPilotSurface");
-    // The Preview pill survives.
-    expect(sidebar).toContain("Preview");
     expect(sidebar).toContain('{ to: "/ops", label: "Ops", icon: Briefcase, group: "live"');
-    expect(sidebar).not.toContain('{ to: "/ops", label: "Ops", icon: Briefcase, group: "preview"');
   });
 
-  it("keeps every preview route in the command palette", () => {
+  it("keeps command navigation complete", () => {
     const palette = source("src/components/CommandPalette.tsx");
     expect(palette).toContain("COMMAND_NAV_ITEMS.map");
     expect(palette).not.toContain("visibleCommandNavItems");
-    expect(palette).toContain("Preview");
   });
 
-  it("keeps the preview banner on the surfaces that are still preview", () => {
-    expect(source("src/routes/reports.tsx")).toContain(
-      "Preview — Reports uses sample reporting content",
-    );
-  });
-
-  it("no longer marks Team as preview anywhere in navigation", () => {
-    // Phase 55 made Team live. Its guard, group, pill and palette flag all move
-    // together — a half-promoted surface is what misleads a tester.
+  it("keeps Team live throughout route and navigation", () => {
     expect(source("src/routes/team.tsx")).toContain("requireManagerAccess");
     expect(source("src/routes/team.tsx")).not.toContain("requirePreviewSurface");
-    expect(source("src/routes/team.tsx")).not.toMatch(/Preview — Team/);
     expect(source("src/components/layout/Sidebar.tsx")).toContain(
       '{ to: "/team", label: "Team", icon: MessageSquare, group: "live"',
     );
@@ -55,10 +41,15 @@ describe("preview surfaces stay reachable and labelled", () => {
     );
   });
 
-  it("still marks Reports as preview, so the promotion was Team-only", () => {
-    expect(source("src/routes/reports.tsx")).toContain("requirePreviewSurface");
+  it("promotes Reports through route, navigation, and command palette together", () => {
+    expect(source("src/routes/reports.tsx")).toContain("requireManagerAccess");
+    expect(source("src/routes/reports.tsx")).not.toContain("requirePreviewSurface");
+    expect(source("src/routes/reports.tsx")).not.toMatch(/Preview.*Reports/);
     expect(source("src/components/layout/Sidebar.tsx")).toContain(
-      '{ to: "/reports", label: "Reports", icon: BarChart3, group: "preview", preview: true }',
+      '{ to: "/reports", label: "Reports", icon: BarChart3, group: "live", mobileOverflow: true }',
+    );
+    expect(source("src/components/commandPaletteData.ts")).toContain(
+      '{ label: "Reports", to: "/reports", icon: BarChart3 }',
     );
   });
 });
@@ -67,8 +58,6 @@ describe("scheduling copy states only what is modelled", () => {
   const rotaCopy = [
     "src/features/rota/components/RotaGridToolbar.tsx",
     "src/features/rota/components/WorkingTimeDetailsDrawer.tsx",
-    // The former GenerateRotaDialog and BuildThisWeekDialog were replaced by the
-    // reviewed Build flow; the same honesty rules apply to its copy.
     "src/features/rota/components/buildWeek/BuildWeekDrawer.tsx",
     "src/features/rota/components/buildWeek/BuildWeekSourceStep.tsx",
     "src/features/rota/components/buildWeek/BuildWeekReviewStep.tsx",
@@ -83,7 +72,6 @@ describe("scheduling copy states only what is modelled", () => {
   });
 
   it("never claims an optimal or auto-generated rota", () => {
-    // Every mention of optimisation must be a denial, never a claim.
     for (const match of rotaCopy.matchAll(/[^.]*optimis[^.]*\./gi)) {
       expect(match[0]).toMatch(/\bnot\b/i);
     }
@@ -91,7 +79,7 @@ describe("scheduling copy states only what is modelled", () => {
     expect(rotaCopy).not.toMatch(/auto-generate|generates? (?:the |your )?rota/i);
   });
 
-  it("renames the dashboard rota action away from 'Generate rota draft'", () => {
+  it("uses Build this week copy", () => {
     const dashboard = source("src/routes/index.tsx");
     const palette = source("src/components/commandPaletteData.ts");
     expect(dashboard).not.toContain("Generate rota draft");

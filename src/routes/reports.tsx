@@ -1,108 +1,126 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
-import { AppShell, PageHeader, ActionButton, AlertCard } from "@/components/dl";
-import { CalendarDays, Download, Info, Plus, BarChart2 } from "lucide-react";
-import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
-import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
-import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
-import { TimeApprovalTrend } from "@/features/reports/components/TimeApprovalTrend";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { ActionButton, AppShell, PageHeader } from "@/components/dl";
+import { requireManagerAccess } from "@/features/auth";
 import { DepartmentLabourPanel } from "@/features/reports/components/DepartmentLabourPanel";
-import { ReportsTopPerformersCard } from "@/features/reports/components/ReportsTopPerformersCard";
-import { ReportsSavedReportsCard } from "@/features/reports/components/ReportsSavedReportsCard";
-import { ReportsCoverageHeatmapCard } from "@/features/reports/components/ReportsCoverageHeatmapCard";
-import { ReportsExportDialog } from "@/features/reports/components/ReportsExportDialog";
 import { InsightDetailDrawer } from "@/features/reports/components/InsightDetailDrawer";
-import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
-import { requirePreviewSurface } from "@/features/auth";
+import { LabourTargetChart } from "@/features/reports/components/LabourTargetChart";
+import { ReportsContractReviewCard } from "@/features/reports/components/ReportsContractReviewCard";
+import { ReportsCoverageHeatmapCard } from "@/features/reports/components/ReportsCoverageHeatmapCard";
+import { ReportsFilters } from "@/features/reports/components/ReportsFilters";
+import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
+import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
+import { ReportsQuickReportsCard } from "@/features/reports/components/ReportsQuickReportsCard";
+import { ReportsStateCard } from "@/features/reports/components/ReportsStateCard";
+import { TimeApprovalTrend } from "@/features/reports/components/TimeApprovalTrend";
+import { useReportsPage } from "@/features/reports/hooks/useReportsPage";
+import { downloadCoverageCsv } from "@/features/reports/lib/reportsCsv";
+import { periodLabel } from "@/features/reports/lib/reportsPeriod";
+import type { ReportsDetailKey } from "@/features/reports/types";
 
 export const Route = createFileRoute("/reports")({
-  beforeLoad: ({ context }) => requirePreviewSurface(context.auth),
+  beforeLoad: ({ context }) => requireManagerAccess(context.auth),
   head: () => ({ meta: [{ title: "Reports — Docklist" }] }),
   component: ReportsPage,
 });
 
 function ReportsPage() {
-  const [exportOpen, setExportOpen] = React.useState(false);
-  const timeRows = useWorkspaceSelector((state) => state.timeRows);
-  const leaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
-  const [selectedReport, setSelectedReport] = React.useState<{
-    name: string;
-    sub?: string;
-    tag?: string;
-    icon?: React.ComponentType<{ className?: string }>;
-  } | null>(null);
+  const navigate = useNavigate();
+  const reports = useReportsPage();
+  const [selectedDetail, setSelectedDetail] = React.useState<ReportsDetailKey | null>(null);
+  const data = reports.data;
+
+  const exportCoverage = () => {
+    if (!data || data.coverageRows.length === 0) return;
+    downloadCoverageCsv(data.coverageRows, data.meta.periodStart, data.meta.periodEnd);
+    toast.success("Published schedule coverage exported", {
+      description: `${data.coverageRows.length} filtered coverage rows downloaded as CSV.`,
+    });
+  };
+
+  const hasOperationalData = Boolean(
+    data &&
+    (data.coverageRows.length > 0 ||
+      data.totals.approvedEntries > 0 ||
+      data.totals.awaitingReviewEntries > 0 ||
+      data.totals.pendingLeave > 0),
+  );
 
   return (
     <AppShell>
       <PageHeader
         title="Reports"
-        subtitle="Review labour cost, coverage, and attendance — with scheduling context and manager review points."
+        subtitle={
+          data
+            ? `Published scheduling and manager review · ${periodLabel(data.meta.periodStart, data.meta.periodEnd)}`
+            : "Published scheduling and manager review for your workspace."
+        }
         actions={
-          <>
-            <span className="badge" title="Sample reporting period">
-              <CalendarDays className="h-3.5 w-3.5" aria-hidden />
-              Last 4 weeks
-            </span>
-            <ActionButton variant="secondary" icon={Download} onClick={() => setExportOpen(true)}>
-              Export
-            </ActionButton>
-            <ActionButton
-              variant="primary"
-              icon={Plus}
-              onClick={() =>
-                setSelectedReport({ name: "New custom report", tag: "Custom", icon: BarChart2 })
-              }
-            >
-              New report
-            </ActionButton>
-          </>
+          <ActionButton
+            variant="secondary"
+            icon={Download}
+            onClick={exportCoverage}
+            disabled={!data || data.coverageRows.length === 0}
+            title={
+              !data?.coverageRows.length
+                ? "No filtered published coverage rows to export"
+                : undefined
+            }
+          >
+            Export coverage CSV
+          </ActionButton>
         }
       />
 
-      <AlertCard
-        className="mb-4"
-        tone="warning"
-        title="Preview — Reports uses sample reporting content"
-        description="Charts, £ figures, saved reports, exports, and insight drawers are sample previews. They are not live BI, payroll, finance, or performance analytics."
+      <ReportsFilters
+        preset={reports.periodPreset}
+        onPresetChange={reports.setPeriodPreset}
+        locationId={reports.locationId}
+        onLocationChange={reports.setLocationId}
+        departmentId={reports.departmentId}
+        onDepartmentChange={reports.setDepartmentId}
+        locations={data?.options.locations ?? []}
+        departments={data?.options.departments ?? []}
+        disabled={reports.isLoading}
       />
 
-      <div className="guidance-note mb-4">
-        <Info className="h-3 w-3 shrink-0" aria-hidden />
-        Use the sample review points below to spot rota issues — review marks stay local to this
-        preview.
-      </div>
-
-      <ReportsKpiCards timeRows={timeRows} leaveRequests={leaveRequests} />
-
-      <div className="grid grid-cols-12 gap-5 items-start">
-        <LabourTargetChart />
-        <DepartmentLabourPanel />
-      </div>
-
-      <div className="mt-4">
-        <ReportsInsightsPanel
-          onOpenDetail={(ins) => setSelectedReport({ name: ins.t, sub: ins.s, icon: ins.icon })}
-        />
-      </div>
-
-      <div className="mt-4 grid grid-cols-12 gap-5 items-start">
-        <TimeApprovalTrend />
-        <ReportsTopPerformersCard />
-        <ReportsSavedReportsCard onOpenReport={setSelectedReport} />
-      </div>
-
-      <ReportsCoverageHeatmapCard />
-
-      <ReportsExportDialog
-        open={exportOpen}
-        onOpenChange={setExportOpen}
-        reportName={selectedReport?.name ?? "weekly_report"}
-      />
-      <InsightDetailDrawer
-        report={selectedReport}
-        onOpenChange={(open) => !open && setSelectedReport(null)}
-        onExport={() => setExportOpen(true)}
-      />
+      {reports.isLoading ? (
+        <ReportsStateCard state="loading" />
+      ) : reports.isError || !data ? (
+        <ReportsStateCard state="error" />
+      ) : (
+        <>
+          {!hasOperationalData && <ReportsStateCard state="empty" />}
+          <ReportsKpiCards data={data} />
+          <div className="grid grid-cols-12 items-start gap-5">
+            <LabourTargetChart data={data} />
+            <DepartmentLabourPanel rows={data.departmentHours} />
+          </div>
+          <div className="mt-4">
+            <ReportsInsightsPanel data={data} onOpenDetail={setSelectedDetail} />
+          </div>
+          <div className="mt-4 grid grid-cols-12 items-start gap-5">
+            <TimeApprovalTrend weeks={data.weeks} />
+            <ReportsContractReviewCard
+              rows={data.contractReviews}
+              preset={reports.periodPreset}
+              onOpen={() => setSelectedDetail("contracts")}
+            />
+            <ReportsQuickReportsCard
+              onOpen={setSelectedDetail}
+              onApprovedExport={() => navigate({ to: "/time" })}
+            />
+          </div>
+          <ReportsCoverageHeatmapCard cells={data.heatmap} />
+          <InsightDetailDrawer
+            detail={selectedDetail}
+            data={data}
+            onOpenChange={(open) => !open && setSelectedDetail(null)}
+          />
+        </>
+      )}
     </AppShell>
   );
 }

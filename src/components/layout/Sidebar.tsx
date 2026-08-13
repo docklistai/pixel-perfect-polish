@@ -59,7 +59,7 @@ const navItems: readonly NavItem[] = [
   },
   { to: "/team", label: "Team", icon: MessageSquare, group: "live", mobileOverflow: true },
   { to: "/ops", label: "Ops", icon: Briefcase, group: "live", mobileOverflow: true },
-  { to: "/reports", label: "Reports", icon: BarChart3, group: "preview", preview: true },
+  { to: "/reports", label: "Reports", icon: BarChart3, group: "live", mobileOverflow: true },
   { to: "/settings", label: "Settings", icon: Settings, group: "admin" },
 ];
 
@@ -69,8 +69,8 @@ const NAV_GROUPS = [
   { key: "admin", label: "Admin", ariaLabel: "Admin" },
 ] as const;
 
-// Preview surfaces stay reachable for manager testers, always under the Preview
-// group and pill so they are never read as active pilot features.
+// Mobile overflow keeps secondary live surfaces and any remaining preview/admin
+// surfaces reachable without crowding the bottom navigation.
 const overflowNavItems = navItems.filter((item) => item.group !== "live" || item.mobileOverflow);
 
 export function Sidebar() {

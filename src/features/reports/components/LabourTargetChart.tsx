@@ -1,115 +1,76 @@
 import { Card } from "@/components/dl";
+import { buildTrendPoints, weekPublicationLabel } from "../lib/reportsPresentation";
+import type { ReportsPageData } from "../types";
 
-export function LabourTargetChart() {
-  const labour = [22, 24, 23, 26, 27, 29, 28, 30, 29, 31, 30, 32];
-  const sales = [70, 72, 75, 80, 82, 85, 84, 88, 87, 90, 92, 94];
-  const width = 700;
-  const height = 220;
-  const xs = (index: number) => (index / (labour.length - 1)) * width;
-  const yLabour = (value: number) => height - ((value - 15) / (35 - 15)) * height;
-  const ySales = (value: number) => height - ((value - 60) / (100 - 60)) * height;
-  const labourPoints = labour.map((value, index) => `${xs(index)},${yLabour(value)}`).join(" ");
-  const salesPoints = sales.map((value, index) => `${xs(index)},${ySales(value)}`).join(" ");
+export function LabourTargetChart({ data }: { data: ReportsPageData }) {
+  const points = buildTrendPoints(data);
+  const maxHours = Math.max(1, ...points.map((point) => point.scheduledHours + point.openHours));
+  const summary = points
+    .map(
+      (point) =>
+        `${point.label}: ${point.scheduledHours} scheduled hours, ${point.openHours} open hours, ${weekPublicationLabel(point.status)}`,
+    )
+    .join(". ");
 
   return (
-    <Card className="col-span-12 lg:col-span-8 p-4 lg:p-5">
-      <div className="mb-3 flex items-center justify-between">
+    <Card className="col-span-12 p-4 lg:col-span-8 lg:p-5">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div id="reports-chart-title" className="text-sm font-semibold">
-            Sample labour cost vs sales
+            Published scheduling trend
           </div>
-          <div className="text-xs text-muted-foreground">Sample weekly trend · last 12 weeks</div>
+          <div className="text-xs text-muted-foreground">
+            Net hours after breaks · latest published snapshot per rota week
+          </div>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-2">
-            <span className="dot" style={{ background: "var(--teal-500)" }} /> Labour cost
+            <span className="dot bg-brand" /> Scheduled
           </span>
           <span className="flex items-center gap-2">
-            <span className="dot" style={{ background: "var(--purple-500)" }} /> Sales
+            <span className="dot bg-warning" /> Open work
           </span>
         </div>
       </div>
-
-      <div id="reports-chart-summary" className="sr-only">
-        Sample chart: labour cost averaged 28.6 percent of sales over the last 12 weeks, with the
-        sharpest increase coming from the busiest weekend periods.
-      </div>
-
-      <svg
-        viewBox={`-20 0 ${width + 40} ${height + 22}`}
-        width="100%"
-        className="block"
+      <p id="reports-chart-summary" className="sr-only">
+        {summary}
+      </p>
+      <div
         role="img"
         aria-labelledby="reports-chart-title"
         aria-describedby="reports-chart-summary"
+        className="grid min-h-64 grid-cols-4 items-end gap-3 border-b border-border/70 px-2 pt-4"
       >
-        {[0, 1, 2, 3, 4].map((index) => (
-          <line
-            key={index}
-            x1="0"
-            x2={width}
-            y1={(index * height) / 4}
-            y2={(index * height) / 4}
-            stroke="var(--border-faint)"
-          />
-        ))}
-        <defs>
-          <linearGradient id="reports-lg-teal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--teal-500)" stopOpacity=".18" />
-            <stop offset="100%" stopColor="var(--teal-500)" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient id="reports-lg-purple" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--purple-500)" stopOpacity=".15" />
-            <stop offset="100%" stopColor="var(--purple-500)" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <polygon
-          points={`0,${height} ${labourPoints} ${width},${height}`}
-          fill="url(#reports-lg-teal)"
-        />
-        <polygon
-          points={`0,${height} ${salesPoints} ${width},${height}`}
-          fill="url(#reports-lg-purple)"
-        />
-        <polyline points={labourPoints} fill="none" stroke="var(--teal-500)" strokeWidth="2.5" />
-        <polyline points={salesPoints} fill="none" stroke="var(--purple-500)" strokeWidth="2.5" />
-        {labour.map((value, index) => (
-          <circle
-            key={`labour-${index}`}
-            cx={xs(index)}
-            cy={yLabour(value)}
-            r="3"
-            fill="var(--bg-card)"
-            stroke="var(--teal-500)"
-            strokeWidth="2"
-          />
-        ))}
-        {sales.map((value, index) => (
-          <circle
-            key={`sales-${index}`}
-            cx={xs(index)}
-            cy={ySales(value)}
-            r="3"
-            fill="var(--bg-card)"
-            stroke="var(--purple-500)"
-            strokeWidth="2"
-          />
-        ))}
-        {["W13", "W14", "W15", "W16", "W17", "W18", "W19", "W20", "W21", "W22", "W23", "W24"].map(
-          (week, index) => (
-            <text
-              key={week}
-              x={xs(index)}
-              y={height + 16}
-              fontSize="11"
-              fill="var(--ink-500)"
-              textAnchor="middle"
-            >
-              {week}
-            </text>
-          ),
-        )}
-      </svg>
+        {points.map((point) => {
+          const scheduledHeight = (point.scheduledHours / maxHours) * 190;
+          const openHeight = (point.openHours / maxHours) * 190;
+          return (
+            <div key={point.weekStart} className="flex min-w-0 flex-col items-center">
+              <div className="mb-2 text-center text-[10px] font-medium text-muted-foreground">
+                {point.status === "not_published"
+                  ? "Not published"
+                  : `${point.scheduledHours.toFixed(1)}h`}
+              </div>
+              <div className="flex h-[190px] w-full max-w-24 flex-col justify-end overflow-hidden rounded-t-lg bg-muted/40">
+                <div
+                  className="bg-warning/85"
+                  style={{ height: openHeight }}
+                  title={`${point.openHours.toFixed(1)} open hours`}
+                />
+                <div
+                  className="bg-brand"
+                  style={{ height: scheduledHeight }}
+                  title={`${point.scheduledHours.toFixed(1)} scheduled hours`}
+                />
+              </div>
+              <div className="mt-2 text-xs font-semibold">{point.label}</div>
+              <div className="min-h-4 text-center text-[10px] text-muted-foreground">
+                {weekPublicationLabel(point.status)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </Card>
   );
 }

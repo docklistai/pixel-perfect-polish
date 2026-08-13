@@ -54,13 +54,13 @@ export const COMMAND_NAV_ITEMS: CommandNavItem[] = [
   { label: "Leave", to: "/leave", icon: CalendarOff, shortcut: "G L" },
   { label: "Team", to: "/team", icon: MessageSquare },
   { label: "Ops", to: "/ops", icon: Wrench },
-  { label: "Reports", to: "/reports", icon: BarChart3, preview: true },
+  { label: "Reports", to: "/reports", icon: BarChart3 },
   { label: "Settings", to: "/settings", icon: SettingsIcon },
 ];
 
 /**
- * Every manager route is listed. Team and Reports remain explicitly labelled
- * preview surfaces; Ops is a live manager workspace surface.
+ * Every manager route is listed. Preview routes stay labelled rather than
+ * hidden; the Phase 56 Reports surface is live.
  */
 export const COMMAND_PREVIEW_ROUTES: readonly NavTarget[] = COMMAND_NAV_ITEMS.filter(
   (item) => item.preview,

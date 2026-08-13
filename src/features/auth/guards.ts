@@ -1,14 +1,7 @@
 import { redirect } from "@tanstack/react-router";
 import type { AuthState } from "./types";
 
-/**
- * Preview surfaces (Team and Reports) show sample content only — no live
- * workspace reads, no writes, no backend. They carry page-level preview banners
- * and sample labels (locked by `src/features/preview/previewHonesty.test.ts`),
- * so a manager tester may open them directly under the same manager access
- * protection as any other route. They are labelled PREVIEW in navigation and are
- * never presented as active pilot features.
- */
+/** Preview-only routes use the same owner/manager access boundary as live manager routes. */
 export function requirePreviewSurface(auth: AuthState): void {
   requireManagerAccess(auth);
 }

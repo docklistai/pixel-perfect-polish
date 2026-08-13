@@ -1,77 +1,44 @@
 import { Card } from "@/components/dl";
+import { formatMinutes } from "../lib/reportsPresentation";
+import { shortWeekLabel } from "../lib/reportsPeriod";
+import type { ReportsWeek } from "../types";
 
-const attendance = [
-  { day: "Mon", thisPeriod: 92, previous: 90 },
-  { day: "Tue", thisPeriod: 95, previous: 91 },
-  { day: "Wed", thisPeriod: 94, previous: 93 },
-  { day: "Thu", thisPeriod: 97, previous: 94 },
-  { day: "Fri", thisPeriod: 98, previous: 96 },
-  { day: "Sat", thisPeriod: 96, previous: 95 },
-  { day: "Sun", thisPeriod: 91, previous: 88 },
-];
-
-export function TimeApprovalTrend() {
-  const max = 100;
-  const chartHeight = 160;
-
+export function TimeApprovalTrend({ weeks }: { weeks: ReportsWeek[] }) {
+  const maxMinutes = Math.max(1, ...weeks.map((week) => week.approvedWorkedMinutes));
   return (
-    <Card className="col-span-12 lg:col-span-4 p-4 lg:p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="text-sm font-semibold">Attendance rate</div>
-        <span className="text-xs text-muted-foreground">Weekly view</span>
+    <Card className="col-span-12 p-4 lg:col-span-4 lg:p-5">
+      <div className="mb-3">
+        <div className="text-sm font-semibold">Time review</div>
+        <div className="text-xs text-muted-foreground">
+          Approved hours and entries awaiting review
+        </div>
       </div>
-
-      <div className="mb-3 flex items-center gap-3 text-xs">
-        <span className="flex items-center gap-1">
-          <span className="dot" style={{ background: "var(--blue-500)" }} /> This period
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="dot" style={{ background: "var(--ink-300)" }} /> Previous
-        </span>
-      </div>
-
-      <div className="row gap-3" style={{ alignItems: "flex-end", height: chartHeight + 20 }}>
-        {attendance.map((day) => (
-          <div key={day.day} className="col" style={{ flex: 1, alignItems: "center", gap: 6 }}>
-            <div
-              className="row gap-1"
-              style={{
-                alignItems: "flex-end",
-                height: chartHeight,
-                width: "100%",
-                justifyContent: "center",
-              }}
-            >
+      <div className="space-y-3">
+        {weeks.map((week) => {
+          const width = (week.approvedWorkedMinutes / maxMinutes) * 100;
+          return (
+            <div key={week.weekStart}>
+              <div className="mb-1 flex items-center justify-between gap-2 text-xs">
+                <span className="font-semibold">{shortWeekLabel(week.weekStart)}</span>
+                <span className="text-muted-foreground">
+                  {formatMinutes(week.approvedWorkedMinutes)} approved ·{" "}
+                  {week.awaitingReviewEntries} awaiting
+                </span>
+              </div>
               <div
-                style={{
-                  width: 14,
-                  height: (day.previous / max) * chartHeight,
-                  background: "var(--ink-200)",
-                  borderRadius: "4px 4px 0 0",
-                }}
-              />
-              <div
-                style={{
-                  width: 14,
-                  height: (day.thisPeriod / max) * chartHeight,
-                  background: "var(--blue-500)",
-                  borderRadius: "4px 4px 0 0",
-                }}
-              />
+                className="h-2 overflow-hidden rounded-full bg-muted"
+                aria-label={`${formatMinutes(week.approvedWorkedMinutes)} approved worked hours`}
+              >
+                <div className="h-full rounded-full bg-info" style={{ width: `${width}%` }} />
+              </div>
             </div>
-            <div className="muted txt-xs">{day.day}</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-
-      <div className="mt-3 row gap-3">
-        <span className="muted txt-xs row gap-2">
-          <span className="dot" style={{ background: "var(--blue-500)" }} /> This period
-        </span>
-        <span className="muted txt-xs row gap-2">
-          <span className="dot" style={{ background: "var(--ink-300)" }} /> Previous
-        </span>
-      </div>
+      <p className="mt-4 border-t border-border/60 pt-3 text-[11px] leading-relaxed text-muted-foreground">
+        This is deterministic review status, not an attendance percentage. Manage individual entries
+        in Time.
+      </p>
     </Card>
   );
 }
