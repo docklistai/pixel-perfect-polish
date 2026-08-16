@@ -81,6 +81,11 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
         queryClient.invalidateQueries({ queryKey: ["rota", "open-shift-applicants"] }),
         queryClient.invalidateQueries({ queryKey: ["rota", "shift-release-requests"] }),
         queryClient.invalidateQueries({ queryKey: ["rota", "operational-issues"] }),
+        // The publish change review compares the draft against the latest
+        // snapshot. Publishing mints a new one, so the cached snapshot is stale
+        // the moment this resolves — without this the review would keep
+        // comparing against the previous version for its whole staleTime.
+        queryClient.invalidateQueries({ queryKey: ["rota", "publish-diff"] }),
       ]);
       return result;
     },

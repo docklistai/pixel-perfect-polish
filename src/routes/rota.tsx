@@ -14,6 +14,7 @@ import { RotaOverlays } from "@/features/rota/components/RotaOverlays";
 import { RoleColoursContext } from "@/features/rota/components/grid/roleColoursContext";
 import { PrintableRota } from "@/features/rota/print/PrintableRota";
 import { useRotaPrintDocument } from "@/features/rota/hooks/useRotaPrintDocument";
+import { usePublishDiff } from "@/features/rota/hooks/usePublishDiff";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { RecordAbsenceDialog } from "@/features/leave/components/RecordAbsenceDialog";
@@ -96,6 +97,15 @@ function RotaPage() {
     () => ({ ...rota.bulkRunners, onApplied: history.reset }),
     [history.reset, rota.bulkRunners],
   );
+  const changeReviewDayLabels = React.useMemo(() => rota.days.map((day) => day.d), [rota.days]);
+  // Only fetched while the publish dialog is open, so week navigation is unaffected.
+  const changeReview = usePublishDiff({
+    rotaWeekId: rota.source === "live" ? rota.liveRotaWeekId : null,
+    enabled: overlays.openOverlays.publish,
+    draftShifts: rota.draftShifts,
+    staff: rota.staff,
+    dayLabels: changeReviewDayLabels,
+  });
 
   return (
     <RoleColoursContext.Provider value={roleColoursConfig}>
@@ -227,6 +237,8 @@ function RotaPage() {
           publishEligibility={publishEligibility}
           constraintClashCount={availability.clashes.length}
           availabilityDataState={availability.dataState}
+          changeReview={changeReview}
+          changeReviewDayLabels={changeReviewDayLabels}
           suggestedAssignTo={
             recoverySelection?.shiftId === rota.selectedShiftId ? recoverySelection.staffId : null
           }

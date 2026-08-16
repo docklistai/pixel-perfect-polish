@@ -3,6 +3,7 @@ import type { useRotaDraftController } from "../hooks/useRotaDraftController";
 import type { RotaOverlaysState } from "../hooks/useRotaOverlays";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { RotaPublishEligibility } from "../lib/publishEligibility";
+import type { PublishDiffState } from "../hooks/usePublishDiff";
 import type { ShiftId } from "../types";
 
 import { AddShiftDrawer } from "./AddShiftDrawer";
@@ -38,6 +39,8 @@ export function RotaOverlays({
   publishEligibility,
   constraintClashCount,
   availabilityDataState,
+  changeReview,
+  changeReviewDayLabels,
   suggestedAssignTo,
   onClearRecoverySelection,
 }: {
@@ -54,6 +57,8 @@ export function RotaOverlays({
   publishEligibility: RotaPublishEligibility;
   constraintClashCount: number;
   availabilityDataState: "ready" | "loading" | "error";
+  changeReview: PublishDiffState;
+  changeReviewDayLabels: readonly string[];
   suggestedAssignTo: string | null;
   onClearRecoverySelection: () => void;
 }) {
@@ -116,6 +121,8 @@ export function RotaOverlays({
         hasUnpublishedChanges={rota.hasUnpublishedChanges}
         canPublish={publishEligibility.canPublish}
         publishBlockedReason={publishEligibility.blockedReason}
+        changeReview={rota.source === "live" ? changeReview : null}
+        changeReviewDayLabels={changeReviewDayLabels}
         onConfirm={onPublishConfirm}
       />
       <ImportScheduleDrawer

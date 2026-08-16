@@ -6,6 +6,8 @@ import {
   constraintAcknowledgementLabel,
   constraintAcknowledgementValue,
 } from "../lib/publishConstraintAcknowledgement";
+import { PublishChangeReview } from "./PublishChangeReview";
+import type { PublishDiffState } from "../hooks/usePublishDiff";
 
 type ReadinessCheck = {
   label: string;
@@ -33,6 +35,8 @@ export function PublishRotaDialog({
   hasUnpublishedChanges,
   canPublish,
   publishBlockedReason,
+  changeReview,
+  changeReviewDayLabels,
   onConfirm,
 }: {
   open: boolean;
@@ -65,6 +69,9 @@ export function PublishRotaDialog({
   hasUnpublishedChanges: boolean;
   canPublish: boolean;
   publishBlockedReason: string | null;
+  /** Diff against the latest published snapshot. Null outside live manager sessions. */
+  changeReview: PublishDiffState | null;
+  changeReviewDayLabels: readonly string[];
   onConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
 }) {
   const [issuesAcknowledged, setIssuesAcknowledged] = React.useState(false);
@@ -209,6 +216,10 @@ export function PublishRotaDialog({
           </li>
         </ul>
       </div>
+
+      {changeReview && (
+        <PublishChangeReview state={changeReview} dayLabels={changeReviewDayLabels} />
+      )}
 
       <div className="card mt-3 p-3" style={{ background: "var(--bg-raised)" }}>
         {checks.map((check) => (
