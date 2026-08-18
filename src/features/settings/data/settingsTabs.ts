@@ -9,6 +9,7 @@ import {
   Sparkles,
   Lock,
   Tag,
+  FlaskConical,
 } from "lucide-react";
 import type { SettingsTab } from "../types";
 
@@ -44,6 +45,13 @@ export const settingsTabs: SettingsTab[] = [
     group: "Operations",
   },
   { t: "Manager support", s: "Deterministic review aids", icon: Sparkles, group: "Platform" },
+  {
+    t: "Labs",
+    s: "Experimental features, off by default",
+    icon: FlaskConical,
+    group: "Platform",
+    pilot: true,
+  },
   {
     t: "Data & privacy",
     s: "Preview security and data exports",

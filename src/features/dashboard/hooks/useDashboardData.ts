@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { Users, Calendar } from "lucide-react";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { fetchWorkspaceStaffFn } from "@/features/staff/api/staffLiveData";
 import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
@@ -8,23 +7,16 @@ import { fetchPendingLeavePreviewFn } from "@/features/leave/api/leaveLiveData";
 import { leaveQueryKeys } from "@/features/leave/lib/leaveQueryRange";
 import { fetchPendingTimePreviewFn } from "@/features/time/api/timeOperationalReads";
 import { timeQueryKeys } from "@/features/time/lib/timeQueryRange";
-import { countOpenShifts, totalScheduledHours } from "@/features/rota/lib/rotaSummaries";
+import { countOpenShifts } from "@/features/rota/lib/rotaSummaries";
 import { buildDashboardOperational } from "../lib/dashboardOperational";
+import { buildLiveKpis, countAssignedToday, dayIndexInWeek } from "../lib/dashboardKpis";
 import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
 import { useDashboardWorkspace } from "./useDashboardWorkspace";
 import type { DraftShift } from "@/features/rota/types";
-import type { KpiItem } from "../types";
 
 const dashRouteApi = getRouteApi("/");
 const PENDING_LEAVE_PREVIEW_LIMIT = 5;
 const PENDING_TIME_PREVIEW_LIMIT = 5;
-
-/** Index of `todayIso` within the week starting `weekStartIso`, or null if outside it. */
-function dayIndexInWeek(weekStartIso: string | null, todayIso: string | null): number | null {
-  if (!weekStartIso || !todayIso) return null;
-  const diff = Math.round((Date.parse(todayIso) - Date.parse(weekStartIso)) / 86_400_000);
-  return diff >= 0 && diff <= 6 ? diff : null;
-}
 
 /**
  * Dashboard operational data, live-first. In a live manager workspace the core
@@ -130,42 +122,8 @@ export function useDashboardData() {
   });
 
   const todayIndex = dayIndexInWeek(week?.weekStart ?? null, week?.today ?? null);
-  const onShiftToday =
-    todayIndex === null
-      ? 0
-      : shifts.filter((shift) => shift.dayIndex === todayIndex && shift.staffId !== null).length;
-
-  // Live KPIs are derived from live reads only. Coverage needs role-requirement
-  // data that has no live source yet, so it is replaced with the live team size
-  // rather than shown as a fabricated percentage.
-  const weeklyKpis: KpiItem[] = [
-    {
-      icon: Users,
-      label: "Scheduled hours",
-      value: `${Math.round(totalScheduledHours(shifts))}h`,
-      delta: "This week · live",
-      tone: "info",
-      tip: "Total scheduled hours this week, from your live rota.",
-    },
-    {
-      icon: Users,
-      label: "Team size",
-      value: String(staffCount),
-      delta: "Live roster",
-      tone: "brand",
-      tip: "Staff members in your workspace roster.",
-    },
-  ];
-  const todayKpis: KpiItem[] = [
-    {
-      icon: Calendar,
-      label: "On shift today",
-      value: String(onShiftToday),
-      delta: "Live",
-      tone: "info",
-      tip: "Assigned shifts on today's live rota.",
-    },
-  ];
+  const onShiftToday = countAssignedToday(shifts, todayIndex);
+  const { weeklyKpis, todayKpis } = buildLiveKpis({ shifts, staffCount, onShiftToday });
 
   return {
     source: "live" as const,

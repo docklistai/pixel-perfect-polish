@@ -46,12 +46,6 @@ export interface TimesheetItem {
   lateTone?: "warning" | "danger";
 }
 
-export interface StaffDeptItem {
-  dept: string;
-  count: number;
-  tone?: string;
-}
-
 export interface AnnouncementItem {
   t: string;
   s: string;

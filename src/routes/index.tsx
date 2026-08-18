@@ -15,19 +15,13 @@ import { DashboardLabourWatchLive } from "@/features/dashboard/components/Dashbo
 import { DashboardLiveReadState } from "@/features/dashboard/components/DashboardLiveReadState";
 import { DashboardRotaPublish } from "@/features/dashboard/components/DashboardRotaPublish";
 import { DashboardPendingLeave } from "@/features/dashboard/components/DashboardPendingLeave";
-import { DashboardTimesheets } from "@/features/dashboard/components/DashboardTimesheets";
-import { DashboardStaffOnShift } from "@/features/dashboard/components/DashboardStaffOnShift";
-import { DashboardAnnouncements } from "@/features/dashboard/components/DashboardAnnouncements";
-import { DashboardQuickActions } from "@/features/dashboard/components/DashboardQuickActions";
+import { DashboardTertiaryRow } from "@/features/dashboard/components/DashboardTertiaryRow";
 import { DashboardAlertDrawer } from "@/features/dashboard/components/DashboardAlertDrawer";
 import { DashboardKpiDetailDrawer } from "@/features/dashboard/components/DashboardKpiDetailDrawer";
 import type { KpiItem } from "@/features/dashboard/types";
-import {
-  staffDeptItems,
-  announcementItems,
-  quickActionItems,
-} from "@/features/dashboard/data/dashboardDemoData";
+import { announcementItems, quickActionItems } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
+import { useTimePulse } from "@/features/dashboard/hooks/useTimePulse";
 import { useGreeting } from "@/features/dashboard/hooks/useGreeting";
 import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
@@ -59,6 +53,7 @@ function Home() {
   const quickRef = React.useRef<HTMLDivElement>(null);
   const moreRef = React.useRef<HTMLDivElement>(null);
   const dashboard = useDashboardData();
+  const timePulse = useTimePulse();
   const { workspaceName, workspaceId } = useManagerIdentity();
   const greeting = useGreeting();
   const labourSettings = useWorkspaceLabourSettings();
@@ -308,13 +303,14 @@ function Home() {
             <DashboardPendingLeave items={dashboard.leaveItems} />
           </div>
 
-          {/* Tertiary row: timesheets · staff board · announcements · quick actions */}
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {!isLiveDashboard && <DashboardStaffOnShift items={staffDeptItems} total={6} />}
-            <DashboardTimesheets items={dashboard.timesheetItems} />
-            {!isLiveDashboard && <DashboardAnnouncements items={announcementItems} />}
-            <DashboardQuickActions items={visibleQuickActionItems} />
-          </div>
+          {/* Tertiary row: time pulse · timesheets · announcements · quick actions */}
+          <DashboardTertiaryRow
+            isLive={isLiveDashboard}
+            timePulse={timePulse}
+            timesheetItems={dashboard.timesheetItems}
+            announcementItems={announcementItems}
+            quickActionItems={visibleQuickActionItems}
+          />
         </>
       )}
 

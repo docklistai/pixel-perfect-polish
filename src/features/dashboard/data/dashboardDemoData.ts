@@ -12,13 +12,7 @@ import {
   DollarSign,
   TrendingUp,
 } from "lucide-react";
-import type {
-  KpiItem,
-  OpenShiftItem,
-  StaffDeptItem,
-  AnnouncementItem,
-  QuickActionItem,
-} from "../types";
+import type { KpiItem, OpenShiftItem, AnnouncementItem, QuickActionItem } from "../types";
 import { DEMO_WORLD } from "@/features/demo/data/demoWorld";
 
 export const kpiItems: KpiItem[] = [
@@ -55,13 +49,6 @@ export const todayKpiItems: KpiItem[] = [
 export const openShiftItems: OpenShiftItem[] = [
   { label: "Bar — Evening", date: "Fri 19 Jun · 16:00–00:00", filled: "Open" },
   { label: "Porter — Day", date: "Fri 19 Jun · 07:00–15:00", filled: "Open" },
-];
-
-export const staffDeptItems: StaffDeptItem[] = [
-  { dept: "Front of House", count: 3, tone: "info" },
-  { dept: "Kitchen", count: 1, tone: "warning" },
-  { dept: "Housekeeping", count: 1, tone: "success" },
-  { dept: "Maintenance", count: 1, tone: "purple" },
 ];
 
 // Announcements — relative dates anchored to Thu 11 Jun 2026
