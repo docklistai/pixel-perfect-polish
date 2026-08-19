@@ -31,6 +31,10 @@ export function useDashboardWorkspace() {
       pendingLeave,
       pendingTime,
       timesheetPeriodLabel: DEMO_TIMESHEET_PERIOD,
+      // The demo store has no live rota week, so operational issues can never
+      // resolve here and that signal stays absent rather than reading zero.
+      hasPublishedSnapshot: nextDraft.published,
+      hasUnpublishedChanges: nextDraft.hasUnpublishedChanges,
     });
 
     const weeklyKpis = kpiItems.map((item) =>

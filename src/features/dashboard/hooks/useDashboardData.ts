@@ -12,6 +12,7 @@ import { buildDashboardOperational } from "../lib/dashboardOperational";
 import { buildLiveKpis, countAssignedToday, dayIndexInWeek } from "../lib/dashboardKpis";
 import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
 import { useDashboardWorkspace } from "./useDashboardWorkspace";
+import { useDashboardRotaIssues } from "./useDashboardRotaIssues";
 import type { DraftShift } from "@/features/rota/types";
 
 const dashRouteApi = getRouteApi("/");
@@ -69,6 +70,12 @@ export function useDashboardData() {
     staleTime: 15_000,
   });
 
+  // Read before the early return so the hook order is stable. The rota week id
+  // only exists once the week read resolves; until then the issues query stays
+  // disabled rather than firing against a null week.
+  const rotaWeekId = weekQuery.data?.rotaWeekId ?? null;
+  const rotaIssues = useDashboardRotaIssues({ enabled, workspaceId, rotaWeekId });
+
   if (!enabled) {
     return {
       ...demo,
@@ -99,6 +106,7 @@ export function useDashboardData() {
     void weekQuery.refetch();
     void leaveQuery.refetch();
     void timeQuery.refetch();
+    rotaIssues.refresh();
   };
 
   const week = weekQuery.data ?? null;
@@ -119,6 +127,10 @@ export function useDashboardData() {
     pendingTime,
     pendingTimeCount,
     timesheetPeriodLabel: "Awaiting review",
+    rotaIssueCount: rotaIssues.count,
+    rotaIssuesResolved: rotaIssues.resolved,
+    hasPublishedSnapshot: Boolean(week?.hasPublishedSnapshot),
+    hasUnpublishedChanges: Boolean(week?.hasUnpublishedChanges),
   });
 
   const todayIndex = dayIndexInWeek(week?.weekStart ?? null, week?.today ?? null);

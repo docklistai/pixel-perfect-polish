@@ -56,7 +56,9 @@ describe("buildDashboardOperational", () => {
       timesheetPeriodLabel: "Awaiting review",
     });
     const routes = out.attentionItems.map((item) => item.route);
-    expect(routes).toEqual(["/rota", "/time", "/leave"]);
+    // Phase 61 fixed the queue order: rota update, open shifts, unpublished,
+    // leave, timesheets. Leave now precedes timesheets.
+    expect(routes).toEqual(["/rota", "/leave", "/time"]);
   });
 
   it("flags a high-impact leave request distinctly", () => {

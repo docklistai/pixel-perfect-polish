@@ -1,7 +1,12 @@
-import { AlertTriangle, Clock3, Plane } from "lucide-react";
 import type { LeaveRequest } from "@/features/leave/types";
 import type { StoredTimesheetRow } from "@/features/time/types";
 import type { AttentionItem, LeaveItem, TimesheetItem } from "../types";
+import {
+  buildAttentionItems,
+  weekScopeHeading,
+  weekScopePossessive,
+  type DashboardWeekScope,
+} from "./dashboardAttention";
 
 /**
  * Pure derivation of the Dashboard's operational surfaces from already-pending
@@ -9,24 +14,14 @@ import type { AttentionItem, LeaveItem, TimesheetItem } from "../types";
  * paths produce identical attention/leave/timesheet output — the only
  * difference between demo and live is where the inputs come from, never how
  * they are presented. Kept free of React/Supabase so the rules are unit-tested.
+ *
+ * The attention queue itself lives in `dashboardAttention.ts`; this module owns
+ * the leave and timesheet lists and hands the queue its already-resolved counts.
  */
 
-/**
- * Which week the dashboard is watching. Live reads watch the current rota week,
- * so their copy must say "this week"; the demo store watches next week's draft,
- * so it keeps "next week". The noun is data-driven, never hardcoded per surface.
- */
-export type DashboardWeekScope = "current" | "next";
-
-/** Heading noun for the watched week, e.g. "This week has 4 open shifts". */
-export function weekScopeHeading(scope: DashboardWeekScope): string {
-  return scope === "current" ? "This week" : "Next week";
-}
-
-/** Possessive form for the watched week, e.g. "This week's draft". */
-export function weekScopePossessive(scope: DashboardWeekScope): string {
-  return scope === "current" ? "This week's" : "Next week's";
-}
+// Re-exported so existing consumers keep one import site for week-scope copy.
+export { weekScopeHeading, weekScopePossessive };
+export type { DashboardWeekScope };
 
 /** Manager-support card title with correct singular/plural for the active count. */
 export function dashboardAttentionTitle(activeCategories: number): string {
@@ -78,6 +73,16 @@ export interface DashboardOperationalInput {
    * passes an honest period label rather than fabricating a per-row range.
    */
   timesheetPeriodLabel: string;
+  /**
+   * Open rota operational issues for the watched week, and whether that read
+   * has actually resolved. Absent for callers with no live rota week, which is
+   * why an unresolved read is never treated as "no issues".
+   */
+  rotaIssueCount?: number;
+  rotaIssuesResolved?: boolean;
+  /** Publish state of the watched week, for the unpublished-changes signal. */
+  hasPublishedSnapshot?: boolean;
+  hasUnpublishedChanges?: boolean;
 }
 
 export interface DashboardOperationalOutput {
@@ -111,65 +116,17 @@ export function buildDashboardOperational(
     lateTone: row.status === "unapproved" ? "danger" : "warning",
   }));
 
-  const openShiftDetail =
-    openShifts === 0
-      ? `${weekScopePossessive(weekScope)} draft has no open shifts. You're clear to publish.`
-      : `${weekScopePossessive(weekScope)} draft has ${openShifts} unassigned shift${openShifts === 1 ? "" : "s"}. Open the rota to assign cover before you publish.`;
-  const timeDetail =
-    pendingTimeCount === 0
-      ? "No timesheets are waiting for review."
-      : `${pendingTimeCount} timesheet${pendingTimeCount === 1 ? "" : "s"} ${pendingTimeCount === 1 ? "is" : "are"} waiting for manager review. Approve or query each before exporting hours.`;
-  const leaveDetail = highLeave
-    ? `${highLeave.n}'s request (${highLeave.date}) needs a decision and may affect coverage. Review it against the rota.`
-    : pendingLeaveCount === 0
-      ? "No leave requests are pending."
-      : `${pendingLeaveCount} leave request${pendingLeaveCount === 1 ? "" : "s"} pending. Review each against the rota.`;
-
-  // Only surface categories with a real active issue, so the Attention count
-  // reflects what actually needs the manager — never a fixed list of three.
-  const attentionCandidates: (AttentionItem | null)[] = [
-    openShifts > 0
-      ? {
-          t: `${weekScopeHeading(weekScope)} has ${openShifts} open shift${openShifts === 1 ? "" : "s"}`,
-          s: "Resolve open shifts before publishing",
-          icon: AlertTriangle,
-          tone: "warning" as const,
-          route: "/rota" as const,
-          cta: "Open rota",
-          tag: "Action needed",
-          detail: openShiftDetail,
-        }
-      : null,
-    pendingTimeCount > 0
-      ? {
-          t: `${pendingTimeCount} timesheet${pendingTimeCount === 1 ? "" : "s"} need manager review`,
-          s: "Export approved hours after review",
-          icon: Clock3,
-          tone: "danger" as const,
-          route: "/time" as const,
-          cta: "Review timesheets",
-          tag: "Needs review",
-          detail: timeDetail,
-        }
-      : null,
-    pendingLeaveCount > 0
-      ? {
-          t: highLeave
-            ? "1 leave request — high coverage impact"
-            : `${pendingLeaveCount} leave request${pendingLeaveCount === 1 ? "" : "s"} pending`,
-          s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
-          icon: Plane,
-          tone: "purple" as const,
-          route: "/leave" as const,
-          cta: "Review leave",
-          tag: "Decision needed",
-          detail: leaveDetail,
-        }
-      : null,
-  ];
-  const attentionItems: AttentionItem[] = attentionCandidates.filter(
-    (item): item is AttentionItem => item !== null,
-  );
+  const attentionItems = buildAttentionItems({
+    weekScope,
+    openShifts,
+    pendingTimeCount,
+    pendingLeaveCount,
+    highLeave: highLeave ? { n: highLeave.n, date: highLeave.date } : null,
+    rotaIssueCount: input.rotaIssueCount ?? 0,
+    rotaIssuesResolved: input.rotaIssuesResolved ?? false,
+    hasPublishedSnapshot: input.hasPublishedSnapshot ?? false,
+    hasUnpublishedChanges: input.hasUnpublishedChanges ?? false,
+  });
 
   return { leaveItems, timesheetItems, attentionItems };
 }
