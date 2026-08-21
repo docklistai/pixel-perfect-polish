@@ -65,6 +65,19 @@ export type ShiftActionHandlers = {
 /** Per-shift menu callbacks passed from the grid cell into pills and the action menu. */
 export type ShiftMenuHandlers = {
   duplicateBlockedReason: ShiftActionHandlers["duplicateBlockedReason"];
+  /**
+   * Puts focus back on the owning grid cell, synchronously.
+   *
+   * Called before an action runs, not after the menu closes: an overlay opened
+   * by a menu item mounts while the item still holds focus and is about to
+   * unmount, so it would capture a doomed element and strand focus on the
+   * document when it closes.
+   */
+  onRestoreFocus?: () => void;
+  /** Why this shift cannot be moved, or null when it can. Shown under the item. */
+  moveBlockedReason?: string | null;
+  /** Arms a move for this shift: the keyboard, menu and touch entry point. */
+  onMove?: () => void;
   onEditInline: () => void;
   onOpen: (shiftId: ShiftId) => void;
   onDuplicate: (shiftId: ShiftId) => MaybePromise<void>;

@@ -60,6 +60,9 @@ export function useRotaCellInteraction({
     requestAnimationFrame(() => cellRef.current?.focus());
   }, []);
 
+  /** The same restore, but now — for callers that must beat a mounting overlay. */
+  const focusCellNow = React.useCallback(() => cellRef.current?.focus(), []);
+
   const cancelEditing = React.useCallback(() => {
     setIsEditing(false);
     restoreCellFocus();
@@ -96,6 +99,7 @@ export function useRotaCellInteraction({
   const menuHandlers = React.useMemo<ShiftMenuHandlers>(
     () => ({
       duplicateBlockedReason: handlers.duplicateBlockedReason,
+      onRestoreFocus: focusCellNow,
       onEditInline: startEditing,
       onOpen: handlers.onShiftOpen,
       onDuplicate: handlers.onShiftDuplicate,
@@ -107,7 +111,7 @@ export function useRotaCellInteraction({
       onResetColour: handlers.onShiftResetColour,
       onClear: handlers.onShiftClear,
     }),
-    [handlers, startEditing],
+    [focusCellNow, handlers, startEditing],
   );
 
   const handleMenuOpenChange = React.useCallback(

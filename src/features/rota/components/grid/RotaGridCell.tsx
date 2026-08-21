@@ -4,6 +4,8 @@ import { cellLeaveTitle } from "./cellLeaveTitle";
 import { InlineCellEditor } from "./InlineCellEditor";
 import { buildRotaCellAccessibleName } from "./rotaGridAccessibility";
 import { useRotaCellInteraction } from "./useRotaCellInteraction";
+import { useRotaCellMove } from "./move/useRotaCellMove";
+import type { RotaMoveApi } from "./move/rotaMoveApi";
 import type { RotaCellSelectionApi, RotaGridDay, ShiftActionHandlers } from "./types";
 import type { RotaGridCell as RotaGridCellData } from "../../types";
 
@@ -15,6 +17,7 @@ export function RotaGridCell({
   openRow = false,
   handlers,
   selection,
+  move,
   rowKey,
   staffId,
   staffRole,
@@ -30,6 +33,7 @@ export function RotaGridCell({
   openRow?: boolean;
   handlers: ShiftActionHandlers;
   selection: RotaCellSelectionApi;
+  move: RotaMoveApi;
   /** Stable row identity: `staff:<id>` or `open`. Never a row position. */
   rowKey: string;
   staffId?: string | null;
@@ -50,6 +54,16 @@ export function RotaGridCell({
     onGridKeyDown: (event) => selection.onCellKeyDown(event, cellKey),
   });
   const { firstShift, isEditing } = interaction;
+
+  const cellMove = useRotaCellMove({
+    move,
+    cellKey,
+    shifts: cell.shifts,
+    firstShift,
+    isEditing,
+    readOnly: handlers.readOnly,
+    baseMenuHandlers: interaction.menuHandlers,
+  });
 
   const todayClass = openRow
     ? "border-brand/20 bg-warning-soft/20"
@@ -79,6 +93,7 @@ export function RotaGridCell({
     readOnly: handlers.readOnly,
     leaveState: cell.leaveState,
     availabilityHint: cell.availabilityHint,
+    moveState: cellMove.moveState,
   });
   const availabilityTitle =
     cell.availabilityHint === "unavailable"
@@ -104,9 +119,26 @@ export function RotaGridCell({
       data-gridrow={rowIndex}
       data-gridcol={dayIndex}
       data-rowkey={rowKey}
-      onFocus={() => {
+      onFocus={(event) => {
+        // A shift pill is never meant to hold focus while desktop selection is
+        // on: the grid's Delete and fill shortcuts are addressed to the cell.
+        // The pill used to enforce that by preventing its own mousedown default,
+        // but that also cancelled the cell's drag, so the cell reclaims focus
+        // one frame later instead — after the browser has finished focusing the
+        // button, and without disturbing the drag it just started.
+        if (
+          selection.enabled &&
+          event.target !== event.currentTarget &&
+          event.target instanceof Element &&
+          event.target.closest(".rota-shift-pill")
+        ) {
+          requestAnimationFrame(() => interaction.cellRef.current?.focus());
+          return;
+        }
         onFocus(rowIndex, dayIndex);
         selection.onCellFocus(cellKey);
+        // Arrow keys move focus; an armed move reads that as choosing a target.
+        if (cellMove.isArmed) cellMove.proposeTarget();
       }}
       onMouseDown={(event) => {
         selection.onCellMouseDown(event, cellKey);
@@ -120,6 +152,20 @@ export function RotaGridCell({
         interaction.cellRef.current?.focus();
       }}
       onDoubleClick={interaction.startEditing}
+      onClickCapture={(event) => {
+        // Tap-to-place. This is the whole mobile move path, and it is also how a
+        // pointer user finishes a move armed from the shift menu.
+        //
+        // Claimed in the CAPTURE phase because the destination may already hold
+        // a shift, and on touch that pill still opens the detail drawer on its
+        // own click. Handling this on the way down stops the event before any
+        // descendant sees it, so placing a shift onto an occupied cell performs
+        // exactly one action instead of also opening a drawer over the result.
+        if (!cellMove.isArmed) return;
+        event.preventDefault();
+        event.stopPropagation();
+        cellMove.commitHere();
+      }}
       onClick={(event) => {
         if (event.shiftKey) return;
         // With rectangular selection on, a single click only selects. Opening an
@@ -129,9 +175,10 @@ export function RotaGridCell({
         if (!firstShift) interaction.startEditing();
       }}
       onKeyDown={interaction.handleKeyDown}
+      {...cellMove.dragProps}
       className={`relative border-b border-l px-2 py-2 select-none outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-within:ring-1 focus-within:ring-brand/30 ${
         day?.isToday ? todayClass : defaultClass
-      } ${leaveClass} ${availabilityClass} ${selectionClass}`}
+      } ${leaveClass} ${availabilityClass} ${selectionClass} ${cellMove.className}`}
     >
       {cell.leaveState && !firstShift && !isEditing && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -172,7 +219,7 @@ export function RotaGridCell({
           // Selecting a block must not pop a drawer per cell; on desktop the
           // pill's own click is stood down and Enter or the shift menu open it.
           suppressPillOpen={selection.enabled}
-          menuHandlers={interaction.menuHandlers}
+          menuHandlers={cellMove.menuHandlers}
           openMenuShiftId={interaction.openMenuShiftId}
           onMenuOpenChange={interaction.handleMenuOpenChange}
           emptyAriaLabel={cellLabel + ": no shift"}

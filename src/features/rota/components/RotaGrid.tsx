@@ -9,19 +9,12 @@ import {
   type ShiftActionHandlers,
 } from "./grid";
 import { RotaGridDescription } from "./grid/RotaGridDescription";
-import { useRotaGridNavigation } from "./grid/useRotaGridNavigation";
-import { useRotaGridKeyboard } from "./grid/useRotaGridKeyboard";
 import { countOpenShifts } from "./grid/rotaGridMetrics";
 import { useShiftActionHandlers } from "./grid/useShiftActionHandlers";
-import { useRotaGridSelection } from "./grid/selection/useRotaGridSelection";
-import { useRotaCellSelectionApi } from "./grid/selection/useRotaCellSelectionApi";
-import { useRotaSelectionAnnouncement } from "./grid/selection/useRotaSelectionAnnouncement";
-import { useSelectionCapableViewport } from "./grid/selection/useSelectionCapableViewport";
-import { useRotaGridCopy } from "./grid/clipboard/useRotaGridCopy";
-import { useRotaGridBulk } from "./grid/bulk/useRotaGridBulk";
+import { useRotaGridInteractions } from "./grid/useRotaGridInteractions";
 import { RotaBulkPreviewDialog } from "./grid/bulk/RotaBulkPreviewDialog";
 import type { RotaBulkRunners } from "./grid/bulk/runRotaBulkPlan";
-import type { RotaGridOpenRow, RotaGridStaffRow } from "../types";
+import type { RotaGridOpenRow, RotaGridStaffRow, StaffMember } from "../types";
 
 export function RotaGrid({
   days,
@@ -37,6 +30,8 @@ export function RotaGrid({
   selectionResetKey,
   bulkRunners,
   weekIsEditable = true,
+  mutationPending = false,
+  assignableStaff,
   onStaffSearchChange,
   onClearFilters,
   readOnly,
@@ -74,6 +69,15 @@ export function RotaGrid({
   bulkRunners: RotaBulkRunners;
   /** False for archived weeks, which refuse every write server-side anyway. */
   weekIsEditable?: boolean;
+  /** A rota write is in flight; no shift move may start or land until it settles. */
+  mutationPending?: boolean;
+  /**
+   * Active staff a shift may be assigned to. Deliberately not the rendered rows:
+   * the grid also shows people who have left but still hold shifts, and their
+   * row must refuse a move rather than quietly reassign work to a former
+   * employee.
+   */
+  assignableStaff: readonly StaffMember[];
   onStaffSearchChange: (value: string) => void;
   onClearFilters: () => void;
   readOnly: boolean;
@@ -86,46 +90,25 @@ export function RotaGrid({
 } & ShiftActionHandlers) {
   const renderedBodyRows = staffRows.length > 0 ? staffRows.length : 1;
   const openRowIndex = staffRows.length > 0 ? staffRows.length : 1;
-  const gridNavigation = useRotaGridNavigation({
-    maxRowIndex: openRowIndex,
-    dayCount: days.length,
-  });
+  const dayLabels = React.useMemo(() => days.map((day) => day.d), [days]);
 
-  const selectionCapable = useSelectionCapableViewport();
-  const selection = useRotaGridSelection({
-    enabled: selectionCapable,
+  const interactions = useRotaGridInteractions({
     staffRows,
     openRow,
     dayCount: days.length,
-    resetKey: selectionResetKey,
-  });
-  const handleGridKeyDown = useRotaGridKeyboard({
-    selection,
-    dayCount: days.length,
-    hasStaffRows: staffRows.length > 0,
-  });
-  const announcement = useRotaSelectionAnnouncement(selection.summary);
-  const handleCopy = useRotaGridCopy({
-    enabled: selection.enabled,
-    summary: selection.summary,
-    announce: announcement.announce,
-  });
-
-  const bulk = useRotaGridBulk({
-    selection,
-    staffRows,
-    openRow,
-    dayLabels: React.useMemo(() => days.map((day) => day.d), [days]),
-    workspaceRoles: configuredRoles,
-    runners: bulkRunners,
+    openRowIndex,
+    selectionResetKey,
+    configuredRoles,
+    bulkRunners,
     readOnly,
     weekIsEditable,
-    onBlocked: onReadOnlyAttempt,
-    announce: announcement.announce,
-    onGridKeyDown: handleGridKeyDown,
+    mutationPending,
+    assignableStaff,
+    onReadOnlyAttempt,
+    onShiftUpdate,
+    dayLabels,
   });
-
-  const cellSelection = useRotaCellSelectionApi(selection, bulk.handleCellKeyDown);
+  const { gridNavigation, selection, cellSelection, announcement, move } = interactions;
 
   const handlers = useShiftActionHandlers({
     staffRows,
@@ -179,8 +162,8 @@ export function RotaGrid({
             aria-rowcount={renderedBodyRows + 3}
             aria-multiselectable={selection.enabled ? true : undefined}
             onBlurCapture={gridNavigation.handleBlur}
-            onCopy={handleCopy}
-            onPaste={bulk.handlePaste}
+            onCopy={interactions.handleCopy}
+            onPaste={interactions.handlePaste}
             className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]"
           >
             <RotaGridHeader
@@ -203,6 +186,7 @@ export function RotaGrid({
                   days={days}
                   handlers={handlers}
                   selection={cellSelection}
+                  move={move}
                   rowIndex={rowIndex}
                   activeRowIndex={gridNavigation.activeRowIndex}
                   activeDayIndex={gridNavigation.activeDayIndex}
@@ -228,6 +212,7 @@ export function RotaGrid({
               totalOpenShifts={totalOpenShifts}
               handlers={handlers}
               selection={cellSelection}
+              move={move}
               rowIndex={openRowIndex}
               ariaRowIndex={staffRows.length > 0 ? staffRows.length + 2 : 3}
               activeRowIndex={gridNavigation.activeRowIndex}
@@ -243,7 +228,7 @@ export function RotaGrid({
         </div>
       </div>
 
-      <RotaBulkPreviewDialog {...bulk.dialog} />
+      <RotaBulkPreviewDialog {...interactions.bulkDialog} />
     </section>
   );
 }

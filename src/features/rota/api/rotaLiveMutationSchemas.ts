@@ -43,6 +43,12 @@ export const updateShiftInput = shiftIdInput.extend({
   patch: z
     .object({
       staffId: z.string().uuid().nullable().optional(),
+      // Moving the shift to another day of its OWN rota week. The client sends
+      // an index, never a date: the calendar date is derived server-side from
+      // the week's stored `week_start`, so a client can neither move a shift
+      // out of its week nor smuggle in a date from another one. Bounded 0–6
+      // because `guard_shift_write` refuses anything outside `week_start + 6`.
+      dayIndex: z.number().int().min(0).max(6).optional(),
       role: z.string().trim().min(1).max(120).optional(),
       start: timeSchema.optional(),
       end: timeSchema.optional(),

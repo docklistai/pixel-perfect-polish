@@ -23,7 +23,17 @@ export function ShiftCell({
   openMenuShiftId: ShiftId | null;
   onMenuOpenChange: (shiftId: ShiftId, open: boolean) => void;
   emptyAriaLabel: string;
-  /** Desktop selection is on: a plain click selects the cell instead of opening. */
+  /**
+   * Desktop selection is on: a plain click selects the cell instead of opening.
+   *
+   * The pill used to also `preventDefault()` its own mousedown so focus stayed
+   * on the owning cell. That suppression is gone, not abandoned: preventing the
+   * mousedown default also cancels the cell's native drag, so a shift could
+   * never be picked up by grabbing it. `RotaGridCell` now reclaims focus from a
+   * pill on the next frame instead, which keeps focus exactly where it was —
+   * on the cell, so Delete and the fill shortcuts still reach the grid — while
+   * leaving the drag intact.
+   */
   suppressPillOpen?: boolean;
 }) {
   if (shifts.length === 0) {
@@ -127,12 +137,6 @@ function ShiftPill({
         <button
           type="button"
           tabIndex={-1}
-          onMouseDown={(event) => {
-            // With selection on, keep focus on the owning cell so a following
-            // Delete or fill shortcut still reaches the grid — the mousedown
-            // still bubbles to the cell, which handles the selection.
-            if (suppressOpen) event.preventDefault();
-          }}
           onClick={(event) => {
             // Selection owns the plain and shifted click on desktop; the drawer
             // is reached with Enter or from the shift menu instead.
@@ -180,12 +184,6 @@ function ShiftPill({
       <button
         type="button"
         tabIndex={-1}
-        onMouseDown={(event) => {
-          // With selection on, keep focus on the owning cell so a following
-          // Delete or fill shortcut still reaches the grid — the mousedown
-          // still bubbles to the cell, which handles the selection.
-          if (suppressOpen) event.preventDefault();
-        }}
         onClick={(event) => {
           // Selection owns the plain and shifted click on desktop; the drawer
           // is reached with Enter or from the shift menu instead.

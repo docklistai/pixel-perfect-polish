@@ -15,7 +15,7 @@ export function getAssignableStaffRows(rows: StaffRow[]): StaffRow[] {
 
 export function isShiftCopyAssignable(
   shift: Pick<DraftShift, "staffId">,
-  assignableStaff: StaffMember[],
+  assignableStaff: readonly StaffMember[],
 ): boolean {
   return (
     shift.staffId === null ||

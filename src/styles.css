@@ -1393,6 +1393,70 @@
       forced-color-adjust: none;
     }
   }
+  /* Moving one shift. Every state is signalled by outline STYLE rather than
+     colour, because a move happens on cells that may already be tinted for
+     today, leave, availability or selection — and because the selection outline
+     is itself a solid brand outline, so a solid one here would be
+     indistinguishable from it. Dashed means "in flight", dotted means "refused".
+
+     Each state also announces itself through the grid's live region, so none of
+     this is the only channel. */
+  .rota-cell-draggable {
+    cursor: grab;
+  }
+  .rota-cell-draggable:active {
+    cursor: grabbing;
+  }
+  /* The shift being carried. It has not moved and must not look as though it
+     has, so the cell is marked rather than emptied. */
+  .rota-cell-move-source {
+    outline: 2px dashed var(--brand) !important;
+    outline-offset: -2px !important;
+  }
+  .rota-cell-move-source .rota-shift-pill {
+    opacity: 0.55;
+  }
+  .rota-cell-move-target {
+    outline: 3px dashed var(--brand) !important;
+    outline-offset: -3px !important;
+  }
+  /* Legal, but the manager is about to schedule over leave or availability.
+     Still droppable: this is the same advisory paste and fill already give. */
+  .rota-cell-move-warn {
+    outline: 3px dashed var(--warning) !important;
+    outline-offset: -3px !important;
+  }
+  .rota-cell-move-invalid {
+    outline: 2px dotted var(--muted-foreground) !important;
+    outline-offset: -2px !important;
+    cursor: not-allowed;
+  }
+  @media (forced-colors: active) {
+    /* Authored colours are discarded, so the states are restated in system
+       colours and kept apart by their outline style alone. */
+    .rota-cell-move-source {
+      outline: 2px dashed Highlight !important;
+    }
+    .rota-cell-move-target,
+    .rota-cell-move-warn {
+      outline: 3px dashed Highlight !important;
+    }
+    .rota-cell-move-invalid {
+      outline: 2px dotted GrayText !important;
+    }
+    .rota-cell-move-source .rota-shift-pill {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* Nothing here animates; stated so a future hover/lift effect has to opt in
+       rather than arrive by default. */
+    .rota-cell-move-source,
+    .rota-cell-move-target,
+    .rota-cell-move-warn {
+      transition: none;
+    }
+  }
   .rota-grid-legend {
     background: color-mix(in srgb, var(--bg-raised) 94%, var(--ink-100));
   }

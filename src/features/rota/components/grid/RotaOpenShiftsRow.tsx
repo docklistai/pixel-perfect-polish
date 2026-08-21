@@ -1,6 +1,7 @@
 import { AlertTriangle } from "lucide-react";
 import { RotaGridCell } from "./RotaGridCell";
 import { OPEN_ROW_KEY } from "./selection/rotaSelectionModel";
+import type { RotaMoveApi } from "./move/rotaMoveApi";
 import type { RotaCellSelectionApi, RotaGridDay, ShiftActionHandlers } from "./types";
 import type { RotaGridOpenRow } from "../../types";
 
@@ -10,6 +11,7 @@ export function RotaOpenShiftsRow({
   totalOpenShifts,
   handlers,
   selection,
+  move,
   rowIndex,
   ariaRowIndex,
   activeRowIndex,
@@ -21,6 +23,7 @@ export function RotaOpenShiftsRow({
   totalOpenShifts: number;
   handlers: ShiftActionHandlers;
   selection: RotaCellSelectionApi;
+  move: RotaMoveApi;
   rowIndex: number;
   ariaRowIndex: number;
   activeRowIndex: number | null;
@@ -55,6 +58,7 @@ export function RotaOpenShiftsRow({
           context="open"
           handlers={handlers}
           selection={selection}
+          move={move}
           rowKey={OPEN_ROW_KEY}
           openRow
           staffId={null}

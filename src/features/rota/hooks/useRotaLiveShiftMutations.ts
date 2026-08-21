@@ -14,10 +14,19 @@ import {
   validateLiveRotaShiftResult,
 } from "../api/rotaLiveMutationResult";
 
-/** Only the fields the update server-fn accepts; anything else is draft-only. */
-function toUpdatePatch(patch: Partial<DraftShift>) {
+/**
+ * Only the fields the update server-fn accepts; anything else is draft-only.
+ *
+ * Exported for its own test: a field that is silently dropped here fails in the
+ * quietest possible way — the write succeeds, reports success, and changes
+ * nothing — so the mapping is worth asserting directly rather than through a
+ * hook.
+ */
+export function toUpdatePatch(patch: Partial<DraftShift>) {
   return {
     ...(patch.staffId !== undefined ? { staffId: patch.staffId } : {}),
+    // Moving the shift to another day of the same rota week.
+    ...(patch.dayIndex !== undefined ? { dayIndex: patch.dayIndex } : {}),
     ...(patch.role !== undefined ? { role: patch.role } : {}),
     ...(patch.start !== undefined ? { start: patch.start } : {}),
     ...(patch.end !== undefined ? { end: patch.end } : {}),

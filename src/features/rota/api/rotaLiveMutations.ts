@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { reportServerError, toSafeBusinessMessage } from "@/lib/safe-errors";
+import { shiftWriteError } from "./shiftWriteError";
 import type { DraftShiftInput } from "../types";
 import {
   buildShiftDateTimeRange,
@@ -57,7 +58,7 @@ export const updateLiveRotaShiftFn = createServerFn({ method: "POST" })
       .update(update)
       .eq("workspace_id", workspaceId)
       .eq("id", shift.id);
-    if (error) throw error;
+    if (error) throw shiftWriteError(error);
     return { rotaWeekId: week.id, shiftId: shift.id };
   });
 

@@ -143,16 +143,37 @@ export async function buildShiftUpdate(
   const nextRole = patch.role ?? shift.role_name;
   const start = patch.start ?? formatTimeInTimezone(shift.starts_at, location.timezone);
   const end = patch.end ?? formatTimeInTimezone(shift.ends_at, location.timezone);
+  // Moving a shift between days re-anchors the SAME local wall-clock times to a
+  // new date in the location's timezone. It is never 24h of milliseconds added
+  // to an instant: across a DST boundary that would shift a 09:00 start to
+  // 08:00 or 10:00. `start`/`end` above are already local time — patched, or
+  // read back out of the stored instants — so rebuilding the range from the new
+  // day index is what keeps the clock face, the duration and the overnight
+  // relationship all intact.
+  const currentDayIndex = dayIndexFromDates(week.week_start, shift.shift_date);
+  const nextDayIndex = (patch.dayIndex ?? currentDayIndex) as RotaDayIndex;
   const range =
-    patch.start || patch.end
+    patch.start || patch.end || nextDayIndex !== currentDayIndex
       ? buildShiftDateTimeRange({
           weekStart: week.week_start,
-          dayIndex: dayIndexFromDates(week.week_start, shift.shift_date),
+          dayIndex: nextDayIndex,
           start,
           end,
           timezone: location.timezone,
         })
       : { shiftDate: shift.shift_date, startsAt: shift.starts_at, endsAt: shift.ends_at };
+  // A reassignment must land on someone who is active in this workspace.
+  // `resolveDepartmentForUpdate` below cannot answer this: an existing shift
+  // always carries its own `department_id` (the column is NOT NULL), so its
+  // staff branch — the only place it would have validated the assignee — is
+  // unreachable on update. Create validates via `resolveDepartmentForCreate`;
+  // until now update did not, which left "assign an existing shift to a former
+  // employee" accepted by the server. Scoped to a genuine CHANGE of assignee so
+  // that editing an inactive person's existing shift (a day move, a time fix)
+  // still works, and so open/null assignment is untouched.
+  if (nextStaffId !== null && nextStaffId !== shift.staff_member_id) {
+    await resolveActiveStaffAssignment(supabase, workspaceId, nextStaffId);
+  }
   // Approved update precedence: explicit patch, then the shift's own
   // department, then the assignee's, then the workspace default. Reassigning
   // staff must never silently move the shift to their department.

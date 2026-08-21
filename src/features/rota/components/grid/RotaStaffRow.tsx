@@ -1,6 +1,7 @@
 import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { RotaGridCell } from "./RotaGridCell";
 import { staffRowKey } from "./selection/rotaSelectionModel";
+import type { RotaMoveApi } from "./move/rotaMoveApi";
 import type { RotaCellSelectionApi, RotaGridDay, ShiftActionHandlers } from "./types";
 import type { RotaGridStaffRow as RotaGridStaffRowData } from "../../types";
 
@@ -9,6 +10,7 @@ export function RotaStaffRow({
   days,
   handlers,
   selection,
+  move,
   rowIndex,
   activeRowIndex,
   activeDayIndex,
@@ -18,6 +20,7 @@ export function RotaStaffRow({
   days: RotaGridDay[];
   handlers: ShiftActionHandlers;
   selection: RotaCellSelectionApi;
+  move: RotaMoveApi;
   rowIndex: number;
   activeRowIndex: number | null;
   activeDayIndex: number | null;
@@ -53,6 +56,7 @@ export function RotaStaffRow({
           context="staff"
           handlers={handlers}
           selection={selection}
+          move={move}
           rowKey={rowKey}
           staffId={row.staff.id}
           staffRole={row.staff.role}

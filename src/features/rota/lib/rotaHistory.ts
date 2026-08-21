@@ -10,6 +10,12 @@ import type { DraftShift } from "../types";
  */
 export const REVERSIBLE_FIELDS = [
   "staffId",
+  // Moving a shift between days. Its absence here was not cosmetic: a day-only
+  // move would have produced an EMPTY inverse patch, and replaying that empty
+  // patch fails `updateShiftInput`'s "at least one shift field is required"
+  // refine — so Undo would have reported an error instead of moving the shift
+  // back. Any new field the grid can patch belongs in this list.
+  "dayIndex",
   "role",
   "start",
   "end",

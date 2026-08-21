@@ -42,24 +42,46 @@ function shiftAccessibleName(shift: DraftShift): string {
   );
 }
 
+/**
+ * What this cell is while a move is armed. Absent when none is.
+ *
+ * A drag is invisible without sight, so the cell has to say what it currently
+ * is — the shift being carried, a place that would take it, a place that would
+ * take it with a warning, or one that would refuse.
+ */
+export type RotaCellMoveState = "source" | "valid" | "warn" | "invalid" | "none";
+
+const MOVE_STATE_TEXT: Readonly<Record<RotaCellMoveState, string>> = {
+  source: "Moving this shift. Choose another cell, or press Escape to cancel",
+  valid: "Press Enter to move the shift here",
+  warn: "Press Enter to move the shift here, despite the warning above",
+  invalid: "The shift cannot be moved here",
+  none: "",
+};
+
 export function buildRotaCellAccessibleName({
   cellLabel,
   shifts,
   readOnly,
   leaveState,
   availabilityHint,
+  moveState,
 }: {
   cellLabel: string;
   shifts: DraftShift[];
   readOnly: boolean;
   leaveState?: "approved" | "pending";
   availabilityHint?: "unavailable" | "day-off";
+  moveState?: RotaCellMoveState;
 }): string {
+  // An armed move replaces the cell's ordinary instructions: while carrying a
+  // shift, what this cell would do with it is the only relevant action.
+  const moveText = moveState ? MOVE_STATE_TEXT[moveState] : "";
   if (shifts.length > 0) {
     const shiftSummary = shifts.map(shiftAccessibleName).join("; ");
     const action = readOnly
       ? "Read only"
-      : "Press Enter or Space to open shift details, or M for shift actions";
+      : moveText || "Press Enter or Space to open shift details, or M for shift actions";
     return cellLabel + ": " + shiftSummary + ". " + action + ".";
   }
 
@@ -73,6 +95,6 @@ export function buildRotaCellAccessibleName({
           : availabilityHint === "day-off"
             ? "Approved recurring day off"
             : "No shift";
-  const action = readOnly ? "Read only" : "Press Enter or Space to add a shift";
+  const action = readOnly ? "Read only" : moveText || "Press Enter or Space to add a shift";
   return cellLabel + ": " + constraint + ". " + action + ".";
 }

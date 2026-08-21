@@ -233,3 +233,73 @@ describe("draftShiftToDiffShift", () => {
     expect(draftShiftToDiffShift(open, new Map([["staff-3", "Jo Baker"]])).staffName).toBeNull();
   });
 });
+
+/**
+ * A drag move must read as one changed shift.
+ *
+ * The identity that makes this work is `published_rota_shifts.source_shift_id`,
+ * which is the `shifts.id` the row was published from — and an UPDATE never
+ * changes it. Had the move been implemented as a create plus a delete, every
+ * drag would have shown the manager an unrelated removal and addition, and the
+ * affected-staff count would have double-counted the same person.
+ */
+describe("buildPublishDiff — a moved shift", () => {
+  const published = shift({
+    id: "shift-1",
+    dayIndex: 3,
+    staffId: "staff-1",
+    staffName: "Sam Ellis",
+  });
+
+  it("reports a day move as one changed shift carrying a Day row", () => {
+    const diff = build([{ ...published, dayIndex: 5 }], [published]);
+
+    expect(diff.totals).toEqual({ added: 0, removed: 0, changed: 1 });
+    const entry = diff.entries[0];
+    expect(entry?.kind).toBe("changed");
+    if (entry?.kind !== "changed") throw new Error("expected a changed entry");
+    expect(entry.changes).toEqual([{ label: "Day", from: "Thu 7", to: "Sat 9" }]);
+    expect(diff.affectedStaffCount).toBe(1);
+  });
+
+  it("reports a reassignment as one changed shift carrying an Assignment row", () => {
+    const diff = build([{ ...published, staffId: "staff-2", staffName: "Jo Baker" }], [published]);
+
+    expect(diff.totals).toEqual({ added: 0, removed: 0, changed: 1 });
+    const entry = diff.entries[0];
+    if (entry?.kind !== "changed") throw new Error("expected a changed entry");
+    expect(entry.changes).toEqual([{ label: "Assignment", from: "Sam Ellis", to: "Jo Baker" }]);
+    // Both the person losing the shift and the person gaining it are affected.
+    expect(diff.affectedStaffCount).toBe(2);
+  });
+
+  it("reports a diagonal move as one entry with both rows, never an add and a remove", () => {
+    const diff = build(
+      [{ ...published, dayIndex: 0, staffId: "staff-2", staffName: "Jo Baker" }],
+      [published],
+    );
+
+    expect(diff.totals).toEqual({ added: 0, removed: 0, changed: 1 });
+    const entry = diff.entries[0];
+    if (entry?.kind !== "changed") throw new Error("expected a changed entry");
+    expect(entry.changes.map((change) => change.label)).toEqual(["Assignment", "Day"]);
+  });
+
+  it("says a shift moved to the open row is unassigned rather than removed", () => {
+    const diff = build([{ ...published, staffId: null, staffName: null }], [published]);
+
+    expect(diff.totals).toEqual({ added: 0, removed: 0, changed: 1 });
+    const entry = diff.entries[0];
+    if (entry?.kind !== "changed") throw new Error("expected a changed entry");
+    expect(entry.changes[0]?.label).toBe("Assignment");
+  });
+
+  it("never reports times, break or role as changed by a move", () => {
+    const diff = build([{ ...published, dayIndex: 6 }], [published]);
+    const entry = diff.entries[0];
+    if (entry?.kind !== "changed") throw new Error("expected a changed entry");
+    expect(entry.changes.map((change) => change.label)).not.toContain("Time");
+    expect(entry.changes.map((change) => change.label)).not.toContain("Break");
+    expect(entry.changes.map((change) => change.label)).not.toContain("Role");
+  });
+});

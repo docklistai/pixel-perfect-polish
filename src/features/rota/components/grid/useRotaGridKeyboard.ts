@@ -1,14 +1,9 @@
 import * as React from "react";
 import { nextCellKey, cellKeysEqual, type RotaCellKey } from "./selection/rotaSelectionModel";
+import { focusRotaCell } from "./rotaCellFocus";
 import type { RotaGridSelection } from "./selection/useRotaGridSelection";
 
 const ARROW_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
-
-function focusCellByKey(grid: Element | null | undefined, cell: RotaCellKey): void {
-  grid
-    ?.querySelector<HTMLElement>(`[data-rowkey="${cell.row}"][data-gridcol="${cell.day}"]`)
-    ?.focus();
-}
 
 /**
  * Grid-level key routing: arrow movement, Shift+Arrow range extension and the
@@ -67,7 +62,7 @@ export function useRotaGridKeyboard({
         if (event.shiftKey) extendTo(target);
         else selectCell(target);
       }
-      focusCellByKey(grid, target);
+      focusRotaCell(grid, target);
       return true;
     },
     [

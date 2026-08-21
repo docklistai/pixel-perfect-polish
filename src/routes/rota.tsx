@@ -178,6 +178,10 @@ function RotaPage() {
                   selectionResetKey={`${rota.source}|${rota.liveLocationId ?? ""}|${rota.weekLabel}`}
                   bulkRunners={bulkRunners}
                   weekIsEditable={rota.liveWeekStatus !== "archived"}
+                  // Active staff only. The grid still renders people who have
+                  // left but hold shifts, and a move must refuse their row.
+                  assignableStaff={rota.assignableStaff}
+                  mutationPending={rota.liveMutationPending}
                   onStaffSearchChange={rota.setStaffSearch}
                   onClearFilters={rota.clearFilters}
                   readOnly={readOnly}
