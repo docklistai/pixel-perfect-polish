@@ -4,6 +4,7 @@ import { DrawerShell, FormSection } from "@/components/dl";
 import { useDemandTemplates } from "../../hooks/useDemandTemplates";
 import { useWorkspaceDepartments } from "../../hooks/useWorkspaceDepartments";
 import { useBuildWeekProposal, type BuildWeekSourceChoice } from "../../hooks/useBuildWeekProposal";
+import { useBuildWeekSources } from "../../hooks/useBuildWeekSources";
 import { buildWeekAvailability } from "../../lib/serverActionAvailability";
 import { BuildWeekSourceStep } from "./BuildWeekSourceStep";
 import { BuildWeekReviewStep } from "./BuildWeekReviewStep";
@@ -36,6 +37,7 @@ export function BuildWeekDrawer({
   canEdit,
   serverBacked,
   onApplied,
+  onOpenTemplates,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -51,11 +53,22 @@ export function BuildWeekDrawer({
   serverBacked: boolean;
   /** Called after a successful apply so the caller can reset undo history. */
   onApplied: () => void;
+  /**
+   * Hands over to the existing Rota templates drawer, which already owns saving
+   * a week's shape. Build offers the route, never a second implementation.
+   */
+  onOpenTemplates?: () => void;
 }) {
   const [step, setStep] = React.useState<BuildWeekStep>("target");
   const [source, setSource] = React.useState<BuildWeekSourceChoice | null>(null);
   const templates = useDemandTemplates();
   const build = useBuildWeekProposal({ weekOffset, locationId, onApplied });
+  // Asked only while the drawer is open on a real workspace rota.
+  const sources = useBuildWeekSources({
+    weekOffset,
+    locationId,
+    enabled: open && serverBacked,
+  });
   const availability = buildWeekAvailability({ serverBacked, canEdit });
   // Build groups demand by department; say so plainly rather than silently
   // producing a weaker proposal when the workspace has none.
@@ -149,6 +162,17 @@ export function BuildWeekDrawer({
         <BuildWeekSourceStep
           templates={templates.templates}
           templatesLoading={templates.isLoading}
+          previousPattern={sources.previousPattern}
+          sourcesLoading={sources.isLoading}
+          canSaveTemplate={plannedShiftCount > 0}
+          onSaveTemplate={
+            onOpenTemplates
+              ? () => {
+                  onOpenChange(false);
+                  onOpenTemplates();
+                }
+              : undefined
+          }
           selected={source}
           onSelect={setSource}
         />

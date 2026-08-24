@@ -1,8 +1,9 @@
 import * as React from "react";
 import { CalendarRange, LayoutTemplate, Rows3, type LucideIcon } from "lucide-react";
-import { FormSection } from "@/components/dl";
+import { ActionButton, FormSection } from "@/components/dl";
 import type { BuildWeekSourceChoice } from "../../hooks/useBuildWeekProposal";
 import type { DemandTemplateSummary } from "../../api/demandTemplates";
+import type { PreviousPatternAvailability } from "../../api/buildWeekSources";
 
 /**
  * Step 2 — choose exactly one demand source.
@@ -10,6 +11,11 @@ import type { DemandTemplateSummary } from "../../api/demandTemplates";
  * Nothing is pre-selected. "No demand source means no generation" is enforced by
  * the shape of the step rather than by a check later: with no choice made there
  * is nothing to continue to.
+ *
+ * Every source states whether it can actually be used BEFORE it is chosen. A
+ * source that would refuse is shown disabled with the reason in place of its
+ * description, so a manager never spends a build to be told their rota has
+ * nothing to build from.
  */
 
 type SourceOption = {
@@ -62,11 +68,21 @@ function OptionRow({
 export function BuildWeekSourceStep({
   templates,
   templatesLoading,
+  previousPattern,
+  sourcesLoading,
+  canSaveTemplate,
+  onSaveTemplate,
   selected,
   onSelect,
 }: {
   templates: DemandTemplateSummary[];
   templatesLoading: boolean;
+  /** Null while unknown; the option stays disabled until it is answered. */
+  previousPattern: PreviousPatternAvailability | null;
+  sourcesLoading: boolean;
+  /** This week has a shape worth keeping, so offering to save it is honest. */
+  canSaveTemplate: boolean;
+  onSaveTemplate?: () => void;
   selected: BuildWeekSourceChoice | null;
   onSelect: (choice: BuildWeekSourceChoice) => void;
 }) {
@@ -78,21 +94,38 @@ export function BuildWeekSourceStep({
     return true;
   };
 
+  // The pattern option names the week it would actually use. With the search
+  // looking back up to four weeks, calling it "last week" would sometimes lie.
+  const patternAvailable = previousPattern?.available === true;
+  const patternTitle = patternAvailable
+    ? `Staffing pattern from ${previousPattern.weekLabel}`
+    : "Recent staffing pattern";
+  const patternDescription = patternAvailable
+    ? `Takes the shape of ${previousPattern.weekLabel} — ${previousPattern.shiftCount} shift${
+        previousPattern.shiftCount === 1 ? "" : "s"
+      }, their days, times and roles — and works out who covers it against this week's leave. Assignments are not copied.`
+    : "Takes the shape of a recent week — days, times and roles — and works out who covers it against this week's leave. Assignments are not copied.";
+
   const patternOptions: SourceOption[] = [
     {
       id: "previous",
       icon: CalendarRange,
-      title: "Last week's staffing pattern",
-      description:
-        "Takes the shape of last week — days, times and roles — and works out who covers it against this week's leave. Assignments are not copied.",
+      title: patternTitle,
+      description: patternDescription,
       choice: { kind: "previous-week-pattern" },
+      disabled: !patternAvailable,
+      disabledHint: sourcesLoading
+        ? "Checking which recent weeks have shifts…"
+        : previousPattern && !previousPattern.available
+          ? previousPattern.reason
+          : "Checking which recent weeks have shifts…",
     },
     {
       id: "current",
       icon: Rows3,
       title: "This week's existing shifts",
       description:
-        "Changes nothing about the week's shape. Suggests who could take the open shifts you already have.",
+        "Changes nothing about the week's shape. Fills the eligible Open shifts you already have, and creates no new demand.",
       choice: { kind: "current-week" },
     },
   ];
@@ -124,10 +157,23 @@ export function BuildWeekSourceStep({
         ) : templates.length === 0 ? (
           <div className="flex items-start gap-2.5 rounded-xl border border-border bg-muted/25 p-3">
             <LayoutTemplate className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
-            <p className="text-xs text-muted-foreground">
-              No templates yet. Build a representative week, then save its shape from Rota templates
-              to reuse it here.
-            </p>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">
+                No template has been saved yet. A template describes the coverage a week needs, so
+                it can be stamped onto any future week.
+              </p>
+              {canSaveTemplate && onSaveTemplate && (
+                <ActionButton
+                  variant="secondary"
+                  size="sm"
+                  className="mt-2"
+                  icon={LayoutTemplate}
+                  onClick={onSaveTemplate}
+                >
+                  Save this week's shape
+                </ActionButton>
+              )}
+            </div>
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
