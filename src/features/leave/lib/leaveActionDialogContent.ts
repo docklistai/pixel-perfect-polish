@@ -1,5 +1,23 @@
 import type { LeaveRequest, LeaveSource } from "../types";
 import type { LeaveStaffOption } from "./leaveRequests";
+import type { LeaveBalance } from "./leaveBalance";
+import {
+  CALENDAR_DAYS_LABEL,
+  formatEntitlementSummary,
+  formatPendingSummary,
+} from "./leaveBalancePresentation";
+
+/** Display label the live mapper gives `annual_leave`. */
+export const ANNUAL_LEAVE_LABEL = "Annual leave";
+
+/**
+ * True when this request draws on annual entitlement. Sick, unpaid, personal
+ * and other never do, so their approval dialog shows no annual balance at all
+ * rather than implying one was consumed.
+ */
+export function consumesAnnualEntitlement(request: Pick<LeaveRequest, "type">): boolean {
+  return request.type === ANNUAL_LEAVE_LABEL;
+}
 
 export type ApprovalDialogRow =
   | {
@@ -22,7 +40,8 @@ export const demoManagerCreateStaffOptions: LeaveStaffOption[] = [
 
 export function approvalDialogRows(
   source: LeaveSource,
-  request: Pick<LeaveRequest, "impact" | "tone">,
+  request: Pick<LeaveRequest, "impact" | "tone" | "type">,
+  balance: LeaveBalance | null = null,
 ): ApprovalDialogRow[] {
   const impactRow: ApprovalDialogRow = {
     kind: "badge",
@@ -39,10 +58,38 @@ export function approvalDialogRows(
     ];
   }
 
+  const coverRow: ApprovalDialogRow = {
+    kind: "text",
+    label: "Cover check",
+    value: "Open the rota to confirm cover",
+  };
+
+  // Balance is manager CONTEXT only. It never gates the decision: Approve stays
+  // enabled at any remaining figure, including a negative one.
+  if (!consumesAnnualEntitlement(request)) {
+    return [
+      impactRow,
+      { kind: "text", label: "Annual leave", value: "Not affected by this leave type" },
+      coverRow,
+    ];
+  }
+
+  if (!balance) {
+    return [impactRow, { kind: "text", label: "Annual leave", value: "Not tracked yet" }, coverRow];
+  }
+
+  const pending = formatPendingSummary(balance);
   return [
     impactRow,
-    { kind: "text", label: "Leave balances", value: "Not tracked yet" },
-    { kind: "text", label: "Cover check", value: "Open the rota to confirm cover" },
+    { kind: "text", label: "Annual leave", value: formatEntitlementSummary(balance) },
+    {
+      kind: "text",
+      label: "Pending",
+      value: pending
+        ? `${pending} · ${CALENDAR_DAYS_LABEL.toLowerCase()}`
+        : `None · ${CALENDAR_DAYS_LABEL.toLowerCase()}`,
+    },
+    coverRow,
   ];
 }
 

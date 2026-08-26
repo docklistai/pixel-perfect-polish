@@ -4,6 +4,7 @@ import { ActionButton } from "@/components/dl";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { RecordAbsenceDialog } from "@/features/leave/components/RecordAbsenceDialog";
 import { LiveLeaveList } from "./LiveLeaveList";
+import { StaffEntitlementCard } from "./StaffEntitlementCard";
 import { StaffRecurringDaysOffCard } from "./StaffRecurringDaysOffCard";
 import { StaffOneOffUnavailabilityCard } from "./StaffOneOffUnavailabilityCard";
 import type { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
@@ -29,6 +30,7 @@ export function LiveProfileLeaveTab({ staffMemberId, firstName, ops }: Props) {
           Record absence
         </ActionButton>
       </div>
+      <StaffEntitlementCard staffMemberId={staffMemberId} />
       <LiveLeaveList ops={ops} firstName={firstName} />
       <StaffRecurringDaysOffCard staffMemberId={staffMemberId} firstName={firstName} />
       <StaffOneOffUnavailabilityCard staffMemberId={staffMemberId} firstName={firstName} />

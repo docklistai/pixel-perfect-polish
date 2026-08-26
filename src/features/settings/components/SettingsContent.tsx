@@ -3,6 +3,7 @@ import { WorkspaceTab } from "./WorkspaceTab";
 import { TeamsTab } from "./TeamsTab";
 import { AccessTab } from "./AccessTab";
 import { RotaSchedulingTab } from "./RotaSchedulingTab";
+import { LeaveTab } from "./LeaveTab";
 import { TimeRulesTab } from "./TimeRulesTab";
 import { NotificationsTab } from "./NotificationsTab";
 import { AIManagerSupportTab } from "./AIManagerSupportTab";
@@ -16,6 +17,7 @@ export type SettingsContentTab =
   | "Locations & teams"
   | "Roles & permissions"
   | "Rota & scheduling"
+  | "Leave"
   | "Time & attendance"
   | "Notifications"
   | "Manager support"
@@ -37,6 +39,8 @@ export function SettingsContent({
       {activeTab === "Locations & teams" && <TeamsTab onDirty={onDirty} />}
       {activeTab === "Roles & permissions" && <AccessTab onDirty={onDirty} />}
       {activeTab === "Rota & scheduling" && <RotaSchedulingTab onDirty={onDirty} />}
+      {/* Leave policy persists on save, so it never marks the page dirty. */}
+      {activeTab === "Leave" && <LeaveTab />}
       {activeTab === "Time & attendance" && <TimeRulesTab onDirty={onDirty} />}
       {activeTab === "Notifications" && <NotificationsTab onDirty={onDirty} />}
       {activeTab === "Manager support" && <AIManagerSupportTab onDirty={onDirty} />}

@@ -10,6 +10,7 @@ import {
   Lock,
   Tag,
   FlaskConical,
+  Plane,
 } from "lucide-react";
 import type { SettingsTab } from "../types";
 
@@ -34,6 +35,13 @@ export const settingsTabs: SettingsTab[] = [
     t: "Rota & scheduling",
     s: "Rota rules and targets",
     icon: Calendar,
+    group: "Operations",
+    pilot: true,
+  },
+  {
+    t: "Leave",
+    s: "Leave year and entitlement",
+    icon: Plane,
     group: "Operations",
     pilot: true,
   },

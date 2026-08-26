@@ -6,6 +6,7 @@ import { PortalRecurringDaysOffCard } from "./PortalRecurringDaysOffCard";
 import { PortalOneOffUnavailabilityCard } from "./PortalOneOffUnavailabilityCard";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 import { PortalLeaveHistory } from "./PortalLeaveHistory";
+import { PortalLeaveBalanceCard } from "./PortalLeaveBalanceCard";
 
 export function LeaveTab() {
   const [open, setOpen] = React.useState(false);
@@ -28,21 +29,8 @@ export function LeaveTab() {
 
   return (
     <div className="space-y-4">
-      {/* Balance cards */}
-      <DashboardCard className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            LEAVE BALANCE
-          </div>
-          <span className="text-[11px] text-muted-foreground">As of today</span>
-        </div>
-        <div className="mt-3 rounded-2xl border border-border bg-muted/40 px-3 py-4 text-center">
-          <div className="text-sm font-semibold text-muted-foreground">Not available yet</div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            Live leave balances will appear here in a future update.
-          </div>
-        </div>
-      </DashboardCard>
+      {/* Balance card */}
+      <PortalLeaveBalanceCard />
 
       <ActionButton
         icon={CalendarDays}

@@ -1,10 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   approvalDialogRows,
+  consumesAnnualEntitlement,
   demoManagerCreateStaffOptions,
   managerCreateDialogState,
 } from "./leaveActionDialogContent";
 import type { LeaveRequest } from "../types";
+import type { LeaveBalance } from "./leaveBalance";
+
+function balance(overrides: Partial<LeaveBalance> = {}): LeaveBalance {
+  return {
+    recorded: true,
+    entitlementDays: 28,
+    booked: 12,
+    pending: 0,
+    remaining: 16,
+    ...overrides,
+  };
+}
 
 const request = {
   id: "leave-1",
@@ -51,10 +64,84 @@ describe("approvalDialogRows", () => {
     expect(values).not.toContain("2 already approved");
     expect(rows).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Leave balances", value: "Not tracked yet" }),
         expect.objectContaining({ label: "Cover check", value: "Open the rota to confirm cover" }),
       ]),
     );
+  });
+
+  it("reports annual leave as untracked when no balance is available", () => {
+    const rows = approvalDialogRows("live", request, null);
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Annual leave", value: "Not tracked yet" }),
+      ]),
+    );
+  });
+
+  it("shows the real balance for an annual leave request", () => {
+    const rows = approvalDialogRows("live", request, balance({ pending: 3 }));
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Annual leave",
+          value: "12 booked of 28 · 16 remaining",
+        }),
+        expect.objectContaining({ label: "Pending", value: "3 days · calendar days" }),
+      ]),
+    );
+  });
+
+  it("states the calendar-day unit even when nothing is pending", () => {
+    const rows = approvalDialogRows("live", request, balance());
+    const pending = rows.find((row) => row.label === "Pending");
+
+    expect(pending?.value).toBe("None · calendar days");
+  });
+
+  it("surfaces a negative remaining rather than hiding an over-booked balance", () => {
+    const rows = approvalDialogRows("live", request, balance({ booked: 31, remaining: -3 }));
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Annual leave",
+          value: "31 booked of 28 · -3 remaining",
+        }),
+      ]),
+    );
+  });
+
+  it("reports an unrecorded entitlement without inventing a workspace default", () => {
+    const rows = approvalDialogRows(
+      "live",
+      request,
+      balance({ recorded: false, entitlementDays: null, booked: 0, remaining: null }),
+    );
+    const annual = rows.find((row) => row.label === "Annual leave");
+
+    expect(annual?.value).toBe("Entitlement not recorded");
+    expect(annual?.value).not.toMatch(/\d/);
+  });
+
+  it("never claims a non-consuming leave type affects the annual balance", () => {
+    for (const type of ["Sick leave", "Unpaid leave", "Personal leave", "Other"]) {
+      const rows = approvalDialogRows("live", { ...request, type }, balance());
+      const annual = rows.find((row) => row.label === "Annual leave");
+
+      expect(annual?.value).toBe("Not affected by this leave type");
+      expect(rows.some((row) => row.label === "Pending")).toBe(false);
+    }
+  });
+});
+
+describe("consumesAnnualEntitlement", () => {
+  it("is true only for annual leave", () => {
+    expect(consumesAnnualEntitlement({ type: "Annual leave" })).toBe(true);
+    for (const type of ["Sick leave", "Unpaid leave", "Personal leave", "Other"]) {
+      expect(consumesAnnualEntitlement({ type })).toBe(false);
+    }
   });
 });
 

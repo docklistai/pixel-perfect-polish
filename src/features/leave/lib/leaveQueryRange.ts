@@ -40,6 +40,12 @@ export const leaveQueryKeys = {
       range.startDate,
       range.endDate,
     ] as const,
+  // Entitlement balances live under the same ["leave", workspaceId] prefix as
+  // the request reads, so an approve/decline/reopen that already invalidates
+  // `all` refreshes every balance surface without extra wiring.
+  teamBalances: (workspaceId: string | null) => ["leave", workspaceId, "team-balances"] as const,
+  staffBalance: (workspaceId: string | null, staffId: string) =>
+    ["leave", workspaceId, "staff-balance", staffId] as const,
   pendingCount: (workspaceId: string | null) => ["leave", workspaceId, "pending-count"] as const,
   pendingPreview: (workspaceId: string | null, limit: number) =>
     ["leave", workspaceId, "pending-preview", limit] as const,

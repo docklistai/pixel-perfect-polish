@@ -2,7 +2,7 @@ import { Card } from "@/components/dl";
 import { AlertTriangle } from "lucide-react";
 import type { LeaveRequest, LeaveSource } from "../types";
 import { leaveRangesOverlap, weekRangeOf } from "../lib/leaveDates";
-import { teamLeaveBalances } from "../lib/leaveCards";
+import { LeaveTeamBalancesCard } from "./LeaveTeamBalancesCard";
 
 function initials(name: string): string {
   return name
@@ -35,7 +35,6 @@ export function LeaveBottomCards({ requests, source, todayIso }: Props) {
       request.state === "approved" &&
       leaveRangesOverlap(request.startIso, request.endIso, startIso, endIso),
   );
-  const balances = teamLeaveBalances(source);
   return (
     <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
       <Card className="card-pad">
@@ -83,41 +82,7 @@ export function LeaveBottomCards({ requests, source, todayIso }: Props) {
         </div>
       </Card>
 
-      <Card className="card-pad">
-        <div className="section-label mb-2">Team leave balances</div>
-        {balances ? (
-          <div className="flex flex-col gap-2 mt-2">
-            {balances.map((b) => {
-              const pct = Math.round((b.used / b.total) * 100);
-              return (
-                <div key={b.name} className="row gap-3 txt-sm">
-                  <div className={`av ${b.tone} xs`}>{initials(b.name)}</div>
-                  <span className="grow truncate">{b.name}</span>
-                  <span className="bar" style={{ width: 90 }}>
-                    <i
-                      style={{
-                        width: `${pct}%`,
-                        background: pct > 80 ? "var(--amber-500)" : "var(--teal-500)",
-                      }}
-                    />
-                  </span>
-                  <span className="mono muted">
-                    {b.used}/{b.total}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="mt-2 text-sm text-muted-foreground">
-            <div className="strong txt-sm text-foreground">Not available yet</div>
-            <p className="mt-1 txt-xs">
-              Leave entitlements and balances aren&apos;t tracked yet — they&apos;ll appear here in
-              a future update.
-            </p>
-          </div>
-        )}
-      </Card>
+      <LeaveTeamBalancesCard source={source} />
     </div>
   );
 }

@@ -2,7 +2,8 @@ import * as React from "react";
 import { ActionButton, DialogShell, StatusBadge } from "@/components/dl";
 import { Check, X } from "lucide-react";
 import type { LeaveRequest, LeaveSource } from "../types";
-import { approvalDialogRows } from "../lib/leaveActionDialogContent";
+import { approvalDialogRows, consumesAnnualEntitlement } from "../lib/leaveActionDialogContent";
+import { useStaffEntitlement } from "../hooks/useStaffEntitlement";
 import { LeaveManagerCreateDialog } from "./LeaveManagerCreateDialog";
 
 interface Props {
@@ -49,7 +50,17 @@ export function LeaveActionDialogs({
   const isApprove = decisionType === "approve";
   const isCancel = decisionType === "cancel";
   const decisionOpen = Boolean(decisionRequest && decisionType);
-  const approvalRows = decisionRequest ? approvalDialogRows(source, decisionRequest) : [];
+
+  // Balance context is read only for a live annual-leave approval. Any other
+  // combination passes null, so the hook stays disabled and no request is made.
+  const balanceStaffId =
+    source === "live" && isApprove && decisionRequest && consumesAnnualEntitlement(decisionRequest)
+      ? decisionRequest.staffId
+      : null;
+  const entitlement = useStaffEntitlement(balanceStaffId);
+  const approvalRows = decisionRequest
+    ? approvalDialogRows(source, decisionRequest, entitlement.result?.balance ?? null)
+    : [];
 
   React.useEffect(() => {
     if (decisionType === "cancel") setCancellationReason("");
