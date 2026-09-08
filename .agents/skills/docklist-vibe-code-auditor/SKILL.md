@@ -237,6 +237,8 @@ Same format, replacing the tag with `[MEDIUM]` or `[LOW]`.
 
 #### Production Readiness Score
 
+**Docklist rule: include this section only when the mission explicitly asks for a readiness score.** Docklist is in product build / refinement mode, and an unrequested readiness verdict is itself a finding-level error. By default, report the issues and stop — no score, no deployability judgement. See the *Current mode* section of `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`.
+
 ```
 Score: XX / 100
 ```

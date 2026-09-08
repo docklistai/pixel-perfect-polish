@@ -9,8 +9,14 @@ Run the line-count check from `docs/ai/snippets/line-count-precheck.md` before e
 If a file is already over its hard max:
 
 - Do not add more logic.
-- Propose extraction first.
-- Only a targeted bug fix is allowed, and only with explicit user approval.
+- Extraction is required before adding substantial new logic.
+- A targeted bug fix may touch a hard-max file where necessary. Where practical, extract the new responsibility rather than growing the file further.
+
+## When not to split
+
+- **Splitting must preserve visible behaviour.** Structure work is not permission to change what the user sees. If a split would alter behaviour, that is a separate, owner-approved change.
+- **Do not refactor merely because a file is near its target.** Target is a flag for review, not an instruction to act. Split when the file is genuinely doing too much, or when the hard max forces it.
+- Do not bundle unrelated cleanup into a split.
 
 ## File size limits
 
@@ -57,4 +63,5 @@ Run `docs/ai/snippets/worktree-precheck.md` before any branch, sync, or worktree
 1. Check line counts.
 2. At/above Target → flag for extraction in the PR description.
 3. At/above Hard max → extraction required before merge.
-4. Lovable-generated output → apply `docklist-vibe-code-auditor`.
+4. Generated or AI-authored output (including Lovable) → apply `docklist-vibe-code-auditor`.
+5. Any split or extraction → confirm visible behaviour is unchanged before merge.

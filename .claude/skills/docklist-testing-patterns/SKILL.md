@@ -10,11 +10,18 @@ date_added: "2026-02-27"
 
 ## Testing Philosophy
 
-**Test-Driven Development (TDD):**
-- Write failing test FIRST
-- Implement minimal code to pass
-- Refactor after green
-- Never write production code without a failing test
+**Test-Driven Development (TDD) — Docklist rules:**
+
+Rigor without destructive ritual. Test order is a tool, not a moral test.
+
+- **New bug:** reproduce it with a failing test first, where practical. The failing test is the proof you understood the defect.
+- **New pure behaviour** (helpers, calculations, data shaping, rules): test-first is preferred.
+- **Inherited or in-progress implementation:** do **not** delete valid working code just because the test was written after it. Add the coverage now.
+- **Before claiming a defect fixed:** regression coverage must exist and must actually exercise the defect. Verify red-green — revert the fix, watch the test fail, restore it.
+- **Browser-observed regressions:** add an automated regression test where practical, so the same defect cannot return silently.
+- Refactor after green.
+
+**Tests must prove behaviour, not mocks.** A test that only asserts a mock was called proves nothing about the product. See *Anti-Patterns* below.
 
 **Behavior-Driven Testing:**
 - Test behavior, not implementation

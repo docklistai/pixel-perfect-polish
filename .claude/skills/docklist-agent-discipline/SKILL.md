@@ -9,10 +9,18 @@ source: community
 
 AGENTS.md is the canonical agent-facing documentation. Keep it minimal—agents are capable and don't need hand-holding. Target under 60 lines; never exceed 100. Instruction-following quality degrades as document length increases.
 
-## File Setup
+## Docklist deltas
+
+This repo already has its agent docs set up. When working here:
+
+- `AGENTS.md` is the entry point; `CLAUDE.md` and `CODEX.md` are separate thin platform-delta files, **not** symlinks. Do not replace them with a symlink.
+- Canonical rules live in `docs/ai/DOCKLIST_OPERATING_SYSTEM.md` and `docs/ai/snippets/`. Reference them; do not restate them in `AGENTS.md`.
+- Follow the Docklist commit-identity rule below, not a generic AI-attribution convention.
+
+## File Setup (new projects)
 
 1. Create `AGENTS.md` at project root
-2. Create symlink: `ln -s AGENTS.md CLAUDE.md`
+2. Point the platform entry files (`CLAUDE.md`, `CODEX.md`) at it
 
 ## Before Writing
 
@@ -54,16 +62,21 @@ Per-file commands are faster and cheaper than full project builds. Always includ
 | Test | `pnpm jest path/to/file.test.ts` |
 ```
 
-### Commit Attribution
-Always include this section. Agents should use their own identity:
+### Commit Identity
+Document how commits are authored. The Docklist rule:
+
 ```markdown
-## Commit Attribution
-AI commits MUST include:
+## Commit Identity
+- Use the configured repo-local Git identity.
+- Do not invent or change the Git identity.
+- Do not add AI attribution trailers (`Co-Authored-By`, "Generated with...")
+  unless repository policy or the user explicitly requires it.
+- Preserve the existing commit convention.
+- Never rewrite existing history.
 ```
-Co-Authored-By: (the agent model's name and attribution byline)
-```
-Example: `Co-Authored-By: Claude Sonnet 4 <noreply@example.com>`
-```
+
+Agents must not add attribution trailers on their own initiative. A clean,
+consistent history is the goal, not a record of which tool typed the diff.
 
 ### Key Conventions
 Project-specific patterns agents must follow. Keep brief.
@@ -97,11 +110,8 @@ Omit these:
 ## Package Manager
 Use **pnpm**: `pnpm install`, `pnpm dev`
 
-## Commit Attribution
-AI commits MUST include:
-```
-Co-Authored-By: (the agent model's name and attribution byline)
-```
+## Commit Identity
+Use the configured repo-local Git identity. No AI attribution trailers.
 
 ## File-Scoped Commands
 | Task | Command |

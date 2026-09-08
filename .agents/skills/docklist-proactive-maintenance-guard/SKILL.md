@@ -19,20 +19,41 @@ The goal is to stop obvious defects, risks, stale behaviour, broken states, unsa
 DocklistAI must stay focused:
 
 - 50% scheduling
-- 30% lightweight workforce admin
+- 30% lightweight HR (lightweight workforce admin)
 - 20% limited manager-led AI
 
 Protect the product from bloat, scope creep, random refactors, and unnecessary complexity.
 
+## Mode
+
+Docklist is in **product build / refinement mode**.
+
+- Findings are about making the product better, not about getting it shipped.
+- **Pilot, release, paid and production readiness are never proactive tasks.** Do not raise "we should get this pilot-ready" as a finding, and do not attach a readiness verdict or score to a findings report. Readiness is owner-initiated only.
+- Deployment preparation is not a maintenance category.
+
 ## Core Rule
 
-Proactive observation is allowed across the whole codebase.
+**Observation may be broad. Fixing stays narrow.**
+
+Proactive observation is allowed across the whole codebase — notice anything, anywhere.
 
 Proactive fixing is only allowed when the issue is clearly inside the approved scope, low enough risk for the current task, and verifiable.
+
+Two specific consequences:
+
+- **Defects introduced by the current batch may always be corrected.** If your own change broke it, fix it in this run — that is self-correction, not scope expansion.
+- **Unrelated product findings are reported, never silently absorbed.** Do not quietly fold an unrelated fix into the diff because it was small. Report it and let the owner scope it.
 
 When in doubt, report the issue instead of fixing it.
 
 This skill does not override the approved task scope.
+
+## Old Repository
+
+The old SmartRota/Docklist repo is **retired as a product roadmap**.
+
+Do not inspect, mine, or compare against it while looking for findings. "The old repo did this better" is not a valid proactive finding. Only the owner may open that door, for an explicit historical question.
 
 ## Use This Skill When
 
@@ -277,6 +298,9 @@ Look for:
 - agent guidance conflicts
 - old references to payroll integrations
 - old references to AI-heavy product positioning
+- stale product-split figures (the split is 50/30/20)
+- guidance that treats pilot, release or deployment as the default goal
+- guidance that treats Lovable as product authority rather than a tool
 
 ### Dependencies, Tooling, and CI
 
@@ -436,3 +460,5 @@ End with one of:
 - Not safe to commit yet
 
 Do not say done unless verification passed.
+
+These describe the state of **this task**. They are not product-readiness statements. Never end with a pilot, release, production or deployment verdict unless the mission explicitly asked for one.

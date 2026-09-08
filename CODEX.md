@@ -6,6 +6,7 @@ Read `AGENTS.md` first, then `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`. Codex does 
 
 - `AGENTS.md`
 - `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`
+- `docs/ai/current-direction.md`
 - `docs/ai/skill-router.md`
 - `docs/ai/guardrails.md`
 - `docs/ai/snippets/declaration.md`

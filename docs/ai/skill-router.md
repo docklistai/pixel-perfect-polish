@@ -1,165 +1,69 @@
 # DocklistAI Skill Router
 
-Task → skill map. Workflow, declaration, completion-report, and guardrails are defined once in `docs/ai/DOCKLIST_OPERATING_SYSTEM.md` and the snippets — do not restate them here.
+Task → skill map, grouped by how often it applies. Workflow, declaration, completion-report, and guardrails are defined once in `docs/ai/DOCKLIST_OPERATING_SYSTEM.md` and the snippets — do not restate them here.
 
 Skill paths shown are `.claude/skills/...`. Codex agents resolve the same skill names under `.agents/skills/`; if missing there, fall back to `.claude/skills/` (see `CODEX.md`).
 
 ---
 
-## Audit-only (no edits expected)
+## CORE — apply on most tasks
 
-**When:** read-only investigations, doc audits, repo surveys
-**Skills:**
-
-- `docklist-agent-discipline`
-- `docklist-proactive-maintenance-guard` (classify findings before recommending action)
-
----
-
-## Proactive maintenance / Scoped auditing during other work
-
-**When:** noticing nearby issues, risks, or broken behaviour during any task
-**Skills:**
-
-- `docklist-proactive-maintenance-guard`
-
-Classify every finding into Fix Now / Scope Allows / Report / Risk Log / Forbidden before action. Fix only if small, local, low-risk, and inside approved scope.
+- `docklist-agent-discipline` — agent docs, instruction files, commit hygiene.
+- `docklist-proactive-maintenance-guard` — classify every nearby finding before acting on it.
+- `docklist-bounded-batch-delivery` — **default orchestration for substantial implementation batches.**
+- `docklist-testing-patterns` — test structure, factories, regression coverage.
+- `docklist-verification-before-completion` — required before any completion claim.
+- `docklist-lint-and-validate` — choosing the right targeted checks.
 
 ---
 
-## Agent guidance or workflow changes
+## PRODUCT REALITY — is the workflow actually good?
 
-**When:** editing AGENTS.md, CLAUDE.md, CODEX.md, the operating-system doc, snippets, or this router
-**Skills:**
+**When:** judging whether a workflow is usable, coherent, trustworthy or complete; auditing a feature the owner has used and disliked; first-run and empty-state review.
 
-- `docklist-agent-discipline`
-
-No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
-
----
-
-## Any completion claim
-
-**Skills:**
-
-- `docklist-verification-before-completion`
-- `docklist-testing-patterns`
-- `docklist-lint-and-validate`
+- `docklist-product-reality-audit` — **start here.** Observe the running app before reading source.
+- `docklist-playwright` — scripted browser automation and repeatable journeys.
+- `docklist-ui-visual-validator` — visual and design-system verification.
+- `docklist-fixing-accessibility` — when the journey involves forms, dialogs, or keyboard/screen-reader use.
 
 ---
 
-## Frontend page or component work
+## FRONTEND
 
 **Also check:** `docs/ai/FRONTEND_GUARDRAILS.md`
-**Skills:**
 
-- `docklist-tanstack-start`
-- `docklist-frontend-dev-guidelines`
-- `docklist-tailwind-design-system`
-- `docklist-baseline-ui`
-- `docklist-ui-visual-validator`
-- `docklist-fixing-accessibility`
-
----
-
-## Query / cache / mutation state
-
-**When:** managing server state, local state overrides, API fetching
-**Skills:**
-
-- `docklist-tanstack-query`
+- `docklist-tanstack-start` — routing and framework conventions.
+- `docklist-tanstack-query` — server state, caching, mutations, stale UI.
+- `docklist-frontend-dev-guidelines` — component and page construction.
+- `docklist-baseline-ui` — typography, spacing, motion, component baseline.
+- `docklist-tailwind-design-system` — tokens, variants, responsive patterns.
+- `docklist-clean-code` — route/component extraction and file-size discipline.
 
 ---
 
-## Lovable frontend review
+## BACKEND / DATABASE
 
-**Skills:**
-
-- `docklist-frontend-dev-guidelines`
-- `docklist-baseline-ui`
-- `docklist-fixing-accessibility`
-- `docklist-differential-review`
-- `docklist-vibe-code-auditor`
+- `docklist-supabase` — queries, schema, storage, edge functions.
+- `docklist-postgresql` — schema design, indexing, constraints.
+- `docklist-saas-multi-tenant` — workspace scoping and RLS isolation.
+- `docklist-api-security` — auth, validation, rate limiting, API surface.
+- `docklist-cloudflare-edge` — edge runtime constraints.
 
 ---
 
-## React refactor or cleanup
+## HIGH-RISK REVIEW
 
-**Skills:**
+**When:** the change touches auth, RLS, staff/manager data boundaries, or is about to be pushed.
 
-- `docklist-tanstack-start`
-- `docklist-tanstack-query`
-- `docklist-code-refactoring`
-- `docklist-clean-code`
-- `docklist-testing-patterns`
+- `docklist-differential-review` — security-focused review of a diff.
+- `docklist-security-audit` — deeper security workflow.
+- `docklist-codebase-audit-pre-push` — line-by-line pre-push sweep. Heavy; use when the mission calls for it.
 
 ---
 
-## Mock data / feature data pattern
+## ARCHITECTURE
 
-**When:** adding or restructuring `src/features/<feature>/data/` mock arrays, types, or fixtures
-**Skills:**
-
-- `docklist-typescript-expert`
-- `docklist-clean-code`
-
-Rules in `guardrails.md` (mock data section): no inline JSX mocks, typed against feature `types.ts`, co-located under the feature.
-
----
-
-## Supabase / RLS / schema work
-
-**Skills:**
-
-- `docklist-security-audit`
-- `docklist-postgresql`
-- `docklist-saas-multi-tenant`
-- `docklist-supabase`
-
----
-
-## Edge function / API / Cloudflare work
-
-**Skills:**
-
-- `docklist-cloudflare-edge`
-- `docklist-security-audit`
-- `docklist-api-security`
-- `docklist-testing-patterns`
-
----
-
-## Installability / PWA / Staff mobile access
-
-**Skills:**
-
-- `docklist-pwa-installability`
-
----
-
-## Review / pre-commit
-
-**Skills:**
-
-- `docklist-codebase-audit-pre-push`
-- `docklist-differential-review`
-- `docklist-verification-before-completion`
-
----
-
-## TypeScript / data model work
-
-**Skills:**
-
-- `docklist-typescript-expert`
-- `docklist-lint-and-validate`
-
----
-
-## Architecture decisions / ADR / product-boundary changes
-
-**When:** proposing structural changes, choosing patterns, recording product-scope decisions (50/30/20, staff portal access, migration strategy, excluded scope)
-**Skills:**
+**When:** proposing structural changes, choosing patterns, recording product-scope decisions.
 
 - `docklist-software-architecture`
 - `docklist-architecture-decision-records`
@@ -168,19 +72,34 @@ Outcome: ADR document in `docs/adr/` + decision summary. Reference the relevant 
 
 ---
 
-## Documentation
+## OPTIONAL SPECIALISTS
 
-**Skills:**
+Pull in only when the task is clearly theirs.
 
-- `docklist-docs-architect`
+- `docklist-typescript-expert` — typed data models, service contracts, route data shapes.
+- `docklist-code-refactoring` — structured refactors.
+- `docklist-vibe-code-auditor` — auditing rapidly generated or AI-produced code.
+- `docklist-docs-architect` — long-form technical documentation.
+- `docklist-pwa-installability` — installability and staff mobile access.
 
 ---
 
-## Repo architecture + file-size guardrails
+## DEPLOYMENT-ORIENTED — not a normal product-build default
 
-**Skills:**
+Use **only** when deployment or runtime acceptance is explicitly part of the mission. Never route here to "finish" ordinary product work.
 
-- `docklist-software-architecture`
-- `docklist-clean-code`
+- `docklist-codebase-audit-pre-push` (production-readiness mode)
 
-Compare against `docs/ai/guardrails.md`.
+`docs/ai/phase-11-deployment.md` and `docs/ai/private-beta-*.md` are historical records, not a live checklist.
+
+---
+
+## Notes on specific task shapes
+
+**Mock data / feature data pattern** — `docklist-typescript-expert` + `docklist-clean-code`. Rules in `guardrails.md`: no inline JSX mocks, typed against feature `types.ts`, co-located under the feature.
+
+**Lovable-generated frontend review** — `docklist-vibe-code-auditor` + `docklist-differential-review` + the FRONTEND group. Lovable output is reviewed like any other generated code; Lovable is not product authority.
+
+**Agent guidance or workflow changes** — `docklist-agent-discipline`. No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
+
+**Audit-only investigations** — `docklist-agent-discipline` + `docklist-proactive-maintenance-guard`. All findings are report-only.
