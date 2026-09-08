@@ -27,10 +27,18 @@ import type { BuildWeekApplySource } from "./buildWeekApplySource";
  * whether or not it can be imported.
  */
 
+/**
+ * The most schedule text one import may carry.
+ *
+ * Exported so the file picker refuses an oversized file while the manager is
+ * still looking at it, rather than after a round trip. One number, one place.
+ */
+export const MAX_IMPORT_TEXT_LENGTH = 200_000;
+
 const inputSchema = z.object({
   weekOffset: z.number().int().min(-260).max(260),
   locationId: z.string().uuid().optional(),
-  text: z.string().min(1).max(200_000),
+  text: z.string().min(1).max(MAX_IMPORT_TEXT_LENGTH),
   dateOrder: z.enum(["iso", "day-first", "month-first"]),
 });
 
@@ -119,14 +127,14 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
               kind: "create-open" as const,
               signature: row.shift!.signature,
               roleName: row.shift!.roleName,
-              reason: `Imported from row ${row.row}`,
+              reason: `Imported from ${row.source ? row.source.label : `row ${row.row}`}`,
             }
           : {
               kind: "create-assigned" as const,
               signature: row.shift!.signature,
               roleName: row.shift!.roleName,
               staffId: row.shift!.staffId,
-              reason: `Imported from row ${row.row}`,
+              reason: `Imported from ${row.source ? row.source.label : `row ${row.row}`}`,
             },
       )
       .sort((a, b) => {

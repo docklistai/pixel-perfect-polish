@@ -9,7 +9,11 @@ import { EditStaffDialog } from "./EditStaffDialog";
 import type { StaffRow } from "../types";
 import { mockStaffProfiles } from "../data/mockStaffProfiles";
 import { buildLiveStaffProfile } from "../data/liveStaffProfile";
-import { getCompactLiveProfileEmptyCopy } from "../lib/staffSurfaceCapabilities";
+import {
+  getCompactLiveProfileEmptyCopy,
+  getStaffPanelTabs,
+  type StaffPanelTab,
+} from "../lib/staffSurfaceCapabilities";
 
 interface StaffProfilePanelProps {
   member: StaffRow;
@@ -27,9 +31,6 @@ const STATUS_CLS: Record<string, string> = {
   "On Leave": "bg-accent-purple-soft text-accent-purple",
   Probation: "bg-info-soft text-info",
 };
-
-const PANEL_TABS = ["Overview", "Documents", "Notes"] as const;
-type PanelTab = (typeof PANEL_TABS)[number];
 
 function docStatusLabel(status: string): { label: string; cls: string } {
   if (status === "valid") return { label: "Verified", cls: "text-success" };
@@ -53,7 +54,8 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
   // profile (real role/department/contract/hours, empty everything else).
   const profile =
     source === "live" ? buildLiveStaffProfile(member) : (mockStaffProfiles[member.id] ?? null);
-  const [activeTab, setActiveTab] = React.useState<PanelTab>("Overview");
+  const [activeTab, setActiveTab] = React.useState<StaffPanelTab>("Overview");
+  const tabs = getStaffPanelTabs(source);
   const [editOpen, setEditOpen] = React.useState(false);
 
   const statusCls = STATUS_CLS[member.status] ?? "bg-muted text-muted-foreground";
@@ -111,12 +113,13 @@ export function StaffProfilePanel({ member, onClose, source }: StaffProfilePanel
         <StaffProfileQuickActions member={member} source={source} />
       </div>
 
+      {/* One section is not a choice, so a live panel shows no tab strip at all. */}
       <div
         role="tablist"
         aria-label="Staff panel sections"
-        className="flex border-b border-border px-4"
+        className={`border-b border-border px-4 ${tabs.length > 1 ? "flex" : "hidden"}`}
       >
-        {PANEL_TABS.map((t) => {
+        {tabs.map((t) => {
           const docsAttention =
             t === "Documents" ? docs.filter((d) => d.status !== "valid").length : 0;
           return (

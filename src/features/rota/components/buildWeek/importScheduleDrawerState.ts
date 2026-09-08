@@ -36,6 +36,8 @@ export const DEFAULT_DATE_ORDER: DateOrder = "day-first";
 
 export type ImportDrawerState = {
   text: string;
+  /** File the text came from, or null when it was typed or pasted. */
+  sourceName: string | null;
   dateOrder: DateOrder;
   result: ImportScheduleResult | null;
   busy: boolean;
@@ -44,6 +46,8 @@ export type ImportDrawerState = {
 
 export type ImportDrawerEvent =
   | { type: "text-changed"; text: string }
+  | { type: "source-selected"; text: string; sourceName: string }
+  | { type: "source-failed"; message: string }
   | { type: "date-order-changed"; dateOrder: DateOrder }
   | { type: "preview-started" }
   | { type: "preview-returned"; result: ImportScheduleResult }
@@ -61,7 +65,7 @@ export const APPLY_FAILURE_MESSAGE =
 export function initialImportDrawerState(
   dateOrder: DateOrder = DEFAULT_DATE_ORDER,
 ): ImportDrawerState {
-  return { text: "", dateOrder, result: null, busy: false, error: null };
+  return { text: "", sourceName: null, dateOrder, result: null, busy: false, error: null };
 }
 
 export function importDrawerReducer(
@@ -70,7 +74,22 @@ export function importDrawerReducer(
 ): ImportDrawerState {
   switch (event.type) {
     case "text-changed":
-      return { ...state, text: event.text };
+      // Typing over a file's contents makes this a paste again; keeping the file
+      // name would credit the text to a file it no longer matches.
+      return { ...state, text: event.text, sourceName: null };
+    case "source-selected":
+      // A new file is a different schedule, so any preview of the previous one
+      // is dropped rather than left on screen where it could still be applied.
+      return {
+        ...state,
+        text: event.text,
+        sourceName: event.sourceName,
+        result: null,
+        error: null,
+      };
+    case "source-failed":
+      // Nothing was read, so the previous source stands untouched.
+      return { ...state, error: event.message };
     case "date-order-changed":
       return { ...state, dateOrder: event.dateOrder };
     case "preview-started":
@@ -135,31 +154,9 @@ export function previewRows(state: ImportDrawerState): ImportedShiftRow[] {
   return state.result?.preview?.rows ?? [];
 }
 
-/**
- * What this paste would write, against what an import is allowed to write.
- *
- * Read from the preview rather than from a successful proposal, so it is
- * available in exactly the case it matters most: a paste that is over the
- * ceiling and therefore has no proposal at all. A preview that says "504 of a
- * maximum 500" is the honest version of the old "504 ready" followed by a
- * refusal nobody could have predicted.
- */
-export function operationCountLabel(state: ImportDrawerState): string | null {
-  const preview = state.result?.preview;
-  if (!preview) return null;
-  if (preview.operationCount > preview.operationLimit) {
-    return `${preview.operationCount} shifts — more than the ${preview.operationLimit} one import can write`;
-  }
-  return `${preview.operationCount} of a maximum ${preview.operationLimit} shifts`;
-}
-
-export function previewLabel(state: ImportDrawerState): string {
-  return state.busy && !state.result ? "Reading…" : "Preview";
-}
-
-export function applyLabel(state: ImportDrawerState): string {
-  return state.busy && state.result ? "Importing…" : "Import to draft";
-}
+// Re-exported so every caller keeps one import site while the wording of a
+// state lives beside the other wording rather than inside the state machine.
+export { applyLabel, operationCountLabel, previewLabel } from "./importScheduleLabels";
 
 /**
  * The exact payload the apply call is made with.

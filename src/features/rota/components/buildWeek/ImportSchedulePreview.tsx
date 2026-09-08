@@ -25,7 +25,11 @@ export function ImportSchedulePreview({ state }: { state: ImportDrawerState }) {
       // The count is stated against the limit, always — a paste over the ceiling
       // must never read as "ready" when the apply would refuse it outright.
       title={`3. Review — ${operationCountLabel(state)}`}
-      description={`${preview.validCount} rows will be imported and ${preview.errorCount} will be left out. Every row you pasted is listed, and anything that will not be imported says why.`}
+      description={
+        preview.layout === "matrix"
+          ? `Read as a grid of staff and days. ${preview.validCount} shifts will be imported and ${preview.errorCount} will be left out. Every cell that held something is listed, and anything that will not be imported says why.`
+          : `${preview.validCount} rows will be imported and ${preview.errorCount} will be left out. Every row you pasted is listed, and anything that will not be imported says why.`
+      }
     >
       {overLimit && (
         <p
@@ -66,7 +70,9 @@ export function ImportSchedulePreview({ state }: { state: ImportDrawerState }) {
           >
             <div className="flex items-center gap-1.5 text-xs font-semibold">
               {!row.ok && <AlertTriangle className="h-3 w-3 shrink-0 text-danger" aria-hidden />}
-              Row {row.row}
+              {/* A grid row is synthesised, so it is named by the cell the
+                  manager actually wrote rather than by its position here. */}
+              {row.source ? row.source.label : `Row ${row.row}`}
               {row.shift && (
                 <span className="font-normal text-muted-foreground">
                   · {row.shift.roleName} · {row.shift.signature.workDate}{" "}

@@ -1,32 +1,25 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { nextProfileTabIndex } from "../../lib/profileTabKeyboard";
+import { ALL_PROFILE_TABS, type ProfileTab, type ProfileTabDefinition } from "./profileTabs";
 
-export type ProfileTab =
-  | "overview"
-  | "schedule"
-  | "time"
-  | "leave"
-  | "documents"
-  | "notes"
-  | "insights";
-
-const TABS: { id: ProfileTab; label: string }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "schedule", label: "Schedule" },
-  { id: "time", label: "Time" },
-  { id: "leave", label: "Leave & Absence" },
-  { id: "documents", label: "Documents" },
-  { id: "notes", label: "Notes" },
-  { id: "insights", label: "Work patterns" },
-];
+// Re-exported as types only, so this file keeps exporting just its component and
+// every existing `import { type ProfileTab } from "./StaffProfileTabs"` still
+// resolves. The values live in ./profileTabs.
+export type { ProfileTab, ProfileTabDefinition } from "./profileTabs";
 
 interface StaffProfileTabsProps {
   activeTab: ProfileTab;
   onChange: (tab: ProfileTab) => void;
+  /** Which sections to offer. Defaults to every section, for demo profiles. */
+  tabs?: readonly ProfileTabDefinition[];
 }
 
-export function StaffProfileTabs({ activeTab, onChange }: StaffProfileTabsProps) {
+export function StaffProfileTabs({
+  activeTab,
+  onChange,
+  tabs: TABS = ALL_PROFILE_TABS,
+}: StaffProfileTabsProps) {
   const activeIndex = Math.max(
     0,
     TABS.findIndex((tab) => tab.id === activeTab),

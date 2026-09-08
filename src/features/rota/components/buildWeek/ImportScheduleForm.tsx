@@ -1,4 +1,5 @@
-import type { Dispatch } from "react";
+import type { ChangeEvent, Dispatch } from "react";
+import { FileUp } from "lucide-react";
 import { FormSection } from "@/components/dl";
 import { SUPPORTED_TIME_FORMATS } from "@/features/rota/lib/scheduling/shiftTimeVocabulary";
 import {
@@ -6,13 +7,22 @@ import {
   type ImportDrawerEvent,
   type ImportDrawerState,
 } from "./importScheduleDrawerState";
+import {
+  ACCEPTED_IMPORT_FILE_ACCEPT,
+  ACCEPTED_IMPORT_FILE_LABEL,
+  readImportFile,
+} from "./importSourceFile";
 
 /**
  * What to import, and how to read its dates.
  *
  * The two questions a manager answers before anything is sent anywhere. They sit
  * together because the second one changes the meaning of the first: the same
- * paste is a different week depending on the declared date order.
+ * file is a different week depending on the declared date order.
+ *
+ * A schedule arrives either way — chosen as a file or pasted — and both land in
+ * the same `text`, so there is exactly one thing to preview and one thing to
+ * apply. The file never leaves the browser.
  *
  * Every event goes straight to the drawer's reducer, so this file holds no state
  * of its own and cannot disagree with what will be previewed.
@@ -24,12 +34,48 @@ export function ImportScheduleForm({
   state: ImportDrawerState;
   dispatch: Dispatch<ImportDrawerEvent>;
 }) {
+  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    // Cleared so picking the same file twice still fires a change event — a
+    // manager who fixed their spreadsheet and re-chose it expects a re-read.
+    event.target.value = "";
+    if (!file) return;
+    const read = await readImportFile(file);
+    if (!read.ok) {
+      dispatch({ type: "source-failed", message: read.message });
+      return;
+    }
+    dispatch({ type: "source-selected", text: read.text, sourceName: read.name });
+  };
+
   return (
     <>
       <FormSection
-        title="1. Paste the schedule"
-        description="The first row must be headers. Date, Role, Start and End are required; Staff, Department, Break and Overnight are optional."
+        title="1. Choose a file, or paste the schedule"
+        description="Docklist reads a long list of shifts, or a grid with staff down the side and days across the top. The file stays on this device."
       >
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border px-3 py-2 text-xs font-semibold transition hover:border-brand hover:bg-brand-soft/20">
+            <FileUp className="h-3.5 w-3.5 text-brand" aria-hidden />
+            Choose a file
+            <input
+              type="file"
+              accept={ACCEPTED_IMPORT_FILE_ACCEPT}
+              className="sr-only"
+              onChange={(event) => void handleFile(event)}
+            />
+          </label>
+          <span className="text-xs text-muted-foreground">
+            {state.sourceName ? (
+              <>
+                Reading <strong className="font-semibold">{state.sourceName}</strong> — edit below
+                to change it.
+              </>
+            ) : (
+              `${ACCEPTED_IMPORT_FILE_LABEL} — or paste straight from a spreadsheet.`
+            )}
+          </span>
+        </div>
         <textarea
           value={state.text}
           onChange={(event) => dispatch({ type: "text-changed", text: event.target.value })}

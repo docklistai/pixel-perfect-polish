@@ -7,8 +7,10 @@ import { useBuildWeekProposal, type BuildWeekSourceChoice } from "../../hooks/us
 import { useBuildWeekSources } from "../../hooks/useBuildWeekSources";
 import { buildWeekAvailability } from "../../lib/serverActionAvailability";
 import { BuildWeekSourceStep } from "./BuildWeekSourceStep";
+import { BuildWeekColdStartStep } from "./BuildWeekColdStartStep";
 import { BuildWeekReviewStep } from "./BuildWeekReviewStep";
 import { BuildWeekStepActions, type BuildWeekStep } from "./BuildWeekStepActions";
+import { isBuildWeekColdStart } from "../../lib/scheduling/buildWeekColdStart";
 
 /**
  * Build the Week: confirm the target, choose one demand source, review one
@@ -38,6 +40,7 @@ export function BuildWeekDrawer({
   serverBacked,
   onApplied,
   onOpenTemplates,
+  onSketchOpenShifts,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -58,6 +61,12 @@ export function BuildWeekDrawer({
    * a week's shape. Build offers the route, never a second implementation.
    */
   onOpenTemplates?: () => void;
+  /**
+   * Hands over to the existing Add shift drawer, so a workspace with no rota at
+   * all can describe what the week needs. Build offers the route, never a
+   * second shift editor.
+   */
+  onSketchOpenShifts?: () => void;
 }) {
   const [step, setStep] = React.useState<BuildWeekStep>("target");
   const [source, setSource] = React.useState<BuildWeekSourceChoice | null>(null);
@@ -73,6 +82,16 @@ export function BuildWeekDrawer({
   // Build groups demand by department; say so plainly rather than silently
   // producing a weaker proposal when the workspace has none.
   const departmentsState = useWorkspaceDepartments();
+
+  // A workspace with no template, no recent week and no shifts has nothing any
+  // source could describe. Asked only once both queries have answered, so the
+  // guidance never flashes over options that are about to appear.
+  const coldStart = isBuildWeekColdStart({
+    resolved: serverBacked && !templates.isLoading && !sources.isLoading,
+    templateCount: templates.templates.length,
+    previousPatternAvailable: sources.previousPattern?.available === true,
+    plannedShiftCount,
+  });
 
   React.useEffect(() => {
     if (open) return;
@@ -96,6 +115,7 @@ export function BuildWeekDrawer({
     <BuildWeekStepActions
       step={step}
       canEdit={canEdit}
+      coldStart={coldStart}
       hasSource={Boolean(source)}
       hasProposal={Boolean(build.proposal)}
       operationCount={build.proposal?.proposal.operations.length ?? 0}
@@ -158,7 +178,21 @@ export function BuildWeekDrawer({
         </FormSection>
       )}
 
-      {step === "source" && (
+      {step === "source" && coldStart && (
+        <BuildWeekColdStartStep
+          weekLabel={weekLabel}
+          onSketchOpenShifts={
+            onSketchOpenShifts && canEdit
+              ? () => {
+                  onOpenChange(false);
+                  onSketchOpenShifts();
+                }
+              : undefined
+          }
+        />
+      )}
+
+      {step === "source" && !coldStart && (
         <BuildWeekSourceStep
           templates={templates.templates}
           templatesLoading={templates.isLoading}

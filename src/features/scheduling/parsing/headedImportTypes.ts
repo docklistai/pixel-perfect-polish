@@ -3,6 +3,7 @@ import type { DateOrder } from "./explicitDateFormat";
 import type { DepartmentCandidate, StaffCandidate } from "./exactResolvers";
 import type { ShiftSignature } from "@/features/rota/lib/scheduling/shiftSignature";
 import type { MappedColumn } from "./headedColumnMap";
+import type { MatrixOrigin } from "./matrixLayout";
 
 /** The contract of a headed schedule import: what goes in, what comes back. */
 
@@ -38,12 +39,22 @@ export type ImportedShiftRow = {
   ok: boolean;
   diagnostics: ParseDiagnostic[];
   shift?: ImportedShift;
+  /**
+   * Where this row came from when the input was a grid rather than a list.
+   *
+   * A matrix row is synthesised, so its row number describes a table the
+   * manager never wrote. This carries the cell they DID write, so a refusal can
+   * say "Row 4, Tue" instead of a number that means nothing to them.
+   */
+  source?: MatrixOrigin;
 };
 
 export type HeadedScheduleImportResult = {
   ok: boolean;
   diagnostics: ParseDiagnostic[];
   columns: MappedColumn[];
+  /** How the input was read: a list of shifts, or a staff × day grid. */
+  layout: "long" | "matrix";
   rows: ImportedShiftRow[];
   validCount: number;
   errorCount: number;

@@ -96,3 +96,32 @@ describe("preview containment honesty", () => {
     expect(settingsSource).not.toMatch(/Your download will start shortly|Renews 8 Jul 2026/i);
   });
 });
+
+/**
+ * Which surfaces the pilot exposes at all.
+ *
+ * Read from source for the same reason as everything above: the test config
+ * deliberately never imports a route, so reachability is asserted against the
+ * gate as written rather than by mounting the router.
+ */
+describe("pilot surface exposure", () => {
+  it("keeps the developer UI kit out of every build that is not dev", () => {
+    const uiKit = source("src/routes/ui-kit.tsx");
+    // One existing gate, in beforeLoad, so the route is refused before it
+    // renders rather than hidden by navigation that omits a link to it.
+    expect(uiKit).toContain("beforeLoad");
+    expect(uiKit).toContain("if (!import.meta.env.DEV)");
+    expect(uiKit).toContain("throw notFound()");
+  });
+
+  it("links the UI kit from nowhere a pilot manager can reach", () => {
+    expect(source("src/components/commandPaletteData.ts")).not.toContain("/ui-kit");
+    expect(source("src/routeTree.gen.ts")).toContain("/ui-kit");
+  });
+
+  it("no longer calls a live manager route a preview on the dashboard", () => {
+    // Reports went live in Phase 56 and the command palette was corrected then;
+    // this dashboard label was missed and kept claiming otherwise.
+    expect(source("src/routes/index.tsx")).not.toContain("View reports… (preview)");
+  });
+});

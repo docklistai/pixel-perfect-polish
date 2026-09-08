@@ -1,10 +1,15 @@
 import { readDelimited } from "./delimitedReader";
-import { errorDiagnostic, warningDiagnostic } from "./parseDiagnostics";
-import { signatureKey } from "@/features/rota/lib/scheduling/shiftSignature";
+import { errorDiagnostic, type ParseDiagnostic } from "./parseDiagnostics";
 import { MAX_PROPOSAL_OPERATIONS } from "@/features/rota/lib/scheduling/buildWeekProposal";
-import { describeColumnMapping, mapColumns } from "./headedColumnMap";
-import { parseHeadedRow } from "./headedRowParser";
-import { buildCanonicalRoleResolver } from "./canonicalRoleNames";
+import {
+  cellReader,
+  describeColumnMapping,
+  mapColumns,
+  type ColumnMapping,
+} from "./headedColumnMap";
+import { analyseRows, type RowSource } from "./headedRowAnalysis";
+import { MATRIX_HEADER, readMatrixLayout } from "./matrixLayout";
+import { resolveStaffByName } from "./exactResolvers";
 import type {
   HeadedImportOptions,
   HeadedScheduleImportResult,
@@ -19,114 +24,126 @@ export type {
 } from "./headedImportTypes";
 
 /**
- * Headed CSV/TSV schedule import.
+ * Schedule import, from either shape a manager's rota comes in.
  *
- * The one genuinely new parser in this subsystem, and the only place a rota date
- * arrives as text — everywhere else a date comes from the grid column a shift
- * sits in, which is why ambiguity cannot arise there and must be handled here.
- * Times, by contrast, are read through the shared scheduling vocabulary, so this
- * accepts exactly what a rota cell accepts.
+ * Two layouts arrive here and exactly one parser reads them. A **long** file
+ * lists shifts a row at a time. A **matrix** is the grid a small venue actually
+ * keeps — people down the side, days across the top — and is rearranged into
+ * long rows before anything else looks at it. Which one this is, is decided by
+ * `readMatrixLayout`, and it declines anything that is not unmistakably a grid;
+ * a valid long-format file can never be re-read as one.
  *
  * This produces a **preview only**. Nothing is written, every source row appears
  * in the result whether or not it could be read, and anything that will not be
  * imported carries a diagnostic saying why. A row can be rejected; it can never
  * quietly vanish.
  *
- * This file owns the file-level shape: read, map the header, walk the rows, then
+ * This file owns the file-level shape: read it, work out its layout, then
  * analyse the paste as a whole — duplicates, role spelling, and whether it is
- * small enough to apply at all. Reading one row is `headedRowParser`;
- * understanding the header is `headedColumnMap`.
+ * small enough to apply at all. Reading one row is `headedRowParser`,
+ * understanding a long header is `headedColumnMap`, and understanding a grid is
+ * `matrixHeaders`.
  */
+
+const EMPTY = {
+  columns: [] as { header: string; mappedTo: string | null }[],
+  rows: [] as ImportedShiftRow[],
+  layout: "long" as const,
+  validCount: 0,
+  errorCount: 0,
+  duplicatesInFile: 0,
+  duplicatesOfExisting: 0,
+  operationCount: 0,
+  operationLimit: MAX_PROPOSAL_OPERATIONS,
+};
+
+function failed(
+  diagnostics: ParseDiagnostic[],
+  columns = EMPTY.columns,
+): HeadedScheduleImportResult {
+  return { ok: false, diagnostics, ...EMPTY, columns };
+}
+
+/** Long-format rows, read through the header the manager wrote. */
+function longSources(
+  dataRows: readonly (readonly string[])[],
+  mapping: ColumnMapping,
+): RowSource[] {
+  const cellAt = cellReader(mapping);
+  const sources: RowSource[] = [];
+  dataRows.forEach((rawRow, index) => {
+    if (rawRow.every((cell) => cell.trim() === "")) return;
+    const cells: Record<string, string> = {};
+    for (const field of mapping.mapped.keys()) cells[field] = cellAt(rawRow, field);
+    sources.push({ rowNumber: index + 1, rawRow, cells });
+  });
+  return sources;
+}
+
+/** Grid cells, already rearranged, described in the same terms. */
+function matrixSources(entries: ReturnType<typeof readMatrixLayout>): RowSource[] {
+  if (entries.kind !== "matrix") return [];
+  return entries.entries.map((entry, index) => {
+    const rowNumber = index + 1;
+    if (!entry.ok) {
+      return {
+        rowNumber,
+        rawRow: [],
+        cells: { staff: "", date: "", role: "", start: "", end: "" },
+        origin: entry.origin,
+        refusal: entry.diagnostics,
+      };
+    }
+    const cells: Record<string, string> = {};
+    MATRIX_HEADER.forEach((header, column) => {
+      cells[header.toLowerCase()] = entry.cells[column] ?? "";
+    });
+    return { rowNumber, rawRow: entry.cells, cells, origin: entry.origin };
+  });
+}
+
 export function importHeadedSchedule(
   text: string,
   options: HeadedImportOptions,
 ): HeadedScheduleImportResult {
-  const empty = {
-    columns: [] as { header: string; mappedTo: string | null }[],
-    rows: [] as ImportedShiftRow[],
-    validCount: 0,
-    errorCount: 0,
-    duplicatesInFile: 0,
-    duplicatesOfExisting: 0,
-    operationCount: 0,
-    operationLimit: MAX_PROPOSAL_OPERATIONS,
-  };
-
   const read = readDelimited(text, { allowRagged: true });
-  if (!read.ok) return { ok: false, diagnostics: read.diagnostics, ...empty };
+  if (!read.ok) return failed(read.diagnostics);
 
   const [headerRow, ...dataRows] = read.rows;
   if (!headerRow || dataRows.length === 0) {
-    return {
-      ok: false,
-      diagnostics: [
-        errorDiagnostic("no-content", "This file needs a header row and at least one shift."),
-      ],
-      ...empty,
-    };
+    return failed([
+      errorDiagnostic("no-content", "This file needs a header row and at least one shift."),
+    ]);
   }
 
-  const mapping = mapColumns(headerRow);
-  const fileDiagnostics = describeColumnMapping(mapping);
+  // A grid is recognised before the header is mapped, because a grid's header
+  // is days rather than fields and mapping it would only ever fail.
+  const matrix = readMatrixLayout(read.rows, {
+    dateOrder: options.dateOrder,
+    weekIsoDates: options.weekIsoDates,
+    roleForStaffName: (name) => {
+      const resolved = resolveStaffByName(name, options.staff);
+      return resolved.kind === "resolved" ? (resolved.value.roleName ?? null) : null;
+    },
+  });
+  if (matrix.kind === "refused") return failed(matrix.diagnostics);
+
+  const isMatrix = matrix.kind === "matrix";
+  const mapping = mapColumns(isMatrix ? [...MATRIX_HEADER] : headerRow);
+  const fileDiagnostics = isMatrix ? [] : describeColumnMapping(mapping);
   if (fileDiagnostics.some((entry) => entry.severity === "error")) {
     // The column mapping is kept even on failure: the manager needs to see which
     // headers were understood to work out what is missing.
-    return { ok: false, diagnostics: fileDiagnostics, ...empty, columns: mapping.columns };
+    return failed(fileDiagnostics, mapping.columns);
   }
 
-  const weekDates = new Set(options.weekIsoDates);
-  const seenInFile = new Map<string, number>();
-  const canonicalRoleName = buildCanonicalRoleResolver(options.knownRoleNames);
-  const rows: ImportedShiftRow[] = [];
-  let duplicatesInFile = 0;
-  let duplicatesOfExisting = 0;
+  const analysis = analyseRows(
+    isMatrix ? matrixSources(matrix) : longSources(dataRows, mapping),
+    mapping,
+    options,
+  );
 
-  dataRows.forEach((rawRow, index) => {
-    const rowNumber = index + 1;
-    if (rawRow.every((cell) => cell.trim() === "")) return;
-
-    const cells: Record<string, string> = {};
-    for (const [field, columnIndex] of mapping.mapped) cells[field] = rawRow[columnIndex] ?? "";
-
-    const outcome = parseHeadedRow({ rawRow, rowNumber, mapping, options, weekDates });
-    if (!outcome.ok) {
-      rows.push({ row: rowNumber, cells, ok: false, diagnostics: outcome.diagnostics });
-      return;
-    }
-
-    const diagnostics = [...outcome.diagnostics];
-    const key = signatureKey(outcome.shift.signature);
-    const firstSeen = seenInFile.get(key);
-    if (firstSeen !== undefined) {
-      duplicatesInFile += 1;
-      diagnostics.push(
-        warningDiagnostic(
-          "duplicate-in-input",
-          `The same shift is also on row ${firstSeen}. Both will be imported — identical shifts are allowed.`,
-          { row: rowNumber },
-        ),
-      );
-    } else seenInFile.set(key, rowNumber);
-
-    if (options.existingSignatureKeys?.has(key)) {
-      duplicatesOfExisting += 1;
-      diagnostics.push(
-        warningDiagnostic(
-          "duplicate-of-existing",
-          "This week already has a shift exactly like this one. Importing adds another.",
-          { row: rowNumber },
-        ),
-      );
-    }
-
-    // One spelling per role across the whole paste. Only the display label
-    // changes; the signature's normalized key — and so every identity and
-    // duplicate decision already made above — is untouched.
-    const shift = { ...outcome.shift, roleName: canonicalRoleName(outcome.shift.roleName) };
-    rows.push({ row: rowNumber, cells, ok: true, diagnostics, shift });
-  });
-
-  const validCount = rows.filter((row) => row.ok).length;
+  const validCount = analysis.rows.filter((row) => row.ok).length;
   const diagnostics = [...fileDiagnostics];
 
   // One valid row is one operation. The ceiling is checked here, before the
@@ -138,7 +155,7 @@ export function importHeadedSchedule(
     diagnostics.push(
       errorDiagnostic(
         "too-many-operations",
-        `This paste would create ${validCount} shifts, and an import writes at most ${MAX_PROPOSAL_OPERATIONS} at once. Split it into smaller pastes and import them one after another.`,
+        `This ${isMatrix ? "grid" : "paste"} would create ${validCount} shifts, and an import writes at most ${MAX_PROPOSAL_OPERATIONS} at once. Split it into smaller imports and apply them one after another.`,
       ),
     );
   }
@@ -146,12 +163,13 @@ export function importHeadedSchedule(
   return {
     ok: validCount > 0 && !overLimit,
     diagnostics,
-    columns: mapping.columns,
-    rows,
+    columns: isMatrix ? headerRow.map((header) => ({ header, mappedTo: null })) : mapping.columns,
+    layout: isMatrix ? "matrix" : "long",
+    rows: analysis.rows,
     validCount,
-    errorCount: rows.length - validCount,
-    duplicatesInFile,
-    duplicatesOfExisting,
+    errorCount: analysis.rows.length - validCount,
+    duplicatesInFile: analysis.duplicatesInFile,
+    duplicatesOfExisting: analysis.duplicatesOfExisting,
     operationCount: validCount,
     operationLimit: MAX_PROPOSAL_OPERATIONS,
   };

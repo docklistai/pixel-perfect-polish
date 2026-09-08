@@ -15,6 +15,7 @@ export type BuildWeekStep = "target" | "source" | "review";
 export function BuildWeekStepActions({
   step,
   canEdit,
+  coldStart,
   hasSource,
   hasProposal,
   operationCount,
@@ -28,6 +29,8 @@ export function BuildWeekStepActions({
 }: {
   step: BuildWeekStep;
   canEdit: boolean;
+  /** This week has no demand source at all, so there is no proposal to build. */
+  coldStart: boolean;
   hasSource: boolean;
   hasProposal: boolean;
   /** Operations in the reviewed proposal; zero means there is nothing to apply. */
@@ -56,9 +59,13 @@ export function BuildWeekStepActions({
           <ActionButton variant="secondary" icon={ArrowLeft} onClick={() => onStepChange("target")}>
             Back
           </ActionButton>
-          <ActionButton icon={ArrowRight} disabled={!hasSource} onClick={onBuildProposal}>
-            Build a proposal
-          </ActionButton>
+          {/* On a cold start there is no source to choose, so there is nothing
+              to build. Offering a disabled button would only restate that. */}
+          {!coldStart && (
+            <ActionButton icon={ArrowRight} disabled={!hasSource} onClick={onBuildProposal}>
+              Build a proposal
+            </ActionButton>
+          )}
         </>
       )}
       {step === "review" && (

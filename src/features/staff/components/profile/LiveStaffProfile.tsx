@@ -1,62 +1,22 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  ChevronLeft,
-  Mail,
-  Briefcase,
-  Activity,
-  Pencil,
-  UserX,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronLeft, Mail, Briefcase, Pencil, UserX } from "lucide-react";
 import { AppShell, Card, StatusBadge } from "@/components/dl";
 import { StaffMonogram } from "../StaffMonogram";
 import { EditStaffDialog } from "../EditStaffDialog";
 import { OffboardStaffDialog } from "./OffboardStaffDialog";
 import { ProfileCard, Pair } from "./ProfileCard";
-import { ProfileEmptyPanel } from "./ProfileEmptyPanel";
 import { LiveOperationalCards } from "./LiveOperationalCards";
 import { LiveScheduleList } from "./LiveScheduleList";
 import { LiveProfileLeaveTab } from "./LiveProfileLeaveTab";
 import { LiveTimeList } from "./LiveTimeList";
-import { StaffProfileTabs, type ProfileTab } from "./StaffProfileTabs";
+import { StaffProfileTabs } from "./StaffProfileTabs";
+import { LIVE_PROFILE_TABS, resolveProfileTab, type ProfileTab } from "./profileTabs";
 import { statusTone, portalTone } from "./profileTones";
 import { useLiveStaffProfileOps } from "../../hooks/useLiveStaffProfileOps";
 import type { StaffRow } from "../../types";
 
 const NOT_RECORDED = "Not recorded";
-
-/**
- * Tab → honest empty-state copy for live members on the tabs that have no live
- * connection yet. Schedule, Leave, and Time are handled by their own live lists.
- */
-function emptyPanel(
-  tab: ProfileTab,
-  firstName: string,
-): { icon: LucideIcon; title: string; description: string; hint?: string } | null {
-  switch (tab) {
-    case "insights":
-      return {
-        icon: Activity,
-        title: "Not enough data yet",
-        description: `Work-pattern insights appear once ${firstName} has rota and time history.`,
-      };
-    case "documents":
-      return {
-        icon: Briefcase,
-        title: "Documents are not connected",
-        description: "Document storage and uploads are not available for live staff profiles.",
-      };
-    case "notes":
-      return {
-        icon: Activity,
-        title: "Manager notes are not connected",
-        description: "Live manager notes are not saved yet, so note editing is unavailable.",
-      };
-    default:
-      return null;
-  }
-}
 
 function LiveOverviewPanel({ member }: { member: StaffRow }) {
   const contract =
@@ -102,11 +62,16 @@ interface LiveStaffProfileProps {
 }
 
 /**
- * Honest full-profile surface for a live workspace staff member. Unsupported
- * tabs render explicit empty states rather than demo figures or fake editors.
+ * Honest full-profile surface for a live workspace staff member.
+ *
+ * Only the sections with a live source are offered — see `LIVE_PROFILE_TABS`.
+ * A deep link naming a section this profile does not have opens the first one
+ * it does, rather than an empty panel with no tab selected.
  */
 export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffProfileProps) {
-  const [activeTab, setActiveTab] = React.useState<ProfileTab>(initialTab);
+  const [activeTab, setActiveTab] = React.useState<ProfileTab>(() =>
+    resolveProfileTab(initialTab, LIVE_PROFILE_TABS),
+  );
   const [editOpen, setEditOpen] = React.useState(false);
   const [offboardOpen, setOffboardOpen] = React.useState(false);
   // A successful offboard flips this member to `left`, which unmounts the
@@ -118,10 +83,8 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
   const ops = useLiveStaffProfileOps(member.id);
 
   React.useEffect(() => {
-    setActiveTab(initialTab);
+    setActiveTab(resolveProfileTab(initialTab, LIVE_PROFILE_TABS));
   }, [initialTab]);
-
-  const empty = emptyPanel(activeTab, firstName);
 
   return (
     <AppShell searchPlaceholder="Search staff...">
@@ -207,7 +170,7 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
         fallbackFocusRef={editDetailsRef}
       />
 
-      <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} />
+      <StaffProfileTabs activeTab={activeTab} onChange={setActiveTab} tabs={LIVE_PROFILE_TABS} />
 
       <div
         role="tabpanel"
@@ -225,14 +188,6 @@ export function LiveStaffProfile({ member, initialTab = "overview" }: LiveStaffP
           <LiveProfileLeaveTab staffMemberId={member.id} firstName={firstName} ops={ops} />
         )}
         {activeTab === "time" && <LiveTimeList ops={ops} firstName={firstName} />}
-        {empty && (
-          <ProfileEmptyPanel
-            icon={empty.icon}
-            title={empty.title}
-            description={empty.description}
-            hint={empty.hint}
-          />
-        )}
       </div>
     </AppShell>
   );

@@ -219,7 +219,7 @@ function Home() {
                     navigate({ to: "/reports" });
                   }}
                 >
-                  View reports… (preview)
+                  View reports…
                 </button>
                 <button
                   type="button"

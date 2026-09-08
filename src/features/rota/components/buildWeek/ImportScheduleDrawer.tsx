@@ -111,7 +111,7 @@ export function ImportScheduleDrawer({
       open={open}
       onOpenChange={onOpenChange}
       title="Import a schedule"
-      description={`Paste a headed CSV or TSV for ${weekLabel}. You review everything before it is written, and the week does not have to exist yet — importing into an empty week creates it as a draft.`}
+      description={`Choose a CSV or TSV file, or paste one, for ${weekLabel}. You review everything before it is written, and the week does not have to exist yet — importing into an empty week creates it as a draft.`}
       width="lg"
       footer={
         <>

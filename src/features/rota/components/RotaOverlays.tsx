@@ -146,6 +146,7 @@ export function RotaOverlays({
         assignedShiftCount={rota.assignedShiftCount}
         openShiftCount={rota.openShiftCount}
         onOpenTemplates={() => setOverlay("templates", true)}
+        onSketchOpenShifts={() => setOverlay("addShift", true)}
         canEdit={!rota.readOnly && rota.source === "live"}
         serverBacked={rota.source === "live"}
         onApplied={onBuildApplied}
