@@ -34,63 +34,40 @@ Example:
 Base styles → Variants → Sizes → States → Overrides
 ```
 
-## Quick Start
+## Quick Start (Tailwind v4, CSS-first — as used in this repo)
 
-```typescript
-// tailwind.config.ts
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
-  content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
-  darkMode: 'class',
-  theme: {
-    extend: {
-      colors: {
-        // Semantic color tokens
-        primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
-        },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
-        border: 'hsl(var(--border))',
-        ring: 'hsl(var(--ring))',
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
-      },
-    },
-  },
-  plugins: [require('tailwindcss-animate')],
-}
-
-export default config
-```
+Docklist has **no `tailwind.config.ts`**. Configuration lives in CSS.
 
 ```css
-/* globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/styles.css */
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
 
+/* Dark mode is driven by [data-theme="dark"], with .dark kept as an alias. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
+/* Map raw design tokens into Tailwind namespaces so utilities resolve to them:
+   --color-* powers bg-*/text-*/border-*, --radius-* powers rounded-*. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+}
+```
+
+The raw token values themselves are declared as ordinary custom properties:
+
+```css
 @layer base {
   :root {
     --background: 0 0% 100%;

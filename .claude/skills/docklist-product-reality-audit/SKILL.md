@@ -24,7 +24,8 @@ Follow this order. Do not skip to source.
 
 Open the app and use it. Do not begin by reading `src/`.
 
-- Use `docklist-playwright` for scripted or repeatable journeys.
+- Use the official `playwright-cli` skill for browser commands, with
+  `docklist-browser-fixtures` for Docklist URLs, personas and viewports.
 - Use direct browser interaction for exploratory review.
 - Capture what you actually saw: screens, states, copy, what happened after each click.
 

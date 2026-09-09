@@ -1,30 +1,35 @@
 # DocklistAI Skill Router
 
-Task → skill map, grouped by how often it applies. Workflow, declaration, completion-report, and guardrails are defined once in `docs/ai/DOCKLIST_OPERATING_SYSTEM.md` and the snippets — do not restate them here.
+Task → skill map. A small default core plus on-demand specialists. Workflow,
+declaration, completion-report and guardrails are defined once in
+`docs/ai/DOCKLIST_OPERATING_SYSTEM.md` and the snippets — not restated here.
 
-Skill paths shown are `.claude/skills/...`. Codex agents resolve the same skill names under `.agents/skills/`; if missing there, fall back to `.claude/skills/` (see `CODEX.md`).
+Skill paths are `.claude/skills/...` (canonical). Codex resolves the same names
+under `.agents/skills/`; if missing there, fall back to `.claude/skills/`.
+
+Skills without the `docklist-` prefix are **vendored official upstream skills**.
+Each has a `VENDOR.md` recording the upstream repo, pinned commit, licence and
+Docklist's execution path. Do not edit vendored files; Docklist rules live in the
+overlay skills beside them.
 
 ---
 
-## CORE — apply on most tasks
+## CORE DOCKLIST — most tasks
 
 - `docklist-agent-discipline` — agent docs, instruction files, commit hygiene.
-- `docklist-proactive-maintenance-guard` — classify every nearby finding before acting on it.
+- `docklist-proactive-maintenance-guard` — classify every nearby finding before acting.
 - `docklist-bounded-batch-delivery` — **default orchestration for substantial implementation batches.**
-- `docklist-testing-patterns` — test structure, factories, regression coverage.
+- `docklist-validate` — which checks a change actually warrants (real repo commands).
 - `docklist-verification-before-completion` — required before any completion claim.
-- `docklist-lint-and-validate` — choosing the right targeted checks.
 
 ---
 
-## PRODUCT REALITY — is the workflow actually good?
+## PRODUCT REALITY
 
-**When:** judging whether a workflow is usable, coherent, trustworthy or complete; auditing a feature the owner has used and disliked; first-run and empty-state review.
+**When:** judging whether a workflow is usable, coherent, trustworthy or complete.
 
 - `docklist-product-reality-audit` — **start here.** Observe the running app before reading source.
-- `docklist-playwright` — scripted browser automation and repeatable journeys.
-- `docklist-ui-visual-validator` — visual and design-system verification.
-- `docklist-fixing-accessibility` — when the journey involves forms, dialogs, or keyboard/screen-reader use.
+- `docklist-scheduling-integrity` — the scheduling invariants: draft/published boundary, cross-entry-point authority parity, DST and overnight semantics, real demand.
 
 ---
 
@@ -32,74 +37,110 @@ Skill paths shown are `.claude/skills/...`. Codex agents resolve the same skill 
 
 **Also check:** `docs/ai/FRONTEND_GUARDRAILS.md`
 
-- `docklist-tanstack-start` — routing and framework conventions.
-- `docklist-tanstack-query` — server state, caching, mutations, stale UI.
 - `docklist-frontend-dev-guidelines` — component and page construction.
 - `docklist-baseline-ui` — typography, spacing, motion, component baseline.
-- `docklist-tailwind-design-system` — tokens, variants, responsive patterns.
-- `docklist-clean-code` — route/component extraction and file-size discipline.
+- `docklist-tailwind-design-system` — Tailwind v4 CSS-first tokens and theming.
+- `docklist-fixing-accessibility` — ARIA, keyboard, focus, contrast.
+- `docklist-ui-visual-validator` — visual and design-system verification.
 
 ---
 
-## BACKEND / DATABASE
+## TANSTACK
 
-- `docklist-supabase` — queries, schema, storage, edge functions.
-- `docklist-postgresql` — schema design, indexing, constraints.
-- `docklist-saas-multi-tenant` — workspace scoping and RLS isolation.
-- `docklist-api-security` — auth, validation, rate limiting, API surface.
-- `docklist-cloudflare-edge` — edge runtime constraints.
+- `docklist-tanstack-start` — routes, loaders, server functions, SSR entry.
+- `docklist-tanstack-query` — server state, query keys, mutations, stale UI.
 
 ---
 
-## HIGH-RISK REVIEW
+## DATABASE / SECURITY
 
-**When:** the change touches auth, RLS, staff/manager data boundaries, or is about to be pushed.
+- `supabase` *(vendored official)* — auth, sessions, RLS, migrations, client usage.
+- `supabase-postgres-best-practices` *(vendored official)* — indexing, RLS performance, locking, schema rules.
+- `docklist-data-boundaries` — Docklist tenancy and access invariants.
+- `docklist-sql-suite` — the local SQL, tenancy, adversarial and concurrency workflow.
 
-- `docklist-differential-review` — security-focused review of a diff.
-- `docklist-security-audit` — deeper security workflow.
-- `docklist-codebase-audit-pre-push` — line-by-line pre-push sweep. Heavy; use when the mission calls for it.
+Docklist's Supabase path is the **CLI against the local Docker stack**. No MCP
+server is configured, and hosted Supabase is never mutated during normal work.
+
+---
+
+## TESTING
+
+- `docklist-testing-patterns` — Vitest 4, jsdom + `@testing-library/react`, factories, regression discipline.
+
+> Automated tests prove implementation correctness. Browser workflows prove
+> product behaviour. Neither substitutes for the other.
+
+---
+
+## BROWSER
+
+- `playwright-cli` *(vendored official)* — browser commands and sessions.
+- `docklist-browser-fixtures` — Docklist URLs, personas, viewports, required checks.
+
+Repo-local `@playwright/cli` only (`npx --no-install playwright-cli …`). Never
+install globally; no Playwright MCP.
 
 ---
 
 ## ARCHITECTURE
 
-**When:** proposing structural changes, choosing patterns, recording product-scope decisions.
+- `docklist-software-architecture` — module boundaries and structure.
+- `docklist-architecture-decision-records` — ADRs in `docs/adr/`.
+- `docklist-typescript-expert` — data models, contracts, prop and route types.
+- `docklist-clean-code` — naming, size, extraction, and whether to refactor at all.
 
-- `docklist-software-architecture`
-- `docklist-architecture-decision-records`
+---
 
-Outcome: ADR document in `docs/adr/` + decision summary. Reference the relevant non-negotiable.
+## HIGH-RISK REVIEW
+
+- `docklist-differential-review` — adversarial review of a specific diff.
+- `docklist-vibe-code-auditor` — rapidly generated or AI-produced code.
+
+---
+
+## GIT
+
+- `docklist-git-integrity` — repo truth, exact manifest, staged diff review, commit identity, fetch-first fast-forward push, external verification handoff.
+
+Used for staging, commit, push and remote-integrity missions **only**. It is not
+a readiness or pre-release gate.
 
 ---
 
 ## OPTIONAL SPECIALISTS
 
-Pull in only when the task is clearly theirs.
-
-- `docklist-typescript-expert` — typed data models, service contracts, route data shapes.
-- `docklist-code-refactoring` — structured refactors.
-- `docklist-vibe-code-auditor` — auditing rapidly generated or AI-produced code.
-- `docklist-docs-architect` — long-form technical documentation.
 - `docklist-pwa-installability` — installability and staff mobile access.
+- `docklist-retrospective` — owner-invoked only, for *repeated* friction.
 
 ---
 
-## DEPLOYMENT-ORIENTED — not a normal product-build default
+## DEPLOYMENT — never a product-build default
 
-Use **only** when deployment or runtime acceptance is explicitly part of the mission. Never route here to "finish" ordinary product work.
+Use **only** when deployment or runtime acceptance is explicitly part of the
+mission. Never route here to "finish" ordinary product work.
 
-- `docklist-codebase-audit-pre-push` (production-readiness mode)
+- `docklist-cloudflare-edge` — edge-runtime constraints and deployment config.
+- Official `cloudflare/skills` — **not installed**; an on-demand upstream specialist for an explicitly scoped Cloudflare mission.
 
-`docs/ai/phase-11-deployment.md` and `docs/ai/private-beta-*.md` are historical records, not a live checklist.
+`docs/ai/phase-11-deployment.md` and `docs/ai/private-beta-*.md` are historical
+records, not a live checklist.
 
 ---
 
 ## Notes on specific task shapes
 
-**Mock data / feature data pattern** — `docklist-typescript-expert` + `docklist-clean-code`. Rules in `guardrails.md`: no inline JSX mocks, typed against feature `types.ts`, co-located under the feature.
+**Mock data / feature data** — `docklist-typescript-expert` + `docklist-clean-code`.
+Rules in `guardrails.md`: no inline JSX mocks, typed against feature `types.ts`,
+co-located under the feature.
 
-**Lovable-generated frontend review** — `docklist-vibe-code-auditor` + `docklist-differential-review` + the FRONTEND group. Lovable output is reviewed like any other generated code; Lovable is not product authority.
+**Lovable-generated frontend review** — `docklist-vibe-code-auditor` +
+`docklist-differential-review` + the FRONTEND group. Lovable output is reviewed
+like any other generated code; Lovable is not product authority.
 
-**Agent guidance or workflow changes** — `docklist-agent-discipline`. No instruction file should exceed 600 lines (doc hard max in `guardrails.md`).
+**Agent guidance or workflow changes** — `docklist-agent-discipline`.
 
-**Audit-only investigations** — `docklist-agent-discipline` + `docklist-proactive-maintenance-guard`. All findings are report-only.
+**Audit-only investigations** — `docklist-agent-discipline` +
+`docklist-proactive-maintenance-guard`. All findings are report-only.
+
+Routing expectations are exercised in `docs/ai/skill-routing-tests.md`.

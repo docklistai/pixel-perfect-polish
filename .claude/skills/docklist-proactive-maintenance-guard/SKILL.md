@@ -97,243 +97,40 @@ Do not use this skill as permission for:
 
 ## Classification Buckets
 
-Every proactive finding must be classified before action.
+Every proactive finding must be classified before any action.
 
-### Bucket 1: Fix Now
+| Bucket | Meaning |
+| --- | --- |
+| **1. Fix Now** | Inside approved scope, close to the work, small, local, low-risk, verifiable, no new feature, no product-direction change. |
+| **2. Scope Allows** | Fix only if the active task explicitly includes that domain (backend, Supabase, RLS, tests, tooling, docs). Otherwise report. |
+| **3. Report, Do Not Fix** | Spans features, touches shared architecture, changes app-wide behaviour, needs product approval, or touches security/auth/billing/payroll/AI/database safety. |
+| **4. Risk Log Only** | Real but not blocking — file size creeping, thin coverage, naming drift, future maintenance traps. |
+| **5. Forbidden Unless Approved** | Migrations, RLS, auth, billing, payroll, AI/operator implementation, integrations, dependency upgrades, CI/CD, generated files, repo-wide formatting, broad architecture. |
 
-The agent may fix the issue during the current task only if all conditions are true:
+Full conditions and worked examples: `references/classification-buckets.md`.
 
-- The issue is inside the approved scope.
-- The issue is close to the files or behaviour already being worked on.
-- The fix is small and local.
-- The fix is low-risk.
-- The fix does not introduce a new feature.
-- The fix does not change product direction.
-- The fix does not require a broader architecture decision.
-- The fix does not touch forbidden areas for the current task.
-- The fix can be verified with targeted checks.
+**During audit-only tasks every finding is report-only**, including anything that
+would otherwise qualify as Fix Now. "Fix Now" describes fix *eligibility* during
+implementation tasks; it is never an instruction to fix during an audit.
 
-Examples:
-
-- A button in the current component opens an empty drawer.
-- A form touched by the task has a missing label.
-- A route being edited contains a stale date.
-- A local test fails because of the current change.
-- A small type error appears in a directly related file.
-- A related copy string conflicts with DocklistAI product direction.
-- A nearby helper has a clear bug affecting the current feature.
-
-### Bucket 2: Fix Only If Current Scope Allows It
-
-The agent may fix the issue only if the active task explicitly includes that domain.
-
-Examples:
-
-- Backend API issue during an approved backend task.
-- Supabase query issue during an approved Supabase task.
-- RLS policy issue during an approved security or database task.
-- Test suite repair during an approved testing task.
-- Build configuration issue during an approved tooling task.
-- Documentation drift during an approved docs task.
-
-If the current task does not include that domain, report the issue instead.
-
-### Bucket 3: Report, Do Not Fix Yet
-
-The agent must report the issue but not implement it when:
-
-- The fix spans multiple features.
-- The fix touches shared architecture.
-- The fix changes app-wide behaviour.
-- The fix needs product approval.
-- The fix affects security, auth, billing, payroll, AI, or database safety.
-- The fix requires dependency upgrades.
-- The fix affects generated files.
-- The fix is real but outside the current scope.
-
-Examples:
-
-- App-wide drawer system feels weak.
-- A shared API pattern is inconsistent.
-- RLS policy may expose too much data.
-- Billing copy conflicts with pricing direction.
-- AI/operator logic needs tool permission boundaries.
-- CI config is messy but not blocking the task.
-- Multiple routes repeat the same fragile pattern.
-
-### Bucket 4: Risk Log Only
-
-The agent should log but not fix future-facing risks that are not blocking now.
-
-Examples:
-
-- Component is getting too large.
-- Route may soon exceed size guardrails.
-- Test coverage is thin but not failing.
-- Demo data is becoming hard to maintain.
-- Naming is inconsistent but not breaking behaviour.
-- A future dark mode conflict is likely.
-- A helper should eventually be extracted.
-
-### Bucket 5: Forbidden Unless Explicitly Approved
-
-The agent must not touch these unless the user has clearly approved that area for the current task:
-
-- Supabase migrations
-- RLS policies
-- auth logic
-- billing
-- payroll integrations
-- AI/operator implementation
-- external integrations
-- dependency upgrades
-- CI/CD workflows
-- generated files
-- large shared primitives
-- repo-wide formatting
-- broad architecture changes
+Do not list verified-correct guidance, healthy files, or successful checks as
+proactive findings — a finding must be an actual issue. If the approved scope is
+clean, write: "No proactive findings in approved scope."
 
 ## Domain Risk Rules
 
-### Frontend and UI
+Fix eligibility by domain, in one line each:
 
-Can be fixed proactively when local, visible, and inside scope.
+- **Frontend / UI** — fix proactively when local, visible and in scope.
+- **Backend / API** — notice anytime; fix only when backend work is approved.
+- **Supabase / DB / RLS** — notice anytime; report first unless database scope is approved.
+- **Auth / Security** — notice anytime; report first unless the task is security-scoped.
+- **Tests** — fix when related to the current change; no broad rewrites.
+- **Documentation** — fix when small and related; report larger drift.
+- **Dependencies / Tooling / CI** — notice anytime; report unless tooling scope is approved.
+- **Generated files** — never touch without explicit approval (`routeTree.gen.ts`, generated Supabase types, build artefacts, browser/session output).
 
-Look for:
-
-- broken interactions
-- empty drawers, modals, popovers, and dialogs
-- bland drawers, modals, popovers, and dialogs
-- misleading buttons
-- fake controls
-- missing disabled states
-- poor focus behaviour
-- accessibility issues
-- layout overflow
-- stale dates
-- copy mismatch
-- weak empty states
-
-### Backend and API
-
-Can be noticed anytime.
-
-Can only be fixed if backend work is approved.
-
-Look for:
-
-- unsafe assumptions
-- missing validation
-- unclear error handling
-- data leakage
-- overly broad queries
-- weak permission checks
-- API responses that do not match frontend needs
-- broken status codes
-- missing failure handling
-
-### Supabase, Database, and RLS
-
-Can be noticed anytime.
-
-Usually report first.
-
-Only fix when database, Supabase, RLS, or security scope is explicitly approved.
-
-Look for:
-
-- workspace isolation risks
-- manager-only data exposed to staff
-- missing tenant filters
-- unsafe update or delete policies
-- migration drift
-- historical data risks
-- missing indexes that clearly affect approved scope
-- unsafe RPC behaviour
-- staff visibility risks
-
-### Auth and Security
-
-Can be noticed anytime.
-
-Report first unless the task is explicitly security or auth scoped.
-
-Look for:
-
-- permission leaks
-- unsafe redirects
-- missing role checks
-- sensitive data exposure
-- secrets or tokens in code
-- weak access boundaries
-- insecure client-side assumptions
-- staff access to manager-only data
-
-### Tests and Verification
-
-Can be fixed proactively when related to the current task.
-
-Do not rewrite broad tests unless approved.
-
-Look for:
-
-- tests failing because of current changes
-- missing test updates for changed behaviour
-- fragile assertions in touched areas
-- test data that no longer matches approved behaviour
-- snapshot drift caused by current work
-
-### Documentation
-
-Can be fixed proactively when small and related.
-
-Report larger documentation debt.
-
-Look for:
-
-- outdated instructions
-- wrong command references
-- missing scope notes
-- incorrect product direction
-- agent guidance conflicts
-- old references to payroll integrations
-- old references to AI-heavy product positioning
-- stale product-split figures (the split is 50/30/20)
-- guidance that treats pilot, release or deployment as the default goal
-- guidance that treats Lovable as product authority rather than a tool
-
-### Dependencies, Tooling, and CI
-
-Can be noticed anytime.
-
-Usually report first.
-
-Only fix when the task includes tooling, build, dependency, or CI scope.
-
-Look for:
-
-- broken scripts
-- failing build config
-- unsafe dependency patterns
-- deprecated commands
-- duplicate tooling rules
-- CI mismatch with local commands
-- unnecessary dependency additions
-
-### Generated Files
-
-Must not be touched unless explicitly approved.
-
-Examples:
-
-- routeTree.gen.ts
-- generated Supabase types
-- generated API clients
-- build artifacts
-- temporary files
-- Playwright traces
-- Playwright screenshots
-- test result artifacts
+Per-domain checklists of what to look for: `references/domain-checklists.md`.
 
 ## Required Workflow
 

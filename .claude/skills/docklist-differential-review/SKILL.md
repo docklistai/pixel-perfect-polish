@@ -1,6 +1,6 @@
 ---
 name: docklist-differential-review
-description: "Security-focused code review for PRs, commits, and diffs."
+description: "Use when reviewing a Docklist diff, PR, commit or staged change for security and correctness risk before it lands. Adversarial, diff-scoped review of what actually changed. Use before committing anything touching data access, auth boundaries or the staff/manager split."
 risk: unknown
 source: community
 ---

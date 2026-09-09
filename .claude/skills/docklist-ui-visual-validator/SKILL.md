@@ -1,6 +1,6 @@
 ---
 name: docklist-ui-visual-validator
-description: Rigorous visual validation expert specializing in UI testing, design system compliance, and accessibility verification.
+description: "Use when verifying that a Docklist UI change actually looks and behaves correctly — visual regressions, design-system compliance, layout and spacing checks, and accessibility verification of rendered output. Use after a visual change, alongside browser evidence."
 risk: unknown
 source: community
 date_added: '2026-02-27'

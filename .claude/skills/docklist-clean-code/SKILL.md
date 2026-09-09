@@ -1,94 +1,93 @@
 ---
 name: docklist-clean-code
-description: "DocklistAI clean code skill. Use for frontend architecture guardrails, file-size limits, route/component extraction, simplification, and avoiding bloated or unclear code."
-risk: safe
-source: "ClawForge (https://github.com/jackjin1997/ClawForge)"
+description: Use when structuring or restructuring Docklist code — naming, function and component size, extraction, removing duplication that causes real inconsistency, and deciding whether a refactor is justified at all. Absorbs the refactoring discipline. Use before splitting a file or starting any structure-only change.
+risk: low
+source: project
 date_added: "2026-02-27"
 ---
 
-# Clean Code Skill
+# Docklist Clean Code
 
-This skill embodies the principles of "Clean Code" by Robert C. Martin (Uncle Bob). Use it to transform "code that works" into "code that is clean."
+Structure serves the product. This skill decides **whether** to restructure and
+**how far**, not how to satisfy a style ideal.
 
-## 🧠 Core Philosophy
-> "Code is clean if it can be read, and enhanced by a developer other than its original author." — Grady Booch
+## When to refactor — and when not to
 
-## When to Use
-Use this skill when:
-- **Writing new code**: To ensure high quality from the start.
-- **Reviewing Pull Requests**: To provide constructive, principle-based feedback.
-- **Refactoring legacy code**: To identify and remove code smells.
-- **Improving team standards**: To align on industry-standard best practices.
+**Do not refactor because something could be cleaner.**
 
-## 1. Meaningful Names
-- **Use Intention-Revealing Names**: `elapsedTimeInDays` instead of `d`.
-- **Avoid Disinformation**: Don't use `accountList` if it's actually a `Map`.
-- **Make Meaningful Distinctions**: Avoid `ProductData` vs `ProductInfo`.
-- **Use Pronounceable/Searchable Names**: Avoid `genymdhms`.
-- **Class Names**: Use nouns (`Customer`, `WikiPage`). Avoid `Manager`, `Data`.
-- **Method Names**: Use verbs (`postPayment`, `deletePage`).
+Refactor only when it is required to:
 
-## 2. Functions
-- **Small!**: Functions should be shorter than you think.
-- **Do One Thing**: A function should do only one thing, and do it well.
-- **One Level of Abstraction**: Don't mix high-level business logic with low-level details (like regex).
-- **Descriptive Names**: `isPasswordValid` is better than `check`.
-- **Arguments**: 0 is ideal, 1-2 is okay, 3+ requires a very strong justification.
-- **No Side Effects**: Functions shouldn't secretly change global state.
+- safely implement approved behaviour;
+- stay inside the file-size guardrails in `docs/ai/guardrails.md`;
+- remove duplication that is causing **real inconsistency** (the same rule
+  enforced differently in two places — see `docklist-scheduling-integrity`);
+- isolate a genuinely new responsibility being introduced now.
 
-## 3. Comments
-- **Don't Comment Bad Code—Rewrite It**: Most comments are a sign of failure to express ourselves in code.
-- **Explain Yourself in Code**:
-  ```python
-  # Check if employee is eligible for full benefits
-  if employee.flags & HOURLY and employee.age > 65:
-  ```
-  vs
-  ```python
-  if employee.isEligibleForFullBenefits():
-  ```
-- **Good Comments**: Legal, Informative (regex intent), Clarification (external libraries), TODOs.
-- **Bad Comments**: Mumbling, Redundant, Misleading, Mandated, Noise, Position Markers.
+Otherwise, leave it alone and log it as a Risk Log finding
+(`docklist-proactive-maintenance-guard`).
 
-## 4. Formatting
-- **The Newspaper Metaphor**: High-level concepts at the top, details at the bottom.
-- **Vertical Density**: Related lines should be close to each other.
-- **Distance**: Variables should be declared near their usage.
-- **Indentation**: Essential for structural readability.
+**Visible behaviour must not change during structure-only work.** If a split
+would alter what the user sees, that is a separate, owner-approved change.
+Never bundle unrelated cleanup into a refactor.
 
-## 5. Objects and Data Structures
-- **Data Abstraction**: Hide the implementation behind interfaces.
-- **The Law of Demeter**: A module should not know about the innards of the objects it manipulates. Avoid `a.getB().getC().doSomething()`.
-- **Data Transfer Objects (DTO)**: Classes with public variables and no functions.
+## Size and extraction
 
-## 6. Error Handling
-- **Use Exceptions instead of Return Codes**: Keeps logic clean.
-- **Write Try-Catch-Finally First**: Defines the scope of the operation.
-- **Don't Return Null**: It forces the caller to check for null every time.
-- **Don't Pass Null**: Leads to `NullPointerException`.
+Limits live in `docs/ai/guardrails.md` — run the line-count precheck before
+editing. In short:
 
-## 7. Unit Tests
-- **The Three Laws of TDD**:
-  1. Don't write production code until you have a failing unit test.
-  2. Don't write more of a unit test than is sufficient to fail.
-  3. Don't write more production code than is sufficient to pass the failing test.
-- **F.I.R.S.T. Principles**: Fast, Independent, Repeatable, Self-Validating, Timely.
+- Routes orchestrate; they do not hold large mock data, big forms, complex
+  tables, or service logic.
+- Extract when a JSX block passes ~80 lines, a drawer has more than one section,
+  mock data passes ~40 lines, or a section appears on more than one page.
+- Over hard max: extract before adding substantial logic. A targeted bug fix may
+  touch the file where necessary.
+- Do not refactor merely because a file is near its target — target flags review,
+  not action.
 
-## 8. Classes
-- **Small!**: Classes should have a single responsibility (SRP).
-- **The Stepdown Rule**: We want the code to read like a top-down narrative.
+## Naming
 
-## 9. Smells and Heuristics
-- **Rigidity**: Hard to change.
-- **Fragility**: Breaks in many places.
-- **Immobility**: Hard to reuse.
-- **Viscosity**: Hard to do the right thing.
-- **Needless Complexity/Repetition**.
+- Intention-revealing: `elapsedTimeInDays`, not `d`.
+- No disinformation: don't call a `Map` a `List`.
+- Functions are verbs (`publishRota`), types and components are nouns
+  (`ShiftCard`, `WeekSummary`).
+- Searchable over clever. Domain words from the product, not invented synonyms —
+  a "shift" is a shift everywhere.
 
-## 🛠️ Implementation Checklist
-- [ ] Is this function smaller than 20 lines?
-- [ ] Does this function do exactly one thing?
-- [ ] Are all names searchable and intention-revealing?
-- [ ] Have I avoided comments by making the code clearer?
-- [ ] Am I passing too many arguments?
-- [ ] Is there a failing test for this change?
+## Functions and components
+
+- Do one thing at one level of abstraction. Don't mix scheduling rules with
+  formatting.
+- Few arguments; prefer a typed options object past two.
+- No hidden side effects — a function named `get*` must not write.
+- Prefer early return over nesting.
+- Components: one responsibility, props typed against the feature's `types.ts`.
+
+## Comments
+
+- Rewrite unclear code rather than explaining it.
+- Keep comments that carry non-obvious *why*: an invariant, a workaround, a
+  product rule, a deliberate exception. Docklist's scheduling and tenancy rules
+  are exactly the kind of thing worth a sentence.
+- Match the surrounding file's comment density.
+
+## Error handling
+
+- Fail loudly at boundaries; never swallow an error to keep a screen quiet.
+- Don't return `null` to mean "something went wrong" — model the failure
+  (`docklist-typescript-expert`, discriminated unions).
+- An action that cannot succeed should not be offered as available — an
+  offered-then-refused control is a trust defect.
+
+## Smells worth acting on here
+
+Rigidity · fragility · duplicated rules that have already drifted · a component
+that knows about three features · a route that grew a service inside it.
+
+Cosmetic imperfection is not a smell.
+
+## Related
+
+- `docs/ai/guardrails.md` — the authoritative size limits.
+- `docklist-software-architecture` — module boundaries and larger structure.
+- `docklist-testing-patterns` — coverage expectations (note: Docklist does **not**
+  require deleting working code because a test came second).

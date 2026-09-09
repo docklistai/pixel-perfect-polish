@@ -1,6 +1,6 @@
 ---
 name: docklist-architecture-decision-records
-description: "DocklistAI ADR skill. Use when recording major product or architecture decisions such as frontend lock, staff portal access, migration strategy, or excluded scope."
+description: "Use when recording a significant Docklist product or architecture decision as an ADR in docs/adr/ — product-boundary changes, staff portal access model, scheduling authority, migration strategy, or explicitly excluded scope. Use when a decision needs to outlive the conversation."
 risk: unknown
 source: community
 date_added: "2026-02-27"

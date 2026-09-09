@@ -87,11 +87,11 @@ Match the checks to the domains touched:
 |---|---|
 | Any code | targeted typecheck + `git diff --check` |
 | Logic / helpers / rules | targeted unit tests, passing |
-| User-visible change | browser verification of the actual journey |
-| Backend / Supabase / RLS | SQL and security validation for the affected policies |
+| User-visible change | browser verification of the actual journey (`playwright-cli` + `docklist-browser-fixtures`) |
+| Backend / Supabase / RLS | SQL and security validation for the affected policies (`docklist-sql-suite`, `docklist-data-boundaries`) |
 | Broad or cross-cutting change | full suite |
 
-Apply `docklist-verification-before-completion`. Run the command, read the output, then make the claim. Report every skipped check and why.
+Commands are in `docklist-validate`. Apply `docklist-verification-before-completion`. Run the command, read the output, then make the claim. Report every skipped check and why.
 
 ## Phase 5 — Report
 
@@ -103,4 +103,4 @@ Use `docs/ai/snippets/completion-report.md`.
 - List real deferred findings.
 - **No readiness declaration, readiness score, or deployment recommendation.**
 
-Staging and commit happen only on explicit user authorisation, with exact paths — never `git add .` / `-A` / `--all`. After an authorised push, follow the external GitHub verification gate in `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`: report the full SHA, verify the remote, then stop.
+Staging and commit happen only on explicit user authorisation and follow `docklist-git-integrity` — exact paths, never `git add .` / `-A` / `--all`. After an authorised push, follow the external GitHub verification gate in `docs/ai/DOCKLIST_OPERATING_SYSTEM.md`: report the full SHA, verify the remote, then stop.

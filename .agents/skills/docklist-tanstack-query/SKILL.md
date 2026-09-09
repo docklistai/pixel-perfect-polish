@@ -1,6 +1,6 @@
 ---
 name: docklist-tanstack-query
-description: "Use to prevent stale UI and enforce proper async state patterns with TanStack Query."
+description: "Use when fetching or mutating server state in Docklist — queries, query keys, mutations, cache invalidation, or any screen showing stale data after an action. Enforces TanStack Query v5 patterns for rota, leave, timesheet and staff portal flows. Use whenever a change adds or updates a useQuery/useMutation."
 ---
 
 # TanStack Query Guard

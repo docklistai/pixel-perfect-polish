@@ -1,6 +1,6 @@
 ---
 name: docklist-vibe-code-auditor
-description: Audit rapidly generated or AI-produced code for structural flaws, fragility, and production risks.
+description: "Use when auditing rapidly generated or AI-produced Docklist code for structural flaws, fragility and hidden risk — typically Lovable output or a large generated batch. Use when code works but its robustness is unproven; report issues only, and never include a readiness score unless the mission asks for one."
 risk: safe
 source: original
 date_added: "2026-02-28"

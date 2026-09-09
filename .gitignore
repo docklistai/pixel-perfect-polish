@@ -46,3 +46,7 @@ supabase/.temp/
 
 # Agent working plans (ephemeral task state — outcomes captured in memory/)
 .claude/plans/
+
+# Playwright CLI local state (browser choice is machine-specific; output may contain credentials)
+.playwright-cli/
+.playwright/

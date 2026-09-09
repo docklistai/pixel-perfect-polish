@@ -135,7 +135,27 @@ Use `docklist-proactive-maintenance-guard` to classify any nearby issue into: Fi
 
 - **Claude Code** — skills in `.claude/skills/`. This is the canonical source of truth.
 - **Codex** — skills in `.agents/skills/`, which is a mirror of `.claude/skills/`. If a skill referenced by `skill-router.md` is missing there, fall back to the canonical copy in `.claude/skills/`.
-- After editing any skill, run `scripts/check-skill-parity.sh`. Run `scripts/sync-skills.sh` only when intentionally mirroring `.claude/skills/` into `.agents/skills/`.
+- After editing any skill, run `scripts/check-skill-parity.sh` and `scripts/check-skill-routing.sh`. Run `scripts/sync-skills.sh` only when intentionally mirroring `.claude/skills/` into `.agents/skills/`.
+- Never hand-maintain different Claude and Codex versions of the same skill.
+
+## Vendored upstream skills
+
+Skills without the `docklist-` prefix are vendored from official upstream
+repositories: `supabase` and `supabase-postgres-best-practices`
+(supabase/agent-skills, MIT) and `playwright-cli` (`@playwright/cli`, Apache-2.0).
+
+- Each carries a `VENDOR.md` recording upstream repository, pinned commit or
+  version, sync date, licence, and local modifications (normally **none**).
+- **Do not edit vendored files.** Docklist-specific rules live in the overlay
+  skills beside them — `docklist-data-boundaries`, `docklist-sql-suite`,
+  `docklist-browser-fixtures`.
+- **Do not auto-update them.** No `npx skills update` and no re-running a vendor
+  installer during normal product work; re-syncing is an explicit, owner-approved
+  maintenance task that re-pins the version and updates `VENDOR.md`.
+- Vendor text may describe optional external tooling (MCP servers, global
+  installs). Docklist's approved path always wins: **no MCP server is configured**,
+  Supabase work uses the CLI against the local Docker stack, and `@playwright/cli`
+  is repo-local only.
 
 ## Required artifacts per task
 

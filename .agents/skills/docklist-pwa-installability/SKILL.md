@@ -1,6 +1,6 @@
 ---
 name: docklist-pwa-installability
-description: "Use for app-like installability and staff portal mobile access."
+description: "Use when working on Docklist installability or staff mobile access — web app manifest, icons, service worker registration, offline fallback, or Add to Home Screen. Use only for app-like install behaviour; not for general mobile layout work."
 ---
 
 # PWA Installability Guard

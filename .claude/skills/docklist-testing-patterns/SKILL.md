@@ -1,272 +1,121 @@
 ---
 name: docklist-testing-patterns
-description: "Jest testing patterns, factory functions, mocking strategies, and TDD workflow. Use when writing unit tests, creating test factories, or following TDD red-green-refactor cycle."
-risk: unknown
-source: community
-date_added: "2026-02-27"
+description: Use when writing, changing or reviewing Docklist automated tests — Vitest unit tests, jsdom component tests with @testing-library/react, factories, regression coverage for a bug, or deciding what a change must prove. Matches this repo's actual stack. Use whenever a fix needs test coverage or an existing test needs updating.
+risk: low
+source: project
+date_added: "2026-09-09"
 ---
 
-# Testing Patterns and Utilities
+# Docklist Testing Patterns
 
-## Testing Philosophy
+## The canonical rule
 
-**Test-Driven Development (TDD) — Docklist rules:**
+> **Automated tests prove implementation correctness.
+> Browser workflows prove product behaviour.
+> Neither substitutes for the other.**
 
-Rigor without destructive ritual. Test order is a tool, not a moral test.
+A green suite does not mean the workflow is usable, and a good browser session
+does not mean the logic is right. Report both kinds of evidence, or say which is
+missing and why (`docklist-browser-fixtures`, `docklist-validate`).
 
-- **New bug:** reproduce it with a failing test first, where practical. The failing test is the proof you understood the defect.
-- **New pure behaviour** (helpers, calculations, data shaping, rules): test-first is preferred.
-- **Inherited or in-progress implementation:** do **not** delete valid working code just because the test was written after it. Add the coverage now.
-- **Before claiming a defect fixed:** regression coverage must exist and must actually exercise the defect. Verify red-green — revert the fix, watch the test fail, restore it.
-- **Browser-observed regressions:** add an automated regression test where practical, so the same defect cannot return silently.
+## This repo's stack
+
+**Vitest 4** · **@testing-library/react 16** · **@testing-library/jest-dom** ·
+**@testing-library/user-event** · **jsdom 30** · React 19 · TypeScript 5.8.
+
+`vitest.config.ts` defines two projects:
+
+| Project | Files | Environment | Setup |
+| --- | --- | --- | --- |
+| node | `src/**/*.test.ts` | `node` | — |
+| dom | `src/**/*.test.tsx` | `jsdom` | `./src/test/setupDom.ts` |
+
+**Components are rendered directly — never routes.** Put logic in `.test.ts`
+(node) and rendered component behaviour in `.test.tsx` (jsdom).
+
+There is **no Jest, no React Native, and no Playwright test suite** in this
+project. Do not use `fireEvent.press`, `fireEvent.changeText`,
+`@testing-library/react-native`, `jest.requireMock`, or `jest.requireActual`.
+Vitest's `vi.*` API is the mocking surface; `describe/it/expect` come from
+`vitest`.
+
+## Shape of a test
+
+```ts
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+describe("resolveShiftWeek", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("keeps an overnight shift in its owning shift-day", () => {
+    expect(resolveShiftWeek(overnightShift)).toBe("2026-09-07");
+  });
+});
+```
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+it("shows the refusal reason when Build has no source week", async () => {
+  render(<BuildTheWeekPanel {...getMockProps({ sourceWeek: null })} />);
+  await userEvent.click(screen.getByRole("button", { name: /build/i }));
+  expect(screen.getByText(/no recent pattern/i)).toBeVisible();
+});
+```
+
+Query by role and accessible name where possible — it tests what a user can
+actually reach, and doubles as an accessibility check.
+
+## Factories
+
+Use `getMockX(overrides?: Partial<X>)` helpers with sensible defaults, typed
+against the feature's `types.ts`. Override only the field under test, so the
+test states its own point.
+
+## TDD — rigor without destructive ritual
+
+Test order is a tool, not a moral test.
+
+- **New bug** — reproduce with a failing test first where practical. The failing
+  test proves you understood the defect.
+- **New pure behaviour** (rules, calculations, data shaping) — test-first
+  preferred.
+- **Inherited or in-progress work** — do **not** delete valid working code
+  because the test came second. Add the coverage now.
+- **Before claiming a defect fixed** — coverage must exist and must exercise the
+  defect. Verify red-green: revert the fix, watch it fail, restore it.
+- **Browser-observed regression** — add automated coverage where practical so it
+  cannot return silently.
 - Refactor after green.
 
-**Tests must prove behaviour, not mocks.** A test that only asserts a mock was called proves nothing about the product. See *Anti-Patterns* below.
+## Test behaviour, not mocks
 
-**Behavior-Driven Testing:**
-- Test behavior, not implementation
-- Focus on public APIs and business requirements
-- Avoid testing implementation details
-- Use descriptive test names that describe behavior
+```ts
+// Bad — asserts the mock, proves nothing about the product
+expect(mockFetchRota).toHaveBeenCalled();
 
-**Factory Pattern:**
-- Create `getMockX(overrides?: Partial<X>)` functions
-- Provide sensible defaults
-- Allow overriding specific properties
-- Keep tests DRY and maintainable
-
-## Test Utilities
-
-### Custom Render Function
-
-Create a custom render that wraps components with required providers:
-
-```typescript
-// src/utils/testUtils.tsx
-import { render } from '@testing-library/react-native';
-import { ThemeProvider } from './theme';
-
-export const renderWithTheme = (ui: React.ReactElement) => {
-  return render(
-    <ThemeProvider>{ui}</ThemeProvider>
-  );
-};
+// Good — asserts what the user gets
+expect(screen.getByText("Late shift")).toBeVisible();
 ```
 
-**Usage:**
-```typescript
-import { renderWithTheme } from 'utils/testUtils';
-import { screen } from '@testing-library/react-native';
+**Never mock away the behaviour under test.** If a test passes with the real
+implementation deleted, it is not a test. Mock at the boundary — network,
+clock, randomness — not at the thing you are trying to prove.
 
-it('should render component', () => {
-  renderWithTheme(<MyComponent />);
-  expect(screen.getByText('Hello')).toBeTruthy();
-});
-```
+Prefer real data structures over stubs; prefer a fake clock over `Date.now()`
+assertions that drift.
 
-## Factory Pattern
+## Scope of proof
 
-### Component Props Factory
+| Change | Minimum proof |
+| --- | --- |
+| Helper / rule / calculation | targeted node test |
+| Component behaviour | targeted jsdom test + browser check |
+| Shared type or provider | full `npm run test` |
+| Scheduling rule | test at the **shared** layer, not per call site — see `docklist-scheduling-integrity` |
+| RLS / policy / RPC | SQL suite — see `docklist-sql-suite` |
+| User-visible workflow | browser evidence — see `docklist-browser-fixtures` |
 
-```typescript
-import { ComponentProps } from 'react';
-
-const getMockMyComponentProps = (
-  overrides?: Partial<ComponentProps<typeof MyComponent>>
-) => {
-  return {
-    title: 'Default Title',
-    count: 0,
-    onPress: jest.fn(),
-    isLoading: false,
-    ...overrides,
-  };
-};
-
-// Usage in tests
-it('should render with custom title', () => {
-  const props = getMockMyComponentProps({ title: 'Custom Title' });
-  renderWithTheme(<MyComponent {...props} />);
-  expect(screen.getByText('Custom Title')).toBeTruthy();
-});
-```
-
-### Data Factory
-
-```typescript
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'user';
-}
-
-const getMockUser = (overrides?: Partial<User>): User => {
-  return {
-    id: '123',
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'user',
-    ...overrides,
-  };
-};
-
-// Usage
-it('should display admin badge for admin users', () => {
-  const user = getMockUser({ role: 'admin' });
-  renderWithTheme(<UserCard user={user} />);
-  expect(screen.getByText('Admin')).toBeTruthy();
-});
-```
-
-## Mocking Patterns
-
-### Mocking Modules
-
-```typescript
-// Mock entire module
-jest.mock('utils/analytics');
-
-// Mock with factory function
-jest.mock('utils/analytics', () => ({
-  Analytics: {
-    logEvent: jest.fn(),
-  },
-}));
-
-// Access mock in test
-const mockLogEvent = jest.requireMock('utils/analytics').Analytics.logEvent;
-```
-
-### Mocking GraphQL Hooks
-
-```typescript
-jest.mock('./GetItems.generated', () => ({
-  useGetItemsQuery: jest.fn(),
-}));
-
-const mockUseGetItemsQuery = jest.requireMock(
-  './GetItems.generated'
-).useGetItemsQuery as jest.Mock;
-
-// In test
-mockUseGetItemsQuery.mockReturnValue({
-  data: { items: [] },
-  loading: false,
-  error: undefined,
-});
-```
-
-## Test Structure
-
-```typescript
-describe('ComponentName', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  describe('Rendering', () => {
-    it('should render component with default props', () => {});
-    it('should render loading state when loading', () => {});
-  });
-
-  describe('User interactions', () => {
-    it('should call onPress when button is clicked', async () => {});
-  });
-
-  describe('Edge cases', () => {
-    it('should handle empty data gracefully', () => {});
-  });
-});
-```
-
-## Query Patterns
-
-```typescript
-// Element must exist
-expect(screen.getByText('Hello')).toBeTruthy();
-
-// Element should not exist
-expect(screen.queryByText('Goodbye')).toBeNull();
-
-// Element appears asynchronously
-await waitFor(() => {
-  expect(screen.findByText('Loaded')).toBeTruthy();
-});
-```
-
-## User Interaction Patterns
-
-```typescript
-import { fireEvent, screen } from '@testing-library/react-native';
-
-it('should submit form on button click', async () => {
-  const onSubmit = jest.fn();
-  renderWithTheme(<LoginForm onSubmit={onSubmit} />);
-
-  fireEvent.changeText(screen.getByLabelText('Email'), 'user@example.com');
-  fireEvent.changeText(screen.getByLabelText('Password'), 'password123');
-  fireEvent.press(screen.getByTestId('login-button'));
-
-  await waitFor(() => {
-    expect(onSubmit).toHaveBeenCalled();
-  });
-});
-```
-
-## Anti-Patterns to Avoid
-
-### Testing Mock Behavior Instead of Real Behavior
-
-```typescript
-// Bad - testing the mock
-expect(mockFetchData).toHaveBeenCalled();
-
-// Good - testing actual behavior
-expect(screen.getByText('John Doe')).toBeTruthy();
-```
-
-### Not Using Factories
-
-```typescript
-// Bad - duplicated, inconsistent test data
-it('test 1', () => {
-  const user = { id: '1', name: 'John', email: 'john@test.com', role: 'user' };
-});
-it('test 2', () => {
-  const user = { id: '2', name: 'Jane', email: 'jane@test.com' }; // Missing role!
-});
-
-// Good - reusable factory
-const user = getMockUser({ name: 'Custom Name' });
-```
-
-## Best Practices
-
-1. **Always use factory functions** for props and data
-2. **Test behavior, not implementation**
-3. **Use descriptive test names**
-4. **Organize with describe blocks**
-5. **Clear mocks between tests**
-6. **Keep tests focused** - one behavior per test
-
-## Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific file
-npm test ComponentName.test.tsx
-```
-
-## Integration with Other Skills
-
-- **react-ui-patterns**: Test all UI states (loading, error, empty, success)
-- **systematic-debugging**: Write test that reproduces bug before fixing
-
-## When to Use
-This skill is applicable to execute the workflow or actions described in the overview.
+Targeted checks first; full suite when scope or risk warrants it. Commands are
+in `docklist-validate`.

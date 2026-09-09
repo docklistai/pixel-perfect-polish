@@ -1,6 +1,6 @@
 ---
 name: docklist-tanstack-start
-description: "Use to prevent Next.js/App Router/RSC hallucinations and enforce TanStack Start/Router conventions."
+description: "Use when working on Docklist routing, route files, loaders, server functions or SSR entry points. Enforces TanStack Start/Router 1.16x conventions for this repo and prevents Next.js, App Router and RSC assumptions. Use before creating a route or touching vite.config.ts, src/start.ts, src/server.ts or routeTree.gen.ts."
 ---
 
 # TanStack Start Guard
