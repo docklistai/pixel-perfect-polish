@@ -110,6 +110,10 @@ a readiness or pre-release gate.
 
 ## OPTIONAL SPECIALISTS
 
+- `docklist-orchestra` — running an approved bounded task through the Orchestra
+  multi-agent lifecycle. Architecture, provenance and refresh live in
+  `docs/ai/orchestra.md`. Orchestra executes approved work only; it never
+  decides product scope and never pushes Docklist.
 - `docklist-pwa-installability` — installability and staff mobile access.
 - `docklist-retrospective` — owner-invoked only, for *repeated* friction.
 

@@ -1,0 +1,240 @@
+From 1b1cb502b908e838a02cdc3011a9bdcc230f8e1c Mon Sep 17 00:00:00 2001
+From: Docklist Orchestra Engine <orchestra-engine@localhost>
+Date: Wed, 9 Sep 2026 19:59:52 +0100
+Subject: [PATCH] fix(orchestra): preserve explicit coder through planning
+
+Upstream handle_commit_plan overwrote tasks.coder_agent with DEFAULT_PLANNER,
+making the planner the sticky coder, so implementation and post-review
+corrections both routed to the planner instead of the assigned coder.
+
+Upstream base: a0a40c6c0c73eca3b8bbd2837af9fbb71253fd9e
+
+Behaviour after this change:
+- commit planning still always runs on DEFAULT_PLANNER
+- an explicitly assigned coder_agent is preserved through planning
+- a null or unset coder still falls back to DEFAULT_PLANNER, so legacy
+  behaviour is unchanged for tasks with no explicit coder
+- DEFAULT_CODER semantics are not altered
+- implementation-review corrections return to the preserved coder
+- plan review remains independent on DEFAULT_PLAN_REVIEWER
+- no schema, config or model-policy change; other task types unaffected
+
+Regression coverage added as TestPlannerCoderDecoupling (5 tests). Negative
+controls: two of them fail against unpatched upstream, and the null-coder test
+fails when the fallback is changed to DEFAULT_CODER.
+
+Validation before commit:
+- full suite: 661 passed, 0 failed
+- focused regression class: 5 of 5 passed
+
+Independent review:
+- Antigravity Gemini 3.8 Flash High, effort high, two read-only passes,
+  both APPROVE with no material findings
+- Codex GPT-5.6 Sol was unavailable due to an account usage limit and did
+  not review this patch
+---
+ kanban-orchestra/scripts/orchestrator.py |   9 +-
+ kanban-orchestra/scripts/test_kanban.py  | 167 +++++++++++++++++++++++
+ 2 files changed, 175 insertions(+), 1 deletion(-)
+
+diff --git a/kanban-orchestra/scripts/orchestrator.py b/kanban-orchestra/scripts/orchestrator.py
+index 738aa64..f24c0d3 100644
+--- a/kanban-orchestra/scripts/orchestrator.py
++++ b/kanban-orchestra/scripts/orchestrator.py
+@@ -1134,8 +1134,15 @@ def handle_commit_plan(task, conn):
+     """Execute a commit-plan step. Returns True on success."""
+     # Always uses DEFAULT_PLANNER rather than task-level coder_agent. This is intentional to ensure
+     # consistent commit planning across all tasks - agent-specific override is not supported.
++    # Planning selects the planner but never claims the implementation slot: an explicitly
++    # assigned coder_agent is preserved so commit-make and review corrections still route to
++    # it, and only an unset coder_agent falls back to the planner.
+     agent = DEFAULT_PLANNER
+-    db.update_task(conn, task["id"], coder_agent=agent)
++    db.update_task(
++        conn,
++        task["id"],
++        coder_agent=task.get("coder_agent") or agent,
++    )
+     ensure_agent_acked(agent, task["id"], conn)
+     comments = db.get_comments(conn, task["id"])
+     prompt = prompt_builder.build_prompt(task, "commit-plan", agent, comments)
+diff --git a/kanban-orchestra/scripts/test_kanban.py b/kanban-orchestra/scripts/test_kanban.py
+index 76afab9..6600a9c 100644
+--- a/kanban-orchestra/scripts/test_kanban.py
++++ b/kanban-orchestra/scripts/test_kanban.py
+@@ -8539,5 +8539,172 @@ class TestAgentPingACKGate(unittest.TestCase):
+         mock_update.assert_not_called()
+ 
+ 
++# Docklist compatibility: planner/coder decoupling.
++#
++# Upstream handle_commit_plan overwrote tasks.coder_agent with DEFAULT_PLANNER,
++# making the planner the sticky coder so implementation and review corrections
++# both routed to the planner. The Docklist change preserves an explicitly
++# assigned coder_agent while planning itself still runs on DEFAULT_PLANNER.
++# Tests A and D fail against unpatched upstream; B, C and E lock the behaviour
++# the change deliberately preserves.
++
++_DECOUPLING_PLANNER = "opus"
++_DECOUPLING_PLAN_REVIEWER = "sonnet"
++_DECOUPLING_CODER = "antigravity"
++# Deliberately distinct from _DECOUPLING_PLANNER so the null-coder regression can
++# prove the fallback is DEFAULT_PLANNER and never DEFAULT_CODER, regardless of any
++# ambient ORCHESTRA_DEFAULT_* values.
++_DECOUPLING_DEFAULT_CODER = "sentinel-not-planner"
++
++
++class TestPlannerCoderDecoupling(unittest.TestCase):
++    """commit-plan must not claim the implementation slot."""
++
++    def setUp(self):
++        self._ack_patcher = patch.object(orchestrator, "ensure_agent_acked")
++        self._ack_patcher.start()
++        self._planner_patcher = patch.object(
++            orchestrator, "DEFAULT_PLANNER", _DECOUPLING_PLANNER
++        )
++        self._planner_patcher.start()
++        self._plan_reviewer_patcher = patch.object(
++            orchestrator, "DEFAULT_PLAN_REVIEWER", _DECOUPLING_PLAN_REVIEWER
++        )
++        self._plan_reviewer_patcher.start()
++        self._default_coder_patcher = patch.object(
++            orchestrator, "DEFAULT_CODER", _DECOUPLING_DEFAULT_CODER
++        )
++        self._default_coder_patcher.start()
++        self.tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
++        self.tmp.close()
++        self.conn = db.connect(self.tmp.name)
++
++    def tearDown(self):
++        self._default_coder_patcher.stop()
++        self._plan_reviewer_patcher.stop()
++        self._planner_patcher.stop()
++        self._ack_patcher.stop()
++        self.conn.close()
++        os.unlink(self.tmp.name)
++
++    def _plan_task(self, coder_agent):
++        tid = db.add_task(
++            self.conn, "Decoupling task", branch="feat-x", coder_agent=coder_agent
++        )
++        db.update_task(self.conn, tid, status="running", next_step="commit-plan")
++        return tid
++
++    def _planner_writes_plan(self, tid):
++        def _side_effect(*args, **kwargs):
++            db.update_task(self.conn, tid, commit_plan="a plan")
++            return 0
++
++        return _side_effect
++
++    def test_explicit_coder_survives_commit_plan(self):
++        tid = self._plan_task(_DECOUPLING_CODER)
++        task = db.get_task(self.conn, tid)
++
++        with patch.object(
++            orchestrator, "run_agent", side_effect=self._planner_writes_plan(tid)
++        ):
++            self.assertTrue(orchestrator.handle_commit_plan(task, self.conn))
++
++        self.assertEqual(
++            db.get_task(self.conn, tid)["coder_agent"], _DECOUPLING_CODER
++        )
++
++    def test_planner_remains_default_planner(self):
++        tid = self._plan_task(_DECOUPLING_CODER)
++        task = db.get_task(self.conn, tid)
++
++        with patch.object(
++            orchestrator, "run_agent", side_effect=self._planner_writes_plan(tid)
++        ) as run_agent:
++            orchestrator.handle_commit_plan(task, self.conn)
++
++        run_agent.assert_called_once()
++        self.assertEqual(run_agent.call_args.args[0], _DECOUPLING_PLANNER)
++
++    def test_null_coder_falls_back_to_planner(self):
++        tid = db.add_task(self.conn, "No coder", branch="feat-y")
++        db.update_task(
++            self.conn, tid, coder_agent=None, status="running", next_step="commit-plan"
++        )
++        self.assertIsNone(db.get_task(self.conn, tid)["coder_agent"])
++        task = db.get_task(self.conn, tid)
++
++        with patch.object(
++            orchestrator, "run_agent", side_effect=self._planner_writes_plan(tid)
++        ):
++            orchestrator.handle_commit_plan(task, self.conn)
++
++        landed = db.get_task(self.conn, tid)["coder_agent"]
++        self.assertEqual(landed, _DECOUPLING_PLANNER)
++        self.assertNotEqual(landed, _DECOUPLING_DEFAULT_CODER)
++        self.assertNotEqual(orchestrator.DEFAULT_CODER, _DECOUPLING_PLANNER)
++
++    def test_correction_round_routes_back_to_explicit_coder(self):
++        tid = self._plan_task(_DECOUPLING_CODER)
++        task = db.get_task(self.conn, tid)
++        with patch.object(
++            orchestrator, "run_agent", side_effect=self._planner_writes_plan(tid)
++        ):
++            orchestrator.handle_commit_plan(task, self.conn)
++
++        db.update_task(
++            self.conn,
++            tid,
++            status="running",
++            next_step="commit-make",
++            review_round=1,
++            last_review_decision="reject",
++        )
++        rework = db.get_task(self.conn, tid)
++
++        def _coder_writes_commit_message(*args, **kwargs):
++            db.add_comment(
++                self.conn, tid, "msg", kind="commit-message", author=_DECOUPLING_CODER
++            )
++            return 0
++
++        with patch.object(
++            orchestrator, "run_agent", side_effect=_coder_writes_commit_message
++        ) as run_agent:
++            orchestrator.handle_commit_make(rework, self.conn)
++
++        run_agent.assert_called_once()
++        self.assertEqual(run_agent.call_args.args[0], _DECOUPLING_CODER)
++
++    def test_plan_review_uses_plan_reviewer_and_preserves_coder(self):
++        tid = self._plan_task(_DECOUPLING_CODER)
++        db.update_task(
++            self.conn, tid, next_step="commit-plan-review", commit_plan="a plan"
++        )
++        task = db.get_task(self.conn, tid)
++
++        def _reviewer_approves(*args, **kwargs):
++            db.add_comment(
++                self.conn,
++                tid,
++                "ok",
++                kind="plan-approval",
++                author=_DECOUPLING_PLAN_REVIEWER,
++            )
++            return 0
++
++        with patch.object(
++            orchestrator, "run_agent", side_effect=_reviewer_approves
++        ) as run_agent:
++            orchestrator.handle_commit_plan_review(task, self.conn)
++
++        run_agent.assert_called_once()
++        self.assertEqual(run_agent.call_args.args[0], _DECOUPLING_PLAN_REVIEWER)
++        self.assertEqual(
++            db.get_task(self.conn, tid)["coder_agent"], _DECOUPLING_CODER
++        )
++
++
++
+ if __name__ == "__main__":
+     unittest.main()
+-- 
+2.43.0
+
