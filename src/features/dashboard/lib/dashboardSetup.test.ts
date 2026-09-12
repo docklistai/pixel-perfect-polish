@@ -27,6 +27,12 @@ describe("buildDashboardSetup", () => {
     ]);
     expect(plan.steps.filter((step) => step.optional).map((step) => step.id)).toEqual(["budget"]);
     expect(plan.showAccessCodesHint).toBe(true);
+
+    const location = plan.steps.find((step) => step.id === "location");
+    expect(location?.search).toBeUndefined();
+
+    const budget = plan.steps.find((step) => step.id === "budget");
+    expect(budget?.search).toBeUndefined();
   });
 
   it("omits the basics step while unknown and once staff exist", () => {
@@ -81,6 +87,7 @@ describe("buildDashboardSetup", () => {
     expect(basics?.description).toMatch(/rota start day/i);
     expect(basics?.description).toMatch(/locks/i);
     expect(basics?.route).toBe("/settings");
+    expect(basics?.search).toEqual({ tab: "workspace" });
   });
 
   it("keeps basics done-ness tied to trading days, inventing no confirmation state", () => {
@@ -225,6 +232,9 @@ describe("buildDashboardSetup", () => {
       ]);
       expect(plan.steps.find((step) => step.id === "location")).toMatchObject({ done: false });
       expect(plan.steps.find((step) => step.id === "department")).toMatchObject({ done: false });
+
+      const location = plan.steps.find((step) => step.id === "location");
+      expect(location?.search).toBeUndefined();
     });
 
     it("does not offer the location step as something Settings can create", () => {

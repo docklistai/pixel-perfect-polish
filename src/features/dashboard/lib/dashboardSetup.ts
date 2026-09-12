@@ -2,6 +2,7 @@ import { CalendarPlus, PiggyBank, Send, Store, UserPlus, type LucideIcon } from 
 import type { IntentName } from "@/lib/interactionIntents";
 import type { AppRoute } from "../types";
 import { buildStructureSteps, isStructureMissing } from "./dashboardSetupStructure";
+import type { SettingsSearch } from "@/features/settings/lib/settingsSearch";
 
 /**
  * Pure derivation of the dashboard's "get set up" panel from live workspace
@@ -47,6 +48,8 @@ export interface DashboardSetupStep {
   description: string;
   done: boolean;
   route: Extract<AppRoute, "/staff" | "/rota" | "/settings">;
+  /** Only meaningful for route "/settings"; picks the initial Settings tab. */
+  search?: SettingsSearch;
   cta: string;
   intent?: IntentName;
   icon: LucideIcon;
@@ -99,6 +102,7 @@ export function buildDashboardSetup(input: DashboardSetupInput): DashboardSetupP
               "Confirm the days you trade, and check your rota start day — it locks once you build your first rota.",
             done: hasBusinessBasics,
             route: "/settings" as const,
+            search: { tab: "workspace" as const },
             cta: "Open settings",
             icon: Store,
           },

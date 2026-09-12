@@ -10,21 +10,33 @@ import { requireManagerAccess } from "@/features/auth";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { isPilotSurface } from "@/config/pilot";
 import { visibleSettingsTabs } from "@/features/settings/data/settingsTabs";
+import {
+  parseSettingsSearch,
+  resolveSettingsSearchTab,
+  DEFAULT_SETTINGS_TAB,
+} from "@/features/settings/lib/settingsSearch";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  validateSearch: parseSettingsSearch,
   head: () => ({ meta: [{ title: "Settings — Docklist" }] }),
   component: SettingsPage,
 });
 
 function SettingsPage() {
   const pilot = isPilotSurface();
+  const search = Route.useSearch();
+  const searchTab = resolveSettingsSearchTab(search);
   const [dirty, setDirty] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState("General");
+  const [activeTab, setActiveTab] = React.useState<string>(searchTab ?? DEFAULT_SETTINGS_TAB);
   // Bumping this key remounts the active tab, resetting its local field state.
   const [resetKey, setResetKey] = React.useState(0);
   const { workspaceName } = useManagerIdentity();
+
+  React.useEffect(() => {
+    setActiveTab(searchTab ?? DEFAULT_SETTINGS_TAB);
+  }, [searchTab]);
 
   const markDirty = React.useCallback(() => setDirty(true), []);
 

@@ -18,7 +18,11 @@ export function DashboardSetupPanel({ plan }: Props) {
   const { requestIntent } = useIntents();
 
   const runStep = (step: DashboardSetupStep) => {
-    navigate({ to: step.route });
+    if (step.route === "/settings") {
+      navigate({ to: "/settings", search: step.search ?? {} });
+    } else {
+      navigate({ to: step.route });
+    }
     if (step.intent) requestIntent(step.intent);
   };
 
