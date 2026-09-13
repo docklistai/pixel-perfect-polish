@@ -105,10 +105,12 @@ describe("the reviewed proposal is applied exactly as it was issued", () => {
   it("adds nothing of its own", () => {
     expect(Object.keys(request).sort()).toEqual([
       "inputFingerprint",
+      "locationId",
       "operations",
       "proposalDigest",
       "rotaWeekId",
       "source",
+      "weekStart",
     ]);
   });
 
@@ -117,5 +119,20 @@ describe("the reviewed proposal is applied exactly as it was issued", () => {
     // is the object the database hashed. Sending the display one would fail.
     expect(request.source).not.toBe(proposal.source);
     expect("label" in request.source).toBe(false);
+  });
+});
+
+describe("fresh-week proposal", () => {
+  it("echoes the null rotaWeekId, locationId and weekStart", () => {
+    const proposal = issuedProposal();
+    proposal.rotaWeekId = null;
+    proposal.locationId = "loc-2";
+    proposal.weekStart = "2026-08-10";
+
+    const request = buildApplyRequestFor(proposal);
+
+    expect(request.rotaWeekId).toBeNull();
+    expect(request.locationId).toBe("loc-2");
+    expect(request.weekStart).toBe("2026-08-10");
   });
 });

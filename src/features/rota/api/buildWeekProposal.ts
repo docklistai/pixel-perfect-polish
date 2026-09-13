@@ -44,7 +44,11 @@ const inputSchema = z.object({
 export type BuildWeekProposalResult =
   | {
       ok: true;
-      rotaWeekId: string;
+      /**
+       * The rota week this is built against. Null when this is a fresh week
+       * and no rota_weeks row exists yet.
+       */
+      rotaWeekId: string | null;
       weekStart: string;
       locationId: string;
       inputFingerprint: string;
@@ -75,18 +79,23 @@ export const buildWeekProposalFn = createServerFn({ method: "POST" })
       { weekOffset: data.weekOffset, ...(data.locationId ? { locationId: data.locationId } : {}) },
       { createWeek: false },
     );
-    if (!context.week) {
-      return {
-        ok: false,
-        message: "Save at least one shift, or apply a template, before building this week.",
-      };
-    }
     const week = context.week;
-    if (week.status !== "draft") {
-      return {
-        ok: false,
-        message: "Build only runs on a draft week. Edit this published week directly.",
-      };
+
+    if (week) {
+      if (week.status !== "draft") {
+        return {
+          ok: false,
+          message: "Build only runs on a draft week. Edit this published week directly.",
+        };
+      }
+    } else {
+      if (data.source.kind === "current-week") {
+        return {
+          ok: false,
+          message:
+            "There are no shifts in this week yet, so there is nothing to build from the current week. Pick a template or last week's pattern instead.",
+        };
+      }
     }
 
     const timezone = context.location.timezone;
@@ -94,29 +103,37 @@ export const buildWeekProposalFn = createServerFn({ method: "POST" })
       addIsoDays(context.weekStart, index),
     );
 
-    const [shiftsRes, staffRes] = await Promise.all([
-      supabase
+    const staffRes = await supabase
+      .from("staff_members")
+      .select(STAFF_COLUMNS)
+      .eq("workspace_id", context.workspaceId)
+      .order("id", { ascending: true });
+    if (staffRes.error) throw staffRes.error;
+
+    let existingRows: ShiftRow[] = [];
+    if (week) {
+      const shiftsRes = await supabase
         .from("shifts")
         .select(SHIFT_COLUMNS)
         .eq("workspace_id", context.workspaceId)
         .eq("rota_week_id", week.id)
-        .order("id", { ascending: true }),
-      supabase
-        .from("staff_members")
-        .select(STAFF_COLUMNS)
-        .eq("workspace_id", context.workspaceId)
-        .order("id", { ascending: true }),
-    ]);
-    if (shiftsRes.error) throw shiftsRes.error;
-    if (staffRes.error) throw staffRes.error;
+        .order("id", { ascending: true });
+      if (shiftsRes.error) throw shiftsRes.error;
+      existingRows = (shiftsRes.data as ShiftRow[] | null) ?? [];
+    }
 
-    const existingRows = (shiftsRes.data as ShiftRow[] | null) ?? [];
     const existingShifts = existingRows.map((row) => toExistingFact(row, timezone));
     const staff = ((staffRes.data as StaffRow[] | null) ?? []).map(toStaffFact);
 
     const [availability, externalCommitments] = await Promise.all([
       loadAvailabilityFacts(supabase, context.workspaceId, context.weekStart, dayIsoDates),
-      loadExternalCommitments(supabase, context.workspaceId, week.id, context.weekStart, timezone),
+      loadExternalCommitments(
+        supabase,
+        context.workspaceId,
+        week?.id ?? null,
+        context.weekStart,
+        timezone,
+      ),
     ]);
 
     const built = await resolveDemand({
@@ -151,22 +168,32 @@ export const buildWeekProposalFn = createServerFn({ method: "POST" })
       contentVersion: built.contentVersion,
       plannerRuleVersion: PLANNER_RULE_VERSION,
     };
+
     // One manager-guarded call. The internal fingerprint/digest functions are
     // revoked from `authenticated` on purpose: the fingerprint reads across a
     // whole workspace and takes the workspace id as a parameter, so exposing it
     // directly would let any signed-in user probe another workspace.
-    const { data: stamp, error: stampError } = await supabase.rpc("rpc_build_week_proposal_stamp", {
-      p_workspace_id: context.workspaceId,
-      p_rota_week_id: week.id,
-      p_source: applySource,
-      p_operations: proposal.operations,
-    });
+    const { data: stamp, error: stampError } = week
+      ? await supabase.rpc("rpc_build_week_proposal_stamp", {
+          p_workspace_id: context.workspaceId,
+          p_rota_week_id: week.id,
+          p_source: applySource,
+          p_operations: proposal.operations,
+        })
+      : await supabase.rpc("rpc_build_week_fresh_proposal_stamp", {
+          p_workspace_id: context.workspaceId,
+          p_location_id: context.location.id,
+          p_week_start: context.weekStart,
+          p_source: applySource,
+          p_operations: proposal.operations,
+        });
+
     if (stampError) throw stampError;
     const { fingerprint, digest } = stamp as { fingerprint: string; digest: string };
 
     return {
       ok: true,
-      rotaWeekId: week.id,
+      rotaWeekId: week?.id ?? null,
       weekStart: context.weekStart,
       locationId: context.location.id,
       inputFingerprint: fingerprint,

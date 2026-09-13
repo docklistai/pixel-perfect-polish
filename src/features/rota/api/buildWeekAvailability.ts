@@ -100,19 +100,26 @@ export async function loadAvailabilityFacts(
 export async function loadExternalCommitments(
   supabase: SupabaseClientLike,
   workspaceId: string,
-  rotaWeekId: string,
+  rotaWeekId: string | null,
   weekStart: string,
   timezone: string,
 ): Promise<CommittedShift[]> {
-  const { data, error } = await supabase
+  // PostgREST's `.neq("col", null)` evaluates to false rather than "col IS NOT NULL",
+  // so passing a null id through would silently return zero rows — the exact inverse
+  // of correct, since with no target week *every* commitment in the window is external.
+  let builder = supabase
     .from("shifts")
     .select("id, staff_member_id, shift_date, starts_at, ends_at, rota_week_id")
     .eq("workspace_id", workspaceId)
-    .neq("rota_week_id", rotaWeekId)
     .not("staff_member_id", "is", null)
     .gte("shift_date", addIsoDays(weekStart, -1))
-    .lte("shift_date", addIsoDays(weekStart, 7))
-    .order("id", { ascending: true });
+    .lte("shift_date", addIsoDays(weekStart, 7));
+
+  if (rotaWeekId !== null) {
+    builder = builder.neq("rota_week_id", rotaWeekId);
+  }
+
+  const { data, error } = await builder.order("id", { ascending: true });
   if (error) throw error;
 
   return (

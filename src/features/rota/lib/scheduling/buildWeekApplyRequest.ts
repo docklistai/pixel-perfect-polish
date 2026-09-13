@@ -21,6 +21,8 @@ export function buildApplyRequestFor(
 ): ApplyBuildWeekProposalInput {
   return {
     rotaWeekId: proposal.rotaWeekId,
+    locationId: proposal.locationId,
+    weekStart: proposal.weekStart,
     inputFingerprint: proposal.inputFingerprint,
     proposalDigest: proposal.proposalDigest,
     source: proposal.applySource,

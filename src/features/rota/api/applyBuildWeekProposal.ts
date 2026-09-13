@@ -18,7 +18,7 @@ import { MAX_PROPOSAL_OPERATIONS } from "../lib/scheduling/buildWeekProposal";
 
 const applySchema = z.object({
   /**
-   * Null only for a schedule import into a week that does not exist yet. The
+   * Null for a schedule import or build into a week that does not exist yet. The
    * apply then creates that week and the shifts in one transaction; `locationId`
    * and `weekStart` say where, and are required in that case.
    */
@@ -76,9 +76,12 @@ export const applyBuildWeekProposalFn = createServerFn({ method: "POST" })
     // where. Refusing here rather than sending an incomplete call keeps the
     // "nothing was written" promise on the client side of the wire too.
     if (data.rotaWeekId === null && (!data.locationId || !data.weekStart)) {
+      const isImport = data.source.kind === "headed-import";
       return {
         ok: false,
-        message: "This import lost track of which week it belongs to. Preview it again.",
+        message: isImport
+          ? "This import lost track of which week it belongs to. Preview it again."
+          : "This build lost track of which week it belongs to. Preview it again.",
       };
     }
 
@@ -89,47 +92,63 @@ export const applyBuildWeekProposalFn = createServerFn({ method: "POST" })
     // creation, and the 16-hour shift ceiling the rota grid applies to a typed
     // cell. That ceiling lives in the database rather than only in the preview
     // because the operation list passes through the client on its way here.
-    const isFreshWeekImport = data.rotaWeekId === null;
+    const isFresh = data.rotaWeekId === null;
     const isImport = data.source.kind === "headed-import";
 
-    const { data: result, error } = isFreshWeekImport
-      ? await supabase.rpc("rpc_apply_import_to_new_week", {
-          p_workspace_id: workspaceId,
-          p_location_id: data.locationId,
-          p_week_start: data.weekStart,
-          p_input_fingerprint: data.inputFingerprint,
-          p_proposal_digest: data.proposalDigest,
-          p_source: data.source,
-          p_operations: data.operations,
-        })
-      : isImport
-        ? await supabase.rpc("rpc_apply_import_to_existing_week", {
-            p_workspace_id: workspaceId,
-            p_rota_week_id: data.rotaWeekId,
-            p_input_fingerprint: data.inputFingerprint,
-            p_proposal_digest: data.proposalDigest,
-            p_source: data.source,
-            p_operations: data.operations,
-          })
-        : await supabase.rpc("rpc_apply_build_week_proposal", {
-            p_workspace_id: workspaceId,
-            p_rota_week_id: data.rotaWeekId,
-            p_input_fingerprint: data.inputFingerprint,
-            p_proposal_digest: data.proposalDigest,
-            p_source: data.source,
-            p_operations: data.operations,
-          });
+    let result, error;
+
+    if (isFresh && isImport) {
+      ({ data: result, error } = await supabase.rpc("rpc_apply_import_to_new_week", {
+        p_workspace_id: workspaceId,
+        p_location_id: data.locationId,
+        p_week_start: data.weekStart,
+        p_input_fingerprint: data.inputFingerprint,
+        p_proposal_digest: data.proposalDigest,
+        p_source: data.source,
+        p_operations: data.operations,
+      }));
+    } else if (!isFresh && isImport) {
+      ({ data: result, error } = await supabase.rpc("rpc_apply_import_to_existing_week", {
+        p_workspace_id: workspaceId,
+        p_rota_week_id: data.rotaWeekId,
+        p_input_fingerprint: data.inputFingerprint,
+        p_proposal_digest: data.proposalDigest,
+        p_source: data.source,
+        p_operations: data.operations,
+      }));
+    } else if (isFresh && !isImport) {
+      ({ data: result, error } = await supabase.rpc("rpc_apply_build_to_new_week", {
+        p_workspace_id: workspaceId,
+        p_location_id: data.locationId,
+        p_week_start: data.weekStart,
+        p_input_fingerprint: data.inputFingerprint,
+        p_proposal_digest: data.proposalDigest,
+        p_source: data.source,
+        p_operations: data.operations,
+      }));
+    } else {
+      ({ data: result, error } = await supabase.rpc("rpc_apply_build_week_proposal", {
+        p_workspace_id: workspaceId,
+        p_rota_week_id: data.rotaWeekId,
+        p_input_fingerprint: data.inputFingerprint,
+        p_proposal_digest: data.proposalDigest,
+        p_source: data.source,
+        p_operations: data.operations,
+      }));
+    }
 
     if (error) {
       return {
         ok: false,
         message: toSafeBusinessMessage(
           error,
-          isFreshWeekImport
+          isFresh && isImport
             ? "Nothing was imported, and no week was created. Preview it again."
-            : isImport
+            : !isFresh && isImport
               ? "Nothing was imported. This week is unchanged — preview it again."
-              : "This week was not built. Nothing was applied — try again.",
+              : isFresh && !isImport
+                ? "This week was not built, and no week was created. Build it again."
+                : "This week was not built. Nothing was applied — try again.",
         ),
       };
     }
