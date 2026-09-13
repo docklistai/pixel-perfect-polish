@@ -4,8 +4,9 @@
 #
 # Fails (exit 1) when production source re-introduces a pattern that would break a
 # DocklistAI non-negotiable or the Phase 9 AI-honesty boundary. Static, read-only,
-# no network, no database. Scans src/ production files only — *.test.ts are skipped
-# because tests legitimately name the patterns they assert against.
+# no network, no database. Scans src/ production files only — *.test.ts and
+# *.test.tsx are skipped because tests legitimately name the patterns they
+# assert against.
 #
 # Allowed matches that are intentionally NOT flagged (documented so the gate stays
 # non-brittle):
@@ -24,7 +25,7 @@ set -uo pipefail
 SRC="src"
 fail=0
 
-mapfile -t FILES < <(find "$SRC" -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.ts' 2>/dev/null)
+mapfile -t FILES < <(find "$SRC" -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.ts' ! -name '*.test.tsx' 2>/dev/null)
 if [[ ${#FILES[@]} -eq 0 ]]; then
   echo "FAIL: no source files found under $SRC/" >&2
   exit 1
