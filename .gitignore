@@ -50,12 +50,3 @@ supabase/.temp/
 # Playwright CLI local state (browser choice is machine-specific; output may contain credentials)
 .playwright-cli/
 .playwright/
-
-# Orchestra task runtime state (machine-local; never committed)
-kanban-orchestra.db
-kanban-orchestra.db-journal
-kanban-orchestra.db-shm
-kanban-orchestra.db-wal
-kanban-orchestra.lock
-kanban-orchestra.sql
-.kanban-orchestra/
