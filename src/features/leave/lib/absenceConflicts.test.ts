@@ -44,8 +44,18 @@ describe("describeAbsenceConflicts", () => {
       absence([shift("2026-08-05"), shift("2026-08-05"), shift("2026-08-06")]),
     );
     expect(message).toContain("3 rota shifts");
-    // Three shifts, but only two distinct days.
-    expect(listConflictDays([shift("2026-08-05"), shift("2026-08-05")])).not.toContain(",");
+
+    // Three shifts, but only two distinct days. Compare renderings produced by the
+    // same function rather than the label's punctuation: `Wed 5 Aug` (en-GB) and
+    // `Wed, Aug 5` (en-US) are both correct, so asserting on commas tests the
+    // runtime locale instead of the de-duplication.
+    const fifth = listConflictDays([shift("2026-08-05")]);
+    const sixth = listConflictDays([shift("2026-08-06")]);
+    expect(listConflictDays([shift("2026-08-05"), shift("2026-08-05")])).toBe(fifth);
+
+    // Two genuinely distinct days are still both listed, in order.
+    const bothDays = listConflictDays([shift("2026-08-05"), shift("2026-08-06")]);
+    expect(bothDays).toBe(`${fifth}, ${sixth}`);
   });
 
   it("never claims the rota was changed or the shift removed", () => {
