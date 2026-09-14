@@ -1,0 +1,52 @@
+# Deterministic verification for ordinary Docklist product changes.
+#
+# This workflow proves the repo's existing checks on GitHub instead of relying on
+# an agent remembering to run them locally. It is a VERIFICATION workflow only:
+# `npm run build` is a check that the app compiles, not a deployment step, and
+# nothing here publishes, deploys, or touches hosted Supabase.
+#
+# Deliberately excluded:
+#   - the SQL, concurrency and Ops HTTP suites — they require a local Docker
+#     Supabase stack (see scripts/sql-tests.sh) and are local-only by design;
+#   - `npm run predeploy` — the repo's deployment chain, not an ordinary gate.
+name: checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Quality gate
+        run: npm run quality
+
+      - name: Tests
+        run: npm run test
+
+      - name: Build (compile check, not a deployment)
+        run: npm run build

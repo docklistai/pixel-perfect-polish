@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git push -f *)",
+      "Bash(git push --delete *)",
+
+      "Bash(git add .)",
+      "Bash(git add -A *)",
+      "Bash(git add --all *)",
+
+      "Bash(git reset --hard *)",
+      "Bash(git commit --amend *)",
+      "Bash(git branch -D *)",
+
+      "Bash(wrangler deploy *)",
+      "Bash(npx wrangler deploy *)",
+      "Bash(wrangler publish *)",
+      "Bash(npx wrangler publish *)",
+
+      "Bash(supabase db push *)",
+      "Bash(npx supabase db push *)",
+      "Bash(supabase secrets set *)",
+      "Bash(npx supabase secrets set *)",
+      "Bash(supabase functions deploy *)",
+      "Bash(npx supabase functions deploy *)",
+
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.claude/.credentials.json)"
+    ]
+  }
+}
