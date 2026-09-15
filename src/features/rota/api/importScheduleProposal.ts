@@ -91,6 +91,8 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
       workspaceId: context.workspaceId,
       rotaWeekId: context.week?.id ?? null,
       timezone: context.location.timezone,
+      weekStart: context.weekStart,
+      weekIsoDates,
     });
     if (!facts.defaultDepartmentId) {
       return { ok: false, message: "Add a department to this workspace before importing shifts." };
@@ -105,6 +107,7 @@ export const importScheduleProposalFn = createServerFn({ method: "POST" })
       defaultDepartmentId: facts.defaultDepartmentId,
       existingSignatureKeys: facts.existingSignatureKeys,
       knownRoleNames: facts.knownRoleNames,
+      availability: facts.availability,
     });
 
     if (!preview.ok) {

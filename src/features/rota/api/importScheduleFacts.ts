@@ -1,6 +1,8 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildShiftSignature, signatureKey } from "../lib/scheduling/shiftSignature";
 import { formatTimeInTimezone } from "../lib/liveRotaDates";
+import { loadAvailabilityFacts } from "./buildWeekAvailability";
+import type { AvailabilityFacts } from "../lib/scheduling/eligibility";
+import type { SupabaseClientLike } from "./buildWeekFacts";
 import type {
   DepartmentCandidate,
   StaffCandidate,
@@ -27,6 +29,14 @@ export type ImportFacts = {
   existingSignatureKeys: Set<string>;
   /** Role labels this workspace already uses, for one spelling per role. */
   knownRoleNames: string[];
+  /**
+   * Recorded absence for the week, read through Build the Week's own loader.
+   *
+   * Loaded unconditionally and never defaulted: if this read fails the whole
+   * preview fails, because a preview that silently treated "leave unknown" as
+   * "no leave" would mark a row importable that the apply boundary refuses.
+   */
+  availability: AvailabilityFacts;
 };
 
 interface ShiftRow {
@@ -44,14 +54,19 @@ export async function loadImportFacts({
   workspaceId,
   rotaWeekId,
   timezone,
+  weekStart,
+  weekIsoDates,
 }: {
-  supabase: SupabaseClient;
+  supabase: SupabaseClientLike;
   workspaceId: string;
   /** Null when importing into a week that does not exist yet. */
   rotaWeekId: string | null;
   timezone: string;
+  /** The week being imported into, for the absence window. */
+  weekStart: string;
+  weekIsoDates: readonly string[];
 }): Promise<ImportFacts> {
-  const [shiftsRes, staffRes, deptRes] = await Promise.all([
+  const [shiftsRes, staffRes, deptRes, availability] = await Promise.all([
     rotaWeekId === null
       ? Promise.resolve({ data: [] as ShiftRow[], error: null })
       : supabase
@@ -66,6 +81,11 @@ export async function loadImportFacts({
       .select("id, display_name, employment_status, role_name")
       .eq("workspace_id", workspaceId),
     supabase.from("departments").select("id, name, status").eq("workspace_id", workspaceId),
+    // Build the Week's loader, called rather than copied: approved and pending
+    // leave, recurring days off and one-off unavailability all arrive already
+    // indexed by staff id, and it throws on a failed read so this whole preview
+    // fails with it.
+    loadAvailabilityFacts(supabase, workspaceId, weekStart, weekIsoDates),
   ]);
   if (shiftsRes.error) throw shiftsRes.error;
   if (staffRes.error) throw staffRes.error;
@@ -111,5 +131,6 @@ export async function loadImportFacts({
       ...shifts.map((row) => row.role_name),
       ...staff.map((member) => member.roleName ?? ""),
     ].filter((name) => name.trim() !== ""),
+    availability,
   };
 }

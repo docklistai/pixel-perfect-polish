@@ -1,5 +1,6 @@
 import { warningDiagnostic, type ParseDiagnostic } from "./parseDiagnostics";
 import { signatureKey } from "@/features/rota/lib/scheduling/shiftSignature";
+import { absenceDiagnosticForImportedRow } from "./importAvailability";
 import { parseHeadedRow } from "./headedRowParser";
 import { buildCanonicalRoleResolver } from "./canonicalRoleNames";
 import { attributeToOrigin, type MatrixOrigin } from "./matrixLayout";
@@ -57,6 +58,11 @@ export function analyseRows(
   const weekDates = new Set(options.weekIsoDates);
   const seenInFile = new Map<string, RowSource>();
   const canonicalRoleName = buildCanonicalRoleResolver(options.knownRoleNames);
+  // The row carries the id it resolved to; absence is explained by name, because
+  // that is what the manager wrote and what they will go looking for in Leave.
+  const staffNameById = new Map(options.staff.map((member) => [member.id, member.name]));
+  const staffNameFor = (staffId: string | null) =>
+    (staffId === null ? undefined : staffNameById.get(staffId)) ?? "This staff member";
   const rows: ImportedShiftRow[] = [];
   let duplicatesInFile = 0;
   let duplicatesOfExisting = 0;
@@ -82,6 +88,28 @@ export function analyseRows(
     }
 
     const diagnostics = positioned(source, outcome.diagnostics);
+
+    // Recorded absence, before the duplicate rules. A row blocked here is never
+    // written, so letting it register as "the first one seen" would attribute a
+    // duplicate warning to a shift that does not exist — the same reason a row
+    // that failed to parse never reaches the block below.
+    const absence = options.availability
+      ? absenceDiagnosticForImportedRow({
+          staffId: outcome.shift.staffId,
+          staffName: staffNameFor(outcome.shift.staffId),
+          signature: outcome.shift.signature,
+          availability: options.availability,
+          position: source.origin
+            ? { row: source.origin.row, column: source.origin.column }
+            : { row: source.rowNumber },
+        })
+      : null;
+    if (absence?.severity === "error") {
+      rows.push(withSource(source, { ok: false, diagnostics: [...diagnostics, absence] }));
+      continue;
+    }
+    if (absence) diagnostics.push(absence);
+
     const key = signatureKey(outcome.shift.signature);
     const firstSeen = seenInFile.get(key);
     if (firstSeen !== undefined) {

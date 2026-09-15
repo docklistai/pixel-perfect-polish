@@ -308,9 +308,16 @@ begin
     raise exception 'FAIL: authenticated can execute the digest function directly';
   end if;
   -- Phase 48 re-signatured this one: the jsonb signature argument became a
-  -- parsed role key, and the staff lock moved out to the caller.
+  -- parsed role key, and the staff lock moved out to the caller. Phase 66 added
+  -- the proposal source kind, and dropped the 7-argument form so no caller can
+  -- reach the source-blind rules.
+  if to_regprocedure(
+      'public.rpc_internal_assert_build_week_assignable(uuid, uuid, text, timestamptz, timestamptz, text, uuid)')
+     is not null then
+    raise exception 'FAIL: the phase 48 source-blind assignability signature still exists';
+  end if;
   if has_function_privilege('authenticated',
-      'public.rpc_internal_assert_build_week_assignable(uuid, uuid, text, timestamptz, timestamptz, text, uuid)', 'execute') then
+      'public.rpc_internal_assert_build_week_assignable(uuid, uuid, text, timestamptz, timestamptz, text, uuid, text)', 'execute') then
     raise exception 'FAIL: authenticated can execute the assignability check directly';
   end if;
   if has_function_privilege('authenticated', 'public.rpc_internal_normalise_role_key(text)', 'execute') then

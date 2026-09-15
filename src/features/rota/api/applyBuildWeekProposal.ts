@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toSafeBusinessMessage } from "@/lib/safe-errors";
 import { MAX_PROPOSAL_OPERATIONS } from "../lib/scheduling/buildWeekProposal";
+import { importApplyRefusalMessage } from "./importApplyRefusal";
 
 /**
  * Applies one reviewed Build the Week proposal through `rpc_apply_build_week_proposal`.
@@ -140,15 +141,20 @@ export const applyBuildWeekProposalFn = createServerFn({ method: "POST" })
     if (error) {
       return {
         ok: false,
-        message: toSafeBusinessMessage(
-          error,
-          isFresh && isImport
-            ? "Nothing was imported, and no week was created. Preview it again."
-            : !isFresh && isImport
-              ? "Nothing was imported. This week is unchanged — preview it again."
-              : isFresh && !isImport
-                ? "This week was not built, and no week was created. Build it again."
-                : "This week was not built. Nothing was applied — try again.",
+        // The shared assignability check speaks in Build's voice; an import is
+        // handed the same refusal in its own. Everything else passes through.
+        message: importApplyRefusalMessage(
+          toSafeBusinessMessage(
+            error,
+            isFresh && isImport
+              ? "Nothing was imported, and no week was created. Preview it again."
+              : !isFresh && isImport
+                ? "Nothing was imported. This week is unchanged — preview it again."
+                : isFresh && !isImport
+                  ? "This week was not built, and no week was created. Build it again."
+                  : "This week was not built. Nothing was applied — try again.",
+          ),
+          isImport,
         ),
       };
     }

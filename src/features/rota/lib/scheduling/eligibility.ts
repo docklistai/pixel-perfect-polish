@@ -52,6 +52,33 @@ function dateConstraint(
 }
 
 /**
+ * The date-recorded reason this person cannot work this interval, or null.
+ *
+ * Leave, recurring days off and one-off unavailability are all recorded against
+ * calendar dates, so the question is the same for every surface that asks it:
+ * which dates does this shift touch, and is any of them spoken for? An overnight
+ * shift touches two, which `datesTouchedByInterval` settles centrally.
+ *
+ * Exported because schedule import needs this answer *while the manager is still
+ * reviewing the paste*, and must get it from the same place the planner and the
+ * apply boundary get it. A second copy of the rule for the preview is how the
+ * two would come to disagree.
+ *
+ * This answers only the date-recorded half of eligibility. Role, active
+ * employment and overlapping shifts are `hardExclusionFor`'s business, and an
+ * import establishes those separately.
+ */
+export function dateAvailabilityExclusion(
+  staffId: string,
+  target: LocalShiftTimes,
+  availability: AvailabilityFacts,
+): HardExclusion | null {
+  const dates = datesTouchedByInterval(target);
+  if (dates.length === 0) return "unreadable-times";
+  return dateConstraint(staffId, dates, availability);
+}
+
+/**
  * The single reason this candidate cannot take this shift, or null when they can.
  *
  * Checked in order of specificity so the manager reads the most useful
@@ -81,10 +108,7 @@ export function hardExclusionFor({
   if (!staff.active) return "inactive";
   if (staff.roleKey !== requiredRoleKey) return "role-mismatch";
 
-  const dates = datesTouchedByInterval(target);
-  if (dates.length === 0) return "unreadable-times";
-
-  const constraint = dateConstraint(staff.id, dates, availability);
+  const constraint = dateAvailabilityExclusion(staff.id, target, availability);
   if (constraint) return constraint;
 
   for (const other of committed) {

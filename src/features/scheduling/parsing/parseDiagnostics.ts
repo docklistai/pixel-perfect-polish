@@ -35,7 +35,14 @@ export type ParseDiagnosticCode =
   /** The same row appears twice in this input. */
   | "duplicate-in-input"
   /** This row already exists in the rota. */
-  | "duplicate-of-existing";
+  | "duplicate-of-existing"
+  /**
+   * The person named by this row has absence recorded on a date it touches.
+   *
+   * Severity carries the product decision: approved leave is decided absence and
+   * is an error, pending leave is an undecided request and is a warning.
+   */
+  | "staff-unavailable";
 
 export type ParseDiagnostic = {
   code: ParseDiagnosticCode;

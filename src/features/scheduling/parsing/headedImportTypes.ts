@@ -1,6 +1,7 @@
 import type { ParseDiagnostic } from "./parseDiagnostics";
 import type { DateOrder } from "./explicitDateFormat";
 import type { DepartmentCandidate, StaffCandidate } from "./exactResolvers";
+import type { AvailabilityFacts } from "@/features/rota/lib/scheduling/eligibility";
 import type { ShiftSignature } from "@/features/rota/lib/scheduling/shiftSignature";
 import type { MappedColumn } from "./headedColumnMap";
 import type { MatrixOrigin } from "./matrixLayout";
@@ -24,6 +25,17 @@ export type HeadedImportOptions = {
    * spelling instead of introducing a second one.
    */
   knownRoleNames?: readonly string[];
+  /**
+   * Recorded absence for the week, from the same loader Build the Week reads.
+   *
+   * Present for the same reason `StaffCandidate.roleName` is: the apply boundary
+   * refuses an assignment onto approved leave, and finding that out after
+   * pressing Import means the whole paste is refused for one row. Omitted only
+   * by callers that have no workspace behind them — parser unit tests — and an
+   * omission means "no absence known", never "absence ignored", because the
+   * server proposal loads it unconditionally and fails the preview if it cannot.
+   */
+  availability?: AvailabilityFacts;
 };
 
 export type ImportedShift = {
