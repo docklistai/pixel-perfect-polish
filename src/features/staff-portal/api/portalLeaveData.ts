@@ -28,18 +28,12 @@ export interface LeaveRequestViewRow {
   decision_reason: string | null;
 }
 
-const LEAVE_TYPE_LABEL: Record<string, string> = {
-  annual_leave: "Annual leave",
-  personal: "Personal leave",
-  sick: "Sick leave",
-  unpaid: "Unpaid leave",
-  other: "Other",
-};
+import { formatLeaveType } from "@/features/leave/lib/leaveVocabulary";
 
 export function mapLeaveRequest(row: LeaveRequestViewRow): PortalLeaveRequest {
   return {
     id: row.leave_request_id,
-    type: LEAVE_TYPE_LABEL[row.leave_type] ?? "Leave",
+    type: formatLeaveType(row.leave_type),
     date: `${dayMonth(row.start_date)} – ${dayMonth(row.end_date)}`,
     startIso: row.start_date,
     endIso: row.end_date,

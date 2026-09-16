@@ -3,6 +3,7 @@ import type { LeaveStaffOption } from "./leaveRequests";
 import type { LeaveBalance } from "./leaveBalance";
 import {
   CALENDAR_DAYS_LABEL,
+  NOT_RECORDED_LABEL,
   formatEntitlementSummary,
   formatPendingSummary,
 } from "./leaveBalancePresentation";
@@ -11,12 +12,21 @@ import {
 export const ANNUAL_LEAVE_LABEL = "Annual leave";
 
 /**
- * True when this request draws on annual entitlement. Sick, unpaid, personal
+ * True when this request draws on annual entitlement. Sick, unpaid, personal/compassionate
  * and other never do, so their approval dialog shows no annual balance at all
  * rather than implying one was consumed.
  */
-export function consumesAnnualEntitlement(request: Pick<LeaveRequest, "type">): boolean {
-  return request.type === ANNUAL_LEAVE_LABEL;
+export function consumesAnnualEntitlement(
+  request: Pick<LeaveRequest, "type"> & { typeKey?: string },
+): boolean {
+  if (request.typeKey) {
+    return request.typeKey === "annual_leave";
+  }
+  return (
+    request.type === "annual_leave" ||
+    request.type === "Annual leave" ||
+    request.type === ANNUAL_LEAVE_LABEL
+  );
 }
 
 export type ApprovalDialogRow =
@@ -40,7 +50,8 @@ export const demoManagerCreateStaffOptions: LeaveStaffOption[] = [
 
 export function approvalDialogRows(
   source: LeaveSource,
-  request: Pick<LeaveRequest, "impact" | "tone" | "type">,
+  request: Pick<LeaveRequest, "impact" | "tone" | "type"> &
+    Partial<Pick<LeaveRequest, "days" | "typeKey">>,
   balance: LeaveBalance | null = null,
 ): ApprovalDialogRow[] {
   const impactRow: ApprovalDialogRow = {
@@ -74,14 +85,34 @@ export function approvalDialogRows(
     ];
   }
 
-  if (!balance) {
-    return [impactRow, { kind: "text", label: "Annual leave", value: "Not tracked yet" }, coverRow];
+  if (!balance || !balance.recorded) {
+    return [
+      impactRow,
+      {
+        kind: "text",
+        label: "Annual leave",
+        value: balance ? formatEntitlementSummary(balance) : NOT_RECORDED_LABEL,
+      },
+      coverRow,
+    ];
   }
 
   const pending = formatPendingSummary(balance);
-  return [
+  const rows: ApprovalDialogRow[] = [
     impactRow,
     { kind: "text", label: "Annual leave", value: formatEntitlementSummary(balance) },
+  ];
+
+  if (balance.remaining !== null && typeof request.days === "number") {
+    const remainingAfter = balance.remaining - request.days;
+    rows.push({
+      kind: "text",
+      label: "Days remaining after",
+      value: `${remainingAfter} / ${balance.entitlementDays ?? balance.remaining}`,
+    });
+  }
+
+  rows.push(
     {
       kind: "text",
       label: "Pending",
@@ -90,7 +121,8 @@ export function approvalDialogRows(
         : `None · ${CALENDAR_DAYS_LABEL.toLowerCase()}`,
     },
     coverRow,
-  ];
+  );
+  return rows;
 }
 
 export function managerCreateDialogState(source: LeaveSource): {

@@ -18,18 +18,19 @@ import {
   validatePortalLeaveRequest,
   type PortalLeaveValidationError,
 } from "../lib/portalLeaveValidation";
+import { CANONICAL_LEAVE_TYPE_LABELS } from "@/features/leave/lib/leaveVocabulary";
 
 const portalRouteApi = getRouteApi("/portal");
 
-/** Local (workspace-facing) yyyy-mm-dd for sensible, non-past default dates. */
-/** UI leave-type labels → the RPC's `leave_type` enum. */
-const LEAVE_TYPE_TO_RPC: Record<string, "annual_leave" | "personal" | "sick" | "unpaid" | "other"> =
-  {
-    "Annual leave": "annual_leave",
-    "Sick leave": "sick",
-    "Compassionate leave": "personal",
-    "Unpaid leave": "unpaid",
-  };
+/** Leave types a staff member can request from the portal. */
+const PORTAL_LEAVE_TYPES = [
+  { key: "annual_leave", label: CANONICAL_LEAVE_TYPE_LABELS.annual_leave },
+  { key: "sick", label: CANONICAL_LEAVE_TYPE_LABELS.sick },
+  { key: "personal", label: CANONICAL_LEAVE_TYPE_LABELS.personal },
+  { key: "unpaid", label: CANONICAL_LEAVE_TYPE_LABELS.unpaid },
+] as const;
+
+type PortalLeaveKey = (typeof PORTAL_LEAVE_TYPES)[number]["key"];
 
 export function PortalLeaveRequestDrawer({
   open,
@@ -43,7 +44,7 @@ export function PortalLeaveRequestDrawer({
   const queryClient = useQueryClient();
   const [startIso, setStartIso] = React.useState(() => localIsoDate(new Date()));
   const [endIso, setEndIso] = React.useState(() => localIsoDate(new Date()));
-  const [leaveType, setLeaveType] = React.useState("Annual leave");
+  const [leaveType, setLeaveType] = React.useState<PortalLeaveKey>("annual_leave");
   const [reason, setReason] = React.useState("");
   const [validationError, setValidationError] = React.useState<PortalLeaveValidationError | null>(
     null,
@@ -84,7 +85,7 @@ export function PortalLeaveRequestDrawer({
       staff: portalStaff,
       startIso,
       endIso,
-      type: leaveType,
+      type: CANONICAL_LEAVE_TYPE_LABELS[leaveType],
       reason,
       source: "portal",
     });
@@ -132,7 +133,7 @@ export function PortalLeaveRequestDrawer({
       const result = await submitLeaveRequestFn({
         data: {
           workspaceId: liveWorkspaceId,
-          leaveType: LEAVE_TYPE_TO_RPC[leaveType] ?? "other",
+          leaveType,
           startDate: startIso,
           endDate: endIso,
           reason: reason.trim(),
@@ -193,13 +194,14 @@ export function PortalLeaveRequestDrawer({
           <select
             id="portal-leave-type"
             value={leaveType}
-            onChange={(event) => setLeaveType(event.target.value)}
+            onChange={(event) => setLeaveType(event.target.value as PortalLeaveKey)}
             className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
           >
-            <option>Annual leave</option>
-            <option>Sick leave</option>
-            <option>Compassionate leave</option>
-            <option>Unpaid leave</option>
+            {PORTAL_LEAVE_TYPES.map(({ key, label }) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
           </select>
         </FormRow>
         <FormRow label="From" htmlFor="portal-leave-from">

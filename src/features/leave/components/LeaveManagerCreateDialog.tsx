@@ -89,10 +89,10 @@ export function LeaveManagerCreateDialog({ source, open, onOpenChange, onCreateR
                 onChange={(event) => setLeaveType(event.target.value)}
               >
                 <option>Annual leave</option>
-                <option>Sick leave</option>
-                <option>Compassionate</option>
-                <option>Unpaid</option>
-                <option>Maternity / paternity</option>
+                <option>Sickness</option>
+                <option>Compassionate leave</option>
+                <option>Unpaid leave</option>
+                <option>Other</option>
               </select>
             </div>
             <div className="field">

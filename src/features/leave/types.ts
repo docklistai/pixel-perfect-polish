@@ -1,3 +1,5 @@
+import type { LeaveTypeKey } from "./lib/leaveVocabulary";
+
 /** Where the inbox data came from: the live workspace read or the demo store. */
 export type LeaveSource = "live" | "demo";
 
@@ -27,6 +29,7 @@ export interface LeaveRequest {
   endIso: string;
   days: number;
   type: string;
+  typeKey?: LeaveTypeKey;
   impact: "Low" | "Medium" | "High";
   tone: "success" | "warning" | "danger";
   state: LeaveRequestState;

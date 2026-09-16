@@ -2,24 +2,18 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { toSafeBusinessMessage } from "@/lib/safe-errors";
 
+import {
+  CANONICAL_LEAVE_TYPES,
+  CANONICAL_LEAVE_TYPE_LABELS,
+  type LeaveTypeKey,
+} from "../lib/leaveVocabulary";
+
 /** Leave types a manager may record directly. Mirrors the RPC's own check. */
-export const MANAGER_ABSENCE_TYPES = [
-  "sick",
-  "annual_leave",
-  "personal",
-  "unpaid",
-  "other",
-] as const;
+export const MANAGER_ABSENCE_TYPES = CANONICAL_LEAVE_TYPES;
 
-export type ManagerAbsenceType = (typeof MANAGER_ABSENCE_TYPES)[number];
+export type ManagerAbsenceType = LeaveTypeKey;
 
-export const MANAGER_ABSENCE_TYPE_LABELS: Record<ManagerAbsenceType, string> = {
-  sick: "Sickness",
-  annual_leave: "Annual leave",
-  personal: "Personal",
-  unpaid: "Unpaid",
-  other: "Other",
-};
+export const MANAGER_ABSENCE_TYPE_LABELS = CANONICAL_LEAVE_TYPE_LABELS;
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use a YYYY-MM-DD date.");
 

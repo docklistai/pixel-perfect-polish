@@ -74,7 +74,7 @@ describe("approvalDialogRows", () => {
 
     expect(rows).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: "Annual leave", value: "Not tracked yet" }),
+        expect.objectContaining({ label: "Annual leave", value: "Entitlement not recorded" }),
       ]),
     );
   });
@@ -88,6 +88,7 @@ describe("approvalDialogRows", () => {
           label: "Annual leave",
           value: "12 booked of 28 · 16 remaining",
         }),
+        expect.objectContaining({ label: "Days remaining after", value: "14 / 28" }),
         expect.objectContaining({ label: "Pending", value: "3 days · calendar days" }),
       ]),
     );
@@ -126,7 +127,14 @@ describe("approvalDialogRows", () => {
   });
 
   it("never claims a non-consuming leave type affects the annual balance", () => {
-    for (const type of ["Sick leave", "Unpaid leave", "Personal leave", "Other"]) {
+    for (const type of [
+      "Sickness",
+      "Sick leave",
+      "Unpaid leave",
+      "Compassionate leave",
+      "Personal leave",
+      "Other",
+    ]) {
       const rows = approvalDialogRows("live", { ...request, type }, balance());
       const annual = rows.find((row) => row.label === "Annual leave");
 
@@ -139,7 +147,16 @@ describe("approvalDialogRows", () => {
 describe("consumesAnnualEntitlement", () => {
   it("is true only for annual leave", () => {
     expect(consumesAnnualEntitlement({ type: "Annual leave" })).toBe(true);
-    for (const type of ["Sick leave", "Unpaid leave", "Personal leave", "Other"]) {
+    expect(consumesAnnualEntitlement({ type: "Annual leave", typeKey: "annual_leave" })).toBe(true);
+    expect(consumesAnnualEntitlement({ type: "any", typeKey: "annual_leave" })).toBe(true);
+    for (const type of [
+      "Sickness",
+      "Sick leave",
+      "Unpaid leave",
+      "Compassionate leave",
+      "Personal leave",
+      "Other",
+    ]) {
       expect(consumesAnnualEntitlement({ type })).toBe(false);
     }
   });

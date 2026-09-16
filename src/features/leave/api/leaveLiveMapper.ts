@@ -1,10 +1,11 @@
 import { leaveStateFromStatus } from "../lib/leaveCards";
+import { CANONICAL_LEAVE_TYPE_LABELS, type LeaveTypeKey } from "../lib/leaveVocabulary";
 import type { LeaveRequest } from "../types";
 
 export interface LeaveRequestRow {
   id: string;
   staff_member_id: string;
-  leave_type: "annual_leave" | "personal" | "sick" | "unpaid" | "other";
+  leave_type: LeaveTypeKey;
   start_date: string;
   end_date: string;
   reason: string;
@@ -19,14 +20,6 @@ export interface StaffLite {
   role_name: string;
   department: string;
 }
-
-const TYPE_LABEL: Record<LeaveRequestRow["leave_type"], string> = {
-  annual_leave: "Annual leave",
-  personal: "Personal leave",
-  sick: "Sick leave",
-  unpaid: "Unpaid leave",
-  other: "Other",
-};
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -74,7 +67,8 @@ export function mapLeaveRequest(row: LeaveRequestRow, staff?: StaffLite): LeaveR
     startIso: row.start_date,
     endIso: row.end_date,
     days,
-    type: TYPE_LABEL[row.leave_type],
+    type: CANONICAL_LEAVE_TYPE_LABELS[row.leave_type],
+    typeKey: row.leave_type,
     impact,
     tone,
     state,

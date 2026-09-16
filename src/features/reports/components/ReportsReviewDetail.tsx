@@ -1,14 +1,7 @@
 import { formatMinutes } from "../lib/reportsPresentation";
 import { shortWeekLabel } from "../lib/reportsPeriod";
 import type { ReportsContractReview, ReportsLeaveImpact, ReportsWeek } from "../types";
-
-const LEAVE_LABELS = {
-  annual_leave: "Annual leave",
-  personal: "Personal",
-  sick: "Sick leave",
-  unpaid: "Unpaid leave",
-  other: "Other leave",
-};
+import { formatLeaveType } from "@/features/leave/lib/leaveVocabulary";
 
 function EmptyDetail({ children }: { children: React.ReactNode }) {
   return <p className="rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{children}</p>;
@@ -41,7 +34,7 @@ export function LeaveImpactDetail({ rows }: { rows: ReportsLeaveImpact[] }) {
             {rows.map((row) => (
               <tr key={row.leaveRequestId}>
                 <td className="font-semibold">{row.staffName}</td>
-                <td>{LEAVE_LABELS[row.leaveType]}</td>
+                <td>{formatLeaveType(row.leaveType)}</td>
                 <td>
                   {shortWeekLabel(row.startDate)} – {shortWeekLabel(row.endDate)}
                 </td>

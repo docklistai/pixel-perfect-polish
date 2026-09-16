@@ -4,6 +4,9 @@ import { Check, X } from "lucide-react";
 import type { LeaveRequest, LeaveSource } from "../types";
 import { leaveRangesOverlap } from "../lib/leaveDates";
 import { coverageRowsForRequest } from "../lib/leaveCards";
+import { useStaffEntitlement } from "../hooks/useStaffEntitlement";
+import { consumesAnnualEntitlement } from "../lib/leaveActionDialogContent";
+import { NOT_RECORDED_LABEL, formatEntitlementSummary } from "../lib/leaveBalancePresentation";
 
 interface Props {
   request: LeaveRequest;
@@ -38,6 +41,8 @@ export function LeaveDetailPanel({
   const isApproved = request.state === "approved";
   const isDeclined = request.state === "declined";
   const isCancelled = request.state === "cancelled";
+  const isAnnual = consumesAnnualEntitlement(request);
+  const entitlement = useStaffEntitlement(source === "live" && isAnnual ? request.staffId : null);
   // Demo shows illustrative coverage bars; live has no real coverage source, so
   // it routes the manager to the rota instead of inventing percentages.
   const coverageRows = coverageRowsForRequest(request, source);
@@ -75,9 +80,37 @@ export function LeaveDetailPanel({
           <div className="card-section">
             <dl className="divide-y divide-border">
               <DetailRow label="Requested" value={request.date} />
-              <DetailRow label="Days" value={`${request.days} days`} />
+              <DetailRow label="Days" value={`${request.days} calendar days`} />
               <DetailRow label="Notice" value={`${request.notice} days`} />
               {source === "demo" && <DetailRow label="Balance after" value={request.balance} />}
+              {source === "live" &&
+                (isAnnual ? (
+                  entitlement.isLoading ? (
+                    <DetailRow label="Annual leave" value="Loading balance…" />
+                  ) : entitlement.result?.balance?.recorded ? (
+                    <>
+                      <DetailRow
+                        label="Remaining before"
+                        value={`${entitlement.result.balance.remaining} of ${entitlement.result.balance.entitlementDays} days`}
+                      />
+                      <DetailRow
+                        label="Remaining after"
+                        value={`${entitlement.result.balance.remaining !== null ? entitlement.result.balance.remaining - request.days : "-"} of ${entitlement.result.balance.entitlementDays} days`}
+                      />
+                    </>
+                  ) : (
+                    <DetailRow
+                      label="Annual leave"
+                      value={
+                        entitlement.result?.balance
+                          ? formatEntitlementSummary(entitlement.result.balance)
+                          : NOT_RECORDED_LABEL
+                      }
+                    />
+                  )
+                ) : (
+                  <DetailRow label="Annual leave" value="Not affected by this leave type" />
+                ))}
               <DetailRow label="Type" value={request.type} />
               {latestDecision && <DetailRow label="Decision note" value={latestDecision.reason} />}
             </dl>
@@ -136,7 +169,10 @@ export function LeaveDetailPanel({
               <div className="av av-c2 sm">{initials(person.n)}</div>
               <div className="min-w-0 grow">
                 <div className="strong txt-sm">{person.n}</div>
-                <div className="muted txt-xs mono">{person.date}</div>
+                <div className="muted txt-xs mono">
+                  {person.role && person.role !== "-" ? `${person.role} · ` : ""}
+                  {person.date}
+                </div>
               </div>
               <StatusBadge tone={person.state === "approved" ? "success" : "warning"}>
                 {person.state === "approved" ? "Approved" : "Pending"}

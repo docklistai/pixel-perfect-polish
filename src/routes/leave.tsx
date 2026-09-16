@@ -59,7 +59,7 @@ type LeaveFilter = "all" | "annual" | "sick" | "coverage" | "notice";
 const LEAVE_FILTER_LABELS: Record<LeaveFilter, string> = {
   all: "All types",
   annual: "Annual leave",
-  sick: "Sick leave",
+  sick: "Sickness",
   coverage: "Long requests (5+ days)",
   notice: "High notice (>30d)",
 };
@@ -69,9 +69,18 @@ function matchesLeaveFilter(request: LeaveRequest, filter: LeaveFilter): boolean
     case "all":
       return true;
     case "annual":
-      return request.type === "Annual leave";
+      return (
+        request.typeKey === "annual_leave" ||
+        request.type === "annual_leave" ||
+        request.type === "Annual leave"
+      );
     case "sick":
-      return request.type === "Sick leave";
+      return (
+        request.typeKey === "sick" ||
+        request.type === "sick" ||
+        request.type === "Sickness" ||
+        request.type === "Sick leave"
+      );
     case "coverage":
       return request.impact === "High";
     case "notice":
@@ -131,8 +140,17 @@ function LeavePage() {
     () => requests.filter((request) => matchesLeaveFilter(request, filter)),
     [requests, filter],
   );
-  const activeRequest =
-    visibleRequests.find((request) => request.id === activeId) ?? visibleRequests[0] ?? null;
+
+  React.useEffect(() => {
+    setActiveId((prev) => {
+      if (prev && visibleRequests.some((request) => request.id === prev)) {
+        return prev;
+      }
+      return visibleRequests[0]?.id ?? "";
+    });
+  }, [filter, visibleRequests]);
+
+  const activeRequest = visibleRequests.find((request) => request.id === activeId) ?? null;
 
   return (
     <AppShell>
@@ -166,7 +184,7 @@ function LeavePage() {
                   {filter === "annual" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilter("sick")}>
-                  <Heart className="h-3.5 w-3.5" aria-hidden /> Sick leave
+                  <Heart className="h-3.5 w-3.5" aria-hidden /> Sickness
                   {filter === "sick" && <Check className="ml-auto h-3.5 w-3.5" aria-hidden />}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilter("all")}>
