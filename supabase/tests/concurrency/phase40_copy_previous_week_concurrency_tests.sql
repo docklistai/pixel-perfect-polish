@@ -36,6 +36,45 @@ values (
   '2026-06-22', 'draft'
 );
 
+-- Ensure the source week has a published snapshot for the copy to read (§2.11).
+update public.rota_weeks set status = 'published'
+where id = '15000000-0000-4000-8000-000000000002';
+alter table public.published_rota_shifts disable trigger published_rota_shifts_reject_changes;
+delete from public.published_rota_shifts
+where workspace_id = '10000000-0000-4000-8000-000000000001'
+  and snapshot_id in (
+    select id from public.published_rota_snapshots
+    where rota_week_id = '15000000-0000-4000-8000-000000000002'
+  );
+alter table public.published_rota_shifts enable trigger published_rota_shifts_reject_changes;
+alter table public.published_rota_snapshots disable trigger published_rota_snapshots_reject_changes;
+delete from public.published_rota_snapshots
+where workspace_id = '10000000-0000-4000-8000-000000000001'
+  and rota_week_id = '15000000-0000-4000-8000-000000000002';
+alter table public.published_rota_snapshots enable trigger published_rota_snapshots_reject_changes;
+insert into public.published_rota_snapshots (
+  id, workspace_id, rota_week_id, version, published_at, published_by_membership_id, created_at
+) values (
+  '17000000-0000-4000-8000-000000000002',
+  '10000000-0000-4000-8000-000000000001',
+  '15000000-0000-4000-8000-000000000002',
+  1,
+  '2026-06-12T12:00:00Z',
+  '13000000-0000-4000-8000-000000000001',
+  '2026-06-12T12:00:00Z'
+);
+insert into public.published_rota_shifts (
+  id, workspace_id, snapshot_id, source_shift_id, location_id, department_id,
+  staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status
+)
+select
+  gen_random_uuid(), shift.workspace_id, '17000000-0000-4000-8000-000000000002',
+  shift.id, shift.location_id, shift.department_id, shift.staff_member_id,
+  shift.shift_date, shift.starts_at, shift.ends_at, shift.break_minutes,
+  shift.role_name, shift.assignment_status
+from public.shifts as shift
+where shift.rota_week_id = '15000000-0000-4000-8000-000000000002';
+
 begin;
 
 create temp table p40c_conn (connstr text primary key);
@@ -207,3 +246,14 @@ where workspace_id = '10000000-0000-4000-8000-000000000001'
 delete from public.rota_weeks
 where workspace_id = '10000000-0000-4000-8000-000000000001'
   and id = '15000000-0000-4000-8000-000000000003';
+
+alter table public.published_rota_shifts disable trigger published_rota_shifts_reject_changes;
+delete from public.published_rota_shifts
+where snapshot_id = '17000000-0000-4000-8000-000000000002';
+alter table public.published_rota_shifts enable trigger published_rota_shifts_reject_changes;
+alter table public.published_rota_snapshots disable trigger published_rota_snapshots_reject_changes;
+delete from public.published_rota_snapshots
+where id = '17000000-0000-4000-8000-000000000002';
+alter table public.published_rota_snapshots enable trigger published_rota_snapshots_reject_changes;
+update public.rota_weeks set status = 'draft'
+where id = '15000000-0000-4000-8000-000000000002';

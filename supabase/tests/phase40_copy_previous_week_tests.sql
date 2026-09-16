@@ -39,8 +39,35 @@ insert into public.shifts (
    '2026-06-08','2026-06-08 09:00:00+01','2026-06-08 17:00:00+01',30,'Chef','scheduled','amber'),
   ('77000000-0000-4000-8000-000000004002','71000000-0000-4000-8000-000000004001','76000000-0000-4000-8000-000000004001','72000000-0000-4000-8000-000000004001','73000000-0000-4000-8000-000000004001',null,
    '2026-06-12','2026-06-12 22:00:00+01','2026-06-13 02:00:00+01',0,'Bar','open',null),
-  ('77000000-0000-4000-8000-000000004003','71000000-0000-4000-8000-000000004001','76000000-0000-4000-8000-000000004002','72000000-0000-4000-8000-000000004001','73000000-0000-4000-8000-000000004001','75000000-0000-4000-8000-000000004001',
+   ('77000000-0000-4000-8000-000000004003','71000000-0000-4000-8000-000000004001','76000000-0000-4000-8000-000000004002','72000000-0000-4000-8000-000000004001','73000000-0000-4000-8000-000000004001','75000000-0000-4000-8000-000000004001',
    '2026-06-16','2026-06-16 12:00:00+01','2026-06-16 18:00:00+01',0,'Chef','scheduled',null);
+
+update public.rota_weeks set status = 'published'
+where id = '76000000-0000-4000-8000-000000004001';
+
+insert into public.published_rota_snapshots (
+  id, workspace_id, rota_week_id, version, published_at, published_by_membership_id, created_at
+) values (
+  '78000000-0000-4000-8000-000000004001',
+  '71000000-0000-4000-8000-000000004001',
+  '76000000-0000-4000-8000-000000004001',
+  1,
+  '2026-06-05T12:00:00Z',
+  '74000000-0000-4000-8000-000000004001',
+  '2026-06-05T12:00:00Z'
+);
+
+insert into public.published_rota_shifts (
+  id, workspace_id, snapshot_id, source_shift_id, location_id, department_id,
+  staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status
+)
+select
+  gen_random_uuid(), shift.workspace_id, '78000000-0000-4000-8000-000000004001',
+  shift.id, shift.location_id, shift.department_id, shift.staff_member_id,
+  shift.shift_date, shift.starts_at, shift.ends_at, shift.break_minutes,
+  shift.role_name, shift.assignment_status
+from public.shifts as shift
+where shift.rota_week_id = '76000000-0000-4000-8000-000000004001';
 
 select set_config('request.jwt.claims', '{"sub":"ad000000-0000-4000-8000-000000004001","role":"authenticated"}', true);
 set local role authenticated;
@@ -123,6 +150,7 @@ end $$;
 -- 2. Insert failure rolls the whole copy back — the draft is never lost.
 -- --------------------------------------------------------------------------
 reset role;
+select set_config('request.jwt.claims', null, true);
 
 create function pg_temp.p40_poison_shift()
 returns trigger
@@ -141,14 +169,17 @@ create trigger p40_poison_shift_trigger
 before insert on public.shifts
 for each row execute function pg_temp.p40_poison_shift();
 
--- Add a poison row to the SOURCE week so the copy fails mid-insert.
-insert into public.shifts (
-  workspace_id, rota_week_id, location_id, department_id, staff_member_id,
-  shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status
+-- Add a poison row to the SOURCE published snapshot so the copy fails mid-insert.
+insert into public.published_rota_shifts (
+  workspace_id, snapshot_id, source_shift_id, location_id, department_id,
+  staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status
 ) values
-  ('71000000-0000-4000-8000-000000004001','76000000-0000-4000-8000-000000004001','72000000-0000-4000-8000-000000004001','73000000-0000-4000-8000-000000004001',null,
+  ('71000000-0000-4000-8000-000000004001','78000000-0000-4000-8000-000000004001',
+   gen_random_uuid(),
+   '72000000-0000-4000-8000-000000004001','73000000-0000-4000-8000-000000004001',null,
    '2026-06-10','2026-06-10 10:00:00+01','2026-06-10 14:00:00+01',0,'Poison','open');
 
+select set_config('request.jwt.claims', '{"sub":"ad000000-0000-4000-8000-000000004001","role":"authenticated"}', true);
 set local role authenticated;
 
 do $$
@@ -175,6 +206,9 @@ end $$;
 
 reset role;
 drop trigger p40_poison_shift_trigger on public.shifts;
+alter table public.published_rota_shifts disable trigger published_rota_shifts_reject_changes;
+delete from public.published_rota_shifts where role_name = 'Poison';
+alter table public.published_rota_shifts enable trigger published_rota_shifts_reject_changes;
 delete from public.shifts where role_name = 'Poison';
 set local role authenticated;
 

@@ -39,21 +39,48 @@ values ('46000000-0000-4000-8000-000000000301', '41000000-0000-4000-8000-0000000
 
 insert into public.rota_weeks (id, workspace_id, location_id, week_start, status)
 values
-  ('45000000-0000-4000-8000-00000000030a', '41000000-0000-4000-8000-000000000301', '42000000-0000-4000-8000-000000000301', '2026-06-15', 'draft'),
+  ('45000000-0000-4000-8000-00000000030a', '41000000-0000-4000-8000-000000000301', '42000000-0000-4000-8000-000000000301', '2026-06-15', 'published'),
   ('45000000-0000-4000-8000-00000000030b', '41000000-0000-4000-8000-000000000301', '42000000-0000-4000-8000-000000000301', '2026-06-22', 'draft');
 
 -- Source week: an assigned Bar/Training shift and an open Bar/Cover shift.
-insert into public.shifts (workspace_id, rota_week_id, location_id, department_id, staff_member_id,
+insert into public.shifts (id, workspace_id, rota_week_id, location_id, department_id, staff_member_id,
                            shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status)
 values
-  ('41000000-0000-4000-8000-000000000301', '45000000-0000-4000-8000-00000000030a',
+  ('47000000-0000-4000-8000-000000000301', '41000000-0000-4000-8000-000000000301', '45000000-0000-4000-8000-00000000030a',
    '42000000-0000-4000-8000-000000000301', '43000000-0000-4000-8000-00000000030b',
    '46000000-0000-4000-8000-000000000301', '2026-06-15',
    '2026-06-15T09:00:00Z', '2026-06-15T17:00:00Z', 30, 'Training', 'scheduled'),
-  ('41000000-0000-4000-8000-000000000301', '45000000-0000-4000-8000-00000000030a',
+  ('47000000-0000-4000-8000-000000000302', '41000000-0000-4000-8000-000000000301', '45000000-0000-4000-8000-00000000030a',
    '42000000-0000-4000-8000-000000000301', '43000000-0000-4000-8000-00000000030b',
    null, '2026-06-16',
    '2026-06-16T18:00:00Z', '2026-06-16T23:00:00Z', 0, 'Cover', 'open');
+
+update public.rota_weeks set status = 'published'
+where id = '45000000-0000-4000-8000-00000000030a';
+
+insert into public.published_rota_snapshots (
+  id, workspace_id, rota_week_id, version, published_at, published_by_membership_id, created_at
+) values (
+  '48000000-0000-4000-8000-000000000301',
+  '41000000-0000-4000-8000-000000000301',
+  '45000000-0000-4000-8000-00000000030a',
+  1,
+  '2026-06-12T12:00:00Z',
+  '44000000-0000-4000-8000-000000000301',
+  '2026-06-12T12:00:00Z'
+);
+
+insert into public.published_rota_shifts (
+  id, workspace_id, snapshot_id, source_shift_id, location_id, department_id,
+  staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status
+)
+select
+  gen_random_uuid(), shift.workspace_id, '48000000-0000-4000-8000-000000000301',
+  shift.id, shift.location_id, shift.department_id, shift.staff_member_id,
+  shift.shift_date, shift.starts_at, shift.ends_at, shift.break_minutes,
+  shift.role_name, shift.assignment_status
+from public.shifts as shift
+where shift.rota_week_id = '45000000-0000-4000-8000-00000000030a';
 
 select set_config('request.jwt.claims', '{"sub":"ad000000-0000-4000-8000-000000000301","role":"authenticated"}', true);
 set local role authenticated;

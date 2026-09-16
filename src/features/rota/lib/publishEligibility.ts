@@ -1,11 +1,6 @@
 import type { LiveWeekStatus } from "../api/rotaLiveData";
 
-export type PublishState =
-  | "draft"
-  | "unpublished-changes"
-  | "ready"
-  | "published"
-  | "published-issues";
+export type PublishState = "empty-week" | "review" | "ready" | "published" | "unpublished-changes";
 
 export type RotaPublishEligibility = {
   canPublish: boolean;
@@ -36,12 +31,6 @@ export function getRotaPublishEligibility(input: PublishEligibilityInput): RotaP
       blockedReason: "Resolve the failed save before publishing.",
     };
   }
-  if (input.plannedShiftCount === 0) {
-    return {
-      canPublish: false,
-      blockedReason: "Add at least one shift before publishing.",
-    };
-  }
   if (input.weekStatus === "archived") {
     return { canPublish: false, blockedReason: "Archived rota weeks cannot be published." };
   }
@@ -68,19 +57,27 @@ export function openPublishIfEligible(
 }
 
 export function getPublishState({
-  published,
-  hasUnpublishedChanges,
-  hasReadinessIssues,
+  plannedShiftCount = 0,
+  hasReadinessIssues = false,
+  published = false,
+  hasUnpublishedChanges = false,
 }: {
-  published: boolean;
-  hasUnpublishedChanges: boolean;
-  hasReadinessIssues: boolean;
+  plannedShiftCount?: number;
+  hasReadinessIssues?: boolean;
+  published?: boolean;
+  hasUnpublishedChanges?: boolean;
 }): PublishState {
-  if (published) {
-    if (hasUnpublishedChanges) return "unpublished-changes";
-    return hasReadinessIssues ? "published-issues" : "published";
+  if (published && !hasUnpublishedChanges) {
+    return "published";
   }
-  return hasReadinessIssues ? "draft" : "ready";
+  if (published && hasUnpublishedChanges) {
+    if (plannedShiftCount === 0) return "empty-week";
+    return hasReadinessIssues ? "review" : "unpublished-changes";
+  }
+  if (plannedShiftCount === 0) {
+    return "empty-week";
+  }
+  return hasReadinessIssues ? "review" : "ready";
 }
 
 /** Header status pill tone + label from the live-load state and publish state. */
@@ -110,15 +107,15 @@ export function getRotaHeaderStatus(input: {
 
 export function publishStateLabel(state: PublishState): string {
   switch (state) {
-    case "draft":
-      return "Draft";
-    case "unpublished-changes":
-      return "Unpublished changes";
+    case "empty-week":
+      return "Empty week";
+    case "review":
+      return "Review before publishing";
     case "ready":
       return "Ready to publish";
     case "published":
       return "Published";
-    case "published-issues":
-      return "Published with issues";
+    case "unpublished-changes":
+      return "Unpublished changes";
   }
 }

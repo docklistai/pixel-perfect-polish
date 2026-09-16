@@ -22,17 +22,36 @@ async function loadPreviousWeekSourceRows({
   if (previousWeekError) throw previousWeekError;
   if (!previousWeek) throw new Error("No previous week rota is available to copy.");
 
+  const { data: latestSnapshot, error: snapshotError } = await context.supabase
+    .from("published_rota_snapshots")
+    .select("id")
+    .eq("workspace_id", context.workspaceId)
+    .eq("rota_week_id", (previousWeek as { id: string }).id)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (snapshotError) throw snapshotError;
+  if (!latestSnapshot) {
+    throw new Error(
+      "Previous week has no published rota to copy. Only published rotas can be copied.",
+    );
+  }
+
   const { data: previousShifts, error: shiftsError } = await context.supabase
-    .from("shifts")
+    .from("published_rota_shifts")
     .select(
       "location_id, department_id, staff_member_id, shift_date, starts_at, ends_at, break_minutes, role_name, assignment_status",
     )
     .eq("workspace_id", context.workspaceId)
-    .eq("rota_week_id", (previousWeek as { id: string }).id)
+    .eq("snapshot_id", (latestSnapshot as { id: string }).id)
     .order("shift_date", { ascending: true })
     .order("starts_at", { ascending: true });
   if (shiftsError) throw shiftsError;
-  return ((previousShifts as LiveCopySourceShiftRow[] | null) ?? []).filter(Boolean);
+  const rows = ((previousShifts as LiveCopySourceShiftRow[] | null) ?? []).filter(Boolean);
+  if (rows.length === 0) {
+    throw new Error("Previous week published rota has no shifts to copy.");
+  }
+  return rows;
 }
 
 /**

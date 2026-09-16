@@ -72,7 +72,7 @@ export function PublishRotaDialog({
   /** Diff against the latest published snapshot. Null outside live manager sessions. */
   changeReview: PublishDiffState | null;
   changeReviewDayLabels: readonly string[];
-  onConfirm: (acknowledgeConstraints: boolean) => MaybePromise<void>;
+  onConfirm: (acknowledgeConstraints: boolean, allowEmpty: boolean) => MaybePromise<void>;
 }) {
   const [issuesAcknowledged, setIssuesAcknowledged] = React.useState(false);
   const [publishing, setPublishing] = React.useState(false);
@@ -80,7 +80,6 @@ export function PublishRotaDialog({
   const availabilityDataWarningCount = availabilityDataState === "ready" ? 0 : 1;
   const issueCount =
     conflictCount +
-    openShiftCount +
     workingTimeAlertCount +
     leaveDataWarningCount +
     availabilityDataWarningCount +
@@ -108,6 +107,7 @@ export function PublishRotaDialog({
           },
           issuesAcknowledged,
         ),
+        plannedShiftCount === 0,
       );
     } catch {
       // Route/persistence handlers own publish failure toasts and keep the dialog open.
@@ -118,11 +118,13 @@ export function PublishRotaDialog({
 
   const checks: ReadinessCheck[] = [
     {
-      label: "Shifts assigned",
-      value: `${assignedShiftCount} / ${plannedShiftCount}`,
-      ok: plannedShiftCount > 0 && assignedShiftCount === plannedShiftCount,
+      label: "Shift assignment",
+      value:
+        plannedShiftCount === 0
+          ? "No shifts planned"
+          : `${assignedShiftCount} of ${plannedShiftCount} assigned · ${openShiftCount} open`,
+      ok: plannedShiftCount === 0 || assignedShiftCount === plannedShiftCount,
     },
-    { label: "Coverage target", value: `${coveragePct}%`, ok: coveragePct >= 100 },
     {
       label: "Conflicts resolved",
       value: conflictCount === 0 ? "All clear" : `${conflictCount} open`,
@@ -130,8 +132,8 @@ export function PublishRotaDialog({
     },
     {
       label: "Open shifts",
-      value: openShiftCount === 0 ? "All covered" : `${openShiftCount} open`,
-      ok: openShiftCount === 0,
+      value: openShiftCount === 0 ? "None" : `${openShiftCount} open`,
+      ok: true,
     },
     {
       label: "Working time",
@@ -169,8 +171,10 @@ export function PublishRotaDialog({
     <DialogShell
       open={open}
       onOpenChange={onOpenChange}
-      title={`${publishActionLabel} this rota?`}
-      description={`${weekLabel} - ${staffCount} staff`}
+      title={plannedShiftCount === 0 ? "Publish empty week?" : `${publishActionLabel} this rota?`}
+      description={
+        plannedShiftCount === 0 ? `${weekLabel} - 0 shifts` : `${weekLabel} - ${staffCount} staff`
+      }
       icon={Send}
       footer={
         <>
@@ -182,17 +186,27 @@ export function PublishRotaDialog({
             disabled={publishing || !canPublish || (hasIssues && !issuesAcknowledged)}
             onClick={() => void handleConfirm()}
           >
-            {published && hasUnpublishedChanges
-              ? "Republish rota"
-              : `Publish to ${staffCount} staff`}
+            {plannedShiftCount === 0
+              ? "Publish empty week"
+              : published && hasUnpublishedChanges
+                ? "Republish rota"
+                : `Publish to ${staffCount} staff`}
           </ActionButton>
         </>
       }
     >
-      <p>
-        Staff see only the published snapshot in the Docklist mobile portal. Draft edits stay
-        manager-only until you publish again.
-      </p>
+      {plannedShiftCount === 0 ? (
+        <p>
+          Publishing an empty week will create a new published snapshot with zero shifts. Staff will
+          see &quot;No shifts this week&quot;. Any staff whose previously published shifts disappear
+          will be notified.
+        </p>
+      ) : (
+        <p>
+          Staff see only the published snapshot in the Docklist mobile portal. Draft edits stay
+          manager-only until you publish again.
+        </p>
+      )}
 
       {!canPublish && publishBlockedReason && (
         <p className="mt-3 text-sm font-medium text-warning">{publishBlockedReason}</p>

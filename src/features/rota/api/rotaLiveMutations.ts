@@ -156,24 +156,32 @@ export const clearLiveRotaWeekFn = createServerFn({ method: "POST" })
 
 export const publishLiveRotaWeekFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
-    liveWeekInput.extend({ acknowledgeConstraints: z.boolean().default(false) }).parse(input),
+    liveWeekInput
+      .extend({
+        acknowledgeConstraints: z.boolean().default(false),
+        allowEmpty: z.boolean().default(false),
+      })
+      .parse(input),
   )
   .handler(async ({ data }) => {
-    const context = await getLiveContext(data, { createWeek: false });
+    const context = await getLiveContext(data, { createWeek: data.allowEmpty });
     if (!context.week) throw new Error("Save at least one shift before publishing");
     const week = requireEditableWeek(context.week);
-    const { count, error: countError } = await context.supabase
-      .from("shifts")
-      .select("id", { count: "exact", head: true })
-      .eq("workspace_id", context.workspaceId)
-      .eq("rota_week_id", week.id);
-    if (countError) throw countError;
-    if (!count) throw new Error("Cannot publish a rota week with no saved shifts");
+    if (!data.allowEmpty) {
+      const { count, error: countError } = await context.supabase
+        .from("shifts")
+        .select("id", { count: "exact", head: true })
+        .eq("workspace_id", context.workspaceId)
+        .eq("rota_week_id", week.id);
+      if (countError) throw countError;
+      if (!count) throw new Error("Cannot publish a rota week with no saved shifts");
+    }
 
     const { data: result, error } = await context.supabase.rpc("rpc_publish_rota_week", {
       p_workspace_id: context.workspaceId,
       p_rota_week_id: week.id,
       p_acknowledge_constraints: data.acknowledgeConstraints,
+      p_allow_empty: data.allowEmpty,
     });
     if (error) {
       // Publication refusals carry the exact reason the manager must see

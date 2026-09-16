@@ -45,4 +45,21 @@ describe("requestLiveCopyPreviousWeekConfirmation", () => {
     expect(requestCopyPreviousWeek).toHaveBeenCalledWith(preview);
     expect(copyPreviousWeek).not.toHaveBeenCalled();
   });
+
+  it("propagates refusal when previous week has no published rota or shifts", async () => {
+    const error = new Error(
+      "Previous week has no published rota to copy. Only published rotas can be copied.",
+    );
+    const previewCopyPreviousWeek = vi.fn().mockRejectedValue(error);
+    const requestCopyPreviousWeek = vi.fn();
+
+    await expect(
+      requestLiveCopyPreviousWeekConfirmation({
+        previewCopyPreviousWeek,
+        requestCopyPreviousWeek,
+      }),
+    ).rejects.toThrow("Previous week has no published rota to copy");
+
+    expect(requestCopyPreviousWeek).not.toHaveBeenCalled();
+  });
 });

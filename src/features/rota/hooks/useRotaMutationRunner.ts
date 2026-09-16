@@ -21,6 +21,8 @@ export type RotaMutationRunner = <T>(
   options?: RotaMutationRunnerOptions,
 ) => Promise<T>;
 
+export type RotaReadOnlyRunner = <T>(label: string, operation: () => Promise<T>) => Promise<T>;
+
 /** Serialises live rota writes and refreshes the authoritative week after each success. */
 export function useRotaMutationRunner(
   refetchWeek: () => Promise<unknown>,
@@ -60,5 +62,28 @@ export function useRotaMutationRunner(
     [refetchWeek],
   );
 
-  return { runMutation, pendingCountRef, pendingCount, lastMutationFailed };
+  const runReadOnly = React.useCallback(
+    async <T>(label: string, operation: () => Promise<T>): Promise<T> => {
+      if (pendingCountRef.current > 0) {
+        const error = new Error("Wait for the current rota save to finish.");
+        toast.info("Rota save in progress", { description: error.message });
+        throw error;
+      }
+
+      pendingCountRef.current += 1;
+      setPendingCount(pendingCountRef.current);
+      try {
+        return await operation();
+      } catch (error) {
+        toast.error(label, { description: errorMessage(error) });
+        throw error;
+      } finally {
+        pendingCountRef.current -= 1;
+        setPendingCount(pendingCountRef.current);
+      }
+    },
+    [],
+  );
+
+  return { runMutation, runReadOnly, pendingCountRef, pendingCount, lastMutationFailed };
 }

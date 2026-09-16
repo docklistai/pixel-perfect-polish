@@ -1,5 +1,6 @@
 import { Send, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Card, StatusBadge, ActionButton } from "@/components/dl";
+import { type PublishState, publishStateLabel } from "../lib/publishEligibility";
 
 export function PublishReadinessCard({
   published,
@@ -13,14 +14,13 @@ export function PublishReadinessCard({
   availabilityDataState,
   assignedShiftCount,
   plannedShiftCount,
-  coveragePct,
   readOnly,
   canPublish,
   onPublish,
 }: {
   published: boolean;
   hasUnpublishedChanges: boolean;
-  publishState: "draft" | "unpublished-changes" | "ready" | "published" | "published-issues";
+  publishState: PublishState;
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
@@ -29,26 +29,29 @@ export function PublishReadinessCard({
   availabilityDataState: "ready" | "loading" | "error";
   assignedShiftCount: number;
   plannedShiftCount: number;
-  coveragePct: number;
+  coveragePct?: number;
   readOnly: boolean;
   canPublish: boolean;
   onPublish: () => void;
 }) {
   const checks = [
     {
-      k: "Shifts assigned",
-      v: `${assignedShiftCount} / ${plannedShiftCount}`,
-      ok: plannedShiftCount > 0 && assignedShiftCount === plannedShiftCount,
-    },
-    {
-      k: "Coverage target",
-      v: `${coveragePct}%`,
-      ok: coveragePct >= 95,
+      k: "Shift assignment",
+      v:
+        plannedShiftCount === 0
+          ? "No shifts planned"
+          : `${assignedShiftCount} of ${plannedShiftCount} assigned · ${openShiftCount} open`,
+      ok: plannedShiftCount === 0 || assignedShiftCount === plannedShiftCount,
     },
     {
       k: "Conflicts resolved",
       v: conflictCount === 0 ? "All clear" : `${conflictCount} remain`,
       ok: conflictCount === 0,
+    },
+    {
+      k: "Open shifts",
+      v: openShiftCount === 0 ? "None" : `${openShiftCount} open`,
+      ok: true,
     },
     {
       k: "Working time checked",
@@ -84,35 +87,22 @@ export function PublishReadinessCard({
 
   const badgeTone =
     publishState === "published" || publishState === "ready" ? "success" : "warning";
-  const badgeLabel = readOnly
-    ? "Read-only"
-    : publishState === "published"
-      ? "Published"
-      : publishState === "published-issues"
-        ? "Published with issues"
-        : publishState === "unpublished-changes"
-          ? "Unpublished changes"
-          : publishState === "ready"
-            ? "Ready"
-            : "Draft";
+  const badgeLabel = readOnly ? "Read-only" : publishStateLabel(publishState);
   const buttonLabel = !canPublish
     ? readOnly
       ? "Publish unavailable"
-      : plannedShiftCount === 0
-        ? "Add shifts before publishing"
-        : published && !hasUnpublishedChanges
-          ? publishState === "published-issues"
-            ? "Published with issues"
-            : "Published"
-          : "Publish unavailable"
-    : openShiftCount > 0 ||
-        conflictCount > 0 ||
-        workingTimeAlertCount > 0 ||
-        leaveDataState !== "ready" ||
-        availabilityDataState !== "ready" ||
-        constraintClashCount > 0
-      ? "Publish with issues"
-      : "Publish to staff";
+      : published && !hasUnpublishedChanges
+        ? "Published"
+        : "Publish unavailable"
+    : plannedShiftCount === 0
+      ? "Publish empty week"
+      : conflictCount > 0 ||
+          workingTimeAlertCount > 0 ||
+          leaveDataState !== "ready" ||
+          availabilityDataState !== "ready" ||
+          constraintClashCount > 0
+        ? "Publish with issues"
+        : "Publish to staff";
 
   return (
     <Card className="p-4">

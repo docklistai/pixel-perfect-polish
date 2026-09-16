@@ -10,11 +10,11 @@ export function useRotaPublishAction({
 }: {
   eligibility: RotaPublishEligibility;
   source: "live" | "demo";
-  publish: (acknowledgeConstraints: boolean) => Promise<unknown> | unknown;
+  publish: (acknowledgeConstraints?: boolean, allowEmpty?: boolean) => Promise<unknown> | unknown;
   closeDialog: () => void;
 }) {
   return React.useCallback(
-    async (acknowledgeConstraints = false) => {
+    async (acknowledgeConstraints = false, allowEmpty = false) => {
       if (!eligibility.canPublish) {
         toast.info("Publish unavailable", {
           description: eligibility.blockedReason ?? "Publishing is unavailable.",
@@ -22,7 +22,7 @@ export function useRotaPublishAction({
         return;
       }
       try {
-        await publish(acknowledgeConstraints);
+        await publish(acknowledgeConstraints, allowEmpty);
         closeDialog();
         toast.success("Rota published", {
           description:

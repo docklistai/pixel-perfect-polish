@@ -13,10 +13,8 @@ import {
 
 export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
   const queryClient = useQueryClient();
-  const { runMutation, pendingCountRef, pendingCount, lastMutationFailed } = useRotaMutationRunner(
-    live.refetchWeek,
-    live.locationId,
-  );
+  const { runMutation, runReadOnly, pendingCountRef, pendingCount, lastMutationFailed } =
+    useRotaMutationRunner(live.refetchWeek, `${live.locationId ?? ""}:${weekOffset}`);
 
   const liveWeekInput = React.useCallback(() => {
     if (!live.isLive) throw new Error("Live rota is not available.");
@@ -46,14 +44,14 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
 
   const previewCopyPreviousWeek = React.useCallback(
     () =>
-      runMutation("Previous week not previewed", async () =>
+      runReadOnly("Previous week not previewed", async () =>
         previewCopyPreviousLiveRotaWeekFn({ data: liveWeekInput() }),
       ),
-    [liveWeekInput, runMutation],
+    [liveWeekInput, runReadOnly],
   );
 
   const publish = React.useCallback(
-    async (acknowledgeConstraints = false) => {
+    async (acknowledgeConstraints = false, allowEmpty = false) => {
       const blockPublish = (message: string) => {
         toast.error("Rota not published", { description: message });
         throw new Error(message);
@@ -62,13 +60,17 @@ export function useRotaLivePersistence(live: RotaLiveData, weekOffset: number) {
       if (lastMutationFailed) blockPublish("Resolve the failed save before publishing.");
       if (pendingCountRef.current > 0)
         blockPublish("Wait for the current rota save before publishing.");
-      if (!live.rotaWeekId) blockPublish("Save at least one shift before publishing.");
       if (live.weekStatus === "archived") blockPublish("Archived rota weeks cannot be published.");
-      if (live.shifts.length === 0)
-        blockPublish("Cannot publish a rota week with no saved shifts.");
+      if (!allowEmpty) {
+        if (!live.rotaWeekId) blockPublish("Save at least one shift before publishing.");
+        if (live.shifts.length === 0)
+          blockPublish("Cannot publish a rota week with no saved shifts.");
+      }
 
       const result = await runMutation("Rota not published", async () =>
-        publishLiveRotaWeekFn({ data: { ...liveWeekInput(), acknowledgeConstraints } }),
+        publishLiveRotaWeekFn({
+          data: { ...liveWeekInput(), acknowledgeConstraints, allowEmpty },
+        }),
       );
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["portal", "published-shifts"] }),

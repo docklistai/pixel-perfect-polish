@@ -118,16 +118,16 @@ export function useRotaPage(week: number | undefined, location: string | undefin
           ? "error"
           : "ready";
   const readinessIssueCount =
-    rota.openShiftCount +
     rota.conflictCount +
     workingTimeAlertCount +
     (leaveDataState === "ready" ? 0 : 1) +
     availability.clashes.length +
     (availability.dataState === "ready" ? 0 : 1);
   const publishState = getPublishState({
+    plannedShiftCount: rota.plannedShiftCount,
+    hasReadinessIssues: readinessIssueCount > 0,
     published: rota.published,
     hasUnpublishedChanges: rota.hasUnpublishedChanges,
-    hasReadinessIssues: readinessIssueCount > 0,
   });
 
   const handlePublish = useRotaPublishAction({
