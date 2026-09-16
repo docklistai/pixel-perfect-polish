@@ -4,12 +4,18 @@ import {
   acknowledgeTeamBirthdayFn,
   addTeamAnnouncementCommentFn,
   createTeamAnnouncementFn,
+  createTeamStaffEventFn,
+  createTeamTrainingReminderFn,
   recordTeamTrainingCompletionFn,
   remindTeamNonReadersFn,
   sendTeamTrainingReminderFn,
   setTeamTrainingNoteFn,
 } from "../api/teamMutations";
 import type { ComposeSubmission } from "../components/TeamComposeDrawer";
+import type {
+  StaffEventSubmission,
+  TrainingReminderSubmission,
+} from "../components/TeamCreationDrawer";
 import type { useTeamActions } from "./useTeamActions";
 
 type Actions = ReturnType<typeof useTeamActions>;
@@ -105,6 +111,57 @@ export function useTeamCommands(actions: Actions) {
     [run],
   );
 
+  const createTrainingReminder = React.useCallback(
+    async (submission: TrainingReminderSubmission) => {
+      const result = await runForResult(async () => {
+        const createResult = await createTeamTrainingReminderFn({
+          data: {
+            requestId: requestId(),
+            title: submission.title,
+            source: "manager_reminder",
+            audienceKind: submission.audienceKind,
+            audienceDepartmentId: submission.audienceDepartmentId,
+            dueAt: submission.dueAt,
+            mandatory: submission.mandatory,
+          },
+        });
+        if (createResult.ok && submission.note) {
+          const reminderId = (createResult.data as { reminder_id?: string })?.reminder_id;
+          if (reminderId) {
+            await setTeamTrainingNoteFn({
+              data: {
+                requestId: requestId(),
+                reminderId,
+                note: submission.note,
+              },
+            });
+          }
+        }
+        return createResult;
+      }, "Training reminder created.");
+      return result !== null;
+    },
+    [runForResult],
+  );
+
+  const createStaffEvent = React.useCallback(
+    async (submission: StaffEventSubmission) => {
+      const result = await runForResult(
+        () =>
+          createTeamStaffEventFn({
+            data: {
+              requestId: requestId(),
+              title: submission.title,
+              occursAt: submission.occursAt,
+            },
+          }),
+        "Staff event created.",
+      );
+      return result !== null;
+    },
+    [runForResult],
+  );
+
   return {
     publishAnnouncement,
     addComment,
@@ -114,5 +171,7 @@ export function useTeamCommands(actions: Actions) {
     recordTrainingCompletion,
     saveTrainingNote,
     acknowledgeBirthday,
+    createTrainingReminder,
+    createStaffEvent,
   };
 }

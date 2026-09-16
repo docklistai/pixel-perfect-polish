@@ -15,6 +15,8 @@ interface Props {
   onSelectBirthday: (birthday: TeamBirthday) => void;
   onSelectTraining: (reminder: TeamTrainingReminder) => void;
   onComposeForAudience: (key: string) => void;
+  onAddTraining?: () => void;
+  onAddEvent?: () => void;
 }
 
 function RailEmpty({ children }: { children: React.ReactNode }) {
@@ -29,15 +31,39 @@ export function TeamRightRail({
   onSelectBirthday,
   onSelectTraining,
   onComposeForAudience,
+  onAddTraining,
+  onAddEvent,
 }: Props) {
   const EventIcon = eventIcon();
 
   return (
     <div className="space-y-4">
       <Card className="p-5">
-        <h3 className="text-sm font-semibold mb-3">Training reminders</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Training reminders</h3>
+          {onAddTraining && (
+            <button
+              type="button"
+              onClick={onAddTraining}
+              className="text-xs text-brand hover:underline font-medium focus-visible:outline-none"
+            >
+              Add
+            </button>
+          )}
+        </div>
         {training.length === 0 ? (
-          <RailEmpty>No training reminders are set up yet.</RailEmpty>
+          <div className="space-y-2">
+            <RailEmpty>No training reminders are set up yet.</RailEmpty>
+            {onAddTraining && (
+              <button
+                type="button"
+                onClick={onAddTraining}
+                className="text-xs text-brand hover:underline font-medium"
+              >
+                Add training reminder
+              </button>
+            )}
+          </div>
         ) : (
           training.map((item) => {
             const Icon = trainingIcon(item);
@@ -104,9 +130,31 @@ export function TeamRightRail({
       </Card>
 
       <Card className="p-5">
-        <h3 className="text-sm font-semibold mb-3">Staff events</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Staff events</h3>
+          {onAddEvent && (
+            <button
+              type="button"
+              onClick={onAddEvent}
+              className="text-xs text-brand hover:underline font-medium focus-visible:outline-none"
+            >
+              Add
+            </button>
+          )}
+        </div>
         {events.length === 0 ? (
-          <RailEmpty>No upcoming staff events.</RailEmpty>
+          <div className="space-y-2">
+            <RailEmpty>No upcoming staff events.</RailEmpty>
+            {onAddEvent && (
+              <button
+                type="button"
+                onClick={onAddEvent}
+                className="text-xs text-brand hover:underline font-medium"
+              >
+                Add staff event
+              </button>
+            )}
+          </div>
         ) : (
           events.map((item) => (
             <div

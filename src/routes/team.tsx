@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { AppShell, PageHeader, ActionButton, Card } from "@/components/dl";
-import { Megaphone, AlertTriangle, Loader2 } from "lucide-react";
+import { Megaphone, AlertTriangle, Loader2, CalendarPlus } from "lucide-react";
 import { TeamKpiCards } from "@/features/team/components/TeamKpiCards";
 import { TeamAnnouncementList } from "@/features/team/components/TeamAnnouncementList";
 import { TeamRightRail } from "@/features/team/components/TeamRightRail";
 import { TeamComposeDrawer } from "@/features/team/components/TeamComposeDrawer";
+import {
+  TeamCreationDrawer,
+  type TeamCreationKind,
+} from "@/features/team/components/TeamCreationDrawer";
 import { TeamAnnouncementDetailDrawer } from "@/features/team/components/TeamAnnouncementDetailDrawer";
 import { TeamTrainingDetailDrawer } from "@/features/team/components/TeamTrainingDetailDrawer";
 import { TeamBirthdayDialog } from "@/features/team/components/TeamBirthdayDialog";
@@ -51,6 +55,8 @@ function TeamPage() {
 
   const [composeOpen, setComposeOpen] = React.useState(false);
   const [composeAudienceKey, setComposeAudienceKey] = React.useState<string | null>(null);
+  const [creationOpen, setCreationOpen] = React.useState(false);
+  const [creationKind, setCreationKind] = React.useState<TeamCreationKind>("training");
   const [selectedBirthday, setSelectedBirthday] = React.useState<TeamBirthday | null>(null);
   const [selectedTrainingId, setSelectedTrainingId] = React.useState<string | null>(null);
 
@@ -70,15 +76,29 @@ function TeamPage() {
     setComposeOpen(true);
   };
 
+  const openCreation = (kind: TeamCreationKind = "training") => {
+    setCreationKind(kind);
+    setCreationOpen(true);
+  };
+
   return (
     <AppShell>
       <PageHeader
         title="Team"
         subtitle="Send announcements to your team and track who has read and acknowledged them."
         actions={
-          <ActionButton icon={Megaphone} onClick={() => openCompose()}>
-            Compose
-          </ActionButton>
+          <div className="flex items-center gap-2">
+            <ActionButton
+              variant="secondary"
+              icon={CalendarPlus}
+              onClick={() => openCreation("training")}
+            >
+              Add reminder / event
+            </ActionButton>
+            <ActionButton icon={Megaphone} onClick={() => openCompose()}>
+              Compose
+            </ActionButton>
+          </div>
         }
       />
 
@@ -106,6 +126,8 @@ function TeamPage() {
               onSelectBirthday={setSelectedBirthday}
               onSelectTraining={(reminder) => setSelectedTrainingId(reminder.id)}
               onComposeForAudience={(key) => openCompose(key)}
+              onAddTraining={() => openCreation("training")}
+              onAddEvent={() => openCreation("event")}
             />
           </div>
         </div>
@@ -118,6 +140,16 @@ function TeamPage() {
         pending={actions.pending}
         presetAudienceKey={composeAudienceKey}
         onSubmit={commands.publishAnnouncement}
+      />
+
+      <TeamCreationDrawer
+        open={creationOpen}
+        onOpenChange={setCreationOpen}
+        audiences={data.audiences}
+        pending={actions.pending}
+        initialKind={creationKind}
+        onCreateTraining={commands.createTrainingReminder}
+        onCreateEvent={commands.createStaffEvent}
       />
 
       <TeamAnnouncementDetailDrawer
