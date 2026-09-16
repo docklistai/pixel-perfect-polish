@@ -6,9 +6,10 @@ Every agent — Claude Code, Codex, others — reads this file first, then `docs
 
 1. `docs/ai/DOCKLIST_OPERATING_SYSTEM.md` — canonical operating rules (mode, workflow, declaration, non-negotiables, prompt-size principle).
 2. `docs/ai/current-direction.md` — what Docklist is building now.
-3. `docs/ai/skill-router.md` — task → skill map.
-4. `docs/ai/guardrails.md` — file-size and worktree rules.
-5. `docs/ai/snippets/` — declaration, completion report, prechecks, non-negotiables.
+3. `docs/ai/DOCKLIST_PRODUCT_CONSTITUTION.md` — canonical product specification and boundary authority.
+4. `docs/ai/skill-router.md` — task → skill map.
+5. `docs/ai/guardrails.md` — file-size and worktree rules.
+6. `docs/ai/snippets/` — declaration, completion report, prechecks, non-negotiables.
 
 ## Current mode
 

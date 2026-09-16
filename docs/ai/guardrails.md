@@ -34,6 +34,7 @@ If a file is already over its hard max:
 | Docs                    | 300 lines |       600 lines | Split into focused docs                                         |
 | SQL migrations          | Exception | Review required | One purpose per migration; include RLS where relevant           |
 | Design system files     | Exception | Review required | Do not add route-specific or feature-specific logic             |
+| Product constitution   | Exception | Review required | Canonical authority; never split, never rewrite substance       |
 
 ## Frontend route rules
 

@@ -6,10 +6,11 @@ The single source of truth for how every agent (Claude Code, Codex, others) work
 
 1. This file.
 2. `docs/ai/current-direction.md` — what Docklist is building right now.
-3. `docs/ai/skill-router.md` — task → skill map.
-4. `docs/ai/guardrails.md` — file-size and worktree rules.
-5. `docs/ai/snippets/` — declaration, completion report, prechecks, non-negotiables.
-6. `docs/ai/FRONTEND_GUARDRAILS.md`
+3. `docs/ai/DOCKLIST_PRODUCT_CONSTITUTION.md` — canonical product specification and boundary authority.
+4. `docs/ai/skill-router.md` — task → skill map.
+5. `docs/ai/guardrails.md` — file-size and worktree rules.
+6. `docs/ai/snippets/` — declaration, completion report, prechecks, non-negotiables.
+7. `docs/ai/FRONTEND_GUARDRAILS.md`
 
 `AGENTS.md`, `CLAUDE.md`, and `CODEX.md` are thin entry points; their job is to send the agent here.
 
