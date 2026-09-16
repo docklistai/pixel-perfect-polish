@@ -13,8 +13,7 @@ export function RotaGridLegendBar({
     <div className="rota-grid-legend flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-4 py-2.5 text-[11px] text-muted-foreground">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <span className="rota-grid-legend-summary">
-          Target 100% · Breaks: 30 min unpaid for shifts ≥ 6h · {staffCount}{" "}
-          {staffCount === 1 ? "staff member" : "staff members"}
+          {staffCount} {staffCount === 1 ? "staff member" : "staff members"}
         </span>
         {roleColours.length > 0 && (
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1" aria-label="Role colours">

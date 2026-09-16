@@ -25,12 +25,12 @@ export const kpiItems: KpiItem[] = [
     tip: "Total scheduled hours across all departments this week.",
   },
   {
-    icon: Calendar,
-    label: "Coverage",
-    value: "96%",
-    delta: "Demo data",
-    tone: "warning",
-    tip: "Scheduled vs role requirement. 100% = fully staffed.",
+    icon: Users,
+    label: "Team size",
+    value: "14",
+    delta: "Demo roster",
+    tone: "brand",
+    tip: "Active staff members on your roster.",
   },
 ];
 

@@ -17,9 +17,7 @@ export function RotaGridFooter({
         aria-colindex={1}
         className="border-b border-border px-3 py-3 sticky left-0 z-10 bg-background"
       >
-        <div className="text-[11px] text-muted-foreground/70">
-          Breaks: 30 min unpaid for shifts ≥ 6h
-        </div>
+        <div className="text-[11px] text-muted-foreground/70">Shift assignment</div>
       </div>
       {days.map((day, dayIndex) => (
         <div
@@ -31,7 +29,7 @@ export function RotaGridFooter({
             day.isToday ? "border-brand/20 bg-brand-soft/10" : "border-border"
           }`}
         >
-          {day.h} planned
+          {day.hours === 0 || day.h === "0h" ? "No shifts planned" : `${day.h} planned`}
         </div>
       ))}
     </div>

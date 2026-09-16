@@ -81,7 +81,7 @@ describe("DashboardAttentionPanel — populated", () => {
     expect(
       screen.getByText("Leave changed after this week's rota was published"),
     ).toBeInTheDocument();
-    expect(screen.getByText("Resolve open shifts before publishing")).toBeInTheDocument();
+    expect(screen.getByText("Open shifts do not block publishing")).toBeInTheDocument();
   });
 
   it("badges the exact total and offers view-all", () => {

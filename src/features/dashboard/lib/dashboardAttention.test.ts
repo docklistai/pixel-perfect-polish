@@ -43,6 +43,7 @@ describe("buildAttentionItems — each signal independently", () => {
     const items = buildAttentionItems(input({ openShifts: 3 }));
     expect(items).toHaveLength(1);
     expect(items[0]!.t).toBe("This week has 3 open shifts");
+    expect(items[0]!.s).toBe("Open shifts do not block publishing");
     expect(items[0]!.route).toBe("/rota");
     expect(items[0]!.cta).toBe("Open rota");
   });
@@ -221,7 +222,7 @@ describe("buildAttentionItems — counts and copy", () => {
     const items = buildAttentionItems(
       input({ pendingLeaveCount: 3, highLeave: { n: "Jordan Vale", date: "8 – 9 Jun" } }),
     );
-    expect(items[0]!.t).toBe("1 leave request — high coverage impact");
+    expect(items[0]!.t).toBe("1 leave request — long request (5+ days)");
     expect(items[0]!.s).toBe("Jordan Vale · 8 – 9 Jun");
   });
 

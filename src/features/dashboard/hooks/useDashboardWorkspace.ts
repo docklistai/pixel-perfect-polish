@@ -1,11 +1,7 @@
 import * as React from "react";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { staff } from "@/features/rota/data/mockData";
-import {
-  coveragePercent,
-  countOpenShifts,
-  totalScheduledHours,
-} from "@/features/rota/lib/rotaSummaries";
+import { countOpenShifts, totalScheduledHours } from "@/features/rota/lib/rotaSummaries";
 import { kpiItems, todayKpiItems } from "../data/dashboardDemoData";
 import { buildDashboardOperational } from "../lib/dashboardOperational";
 
@@ -40,8 +36,8 @@ export function useDashboardWorkspace() {
     const weeklyKpis = kpiItems.map((item) =>
       item.label === "Scheduled hours"
         ? { ...item, value: `${Math.round(totalScheduledHours(draft.shifts))}h` }
-        : item.label === "Coverage"
-          ? { ...item, value: `${coveragePercent(staff, draft.shifts)}%` }
+        : item.label === "Team size"
+          ? { ...item, value: String(staff.length) }
           : item,
     );
     const onShiftToday =

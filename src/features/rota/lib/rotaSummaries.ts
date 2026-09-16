@@ -40,28 +40,34 @@ export function buildRoleCoverage(
   staff: StaffMember[],
   shifts: DraftShift[],
 ): RoleCoverageSummary[] {
-  const roles = new Map<string, { days: Set<number>; tone: string }>();
+  const roles = new Map<string, { assigned: number; open: number; tone: string }>();
   for (const member of staff) {
-    roles.set(
-      member.role,
-      roles.get(member.role) ?? { days: new Set<number>(), tone: member.tone },
-    );
+    roles.set(member.role, roles.get(member.role) ?? { assigned: 0, open: 0, tone: member.tone });
   }
 
   for (const shift of shifts) {
-    if (shift.staffId === null) continue;
-    const current = roles.get(shift.role) ?? { days: new Set<number>(), tone: shift.tone };
-    current.days.add(shift.dayIndex);
+    const current = roles.get(shift.role) ?? { assigned: 0, open: 0, tone: shift.tone };
+    if (shift.staffId !== null) {
+      current.assigned += 1;
+    } else {
+      current.open += 1;
+    }
     roles.set(shift.role, current);
   }
 
   return Array.from(roles.entries())
-    .map(([role, { days, tone }]) => {
-      const filled = days.size;
-      const pct = Math.round((filled / DAY_COUNT) * 100);
-      return { label: role, value: `${filled} / ${DAY_COUNT} days`, pct, tone };
+    .map(([role, { assigned, open, tone }]) => {
+      const planned = assigned + open;
+      const pct = planned > 0 ? Math.round((assigned / planned) * 100) : 0;
+      const value =
+        planned === 0
+          ? "No shifts planned"
+          : open > 0
+            ? `${assigned} of ${planned} assigned · ${open} open`
+            : `${assigned} assigned`;
+      return { label: role, value, pct, tone };
     })
-    .sort((a, b) => a.pct - b.pct);
+    .sort((a, b) => b.pct - a.pct || a.label.localeCompare(b.label));
 }
 
 /**
@@ -102,10 +108,11 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
     const dayShifts = shifts.filter((shift) => shift.dayIndex === dayIndex);
     const assigned = dayShifts.filter((shift) => shift.staffId !== null);
     const open = dayShifts.length - assigned.length;
-    const hours = assigned.reduce((sum, shift) => sum + shiftHours(shift.start, shift.end), 0);
-    const coverage = dayShifts.length
-      ? Math.round((assigned.length / dayShifts.length) * 100)
-      : 100;
+    const plannedHours = dayShifts.reduce(
+      (sum, shift) => sum + shiftHours(shift.start, shift.end),
+      0,
+    );
+    const coverage = dayShifts.length ? Math.round((assigned.length / dayShifts.length) * 100) : 0;
     const tone =
       open > 0
         ? "warning"
@@ -114,10 +121,10 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
           : "muted";
 
     return {
-      h: `${Math.round(hours)}h`,
+      h: `${Math.round(plannedHours)}h`,
       c: `${coverage}%`,
       tone,
-      hours,
+      hours: plannedHours,
     };
   });
 }

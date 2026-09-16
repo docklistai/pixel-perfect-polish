@@ -103,13 +103,13 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
     openShifts > 0
       ? {
           t: `${weekScopeHeading(weekScope)} has ${openShifts} open shift${s(openShifts)}`,
-          s: "Resolve open shifts before publishing",
+          s: "Open shifts do not block publishing",
           icon: AlertTriangle,
           tone: "warning" as const,
           route: "/rota" as const,
           cta: "Open rota",
           tag: "Action needed",
-          detail: `${weekScopePossessive(weekScope)} draft has ${openShifts} unassigned shift${s(openShifts)}. Open the rota to assign cover before you publish.`,
+          detail: `${weekScopePossessive(weekScope)} draft has ${openShifts} unassigned shift${s(openShifts)}. You can assign cover or publish with open shifts.`,
         }
       : null,
     hasPublishedSnapshot && hasUnpublishedChanges && !rotaIssuesActive
@@ -127,7 +127,7 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
     pendingLeaveCount > 0
       ? {
           t: highLeave
-            ? "1 leave request — high coverage impact"
+            ? "1 leave request — long request (5+ days)"
             : `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending`,
           s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
           icon: Plane,
@@ -136,7 +136,7 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
           cta: "Review leave",
           tag: "Decision needed",
           detail: highLeave
-            ? `${highLeave.n}'s request (${highLeave.date}) needs a decision and may affect coverage. Review it against the rota.`
+            ? `${highLeave.n}'s request (${highLeave.date}) needs a decision. Review it against the rota.`
             : `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending. Review each against the rota.`,
         }
       : null,

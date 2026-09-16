@@ -27,6 +27,7 @@ export type RotaGridDay = {
   c: string;
   tone: string;
   isToday: boolean;
+  hours?: number;
 };
 
 export type ShiftActionHandlers = {

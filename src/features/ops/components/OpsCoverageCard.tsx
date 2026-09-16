@@ -9,7 +9,7 @@ export function OpsCoverageCard(props: {
 }) {
   const navigate = useNavigate();
   const total = props.metrics.onShift + props.metrics.uncoveredShifts;
-  const coverage = total === 0 ? 100 : Math.round((props.metrics.onShift / total) * 100);
+  const coverage = total === 0 ? 0 : Math.round((props.metrics.onShift / total) * 100);
   const counts = props.departments
     .map((department) => ({
       ...department,
@@ -29,7 +29,17 @@ export function OpsCoverageCard(props: {
         </div>
         <CoverageRing percentage={coverage} />
         <div>
-          <div className="text-sm font-semibold text-success">{coverage}%</div>
+          <div
+            className={`text-sm font-semibold ${
+              total === 0
+                ? "text-muted-foreground"
+                : coverage >= 90
+                  ? "text-success"
+                  : "text-warning"
+            }`}
+          >
+            {coverage}%
+          </div>
           <div className="text-[11px] text-muted-foreground">Coverage</div>
         </div>
       </div>

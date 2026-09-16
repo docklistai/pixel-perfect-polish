@@ -69,7 +69,7 @@ describe("buildDashboardOperational", () => {
       pendingTime: [],
       timesheetPeriodLabel: "Awaiting review",
     });
-    expect(out.attentionItems[0]?.t).toContain("high coverage impact");
+    expect(out.attentionItems[0]?.t).toContain("long request (5+ days)");
     expect(out.attentionItems[0]?.s).toContain("Jordan Vale");
   });
 
@@ -126,7 +126,7 @@ describe("buildDashboardOperational", () => {
       timesheetPeriodLabel: "Awaiting review",
     });
     const item = out.attentionItems[0]!;
-    expect(item.s).toBe("Resolve open shifts before publishing");
+    expect(item.s).toBe("Open shifts do not block publishing");
     expect(`${item.s} ${item.detail ?? ""}`).not.toMatch(/16:00|deadline|on time/i);
   });
 });
