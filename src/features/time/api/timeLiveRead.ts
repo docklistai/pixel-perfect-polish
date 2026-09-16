@@ -25,6 +25,7 @@ export interface TimeEntryRow {
 
 export interface WorkspaceTimeResult {
   workspaceTimezone: string;
+  rotaStartWeekday: number;
   rows: StoredTimesheetRow[];
 }
 
@@ -164,12 +165,21 @@ export async function readWorkspaceTime(
   const [{ data: entries, error: entryError }, { data: workspace, error: workspaceError }] =
     await Promise.all([
       entriesQuery,
-      supabase.from("workspaces").select("timezone").eq("id", input.workspaceId).single(),
+      supabase
+        .from("workspaces")
+        .select("timezone, rota_start_weekday")
+        .eq("id", input.workspaceId)
+        .single(),
     ]);
   if (entryError) throw entryError;
   if (workspaceError) throw workspaceError;
 
-  const workspaceTimezone = (workspace as { timezone: string | null }).timezone ?? "UTC";
+  const workspaceData = workspace as {
+    timezone: string | null;
+    rota_start_weekday: number | null;
+  } | null;
+  const workspaceTimezone = workspaceData?.timezone ?? "UTC";
+  const rotaStartWeekday = workspaceData?.rota_start_weekday ?? 0;
   const typedEntries = (entries as TimeEntryRow[] | null) ?? [];
   const [{ staffById, venueByShiftId }, incompleteBreakEntryIds] = await Promise.all([
     loadTimeRowContext(supabase, input.workspaceId, typedEntries, workspaceTimezone),
@@ -182,6 +192,7 @@ export async function readWorkspaceTime(
   const now = new Date();
   return {
     workspaceTimezone,
+    rotaStartWeekday,
     rows: typedEntries.map((entry) =>
       mapTimeRow(
         entry,

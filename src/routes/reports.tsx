@@ -113,7 +113,10 @@ function ReportsPage() {
               onApprovedExport={() => navigate({ to: "/time" })}
             />
           </div>
-          <ReportsCoverageHeatmapCard cells={data.heatmap} />
+          <ReportsCoverageHeatmapCard
+            cells={data.heatmap}
+            rotaStartWeekday={data.meta.rotaStartWeekday}
+          />
           <InsightDetailDrawer
             detail={selectedDetail}
             data={data}

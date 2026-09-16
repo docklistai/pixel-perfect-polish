@@ -6,12 +6,20 @@ import { timeQueries } from "../data/timeDemoData";
 import { isApprovable } from "../lib/approvalEligibility";
 import type { StoredTimesheetRow, TimeQuery } from "../types";
 
+const WEEKDAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+
+function getTimeRightRailDays(rotaStartWeekday: number = 0): string[] {
+  return Array.from({ length: 7 }, (_, i) => WEEKDAY_NAMES[(rotaStartWeekday + i) % 7]!);
+}
+
 interface Props {
   source: "live" | "demo";
   onApproveSuggested: () => void;
   onOpenAssistant: () => void;
   onOpenQuery: (query: TimeQuery) => void;
   rows: StoredTimesheetRow[];
+  /** Workspace configured week start weekday (0 = Mon .. 6 = Sun, default 0). */
+  rotaStartWeekday?: number;
 }
 
 /** Marks cards backed by sample data once the page is showing live entries. */
@@ -30,6 +38,7 @@ export function TimeRightRail({
   onOpenAssistant,
   onOpenQuery,
   rows,
+  rotaStartWeekday = 0,
 }: Props) {
   const cleanPending = rows.filter((row) => isApprovable(row));
   const liveEmpty = source === "live" && rows.length === 0;
@@ -149,7 +158,7 @@ export function TimeRightRail({
               })()}
             </svg>
             <div className="flex justify-between text-[10px] text-muted-foreground">
-              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => (
+              {getTimeRightRailDays(rotaStartWeekday).map((d, i) => (
                 <span key={`${d}-${i}`}>{d}</span>
               ))}
             </div>

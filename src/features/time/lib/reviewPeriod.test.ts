@@ -72,3 +72,39 @@ describe("dateIsoInTimezone / currentWeekPeriod", () => {
     });
   });
 });
+
+describe("rotaStartWeekday authority", () => {
+  it("starts the week on Sunday when rotaStartWeekday is 6", () => {
+    // 2026-06-11 is Thursday; with Sunday start (6), week is 7 Jun – 13 Jun 2026
+    const period = weekPeriodOf("2026-06-11", 6);
+    expect(period).toEqual({
+      startIso: "2026-06-07",
+      endIso: "2026-06-13",
+      label: "7 – 13 Jun 2026",
+    });
+  });
+
+  it("starts the week on Friday when rotaStartWeekday is 4", () => {
+    // 2026-06-11 is Thursday; with Friday start (4), week is 5 Jun – 11 Jun 2026
+    const period = weekPeriodOf("2026-06-11", 4);
+    expect(period).toEqual({
+      startIso: "2026-06-05",
+      endIso: "2026-06-11",
+      label: "5 – 11 Jun 2026",
+    });
+  });
+
+  it("shifts periods preserving configured start weekday", () => {
+    const period = weekPeriodOf("2026-06-11", 6);
+    expect(shiftPeriod(period, -1, 6).startIso).toBe("2026-05-31");
+    expect(shiftPeriod(period, 1, 6).startIso).toBe("2026-06-14");
+  });
+
+  it("resolves currentWeekPeriod with configured rotaStartWeekday", () => {
+    expect(currentWeekPeriod(new Date("2026-06-11T12:00:00Z"), "Europe/London", 6)).toEqual({
+      startIso: "2026-06-07",
+      endIso: "2026-06-13",
+      label: "7 – 13 Jun 2026",
+    });
+  });
+});

@@ -53,6 +53,7 @@ function TimePage() {
     source: timeSource,
     state: timeState,
     workspaceTimezone,
+    rotaStartWeekday,
   } = useWorkspaceTime(period);
   const liveWorkspaceId =
     timeSource === "live" && auth.status === "member" ? auth.workspaceId : null;
@@ -69,8 +70,8 @@ function TimePage() {
   );
   React.useEffect(() => {
     if (!workspaceTimezone || periodTouchedRef.current) return;
-    setPeriodState(currentWeekPeriod(new Date(), workspaceTimezone));
-  }, [workspaceTimezone]);
+    setPeriodState(currentWeekPeriod(new Date(), workspaceTimezone, rotaStartWeekday));
+  }, [workspaceTimezone, rotaStartWeekday]);
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
@@ -163,6 +164,7 @@ function TimePage() {
             setPeriod={setPeriod}
             source={timeSource}
             workspaceTimezone={workspaceTz}
+            rotaStartWeekday={rotaStartWeekday}
             team={team}
             teamOptions={teamOptions}
             setTeam={setTeam}
@@ -246,6 +248,7 @@ function TimePage() {
           onOpenAssistant={openAiDrawer}
           onOpenQuery={setQueryRow}
           rows={teamRows}
+          rotaStartWeekday={rotaStartWeekday}
         />
       </div>
 
@@ -275,7 +278,7 @@ function TimePage() {
             const saved = await addEntry.save(payload, staffName);
             // Snap the review period to the entry's week so the new row is visible.
             if (saved && !isWithinPeriod(payload.workDate, period)) {
-              setPeriod(weekPeriodOf(payload.workDate));
+              setPeriod(weekPeriodOf(payload.workDate, rotaStartWeekday));
             }
             return saved;
           }}

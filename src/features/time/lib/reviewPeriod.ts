@@ -1,19 +1,24 @@
 /**
- * Review-period helpers for the Time page. A review period is a Monday–Sunday
- * week, derived from an injected date so live mode uses the real current week
- * while demo mode can pin to the frozen demo week. All maths runs on
- * `YYYY-MM-DD` strings in UTC to stay timezone-stable; the "now" boundary is
- * resolved in the workspace timezone via the canonical rota date helper.
+ * Review-period helpers for the Time page. A review period is an operational
+ * week (governed by workspace rota_start_weekday, default Monday), derived
+ * from an injected date so live mode uses the real current week while demo
+ * mode can pin to the frozen demo week. All maths runs on `YYYY-MM-DD` strings
+ * in UTC to stay timezone-stable; the "now" boundary is resolved in the
+ * workspace timezone via the canonical rota date helper.
  */
 
-import { dateIsoInTimezone } from "@/features/rota/lib/liveRotaDates";
+import {
+  addIsoDays,
+  dateIsoInTimezone,
+  weekStartForOffset,
+} from "@/features/rota/lib/liveRotaDates";
 
 export { dateIsoInTimezone } from "@/features/rota/lib/liveRotaDates";
 
 export interface ReviewPeriod {
-  /** Inclusive Monday, `YYYY-MM-DD`. */
+  /** Inclusive first day of operational week, `YYYY-MM-DD`. */
   startIso: string;
-  /** Inclusive Sunday, `YYYY-MM-DD`. */
+  /** Inclusive last day of operational week, `YYYY-MM-DD`. */
   endIso: string;
   /** Human label, e.g. "8 – 14 Jun 2026". */
   label: string;
@@ -55,22 +60,27 @@ function formatRange(a: Date, b: Date): string {
   return `${da} – ${db} ${mb} ${yb}`;
 }
 
-/** The Monday–Sunday week containing `dateIso`. */
-export function weekPeriodOf(dateIso: string): ReviewPeriod {
+/** The operational week containing `dateIso`, starting on `rotaStartWeekday` (0 = Mon .. 6 = Sun, default 0). */
+export function weekPeriodOf(dateIso: string, rotaStartWeekday: number = 0): ReviewPeriod {
   const d = toUtc(dateIso);
-  const diffToMonday = (d.getUTCDay() + 6) % 7; // 0=Sun..6=Sat → days since Monday
-  const monday = new Date(d);
-  monday.setUTCDate(d.getUTCDate() - diffToMonday);
-  const sunday = new Date(monday);
-  sunday.setUTCDate(monday.getUTCDate() + 6);
-  return { startIso: iso(monday), endIso: iso(sunday), label: formatRange(monday, sunday) };
+  const weekdayMon0 = (d.getUTCDay() + 6) % 7; // 0=Mon..6=Sun
+  const diffToStart = (weekdayMon0 - rotaStartWeekday + 7) % 7;
+  const start = new Date(d);
+  start.setUTCDate(d.getUTCDate() - diffToStart);
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 6);
+  return { startIso: iso(start), endIso: iso(end), label: formatRange(start, end) };
 }
 
 /** The same week shifted by `deltaWeeks` (negative = earlier). */
-export function shiftPeriod(period: ReviewPeriod, deltaWeeks: number): ReviewPeriod {
+export function shiftPeriod(
+  period: ReviewPeriod,
+  deltaWeeks: number,
+  rotaStartWeekday: number = 0,
+): ReviewPeriod {
   const start = toUtc(period.startIso);
   start.setUTCDate(start.getUTCDate() + deltaWeeks * 7);
-  return weekPeriodOf(iso(start));
+  return weekPeriodOf(iso(start), rotaStartWeekday);
 }
 
 /** True when a `YYYY-MM-DD` work date falls inside the period (inclusive). */
@@ -84,6 +94,13 @@ export function periodFilename(period: ReviewPeriod): string {
 }
 
 /** The current real-world review week, resolved in the workspace timezone. */
-export function currentWeekPeriod(now: Date, timeZone: string): ReviewPeriod {
-  return weekPeriodOf(dateIsoInTimezone(now, timeZone));
+export function currentWeekPeriod(
+  now: Date,
+  timeZone: string,
+  rotaStartWeekday: number = 0,
+): ReviewPeriod {
+  const startIso = weekStartForOffset(timeZone, 0, rotaStartWeekday, now);
+  const start = toUtc(startIso);
+  const end = toUtc(addIsoDays(startIso, 6));
+  return { startIso, endIso: iso(end), label: formatRange(start, end) };
 }

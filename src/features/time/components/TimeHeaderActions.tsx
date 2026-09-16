@@ -32,10 +32,14 @@ export const TEAM_OPTIONS = [
  * The demo dataset is pinned to the frozen demo week; live defaults to the
  * current week resolved in the workspace timezone.
  */
-export function defaultPeriod(source: "live" | "demo", workspaceTimezone: string): ReviewPeriod {
+export function defaultPeriod(
+  source: "live" | "demo",
+  workspaceTimezone: string,
+  rotaStartWeekday: number = 0,
+): ReviewPeriod {
   return source === "demo"
-    ? weekPeriodOf(DEMO_WORLD.weeks.current.startIso)
-    : currentWeekPeriod(new Date(), workspaceTimezone);
+    ? weekPeriodOf(DEMO_WORLD.weeks.current.startIso, rotaStartWeekday)
+    : currentWeekPeriod(new Date(), workspaceTimezone, rotaStartWeekday);
 }
 
 interface Props {
@@ -44,6 +48,8 @@ interface Props {
   source: "live" | "demo";
   /** Workspace default timezone; anchors the "This week" boundary. */
   workspaceTimezone: string;
+  /** Workspace configured week start weekday (0 = Mon .. 6 = Sun, default 0). */
+  rotaStartWeekday?: number;
   team: string;
   teamOptions: string[];
   setTeam: (team: string) => void;
@@ -60,6 +66,7 @@ export function TimeHeaderActions({
   setPeriod,
   source,
   workspaceTimezone,
+  rotaStartWeekday = 0,
   team,
   teamOptions,
   setTeam,
@@ -86,12 +93,18 @@ export function TimeHeaderActions({
         }
         items={[
           { kind: "label", text: "Review period" },
-          { label: "Previous week", onSelect: () => setPeriod((p) => shiftPeriod(p, -1)) },
+          {
+            label: "Previous week",
+            onSelect: () => setPeriod((p) => shiftPeriod(p, -1, rotaStartWeekday)),
+          },
           {
             label: "This week",
-            onSelect: () => setPeriod(defaultPeriod(source, workspaceTimezone)),
+            onSelect: () => setPeriod(defaultPeriod(source, workspaceTimezone, rotaStartWeekday)),
           },
-          { label: "Next week", onSelect: () => setPeriod((p) => shiftPeriod(p, 1)) },
+          {
+            label: "Next week",
+            onSelect: () => setPeriod((p) => shiftPeriod(p, 1, rotaStartWeekday)),
+          },
         ]}
       />
       {source === "demo" && (

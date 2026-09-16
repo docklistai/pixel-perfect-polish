@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { weekStartForOffset } from "@/features/rota/lib/liveRotaDates";
 
 export interface ManagerNotificationRecord {
   id: string;
@@ -24,28 +25,15 @@ function unique(values: Array<string | null>): string[] {
   return [...new Set(values.filter((value): value is string => value !== null))];
 }
 
-function localIsoDate(timezone: string, instant = new Date()): string {
-  const parts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(instant);
-  const value = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value ?? "";
-  return `${value("year")}-${value("month")}-${value("day")}`;
-}
-
-function mondayIso(isoDate: string): string {
-  const date = new Date(`${isoDate}T12:00:00Z`);
-  const mondayOffset = (date.getUTCDay() + 6) % 7;
-  date.setUTCDate(date.getUTCDate() - mondayOffset);
-  return date.toISOString().slice(0, 10);
-}
-
-function weekOffset(todayIso: string, weekStartIso: string): number {
+export function calculateRotaWeekOffset(
+  weekStartIso: string,
+  timezone: string,
+  rotaStartWeekday: number = 0,
+  now: Date = new Date(),
+): number {
+  const currentWeekStart = weekStartForOffset(timezone, 0, rotaStartWeekday, now);
   return Math.round(
-    (Date.parse(`${weekStartIso}T12:00:00Z`) - Date.parse(`${mondayIso(todayIso)}T12:00:00Z`)) /
+    (Date.parse(`${weekStartIso}T12:00:00Z`) - Date.parse(`${currentWeekStart}T12:00:00Z`)) /
       (7 * 86_400_000),
   );
 }
@@ -77,16 +65,23 @@ export const fetchManagerNotificationsFn = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => listInput.parse(input))
   .handler(async ({ data }): Promise<ManagerNotificationRecord[]> => {
     const { supabase, workspaceId } = await managerClient();
-    const { data: rows, error } = await supabase
-      .from("staff_portal_notifications")
-      .select(
-        "notification_id, kind, title, body, related_entity_type, related_entity_id, created_at, read_at",
-      )
-      .eq("workspace_id", workspaceId)
-      .order("created_at", { ascending: false })
-      .limit(data.limit);
+    const [{ data: rows, error }, { data: workspace, error: workspaceError }] = await Promise.all([
+      supabase
+        .from("staff_portal_notifications")
+        .select(
+          "notification_id, kind, title, body, related_entity_type, related_entity_id, created_at, read_at",
+        )
+        .eq("workspace_id", workspaceId)
+        .order("created_at", { ascending: false })
+        .limit(data.limit),
+      supabase.from("workspaces").select("rota_start_weekday").eq("id", workspaceId).single(),
+    ]);
 
     if (error) throw error;
+    if (workspaceError) throw workspaceError;
+
+    const rotaStartWeekday =
+      (workspace as { rota_start_weekday: number | null } | null)?.rota_start_weekday ?? 0;
     const notificationRows =
       (rows as Array<{
         notification_id: string;
@@ -199,7 +194,7 @@ export const fetchManagerNotificationsFn = createServerFn({ method: "GET" })
             ? (staffByUnavailabilityId.get(row.related_entity_id) ?? null)
             : null,
         rotaWeekOffset: rotaContext
-          ? weekOffset(localIsoDate(rotaContext.timezone), rotaContext.weekStart)
+          ? calculateRotaWeekOffset(rotaContext.weekStart, rotaContext.timezone, rotaStartWeekday)
           : null,
         rotaLocationId: rotaContext?.locationId ?? null,
       };

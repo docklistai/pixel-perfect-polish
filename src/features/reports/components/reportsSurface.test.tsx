@@ -81,4 +81,19 @@ describe("scheduled staffing density", () => {
     expect(document.body).toHaveTextContent("does not judge whether staffing is adequate");
     expect(document.body).not.toHaveTextContent(/understaffed|overstaffed|score|rank/i);
   });
+
+  it("renders day labels aligned with rotaStartWeekday authority", () => {
+    const { container: sundayContainer } = render(
+      <ReportsCoverageHeatmapCard cells={[]} rotaStartWeekday={6} />,
+    );
+    // When rotaStartWeekday is 6 (Sunday), the first weekday label is Sun
+    const sundayLabels = sundayContainer.querySelectorAll(".font-semibold.text-muted-foreground");
+    expect(sundayLabels[0]?.textContent).toBe("Sun");
+
+    const { container: mondayContainer } = render(
+      <ReportsCoverageHeatmapCard cells={[]} rotaStartWeekday={0} />,
+    );
+    const mondayLabels = mondayContainer.querySelectorAll(".font-semibold.text-muted-foreground");
+    expect(mondayLabels[0]?.textContent).toBe("Mon");
+  });
 });

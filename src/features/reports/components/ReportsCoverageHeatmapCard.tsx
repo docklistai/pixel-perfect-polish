@@ -2,7 +2,12 @@ import * as React from "react";
 import { Card } from "@/components/dl";
 import type { ReportsHeatmapCell } from "../types";
 
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+
+function getHeatmapDayLabels(rotaStartWeekday: number = 0): string[] {
+  return Array.from({ length: 7 }, (_, i) => WEEKDAY_NAMES[(rotaStartWeekday + i) % 7]!);
+}
+
 const PALETTE = ["#ECFAF9", "#DCF4F3", "#A8E0DE", "#5BC2BF", "#0E9591"];
 
 function hourLabel(hour: number) {
@@ -11,7 +16,14 @@ function hourLabel(hour: number) {
   return `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? "pm" : "am"}`;
 }
 
-export function ReportsCoverageHeatmapCard({ cells }: { cells: ReportsHeatmapCell[] }) {
+export function ReportsCoverageHeatmapCard({
+  cells,
+  rotaStartWeekday = 0,
+}: {
+  cells: ReportsHeatmapCell[];
+  rotaStartWeekday?: number;
+}) {
+  const days = getHeatmapDayLabels(rotaStartWeekday);
   const buckets = [...new Set(cells.map((cell) => cell.bucketStartHour))].sort((a, b) => a - b);
   const max = Math.max(1, ...cells.map((cell) => cell.averageHeadcount));
   const byKey = new Map(cells.map((cell) => [`${cell.weekday}:${cell.bucketStartHour}`, cell]));
@@ -44,7 +56,7 @@ export function ReportsCoverageHeatmapCard({ cells }: { cells: ReportsHeatmapCel
               {hourLabel(bucket)}
             </div>
           ))}
-          {DAYS.map((day, weekday) => (
+          {days.map((day, weekday) => (
             <React.Fragment key={day}>
               <div className="flex items-center text-[11px] font-semibold text-muted-foreground">
                 {day}

@@ -20,6 +20,8 @@ export type WorkspaceTime = {
   state: TimeViewState;
   /** The workspace default timezone once the live read resolves; null otherwise. */
   workspaceTimezone: string | null;
+  /** Configured operational week start (0 = Mon .. 6 = Sun, default 0). */
+  rotaStartWeekday: number;
 };
 
 /**
@@ -56,5 +58,6 @@ export function useWorkspaceTime(period: ReviewPeriod): WorkspaceTime {
       demoRows,
     }),
     workspaceTimezone: query.data?.workspaceTimezone ?? null,
+    rotaStartWeekday: query.data?.rotaStartWeekday ?? 0,
   };
 }
