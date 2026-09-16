@@ -34,15 +34,22 @@ export const fetchPendingTimePreviewFn = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) => pendingTimePreviewInput.parse(input))
   .handler(async ({ data }): Promise<PendingTimePreviewResult> => {
     const supabase = getSupabaseServerClient();
+    let query = supabase
+      .from("time_entries")
+      .select("id, staff_member_id, approval_status", { count: "exact" })
+      .eq("workspace_id", data.workspaceId)
+      .neq("approval_status", "approved");
+    if (data.startDate) {
+      query = query.gte("work_date", data.startDate);
+    }
+    if (data.endDate) {
+      query = query.lte("work_date", data.endDate);
+    }
     const {
       data: entries,
       count,
       error,
-    } = await supabase
-      .from("time_entries")
-      .select("id, staff_member_id, approval_status", { count: "exact" })
-      .eq("workspace_id", data.workspaceId)
-      .neq("approval_status", "approved")
+    } = await query
       .order("work_date", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(data.limit);
@@ -94,7 +101,9 @@ export const fetchTimeOperationalCountsFn = createServerFn({ method: "GET" })
         .from("time_entries")
         .select("id", { count: "exact", head: true })
         .eq("workspace_id", data.workspaceId)
-        .neq("approval_status", "approved"),
+        .neq("approval_status", "approved")
+        .gte("work_date", data.startDate)
+        .lte("work_date", data.endDate),
       supabase
         .from("time_entries")
         .select("id", { count: "exact", head: true })

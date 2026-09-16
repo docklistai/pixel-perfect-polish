@@ -46,7 +46,7 @@ export function TimeMetricCards({ rows }: { rows: StoredTimesheetRow[] }) {
       label: "Pending Approvals",
       value: String(pending),
       sub2: "Entries",
-      subline: "Need manager review",
+      subline: "Need manager review this period",
       tone: "warning",
     },
     {

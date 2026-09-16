@@ -1,4 +1,14 @@
-import { AlertTriangle, Clock3, Plane, RefreshCw, Send } from "lucide-react";
+import {
+  AlertTriangle,
+  CalendarClock,
+  Clock3,
+  HelpCircle,
+  Plane,
+  RefreshCw,
+  Send,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
 import type { AttentionItem } from "../types";
 
 /**
@@ -57,6 +67,14 @@ export interface DashboardAttentionInput {
   hasPublishedSnapshot: boolean;
   /** True when the draft holds work the team has not been shown yet. */
   hasUnpublishedChanges: boolean;
+  /** Pending open-shift requests from staff. */
+  openShiftRequestCount?: number;
+  /** Pending shift release requests from staff. */
+  shiftReleaseRequestCount?: number;
+  /** Pending one-off unavailability or recurring day off requests from staff. */
+  availabilityRequestCount?: number;
+  /** Pending staff hours queries (slot for WS-12). */
+  timeQueryCount?: number;
 }
 
 const s = (count: number) => (count === 1 ? "" : "s");
@@ -64,9 +82,18 @@ const s = (count: number) => (count === 1 ? "" : "s");
 /**
  * Build the ordered attention queue.
  *
- * Fixed order: rota update required, open shifts, unpublished changes, pending
- * leave, pending timesheets. Inactive categories are dropped entirely rather
- * than rendered as zeros.
+ * Fixed order:
+ * 1. Rota issues
+ * 2. Open shifts
+ * 3. Open-shift requests
+ * 4. Shift release requests
+ * 5. Availability / day-off requests
+ * 6. Unpublished changes
+ * 7. Pending leave
+ * 8. Hours queries
+ * 9. Pending timesheets
+ *
+ * Inactive categories are dropped entirely rather than rendered as zeros.
  */
 export function buildAttentionItems(input: DashboardAttentionInput): AttentionItem[] {
   const {
@@ -81,6 +108,11 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
     hasUnpublishedChanges,
   } = input;
 
+  const openShiftRequestCount = input.openShiftRequestCount ?? 0;
+  const shiftReleaseRequestCount = input.shiftReleaseRequestCount ?? 0;
+  const availabilityRequestCount = input.availabilityRequestCount ?? 0;
+  const timeQueryCount = input.timeQueryCount ?? 0;
+
   // An open operational issue makes the server report unpublished work by
   // definition (see hasUnpublishedWork), so the two rota signals describe one
   // cause. The specific item wins and the generic notice is suppressed,
@@ -88,6 +120,7 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
   const rotaIssuesActive = rotaIssuesResolved && rotaIssueCount > 0;
 
   const candidates: (AttentionItem | null)[] = [
+    // 1. Rota issues
     rotaIssuesActive
       ? {
           t: `${rotaIssueCount} leave change${s(rotaIssueCount)} need${rotaIssueCount === 1 ? "s" : ""} a rota update`,
@@ -100,6 +133,8 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
           detail: `${rotaIssueCount} leave request${s(rotaIssueCount)} changed after ${weekScopePossessive(weekScope).toLowerCase()} rota was published. Review the affected assignment, update the draft if needed, then explicitly republish. ${rotaIssueCount === 1 ? "It stays" : "They stay"} open until publication.`,
         }
       : null,
+
+    // 2. Open shifts
     openShifts > 0
       ? {
           t: `${weekScopeHeading(weekScope)} has ${openShifts} open shift${s(openShifts)}`,
@@ -112,6 +147,50 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
           detail: `${weekScopePossessive(weekScope)} draft has ${openShifts} unassigned shift${s(openShifts)}. You can assign cover or publish with open shifts.`,
         }
       : null,
+
+    // 3. Open-shift requests
+    openShiftRequestCount > 0
+      ? {
+          t: `${openShiftRequestCount} open-shift request${s(openShiftRequestCount)} pending`,
+          s: "Staff applied for unassigned shifts",
+          icon: UserPlus,
+          tone: "warning" as const,
+          route: "/rota" as const,
+          cta: "Review requests",
+          tag: "Action needed",
+          detail: `${openShiftRequestCount} team member${s(openShiftRequestCount)} requested an open shift. Review and confirm cover on the rota.`,
+        }
+      : null,
+
+    // 4. Shift release requests
+    shiftReleaseRequestCount > 0
+      ? {
+          t: `${shiftReleaseRequestCount} shift release request${s(shiftReleaseRequestCount)} pending`,
+          s: "Staff asked to give up assigned shifts",
+          icon: UserMinus,
+          tone: "warning" as const,
+          route: "/rota" as const,
+          cta: "Review releases",
+          tag: "Action needed",
+          detail: `${shiftReleaseRequestCount} team member${s(shiftReleaseRequestCount)} asked to be released from an assigned shift. Review reasons and reassign cover if needed.`,
+        }
+      : null,
+
+    // 5. Availability / day-off requests
+    availabilityRequestCount > 0
+      ? {
+          t: `${availabilityRequestCount} availability request${s(availabilityRequestCount)} pending`,
+          s: "One-off or recurring day-off requests waiting",
+          icon: CalendarClock,
+          tone: "warning" as const,
+          route: "/staff" as const,
+          cta: "Review requests",
+          tag: "Action needed",
+          detail: `${availabilityRequestCount} availability or recurring day-off request${s(availabilityRequestCount)} ${availabilityRequestCount === 1 ? "is" : "are"} waiting for manager review. Review on the Staff page.`,
+        }
+      : null,
+
+    // 6. Unpublished changes
     hasPublishedSnapshot && hasUnpublishedChanges && !rotaIssuesActive
       ? {
           t: `${weekScopeHeading(weekScope)} has unpublished changes`,
@@ -124,6 +203,8 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
           detail: `${weekScopePossessive(weekScope)} draft has changes that have not been published, so your team is still seeing the last published version. Review the draft and republish when it is ready.`,
         }
       : null,
+
+    // 7. Pending leave
     pendingLeaveCount > 0
       ? {
           t: highLeave
@@ -140,16 +221,32 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
             : `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending. Review each against the rota.`,
         }
       : null,
+
+    // 8. Hours queries
+    timeQueryCount > 0
+      ? {
+          t: `${timeQueryCount} staff hours quer${timeQueryCount === 1 ? "y" : "ies"} waiting`,
+          s: "Staff queried their recorded hours",
+          icon: HelpCircle,
+          tone: "danger" as const,
+          route: "/time" as const,
+          cta: "Review queries",
+          tag: "Needs review",
+          detail: `${timeQueryCount} staff member${s(timeQueryCount)} queried recorded shift hours. Review and reconcile before export.`,
+        }
+      : null,
+
+    // 9. Pending timesheets
     pendingTimeCount > 0
       ? {
           t: `${pendingTimeCount} timesheet${s(pendingTimeCount)} need manager review`,
-          s: "Export approved hours after review",
+          s: "Need manager review this period",
           icon: Clock3,
           tone: "danger" as const,
           route: "/time" as const,
           cta: "Review timesheets",
           tag: "Needs review",
-          detail: `${pendingTimeCount} timesheet${s(pendingTimeCount)} ${pendingTimeCount === 1 ? "is" : "are"} waiting for manager review. Approve or query each before exporting hours.`,
+          detail: `${pendingTimeCount} timesheet${s(pendingTimeCount)} ${pendingTimeCount === 1 ? "is" : "are"} waiting for manager review this period. Approve or query each before exporting hours.`,
         }
       : null,
   ];

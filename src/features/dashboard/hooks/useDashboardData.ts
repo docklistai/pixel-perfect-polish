@@ -6,8 +6,13 @@ import { fetchWorkspaceRotaWeekFn } from "@/features/rota/api/rotaLiveData";
 import { fetchPendingLeavePreviewFn } from "@/features/leave/api/leaveLiveData";
 import { leaveQueryKeys } from "@/features/leave/lib/leaveQueryRange";
 import { fetchPendingTimePreviewFn } from "@/features/time/api/timeOperationalReads";
-import { timeQueryKeys } from "@/features/time/lib/timeQueryRange";
+import {
+  rollingTimeRange,
+  TIME_OPERATIONAL_LOOKBACK_DAYS,
+  timeQueryKeys,
+} from "@/features/time/lib/timeQueryRange";
 import { countOpenShifts } from "@/features/rota/lib/rotaSummaries";
+import { fetchDashboardAttentionCountsFn } from "../api/dashboardAttentionCounts";
 import { buildDashboardOperational } from "../lib/dashboardOperational";
 import { buildLiveKpis, countAssignedToday, dayIndexInWeek } from "../lib/dashboardKpis";
 import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
@@ -39,6 +44,8 @@ export function useDashboardData() {
     auth.status === "member" &&
     (auth.role === "owner" || auth.role === "manager");
 
+  const timeRange = rollingTimeRange(new Date(), TIME_OPERATIONAL_LOOKBACK_DAYS);
+
   const staffQuery = useQuery({
     queryKey: ["staff", "workspace-roster", workspaceId],
     queryFn: () => fetchWorkspaceStaffFn(),
@@ -61,11 +68,21 @@ export function useDashboardData() {
     staleTime: 15_000,
   });
   const timeQuery = useQuery({
-    queryKey: timeQueryKeys.pendingPreview(workspaceId, PENDING_TIME_PREVIEW_LIMIT),
+    queryKey: timeQueryKeys.pendingPreview(workspaceId, PENDING_TIME_PREVIEW_LIMIT, timeRange),
     queryFn: () =>
       fetchPendingTimePreviewFn({
-        data: { workspaceId: workspaceId!, limit: PENDING_TIME_PREVIEW_LIMIT },
+        data: {
+          workspaceId: workspaceId!,
+          limit: PENDING_TIME_PREVIEW_LIMIT,
+          ...timeRange,
+        },
       }),
+    enabled,
+    staleTime: 15_000,
+  });
+  const attentionCountsQuery = useQuery({
+    queryKey: ["dashboard", "attention-counts", workspaceId],
+    queryFn: () => fetchDashboardAttentionCountsFn({ data: { workspaceId: workspaceId! } }),
     enabled,
     staleTime: 15_000,
   });
@@ -98,14 +115,23 @@ export function useDashboardData() {
   // read is still settling, and a failed read gets an explicit error + retry
   // surface instead of quietly rendering empty-looking data.
   const isLiveLoading =
-    staffQuery.isLoading || weekQuery.isLoading || leaveQuery.isLoading || timeQuery.isLoading;
+    staffQuery.isLoading ||
+    weekQuery.isLoading ||
+    leaveQuery.isLoading ||
+    timeQuery.isLoading ||
+    attentionCountsQuery.isLoading;
   const isLiveError =
-    staffQuery.isError || weekQuery.isError || leaveQuery.isError || timeQuery.isError;
+    staffQuery.isError ||
+    weekQuery.isError ||
+    leaveQuery.isError ||
+    timeQuery.isError ||
+    attentionCountsQuery.isError;
   const retryLive = () => {
     void staffQuery.refetch();
     void weekQuery.refetch();
     void leaveQuery.refetch();
     void timeQuery.refetch();
+    void attentionCountsQuery.refetch();
     rotaIssues.refresh();
   };
 
@@ -117,6 +143,13 @@ export function useDashboardData() {
   const pendingLeaveCount = leaveQuery.data?.total ?? 0;
   const pendingTime = timeQuery.data?.rows ?? [];
   const pendingTimeCount = timeQuery.data?.total ?? 0;
+
+  const attentionCounts = attentionCountsQuery.data;
+  const openShiftRequestCount = attentionCounts?.openShiftRequestCount ?? 0;
+  const shiftReleaseRequestCount = attentionCounts?.shiftReleaseRequestCount ?? 0;
+  const availabilityRequestCount =
+    (attentionCounts?.unavailabilityRequestCount ?? 0) +
+    (attentionCounts?.recurringDayOffRequestCount ?? 0);
 
   const { leaveItems, timesheetItems, attentionItems } = buildDashboardOperational({
     openShifts,
@@ -131,6 +164,10 @@ export function useDashboardData() {
     rotaIssuesResolved: rotaIssues.resolved,
     hasPublishedSnapshot: Boolean(week?.hasPublishedSnapshot),
     hasUnpublishedChanges: Boolean(week?.hasUnpublishedChanges),
+    openShiftRequestCount,
+    shiftReleaseRequestCount,
+    availabilityRequestCount,
+    timeQueryCount: 0,
   });
 
   const todayIndex = dayIndexInWeek(week?.weekStart ?? null, week?.today ?? null);
@@ -160,5 +197,8 @@ export function useDashboardData() {
     attentionWeekScope: "current" as const,
     staffCount,
     weekShifts: shifts,
+    openShiftRequestCount,
+    shiftReleaseRequestCount,
+    availabilityRequestCount,
   };
 }

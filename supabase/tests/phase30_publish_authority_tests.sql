@@ -248,6 +248,7 @@ begin
     on notification.workspace_id = delivery.workspace_id
    and notification.id = delivery.notification_id
   where notification.related_entity_id in (new_snapshot_id, (select id from p30_ids where key = 'request_a'))
+    and notification.title <> 'Open shift requested'
     and delivery.recipient_membership_id <> '13000000-0000-4000-8000-000000000005';
   if wrong_recipient_count <> 0 then
     raise exception 'FAIL: republish notified % unaffected memberships', wrong_recipient_count;

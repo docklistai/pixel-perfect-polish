@@ -19,6 +19,10 @@ function input(partial: Partial<DashboardAttentionInput> = {}): DashboardAttenti
     rotaIssuesResolved: true,
     hasPublishedSnapshot: false,
     hasUnpublishedChanges: false,
+    openShiftRequestCount: 0,
+    shiftReleaseRequestCount: 0,
+    availabilityRequestCount: 0,
+    timeQueryCount: 0,
     ...partial,
   };
 }
@@ -46,6 +50,42 @@ describe("buildAttentionItems — each signal independently", () => {
     expect(items[0]!.s).toBe("Open shifts do not block publishing");
     expect(items[0]!.route).toBe("/rota");
     expect(items[0]!.cta).toBe("Open rota");
+  });
+
+  it("surfaces open-shift requests alone", () => {
+    const items = buildAttentionItems(input({ openShiftRequestCount: 2 }));
+    expect(items).toHaveLength(1);
+    expect(items[0]!.t).toBe("2 open-shift requests pending");
+    expect(items[0]!.s).toBe("Staff applied for unassigned shifts");
+    expect(items[0]!.route).toBe("/rota");
+    expect(items[0]!.cta).toBe("Review requests");
+  });
+
+  it("surfaces shift release requests alone", () => {
+    const items = buildAttentionItems(input({ shiftReleaseRequestCount: 1 }));
+    expect(items).toHaveLength(1);
+    expect(items[0]!.t).toBe("1 shift release request pending");
+    expect(items[0]!.s).toBe("Staff asked to give up assigned shifts");
+    expect(items[0]!.route).toBe("/rota");
+    expect(items[0]!.cta).toBe("Review releases");
+  });
+
+  it("surfaces availability requests alone", () => {
+    const items = buildAttentionItems(input({ availabilityRequestCount: 3 }));
+    expect(items).toHaveLength(1);
+    expect(items[0]!.t).toBe("3 availability requests pending");
+    expect(items[0]!.s).toBe("One-off or recurring day-off requests waiting");
+    expect(items[0]!.route).toBe("/staff");
+    expect(items[0]!.cta).toBe("Review requests");
+  });
+
+  it("surfaces staff hours queries alone", () => {
+    const items = buildAttentionItems(input({ timeQueryCount: 1 }));
+    expect(items).toHaveLength(1);
+    expect(items[0]!.t).toBe("1 staff hours query waiting");
+    expect(items[0]!.s).toBe("Staff queried their recorded hours");
+    expect(items[0]!.route).toBe("/time");
+    expect(items[0]!.cta).toBe("Review queries");
   });
 
   it("surfaces pending leave alone", () => {
@@ -145,7 +185,7 @@ describe("buildAttentionItems — an unresolved read never reads as zero", () =>
 });
 
 describe("buildAttentionItems — deterministic order", () => {
-  it("orders rota update, open shifts, leave, timesheets", () => {
+  it("orders rota update, open shifts, requests, leave, timesheets", () => {
     const items = buildAttentionItems(
       input({
         rotaIssueCount: 1,
@@ -153,32 +193,48 @@ describe("buildAttentionItems — deterministic order", () => {
         hasPublishedSnapshot: true,
         hasUnpublishedChanges: true,
         openShifts: 2,
+        openShiftRequestCount: 1,
+        shiftReleaseRequestCount: 1,
+        availabilityRequestCount: 1,
         pendingLeaveCount: 1,
+        timeQueryCount: 1,
         pendingTimeCount: 3,
       }),
     );
     expect(titles(items)).toEqual([
       "1 leave change needs a rota update",
       "This week has 2 open shifts",
+      "1 open-shift request pending",
+      "1 shift release request pending",
+      "1 availability request pending",
       "1 leave request pending",
+      "1 staff hours query waiting",
       "3 timesheets need manager review",
     ]);
   });
 
-  it("orders open shifts, unpublished, leave, timesheets when no issue is open", () => {
+  it("orders open shifts, requests, unpublished, leave, timesheets when no issue is open", () => {
     const items = buildAttentionItems(
       input({
         hasPublishedSnapshot: true,
         hasUnpublishedChanges: true,
         openShifts: 1,
+        openShiftRequestCount: 1,
+        shiftReleaseRequestCount: 1,
+        availabilityRequestCount: 1,
         pendingLeaveCount: 2,
+        timeQueryCount: 1,
         pendingTimeCount: 1,
       }),
     );
     expect(titles(items)).toEqual([
       "This week has 1 open shift",
+      "1 open-shift request pending",
+      "1 shift release request pending",
+      "1 availability request pending",
       "This week has unpublished changes",
       "2 leave requests pending",
+      "1 staff hours query waiting",
       "1 timesheet need manager review",
     ]);
   });
@@ -232,7 +288,11 @@ describe("buildAttentionItems — counts and copy", () => {
         rotaIssueCount: 2,
         rotaIssuesResolved: true,
         openShifts: 1,
+        openShiftRequestCount: 1,
+        shiftReleaseRequestCount: 1,
+        availabilityRequestCount: 1,
         pendingLeaveCount: 1,
+        timeQueryCount: 1,
         pendingTimeCount: 1,
       }),
     );
@@ -248,17 +308,30 @@ describe("buildAttentionItems — every item is actionable", () => {
         rotaIssueCount: 1,
         rotaIssuesResolved: true,
         openShifts: 1,
+        openShiftRequestCount: 1,
+        shiftReleaseRequestCount: 1,
+        availabilityRequestCount: 1,
         pendingLeaveCount: 1,
+        timeQueryCount: 1,
         pendingTimeCount: 1,
       }),
     );
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(8);
     for (const item of items) {
       expect(item.route).toBeTruthy();
       expect(item.cta).toBeTruthy();
       expect(item.tag).toBeTruthy();
       expect(item.detail).toBeTruthy();
     }
-    expect(items.map((item) => item.route)).toEqual(["/leave", "/rota", "/leave", "/time"]);
+    expect(items.map((item) => item.route)).toEqual([
+      "/leave",
+      "/rota",
+      "/rota",
+      "/rota",
+      "/staff",
+      "/leave",
+      "/time",
+      "/time",
+    ]);
   });
 });

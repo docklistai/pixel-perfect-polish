@@ -83,6 +83,14 @@ export interface DashboardOperationalInput {
   /** Publish state of the watched week, for the unpublished-changes signal. */
   hasPublishedSnapshot?: boolean;
   hasUnpublishedChanges?: boolean;
+  /** Pending open-shift requests from staff. */
+  openShiftRequestCount?: number;
+  /** Pending shift release requests from staff. */
+  shiftReleaseRequestCount?: number;
+  /** Pending one-off unavailability or recurring day off requests from staff. */
+  availabilityRequestCount?: number;
+  /** Pending staff hours queries (slot for WS-12). */
+  timeQueryCount?: number;
 }
 
 export interface DashboardOperationalOutput {
@@ -126,6 +134,10 @@ export function buildDashboardOperational(
     rotaIssuesResolved: input.rotaIssuesResolved ?? false,
     hasPublishedSnapshot: input.hasPublishedSnapshot ?? false,
     hasUnpublishedChanges: input.hasUnpublishedChanges ?? false,
+    openShiftRequestCount: input.openShiftRequestCount ?? 0,
+    shiftReleaseRequestCount: input.shiftReleaseRequestCount ?? 0,
+    availabilityRequestCount: input.availabilityRequestCount ?? 0,
+    timeQueryCount: input.timeQueryCount ?? 0,
   });
 
   return { leaveItems, timesheetItems, attentionItems };

@@ -51,12 +51,12 @@ export const timeQueryKeys = {
         filterAuthority: TIME_QUERY_FILTER_AUTHORITY,
       },
     ] as const,
-  pendingPreview: (workspaceId: string | null, limit: number) =>
+  pendingPreview: (workspaceId: string | null, limit: number, range?: TimeDateRange) =>
     [
       "time",
       "pending-preview",
       workspaceId,
-      { limit, authority: "all-actionable-limit-v1" },
+      { limit, authority: "all-actionable-limit-v1", ...(range ?? {}) },
     ] as const,
   operationalCounts: (workspaceId: string | null, range: TimeDateRange) =>
     ["time", "operational-counts", workspaceId, { ...range, authority: "head-count-v1" }] as const,

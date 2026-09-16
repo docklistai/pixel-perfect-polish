@@ -24,6 +24,8 @@ export const timeEntryReviewInput = z.object({
 export const pendingTimePreviewInput = z.object({
   workspaceId: z.string().uuid(),
   limit: z.number().int().min(1).max(20).default(5),
+  startDate: isoDate.optional(),
+  endDate: isoDate.optional(),
 });
 
 export const timeOperationalCountsInput = z
