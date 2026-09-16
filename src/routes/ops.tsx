@@ -152,7 +152,7 @@ function OpsPage() {
             onLogEntry={() => openNew()}
             onExport={() => void entries.exportCsv(page.filters.locationId)}
             onPrintBriefing={() => printBriefing(data.briefings)}
-            onSettings={() => void navigate({ to: "/settings" })}
+            onSettings={() => void navigate({ to: "/settings", search: { tab: "general" } })}
           />
         }
       />

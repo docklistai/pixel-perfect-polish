@@ -110,7 +110,16 @@ function ReportsPage() {
             />
             <ReportsQuickReportsCard
               onOpen={setSelectedDetail}
-              onApprovedExport={() => navigate({ to: "/time" })}
+              onApprovedExport={() =>
+                navigate({
+                  to: "/time",
+                  search: data
+                    ? {
+                        start: data.meta.currentWeekStart ?? data.meta.periodStart,
+                      }
+                    : {},
+                })
+              }
             />
           </div>
           <ReportsCoverageHeatmapCard

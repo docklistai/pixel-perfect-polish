@@ -1,6 +1,8 @@
 import { CalendarDays } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { DrawerShell, FormSection, StatusBadge, ActionButton } from "@/components/dl";
+import { MAX_ROTA_WEEK_OFFSET } from "@/features/rota/lib/rotaSearch";
+import { weekOffsetForDate } from "../lib/leaveRotaImpact";
 import { riskDrawerContext } from "../lib/leaveCards";
 import type { LeaveRequest } from "../types";
 
@@ -8,6 +10,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   request: LeaveRequest | null;
+  todayIso?: string;
 }
 
 /**
@@ -16,9 +19,13 @@ interface Props {
  * request's dates/department, explains what to check, and routes the manager to
  * the rota to confirm coverage themselves.
  */
-export function LeaveRiskDrawer({ open, onOpenChange, request }: Props) {
+export function LeaveRiskDrawer({ open, onOpenChange, request, todayIso }: Props) {
   const navigate = useNavigate();
   const { title, dateLabel, dept } = riskDrawerContext(request);
+  const today = todayIso ?? new Date().toISOString().slice(0, 10);
+  const weekOffset = request ? weekOffsetForDate(today, request.startIso) : 0;
+  const inRange = Math.abs(weekOffset) <= MAX_ROTA_WEEK_OFFSET;
+
   return (
     <DrawerShell
       open={open}
@@ -35,7 +42,11 @@ export function LeaveRiskDrawer({ open, onOpenChange, request }: Props) {
             icon={CalendarDays}
             onClick={() => {
               onOpenChange(false);
-              void navigate({ to: "/rota" });
+              if (inRange) {
+                void navigate({ to: "/rota", search: { week: weekOffset } });
+              } else {
+                void navigate({ to: "/rota" });
+              }
             }}
           >
             Open rota

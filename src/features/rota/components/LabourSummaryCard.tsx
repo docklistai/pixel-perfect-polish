@@ -101,7 +101,7 @@ export function LabourSummaryCard({
           label="Edit labour targets in Settings"
           size="sm"
           variant="ghost"
-          onClick={() => navigate({ to: "/settings" })}
+          onClick={() => navigate({ to: "/settings", search: { tab: "rota" } })}
         />
       </div>
 

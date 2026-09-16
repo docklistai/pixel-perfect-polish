@@ -282,7 +282,12 @@ function LeavePage() {
         onNewRequest={() => setNewRequestOpen(true)}
         requests={requests}
       />
-      <LeaveRiskDrawer open={riskOpen} onOpenChange={setRiskOpen} request={activeRequest} />
+      <LeaveRiskDrawer
+        open={riskOpen}
+        onOpenChange={setRiskOpen}
+        request={activeRequest}
+        todayIso={todayIso}
+      />
       <LeaveActionDialogs
         source={source}
         decisionRequest={decisionRequest}

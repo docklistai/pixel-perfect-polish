@@ -30,9 +30,11 @@ import {
 import { canExportApprovedHours } from "@/features/time/lib/timeExport";
 import { requireManagerAccess } from "@/features/auth";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { parseTimeSearch } from "@/features/time/lib/timeSearch";
 
 export const Route = createFileRoute("/time")({
   beforeLoad: ({ context }) => requireManagerAccess(context.auth),
+  validateSearch: parseTimeSearch,
   head: () => ({ meta: [{ title: "Time & Attendance — Docklist" }] }),
   component: TimePage,
 });
@@ -40,13 +42,17 @@ export const Route = createFileRoute("/time")({
 function TimePage() {
   const { openAiDrawer } = useOverlays();
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const searchStart = search.start;
   const { auth } = Route.useRouteContext();
   const liveExpected =
     Boolean(getSupabaseEnv()) &&
     auth.status === "member" &&
     (auth.role === "owner" || auth.role === "manager");
   const [period, setPeriodState] = React.useState<ReviewPeriod>(() =>
-    defaultPeriod(liveExpected ? "live" : "demo", "UTC"),
+    searchStart
+      ? weekPeriodOf(searchStart, 0)
+      : defaultPeriod(liveExpected ? "live" : "demo", "UTC"),
   );
   const {
     rows: rawRows,
@@ -69,9 +75,31 @@ function TimePage() {
     [],
   );
   React.useEffect(() => {
+    if (searchStart) {
+      setPeriodState((prev) => {
+        const target = weekPeriodOf(searchStart, rotaStartWeekday);
+        if (prev.startIso === target.startIso && prev.endIso === target.endIso) return prev;
+        return target;
+      });
+      return;
+    }
     if (!workspaceTimezone || periodTouchedRef.current) return;
     setPeriodState(currentWeekPeriod(new Date(), workspaceTimezone, rotaStartWeekday));
-  }, [workspaceTimezone, rotaStartWeekday]);
+  }, [searchStart, workspaceTimezone, rotaStartWeekday]);
+
+  React.useEffect(() => {
+    if (!periodTouchedRef.current) return;
+    if (search.start === period.startIso && search.end === period.endIso) return;
+    void navigate({
+      to: "/time",
+      search: (prev: Record<string, unknown>) => ({
+        ...prev,
+        start: period.startIso,
+        end: period.endIso,
+      }),
+      replace: true,
+    });
+  }, [navigate, period.endIso, period.startIso, search.end, search.start]);
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);

@@ -24,7 +24,7 @@ export function useRotaPage(week: number | undefined, location: string | undefin
   const rota = useRotaDraftController(location ?? null);
   const history = useRotaHistory(rota);
 
-  useRotaWeekSearch(week, rota.setWeekOffset);
+  useRotaWeekSearch(week, rota.setWeekOffset, rota.weekOffset);
 
   // Resolved before the shift actions so open-shift fill can exclude staff who
   // are on an approved day off or marked unavailable.

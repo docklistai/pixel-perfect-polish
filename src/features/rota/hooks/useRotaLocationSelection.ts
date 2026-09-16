@@ -32,17 +32,42 @@ export function advanceStableLocation(
   };
 }
 
-/** Applies valid route week offsets once per changed search value. */
+/** Applies valid route week offsets once per changed search value, and writes back UI week changes to URL. */
 export function useRotaWeekSearch(
   week: number | undefined,
   setWeekOffset: (week: number) => void,
+  currentWeekOffset?: number,
 ): void {
+  const navigate = useNavigate();
   const appliedWeekRef = React.useRef<number | null>(null);
+
+  // Inbound: route URL -> rota state
   React.useEffect(() => {
-    if (week === undefined || appliedWeekRef.current === week) return;
-    appliedWeekRef.current = week;
-    setWeekOffset(week);
+    const targetWeek = week ?? 0;
+    if (appliedWeekRef.current === targetWeek) return;
+    if (week === undefined && appliedWeekRef.current === null) {
+      appliedWeekRef.current = 0;
+      return;
+    }
+    appliedWeekRef.current = targetWeek;
+    setWeekOffset(targetWeek);
   }, [setWeekOffset, week]);
+
+  // Outbound (reverse sync): rota state -> route URL
+  React.useEffect(() => {
+    if (currentWeekOffset === undefined) return;
+    const currentSearchWeek = week ?? 0;
+    if (currentWeekOffset === currentSearchWeek) return;
+
+    appliedWeekRef.current = currentWeekOffset;
+    void navigate({
+      to: "/rota",
+      search: (previous: Record<string, unknown>) => ({
+        ...previous,
+        week: currentWeekOffset,
+      }),
+    });
+  }, [currentWeekOffset, navigate, week]);
 }
 
 /** Keeps route search, live location data, and location-bound UI state aligned. */
