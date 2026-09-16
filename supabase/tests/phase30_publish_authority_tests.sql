@@ -111,17 +111,19 @@ end $$;
 -- STAFF persona: no direct write path to publication evidence.
 -- --------------------------------------------------------------------------
 do $$
+declare
+  n int;
 begin
   begin
     insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
     values ('10000000-0000-4000-8000-000000000001', '3e000000-0000-4000-8000-000000000011', 2, '13000000-0000-4000-8000-000000000005', transaction_timestamp(), transaction_timestamp());
     raise exception 'FAIL: staff minted a published snapshot';
   exception when insufficient_privilege then raise notice 'PASS: staff cannot insert published snapshots'; end;
-  begin
-    update public.open_shift_requests set status = 'confirmed'
-    where workspace_id = '10000000-0000-4000-8000-000000000001';
-    raise exception 'FAIL: staff finalised their own open-shift request';
-  exception when insufficient_privilege then raise notice 'PASS: staff cannot write open-shift requests directly'; end;
+  update public.open_shift_requests set status = 'confirmed'
+  where workspace_id = '10000000-0000-4000-8000-000000000001';
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: staff updated rows under RLS (%)', n; end if;
+  raise notice 'PASS: staff cannot write open-shift requests directly';
 end $$;
 reset role;
 select set_config('request.jwt.claims', '', true);
@@ -145,6 +147,8 @@ select set_config('request.jwt.claims', '{"sub":"ab000000-0000-4000-8000-0000000
 set local role authenticated;
 
 do $$
+declare
+  n int;
 begin
   begin
     insert into public.published_rota_snapshots (workspace_id, rota_week_id, version, published_by_membership_id, published_at, created_at)
@@ -162,11 +166,11 @@ begin
     from p30_dates;
     raise exception 'FAIL: manager injected a published shift without the publish RPC';
   exception when insufficient_privilege then raise notice 'PASS: manager cannot insert published shifts directly'; end;
-  begin
-    update public.open_shift_requests set status = 'confirmed', decided_by_membership_id = '13000000-0000-4000-8000-000000000011', decided_at = now()
-    where id = (select id from p30_ids where key = 'request_a');
-    raise exception 'FAIL: manager finalised an open-shift request without publish/decline RPCs';
-  exception when insufficient_privilege then raise notice 'PASS: manager cannot write open-shift requests directly'; end;
+  update public.open_shift_requests set status = 'confirmed', decided_by_membership_id = '13000000-0000-4000-8000-000000000011', decided_at = now()
+  where id = (select id from p30_ids where key = 'request_a');
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: manager updated rows under RLS (%)', n; end if;
+  raise notice 'PASS: manager cannot write open-shift requests directly';
   begin
     insert into public.open_shift_requests (workspace_id, published_shift_id, source_shift_id, rota_week_id, staff_member_id)
     values ('10000000-0000-4000-8000-000000000001', (select id from p30_ids where key = 'published_a'),
@@ -174,11 +178,11 @@ begin
             '14000000-0000-4000-8000-000000000001');
     raise exception 'FAIL: manager forged an open-shift request';
   exception when insufficient_privilege then raise notice 'PASS: manager cannot insert open-shift requests directly'; end;
-  begin
-    delete from public.open_shift_requests
-    where id = (select id from p30_ids where key = 'request_a');
-    raise exception 'FAIL: manager deleted open-shift request evidence';
-  exception when insufficient_privilege then raise notice 'PASS: manager cannot delete open-shift requests'; end;
+  delete from public.open_shift_requests
+  where id = (select id from p30_ids where key = 'request_a');
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: manager deleted rows under RLS (%)', n; end if;
+  raise notice 'PASS: manager cannot delete open-shift requests';
   begin
     insert into public.notifications (workspace_id, created_by_membership_id, kind, title, body)
     values ('10000000-0000-4000-8000-000000000001', '13000000-0000-4000-8000-000000000011', 'rota_published', 'Fake publish', 'No snapshot exists for this.');

@@ -92,6 +92,7 @@ declare
   request_date date;
   notification_count integer;
   audit_count integer;
+  n integer;
 begin
   select week_start + 2 into request_date from p33_dates;
   v_request_id := (public.rpc_request_one_off_unavailability(
@@ -141,13 +142,15 @@ begin
     raise exception 'FAIL: staff inserted one-off state directly';
   exception when insufficient_privilege then null;
   end;
-  begin
-    update public.staff_one_off_unavailability_requests
-    set status = 'approved'
-    where id = v_request_id;
+  update public.staff_one_off_unavailability_requests
+  set status = 'approved'
+  where id = v_request_id;
+  get diagnostics n = row_count;
+  if n <> 0 then raise exception 'FAIL: staff updated rows under RLS (%)', n; end if;
+  if (select status from public.staff_portal_one_off_unavailability
+      where request_id = v_request_id) <> 'pending' then
     raise exception 'FAIL: staff updated one-off state directly';
-  exception when insufficient_privilege then null;
-  end;
+  end if;
   raise notice 'PASS: staff request is self-only/idempotent and pending does not block applying';
 end $$;
 

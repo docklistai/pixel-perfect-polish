@@ -48,6 +48,7 @@ expand_sql_includes() {
   while IFS= read -r line || [[ -n "$line" ]]; do
     if [[ "$line" == '\i '* ]]; then
       include="${line#'\i '}"
+      include="${include%$'\r'}"
       if [[ "$include" != supabase/tests/* || ! -f "$include" ]]; then
         echo "Unsafe or missing SQL include: $include" >&2
         return 1
