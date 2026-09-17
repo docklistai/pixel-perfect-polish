@@ -90,3 +90,33 @@ describe("RotaGridToolbar undo/redo", () => {
     expect(redo).toHaveAttribute("title", expect.stringContaining("Ctrl/Cmd+Shift+Z"));
   });
 });
+
+describe("RotaGridToolbar assignment facts", () => {
+  it("renders 'No shifts planned' on an empty week with no percentage", () => {
+    renderToolbar({ plannedShiftCount: 0, openShiftCount: 0, coveragePct: 0 });
+    expect(screen.getByText("No shifts planned")).toBeInTheDocument();
+    expect(screen.queryByText(/% coverage/i)).not.toBeInTheDocument();
+  });
+
+  it("renders assignment composition on a partial week with open shifts", () => {
+    renderToolbar({
+      plannedShiftCount: 8,
+      assignedShiftCount: 6,
+      openShiftCount: 2,
+      coveragePct: 75,
+    });
+    expect(screen.getByText("6 of 8 assigned · 2 open")).toBeInTheDocument();
+    expect(screen.queryByText(/% coverage/i)).not.toBeInTheDocument();
+  });
+
+  it("renders 'All shifts assigned' only when planned > 0 and open = 0", () => {
+    renderToolbar({
+      plannedShiftCount: 5,
+      assignedShiftCount: 5,
+      openShiftCount: 0,
+      coveragePct: 100,
+    });
+    expect(screen.getByText("All shifts assigned")).toBeInTheDocument();
+    expect(screen.queryByText(/% coverage/i)).not.toBeInTheDocument();
+  });
+});

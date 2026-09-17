@@ -9,6 +9,7 @@ export function CoverageDetailsDrawer({
   conflictCount,
   coveragePct,
   roleCoverage,
+  plannedShiftCount,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -17,17 +18,27 @@ export function CoverageDetailsDrawer({
   conflictCount: number;
   coveragePct: number;
   roleCoverage: RoleCoverageSummary[];
+  plannedShiftCount?: number;
 }) {
-  const coverageTone =
-    coveragePct > 110
+  const isZeroPlanned =
+    plannedShiftCount === 0 ||
+    (coveragePct === 0 &&
+      openShiftCount === 0 &&
+      roleCoverage.every((r) => r.value === "No shifts planned"));
+  const coverageTone = isZeroPlanned
+    ? "muted"
+    : coveragePct > 110
       ? "warning"
       : coveragePct >= 95
         ? "success"
         : coveragePct >= 80
           ? "warning"
           : "danger";
-  const coverageLabel =
-    coveragePct > 110 ? `${coveragePct}% over target` : `${coveragePct}% schedule load`;
+  const coverageLabel = isZeroPlanned
+    ? "No shifts planned"
+    : coveragePct > 110
+      ? `${coveragePct}% over target`
+      : `${coveragePct}% schedule load`;
 
   return (
     <DrawerShell
@@ -41,7 +52,10 @@ export function CoverageDetailsDrawer({
       <FormSection title="Week summary">
         <dl className="divide-y divide-border">
           <DetailRow label="Visible staff" value={`${staffCount}`} />
-          <DetailRow label="Schedule load" value={`${coveragePct}%`} />
+          <DetailRow
+            label="Schedule load"
+            value={isZeroPlanned ? "No shifts planned" : `${coveragePct}%`}
+          />
           <DetailRow label="Open shifts" value={`${openShiftCount}`} />
           <DetailRow label="Conflicts" value={`${conflictCount}`} />
         </dl>

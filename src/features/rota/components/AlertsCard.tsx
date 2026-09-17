@@ -5,6 +5,7 @@ export function AlertsCard({
   openShiftCount,
   conflictCount,
   workingTimeAlertCount,
+  plannedShiftCount = 0,
   onAddShift,
   onViewConflicts,
   onWorkingTimeAlert,
@@ -12,6 +13,7 @@ export function AlertsCard({
   openShiftCount: number;
   conflictCount: number;
   workingTimeAlertCount: number;
+  plannedShiftCount?: number;
   onAddShift: () => void;
   onViewConflicts: () => void;
   onWorkingTimeAlert: () => void;
@@ -19,7 +21,12 @@ export function AlertsCard({
   const alerts = [
     {
       t: `${openShiftCount} Open shifts`,
-      s: openShiftCount === 0 ? "All shifts assigned" : "Require staff",
+      s:
+        plannedShiftCount === 0
+          ? "No shifts planned"
+          : openShiftCount === 0
+            ? "All shifts assigned"
+            : "Require staff",
       icon: AlertTriangle,
       tone: openShiftCount > 0 ? "warning" : "muted",
       action: onAddShift,

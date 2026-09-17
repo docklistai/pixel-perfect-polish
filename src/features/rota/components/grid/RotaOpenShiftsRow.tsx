@@ -9,6 +9,7 @@ export function RotaOpenShiftsRow({
   openRow,
   days,
   totalOpenShifts,
+  plannedShiftCount,
   handlers,
   selection,
   move,
@@ -21,6 +22,7 @@ export function RotaOpenShiftsRow({
   openRow: RotaGridOpenRow;
   days: RotaGridDay[];
   totalOpenShifts: number;
+  plannedShiftCount?: number;
   handlers: ShiftActionHandlers;
   selection: RotaCellSelectionApi;
   move: RotaMoveApi;
@@ -43,9 +45,11 @@ export function RotaOpenShiftsRow({
         <div className="min-w-0">
           <div className="text-sm font-medium">Open shifts</div>
           <div className="text-[11px] text-muted-foreground">
-            {totalOpenShifts === 0
-              ? "All shifts assigned"
-              : `${totalOpenShifts} unassigned this week`}
+            {plannedShiftCount === 0
+              ? "No shifts planned"
+              : totalOpenShifts === 0
+                ? "All shifts assigned"
+                : `${totalOpenShifts} unassigned this week`}
           </div>
           <div className="text-[10px] text-muted-foreground">Unassigned</div>
         </div>

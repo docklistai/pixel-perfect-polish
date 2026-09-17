@@ -116,18 +116,20 @@ function DayHeader({ day, dayIndex }: { day: RotaGridDay; dayIndex: number }) {
         <Clock className="h-3 w-3" aria-hidden />
         <span>{day.h}</span>
       </div>
-      <div
-        className={`relative z-10 rota-day-metric mt-1 flex items-center gap-1.5 text-[11px] ${
-          day.tone === "danger"
-            ? "text-danger"
-            : day.tone === "warning"
-              ? "text-warning"
-              : "text-muted-foreground"
-        }`}
-      >
-        <Target className="h-3 w-3" aria-hidden />
-        <span>{day.c}</span>
-      </div>
+      {day.c ? (
+        <div
+          className={`relative z-10 rota-day-metric mt-1 flex items-center gap-1.5 text-[11px] ${
+            day.tone === "danger"
+              ? "text-danger"
+              : day.tone === "warning"
+                ? "text-warning"
+                : "text-muted-foreground"
+          }`}
+        >
+          <Target className="h-3 w-3" aria-hidden />
+          <span>{day.c}</span>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -151,6 +151,8 @@ function RotaPage() {
                   openShiftCount={rota.openShiftCount}
                   workingTimeAlertCount={workingTimeAlertCount}
                   coveragePct={rota.coveragePct}
+                  plannedShiftCount={rota.plannedShiftCount}
+                  assignedShiftCount={rota.assignedShiftCount}
                   onFilter={() => openOverlay("filters")}
                   onBuildWeek={() => openOverlay("buildWeek")}
                   onAddShift={() => openOverlay("addShift")}
@@ -171,6 +173,7 @@ function RotaPage() {
                   weekLabel={rota.weekLabel}
                   staffSearch={rota.staffSearch}
                   hasActiveFilters={rota.hasActiveFilters}
+                  plannedShiftCount={rota.plannedShiftCount}
                   scheduleTitleId={SCHEDULE_TITLE_ID}
                   scheduleDescId={SCHEDULE_DESC_ID}
                   // A different week, data source or location invalidates every

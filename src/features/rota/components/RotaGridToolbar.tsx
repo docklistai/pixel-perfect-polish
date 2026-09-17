@@ -8,6 +8,8 @@ export function RotaGridToolbar({
   openShiftCount,
   workingTimeAlertCount,
   coveragePct,
+  plannedShiftCount,
+  assignedShiftCount,
   onFilter,
   onBuildWeek,
   onAddShift,
@@ -23,6 +25,8 @@ export function RotaGridToolbar({
   openShiftCount: number;
   workingTimeAlertCount: number;
   coveragePct: number;
+  plannedShiftCount?: number;
+  assignedShiftCount?: number;
   onFilter: () => void;
   onBuildWeek: () => void;
   onAddShift: () => void;
@@ -34,7 +38,27 @@ export function RotaGridToolbar({
   canUndo: boolean;
   canRedo: boolean;
 }) {
-  const coverageTone = coveragePct > 110 ? "warning" : coveragePct >= 95 ? "success" : "warning";
+  const planned = plannedShiftCount ?? (openShiftCount === 0 && coveragePct === 0 ? 0 : 1);
+  const assigned = assignedShiftCount ?? Math.max(0, planned - openShiftCount);
+
+  const coverageBadge = (() => {
+    if (planned === 0) {
+      return {
+        label: "No shifts planned",
+        tone: "muted" as const,
+      };
+    }
+    if (openShiftCount === 0) {
+      return {
+        label: "All shifts assigned",
+        tone: "success" as const,
+      };
+    }
+    return {
+      label: `${assigned} of ${planned} assigned · ${openShiftCount} open`,
+      tone: "warning" as const,
+    };
+  })();
   const selectionCapable = useSelectionCapableViewport();
 
   return (
@@ -119,16 +143,24 @@ export function RotaGridToolbar({
 
           <span
             className={`rota-toolbar-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none ${
-              coverageTone === "success"
+              coverageBadge.tone === "success"
                 ? "bg-success-soft text-success"
-                : "bg-warning-soft text-warning-700"
+                : coverageBadge.tone === "muted"
+                  ? "bg-muted text-muted-foreground"
+                  : "bg-warning-soft text-warning-700"
             }`}
           >
             <span
-              className={`h-1.5 w-1.5 rounded-full ${coverageTone === "success" ? "bg-success" : "bg-warning"}`}
+              className={`h-1.5 w-1.5 rounded-full ${
+                coverageBadge.tone === "success"
+                  ? "bg-success"
+                  : coverageBadge.tone === "muted"
+                    ? "bg-muted-foreground"
+                    : "bg-warning"
+              }`}
               aria-hidden
             />
-            {coveragePct}% coverage
+            {coverageBadge.label}
           </span>
         </div>
 

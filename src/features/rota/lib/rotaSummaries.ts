@@ -122,7 +122,7 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
 
     return {
       h: `${Math.round(plannedHours)}h`,
-      c: `${coverage}%`,
+      c: dayShifts.length > 0 ? `${coverage}%` : "",
       tone,
       hours: plannedHours,
     };

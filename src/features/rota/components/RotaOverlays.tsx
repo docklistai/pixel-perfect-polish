@@ -178,6 +178,7 @@ export function RotaOverlays({
         conflictCount={rota.conflictCount}
         coveragePct={rota.coveragePct}
         roleCoverage={rota.roleCoverage}
+        plannedShiftCount={rota.plannedShiftCount}
       />
       <WorkingTimeDetailsDrawer
         open={openOverlays.workingTime}

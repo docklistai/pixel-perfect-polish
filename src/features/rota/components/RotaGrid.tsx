@@ -52,6 +52,7 @@ export function RotaGrid({
   onShiftUpdate,
   onRecordAbsence,
   serverBacked = false,
+  plannedShiftCount,
 }: {
   days: RotaGridDay[];
   staffRows: RotaGridStaffRow[];
@@ -63,6 +64,7 @@ export function RotaGrid({
   hasActiveFilters: boolean;
   scheduleTitleId: string;
   scheduleDescId: string;
+  plannedShiftCount?: number;
   /** Week, source and location identity — a change invalidates any selection. */
   selectionResetKey: string;
   /** Toast-free sequential writes plus one end-of-run refetch, for bulk changes. */
@@ -210,6 +212,7 @@ export function RotaGrid({
               openRow={openRow}
               days={days}
               totalOpenShifts={totalOpenShifts}
+              plannedShiftCount={plannedShiftCount}
               handlers={handlers}
               selection={cellSelection}
               move={move}

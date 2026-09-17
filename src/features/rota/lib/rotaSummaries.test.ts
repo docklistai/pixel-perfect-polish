@@ -106,11 +106,11 @@ describe("coveragePercent", () => {
 });
 
 describe("buildDayStats", () => {
-  it("returns 0% coverage and 0 planned hours for empty days", () => {
+  it("returns empty coverage and 0 planned hours for empty days", () => {
     const stats = buildDayStats([]);
     expect(stats).toHaveLength(7);
     for (const day of stats) {
-      expect(day.c).toBe("0%");
+      expect(day.c).toBe("");
       expect(day.h).toBe("0h");
       expect(day.hours).toBe(0);
       expect(day.tone).toBe("muted");
@@ -154,7 +154,7 @@ describe("buildDayStats", () => {
     // Day 1: empty
     expect(stats[1]).toEqual({
       h: "0h",
-      c: "0%",
+      c: "",
       tone: "muted",
       hours: 0,
     });
