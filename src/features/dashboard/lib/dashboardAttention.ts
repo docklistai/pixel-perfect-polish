@@ -207,9 +207,7 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
     // 7. Pending leave
     pendingLeaveCount > 0
       ? {
-          t: highLeave
-            ? "1 leave request — long request (5+ days)"
-            : `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending`,
+          t: `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending`,
           s: highLeave ? `${highLeave.n} · ${highLeave.date}` : "Review against the rota",
           icon: Plane,
           tone: "purple" as const,
@@ -217,8 +215,10 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
           cta: "Review leave",
           tag: "Decision needed",
           detail: highLeave
-            ? `${highLeave.n}'s request (${highLeave.date}) needs a decision. Review it against the rota.`
-            : `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending. Review each against the rota.`,
+            ? pendingLeaveCount === 1
+              ? `${highLeave.n}'s request (${highLeave.date}) needs a decision. Review it against the rota.`
+              : `${pendingLeaveCount} leave requests pending, including ${highLeave.n}'s request (${highLeave.date}). Review each against the rota.`
+            : `${pendingLeaveCount} leave request${s(pendingLeaveCount)} pending. Review ${pendingLeaveCount === 1 ? "it" : "each"} against the rota.`,
         }
       : null,
 
@@ -239,8 +239,8 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
     // 9. Pending timesheets
     pendingTimeCount > 0
       ? {
-          t: `${pendingTimeCount} timesheet${s(pendingTimeCount)} need manager review`,
-          s: "Need manager review this period",
+          t: `${pendingTimeCount} timesheet${s(pendingTimeCount)} need${pendingTimeCount === 1 ? "s" : ""} manager review`,
+          s: `${pendingTimeCount === 1 ? "Needs" : "Need"} manager review this period`,
           icon: Clock3,
           tone: "danger" as const,
           route: "/time" as const,

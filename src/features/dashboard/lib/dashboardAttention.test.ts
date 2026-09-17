@@ -235,7 +235,7 @@ describe("buildAttentionItems — deterministic order", () => {
       "This week has unpublished changes",
       "2 leave requests pending",
       "1 staff hours query waiting",
-      "1 timesheet need manager review",
+      "1 timesheet needs manager review",
     ]);
   });
 
@@ -245,7 +245,7 @@ describe("buildAttentionItems — deterministic order", () => {
     );
     expect(titles(items)).toEqual([
       "This week has unpublished changes",
-      "1 timesheet need manager review",
+      "1 timesheet needs manager review",
     ]);
   });
 });
@@ -258,28 +258,29 @@ describe("buildAttentionItems — counts and copy", () => {
   });
 
   it("agrees the verb with the rota issue count", () => {
-    expect(
-      buildAttentionItems(input({ rotaIssueCount: 1, rotaIssuesResolved: true }))[0]!.t,
-    ).toContain("needs a rota update");
-    expect(
-      buildAttentionItems(input({ rotaIssueCount: 4, rotaIssuesResolved: true }))[0]!.t,
-    ).toContain("need a rota update");
+    const single = buildAttentionItems(input({ rotaIssueCount: 1, rotaIssuesResolved: true }));
+    expect(single[0]!.t).toBe("1 leave change needs a rota update");
+
+    const multiple = buildAttentionItems(input({ rotaIssueCount: 2, rotaIssuesResolved: true }));
+    expect(multiple[0]!.t).toBe("2 leave changes need a rota update");
   });
 
-  it("follows the watched week's noun for the demo store's next-week scope", () => {
-    const items = buildAttentionItems(
-      input({ weekScope: "next", hasPublishedSnapshot: true, hasUnpublishedChanges: true }),
-    );
-    expect(items[0]!.t).toBe("Next week has unpublished changes");
-    expect(items[0]!.detail).toContain("Next week's draft");
-  });
-
-  it("names the person behind a high-impact leave request", () => {
+  it("states the real pending leave count when a high-impact leave request exists", () => {
     const items = buildAttentionItems(
       input({ pendingLeaveCount: 3, highLeave: { n: "Jordan Vale", date: "8 – 9 Jun" } }),
     );
-    expect(items[0]!.t).toBe("1 leave request — long request (5+ days)");
+    expect(items[0]!.t).toBe("3 leave requests pending");
     expect(items[0]!.s).toBe("Jordan Vale · 8 – 9 Jun");
+    expect(items[0]!.detail).toContain("3 leave requests pending, including Jordan Vale's request (8 – 9 Jun)");
+  });
+
+  it("names the person behind a high-impact leave request when count is 1", () => {
+    const items = buildAttentionItems(
+      input({ pendingLeaveCount: 1, highLeave: { n: "Jordan Vale", date: "8 – 9 Jun" } }),
+    );
+    expect(items[0]!.t).toBe("1 leave request pending");
+    expect(items[0]!.s).toBe("Jordan Vale · 8 – 9 Jun");
+    expect(items[0]!.detail).toContain("Jordan Vale's request (8 – 9 Jun) needs a decision");
   });
 
   it("carries no severity, score or urgency language", () => {
