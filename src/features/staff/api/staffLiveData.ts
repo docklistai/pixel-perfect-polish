@@ -77,6 +77,7 @@ function mapStaffRow(
   membershipStatusById: Map<string, string>,
   timezone: string,
   birthday: StaffBirthdayRow | undefined,
+  eligibleRoles?: string[],
 ): StaffRow {
   const dept = departmentName ?? "Unassigned";
   const hoursPerWeek = row.contracted_minutes_per_week;
@@ -110,6 +111,7 @@ function mapStaffRow(
     birthMonth: birthday?.birth_month ?? null,
     employmentStatus: row.employment_status,
     timezone,
+    eligibleRoles: eligibleRoles ?? [],
   };
 }
 
@@ -132,6 +134,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       { data: locations, error: locationError },
       { data: workspace, error: workspaceError },
       { data: birthdays, error: birthdaysError },
+      { data: eligibleRoles, error: eligibleRolesError },
     ] = await Promise.all([
       supabase
         .from("staff_members")
@@ -149,6 +152,11 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       supabase.from("locations").select("id, timezone").eq("workspace_id", workspaceId),
       supabase.from("workspaces").select("timezone").eq("id", workspaceId).single(),
       supabase.rpc("rpc_team_read_staff_birthdays", { p_workspace_id: workspaceId }),
+      supabase
+        .from("staff_eligible_roles")
+        .select("staff_member_id, role_name")
+        .eq("workspace_id", workspaceId)
+        .order("role_name", { ascending: true }),
     ]);
 
     if (staffError) throw staffError;
@@ -157,6 +165,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
     if (locationError) throw locationError;
     if (workspaceError) throw workspaceError;
     if (birthdaysError) throw birthdaysError;
+    if (eligibleRolesError) throw eligibleRolesError;
 
     const departmentNames = new Map(
       ((departments as { id: string; name: string }[] | null) ?? []).map((d) => [d.id, d.name]),
@@ -184,6 +193,16 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         birthday,
       ]),
     );
+    const eligibleRolesByStaffId = new Map<string, string[]>();
+    for (const r of (eligibleRoles as { staff_member_id: string; role_name: string }[] | null) ??
+      []) {
+      const list = eligibleRolesByStaffId.get(r.staff_member_id);
+      if (list) {
+        list.push(r.role_name);
+      } else {
+        eligibleRolesByStaffId.set(r.staff_member_id, [r.role_name]);
+      }
+    }
 
     return ((staff as StaffMemberRow[] | null) ?? []).map((row) =>
       mapStaffRow(
@@ -194,6 +213,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         (row.primary_location_id ? locationTimezones.get(row.primary_location_id) : null) ??
           workspaceTimezone,
         birthdayByStaffId.get(row.id),
+        eligibleRolesByStaffId.get(row.id) ?? [],
       ),
     );
   },

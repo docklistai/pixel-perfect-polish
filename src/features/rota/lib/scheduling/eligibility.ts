@@ -106,7 +106,10 @@ export function hardExclusionFor({
   excludeShiftId?: string;
 }): HardExclusion | null {
   if (!staff.active) return "inactive";
-  if (staff.roleKey !== requiredRoleKey) return "role-mismatch";
+  const holdsRole =
+    staff.roleKey === requiredRoleKey ||
+    (staff.eligibleRoleKeys?.includes(requiredRoleKey) ?? false);
+  if (!holdsRole) return "role-mismatch";
 
   const constraint = dateAvailabilityExclusion(staff.id, target, availability);
   if (constraint) return constraint;

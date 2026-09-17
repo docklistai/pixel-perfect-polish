@@ -4,6 +4,7 @@ import { ActionButton, DrawerShell, FormSection, StatusBadge } from "@/component
 import type { LeaveRequest } from "@/features/leave/types";
 import { toSafeBusinessMessage } from "@/lib/safe-errors";
 import { isValidShiftTimeRange } from "../lib/draftRota";
+import { isStaffEligibleForRole } from "../lib/assignableStaff";
 import type { RepeatShiftResult } from "../lib/repeatShift";
 import type { DraftShift, ShiftId, StaffMember } from "../types";
 import { useRotaRecoveryOptions } from "../hooks/useRotaRecoveryOptions";
@@ -125,8 +126,13 @@ export function ShiftDetailDrawer({
     form.start !== shift.start ||
     form.end !== shift.end ||
     form.assignTo !== (shift.staffId ?? "");
+  const assignedStaffMember = form.assignTo
+    ? assignableStaff.find((member) => member.id === form.assignTo)
+    : undefined;
+  const isAssignedEligible =
+    !assignedStaffMember || isStaffEligibleForRole(assignedStaffMember, form.role);
   const hasValidAssignment =
-    form.assignTo === "" || assignableStaff.some((member) => member.id === form.assignTo);
+    form.assignTo === "" || (Boolean(assignedStaffMember) && isAssignedEligible);
   const canSave = !saving && isDirty && form.role.trim() !== "" && timesValid && hasValidAssignment;
   const saveHint = !isDirty
     ? "Make a change to enable Save."
@@ -134,7 +140,9 @@ export function ShiftDetailDrawer({
       ? "Enter a role to save."
       : !timesValid
         ? "Enter a valid time range to save."
-        : "";
+        : !isAssignedEligible
+          ? `${assignedStaffMember?.name} is not eligible for the ${form.role} role.`
+          : "";
 
   const handleSave = async () => {
     if (!canSave) return;

@@ -1,5 +1,7 @@
 import { FormRow } from "@/components/dl";
 import type { StaffMember } from "../types";
+import { isStaffEligibleForRole } from "../lib/assignableStaff";
+import { normaliseRoleKey } from "../lib/scheduling/shiftSignature";
 
 export type ShiftEditFormState = {
   role: string;
@@ -29,6 +31,12 @@ export function ShiftEditFormFields({
 }) {
   const timeErrorId = "shift-edit-time-error";
   const roleErrorId = "shift-edit-role-error";
+
+  const assignedStaffMember = form.assignTo
+    ? assignableStaff.find((s) => s.id === form.assignTo)
+    : undefined;
+  const isAssignedEligible =
+    !assignedStaffMember || isStaffEligibleForRole(assignedStaffMember, form.role);
 
   return (
     <>
@@ -94,16 +102,31 @@ export function ShiftEditFormFields({
               {currentStaff.name} · inactive — reassign or mark open
             </option>
           )}
-          {assignableStaff.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name} · {s.role}
-            </option>
-          ))}
+          {assignableStaff.map((s) => {
+            const isPrimary = normaliseRoleKey(s.role) === normaliseRoleKey(form.role);
+            const isEligible = isStaffEligibleForRole(s, form.role);
+            const label = isPrimary
+              ? `${s.name} · ${s.role}`
+              : isEligible
+                ? `${s.name} · ${s.role} (eligible)`
+                : `${s.name} · ${s.role} (not eligible)`;
+            return (
+              <option key={s.id} value={s.id} disabled={!isEligible}>
+                {label}
+              </option>
+            );
+          })}
         </select>
       </FormRow>
       {!currentAssignmentIsAssignable && form.assignTo === originalStaffId && (
         <p className="text-[11px] text-warning">
           This staff member is no longer active. Reassign the shift or mark it open before saving.
+        </p>
+      )}
+      {!isAssignedEligible && assignedStaffMember && (
+        <p className="text-[11px] text-danger">
+          {assignedStaffMember.name} is not eligible for the {form.role} role. Choose an eligible
+          staff member or configure this role under Staff.
         </p>
       )}
       {saveHint && <p className="text-[11px] text-muted-foreground">{saveHint}</p>}

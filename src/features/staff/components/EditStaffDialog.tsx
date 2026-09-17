@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Loader2, Pencil } from "lucide-react";
 import { ActionButton, DialogShell, FormRow, FormSection } from "@/components/dl";
 import { updateStaffMemberFn } from "../api/updateStaffMember";
+import { setStaffEligibleRolesFn } from "../api/setStaffEligibleRoles";
 import { buildStaffMemberUpdate, type EditStaffFormValues } from "../lib/editStaff";
 import { submitEditStaff } from "../lib/editStaffSubmission";
 import { useWorkspaceDepartments } from "../hooks/useWorkspaceDepartments";
@@ -37,6 +38,7 @@ function valuesFromMember(member: StaffRow): EditStaffFormValues {
     // An offboarded member has no editable status; the field is locked and the
     // stored 'left' is never carried into the form or written back.
     employmentStatus: member.employmentStatus === "inactive" ? "inactive" : "active",
+    eligibleRoles: member.eligibleRoles ? [...member.eligibleRoles] : [],
   };
 }
 
@@ -50,6 +52,7 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
   const [detailsError, setDetailsError] = React.useState<string | null>(null);
   const [payError, setPayError] = React.useState<string | null>(null);
   const [birthdayError, setBirthdayError] = React.useState<string | null>(null);
+  const [eligibleRolesError, setEligibleRolesError] = React.useState<string | null>(null);
   // Sticky across retries: once the details have persisted, a retry for the pay
   // rate must not re-send them, and must not re-describe them as unsaved.
   const [detailsSaved, setDetailsSaved] = React.useState(false);
@@ -65,6 +68,7 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
       setDetailsError(null);
       setPayError(null);
       setBirthdayError(null);
+      setEligibleRolesError(null);
       setDetailsSaved(false);
       setSubmitting(false);
     }
@@ -81,6 +85,7 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
     setDetailsError(null);
     setPayError(null);
     setBirthdayError(null);
+    setEligibleRolesError(null);
     const built = buildStaffMemberUpdate(values, { offboarded });
     if (!built.ok) {
       setFieldErrors(built.errors);
@@ -107,10 +112,21 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
     const birthdayResult = await birthday.submit();
     if (!birthdayResult.ok) setBirthdayError(birthdayResult.message);
 
+    // Secondary eligible roles write
+    const eligibleRolesResult = await setStaffEligibleRolesFn({
+      data: {
+        staffMemberId: member.id,
+        roles: values.eligibleRoles ?? [],
+      },
+    });
+    if (!eligibleRolesResult.ok) setEligibleRolesError(eligibleRolesResult.message);
+
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ["staff", "workspace-roster"] }),
       // Team reads birthdays from the same rows; keep its rail in step.
       queryClient.invalidateQueries({ queryKey: ["team"] }),
+      // Rota assigns staff by role eligibility; keep rota staff in step.
+      queryClient.invalidateQueries({ queryKey: ["rota"] }),
     ]);
 
     // The details are on record either way. A pay-rate failure reports only
@@ -124,6 +140,12 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
     if (!birthdayResult.ok) {
       toast.warning(`${built.payload.display_name} updated`, {
         description: "Their details saved. The birthday did not.",
+      });
+      return;
+    }
+    if (!eligibleRolesResult.ok) {
+      toast.warning(`${built.payload.display_name} updated`, {
+        description: "Their details saved. Secondary eligible roles did not.",
       });
       return;
     }
@@ -187,6 +209,15 @@ export function EditStaffDialog({ open, onOpenChange, member }: EditStaffDialogP
             className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
           >
             Birthday not saved. {birthdayError}
+          </div>
+        )}
+
+        {eligibleRolesError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
+          >
+            Secondary eligible roles not saved. {eligibleRolesError}
           </div>
         )}
 

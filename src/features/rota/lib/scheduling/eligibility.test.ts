@@ -69,6 +69,21 @@ describe("hard exclusions", () => {
     expect(exclusion({ requiredRoleKey: "head chef" })).toBe("role-mismatch");
   });
 
+  it("permits staff holding the required role as an additive secondary eligible role", () => {
+    expect(
+      exclusion({
+        staff: staff({ roleKey: "bar", eligibleRoleKeys: ["barista", "cashier"] }),
+        requiredRoleKey: "barista",
+      }),
+    ).toBeNull();
+    expect(
+      exclusion({
+        staff: staff({ roleKey: "bar", eligibleRoleKeys: ["barista"] }),
+        requiredRoleKey: "cashier",
+      }),
+    ).toBe("role-mismatch");
+  });
+
   it("excludes approved leave", () => {
     const availability = facts({
       approvedLeaveDatesByStaff: new Map([["staff-a", new Set([MON])]]),

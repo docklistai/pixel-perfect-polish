@@ -72,6 +72,10 @@ describe("fetchWorkspaceStaffFn", () => {
       error: null,
     });
     const workspaces = query({ data: { timezone: "UTC" }, error: null });
+    const eligibleRoles = query({
+      data: [{ staff_member_id: "staff-1", role_name: "Barista" }],
+      error: null,
+    });
     const rpc = vi.fn().mockResolvedValue({
       data: [{ staff_member_id: "staff-1", birth_day: 9, birth_month: 6 }],
       error: null,
@@ -81,6 +85,7 @@ describe("fetchWorkspaceStaffFn", () => {
       if (table === "departments") return departments;
       if (table === "workspace_memberships") return memberships;
       if (table === "locations") return locations;
+      if (table === "staff_eligible_roles") return eligibleRoles;
       return workspaces;
     });
     getSupabaseServerClient.mockReturnValue({ from, rpc });
@@ -92,6 +97,7 @@ describe("fetchWorkspaceStaffFn", () => {
           id: string;
           birthDay: number | null;
           birthMonth: number | null;
+          eligibleRoles?: string[];
         }>
       >
     )();
@@ -104,7 +110,10 @@ describe("fetchWorkspaceStaffFn", () => {
     expect(rpc).toHaveBeenCalledWith("rpc_team_read_staff_birthdays", {
       p_workspace_id: "workspace-1",
     });
-    expect(rows).toMatchObject([{ id: "staff-1", birthDay: 9, birthMonth: 6 }]);
+    expect(eligibleRoles.select).toHaveBeenCalledWith("staff_member_id, role_name");
+    expect(rows).toMatchObject([
+      { id: "staff-1", birthDay: 9, birthMonth: 6, eligibleRoles: ["Barista"] },
+    ]);
   });
 });
 

@@ -93,6 +93,8 @@ export interface StaffRow {
    */
   birthDay?: number | null;
   birthMonth?: number | null;
+  /** Secondary eligible roles configured for this staff member (additive to primary role). */
+  eligibleRoles?: string[];
 }
 
 // Extended manager-only profile data — never exposed to staff portal

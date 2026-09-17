@@ -16,5 +16,6 @@ export function toRotaStaffMember(row: StaffRow, index: number): StaffMember {
     img: row.img,
     tone: TONE_CYCLE[index % TONE_CYCLE.length]!,
     departmentId: row.departmentId ?? null,
+    eligibleRoles: row.eligibleRoles ?? [],
   };
 }

@@ -32,6 +32,11 @@ export type StaffMember = {
    * new shifts — never a restriction, and never rewritten by scheduling.
    */
   departmentId?: string | null;
+  /**
+   * Additive secondary roles this staff member is eligible to work.
+   * The primary role (`role`) is always eligible.
+   */
+  eligibleRoles?: string[];
 };
 
 export type DraftShift = {

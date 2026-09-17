@@ -16,10 +16,11 @@ import type { StaffEmploymentStatus } from "../types";
 /** The statuses a generic staff edit may set. `left` belongs to Offboard only. */
 export type EditableStaffEmploymentStatus = Exclude<StaffEmploymentStatus, "left">;
 
-/** Edit form values: the Add fields plus phone and employment status. */
+/** Edit form values: the Add fields plus phone, employment status, and secondary eligible roles. */
 export interface EditStaffFormValues extends AddStaffFormValues {
   phone: string;
   employmentStatus: EditableStaffEmploymentStatus;
+  eligibleRoles?: string[];
 }
 
 /** Update payload — `id`/`workspace_id` are applied server-side, never here. */

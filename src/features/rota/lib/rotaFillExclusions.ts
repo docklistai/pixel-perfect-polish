@@ -79,5 +79,6 @@ export function toStaffSchedulingFact(member: StaffMember): StaffSchedulingFact 
     departmentId: member.departmentId ?? null,
     active: true,
     contractedMinutesPerWeek: member.contractedMinutesPerWeek ?? null,
+    eligibleRoleKeys: (member.eligibleRoles ?? []).map(normaliseRoleKey),
   };
 }

@@ -37,6 +37,8 @@ export type StaffSchedulingFact = {
   active: boolean;
   /** Soft signal only. `null` means "no target", never "no shifts". */
   contractedMinutesPerWeek: number | null;
+  /** Additive secondary role keys, already normalized by `normaliseRoleKey`. */
+  eligibleRoleKeys?: string[];
 };
 
 /** A shift a person is already committed to, for interval comparison. */
