@@ -60,4 +60,33 @@ describe("useRotaWeekSearch", () => {
       }),
     );
   });
+
+  it("ignores stale intermediate route updates while a newer outbound navigation is pending", () => {
+    const setWeekOffset = vi.fn();
+    const { rerender } = renderHook(
+      ({ week, current }) => useRotaWeekSearch(week, setWeekOffset, current),
+      { initialProps: { week: undefined as number | undefined, current: 0 } },
+    );
+
+    // User clicks Next (offset 1)
+    rerender({ week: undefined, current: 1 });
+    expect(mockNavigate).toHaveBeenCalledTimes(1);
+
+    // User clicks Next again before router catches up (offset 2)
+    rerender({ week: undefined, current: 2 });
+    expect(mockNavigate).toHaveBeenCalledTimes(2);
+
+    // Router finishes first navigation with stale week 1
+    rerender({ week: 1, current: 2 });
+    // setWeekOffset should NOT be called with stale week 1
+    expect(setWeekOffset).not.toHaveBeenCalledWith(1);
+
+    // Router catches up with final target week 2
+    rerender({ week: 2, current: 2 });
+    expect(setWeekOffset).not.toHaveBeenCalled();
+
+    // Now user clicks browser back to week 1 (external navigation, no outbound pending)
+    rerender({ week: 1, current: 2 });
+    expect(setWeekOffset).toHaveBeenCalledWith(1);
+  });
 });

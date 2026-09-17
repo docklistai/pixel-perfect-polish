@@ -40,10 +40,20 @@ export function useRotaWeekSearch(
 ): void {
   const navigate = useNavigate();
   const appliedWeekRef = React.useRef<number | null>(null);
+  const pendingOutboundRef = React.useRef<number | null>(null);
 
   // Inbound: route URL -> rota state
   React.useEffect(() => {
     const targetWeek = week ?? 0;
+
+    if (pendingOutboundRef.current !== null) {
+      if (targetWeek === pendingOutboundRef.current) {
+        pendingOutboundRef.current = null;
+        appliedWeekRef.current = targetWeek;
+      }
+      return;
+    }
+
     if (appliedWeekRef.current === targetWeek) return;
     if (week === undefined && appliedWeekRef.current === null) {
       appliedWeekRef.current = 0;
@@ -59,6 +69,7 @@ export function useRotaWeekSearch(
     const currentSearchWeek = week ?? 0;
     if (currentWeekOffset === currentSearchWeek) return;
 
+    pendingOutboundRef.current = currentWeekOffset;
     appliedWeekRef.current = currentWeekOffset;
     void navigate({
       to: "/rota",
