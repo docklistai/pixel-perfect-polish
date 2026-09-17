@@ -14,7 +14,12 @@ import {
 import { countOpenShifts } from "@/features/rota/lib/rotaSummaries";
 import { fetchDashboardAttentionCountsFn } from "../api/dashboardAttentionCounts";
 import { buildDashboardOperational } from "../lib/dashboardOperational";
-import { buildLiveKpis, countAssignedToday, dayIndexInWeek } from "../lib/dashboardKpis";
+import {
+  buildLiveKpis,
+  countAssignedToday,
+  countOpenToday,
+  dayIndexInWeek,
+} from "../lib/dashboardKpis";
 import { formatDashboardPublishWeekLabel } from "../lib/nextPublishWeek";
 import { useDashboardWorkspace } from "./useDashboardWorkspace";
 import { useDashboardRotaIssues } from "./useDashboardRotaIssues";
@@ -101,7 +106,7 @@ export function useDashboardData() {
       retryLive: () => undefined,
       publishWeekLabel: formatDashboardPublishWeekLabel(null),
       staffCount: null as number | null,
-      weekShifts: [] as DraftShift[],
+      weekShifts: demo.weekShifts,
       pendingLeaveCount: demo.pendingLeave.length,
       pendingTimeCount: demo.pendingTime.length,
     };
@@ -172,7 +177,13 @@ export function useDashboardData() {
 
   const todayIndex = dayIndexInWeek(week?.weekStart ?? null, week?.today ?? null);
   const onShiftToday = countAssignedToday(shifts, todayIndex);
-  const { weeklyKpis, todayKpis } = buildLiveKpis({ shifts, staffCount, onShiftToday });
+  const openShiftsToday = countOpenToday(shifts, todayIndex);
+  const { weeklyKpis, todayKpis } = buildLiveKpis({
+    shifts,
+    staffCount,
+    onShiftToday,
+    openShiftsToday,
+  });
 
   return {
     source: "live" as const,

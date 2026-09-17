@@ -44,12 +44,26 @@ export function useDashboardWorkspace() {
       draft.publishedSnapshot?.shifts.filter(
         (shift) => shift.dayIndex === 3 && shift.staffId !== null,
       ).length ?? 0;
+    const openToday =
+      draft.publishedSnapshot?.shifts.filter(
+        (shift) => shift.dayIndex === 3 && shift.staffId === null,
+      ).length ?? 0;
     const todayKpis = todayKpiItems.map((item) =>
-      item.label === "On shift today" ? { ...item, value: String(onShiftToday) } : item,
+      item.label === "On shift today"
+        ? { ...item, value: String(onShiftToday) }
+        : item.label === "Open today"
+          ? {
+              ...item,
+              value: String(openToday),
+              delta: openToday > 0 ? "Urgent · unassigned" : "Fully staffed",
+              tone: openToday > 0 ? ("warning" as const) : ("muted" as const),
+            }
+          : item,
     );
     return {
       source: "demo" as const,
       openShifts,
+      weekShifts: draft.shifts,
       pendingTime,
       pendingLeave,
       leaveItems,

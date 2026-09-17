@@ -43,6 +43,14 @@ export const todayKpiItems: KpiItem[] = [
     tone: "info",
     tip: "Staff currently on shift across all departments.",
   },
+  {
+    icon: Calendar,
+    label: "Open today",
+    value: "0",
+    delta: "Fully staffed",
+    tone: "muted",
+    tip: "Shifts today with no staff member assigned.",
+  },
 ];
 
 // Open shifts in next week's draft (15–21 Jun 2026)

@@ -3,8 +3,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, ActionButton, IconButton } from "@/components/dl";
 import { useOverlays } from "@/components/AppShortcuts";
-import { useIntents, type IntentName } from "@/lib/interactionIntents";
-import { Sparkles, MoreHorizontal, Plus, ChevronDown } from "lucide-react";
+import { Sparkles, MoreHorizontal } from "lucide-react";
 import { DashboardAISummaryCard } from "@/features/dashboard/components/DashboardAISummaryCard";
 import { DashboardSetupPanel } from "@/features/dashboard/components/DashboardSetupPanel";
 import { useDashboardSetupPlan } from "@/features/dashboard/hooks/useDashboardSetupPlan";
@@ -15,6 +14,9 @@ import { DashboardLabourWatchLive } from "@/features/dashboard/components/Dashbo
 import { DashboardLiveReadState } from "@/features/dashboard/components/DashboardLiveReadState";
 import { DashboardRotaPublish } from "@/features/dashboard/components/DashboardRotaPublish";
 import { DashboardPendingLeave } from "@/features/dashboard/components/DashboardPendingLeave";
+import { DashboardWeekShape } from "@/features/dashboard/components/DashboardWeekShape";
+import { DashboardQuickActions } from "@/features/dashboard/components/DashboardQuickActions";
+import { DashboardAnnouncements } from "@/features/dashboard/components/DashboardAnnouncements";
 import { DashboardTertiaryRow } from "@/features/dashboard/components/DashboardTertiaryRow";
 import { DashboardAlertDrawer } from "@/features/dashboard/components/DashboardAlertDrawer";
 import { DashboardKpiDetailDrawer } from "@/features/dashboard/components/DashboardKpiDetailDrawer";
@@ -42,15 +44,12 @@ export const Route = createFileRoute("/")({
 function Home() {
   const navigate = useNavigate();
   const { openAiDrawer, openNotifications } = useOverlays();
-  const { requestIntent } = useIntents();
   const [alertOpen, setAlertOpen] = React.useState(false);
   const [selectedAlertIdx, setSelectedAlertIdx] = React.useState(0);
   const [selectedKpi, setSelectedKpi] = React.useState<KpiItem | null>(null);
   const [summaryDismissed, setSummaryDismissed] = React.useState(false);
   const [filter, setFilter] = React.useState<"today" | "week">("week");
-  const [quickOpen, setQuickOpen] = React.useState(false);
   const [moreOpen, setMoreOpen] = React.useState(false);
-  const quickRef = React.useRef<HTMLDivElement>(null);
   const moreRef = React.useRef<HTMLDivElement>(null);
   const dashboard = useDashboardData();
   const timePulse = useTimePulse();
@@ -85,16 +84,6 @@ function Home() {
     [isLiveDashboard],
   );
 
-  const runQuickAction = React.useCallback(
-    (to: "/" | "/rota" | "/staff" | "/leave" | "/team" | "/ops", intent?: IntentName) => {
-      setQuickOpen(false);
-      navigate({ to });
-      if (intent) requestIntent(intent);
-    },
-    [navigate, requestIntent],
-  );
-
-  useDismissOnOutside(quickRef, quickOpen, () => setQuickOpen(false));
   useDismissOnOutside(moreRef, moreOpen, () => setMoreOpen(false));
 
   return (
@@ -148,58 +137,6 @@ function Home() {
           <ActionButton icon={Sparkles} variant="outline" onClick={openAiDrawer}>
             Manager support
           </ActionButton>
-          <div className="relative" ref={quickRef}>
-            <ActionButton
-              icon={Plus}
-              iconRight={ChevronDown}
-              variant="primary"
-              onClick={() => setQuickOpen((v) => !v)}
-              aria-haspopup="menu"
-              aria-expanded={quickOpen}
-            >
-              New
-            </ActionButton>
-            {quickOpen && (
-              <div className="popover absolute top-[44px] right-0 z-50 w-56 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="menu-label">Create</div>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/rota", "rota.addShift")}
-                >
-                  Add a shift…
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/staff", "staff.add")}
-                >
-                  Add team member…
-                </button>
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/leave", "leave.new")}
-                >
-                  Log a leave request…
-                </button>
-                <button type="button" className="menu-item" onClick={() => runQuickAction("/team")}>
-                  Compose announcement…
-                </button>
-                <button type="button" className="menu-item" onClick={() => runQuickAction("/ops")}>
-                  Log an incident… (preview)
-                </button>
-                <div className="menu-sep" />
-                <button
-                  type="button"
-                  className="menu-item"
-                  onClick={() => runQuickAction("/rota", "rota.generate")}
-                >
-                  Build this week…
-                </button>
-              </div>
-            )}
-          </div>
           <div className="relative" ref={moreRef}>
             <IconButton
               icon={MoreHorizontal}
@@ -211,6 +148,16 @@ function Home() {
             {moreOpen && (
               <div className="popover absolute top-[44px] right-0 z-50 w-52 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="menu-label">Dashboard</div>
+                <button
+                  type="button"
+                  className="menu-item"
+                  onClick={() => {
+                    setMoreOpen(false);
+                    navigate({ to: "/rota" });
+                  }}
+                >
+                  Build this week…
+                </button>
                 <button
                   type="button"
                   className="menu-item"
@@ -249,30 +196,7 @@ function Home() {
         />
       )}
 
-      {/* Setup / weekly-readiness checklist for empty live workspaces */}
-      {!liveReadsPending && showSetupPanel && setupPlan && (
-        <div className="mb-4">
-          <DashboardSetupPanel plan={setupPlan} />
-        </div>
-      )}
-
-      {/* AI manager summary (dismissible) */}
-      {!liveReadsPending && !summaryDismissed && !showSetupPanel && (
-        <div className="mb-4">
-          <DashboardAISummaryCard
-            onDismiss={() => setSummaryDismissed(true)}
-            onOpenAssistant={openAiDrawer}
-            onOpenRota={() => navigate({ to: "/rota" })}
-            onReviewTimesheets={() => navigate({ to: "/time" })}
-            openShiftCount={dashboard.openShifts}
-            pendingTimeCount={dashboard.pendingTimeCount}
-            pendingLeaveCount={dashboard.pendingLeaveCount}
-            weekScope={dashboard.attentionWeekScope}
-          />
-        </div>
-      )}
-
-      {/* KPI row + attention rail */}
+      {/* KPI row + attention rail (deterministic facts first) */}
       {!liveReadsPending && (
         <>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)]">
@@ -292,25 +216,68 @@ function Home() {
             />
           </div>
 
-          {/* Secondary row: labour watch · rota countdown · leave queue */}
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <DashboardLabourWatchLive source={dashboard.source} weekShifts={dashboard.weekShifts} />
-            <DashboardRotaPublish
-              published={dashboard.nextPublished}
-              hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
-              weekCommencing={dashboard.publishWeekLabel}
-            />
-            <DashboardPendingLeave items={dashboard.leaveItems} />
-          </div>
+          {/* AI manager summary (secondary, dismissible) */}
+          {!summaryDismissed && !showSetupPanel && (
+            <div className="mt-4">
+              <DashboardAISummaryCard
+                onDismiss={() => setSummaryDismissed(true)}
+                onOpenAssistant={openAiDrawer}
+                onOpenRota={() => navigate({ to: "/rota" })}
+                onReviewTimesheets={() => navigate({ to: "/time" })}
+                openShiftCount={dashboard.openShifts}
+                pendingTimeCount={dashboard.pendingTimeCount}
+                pendingLeaveCount={dashboard.pendingLeaveCount}
+                weekScope={dashboard.attentionWeekScope}
+              />
+            </div>
+          )}
 
-          {/* Tertiary row: time pulse · timesheets · announcements · quick actions */}
-          <DashboardTertiaryRow
-            isLive={isLiveDashboard}
-            timePulse={timePulse}
-            timesheetItems={dashboard.timesheetItems}
-            announcementItems={announcementItems}
-            quickActionItems={visibleQuickActionItems}
-          />
+          {/* Setup / weekly-readiness checklist for empty live workspaces (below first viewport) */}
+          {showSetupPanel && setupPlan && (
+            <div className="mt-4">
+              <DashboardSetupPanel plan={setupPlan} />
+            </div>
+          )}
+
+          {filter === "week" ? (
+            <>
+              {/* Compact week-at-a-glance strip (WS-2 assigned/open truth, no coverage %) */}
+              <div className="mt-4">
+                <DashboardWeekShape shifts={dashboard.weekShifts} />
+              </div>
+
+              {/* Secondary row: labour watch · rota countdown · leave queue */}
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <DashboardLabourWatchLive
+                  source={dashboard.source}
+                  weekShifts={dashboard.weekShifts}
+                />
+                <DashboardRotaPublish
+                  published={dashboard.nextPublished}
+                  hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
+                  weekCommencing={dashboard.publishWeekLabel}
+                />
+                <DashboardPendingLeave items={dashboard.leaveItems} />
+              </div>
+
+              {/* Bottom row: quick actions · announcements */}
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <DashboardQuickActions items={visibleQuickActionItems} />
+                {!isLiveDashboard && <DashboardAnnouncements items={announcementItems} />}
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Today: who is working, live attendance/clock, unapproved timesheets, quick actions */}
+              <DashboardTertiaryRow
+                isLive={isLiveDashboard}
+                timePulse={timePulse}
+                timesheetItems={dashboard.timesheetItems}
+                announcementItems={announcementItems}
+                quickActionItems={visibleQuickActionItems}
+              />
+            </>
+          )}
         </>
       )}
 
