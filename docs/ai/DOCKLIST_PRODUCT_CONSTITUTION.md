@@ -1,8 +1,8 @@
 # Docklist V2 — Product Constitution
 
-**Status:** Canonical product direction before the next implementation campaign  
-**Purpose:** Preserve the owner-level decisions made during the full Docklist audit and prevent implementation drift.  
-**Starting implementation baseline:** `main` at `f47e1e1c6b03f56d72fb6f9a71d1cb61475cedd5` (`fix(rota): align import leave handling`)  
+**Status:** Canonical product direction before the next implementation campaign
+**Purpose:** Preserve the owner-level decisions made during the full Docklist audit and prevent implementation drift.
+**Starting implementation baseline:** `main` at `f47e1e1c6b03f56d72fb6f9a71d1cb61475cedd5` (`fix(rota): align import leave handling`)
 **Repo:** `docklistai/pixel-perfect-polish` / local `C:\Dev\Docklist`
 
 ---
@@ -381,7 +381,7 @@ Decisions remain in:
 
 ## 4.1 Departments and roles
 
-**Department** = organisational/scheduling grouping.  
+**Department** = organisational/scheduling grouping.
 **Role** = work the person can perform.
 
 A staff member has:
