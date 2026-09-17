@@ -143,7 +143,7 @@ function RotaPage() {
             <RotaLiveReadState isError={rota.isLiveError} onRetry={() => void rota.retryLive()} />
           ) : (
             <div
-              className={`grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden ${showInsights ? "xl:grid-cols-[minmax(0,1fr)_300px]" : "xl:grid-cols-1"}`}
+              className={`grid min-w-0 grid-cols-1 gap-4 overflow-x-hidden ${showInsights ? "2xl:grid-cols-[minmax(0,1fr)_300px]" : "2xl:grid-cols-1"}`}
             >
               <Card className="min-w-0 overflow-hidden p-0">
                 <RotaGridToolbar

@@ -164,7 +164,7 @@ export function RotaGrid({
             onBlurCapture={gridNavigation.handleBlur}
             onCopy={interactions.handleCopy}
             onPaste={interactions.handlePaste}
-            className="grid min-w-[720px] w-max grid-cols-[160px_repeat(7,80px)] md:min-w-[1080px] md:grid-cols-[240px_repeat(7,120px)] xl:w-full xl:grid-cols-[240px_repeat(7,minmax(120px,1fr))]"
+            className="grid min-w-[1080px] w-full grid-cols-[240px_repeat(7,minmax(120px,1fr))]"
           >
             <RotaGridHeader
               days={days}

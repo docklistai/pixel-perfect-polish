@@ -40,7 +40,21 @@ export function useRotaPage(week: number | undefined, location: string | undefin
   const { openAiDrawer } = useOverlays();
   const overlays = useRotaOverlays();
   const actions = useRotaShiftActions(history.controller);
-  const [showInsights, setShowInsights] = React.useState(true);
+  const [showInsights, setShowInsights] = React.useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.innerWidth >= 1536;
+  });
+
+  React.useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mql = window.matchMedia("(min-width: 1536px)");
+    const handleChange = (e: MediaQueryListEvent) => {
+      setShowInsights(e.matches);
+    };
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
+  }, []);
+
   const [recoverySelection, setRecoverySelection] = React.useState<{
     shiftId: ShiftId;
     staffId: string;

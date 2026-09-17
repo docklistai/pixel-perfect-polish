@@ -61,7 +61,7 @@ export function RotaInsightsColumn({
 
   if (!visible) {
     return (
-      <div className="flex justify-center xl:justify-end">
+      <div className="flex justify-center 2xl:justify-end">
         <button
           type="button"
           onClick={() => onVisibleChange(true)}
