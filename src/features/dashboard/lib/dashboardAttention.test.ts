@@ -271,7 +271,9 @@ describe("buildAttentionItems — counts and copy", () => {
     );
     expect(items[0]!.t).toBe("3 leave requests pending");
     expect(items[0]!.s).toBe("Jordan Vale · 8 – 9 Jun");
-    expect(items[0]!.detail).toContain("3 leave requests pending, including Jordan Vale's request (8 – 9 Jun)");
+    expect(items[0]!.detail).toContain(
+      "3 leave requests pending, including Jordan Vale's request (8 – 9 Jun)",
+    );
   });
 
   it("names the person behind a high-impact leave request when count is 1", () => {

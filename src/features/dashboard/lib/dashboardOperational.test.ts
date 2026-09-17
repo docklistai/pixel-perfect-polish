@@ -69,7 +69,7 @@ describe("buildDashboardOperational", () => {
       pendingTime: [],
       timesheetPeriodLabel: "Awaiting review",
     });
-    expect(out.attentionItems[0]?.t).toContain("long request (5+ days)");
+    expect(out.attentionItems[0]?.t).toBe("1 leave request pending");
     expect(out.attentionItems[0]?.s).toContain("Jordan Vale");
   });
 

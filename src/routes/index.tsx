@@ -13,7 +13,6 @@ import { DashboardAttentionPanel } from "@/features/dashboard/components/Dashboa
 import { DashboardLabourWatchLive } from "@/features/dashboard/components/DashboardLabourWatchLive";
 import { DashboardLiveReadState } from "@/features/dashboard/components/DashboardLiveReadState";
 import { DashboardRotaPublish } from "@/features/dashboard/components/DashboardRotaPublish";
-import { DashboardPendingLeave } from "@/features/dashboard/components/DashboardPendingLeave";
 import { DashboardWeekShape } from "@/features/dashboard/components/DashboardWeekShape";
 import { DashboardQuickActions } from "@/features/dashboard/components/DashboardQuickActions";
 import { DashboardAnnouncements } from "@/features/dashboard/components/DashboardAnnouncements";
@@ -83,6 +82,14 @@ function Home() {
     () => (isLiveDashboard ? quickActionItems.filter((item) => !item.preview) : quickActionItems),
     [isLiveDashboard],
   );
+  const visibleAttentionItems = React.useMemo(() => {
+    if (filter === "week") {
+      return dashboard.attentionItems.filter((item) => item.route !== "/time");
+    }
+    return dashboard.attentionItems.filter(
+      (item) => item.route !== "/leave" && item.route !== "/time",
+    );
+  }, [filter, dashboard.attentionItems]);
 
   useDismissOnOutside(moreRef, moreOpen, () => setMoreOpen(false));
 
@@ -116,6 +123,7 @@ function Home() {
                 key={k}
                 type="button"
                 onClick={() => setFilter(k)}
+                aria-pressed={filter === k}
                 className="rounded-[8px] px-3 py-1.5 text-[12px] font-semibold focus:outline-none"
                 style={
                   filter === k
@@ -206,8 +214,8 @@ function Home() {
               onKpiClick={setSelectedKpi}
             />
             <DashboardAttentionPanel
-              items={dashboard.attentionItems}
-              total={dashboard.attentionItems.length}
+              items={visibleAttentionItems}
+              total={visibleAttentionItems.length}
               onAlertClick={(idx) => {
                 setSelectedAlertIdx(idx);
                 setAlertOpen(true);
@@ -246,8 +254,8 @@ function Home() {
                 <DashboardWeekShape shifts={dashboard.weekShifts} />
               </div>
 
-              {/* Secondary row: labour watch · rota countdown · leave queue */}
-              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* Secondary row: labour watch · rota countdown */}
+              <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                 <DashboardLabourWatchLive
                   source={dashboard.source}
                   weekShifts={dashboard.weekShifts}
@@ -257,7 +265,6 @@ function Home() {
                   hasUnpublishedChanges={dashboard.nextHasUnpublishedChanges}
                   weekCommencing={dashboard.publishWeekLabel}
                 />
-                <DashboardPendingLeave items={dashboard.leaveItems} />
               </div>
 
               {/* Bottom row: quick actions · announcements */}
@@ -284,7 +291,7 @@ function Home() {
       <DashboardAlertDrawer
         open={alertOpen}
         onOpenChange={setAlertOpen}
-        items={dashboard.attentionItems}
+        items={visibleAttentionItems}
         selectedIndex={selectedAlertIdx}
       />
       <DashboardKpiDetailDrawer
