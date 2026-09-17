@@ -36,6 +36,12 @@ export type WorkspaceProfile = {
   rotaStartWeekday: number;
   /** True once any rota week exists — the start day is locked from then on. */
   hasRotas: boolean;
+  /** Workspace-level staff contact for staff portal inquiries. */
+  staffContact: {
+    name: string;
+    email: string;
+    phone: string;
+  } | null;
 };
 
 /** Postgres `time` ("HH:MM:SS") → "HH:MM", or null. */
@@ -55,7 +61,7 @@ export const fetchWorkspaceProfileFn = createServerFn({ method: "GET" }).handler
       supabase
         .from("workspaces")
         .select(
-          "name, open_weekdays_mask, default_open_time, default_close_time, rota_start_weekday",
+          "name, open_weekdays_mask, default_open_time, default_close_time, rota_start_weekday, staff_contact_name, staff_contact_email, staff_contact_phone",
         )
         .eq("id", workspaceId)
         .single(),
@@ -78,6 +84,9 @@ export const fetchWorkspaceProfileFn = createServerFn({ method: "GET" }).handler
       default_open_time: string | null;
       default_close_time: string | null;
       rota_start_weekday: number;
+      staff_contact_name: string | null;
+      staff_contact_email: string | null;
+      staff_contact_phone: string | null;
     };
     const location =
       ((locationRes.data as { id: string; name: string; timezone: string }[] | null) ?? [])[0] ??
@@ -95,6 +104,14 @@ export const fetchWorkspaceProfileFn = createServerFn({ method: "GET" }).handler
       primaryLocation: location === null ? null : { ...location, timezoneLocked },
       rotaStartWeekday: row.rota_start_weekday ?? 0,
       hasRotas: ((rotaWeekRes.data as { id: string }[] | null) ?? []).length > 0,
+      staffContact:
+        row.staff_contact_name || row.staff_contact_email || row.staff_contact_phone
+          ? {
+              name: row.staff_contact_name ?? "",
+              email: row.staff_contact_email ?? "",
+              phone: row.staff_contact_phone ?? "",
+            }
+          : null,
     };
   },
 );
@@ -228,6 +245,40 @@ export const updateWorkspaceNameFn = createServerFn({ method: "POST" })
           error.code === "42501"
             ? "Only an owner or manager can rename the workspace."
             : "Couldn't save the workspace name. Please try again.",
+      };
+    }
+    return { ok: true };
+  });
+
+const staffContactSchema = z.object({
+  name: z.string().trim().max(120).nullable(),
+  email: z.string().trim().max(255).nullable(),
+  phone: z.string().trim().max(40).nullable(),
+});
+
+export const updateWorkspaceStaffContactFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => staffContactSchema.parse(input))
+  .handler(async ({ data }): Promise<UpdateWorkspaceNameResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
+    const supabase = getSupabaseServerClient();
+    const workspaceId = await requireActiveManagerWorkspaceId(supabase);
+
+    const { error } = await supabase.rpc("rpc_update_workspace_staff_contact", {
+      p_workspace_id: workspaceId,
+      p_contact_name: data.name || null,
+      p_contact_email: data.email || null,
+      p_contact_phone: data.phone || null,
+    });
+
+    if (error) {
+      return {
+        ok: false,
+        message:
+          error.code === "42501"
+            ? "Only an owner or manager can update the staff contact."
+            : "Couldn't save staff contact. Please try again.",
       };
     }
     return { ok: true };

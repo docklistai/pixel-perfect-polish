@@ -78,6 +78,8 @@ export interface PortalProfile {
   email: string;
   phone: string;
   accessStatus: "active" | "pending" | "suspended";
+  staffContact: { name: string; email: string; phone: string };
+  /** Points to staff contact; preserved for backward compatibility */
   manager: { name: string; email: string; phone: string };
   /** IANA timezone of the staff member's venue (primary location, workspace fallback). */
   timezone: string;

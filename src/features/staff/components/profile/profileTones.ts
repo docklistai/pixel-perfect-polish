@@ -18,5 +18,6 @@ export function statusTone(status: string): Tone {
 export function portalTone(status: string | undefined): Tone {
   if (status === "Claimed") return "success";
   if (status === "Pending") return "warning";
+  if (status === "Suspended") return "danger";
   return "muted";
 }

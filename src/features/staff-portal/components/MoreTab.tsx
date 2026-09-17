@@ -81,7 +81,7 @@ export function MoreTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
       <DashboardCard className="rounded-2xl p-2.5">
         <ul className="divide-y divide-border">
           <Row icon={User} label="Profile" onClick={() => setSection("profile")} />
-          <Row icon={Users} label="Team" onClick={() => setSection("team")} />
+          <Row icon={Users} label="Who's working" onClick={() => setSection("team")} />
           <Row icon={FileText} label="Documents" onClick={() => setSection("documents")} />
           <Row icon={Settings} label="Settings" onClick={() => setSection("settings")} />
           <Row icon={HelpCircle} label="Help & support" onClick={() => setSection("help")} />

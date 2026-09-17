@@ -107,3 +107,37 @@ describe("fetchWorkspaceStaffFn", () => {
     expect(rows).toMatchObject([{ id: "staff-1", birthDay: 9, birthMonth: 6 }]);
   });
 });
+
+describe("portalStatusFor", () => {
+  it("returns 'Not invited' when membershipId is null", async () => {
+    const { portalStatusFor } = await import("./staffLiveData");
+    const userIdMap = new Map<string, string | null>();
+    expect(portalStatusFor(null, userIdMap, "active")).toBe("Not invited");
+  });
+
+  it("returns 'Suspended' when employment status is not active", async () => {
+    const { portalStatusFor } = await import("./staffLiveData");
+    const userIdMap = new Map<string, string | null>([["mem-1", "user-1"]]);
+    expect(portalStatusFor("mem-1", userIdMap, "inactive")).toBe("Suspended");
+    expect(portalStatusFor("mem-1", userIdMap, "left")).toBe("Suspended");
+  });
+
+  it("returns 'Suspended' when membership status is not active", async () => {
+    const { portalStatusFor } = await import("./staffLiveData");
+    const userIdMap = new Map<string, string | null>([["mem-1", "user-1"]]);
+    expect(portalStatusFor("mem-1", userIdMap, "active", "suspended")).toBe("Suspended");
+    expect(portalStatusFor("mem-1", userIdMap, "active", "inactive")).toBe("Suspended");
+  });
+
+  it("returns 'Pending' when membership exists but is not claimed by any auth user", async () => {
+    const { portalStatusFor } = await import("./staffLiveData");
+    const userIdMap = new Map<string, string | null>([["mem-1", null]]);
+    expect(portalStatusFor("mem-1", userIdMap, "active", "active")).toBe("Pending");
+  });
+
+  it("returns 'Claimed' when membership exists, is active, and is claimed by an auth user", async () => {
+    const { portalStatusFor } = await import("./staffLiveData");
+    const userIdMap = new Map<string, string | null>([["mem-1", "user-123"]]);
+    expect(portalStatusFor("mem-1", userIdMap, "active", "active")).toBe("Claimed");
+  });
+});

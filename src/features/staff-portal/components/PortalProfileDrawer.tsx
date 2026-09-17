@@ -25,7 +25,7 @@ export function PortalProfileDrawer({
       open={open}
       onOpenChange={(o) => !o && onClose()}
       title="Profile"
-      description="Your details and manager contact"
+      description="Your details and staff contact"
       width="lg"
     >
       <div className="space-y-4">
@@ -52,30 +52,36 @@ export function PortalProfileDrawer({
           <DetailRow label="Phone" value={p.phone} />
         </FormSection>
 
-        <FormSection title="Manager contact">
-          <DetailRow label="Name" value={p.manager.name} />
-          <DetailRow label="Email" value={p.manager.email} />
-          <DetailRow label="Phone" value={p.manager.phone} />
+        <FormSection title="Staff contact">
+          <DetailRow label="Name" value={p.staffContact.name || "Not set"} />
+          <DetailRow label="Email" value={p.staffContact.email || "Not set"} />
+          <DetailRow label="Phone" value={p.staffContact.phone || "Not set"} />
         </FormSection>
 
-        <div className="flex gap-2">
-          <ActionButton
-            size="sm"
-            variant="secondary"
-            icon={Mail}
-            onClick={() => (window.location.href = `mailto:${p.manager.email}`)}
-          >
-            Email manager
-          </ActionButton>
-          <ActionButton
-            size="sm"
-            variant="secondary"
-            icon={Phone}
-            onClick={() => (window.location.href = `tel:${p.manager.phone}`)}
-          >
-            Call
-          </ActionButton>
-        </div>
+        {(Boolean(p.staffContact.email) || Boolean(p.staffContact.phone)) && (
+          <div className="flex gap-2">
+            {p.staffContact.email ? (
+              <ActionButton
+                size="sm"
+                variant="secondary"
+                icon={Mail}
+                onClick={() => (window.location.href = `mailto:${p.staffContact.email}`)}
+              >
+                Email
+              </ActionButton>
+            ) : null}
+            {p.staffContact.phone ? (
+              <ActionButton
+                size="sm"
+                variant="secondary"
+                icon={Phone}
+                onClick={() => (window.location.href = `tel:${p.staffContact.phone}`)}
+              >
+                Call
+              </ActionButton>
+            ) : null}
+          </div>
+        )}
       </div>
     </DrawerShell>
   );

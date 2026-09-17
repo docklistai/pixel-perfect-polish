@@ -4,11 +4,21 @@ import {
   describePortalCodeIssueError,
   describePortalRecoveryIssueError,
 } from "../lib/issuePortalCode";
-import type { IssuePortalCodeResult } from "../types";
+import type {
+  BulkIssuePortalCodeResult,
+  BulkIssuedPortalCode,
+  IssuePortalCodeResult,
+} from "../types";
 
 const issueStaffInputSchema = z.object({
   staffMemberId: z.string().uuid(),
 });
+
+const bulkIssueStaffInputSchema = z
+  .object({
+    staffMemberIds: z.array(z.string().uuid()).optional(),
+  })
+  .optional();
 
 const resetStaffAccessInputSchema = issueStaffInputSchema.extend({
   reason: z.string().trim().min(1).max(500),
@@ -131,4 +141,59 @@ export const resetStaffPortalAccessFn = createServerFn({ method: "POST" })
         describePortalRecoveryIssueError,
       );
     return { ok: true, code };
+  });
+
+/**
+ * Issues single-use 14-day personal portal codes in bulk for active unclaimed staff
+ * members in the active manager workspace. Returns codes for immediate distribution.
+ */
+export const bulkIssueStaffPortalCodesFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => bulkIssueStaffInputSchema.parse(input))
+  .handler(async ({ data }): Promise<BulkIssuePortalCodeResult> => {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/serverClient");
+    const { requireActiveManagerWorkspaceId } =
+      await import("@/features/auth/api/activeManagerWorkspace");
+    const supabase = getSupabaseServerClient();
+
+    let workspaceId: string;
+    try {
+      workspaceId = await requireActiveManagerWorkspaceId(supabase);
+    } catch {
+      return { ok: false, message: describePortalCodeIssueError("42501") };
+    }
+
+    const { data: rows, error } = await supabase.rpc("rpc_bulk_issue_staff_portal_access_codes", {
+      p_workspace_id: workspaceId,
+      p_staff_member_ids: data?.staffMemberIds ?? null,
+    });
+
+    if (error) {
+      const state = sqlState(error);
+      const message = describePortalCodeIssueError(state);
+      if (state && EXPECTED_PORTAL_CODE_STATES.has(state)) return { ok: false, message };
+      const { reportServerError } = await import("@/lib/safe-errors");
+      const reported = reportServerError(error, {
+        operation: "bulk_issue_staff_portal_access_codes",
+        fallbackMessage: message,
+      });
+      return { ok: false, ...reported };
+    }
+
+    const codes: BulkIssuedPortalCode[] = (
+      (rows as {
+        staff_member_id: string;
+        display_name: string;
+        role_name: string;
+        access_code: string;
+        expires_at: string;
+      }[]) ?? []
+    ).map((r) => ({
+      staffMemberId: r.staff_member_id,
+      displayName: r.display_name,
+      roleName: r.role_name,
+      accessCode: r.access_code,
+      expiresAt: r.expires_at,
+    }));
+
+    return { ok: true, codes };
   });

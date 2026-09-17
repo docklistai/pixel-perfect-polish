@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import type { StaffRow, WorkspaceDepartment } from "../types";
+import type { StaffEmploymentStatus, StaffRow, WorkspaceDepartment } from "../types";
 
 /**
  * Manager-side live staff reads. Runs as a server function bound to the
@@ -53,14 +53,20 @@ function avatarIndex(id: string): number {
 /**
  * Portal access state for a staff member:
  * - "Not invited" — no workspace membership is linked.
+ * - "Suspended"   — employment status is not active (or membership inactive), revoking access.
  * - "Pending"     — a membership exists but has not been claimed (no user_id).
  * - "Claimed"     — the membership is linked to a real auth user.
  */
-function portalStatusFor(
+export function portalStatusFor(
   membershipId: string | null,
   userIdByMembership: Map<string, string | null>,
+  employmentStatus: StaffEmploymentStatus = "active",
+  membershipStatus?: string | null,
 ): StaffRow["portalStatus"] {
   if (!membershipId) return "Not invited";
+  if (employmentStatus !== "active" || (membershipStatus && membershipStatus !== "active")) {
+    return "Suspended";
+  }
   return userIdByMembership.get(membershipId) ? "Claimed" : "Pending";
 }
 
@@ -68,6 +74,7 @@ function mapStaffRow(
   row: StaffMemberRow,
   departmentName: string | null,
   userIdByMembership: Map<string, string | null>,
+  membershipStatusById: Map<string, string>,
   timezone: string,
   birthday: StaffBirthdayRow | undefined,
 ): StaffRow {
@@ -88,7 +95,12 @@ function mapStaffRow(
     availTone: "off",
     img: avatarIndex(row.id),
     active: row.employment_status === "active",
-    portalStatus: portalStatusFor(row.membership_id, userIdByMembership),
+    portalStatus: portalStatusFor(
+      row.membership_id,
+      userIdByMembership,
+      row.employment_status,
+      row.membership_id ? membershipStatusById.get(row.membership_id) : undefined,
+    ),
     // Raw values for Edit Staff prefill (presentation fields above stay unchanged).
     phone: row.phone ?? undefined,
     departmentId: row.department_id,
@@ -130,7 +142,10 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         .order("display_name", { ascending: true }),
       supabase.from("departments").select("id, name").eq("workspace_id", workspaceId),
       // user_id distinguishes a claimed membership from a pending (unclaimed) one.
-      supabase.from("workspace_memberships").select("id, user_id").eq("workspace_id", workspaceId),
+      supabase
+        .from("workspace_memberships")
+        .select("id, user_id, status")
+        .eq("workspace_id", workspaceId),
       supabase.from("locations").select("id, timezone").eq("workspace_id", workspaceId),
       supabase.from("workspaces").select("timezone").eq("id", workspaceId).single(),
       supabase.rpc("rpc_team_read_staff_birthdays", { p_workspace_id: workspaceId }),
@@ -147,10 +162,14 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
       ((departments as { id: string; name: string }[] | null) ?? []).map((d) => [d.id, d.name]),
     );
     const userIdByMembership = new Map(
-      ((memberships as { id: string; user_id: string | null }[] | null) ?? []).map((m) => [
-        m.id,
-        m.user_id,
-      ]),
+      ((memberships as { id: string; user_id: string | null; status: string }[] | null) ?? []).map(
+        (m) => [m.id, m.user_id],
+      ),
+    );
+    const membershipStatusById = new Map(
+      ((memberships as { id: string; user_id: string | null; status: string }[] | null) ?? []).map(
+        (m) => [m.id, m.status],
+      ),
     );
     const workspaceTimezone = (workspace as { timezone: string | null }).timezone ?? "UTC";
     const locationTimezones = new Map(
@@ -171,6 +190,7 @@ export const fetchWorkspaceStaffFn = createServerFn({ method: "GET" }).handler(
         row,
         row.department_id ? (departmentNames.get(row.department_id) ?? null) : null,
         userIdByMembership,
+        membershipStatusById,
         (row.primary_location_id ? locationTimezones.get(row.primary_location_id) : null) ??
           workspaceTimezone,
         birthdayByStaffId.get(row.id),

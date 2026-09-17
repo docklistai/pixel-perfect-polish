@@ -20,6 +20,8 @@ interface StaffTableProps {
   onDeptChange: (d: string) => void;
   statusFilter: string;
   onStatusChange: (s: string) => void;
+  portalFilter?: string;
+  onPortalChange?: (p: string) => void;
   onSelectMember: (row: StaffRow) => void;
   /** Opens the Add Staff dialog from the first-staff empty state. */
   onAddStaff: () => void;
@@ -39,11 +41,16 @@ export function StaffTable({
   onDeptChange,
   statusFilter,
   onStatusChange,
+  portalFilter,
+  onPortalChange,
   onSelectMember,
   onAddStaff,
   compact = false,
 }: StaffTableProps) {
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [localPortalFilter, setLocalPortalFilter] = React.useState("All");
+  const effectivePortalFilter = portalFilter ?? localPortalFilter;
+  const handlePortalChange = onPortalChange ?? setLocalPortalFilter;
   const [page, setPage] = React.useState(1);
   const [actionToast, setActionToast] = React.useState<string | null>(null);
   const { showDemoBulkActions, showDemoRowActions } = getStaffSurfaceCapabilities(source);
@@ -54,8 +61,9 @@ export function StaffTable({
         query,
         department: deptFilter,
         status: statusFilter,
+        portalStatus: effectivePortalFilter,
       }),
-    [rows, query, deptFilter, statusFilter],
+    [rows, query, deptFilter, statusFilter, effectivePortalFilter],
   );
   const departmentOptions = React.useMemo(
     () => [
@@ -71,7 +79,7 @@ export function StaffTable({
 
   React.useEffect(() => {
     setPage(1);
-  }, [query, deptFilter, statusFilter]);
+  }, [query, deptFilter, statusFilter, effectivePortalFilter]);
 
   function toast(msg: string) {
     setActionToast(msg);
@@ -106,6 +114,8 @@ export function StaffTable({
           onDeptChange={onDeptChange}
           statusFilter={statusFilter}
           onStatusChange={onStatusChange}
+          portalFilter={effectivePortalFilter}
+          onPortalChange={handlePortalChange}
           departmentOptions={departmentOptions}
           filteredCount={filteredRows.length}
           totalCount={rows.length}

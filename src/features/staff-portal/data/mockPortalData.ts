@@ -22,6 +22,11 @@ export const mockProfile: PortalProfile = {
   email: "olivia.bennett@harbourview.co.uk",
   phone: "+44 7700 900123",
   accessStatus: "active",
+  staffContact: {
+    name: "Alex Thompson",
+    email: "alex@harbourview.co.uk",
+    phone: "+44 7700 900456",
+  },
   manager: {
     name: "Alex Thompson",
     email: "alex@harbourview.co.uk",

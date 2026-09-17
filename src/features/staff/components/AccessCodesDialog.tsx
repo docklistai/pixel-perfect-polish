@@ -1,10 +1,15 @@
 import * as React from "react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { ActionButton, DialogShell, FormRow, FormSection } from "@/components/dl";
-import { issueStaffPortalCodeFn, issueWorkspacePortalCodeFn } from "../api/issuePortalCode";
+import {
+  bulkIssueStaffPortalCodesFn,
+  issueStaffPortalCodeFn,
+  issueWorkspacePortalCodeFn,
+} from "../api/issuePortalCode";
 import { getStaffSurfaceCapabilities } from "../lib/staffSurfaceCapabilities";
-import type { IssuePortalCodeResult, StaffRow } from "../types";
+import type { BulkIssuePortalCodeResult, IssuePortalCodeResult, StaffRow } from "../types";
 import { PortalCodeResult } from "./PortalCodeResult";
+import { PortalBulkDistributionSheet } from "./PortalBulkDistributionSheet";
 import { StaffAccessRecoverySection } from "./StaffAccessRecoverySection";
 
 interface AccessCodesDialogProps {
@@ -21,12 +26,15 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
   const [staffId, setStaffId] = React.useState("");
   const [staffLoading, setStaffLoading] = React.useState(false);
   const [staffResult, setStaffResult] = React.useState<IssuePortalCodeResult | null>(null);
+  const [bulkLoading, setBulkLoading] = React.useState(false);
+  const [bulkResult, setBulkResult] = React.useState<BulkIssuePortalCodeResult | null>(null);
   const { canIssueAccessCodes } = getStaffSurfaceCapabilities(source);
 
   React.useEffect(() => {
     if (!open) {
       setWsResult(null);
       setStaffResult(null);
+      setBulkResult(null);
       setStaffId("");
     }
   }, [open]);
@@ -57,6 +65,19 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
     }
   };
 
+  const issueBulk = async () => {
+    if (!canIssueAccessCodes) return;
+    setBulkLoading(true);
+    setBulkResult(null);
+    try {
+      setBulkResult(await bulkIssueStaffPortalCodesFn({ data: {} }));
+    } catch {
+      setBulkResult({ ok: false, message: "Something went wrong on our end. Please try again." });
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   return (
     <DialogShell
       open={open}
@@ -71,74 +92,105 @@ export function AccessCodesDialog({ open, onOpenChange, staff, source }: AccessC
         </ActionButton>
       }
     >
-      <div className="space-y-5">
-        {source === "demo" && (
-          <div className="rounded-xl border border-border/40 bg-[var(--bg-raised)] px-3 py-2 text-xs text-muted-foreground">
-            This roster is demo data. Real codes can only be issued against a live workspace roster.
-          </div>
-        )}
+      {bulkResult?.ok ? (
+        <PortalBulkDistributionSheet
+          codes={bulkResult.codes}
+          workspaceCode={wsResult?.ok ? wsResult.code : null}
+          onReset={() => setBulkResult(null)}
+        />
+      ) : (
+        <div className="space-y-5">
+          {source === "demo" && (
+            <div className="rounded-xl border border-border/40 bg-[var(--bg-raised)] px-3 py-2 text-xs text-muted-foreground">
+              This roster is demo data. Real codes can only be issued against a live workspace
+              roster.
+            </div>
+          )}
 
-        <FormSection title="Workspace code">
-          <p className="text-xs text-muted-foreground">
-            One shared code for the whole workspace. Every staff member enters it alongside their
-            own personal code.
-          </p>
-          <ActionButton
-            icon={KeyRound}
-            onClick={issueWorkspace}
-            disabled={!canIssueAccessCodes || wsLoading}
-          >
-            {wsLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : wsResult?.ok ? (
-              "Rotate workspace code"
-            ) : (
-              "Issue workspace code"
-            )}
-          </ActionButton>
-          <PortalCodeResult result={wsResult} />
-        </FormSection>
-
-        <FormSection title="Personal staff code">
-          <p className="text-xs text-muted-foreground">
-            A single-use code for one staff member. It can&apos;t be issued for someone who already
-            has an account.
-          </p>
-          <FormRow label="Staff member" htmlFor="issue-staff-select">
-            <select
-              id="issue-staff-select"
-              aria-label="Staff member"
-              value={staffId}
-              onChange={(e) => {
-                setStaffId(e.target.value);
-                setStaffResult(null);
-              }}
-              className="h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+          <FormSection title="Workspace code">
+            <p className="text-xs text-muted-foreground">
+              One shared code for the whole workspace. Every staff member enters it alongside their
+              own personal code.
+            </p>
+            <ActionButton
+              icon={KeyRound}
+              onClick={issueWorkspace}
+              disabled={!canIssueAccessCodes || wsLoading}
             >
-              <option value="">Select a staff member…</option>
-              {staff.map((row) => (
-                <option key={row.id} value={row.id}>
-                  {row.n} — {row.role}
-                </option>
-              ))}
-            </select>
-          </FormRow>
-          <ActionButton
-            icon={KeyRound}
-            onClick={issueStaff}
-            disabled={!canIssueAccessCodes || staffLoading || !staffId}
-          >
-            {staffLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              "Issue personal code"
-            )}
-          </ActionButton>
-          <PortalCodeResult result={staffResult} />
-        </FormSection>
+              {wsLoading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : wsResult?.ok ? (
+                "Rotate workspace code"
+              ) : (
+                "Issue workspace code"
+              )}
+            </ActionButton>
+            <PortalCodeResult result={wsResult} />
+          </FormSection>
 
-        <StaffAccessRecoverySection open={open} staff={staff} enabled={canIssueAccessCodes} />
-      </div>
+          <FormSection title="Personal staff code">
+            <p className="text-xs text-muted-foreground">
+              A single-use code for one staff member. It can&apos;t be issued for someone who
+              already has an account.
+            </p>
+            <FormRow label="Staff member" htmlFor="issue-staff-select">
+              <select
+                id="issue-staff-select"
+                aria-label="Staff member"
+                value={staffId}
+                onChange={(e) => {
+                  setStaffId(e.target.value);
+                  setStaffResult(null);
+                }}
+                className="h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
+              >
+                <option value="">Select a staff member…</option>
+                {staff.map((row) => (
+                  <option key={row.id} value={row.id}>
+                    {row.n} — {row.role}
+                  </option>
+                ))}
+              </select>
+            </FormRow>
+            <div className="flex flex-wrap gap-2">
+              <ActionButton
+                icon={KeyRound}
+                onClick={issueStaff}
+                disabled={!canIssueAccessCodes || staffLoading || !staffId}
+              >
+                {staffLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  "Issue personal code"
+                )}
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                icon={KeyRound}
+                onClick={issueBulk}
+                disabled={!canIssueAccessCodes || bulkLoading}
+              >
+                {bulkLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  "Bulk issue personal codes"
+                )}
+              </ActionButton>
+            </div>
+            <PortalCodeResult result={staffResult} />
+            {bulkResult && !bulkResult.ok && (
+              <div
+                role="alert"
+                className="rounded-xl border border-danger/30 bg-danger-soft px-3 py-2 text-xs text-danger"
+              >
+                <p>{bulkResult.message}</p>
+              </div>
+            )}
+          </FormSection>
+
+          <StaffAccessRecoverySection open={open} staff={staff} enabled={canIssueAccessCodes} />
+        </div>
+      )}
     </DialogShell>
   );
 }

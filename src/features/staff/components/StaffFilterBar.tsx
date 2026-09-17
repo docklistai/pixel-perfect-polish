@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Search, X, ChevronDown, Check } from "lucide-react";
-import { STAFF_STATUS_FILTERS } from "../lib/staffListPresentation";
+import { STAFF_STATUS_FILTERS, PORTAL_STATUS_FILTERS } from "../lib/staffListPresentation";
 
 interface FilterDropdownProps {
   value: string;
@@ -38,7 +38,7 @@ function FilterDropdown({ value, options, allLabel, onChange, ariaLabel }: Filte
         type="button"
         aria-label={ariaLabel}
         aria-haspopup="listbox"
-        aria-controls={`${ariaLabel === "Filter by department" ? "staff-filter-department" : "staff-filter-status"}-menu`}
+        aria-controls={`${ariaLabel === "Filter by department" ? "staff-filter-department" : ariaLabel === "Filter by portal status" ? "staff-filter-portal" : "staff-filter-status"}-menu`}
         aria-expanded={open}
         onClick={() => setOpen((p) => !p)}
         onKeyDown={(e) => {
@@ -54,7 +54,7 @@ function FilterDropdown({ value, options, allLabel, onChange, ariaLabel }: Filte
       </button>
       {open && (
         <div
-          id={`${ariaLabel === "Filter by department" ? "staff-filter-department" : "staff-filter-status"}-menu`}
+          id={`${ariaLabel === "Filter by department" ? "staff-filter-department" : ariaLabel === "Filter by portal status" ? "staff-filter-portal" : "staff-filter-status"}-menu`}
           role="listbox"
           className="absolute left-0 top-full mt-1.5 z-50 min-w-[172px] rounded-xl border border-border bg-card shadow-lg py-1 overflow-hidden"
         >
@@ -96,6 +96,8 @@ interface StaffFilterBarProps {
   onDeptChange: (d: string) => void;
   statusFilter: string;
   onStatusChange: (s: string) => void;
+  portalFilter?: string;
+  onPortalChange?: (p: string) => void;
   departmentOptions: string[];
   filteredCount: number;
   totalCount: number;
@@ -108,6 +110,8 @@ export function StaffFilterBar({
   onDeptChange,
   statusFilter,
   onStatusChange,
+  portalFilter,
+  onPortalChange,
   departmentOptions,
   filteredCount,
   totalCount,
@@ -150,6 +154,16 @@ export function StaffFilterBar({
         onChange={onStatusChange}
         ariaLabel="Filter by employment status"
       />
+
+      {onPortalChange && (
+        <FilterDropdown
+          value={portalFilter ?? "All"}
+          options={[...PORTAL_STATUS_FILTERS]}
+          allLabel="Any portal status"
+          onChange={onPortalChange}
+          ariaLabel="Filter by portal status"
+        />
+      )}
 
       <span className="ml-auto text-xs text-muted-foreground tabular-nums">
         {filteredCount} of {totalCount}

@@ -4,6 +4,7 @@ import { Upload } from "lucide-react";
 import { isPilotSurface } from "@/config/pilot";
 import { useManagerIdentity } from "@/features/auth/hooks/useManagerIdentity";
 import { OpeningDaysSection } from "./OpeningDaysSection";
+import { StaffContactSection } from "./StaffContactSection";
 import { NoActiveLocationNotice } from "./NoActiveLocationNotice";
 import { useWorkspaceProfile } from "../hooks/useWorkspaceProfile";
 import {
@@ -73,6 +74,8 @@ export function WorkspaceTab(_props: { onDirty: () => void }) {
       </SectionCard>
 
       <OpeningDaysSection />
+
+      <StaffContactSection />
 
       <SectionCard title="Workspace owner" description="Primary contact for this workspace.">
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/20 p-3">

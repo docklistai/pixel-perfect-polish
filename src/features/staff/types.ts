@@ -47,6 +47,18 @@ export interface ManageableDepartment {
 export type DepartmentWriteResult = { ok: true; id: string } | { ok: false; message: string };
 
 /** Result of updating a live staff member. `id` echoes the updated row's uuid. */
+export interface BulkIssuedPortalCode {
+  staffMemberId: string;
+  displayName: string;
+  roleName: string;
+  accessCode: string;
+  expiresAt: string;
+}
+
+export type BulkIssuePortalCodeResult =
+  | { ok: true; codes: BulkIssuedPortalCode[] }
+  | { ok: false; message: string; referenceId?: string };
+
 export type UpdateStaffMemberResult = { ok: true; id: string } | { ok: false; message: string };
 
 export interface StaffRow {
@@ -65,7 +77,7 @@ export interface StaffRow {
   img: number;
   active?: boolean;
   statusTone?: "info" | "purple";
-  portalStatus?: "Claimed" | "Pending" | "Not invited";
+  portalStatus?: "Claimed" | "Pending" | "Not invited" | "Suspended";
   // Raw live-schema values carried on live rows so Edit Staff can prefill them
   // accurately. Demo rows omit these (their editing stays demo-only).
   phone?: string;

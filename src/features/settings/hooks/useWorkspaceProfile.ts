@@ -6,6 +6,7 @@ import {
   updateOpeningDaysFn,
   updateOpeningTimesFn,
   updateRotaStartDayFn,
+  updateWorkspaceStaffContactFn,
 } from "../api/workspaceProfile";
 import { updateLocationNameFn, updateLocationTimezoneFn } from "../api/locationSettings";
 
@@ -34,12 +35,19 @@ export type WorkspaceProfileState = {
   rotaStartWeekday: number;
   /** True once a rota week exists — the start day is then locked. */
   hasRotas: boolean;
+  /** Workspace-level staff contact info. */
+  staffContact: { name: string; email: string; phone: string } | null;
   isSaving: boolean;
   saveOpeningDays: (mask: number) => Promise<WriteResult>;
   saveOpeningTimes: (openTime: string | null, closeTime: string | null) => Promise<WriteResult>;
   saveLocationName: (locationId: string, name: string) => Promise<WriteResult>;
   saveLocationTimezone: (locationId: string, timezone: string) => Promise<WriteResult>;
   saveRotaStartDay: (rotaStartWeekday: number) => Promise<WriteResult>;
+  saveStaffContact: (contact: {
+    name: string;
+    email: string;
+    phone: string;
+  }) => Promise<WriteResult>;
 };
 
 /** Workspace business config (opening days) for the active manager workspace. */
@@ -96,6 +104,14 @@ export function useWorkspaceProfile(): WorkspaceProfileState {
     },
   });
 
+  const staffContactMutation = useMutation({
+    mutationFn: (contact: { name: string; email: string; phone: string }) =>
+      updateWorkspaceStaffContactFn({ data: contact }),
+    onSuccess: (result) => {
+      if (result.ok) invalidate();
+    },
+  });
+
   return {
     enabled,
     isLoading: enabled && query.isLoading,
@@ -106,12 +122,14 @@ export function useWorkspaceProfile(): WorkspaceProfileState {
     hasNoActiveLocation: query.isSuccess && query.data.primaryLocation === null,
     rotaStartWeekday: query.data?.rotaStartWeekday ?? 0,
     hasRotas: query.data?.hasRotas ?? false,
+    staffContact: query.data?.staffContact ?? null,
     isSaving:
       openingDaysMutation.isPending ||
       locationMutation.isPending ||
       timezoneMutation.isPending ||
       openingTimesMutation.isPending ||
-      rotaStartMutation.isPending,
+      rotaStartMutation.isPending ||
+      staffContactMutation.isPending,
     saveOpeningDays: (mask) => openingDaysMutation.mutateAsync(mask),
     saveOpeningTimes: (openTime, closeTime) =>
       openingTimesMutation.mutateAsync({ openTime, closeTime }),
@@ -119,5 +137,6 @@ export function useWorkspaceProfile(): WorkspaceProfileState {
     saveLocationTimezone: (locationId, timezone) =>
       timezoneMutation.mutateAsync({ locationId, timezone }),
     saveRotaStartDay: (rotaStartWeekday) => rotaStartMutation.mutateAsync(rotaStartWeekday),
+    saveStaffContact: (contact) => staffContactMutation.mutateAsync(contact),
   };
 }

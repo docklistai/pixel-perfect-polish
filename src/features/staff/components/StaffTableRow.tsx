@@ -135,14 +135,31 @@ export function StaffTableRow({
       </td>
       <td className="py-3 text-sm text-muted-foreground">{r.dept}</td>
       <td className="py-3">
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
-            STATUS_CLS[r.status] ?? "bg-muted text-muted-foreground"
-          }`}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-current shrink-0" aria-hidden />
-          {r.status}
-        </span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${
+              STATUS_CLS[r.status] ?? "bg-muted text-muted-foreground"
+            }`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-current shrink-0" aria-hidden />
+            {r.status}
+          </span>
+          {r.portalStatus && (
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                r.portalStatus === "Claimed"
+                  ? "bg-success-soft text-success"
+                  : r.portalStatus === "Pending"
+                    ? "bg-warning-soft text-warning"
+                    : r.portalStatus === "Suspended"
+                      ? "bg-danger-soft text-danger"
+                      : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {r.portalStatus}
+            </span>
+          )}
+        </div>
       </td>
       <td className="py-3 text-sm">
         <div className="font-medium text-foreground">{r.contract}</div>

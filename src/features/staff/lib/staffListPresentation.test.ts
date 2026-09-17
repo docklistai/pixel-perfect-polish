@@ -74,3 +74,43 @@ describe("staff status filters", () => {
     ).toHaveLength(3);
   });
 });
+
+describe("portal status filters", () => {
+  const rows = [
+    row({ id: "claimed", portalStatus: "Claimed" }),
+    row({ id: "pending", portalStatus: "Pending" }),
+    row({ id: "not-invited", portalStatus: "Not invited" }),
+    row({ id: "suspended", portalStatus: "Suspended" }),
+  ];
+
+  it("filters the roster by portal status", () => {
+    expect(
+      filterStaffRows(rows, {
+        query: "",
+        department: "All",
+        status: "All",
+        portalStatus: "Suspended",
+      }).map((s) => s.id),
+    ).toEqual(["suspended"]);
+
+    expect(
+      filterStaffRows(rows, {
+        query: "",
+        department: "All",
+        status: "All",
+        portalStatus: "Claimed",
+      }).map((s) => s.id),
+    ).toEqual(["claimed"]);
+  });
+
+  it("keeps all portal statuses when the filter is All", () => {
+    expect(
+      filterStaffRows(rows, {
+        query: "",
+        department: "All",
+        status: "All",
+        portalStatus: "All",
+      }),
+    ).toHaveLength(4);
+  });
+});

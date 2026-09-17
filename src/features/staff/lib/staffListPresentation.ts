@@ -4,10 +4,21 @@ export const STAFF_STATUS_FILTERS = ["All", "Active", "Inactive", "Left"] as con
 
 export type StaffStatusFilter = (typeof STAFF_STATUS_FILTERS)[number];
 
+export const PORTAL_STATUS_FILTERS = [
+  "All",
+  "Claimed",
+  "Pending",
+  "Not invited",
+  "Suspended",
+] as const;
+
+export type PortalStatusFilter = (typeof PORTAL_STATUS_FILTERS)[number];
+
 export interface StaffListFilters {
   query: string;
   department: string;
   status: string;
+  portalStatus?: string;
 }
 
 export interface StaffStat {
@@ -59,6 +70,12 @@ export function filterStaffRows(rows: StaffRow[], filters: StaffListFilters): St
   return rows.filter((row) => {
     if (filters.department !== "All" && row.dept !== filters.department) return false;
     if (filters.status !== "All" && row.status !== filters.status) return false;
+    if (
+      filters.portalStatus &&
+      filters.portalStatus !== "All" &&
+      (row.portalStatus ?? "Not invited") !== filters.portalStatus
+    )
+      return false;
     if (!query) return true;
 
     return (
