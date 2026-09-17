@@ -38,6 +38,8 @@ export interface StoredTimesheetRow extends TimesheetRow {
   departmentId?: string | null;
   status: TimesheetStatus;
   flagged: boolean;
+  flagNote?: string | null;
+  returnNote?: string | null;
   auditTrail: TimeAuditEntry[];
   /**
    * The entry's work date (YYYY-MM-DD), present on live rows only. Required to
@@ -84,4 +86,10 @@ export interface TimeQuery {
   st: string;
   stTone: "danger" | "info";
   img: number;
+  timeEntryId?: string;
+  issueType?: string;
+  note?: string;
+  createdAt?: string;
+  resolvedAt?: string | null;
+  resolutionNote?: string | null;
 }

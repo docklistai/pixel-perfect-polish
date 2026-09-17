@@ -35,11 +35,55 @@ export const timeOperationalCountsInput = z
     path: ["endDate"],
   });
 
-export const approveInput = z.object({
+export const approveInput = z
+  .object({
+    workspaceId: z.string().uuid(),
+    timeEntryIds: z.array(z.string().uuid()).min(1),
+    approvalStatus: z.enum(["approved", "rejected", "pending"]),
+    reason: z.string().trim().max(2000).optional(),
+  })
+  .refine(
+    (val) => val.approvalStatus !== "rejected" || (Boolean(val.reason) && val.reason!.length > 0),
+    {
+      message: "Rejection reason is required when returning time for correction",
+      path: ["reason"],
+    },
+  );
+
+export const flagTimeEntryInput = z.object({
   workspaceId: z.string().uuid(),
-  timeEntryIds: z.array(z.string().uuid()).min(1),
-  approvalStatus: z.enum(["approved", "rejected", "pending"]),
-  reason: z.string().trim().max(2000).optional(),
+  timeEntryId: z.string().uuid(),
+  note: z.string().trim().min(1, "Flag note is required").max(2000),
+});
+
+export const unflagTimeEntryInput = z.object({
+  workspaceId: z.string().uuid(),
+  timeEntryId: z.string().uuid(),
+});
+
+export const hoursQueriesInput = z.object({
+  workspaceId: z.string().uuid(),
+  status: z.enum(["pending", "resolved", "dismissed"]).optional(),
+});
+
+export const resolveHoursQueryInput = z.object({
+  workspaceId: z.string().uuid(),
+  queryId: z.string().uuid(),
+  status: z.enum(["resolved", "dismissed"]),
+  resolutionNote: z.string().trim().max(2000).optional(),
+});
+
+export const staffHoursQueryInput = z.object({
+  workspaceId: z.string().uuid(),
+  timeEntryId: z.string().uuid(),
+  issueType: z.enum([
+    "missing_clock_out",
+    "incorrect_times",
+    "incorrect_break",
+    "missing_shift",
+    "other",
+  ]),
+  note: z.string().trim().min(1, "Query note is required").max(2000),
 });
 
 export const adjustInput = z.object({

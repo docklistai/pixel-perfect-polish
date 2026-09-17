@@ -8,7 +8,7 @@ export interface TimeReviewPreviewRow {
   n: string;
   img: number;
   status: TimesheetStatus;
-  flagged: false;
+  flagged: boolean;
 }
 
 export interface PendingTimePreviewResult {
@@ -36,7 +36,7 @@ export const fetchPendingTimePreviewFn = createServerFn({ method: "GET" })
     const supabase = getSupabaseServerClient();
     let query = supabase
       .from("time_entries")
-      .select("id, staff_member_id, approval_status", { count: "exact" })
+      .select("id, staff_member_id, approval_status, flagged", { count: "exact" })
       .eq("workspace_id", data.workspaceId)
       .neq("approval_status", "approved");
     if (data.startDate) {
@@ -61,6 +61,7 @@ export const fetchPendingTimePreviewFn = createServerFn({ method: "GET" })
             id: string;
             staff_member_id: string;
             approval_status: "pending" | "rejected";
+            flagged?: boolean | null;
           }[]
         | null) ?? [];
     const staffIds = [...new Set(typedEntries.map((entry) => entry.staff_member_id))];
@@ -86,7 +87,7 @@ export const fetchPendingTimePreviewFn = createServerFn({ method: "GET" })
         n: names.get(entry.staff_member_id) ?? "Team member",
         img: avatarIndex(entry.staff_member_id),
         status: entry.approval_status === "rejected" ? "unapproved" : "pending",
-        flagged: false,
+        flagged: Boolean(entry.flagged),
       })),
     };
   });

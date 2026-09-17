@@ -1,5 +1,14 @@
 import * as React from "react";
-import { AlertTriangle, Clock, Coffee, MapPin, PlayCircle, StopCircle } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Coffee,
+  HelpCircle,
+  MapPin,
+  PlayCircle,
+  StopCircle,
+} from "lucide-react";
+import { getRouteApi } from "@tanstack/react-router";
 import {
   ActionButton,
   DashboardCard,
@@ -13,14 +22,23 @@ import { formatPortalElapsed } from "../lib/portalElapsed";
 import { nextPublishedShiftEmptyText } from "../lib/portalShiftCopy";
 import { PortalClockFeedback } from "./PortalClockFeedback";
 import { PortalRotaReadState } from "./PortalRotaReadState";
+import { PortalHoursQueryDialog } from "./PortalHoursQueryDialog";
+import type { ClockEntry } from "../types";
+
+const portalRouteApi = getRouteApi("/portal");
 
 export function TimeTab() {
+  const { auth } = portalRouteApi.useRouteContext();
+  const workspaceId = auth.status === "member" ? auth.workspaceId : null;
+  const staffMemberId = auth.status === "member" ? auth.staffMemberId : null;
+
   const clock = usePortalClock();
   const { clockedIn, onBreak, startedAtMs, sinceLabel, entries, clockIn, clockOut, toggleBreak } =
     clock;
   const rota = usePortalRota();
   const { nextShift, activeShift, hasPublished } = rota;
   const [now, setNow] = React.useState(() => Date.now());
+  const [queryEntry, setQueryEntry] = React.useState<ClockEntry | null>(null);
 
   React.useEffect(() => {
     if (!clockedIn) return;
@@ -206,7 +224,12 @@ export function TimeTab() {
         <FeedbackBanner
           tone="warning"
           title={`Missing clock-out on ${missingEntry.dayLabel}`}
-          description="Please add the missing clock-out so your hours are accurate."
+          description="Ask your manager to correct your hours if you forgot to clock out."
+          action={
+            <ActionButton variant="secondary" size="sm" onClick={() => setQueryEntry(missingEntry)}>
+              Query hours
+            </ActionButton>
+          }
         />
       )}
 
@@ -224,32 +247,71 @@ export function TimeTab() {
           </DashboardCard>
         ) : (
           <ul className="space-y-2">
-            {entries.map((e) => (
-              <li key={e.id}>
-                <DashboardCard className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm font-semibold">{e.dayLabel}</div>
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {e.clockIn} – {e.clockOut ?? "—"}
-                        {e.breakMinutes > 0 ? ` · ${e.breakMinutes}m break` : ""}
+            {entries.map((e) => {
+              const isRejected = e.approvalStatus === "rejected";
+              const isApproved = e.approvalStatus === "approved";
+
+              return (
+                <li key={e.id}>
+                  <DashboardCard className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-semibold">{e.dayLabel}</span>
+                          {isApproved ? (
+                            <StatusBadge tone="success">Approved</StatusBadge>
+                          ) : isRejected ? (
+                            <StatusBadge tone="danger">Returned for correction</StatusBadge>
+                          ) : (
+                            <StatusBadge tone="muted">Pending review</StatusBadge>
+                          )}
+                        </div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">
+                          {e.clockIn} – {e.clockOut ?? "—"}
+                          {e.breakMinutes > 0 ? ` · ${e.breakMinutes}m break` : ""}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {e.flag === "missing-clock-out" ? (
+                          <StatusBadge tone="warning">
+                            <AlertTriangle className="h-3 w-3" />
+                            Missing out
+                          </StatusBadge>
+                        ) : (
+                          <div className="text-sm font-semibold">{e.totalHours?.toFixed(1)}h</div>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setQueryEntry(e)}
+                          className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                          title="Query recorded hours"
+                          aria-label={`Query recorded hours for ${e.dayLabel}`}
+                        >
+                          <HelpCircle className="h-4 w-4" aria-hidden />
+                        </button>
                       </div>
                     </div>
-                    {e.flag === "missing-clock-out" ? (
-                      <StatusBadge tone="warning">
-                        <AlertTriangle className="h-3 w-3" />
-                        Missing out
-                      </StatusBadge>
-                    ) : (
-                      <div className="text-sm font-semibold">{e.totalHours?.toFixed(1)}h</div>
+
+                    {isRejected && e.returnNote && (
+                      <div className="mt-2.5 rounded-lg border border-danger/20 bg-danger-soft p-2.5 text-xs text-danger">
+                        <span className="font-semibold">Manager note:</span> {e.returnNote}
+                      </div>
                     )}
-                  </div>
-                </DashboardCard>
-              </li>
-            ))}
+                  </DashboardCard>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
+
+      <PortalHoursQueryDialog
+        entry={queryEntry}
+        open={Boolean(queryEntry)}
+        onClose={() => setQueryEntry(null)}
+        workspaceId={workspaceId}
+        staffMemberId={staffMemberId}
+      />
     </div>
   );
 }

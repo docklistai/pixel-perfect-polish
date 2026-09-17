@@ -16,7 +16,7 @@ interface Props {
   statusOf: (row: StoredTimesheetRow) => TimesheetStatus;
   onApprove: (row: StoredTimesheetRow, note: string) => void;
   onRevert: (row: StoredTimesheetRow) => void;
-  onReject: (row: StoredTimesheetRow) => void;
+  onReject: (row: StoredTimesheetRow, reason?: string) => void;
   onAdjust: (row: StoredTimesheetRow) => void;
   onClose: () => void;
 }
@@ -35,9 +35,13 @@ export function TimesheetReviewDrawer({
   onClose,
 }: Props) {
   const [managerNote, setManagerNote] = React.useState("");
+  const [rejectError, setRejectError] = React.useState<string | null>(null);
   const review = useTimeEntryReview(liveWorkspaceId, row?.id ?? null);
 
-  React.useEffect(() => setManagerNote(""), [row]);
+  React.useEffect(() => {
+    setManagerNote("");
+    setRejectError(null);
+  }, [row]);
 
   const exceptionCodes = React.useMemo(() => {
     const codes = [...(row?.exceptionCodes ?? [])];
@@ -104,7 +108,13 @@ export function TimesheetReviewDrawer({
                 <ActionButton
                   variant="secondary"
                   onClick={() => {
-                    onReject(row);
+                    if (!managerNote.trim()) {
+                      setRejectError("A reason is required when returning time for correction.");
+                      const noteElem = document.getElementById("time-manager-note");
+                      if (noteElem) noteElem.focus();
+                      return;
+                    }
+                    onReject(row, managerNote.trim());
                     onClose();
                   }}
                 >
@@ -187,14 +197,32 @@ export function TimesheetReviewDrawer({
             placeholder={
               isUnscheduledAttendance
                 ? "How was this unscheduled attendance verified?"
-                : "Optional approval note…"
+                : "Required for return for correction; optional for approval…"
             }
             value={managerNote}
             maxLength={2000}
-            onChange={(event) => setManagerNote(event.target.value)}
+            onChange={(event) => {
+              setManagerNote(event.target.value);
+              if (rejectError) setRejectError(null);
+            }}
           />
+          {rejectError && <p className="mt-1.5 text-xs text-danger font-medium">{rejectError}</p>}
         </FormRow>
       </FormSection>
+
+      {row.flagged && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-300">
+          <span className="font-semibold">Flagged for review: </span>
+          {row.flagNote || "Marked for review"}
+        </div>
+      )}
+
+      {row.returnNote && (
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-800 dark:text-rose-300">
+          <span className="font-semibold">Return note: </span>
+          {row.returnNote}
+        </div>
+      )}
     </DrawerShell>
   );
 }

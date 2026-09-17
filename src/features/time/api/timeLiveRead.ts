@@ -21,6 +21,9 @@ export interface TimeEntryRow {
   clocked_out_at: string | null;
   break_minutes: number;
   approval_status: "pending" | "approved" | "rejected";
+  flagged?: boolean | null;
+  flag_note?: string | null;
+  return_note?: string | null;
 }
 
 export interface WorkspaceTimeResult {
@@ -123,7 +126,9 @@ function mapTimeRow(
     department: staff?.department ?? "—",
     departmentId: staff?.departmentId ?? null,
     status: STATUS_MAP[row.approval_status],
-    flagged: false,
+    flagged: Boolean(row.flagged),
+    flagNote: row.flag_note ?? null,
+    returnNote: row.return_note ?? null,
     auditTrail: [],
     workDate: row.work_date,
     timezone,
@@ -153,7 +158,7 @@ export async function readWorkspaceTime(
   let entriesQuery = supabase
     .from("time_entries")
     .select(
-      "id, staff_member_id, shift_id, work_date, scheduled_start_at, scheduled_end_at, clocked_in_at, clocked_out_at, break_minutes, approval_status",
+      "id, staff_member_id, shift_id, work_date, scheduled_start_at, scheduled_end_at, clocked_in_at, clocked_out_at, break_minutes, approval_status, flagged, flag_note, return_note",
     )
     .eq("workspace_id", input.workspaceId)
     .gte("work_date", buffered.startDate)

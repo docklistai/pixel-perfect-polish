@@ -153,5 +153,9 @@ function kindLabel(k: PortalNotification["kind"]) {
       return "Shift release";
     case "unavailability-update":
       return "Unavailability";
+    case "time-returned":
+      return "Time review";
+    case "time-query-resolved":
+      return "Hours query";
   }
 }

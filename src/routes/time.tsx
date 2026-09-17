@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { toast } from "sonner";
 import { AppShell, PageHeader, ConfirmDialog } from "@/components/dl";
@@ -11,7 +12,9 @@ import { TimesheetReviewDrawer } from "@/features/time/components/TimesheetRevie
 import { TimeExportDialog } from "@/features/time/components/TimeExportDialog";
 import { TimeAdjustDialog } from "@/features/time/components/TimeAdjustDialog";
 import { TimeAddEntryDialog } from "@/features/time/components/TimeAddEntryDialog";
+import { TimeFlagDialog } from "@/features/time/components/TimeFlagDialog";
 import { TimeQueryDrawer } from "@/features/time/components/TimeQueryDrawer";
+import { fetchHoursQueriesFn, resolveHoursQueryFn } from "@/features/time/api/hoursQueries";
 import {
   TimeHeaderActions,
   TEAM_OPTIONS,
@@ -103,6 +106,73 @@ function TimePage() {
   const [reviewRow, setReviewRow] = React.useState<StoredTimesheetRow | null>(null);
   const [adjustRow, setAdjustRow] = React.useState<StoredTimesheetRow | null>(null);
   const [queryRow, setQueryRow] = React.useState<TimeQuery | null>(null);
+  const [flagTarget, setFlagTarget] = React.useState<
+    { type: "single"; row: StoredTimesheetRow } | { type: "bulk"; ids: string[] } | null
+  >(null);
+  const queryClient = useQueryClient();
+  const hoursQueriesQuery = useQuery({
+    queryKey: ["hours-queries", liveWorkspaceId],
+    queryFn: () => fetchHoursQueriesFn({ data: { workspaceId: liveWorkspaceId! } }),
+    enabled: Boolean(liveWorkspaceId),
+    staleTime: 15_000,
+  });
+
+  const resolveHoursQuery = async (q: TimeQuery, resolutionNote?: string) => {
+    if (!liveWorkspaceId) {
+      toast.info("Demo mode", { description: "Hours query resolved in demo." });
+      setQueryRow(null);
+      return;
+    }
+    const res = await resolveHoursQueryFn({
+      data: {
+        workspaceId: liveWorkspaceId,
+        queryId: q.id,
+        status: "resolved",
+        resolutionNote,
+      },
+    });
+    if (!res.ok) {
+      toast.error("Couldn't resolve hours query", { description: res.message });
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["hours-queries", liveWorkspaceId] });
+    await queryClient.invalidateQueries({
+      queryKey: ["dashboard", "attention-counts", liveWorkspaceId],
+    });
+    toast.success("Hours query resolved", {
+      description: `${q.n}'s query has been marked as resolved.`,
+    });
+    setQueryRow(null);
+  };
+
+  const dismissHoursQuery = async (q: TimeQuery, resolutionNote?: string) => {
+    if (!liveWorkspaceId) {
+      toast.info("Demo mode", { description: "Hours query dismissed in demo." });
+      setQueryRow(null);
+      return;
+    }
+    const res = await resolveHoursQueryFn({
+      data: {
+        workspaceId: liveWorkspaceId,
+        queryId: q.id,
+        status: "dismissed",
+        resolutionNote,
+      },
+    });
+    if (!res.ok) {
+      toast.error("Couldn't dismiss hours query", { description: res.message });
+      return;
+    }
+    await queryClient.invalidateQueries({ queryKey: ["hours-queries", liveWorkspaceId] });
+    await queryClient.invalidateQueries({
+      queryKey: ["dashboard", "attention-counts", liveWorkspaceId],
+    });
+    toast.success("Hours query dismissed", {
+      description: `${q.n}'s query has been dismissed.`,
+    });
+    setQueryRow(null);
+  };
+
   const [approveSuggestedOpen, setApproveSuggestedOpen] = React.useState(false);
   const [exportOpen, setExportOpen] = React.useState(false);
   const [addEntryOpen, setAddEntryOpen] = React.useState(false);
@@ -234,11 +304,14 @@ function TimePage() {
               >
                 <Check className="h-3.5 w-3.5" aria-hidden /> Approve {time.selectedIds.size}
               </button>
-              {timeSource === "demo" && (
-                <button type="button" className="btn secondary sm" onClick={time.flagSelection}>
-                  <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Flag
-                </button>
-              )}
+              <button
+                type="button"
+                className="btn secondary sm"
+                onClick={() => setFlagTarget({ type: "bulk", ids: [...time.selectedIds] })}
+                disabled={time.isSubmitting}
+              >
+                <AlertTriangle className="h-3.5 w-3.5" aria-hidden /> Flag
+              </button>
               <button type="button" className="btn ghost sm" onClick={time.clearSelection}>
                 Clear
               </button>
@@ -258,7 +331,13 @@ function TimePage() {
             onReview={setReviewRow}
             onAdjust={setAdjustRow}
             onToggleApprove={time.toggleApprove}
-            onToggleFlag={timeSource === "demo" ? time.toggleFlag : undefined}
+            onToggleFlag={(row) => {
+              if (row.flagged) {
+                time.toggleFlag(row);
+              } else {
+                setFlagTarget({ type: "single", row });
+              }
+            }}
             onViewRota={() => navigate({ to: "/rota" })}
             tab={tab}
             onTabChange={setTab}
@@ -276,6 +355,7 @@ function TimePage() {
           onOpenAssistant={openAiDrawer}
           onOpenQuery={setQueryRow}
           rows={teamRows}
+          queries={timeSource === "live" ? (hoursQueriesQuery.data ?? []) : undefined}
           rotaStartWeekday={rotaStartWeekday}
         />
       </div>
@@ -326,6 +406,26 @@ function TimePage() {
           setQueryRow(null);
           if (match) setAdjustRow(match);
           else toast.info("Adjustment", { description: "Entry not in this period." });
+        }}
+        onResolve={resolveHoursQuery}
+        onDismiss={dismissHoursQuery}
+      />
+      <TimeFlagDialog
+        open={Boolean(flagTarget)}
+        onClose={() => setFlagTarget(null)}
+        targetDescription={
+          flagTarget?.type === "single"
+            ? `${flagTarget.row.n}'s entry`
+            : `${flagTarget?.ids.length ?? 0} timesheets`
+        }
+        isSubmitting={time.isSubmitting}
+        onConfirm={async (note) => {
+          if (!flagTarget) return;
+          if (flagTarget.type === "single") {
+            time.toggleFlag(flagTarget.row, note);
+          } else {
+            time.flagSelection(note);
+          }
         }}
       />
       <ConfirmDialog

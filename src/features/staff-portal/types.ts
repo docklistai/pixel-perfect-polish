@@ -40,6 +40,8 @@ export interface ClockEntry {
   breakMinutes: number;
   totalHours: number | null;
   flag?: "missing-clock-out" | "late-in" | null;
+  approvalStatus?: "pending" | "approved" | "rejected";
+  returnNote?: string | null;
 }
 
 export type RequestKind = "time-off" | "availability" | "shift-question";
@@ -119,7 +121,9 @@ export type NotificationKind =
   | "timesheet-reminder"
   | "open-shift-update"
   | "shift-release-update"
-  | "unavailability-update";
+  | "unavailability-update"
+  | "time-returned"
+  | "time-query-resolved";
 
 export type NotificationCategory = "all" | "unread" | "important";
 

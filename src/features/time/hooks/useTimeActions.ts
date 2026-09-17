@@ -62,17 +62,25 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
     });
   };
 
-  const reject = (row: StoredTimesheetRow) => {
+  const reject = (row: StoredTimesheetRow, reason?: string) => {
     if (row.status === "unapproved") return;
-    setTimesheetStatus(store, [row.id], "unapproved", "Returned for correction by Alex Thompson.");
+    const note = reason?.trim()
+      ? `Returned for correction: ${reason.trim()}`
+      : "Returned for correction.";
+    setTimesheetStatus(store, [row.id], "unapproved", note);
     toast.info("Returned for correction", {
       description: `${row.n}'s entry was returned and is no longer pending approval.`,
     });
   };
 
-  const toggleFlag = (row: StoredTimesheetRow) => {
+  const toggleFlag = (row: StoredTimesheetRow, note?: string) => {
     const next = !row.flagged;
-    setTimesheetFlagged(store, [row.id], next, "Updated by Alex Thompson.");
+    const auditNote = next
+      ? note?.trim()
+        ? `Flagged for review: ${note.trim()}`
+        : "Flagged for review."
+      : "Flag removed.";
+    setTimesheetFlagged(store, [row.id], next, auditNote);
     toast[next ? "warning" : "info"](next ? "Flagged" : "Flag removed", {
       description: `${row.n}'s entry ${next ? "flagged for review" : "unflagged"}.`,
       action: {
@@ -98,7 +106,7 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
       store,
       eligible.map((row) => row.id),
       "approved",
-      "Bulk approved by Alex Thompson.",
+      "Bulk approved by manager.",
     );
     toast.success(label, {
       description: outcome.description,
@@ -116,9 +124,10 @@ export function useTimeActions(allRows: StoredTimesheetRow[], scopedRows: Stored
     bulkApprove([...selectedIds], "Timesheets approved");
     setSelectedIds(new Set());
   };
-  const flagSelection = () => {
+  const flagSelection = (note?: string) => {
     const ids = [...selectedIds];
-    setTimesheetFlagged(store, ids, true, "Bulk flagged by Alex Thompson.");
+    const auditNote = note?.trim() ? `Bulk flagged: ${note.trim()}` : "Bulk flagged by manager.";
+    setTimesheetFlagged(store, ids, true, auditNote);
     toast.warning("Flagged for review", {
       description: `${ids.length} timesheet${ids.length === 1 ? "" : "s"} flagged.`,
       action: {

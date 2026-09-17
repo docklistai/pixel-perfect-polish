@@ -167,7 +167,7 @@ export function useDashboardData() {
     openShiftRequestCount,
     shiftReleaseRequestCount,
     availabilityRequestCount,
-    timeQueryCount: 0,
+    timeQueryCount: attentionCounts?.timeQueryCount ?? 0,
   });
 
   const todayIndex = dayIndexInWeek(week?.weekStart ?? null, week?.today ?? null);

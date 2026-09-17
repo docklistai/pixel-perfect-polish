@@ -22,6 +22,8 @@ interface TimeEntryViewRow {
   clocked_in_at: string | null;
   clocked_out_at: string | null;
   break_minutes: number;
+  approval_status?: "pending" | "approved" | "rejected";
+  return_note?: string | null;
 }
 
 function mapPortalTimeEntry(row: TimeEntryViewRow, timezone: string): PortalTimeEntry {
@@ -39,6 +41,8 @@ function mapPortalTimeEntry(row: TimeEntryViewRow, timezone: string): PortalTime
     breakMinutes: row.break_minutes,
     totalHours: workedMinutes !== null ? Math.round((workedMinutes / 60) * 10) / 10 : null,
     flag: clockedInAtMs !== null && clockedOutAtMs === null ? "missing-clock-out" : null,
+    approvalStatus: row.approval_status ?? "pending",
+    returnNote: row.return_note ?? null,
     clockedInAtMs,
     clockedOutAtMs,
   };
@@ -54,7 +58,7 @@ export async function fetchPortalTimeEntries(
   const { data, error } = await supabase
     .from("staff_portal_time_entries")
     .select(
-      "time_entry_id, staff_member_id, work_date, clocked_in_at, clocked_out_at, break_minutes",
+      "time_entry_id, staff_member_id, work_date, clocked_in_at, clocked_out_at, break_minutes, approval_status, return_note",
     )
     .eq("workspace_id", workspaceId)
     .eq("staff_member_id", staffMemberId)

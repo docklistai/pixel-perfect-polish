@@ -4,6 +4,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { adjustTimeEntryFn, batchApproveTimeFn } from "../api/timeLiveData";
+import { flagTimeEntryFn, unflagTimeEntryFn } from "../api/flagTimeEntry";
 import {
   approvalEligibility,
   describeBulkApproval,
@@ -83,10 +84,95 @@ export function useTimeController(
     );
   };
 
-  const notLiveYet = () =>
-    toast.info("Not available in live mode yet", {
-      description: "This action isn't wired to the live workspace yet.",
-    });
+  const runFlag = async (row: StoredTimesheetRow, note: string) => {
+    if (submitting) return;
+    if (!note.trim()) {
+      toast.error("Note required", { description: "A note is required when flagging for review." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const result = await runTimeWrite(
+        () =>
+          flagTimeEntryFn({
+            data: {
+              workspaceId: workspaceId!,
+              timeEntryId: row.id,
+              note: note.trim(),
+            },
+          }),
+        "Couldn't flag timesheet",
+      );
+      if (!result) return;
+      if (!result.ok) {
+        toast.error("Couldn't flag timesheet", { description: result.message });
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: timeQueryKeys.root });
+      toast.warning("Flagged for review", {
+        description: `${row.n}'s entry flagged for review.`,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const runUnflag = async (row: StoredTimesheetRow) => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const result = await runTimeWrite(
+        () =>
+          unflagTimeEntryFn({
+            data: {
+              workspaceId: workspaceId!,
+              timeEntryId: row.id,
+            },
+          }),
+        "Couldn't clear flag",
+      );
+      if (!result) return;
+      if (!result.ok) {
+        toast.error("Couldn't clear flag", { description: result.message });
+        return;
+      }
+      await queryClient.invalidateQueries({ queryKey: timeQueryKeys.root });
+      toast.info("Flag removed", {
+        description: `${row.n}'s entry unflagged.`,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const runBulkFlag = async (ids: string[], note: string) => {
+    if (ids.length === 0 || submitting) return;
+    if (!note.trim()) {
+      toast.error("Note required", { description: "A note is required when flagging for review." });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      for (const id of ids) {
+        await flagTimeEntryFn({
+          data: {
+            workspaceId: workspaceId!,
+            timeEntryId: id,
+            note: note.trim(),
+          },
+        });
+      }
+      await queryClient.invalidateQueries({ queryKey: timeQueryKeys.root });
+      toast.warning("Flagged for review", {
+        description: `${ids.length} timesheet${ids.length === 1 ? "" : "s"} flagged for review.`,
+      });
+      demo.clearSelection();
+    } catch {
+      toast.error("Couldn't flag selected timesheets");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const saveAdjustment = async (row: StoredTimesheetRow, adjustment: TimeAdjustment) => {
     const prepared = prepareAdjustment(row, adjustment);
@@ -153,13 +239,20 @@ export function useTimeController(
         note,
       );
     },
-    reject: (row: StoredTimesheetRow) => {
+    reject: (row: StoredTimesheetRow, reason = "") => {
       if (row.status === "unapproved") return;
+      if (!reason.trim()) {
+        toast.error("Reason required", {
+          description: "A note explaining what needs correcting is required.",
+        });
+        return;
+      }
       void runApprove(
         [row.id],
         "rejected",
         "Returned for correction",
         `${row.n}'s entry was returned and is no longer pending approval.`,
+        reason.trim(),
       );
     },
     bulkApprove: (ids: string[], label: string) => approveEligible(rowsByIds(ids), label),
@@ -174,7 +267,16 @@ export function useTimeController(
       ),
     saveAdjustment: (row: StoredTimesheetRow, adjustment: TimeAdjustment) =>
       void saveAdjustment(row, adjustment),
-    toggleFlag: notLiveYet,
-    flagSelection: notLiveYet,
+    toggleFlag: (row: StoredTimesheetRow, note?: string) => {
+      if (row.flagged) {
+        void runUnflag(row);
+      } else {
+        void runFlag(row, note || "Flagged for review");
+      }
+    },
+    flagSelection: (note?: string) => {
+      const ids = [...demo.selectedIds];
+      void runBulkFlag(ids, note || "Bulk flagged for review");
+    },
   };
 }

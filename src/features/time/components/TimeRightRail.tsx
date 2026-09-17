@@ -18,6 +18,8 @@ interface Props {
   onOpenAssistant: () => void;
   onOpenQuery: (query: TimeQuery) => void;
   rows: StoredTimesheetRow[];
+  /** Live hours queries; if omitted or in demo mode, falls back to timeQueries demo data */
+  queries?: TimeQuery[];
   /** Workspace configured week start weekday (0 = Mon .. 6 = Sun, default 0). */
   rotaStartWeekday?: number;
 }
@@ -38,8 +40,11 @@ export function TimeRightRail({
   onOpenAssistant,
   onOpenQuery,
   rows,
+  queries,
   rotaStartWeekday = 0,
 }: Props) {
+  const isDemoQueries = queries === undefined;
+  const activeQueries = queries ?? timeQueries;
   const cleanPending = rows.filter((row) => isApprovable(row));
   const liveEmpty = source === "live" && rows.length === 0;
   const missedClockIns = rows.filter((row) => row.in === "—");
@@ -187,9 +192,9 @@ export function TimeRightRail({
             <div className="card-section flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="text-sm font-semibold">Hours queries</span>
-                <SampleBadge source={source} />
+                {isDemoQueries && <SampleBadge source={source} />}
               </span>
-              <span className="badge">{timeQueries.length}</span>
+              <span className="badge">{activeQueries.length}</span>
             </div>
             <div className="mx-3 mb-2 flex items-start gap-2 rounded-xl border border-border/60 bg-muted/20 px-2.5 py-2">
               <Info className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" aria-hidden />
@@ -197,21 +202,29 @@ export function TimeRightRail({
                 Staff-raised questions about recorded hours — Docklist records hours only
               </span>
             </div>
-            {timeQueries.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => onOpenQuery(p)}
-                className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left transition hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-              >
-                <StaffMonogram name={p.n} />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">{p.n}</div>
-                  <div className="text-[11px] text-muted-foreground">{p.t}</div>
-                </div>
-                <span className={`badge ${p.stTone === "danger" ? "red" : "blue"}`}>{p.st}</span>
-              </button>
-            ))}
+            {activeQueries.length === 0 ? (
+              <div className="border-t border-border/40 p-4 text-center text-xs text-muted-foreground">
+                No open hours queries
+              </div>
+            ) : (
+              activeQueries.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onOpenQuery(p)}
+                  className="flex w-full items-center gap-3 border-t border-border/40 px-4 py-3 text-left transition hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+                >
+                  <StaffMonogram name={p.n} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium truncate">{p.n}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">{p.t}</div>
+                  </div>
+                  <span className={`badge shrink-0 ${p.stTone === "danger" ? "red" : "blue"}`}>
+                    {p.st}
+                  </span>
+                </button>
+              ))
+            )}
           </Card>
         </>
       )}

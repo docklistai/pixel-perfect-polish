@@ -122,6 +122,8 @@ const NOTIFICATION_KIND_MAP: Record<string, PortalNotification["kind"]> = {
   open_shift_update: "open-shift-update",
   shift_release_update: "shift-release-update",
   unavailability_update: "unavailability-update",
+  time_returned: "time-returned",
+  time_query_resolved: "time-query-resolved",
 };
 
 interface NotificationViewRow {
@@ -150,7 +152,9 @@ function mapNotification(row: NotificationViewRow, timezone: string): PortalNoti
       kind === "leave-cancelled" ||
       kind === "open-shift-update" ||
       kind === "shift-release-update" ||
-      kind === "unavailability-update",
+      kind === "unavailability-update" ||
+      kind === "time-returned" ||
+      kind === "time-query-resolved",
     relatedLeaveRequestId:
       row.related_entity_type === "leave_request" && row.related_entity_id
         ? row.related_entity_id
