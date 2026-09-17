@@ -1,5 +1,5 @@
 import { CheckCircle2, Info, Sparkles } from "lucide-react";
-import { Card } from "@/components/dl";
+import { Card, SampleBadge } from "@/components/dl";
 import { AiSuggestionCard } from "@/components/ai/AiSuggestionCard";
 import { StaffMonogram } from "@/features/staff/components/StaffMonogram";
 import { timeQueries } from "../data/timeDemoData";
@@ -24,16 +24,6 @@ interface Props {
   rotaStartWeekday?: number;
 }
 
-/** Marks cards backed by sample data once the page is showing live entries. */
-function SampleBadge({ source }: { source: "live" | "demo" }) {
-  if (source !== "live") return null;
-  return (
-    <span className="badge" title="Sample data — not yet wired to live entries">
-      Sample
-    </span>
-  );
-}
-
 export function TimeRightRail({
   source,
   onApproveSuggested,
@@ -43,7 +33,6 @@ export function TimeRightRail({
   queries,
   rotaStartWeekday = 0,
 }: Props) {
-  const isDemoQueries = queries === undefined;
   const activeQueries = queries ?? timeQueries;
   const cleanPending = rows.filter((row) => isApprovable(row));
   const liveEmpty = source === "live" && rows.length === 0;
@@ -92,7 +81,7 @@ export function TimeRightRail({
             <div className="flex items-center justify-between mb-3">
               <span className="flex items-center gap-2">
                 <span className="text-sm font-semibold">Attendance this week</span>
-                <SampleBadge source={source} />
+                <SampleBadge sample={source === "live"} />
               </span>
               <span className="text-xs text-muted-foreground">vs last week</span>
             </div>
@@ -192,7 +181,6 @@ export function TimeRightRail({
             <div className="card-section flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <span className="text-sm font-semibold">Hours queries</span>
-                {isDemoQueries && <SampleBadge source={source} />}
               </span>
               <span className="badge">{activeQueries.length}</span>
             </div>

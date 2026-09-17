@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Settings } from "lucide-react";
-import { Card } from "@/components/dl";
+import { Card, SampleBadge } from "@/components/dl";
 import { isPilotSurface } from "@/config/pilot";
 
 interface Props {
@@ -13,17 +13,6 @@ interface Props {
 
 function formatPct(value: number) {
   return Number.isInteger(value) ? `${value}%` : `${value.toFixed(1)}%`;
-}
-
-// Labour cost/sales have no live source yet; mark the card as sample so the
-// figures are never read as live financial data.
-function SampleBadge({ sample }: { sample?: boolean }) {
-  if (!sample) return null;
-  return (
-    <span className="badge" title="Sample data — not wired to live labour costs">
-      Sample
-    </span>
-  );
 }
 
 function LabourGauge({ value, targetPct }: { value: number; targetPct: number }) {

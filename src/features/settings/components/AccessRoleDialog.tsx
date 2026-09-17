@@ -1,6 +1,6 @@
 import { toast } from "sonner";
 import { Check, Info, Shield } from "lucide-react";
-import { ActionButton, DialogShell } from "@/components/dl";
+import { ActionButton, DialogShell, SampleBadge } from "@/components/dl";
 export interface AccessRoleDef {
   id: string;
   name: string;
@@ -30,7 +30,12 @@ export function AccessRoleDialog({
     <DialogShell
       open={role !== null}
       onOpenChange={(open) => !open && onClose()}
-      title={role ? `${role.name} permissions` : ""}
+      title={
+        <span className="flex items-center gap-2">
+          <span>{role ? `${role.name} permissions` : ""}</span>
+          <SampleBadge />
+        </span>
+      }
       description={role ? `${role.scope} - ${role.people} people` : ""}
       icon={Shield}
       footer={

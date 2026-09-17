@@ -1,4 +1,4 @@
-import { Card } from "@/components/dl";
+import { Card, SampleBadge } from "@/components/dl";
 import { AlertTriangle } from "lucide-react";
 import type { LeaveRequest, LeaveSource } from "../types";
 import { leaveRangesOverlap, weekRangeOf } from "../lib/leaveDates";
@@ -61,9 +61,7 @@ export function LeaveBottomCards({ requests, source, todayIso }: Props) {
       <Card className="card-pad">
         <div className="mb-2 flex items-center gap-2">
           <div className="section-label">Public holidays</div>
-          <span className="badge" title="Illustrative dates — not configured for this workspace">
-            Sample
-          </span>
+          <SampleBadge title="Illustrative dates — not configured for this workspace" />
         </div>
         <div className="flex flex-col gap-3 mt-2">
           {publicHolidays.map((h) => (

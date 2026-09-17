@@ -1,4 +1,5 @@
 import * as React from "react";
+import { SampleBadge } from "@/components/dl";
 import { SectionCard, ToggleRow, PreviewTag } from "./SettingsPrimitives";
 import { Shield, ChevronRight } from "lucide-react";
 import { AccessRoleDialog, type AccessRoleDef } from "./AccessRoleDialog";
@@ -98,7 +99,7 @@ export function AccessTab({ onDirty }: { onDirty: () => void }) {
 
       <SectionCard
         title="System roles"
-        badge={<PreviewTag>Sample</PreviewTag>}
+        badge={<SampleBadge />}
         description="Click a role to preview its permissions. No role is duplicated or saved."
       >
         <div className="grid gap-3 sm:grid-cols-2">

@@ -421,6 +421,27 @@ export function StatusBadge({
   );
 }
 
+/**
+ * Canonical badge for illustrative or sample functionality standing in for an
+ * intended Docklist capability (§16.2).
+ */
+export function SampleBadge({
+  sample = true,
+  title = "Sample data — illustrative and not yet wired to live entries",
+  className,
+}: {
+  sample?: boolean;
+  title?: string;
+  className?: string;
+} = {}) {
+  if (!sample) return null;
+  return (
+    <span className={cn("badge", className)} title={title}>
+      Sample
+    </span>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Inputs                                                              */
 /* ------------------------------------------------------------------ */
