@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { formatContractedHours } from "../lib/profileOperational";
 import type { StaffEmploymentStatus, StaffRow, WorkspaceDepartment } from "../types";
 
 /**
@@ -91,7 +92,7 @@ function mapStaffRow(
     dept,
     status: STATUS_LABEL[row.employment_status],
     contract: row.contract_type ? CONTRACT_LABEL[row.contract_type] : "—",
-    hours: hoursPerWeek != null ? `${Math.round(hoursPerWeek / 60)}h/wk` : "—",
+    hours: formatContractedHours(hoursPerWeek),
     avail: "—",
     availTone: "off",
     img: avatarIndex(row.id),

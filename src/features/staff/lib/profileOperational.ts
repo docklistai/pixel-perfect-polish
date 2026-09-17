@@ -148,3 +148,96 @@ export function memberRecentTimeRows(
 
   return cap > 0 ? mine.slice(0, cap) : mine;
 }
+
+/**
+ * Formats weekly contracted hours honestly across all manager surfaces (§4.6).
+ *
+ * Three states:
+ * - Positive (> 0): e.g. 1440 mins -> "24h/wk"
+ * - Zero (= 0): "Zero-hours contract" (never "0h/wk" or "not recorded")
+ * - Null / undefined: "Contracted hours not recorded" (never "0h" or "—")
+ */
+export function formatContractedHours(contractedMinutesPerWeek: number | null | undefined): string {
+  if (contractedMinutesPerWeek === null || contractedMinutesPerWeek === undefined) {
+    return "Contracted hours not recorded";
+  }
+  if (contractedMinutesPerWeek === 0) {
+    return "Zero-hours contract";
+  }
+  return `${Math.round(contractedMinutesPerWeek / 60)}h/wk`;
+}
+
+/**
+ * Scheduled-versus-contracted copy where a surface already holds scheduled hours (CL-6).
+ *
+ * - positive contracted -> 22h scheduled / 24h contracted
+ * - zero-hours contract -> 22h scheduled · Zero-hours contract
+ * - null -> Contracted hours not recorded
+ */
+export function formatScheduledVsContracted(
+  scheduledHours: number,
+  contracted: number | string | null | undefined,
+): string {
+  if (
+    contracted === null ||
+    contracted === undefined ||
+    contracted === "—" ||
+    contracted === "-" ||
+    contracted === "Contracted hours not recorded"
+  ) {
+    return "Contracted hours not recorded";
+  }
+
+  if (
+    contracted === 0 ||
+    contracted === "0" ||
+    contracted === "0h" ||
+    contracted === "0h/wk" ||
+    contracted === "Zero-hours contract"
+  ) {
+    return `${scheduledHours}h scheduled · Zero-hours contract`;
+  }
+
+  if (typeof contracted === "number") {
+    const hours = Math.round(contracted / 60);
+    if (hours === 0) {
+      return `${scheduledHours}h scheduled · Zero-hours contract`;
+    }
+    return `${scheduledHours}h scheduled / ${hours}h contracted`;
+  }
+
+  const match = contracted.match(/(\d+)/);
+  if (match && match[1]) {
+    const hours = parseInt(match[1], 10);
+    if (hours === 0) {
+      return `${scheduledHours}h scheduled · Zero-hours contract`;
+    }
+    return `${scheduledHours}h scheduled / ${hours}h contracted`;
+  }
+
+  return "Contracted hours not recorded";
+}
+
+/**
+ * Formats the contracted hours sub-label on profile stat cards (§4.6).
+ */
+export function formatContractedSub(contractedHours: string | null | undefined): string {
+  if (
+    !contractedHours ||
+    contractedHours === "—" ||
+    contractedHours === "-" ||
+    contractedHours === "Contracted hours not recorded"
+  ) {
+    return "Contracted hours not recorded";
+  }
+  if (
+    contractedHours === "Zero-hours contract" ||
+    contractedHours === "0h" ||
+    contractedHours === "0h/wk" ||
+    contractedHours === "0"
+  ) {
+    return "Zero-hours contract";
+  }
+  const clean = contractedHours.replace(/\s*\/.*$/, "").trim();
+  return `${clean} contracted`;
+}

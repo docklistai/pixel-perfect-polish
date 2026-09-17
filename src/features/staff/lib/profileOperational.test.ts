@@ -7,6 +7,9 @@ import {
   memberLeaveSummary,
   memberRecentTimeRows,
   memberUpcomingShifts,
+  formatContractedHours,
+  formatScheduledVsContracted,
+  formatContractedSub,
   type WeekShiftsInput,
 } from "./profileOperational";
 
@@ -209,5 +212,82 @@ describe("memberRecentTimeRows", () => {
     const result = memberRecentTimeRows(timeRows, "s1", 0);
     expect(result.some((row) => row.id === "other-member")).toBe(false);
     expect(result.some((row) => row.id === "demo-without-staff-id")).toBe(false);
+  });
+});
+
+describe("formatContractedHours — three-state honesty (§4.6)", () => {
+  it("formats positive contracted minutes as weekly hours", () => {
+    expect(formatContractedHours(1440)).toBe("24h/wk");
+    expect(formatContractedHours(2400)).toBe("40h/wk");
+    expect(formatContractedHours(900)).toBe("15h/wk");
+  });
+
+  it("formats zero contracted minutes as Zero-hours contract", () => {
+    const result = formatContractedHours(0);
+    expect(result).toBe("Zero-hours contract");
+
+    // Strictly assert 0 never renders as "not recorded", "—", or "0h"
+    expect(result).not.toBe("Contracted hours not recorded");
+    expect(result).not.toBe("—");
+    expect(result).not.toBe("0h");
+    expect(result).not.toBe("0h/wk");
+  });
+
+  it("formats null or undefined contracted minutes as Contracted hours not recorded", () => {
+    const fromNull = formatContractedHours(null);
+    const fromUndefined = formatContractedHours(undefined);
+
+    expect(fromNull).toBe("Contracted hours not recorded");
+    expect(fromUndefined).toBe("Contracted hours not recorded");
+
+    // Strictly assert null never renders as 0h, "—", or zero-hours contract
+    expect(fromNull).not.toBe("0h");
+    expect(fromNull).not.toBe("0h/wk");
+    expect(fromNull).not.toBe("—");
+    expect(fromNull).not.toBe("Zero-hours contract");
+
+    expect(fromUndefined).not.toBe("0h");
+    expect(fromUndefined).not.toBe("0h/wk");
+    expect(fromUndefined).not.toBe("—");
+    expect(fromUndefined).not.toBe("Zero-hours contract");
+  });
+});
+
+describe("formatScheduledVsContracted — scheduled-versus-contracted context (CL-6)", () => {
+  it("formats positive contracted hours with scheduled hours", () => {
+    expect(formatScheduledVsContracted(22, 1440)).toBe("22h scheduled / 24h contracted");
+    expect(formatScheduledVsContracted(22, "24h/wk")).toBe("22h scheduled / 24h contracted");
+    expect(formatScheduledVsContracted(22, "24h")).toBe("22h scheduled / 24h contracted");
+  });
+
+  it("formats zero-hours contracts with scheduled hours", () => {
+    expect(formatScheduledVsContracted(22, 0)).toBe("22h scheduled · Zero-hours contract");
+    expect(formatScheduledVsContracted(22, "Zero-hours contract")).toBe(
+      "22h scheduled · Zero-hours contract",
+    );
+    expect(formatScheduledVsContracted(22, "0h")).toBe("22h scheduled · Zero-hours contract");
+  });
+
+  it("formats unrecorded contracted hours honestly", () => {
+    expect(formatScheduledVsContracted(22, null)).toBe("Contracted hours not recorded");
+    expect(formatScheduledVsContracted(22, undefined)).toBe("Contracted hours not recorded");
+    expect(formatScheduledVsContracted(22, "—")).toBe("Contracted hours not recorded");
+    expect(formatScheduledVsContracted(22, "Contracted hours not recorded")).toBe(
+      "Contracted hours not recorded",
+    );
+  });
+});
+
+describe("formatContractedSub — profile stat card sub-labels", () => {
+  it("formats positive, zero-hours, and null sub-labels", () => {
+    expect(formatContractedSub("35h / week")).toBe("35h contracted");
+    expect(formatContractedSub("24h/wk")).toBe("24h contracted");
+    expect(formatContractedSub("Zero-hours contract")).toBe("Zero-hours contract");
+    expect(formatContractedSub("0h/wk")).toBe("Zero-hours contract");
+    expect(formatContractedSub("Contracted hours not recorded")).toBe(
+      "Contracted hours not recorded",
+    );
+    expect(formatContractedSub("—")).toBe("Contracted hours not recorded");
+    expect(formatContractedSub(null)).toBe("Contracted hours not recorded");
   });
 });

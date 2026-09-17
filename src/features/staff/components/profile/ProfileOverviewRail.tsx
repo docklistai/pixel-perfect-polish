@@ -2,6 +2,7 @@ import * as React from "react";
 import { AlertTriangle, ChevronRight, Plane } from "lucide-react";
 import { StatusBadge, type Tone } from "@/components/dl";
 import { ProfileCard, Pair } from "./ProfileCard";
+import { formatContractedSub } from "../../lib/profileOperational";
 import type { StaffProfile } from "../../types";
 import type { ProfileTab } from "./StaffProfileTabs";
 
@@ -173,7 +174,7 @@ export function WorkloadBalanceCard({ profile }: { profile: StaffProfile }) {
           {wb.hoursThisWeek > 0 ? `${wb.hoursThisWeek}h` : "--"}
         </div>
         <div className="text-[11px] text-muted-foreground mt-0.5">
-          {profile.contractedHours} contracted
+          {formatContractedSub(profile.contractedHours)}
         </div>
       </div>
       {/* Progress bar */}

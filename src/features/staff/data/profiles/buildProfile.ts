@@ -92,7 +92,10 @@ export function buildProfile(seed: ProfileSeed): StaffProfile {
     dept: seed.dept,
     status: seed.status ?? "Active",
     contract: seed.contract ?? "Full-time",
-    contractedHours: seed.contractedHours ?? "—",
+    contractedHours:
+      seed.contractedHours && seed.contractedHours !== "—"
+        ? seed.contractedHours
+        : "Contracted hours not recorded",
     startDate: seed.startDate ?? "—",
     img: seed.img,
     employmentType: seed.employmentType ?? seed.contract ?? "Full-time",

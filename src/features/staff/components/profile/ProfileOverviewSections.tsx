@@ -2,6 +2,7 @@ import * as React from "react";
 import { AlertTriangle, ChevronRight, Clock, ClipboardList, type LucideIcon } from "lucide-react";
 import { ProfileCard, Pair } from "./ProfileCard";
 import { ProfileManagerActions } from "./ProfileManagerActions";
+import { formatContractedSub } from "../../lib/profileOperational";
 import type { StaffProfile } from "../../types";
 import type { ProfileTab } from "./StaffProfileTabs";
 
@@ -89,7 +90,7 @@ export function ManagerSnapshotCard({ profile, onTabChange, onToast }: OverviewS
         <SnapStat
           label="Hours this week"
           value={`${profile.workloadBalance.hoursThisWeek}h`}
-          sub={`${profile.contractedHours} contracted`}
+          sub={formatContractedSub(profile.contractedHours)}
         />
         <SnapStat label="Coverage gaps" value="0" sub="No conflicts this week" tone="green" />
         <SnapStat
