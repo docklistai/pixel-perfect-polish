@@ -2,6 +2,7 @@ import { DashboardCard } from "@/components/dl";
 import {
   CALENDAR_DAYS_EXPLAINER,
   CALENDAR_DAYS_LABEL,
+  NOT_RECORDED_LABEL,
 } from "@/features/leave/lib/leaveBalancePresentation";
 import { usePortalLeaveBalance } from "../hooks/usePortalLeaveBalance";
 
@@ -21,12 +22,12 @@ function Figure({ label, value, tone }: { label: string; value: number; tone?: "
 }
 
 /**
- * The staff member's own annual leave balance.
+ * The staff member's own annual leave balance (§8.6).
  *
  * Reads the entitlement the manager recorded for this person and nothing else —
  * no workspace default is substituted — so this card and the manager's view can
- * never disagree. When no entitlement has been recorded the card keeps its
- * original honest empty state.
+ * never disagree. When no entitlement has been recorded the card states that
+ * honestly using canonical copy.
  */
 export function PortalLeaveBalanceCard() {
   const { isLoading, isError, balance, leaveYearLabel } = usePortalLeaveBalance();
@@ -38,20 +39,20 @@ export function PortalLeaveBalanceCard() {
           LEAVE BALANCE
         </div>
         <span className="text-[11px] text-muted-foreground">
-          {balance && leaveYearLabel ? leaveYearLabel : "As of today"}
+          {leaveYearLabel ?? NOT_RECORDED_LABEL}
         </span>
       </div>
 
       {balance ? (
         <>
           <div className="mt-3 grid grid-cols-4 divide-x divide-border rounded-2xl border border-border">
-            <Figure label="Total" value={balance.entitlementDays ?? 0} />
-            <Figure label="Booked" value={balance.booked} />
+            <Figure label="Entitlement" value={balance.entitlementDays ?? 0} />
+            <Figure label="Approved" value={balance.booked} />
             <Figure label="Pending" value={balance.pending} />
             <Figure
-              label="Left"
+              label="Remaining"
               value={balance.remaining ?? 0}
-              tone={(balance.remaining ?? 0) < 0 ? "danger" : undefined}
+              tone={balance.remaining !== null && balance.remaining < 0 ? "danger" : undefined}
             />
           </div>
           <div className="mt-2 text-[11px] text-muted-foreground">
@@ -62,14 +63,14 @@ export function PortalLeaveBalanceCard() {
       ) : (
         <div className="mt-3 rounded-2xl border border-border bg-muted/40 px-3 py-4 text-center">
           <div className="text-sm font-semibold text-muted-foreground">
-            {isLoading ? "Loading…" : "Not available yet"}
+            {isLoading ? "Loading…" : NOT_RECORDED_LABEL}
           </div>
           <div className="mt-1 text-xs text-muted-foreground">
             {isError
               ? "We couldn't load your balance. Pull to refresh to try again."
               : isLoading
                 ? "Checking your recorded entitlement."
-                : "Your manager hasn't recorded a leave entitlement for you yet."}
+                : "Your manager has not recorded a leave entitlement for this leave year."}
           </div>
         </div>
       )}

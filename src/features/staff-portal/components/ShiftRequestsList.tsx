@@ -1,10 +1,7 @@
 import { CalendarOff } from "lucide-react";
 import { ActionButton, DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
-import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 import { usePortalOpenShifts } from "../hooks/usePortalOpenShifts";
 import { usePortalShiftReleases } from "../hooks/usePortalShiftReleases";
-import { toPortalRequest } from "../lib/portalRequests";
-import type { PortalRequest } from "../types";
 import type { OpenShiftRequestStatus, PortalOpenShiftRequest } from "../api/openShiftRequests";
 import { ShiftReleaseHistoryItems } from "./ShiftReleaseHistoryItems";
 
@@ -46,15 +43,15 @@ function OpenShiftRequestItem({ request }: { request: PortalOpenShiftRequest }) 
 }
 
 /**
- * The "My requests" sub-tab: the staff member's open-shift requests and
- * time-off requests together, so every request they made is findable in one
- * place. Live sessions only; demo sessions show the empty state.
+ * The "My requests" sub-tab: the staff member's shift-related requests only
+ * (open-shift applications and shift-release requests) (§8.6).
+ *
+ * Staff Leave is the canonical home for employee leave requests, balances, and
+ * manager responses; this surface strictly handles shift requests.
  */
 export function ShiftRequestsList() {
-  const { isLive, requestHistory } = usePortalLeaveRequests();
   const openShifts = usePortalOpenShifts();
   const releases = usePortalShiftReleases();
-  const leaveRequests: PortalRequest[] = (isLive ? requestHistory : []).map(toPortalRequest);
   const shiftRequests = openShifts.enabled ? openShifts.requests : [];
 
   if (
@@ -62,7 +59,6 @@ export function ShiftRequestsList() {
     !openShifts.isError &&
     !releases.isLoading &&
     !releases.isError &&
-    leaveRequests.length === 0 &&
     shiftRequests.length === 0 &&
     releases.requests.length === 0
   ) {
@@ -70,8 +66,8 @@ export function ShiftRequestsList() {
       <DashboardCard className="p-6">
         <EmptyState
           icon={CalendarOff}
-          title="No requests yet"
-          description="Open-shift, shift-release and time-off requests you submit will appear here."
+          title="No shift requests yet"
+          description="Open-shift applications and shift-release requests you submit will appear here. Time-off requests are in the Leave tab."
         />
       </DashboardCard>
     );
@@ -94,7 +90,7 @@ export function ShiftRequestsList() {
             <div role="alert">
               <p className="text-sm font-medium">Shift requests are unavailable</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Your time-off requests are still shown below. Try loading shift requests again.
+                Try loading shift requests again.
               </p>
               <ActionButton
                 className="mt-2"
@@ -111,34 +107,6 @@ export function ShiftRequestsList() {
       {shiftRequests.map((request) => (
         <li key={request.requestId}>
           <OpenShiftRequestItem request={request} />
-        </li>
-      ))}
-      {leaveRequests.map((r) => (
-        <li key={r.id}>
-          <DashboardCard className="p-4 rounded-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-sm font-semibold truncate">{r.title}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{r.submitted}</div>
-                {r.managerResponse && (
-                  <div className="text-xs text-foreground mt-1.5">
-                    <span className="font-medium">Manager response:</span> {r.managerResponse}
-                  </div>
-                )}
-              </div>
-              <StatusBadge
-                tone={
-                  r.status === "approved"
-                    ? "success"
-                    : r.status === "declined"
-                      ? "danger"
-                      : "warning"
-                }
-              >
-                {r.status[0].toUpperCase() + r.status.slice(1)}
-              </StatusBadge>
-            </div>
-          </DashboardCard>
         </li>
       ))}
     </ul>

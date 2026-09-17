@@ -1,18 +1,19 @@
 import * as React from "react";
 import { CalendarDays, Check } from "lucide-react";
 import { ActionButton, DashboardCard } from "@/components/dl";
+import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
 import { PortalLeaveRequestDrawer } from "./PortalLeaveRequestDrawer";
 import { PortalRecurringDaysOffCard } from "./PortalRecurringDaysOffCard";
 import { PortalOneOffUnavailabilityCard } from "./PortalOneOffUnavailabilityCard";
 import { usePortalLeaveRequests } from "../hooks/usePortalLeaveRequests";
 import { PortalLeaveHistory } from "./PortalLeaveHistory";
 import { PortalLeaveBalanceCard } from "./PortalLeaveBalanceCard";
+import type { PortalLeaveRequest } from "../api/portalLiveData";
 
 export function LeaveTab() {
   const [open, setOpen] = React.useState(false);
 
   const {
-    enabled,
     isLive,
     isLoading,
     isError,
@@ -23,9 +24,28 @@ export function LeaveTab() {
     requestHistory: liveHistory,
   } = usePortalLeaveRequests();
 
-  // Phase 13 connects these to live data.
-  const approvedLeave = isLive ? liveApproved : [];
-  const requestHistory = isLive ? liveHistory : [];
+  const demoLeaveRequests = useWorkspaceSelector((state) => state.leaveRequests);
+  const demoOliviaRequests: PortalLeaveRequest[] = React.useMemo(() => {
+    return demoLeaveRequests
+      .filter((r) => r.staffId === "olivia-bennett")
+      .map((r) => ({
+        id: r.id,
+        type: r.type,
+        date: r.date,
+        startIso: r.startIso,
+        endIso: r.endIso,
+        days: r.days,
+        reason: r.reason,
+        status: r.state as "pending" | "approved" | "declined" | "cancelled",
+        submittedAt: r.submitted.slice(0, 11),
+        decisionReason: r.state === "declined" ? "Peak coverage required" : undefined,
+      }));
+  }, [demoLeaveRequests]);
+
+  const approvedLeave = isLive
+    ? liveApproved
+    : demoOliviaRequests.filter((r) => r.status === "approved");
+  const requestHistory = isLive ? liveHistory : demoOliviaRequests;
 
   return (
     <div className="space-y-4">
@@ -34,14 +54,10 @@ export function LeaveTab() {
 
       <ActionButton
         icon={CalendarDays}
-        className={
-          enabled ? "w-full justify-center" : "w-full justify-center opacity-50 cursor-not-allowed"
-        }
-        onClick={() => {
-          if (enabled) setOpen(true);
-        }}
+        className="w-full justify-center"
+        onClick={() => setOpen(true)}
       >
-        {enabled ? "Request time off" : "Request time off (not available here)"}
+        Request time off
       </ActionButton>
 
       {/* Upcoming approved leave */}
