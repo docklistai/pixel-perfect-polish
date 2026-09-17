@@ -165,8 +165,10 @@ export const publishLiveRotaWeekFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const context = await getLiveContext(data, { createWeek: data.allowEmpty });
-    if (!context.week) throw new Error("Save at least one shift before publishing");
-    const week = requireEditableWeek(context.week);
+    if (!context.week && !data.allowEmpty) {
+      throw new Error("Save at least one shift before publishing");
+    }
+    const week = data.allowEmpty ? await ensureWeek(context) : requireEditableWeek(context.week!);
     if (!data.allowEmpty) {
       const { count, error: countError } = await context.supabase
         .from("shifts")
