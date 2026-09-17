@@ -12,6 +12,10 @@ select '43000000-0000-4000-8000-000000000001',
        '10000000-0000-4000-8000-000000000001',
        '11000000-0000-4000-8000-000000000001', week_start, 'draft'
 from p43_dates;
+insert into public.staff_eligible_roles (workspace_id, staff_member_id, role_name, role_key)
+values
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', 'Bartender', 'bartender'),
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000002', 'Bartender', 'bartender');
 
 -- Shift on week_start + 1 for staff 1 (id: 14000000-0000-4000-8000-000000000001)
 insert into public.shifts (

@@ -6,6 +6,7 @@ import { isValidShiftTimeRange } from "../lib/draftRota";
 import type { DraftShiftInput, RotaDayIndex, StaffMember } from "../types";
 import type { MaybePromise } from "./grid";
 import { AddShiftFormFields, type AddShiftFormState } from "./AddShiftFormFields";
+import { isStaffEligibleForRole } from "../lib/assignableStaff";
 import { departmentWarning } from "../lib/departmentWarning";
 import { useWorkspaceDepartments } from "../hooks/useWorkspaceDepartments";
 
@@ -61,6 +62,10 @@ export function AddShiftDrawer({
     wasOpenRef.current = open;
   }, [open, initialForm]);
 
+  const assignedStaff = form.assignTo ? staff.find((s) => s.id === form.assignTo) : undefined;
+  const isEligible =
+    !assignedStaff || !form.role || isStaffEligibleForRole(assignedStaff, form.role);
+
   const errors = {
     role: !form.role ? "Choose a role" : "",
     start: !form.start ? "Required" : "",
@@ -69,8 +74,11 @@ export function AddShiftDrawer({
       form.start && form.end && !isValidShiftTimeRange(form.start, form.end)
         ? "Enter a valid shift time. Overnight shifts are allowed."
         : "",
+    staff: !isEligible ? `${assignedStaff?.name} is not eligible for the ${form.role} role.` : "",
   };
-  const hasError = Boolean(errors.role || errors.start || errors.end || errors.timeOrder);
+  const hasError = Boolean(
+    errors.role || errors.start || errors.end || errors.timeOrder || errors.staff,
+  );
   const handleSave = async (keepOpen: boolean) => {
     setSubmitted(true);
     setSaveError(null);
@@ -144,6 +152,7 @@ export function AddShiftDrawer({
         submitted={submitted}
         roleError={errors.role}
         timeError={errors.timeOrder}
+        staffError={errors.staff}
         departments={departmentsState.departments}
         departmentsEmpty={departmentsState.isEmpty}
         departmentWarning={departmentWarning({

@@ -37,6 +37,9 @@ values ('46000000-0000-4000-8000-000000000301', '41000000-0000-4000-8000-0000000
         '42000000-0000-4000-8000-000000000301', '43000000-0000-4000-8000-00000000030a',
         'Gate Three', 'Housekeeper', 'active');
 
+insert into public.staff_eligible_roles (workspace_id, staff_member_id, role_name, role_key)
+values ('41000000-0000-4000-8000-000000000301', '46000000-0000-4000-8000-000000000301', 'Training', 'training');
+
 insert into public.rota_weeks (id, workspace_id, location_id, week_start, status)
 values
   ('45000000-0000-4000-8000-00000000030a', '41000000-0000-4000-8000-000000000301', '42000000-0000-4000-8000-000000000301', '2026-06-15', 'published'),

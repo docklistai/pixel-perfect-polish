@@ -45,6 +45,11 @@ values
    '42000000-0000-4000-8000-000000000402', '43000000-0000-4000-8000-00000000040d',
    'Other Person', 'Other Role', 'active');
 
+insert into public.staff_eligible_roles (workspace_id, staff_member_id, role_name, role_key)
+values
+  ('41000000-0000-4000-8000-000000000401', '46000000-0000-4000-8000-000000000401', 'Training', 'training'),
+  ('41000000-0000-4000-8000-000000000401', '46000000-0000-4000-8000-000000000401', 'Cover', 'cover');
+
 insert into public.rota_weeks (id, workspace_id, location_id, week_start, status)
 values ('45000000-0000-4000-8000-000000000401', '41000000-0000-4000-8000-000000000401',
         '42000000-0000-4000-8000-000000000401', '2026-06-15', 'draft');

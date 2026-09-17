@@ -41,6 +41,11 @@ from p52_dates,
 -- Fixtures
 -- ---------------------------------------------------------------------------
 
+insert into public.staff_eligible_roles (workspace_id, staff_member_id, role_name, role_key)
+values
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', 'Bartender', 'bartender'),
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000002', 'Bartender', 'bartender');
+
 -- Week 1: two overlapping shifts for ONE staff member (09:00-17:00, 10:00-18:00).
 insert into public.shifts (
   id, workspace_id, rota_week_id, location_id, department_id, staff_member_id,

@@ -98,6 +98,12 @@ from p53_dates;
 -- Fixtures
 -- ---------------------------------------------------------------------------
 
+insert into public.staff_eligible_roles (workspace_id, staff_member_id, role_name, role_key)
+values
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', 'Bartender', 'bartender'),
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000001', 'Chef', 'chef'),
+  ('10000000-0000-4000-8000-000000000001', '14000000-0000-4000-8000-000000000002', 'Bartender', 'bartender');
+
 -- A: the commissioned defect. Week A's final-day overnight shift runs into
 -- week B's first-day shift, for one staff member.
 insert into public.shifts (

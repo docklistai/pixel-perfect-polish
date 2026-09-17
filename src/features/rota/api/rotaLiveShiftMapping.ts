@@ -13,6 +13,7 @@ import {
   type RotaWeekRow,
 } from "./rotaLiveMutationContext";
 import type { draftShiftInput, updateShiftInput } from "./rotaLiveMutationSchemas";
+import { shiftWriteError } from "./shiftWriteError";
 
 export interface ExistingShiftRow {
   id: string;
@@ -84,7 +85,7 @@ export async function insertShift(
     })
     .select("id")
     .single();
-  if (error) throw error;
+  if (error) throw shiftWriteError(error);
   return (data as { id: string }).id;
 }
 

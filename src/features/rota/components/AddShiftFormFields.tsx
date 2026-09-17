@@ -1,6 +1,8 @@
 import { FormRow, FormSection } from "@/components/dl";
 import type { RotaDayIndex, StaffMember } from "../types";
 import type { WorkspaceDepartment } from "../api/workspaceDepartments";
+import { isStaffEligibleForRole } from "../lib/assignableStaff";
+import { normaliseRoleKey } from "../lib/scheduling/shiftSignature";
 import { ShiftDepartmentField } from "./ShiftDepartmentField";
 
 export type AddShiftFormState = {
@@ -24,6 +26,7 @@ export function AddShiftFormFields({
   submitted,
   roleError,
   timeError,
+  staffError,
   departments,
   departmentsEmpty,
   departmentWarning,
@@ -36,10 +39,12 @@ export function AddShiftFormFields({
   submitted: boolean;
   roleError: string;
   timeError: string;
+  staffError?: string;
   departments: WorkspaceDepartment[];
   departmentsEmpty: boolean;
   departmentWarning: string | null;
 }) {
+  const staffErrorId = "add-shift-staff-error";
   const roleErrorId = "add-shift-role-error";
   const timeErrorId = "add-shift-time-error";
 
@@ -53,15 +58,37 @@ export function AddShiftFormFields({
             onChange={(event) =>
               setForm((current) => ({ ...current, assignTo: event.target.value }))
             }
+            aria-invalid={submitted && Boolean(staffError)}
+            aria-describedby={submitted && staffError ? staffErrorId : undefined}
             className="h-9 w-full rounded-lg border border-border bg-background px-2 text-sm"
           >
             <option value="">Open shift (no one yet)</option>
-            {staff.map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name}
-              </option>
-            ))}
+            {staff.map((member) => {
+              const isPrimary = normaliseRoleKey(member.role) === normaliseRoleKey(form.role);
+              const isEligible = isStaffEligibleForRole(member, form.role);
+              const label = !form.role
+                ? member.name
+                : isPrimary
+                  ? `${member.name} · ${member.role}`
+                  : isEligible
+                    ? `${member.name} · ${member.role} (eligible)`
+                    : `${member.name} · ${member.role} (not eligible)`;
+              return (
+                <option
+                  key={member.id}
+                  value={member.id}
+                  disabled={Boolean(form.role) && !isEligible}
+                >
+                  {label}
+                </option>
+              );
+            })}
           </select>
+          {submitted && staffError && (
+            <p id={staffErrorId} className="mt-1 text-[11px] text-danger">
+              {staffError}
+            </p>
+          )}
         </FormRow>
 
         <FormRow label="Role" required htmlFor="add-shift-role">
