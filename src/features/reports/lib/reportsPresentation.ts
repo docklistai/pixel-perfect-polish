@@ -54,3 +54,36 @@ export function weekPublicationLabel(status: ReportsPublicationStatus): string {
   if (status === "partially_published") return "Partially published";
   return "Published";
 }
+
+export interface ScheduledVsWorkedSummary {
+  /** True when at least one week in the period has a published rota snapshot. */
+  hasPublishedWeek: boolean;
+  /** Published scheduled hours, formatted as e.g. "160h 00m". */
+  scheduledHours: string;
+  /** Raw scheduled minutes from published snapshots. */
+  scheduledMinutes: number;
+  /** Approved worked hours, formatted as e.g. "152h 30m". */
+  approvedWorkedHours: string;
+  /** Raw approved worked minutes. */
+  approvedWorkedMinutes: number;
+  /** Exact count of time entries awaiting review (pending). */
+  awaitingReviewCount: number;
+  /** Exact count of approved time entries. */
+  approvedEntriesCount: number;
+}
+
+export function buildScheduledVsWorkedSummary(data: ReportsPageData): ScheduledVsWorkedSummary {
+  const hasPublishedWeek = data.weeks.some(
+    (w) => w.publicationStatus === "published" || w.publicationStatus === "partially_published",
+  );
+
+  return {
+    hasPublishedWeek,
+    scheduledHours: formatMinutes(data.totals.scheduledMinutes),
+    scheduledMinutes: data.totals.scheduledMinutes,
+    approvedWorkedHours: formatMinutes(data.totals.approvedWorkedMinutes),
+    approvedWorkedMinutes: data.totals.approvedWorkedMinutes,
+    awaitingReviewCount: data.totals.awaitingReviewEntries,
+    approvedEntriesCount: data.totals.approvedEntries,
+  };
+}

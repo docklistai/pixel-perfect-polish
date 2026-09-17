@@ -12,6 +12,7 @@ import { ReportsCoverageHeatmapCard } from "@/features/reports/components/Report
 import { ReportsFilters } from "@/features/reports/components/ReportsFilters";
 import { ReportsInsightsPanel } from "@/features/reports/components/ReportsInsightsPanel";
 import { ReportsKpiCards } from "@/features/reports/components/ReportsKpiCards";
+import { ReportsScheduledVsWorkedCard } from "@/features/reports/components/ReportsScheduledVsWorkedCard";
 import { ReportsQuickReportsCard } from "@/features/reports/components/ReportsQuickReportsCard";
 import { ReportsStateCard } from "@/features/reports/components/ReportsStateCard";
 import { TimeApprovalTrend } from "@/features/reports/components/TimeApprovalTrend";
@@ -94,6 +95,9 @@ function ReportsPage() {
         <>
           {!hasOperationalData && <ReportsStateCard state="empty" />}
           <ReportsKpiCards data={data} />
+          <div className="mb-5">
+            <ReportsScheduledVsWorkedCard data={data} />
+          </div>
           <div className="grid grid-cols-12 items-start gap-5">
             <LabourTargetChart data={data} />
             <DepartmentLabourPanel rows={data.departmentHours} />
