@@ -1,17 +1,21 @@
+import * as React from "react";
 import { Calendar, CalendarDays, Clock, MapPin, MessageSquare } from "lucide-react";
-import { DashboardCard, StatusBadge } from "@/components/dl";
+import { DashboardCard } from "@/components/dl";
+import { isOvernightLocal } from "@/features/rota/lib/scheduling/calendarInterval";
 import { usePortalRota } from "../hooks/usePortalRota";
 import { usePortalProfile } from "../hooks/usePortalProfile";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
-import type { PortalTab } from "../types";
+import type { PortalShift, PortalTab } from "../types";
 import { PortalRotaReadState } from "./PortalRotaReadState";
 import { PortalTeamUpdatesCard } from "./PortalTeamUpdatesCard";
+import { PortalThisWeekCard } from "./PortalThisWeekCard";
+import { ShiftDetailDrawer } from "./ShiftDetailDrawer";
 
 export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }) {
   const rota = usePortalRota();
-  const { hasPublished, nextShift, upcoming, weekDays } = rota;
+  const { hasPublished, nextShift } = rota;
   const { data: profile } = usePortalProfile();
-  const publishedDates = new Set(upcoming.map((shift) => shift.date));
+  const [selectedShift, setSelectedShift] = React.useState<PortalShift | null>(null);
   const emptyCopy = noUpcomingShiftsCopy(hasPublished);
 
   if (rota.isLoading || rota.isError) {
@@ -34,8 +38,15 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
               </span>
             </div>
             <div className="mt-2 text-[13px] text-white/80">{nextShift.dayLabel}</div>
-            <div className="mt-1 text-[30px] font-bold tracking-tight leading-none">
-              {nextShift.start} – {nextShift.end}
+            <div className="mt-1 flex items-baseline gap-2 flex-wrap">
+              <span className="text-[30px] font-bold tracking-tight leading-none">
+                {nextShift.start} – {nextShift.end}
+              </span>
+              {isOvernightLocal(nextShift.start, nextShift.end) && (
+                <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold text-white">
+                  +1 next day
+                </span>
+              )}
             </div>
             <div className="mt-3 space-y-1 text-sm text-white/90">
               <div className="inline-flex items-center gap-1.5">
@@ -50,7 +61,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
             </div>
             <button
               type="button"
-              onClick={() => onNavigate("shifts")}
+              onClick={() => setSelectedShift(nextShift)}
               className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-brand font-semibold shadow-[var(--shadow-card)] hover:bg-white/95"
             >
               <Clock className="h-4 w-4" />
@@ -65,39 +76,7 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
         </DashboardCard>
       )}
 
-      <DashboardCard className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
-            This week
-          </div>
-          <button
-            type="button"
-            onClick={() => onNavigate("shifts")}
-            className="text-[11px] font-semibold text-brand hover:underline"
-          >
-            View rota
-          </button>
-        </div>
-        <div className="mt-3 grid grid-cols-7 gap-1.5">
-          {weekDays.map((day) => {
-            const active = publishedDates.has(day.iso);
-            return (
-              <div
-                key={day.iso}
-                className={`rounded-2xl border px-0 py-3 text-center ${active ? "border-brand/20 bg-brand-soft/70" : "border-border bg-muted/60"}`}
-              >
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  {day.letter}
-                </div>
-                <div className={`mt-1 text-sm font-semibold ${active ? "text-brand" : ""}`}>
-                  {day.dayNum}
-                </div>
-                {active && <div className="mx-auto mt-2 h-1.5 w-1.5 rounded-full bg-brand" />}
-              </div>
-            );
-          })}
-        </div>
-      </DashboardCard>
+      <PortalThisWeekCard onNavigate={onNavigate} onSelectShift={setSelectedShift} />
 
       <PortalTeamUpdatesCard />
 
@@ -154,6 +133,8 @@ export function HomeTab({ onNavigate }: { onNavigate: (tab: PortalTab) => void }
           ))}
         </div>
       </div>
+
+      <ShiftDetailDrawer shift={selectedShift} onClose={() => setSelectedShift(null)} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { CalendarOff, ChevronRight } from "lucide-react";
 import { DashboardCard, EmptyState, StatusBadge } from "@/components/dl";
+import { isOvernightLocal } from "@/features/rota/lib/scheduling/calendarInterval";
 import { usePortalRota } from "../hooks/usePortalRota";
 import { noUpcomingShiftsCopy } from "../lib/portalShiftCopy";
 import type { PortalShift, ShiftStatus, ShiftsSubTab } from "../types";
@@ -160,8 +161,15 @@ function ShiftList({
                         <div className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground">
                           {s.dayLabel.toUpperCase()}
                         </div>
-                        <div className="mt-1 text-base font-semibold">
-                          {s.start} – {s.end}
+                        <div className="mt-1 text-base font-semibold flex items-center gap-2 flex-wrap">
+                          <span>
+                            {s.start} – {s.end}
+                          </span>
+                          {isOvernightLocal(s.start, s.end) && (
+                            <span className="inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                              +1 next day
+                            </span>
+                          )}
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground truncate">
                           {s.role} · {s.station}

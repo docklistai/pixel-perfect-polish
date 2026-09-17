@@ -7,6 +7,7 @@ import {
   FormSection,
   StatusBadge,
 } from "@/components/dl";
+import { isOvernightLocal } from "@/features/rota/lib/scheduling/calendarInterval";
 import type { PortalShift } from "../types";
 import { PortalShiftReleaseSection } from "./PortalShiftReleaseSection";
 
@@ -52,8 +53,15 @@ export function ShiftDetailDrawer({
               {shift.hours}h · {shift.breakMinutes}m break
             </span>
           </div>
-          <div className="mt-2 text-2xl font-bold tracking-tight">
-            {shift.start} – {shift.end}
+          <div className="mt-2 text-2xl font-bold tracking-tight flex items-baseline gap-2 flex-wrap">
+            <span>
+              {shift.start} – {shift.end}
+            </span>
+            {isOvernightLocal(shift.start, shift.end) && (
+              <span className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                Finishes next day (+1)
+              </span>
+            )}
           </div>
         </DashboardCard>
 
