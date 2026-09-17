@@ -88,7 +88,7 @@ export function TimesheetRow({
           </div>
         </div>
       </td>
-      <td className="font-mono text-sm">{row.sched}</td>
+      <td className="hidden font-mono text-sm xl:table-cell">{row.sched}</td>
       <td>
         <div className="font-mono text-sm font-semibold">{row.in}</div>
         <div
@@ -108,7 +108,7 @@ export function TimesheetRow({
           {row.outN}
         </div>
       </td>
-      <td className="font-mono text-sm">{row.brk}</td>
+      <td className="hidden font-mono text-sm xl:table-cell">{row.brk}</td>
       <td className="font-mono text-sm font-semibold">{row.paid}</td>
       <td>
         <TimeExceptionBadges codes={row.exceptionCodes} legacyLabel={row.exc} />

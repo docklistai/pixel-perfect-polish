@@ -133,7 +133,9 @@ export function StaffTable({
       )}
 
       <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Staff list">
-        <table className={`${compact ? "min-w-[700px]" : "min-w-[860px]"} w-full text-sm`}>
+        <table
+          className={`${compact ? "min-w-[700px]" : "min-w-0 xl:min-w-[860px]"} w-full text-sm`}
+        >
           <thead>
             <tr className="border-y border-border text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
               {showDemoBulkActions && (
@@ -152,7 +154,7 @@ export function StaffTable({
               <th className="text-left py-2.5">Department</th>
               <th className="text-left py-2.5">Status</th>
               <th className="text-left py-2.5">Contract</th>
-              {!compact && <th className="text-left py-2.5">Availability</th>}
+              {!compact && <th className="hidden xl:table-cell text-left py-2.5">Availability</th>}
               <th className="w-9" />
             </tr>
           </thead>

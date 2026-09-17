@@ -166,7 +166,7 @@ export function StaffTableRow({
         <div className="text-[11px] text-muted-foreground">{r.hours}</div>
       </td>
       {!compact && (
-        <td className="py-3">
+        <td className="hidden py-3 xl:table-cell">
           <div className="flex items-center gap-2 min-w-[100px]">
             <div className="flex-1 max-w-[90px] h-1.5 rounded-full bg-muted overflow-hidden">
               <div

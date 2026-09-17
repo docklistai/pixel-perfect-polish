@@ -139,7 +139,7 @@ export function TimesheetTable({
             role="region"
             aria-label="Weekly timesheet, scroll horizontally to see all columns"
           >
-            <table className="tbl min-w-[900px] w-full">
+            <table className="tbl min-w-0 xl:min-w-[900px] w-full">
               <thead>
                 <tr>
                   <th style={{ width: 36 }}>
@@ -151,10 +151,10 @@ export function TimesheetTable({
                     />
                   </th>
                   <th>Staff</th>
-                  <th>Scheduled</th>
+                  <th className="hidden xl:table-cell">Scheduled</th>
                   <th>Clock in</th>
                   <th>Clock out</th>
-                  <th>Break</th>
+                  <th className="hidden xl:table-cell">Break</th>
                   <th>Paid</th>
                   <th>Exceptions</th>
                   <th>Status</th>
