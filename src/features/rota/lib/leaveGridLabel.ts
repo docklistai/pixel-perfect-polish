@@ -12,7 +12,7 @@ export function shortLeaveLabel(type: string): string {
   }
   if (value.includes("sick")) return "Sick";
   if (value.includes("unpaid")) return "Unpaid";
-  if (value.includes("personal") || value.includes("compassionate")) return "Personal";
+  if (value.includes("personal") || value.includes("compassionate")) return "Compassionate";
   if (value.includes("parental") || value.includes("maternity") || value.includes("paternity")) {
     return "Parental";
   }

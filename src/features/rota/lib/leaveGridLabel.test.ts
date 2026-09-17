@@ -6,13 +6,13 @@ describe("shortLeaveLabel", () => {
     expect(shortLeaveLabel("annual_leave")).toBe("Holiday");
     expect(shortLeaveLabel("sick")).toBe("Sick");
     expect(shortLeaveLabel("unpaid")).toBe("Unpaid");
-    expect(shortLeaveLabel("personal")).toBe("Personal");
+    expect(shortLeaveLabel("personal")).toBe("Compassionate");
   });
 
   it("maps human display labels too, case-insensitively", () => {
     expect(shortLeaveLabel("Annual leave")).toBe("Holiday");
     expect(shortLeaveLabel("Sick leave")).toBe("Sick");
-    expect(shortLeaveLabel("Compassionate leave")).toBe("Personal");
+    expect(shortLeaveLabel("Compassionate leave")).toBe("Compassionate");
   });
 
   it("falls back to a generic Leave badge for unknown types", () => {
