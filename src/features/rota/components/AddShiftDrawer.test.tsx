@@ -112,7 +112,9 @@ describe("AddShiftDrawer with secondary eligible roles", () => {
     fireEvent.change(screen.getByLabelText(/role/i), { target: { value: "Sommelier" } });
 
     // Sam Rivers (who only has Bartender, not Sommelier) is marked not eligible and disabled
-    const samOption = screen.getByRole("option", { name: /Sam Rivers · Bartender \(not eligible\)/i });
+    const samOption = screen.getByRole("option", {
+      name: /Sam Rivers · Bartender \(not eligible\)/i,
+    });
     expect(samOption).toBeInTheDocument();
     expect(samOption).toBeDisabled();
   });

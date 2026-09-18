@@ -218,10 +218,7 @@ describe("extractRoleOptions", () => {
   });
 
   it("handles staff with no eligibleRoles cleanly", () => {
-    const roster = [
-      { role: "Chef" },
-      { role: "Waiter", eligibleRoles: undefined },
-    ];
+    const roster = [{ role: "Chef" }, { role: "Waiter", eligibleRoles: undefined }];
     const options = extractRoleOptions(roster);
     expect(options).toEqual(["Chef", "Waiter"]);
   });

@@ -29,11 +29,7 @@ export function CoverageDetailsDrawer({
   const assignedCount =
     plannedShiftCount !== undefined ? Math.max(0, plannedShiftCount - openShiftCount) : null;
 
-  const statusTone = isZeroPlanned
-    ? "muted"
-    : openShiftCount > 0
-      ? "warning"
-      : "success";
+  const statusTone = isZeroPlanned ? "muted" : openShiftCount > 0 ? "warning" : "success";
 
   const statusLabel = isZeroPlanned
     ? "No shifts planned"
@@ -74,10 +70,7 @@ export function CoverageDetailsDrawer({
                 <span className="text-muted-foreground">{row.value}</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-brand"
-                  style={{ width: `${row.pct}%` }}
-                />
+                <div className="h-full rounded-full bg-brand" style={{ width: `${row.pct}%` }} />
               </div>
             </div>
           ))}
