@@ -144,10 +144,10 @@ describe("buildDayStats", () => {
     ];
 
     const stats = buildDayStats(shifts);
-    // Day 0: 8h + 4h = 12h planned. 1 assigned of 2 shifts = 50%
+    // Day 0: 8h + 4h = 12h planned. 1 assigned of 2 shifts
     expect(stats[0]).toEqual({
       h: "12h",
-      c: "50%",
+      c: "1 of 2 assigned",
       tone: "warning",
       hours: 12,
     });
@@ -160,7 +160,7 @@ describe("buildDayStats", () => {
     });
   });
 
-  it("handles a day with only open shifts (0% coverage, planned hours > 0, warning tone)", () => {
+  it("handles a day with only open shifts (1 open, planned hours > 0, warning tone)", () => {
     const shifts: DraftShift[] = [
       {
         id: "s1",
@@ -178,7 +178,7 @@ describe("buildDayStats", () => {
     const stats = buildDayStats(shifts);
     expect(stats[2]).toEqual({
       h: "8h",
-      c: "0%",
+      c: "1 open",
       tone: "warning",
       hours: 8,
     });
@@ -236,14 +236,14 @@ describe("buildRoleCoverage", () => {
     });
   });
 
-  it("renders 'X assigned' when role has no open shifts", () => {
+  it("renders 'X of X assigned' when role has no open shifts", () => {
     const team = [staff("a", 2400)];
     const shifts = daysScheduled("a", 3);
     const roleCoverage = buildRoleCoverage(team, shifts);
     expect(roleCoverage).toHaveLength(1);
     expect(roleCoverage[0]).toEqual({
       label: "Chef",
-      value: "3 assigned",
+      value: "3 of 3 assigned",
       pct: 100,
       tone: "info",
     });

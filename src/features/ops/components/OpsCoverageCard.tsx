@@ -8,8 +8,6 @@ export function OpsCoverageCard(props: {
   staff: OpsStaffOption[];
 }) {
   const navigate = useNavigate();
-  const total = props.metrics.onShift + props.metrics.uncoveredShifts;
-  const coverage = total === 0 ? 0 : Math.round((props.metrics.onShift / total) * 100);
   const counts = props.departments
     .map((department) => ({
       ...department,
@@ -20,27 +18,18 @@ export function OpsCoverageCard(props: {
   return (
     <Card className="p-4">
       <h2 className="text-sm font-semibold">On shift now</h2>
-      <div className="mt-3 flex items-end gap-4">
+      <div className="mt-3 flex items-end gap-6">
         <div>
           <div className="text-[28px] font-bold leading-none tracking-tight">
             {props.metrics.onShift}
           </div>
-          <div className="mt-1 text-[11px] text-muted-foreground">Published rota staff</div>
+          <div className="mt-1 text-[11px] text-muted-foreground">Staff on shift now</div>
         </div>
-        <CoverageRing percentage={coverage} />
         <div>
-          <div
-            className={`text-sm font-semibold ${
-              total === 0
-                ? "text-muted-foreground"
-                : coverage >= 90
-                  ? "text-success"
-                  : "text-warning"
-            }`}
-          >
-            {coverage}%
+          <div className="text-[28px] font-bold leading-none tracking-tight text-muted-foreground">
+            {props.metrics.uncoveredShifts}
           </div>
-          <div className="text-[11px] text-muted-foreground">Coverage</div>
+          <div className="mt-1 text-[11px] text-muted-foreground">Open published shifts</div>
         </div>
       </div>
       <div className="my-3 h-px bg-border" />
@@ -63,29 +52,5 @@ export function OpsCoverageCard(props: {
         )}
       </div>
     </Card>
-  );
-}
-
-function CoverageRing({ percentage }: { percentage: number }) {
-  const circumference = 2 * Math.PI * 20;
-  const dash = (percentage / 100) * circumference;
-  return (
-    <svg width="52" height="52" viewBox="0 0 52 52" aria-label={`${percentage}% coverage`}>
-      <circle cx="26" cy="26" r="20" stroke="var(--border)" strokeWidth="5" fill="none" />
-      <circle
-        cx="26"
-        cy="26"
-        r="20"
-        stroke="var(--teal-500)"
-        strokeWidth="5"
-        fill="none"
-        strokeLinecap="round"
-        strokeDasharray={`${dash} ${circumference}`}
-        transform="rotate(-90 26 26)"
-      />
-      <text x="26" y="30" textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--ink-900)">
-        {percentage}%
-      </text>
-    </svg>
   );
 }

@@ -7,7 +7,7 @@ export function OpsStatCards({ metrics }: { metrics: OpsMetrics }) {
     {
       label: "Active shifts",
       value: metrics.activeShifts,
-      sub: `${metrics.onShift} staff · ${metrics.uncoveredShifts} uncovered`,
+      sub: `${metrics.onShift} staff · ${metrics.uncoveredShifts} open`,
       icon: Users,
       tone: "brand" as const,
     },

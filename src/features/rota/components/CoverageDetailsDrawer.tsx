@@ -25,43 +25,47 @@ export function CoverageDetailsDrawer({
     (coveragePct === 0 &&
       openShiftCount === 0 &&
       roleCoverage.every((r) => r.value === "No shifts planned"));
-  const coverageTone = isZeroPlanned
+
+  const assignedCount =
+    plannedShiftCount !== undefined ? Math.max(0, plannedShiftCount - openShiftCount) : null;
+
+  const statusTone = isZeroPlanned
     ? "muted"
-    : coveragePct > 110
+    : openShiftCount > 0
       ? "warning"
-      : coveragePct >= 95
-        ? "success"
-        : coveragePct >= 80
-          ? "warning"
-          : "danger";
-  const coverageLabel = isZeroPlanned
+      : "success";
+
+  const statusLabel = isZeroPlanned
     ? "No shifts planned"
-    : coveragePct > 110
-      ? `${coveragePct}% over target`
-      : `${coveragePct}% schedule load`;
+    : openShiftCount > 0
+      ? `${openShiftCount} open shift${openShiftCount === 1 ? "" : "s"}`
+      : "All shifts assigned";
+
+  const assignmentSummary = isZeroPlanned
+    ? "No shifts planned"
+    : assignedCount !== null && plannedShiftCount !== undefined
+      ? `${assignedCount} of ${plannedShiftCount} assigned`
+      : `${coveragePct}%`;
 
   return (
     <DrawerShell
       open={open}
       onOpenChange={onOpenChange}
-      title="Coverage details"
-      description="Scheduling health for the current visible rota."
-      meta={<StatusBadge tone={coverageTone}>{coverageLabel}</StatusBadge>}
+      title="Shift assignment details"
+      description="Scheduling status for the current visible rota."
+      meta={<StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>}
       footer={<ActionButton onClick={() => onOpenChange(false)}>Close</ActionButton>}
     >
       <FormSection title="Week summary">
         <dl className="divide-y divide-border">
           <DetailRow label="Visible staff" value={`${staffCount}`} />
-          <DetailRow
-            label="Schedule load"
-            value={isZeroPlanned ? "No shifts planned" : `${coveragePct}%`}
-          />
+          <DetailRow label="Shift assignment" value={assignmentSummary} />
           <DetailRow label="Open shifts" value={`${openShiftCount}`} />
           <DetailRow label="Conflicts" value={`${conflictCount}`} />
         </dl>
       </FormSection>
 
-      <FormSection title="Role coverage">
+      <FormSection title="Role assignment">
         <div className="space-y-3">
           {roleCoverage.map((row) => (
             <div key={row.label} className="space-y-1">
@@ -71,9 +75,7 @@ export function CoverageDetailsDrawer({
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className={`h-full rounded-full ${
-                    row.pct >= 85 ? "bg-success" : row.pct >= 70 ? "bg-warning" : "bg-danger"
-                  }`}
+                  className="h-full rounded-full bg-brand"
                   style={{ width: `${row.pct}%` }}
                 />
               </div>
@@ -81,7 +83,7 @@ export function CoverageDetailsDrawer({
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          Role bars show how many days have at least one assigned shift for that role.
+          Role bars show assigned shifts relative to planned shifts for that role.
         </p>
       </FormSection>
     </DrawerShell>

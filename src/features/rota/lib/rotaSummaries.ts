@@ -64,7 +64,7 @@ export function buildRoleCoverage(
           ? "No shifts planned"
           : open > 0
             ? `${assigned} of ${planned} assigned · ${open} open`
-            : `${assigned} assigned`;
+            : `${assigned} of ${planned} assigned`;
       return { label: role, value, pct, tone };
     })
     .sort((a, b) => b.pct - a.pct || a.label.localeCompare(b.label));
@@ -112,7 +112,12 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
       (sum, shift) => sum + shiftHours(shift.start, shift.end),
       0,
     );
-    const coverage = dayShifts.length ? Math.round((assigned.length / dayShifts.length) * 100) : 0;
+    const c =
+      dayShifts.length === 0
+        ? ""
+        : open === dayShifts.length
+          ? `${open} open`
+          : `${assigned.length} of ${dayShifts.length} assigned`;
     const tone =
       open > 0
         ? "warning"
@@ -122,7 +127,7 @@ export function buildDayStats(shifts: DraftShift[]): RotaDayStat[] {
 
     return {
       h: `${Math.round(plannedHours)}h`,
-      c: dayShifts.length > 0 ? `${coverage}%` : "",
+      c,
       tone,
       hours: plannedHours,
     };

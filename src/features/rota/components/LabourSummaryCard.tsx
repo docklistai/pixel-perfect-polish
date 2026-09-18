@@ -9,28 +9,6 @@ const DEMO_FORECAST_SALES_PENCE = 1_780_000;
 const DEMO_BLENDED_RATE_PENCE = 1_400;
 const DEMO_LABOUR_TARGET_PCT = 30;
 
-function Ring({ pct }: { pct: number }) {
-  const r = 18;
-  const c = 2 * Math.PI * r;
-  const dash = (Math.min(100, Math.max(0, pct)) / 100) * c;
-  return (
-    <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden>
-      <circle cx="22" cy="22" r={r} stroke="var(--border)" strokeWidth="4" fill="none" />
-      <circle
-        cx="22"
-        cy="22"
-        r={r}
-        stroke="var(--brand)"
-        strokeWidth="4"
-        fill="none"
-        strokeLinecap="round"
-        strokeDasharray={`${dash} ${c}`}
-        transform="rotate(-90 22 22)"
-      />
-    </svg>
-  );
-}
-
 const TONE_TEXT = {
   ok: "text-brand",
   warning: "text-warning",
@@ -54,13 +32,12 @@ export function LabourSummaryCard({
   source: "live" | "demo";
   scheduledHours: number;
   contractedHours: number;
-  coveragePct: number;
+  coveragePct?: number;
   /** Live cost estimate; null while demo data or settings are on screen. */
   labour: LabourCostView | null;
   onViewCoverageDetails: () => void;
 }) {
   const navigate = useNavigate();
-  const clampedPct = Math.min(100, Math.max(0, coveragePct));
 
   const isLiveEstimate = source === "live" && labour !== null;
   const view = isLiveEstimate
@@ -126,7 +103,6 @@ export function LabourSummaryCard({
             {view.targetPctLabel ? `vs ${view.targetPctLabel} target` : "labour % target unset"}
           </div>
         </div>
-        <Ring pct={clampedPct} />
       </div>
 
       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -158,7 +134,7 @@ export function LabourSummaryCard({
         className="mt-2 px-0 text-xs font-semibold text-brand"
         onClick={onViewCoverageDetails}
       >
-        View coverage details
+        View shift assignment
       </ActionButton>
     </Card>
   );
