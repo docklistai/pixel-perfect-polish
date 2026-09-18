@@ -16,11 +16,11 @@ export function usePortalOpenShiftConstraints(): PortalOpenShiftConstraintState 
   const oneOff = usePortalOneOffUnavailability();
   const constraints = React.useMemo(
     () => ({
-      blockingLeave: leave.blockingLeave.map((request) => ({
+      blockingLeave: (leave.blockingLeave ?? leave.approvedLeave ?? []).map((request) => ({
         startIso: request.startIso,
         endIso: request.endIso,
       })),
-      approvedLeave: leave.approvedLeave.map((request) => ({
+      approvedLeave: (leave.approvedLeave ?? []).map((request) => ({
         startIso: request.startIso,
         endIso: request.endIso,
       })),
