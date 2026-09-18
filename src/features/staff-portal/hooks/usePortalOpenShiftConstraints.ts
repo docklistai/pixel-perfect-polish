@@ -16,6 +16,10 @@ export function usePortalOpenShiftConstraints(): PortalOpenShiftConstraintState 
   const oneOff = usePortalOneOffUnavailability();
   const constraints = React.useMemo(
     () => ({
+      blockingLeave: leave.blockingLeave.map((request) => ({
+        startIso: request.startIso,
+        endIso: request.endIso,
+      })),
       approvedLeave: leave.approvedLeave.map((request) => ({
         startIso: request.startIso,
         endIso: request.endIso,
@@ -31,7 +35,7 @@ export function usePortalOpenShiftConstraints(): PortalOpenShiftConstraintState 
           .map((request) => request.date),
       ),
     }),
-    [leave.approvedLeave, oneOff.requests, recurring.requests],
+    [leave.blockingLeave, leave.approvedLeave, oneOff.requests, recurring.requests],
   );
   return {
     isLoading: leave.isLoading || recurring.isLoading || oneOff.isLoading,

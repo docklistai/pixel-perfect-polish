@@ -59,6 +59,19 @@ export function upcomingApprovedLeaveRequests(
     .sort((a, b) => a.startIso.localeCompare(b.startIso));
 }
 
+export function upcomingBlockingLeaveRequests(
+  requests: PortalLeaveRequest[],
+  todayIso: string,
+): PortalLeaveRequest[] {
+  return requests
+    .filter(
+      (request) =>
+        (request.status === "approved" || request.status === "pending") &&
+        request.endIso >= todayIso,
+    )
+    .sort((a, b) => a.startIso.localeCompare(b.startIso));
+}
+
 export async function fetchPortalLeaveRequests(
   workspaceId: string,
   staffMemberId: string,

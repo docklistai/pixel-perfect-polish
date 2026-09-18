@@ -2,7 +2,11 @@ import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { fetchPortalLeaveRequests, upcomingApprovedLeaveRequests } from "../api/portalLiveData";
+import {
+  fetchPortalLeaveRequests,
+  upcomingApprovedLeaveRequests,
+  upcomingBlockingLeaveRequests,
+} from "../api/portalLiveData";
 import type { PortalLeaveRequest } from "../api/portalLiveData";
 import { cancelPortalLeaveRequestFn } from "../api/portalLeaveActions";
 import { operationalLeaveRange } from "@/features/leave/lib/leaveQueryRange";
@@ -21,6 +25,7 @@ export type PortalLeaveRequestsState = {
   isWithdrawing: boolean;
   withdraw: (leaveRequestId: string) => void;
   approvedLeave: PortalLeaveRequest[];
+  blockingLeave: PortalLeaveRequest[];
   requestHistory: PortalLeaveRequest[];
 };
 
@@ -66,6 +71,7 @@ export function usePortalLeaveRequests(): PortalLeaveRequestsState {
     : new Date().toISOString().slice(0, 10);
 
   const approvedLeave = upcomingApprovedLeaveRequests(data, todayIso);
+  const blockingLeave = upcomingBlockingLeaveRequests(data, todayIso);
   const withdrawMutation = useMutation({
     mutationFn: async (leaveRequestId: string) => {
       const result = await cancelPortalLeaveRequestFn({
@@ -94,6 +100,7 @@ export function usePortalLeaveRequests(): PortalLeaveRequestsState {
     isWithdrawing: withdrawMutation.isPending,
     withdraw: (leaveRequestId) => withdrawMutation.mutate(leaveRequestId),
     approvedLeave: isLive ? approvedLeave : [],
+    blockingLeave: isLive ? blockingLeave : [],
     requestHistory: isLive ? data : [],
   };
 }

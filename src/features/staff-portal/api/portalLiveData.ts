@@ -191,6 +191,7 @@ export {
   fetchPortalLeaveRequests,
   mapLeaveRequest,
   upcomingApprovedLeaveRequests,
+  upcomingBlockingLeaveRequests,
   type LeaveRequestViewRow,
   type PortalLeaveRequest,
 } from "./portalLeaveData";
