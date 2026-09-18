@@ -20,6 +20,7 @@ import { useRotaLiveData } from "./useRotaLiveData";
 import { useRotaLivePersistence } from "./useRotaLivePersistence";
 import { useRotaConfirmations } from "./useRotaConfirmations";
 import { useWorkspaceSelector } from "@/features/demo/store/useWorkspaceStore";
+import { extractRoleOptions } from "../lib/assignableStaff";
 
 export function useRotaDraftController(initialLocationId: string | null = null) {
   const weekDraft = useRotaWeekDrafts();
@@ -138,7 +139,7 @@ export function useRotaDraftController(initialLocationId: string | null = null) 
     assignableStaff,
     leaveRequests,
     dayIsoDates: derived.dayIsoDates,
-    roleOptions: Array.from(new Set(roster.map((row) => row.role))),
+    roleOptions: extractRoleOptions(roster),
     filters,
     setFilters,
     staffSearch,

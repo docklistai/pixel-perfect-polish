@@ -47,6 +47,9 @@ export function useShiftActionHandlers({
     const roles = new Set<string>();
     for (const row of staffRows) {
       if (row.staff.role) roles.add(row.staff.role);
+      for (const role of row.staff.eligibleRoles ?? []) {
+        if (role) roles.add(role);
+      }
     }
     for (const role of configuredRoles ?? []) roles.add(role);
     return [...roles];

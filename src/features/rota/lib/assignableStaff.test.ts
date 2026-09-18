@@ -3,6 +3,7 @@ import {
   COPY_ASSIGNMENT_BLOCKED_REASON,
   filterStaffByRoleEligibility,
   getAssignableStaffRows,
+  extractRoleOptions,
   getShiftCopyBlockedReason,
   isShiftCopyAssignable,
   isStaffEligibleForRole,
@@ -174,5 +175,54 @@ describe("isShiftCopyAssignable", () => {
     expect(getShiftCopyBlockedReason(undefined, activeStaff)).toBe(
       "The source shift is no longer available.",
     );
+  });
+});
+
+describe("extractRoleOptions", () => {
+  it("extracts and combines primary and secondary eligible roles", () => {
+    const roster = [
+      { role: "FOH Supervisor", eligibleRoles: ["Barista"] },
+      { role: "Bartender", eligibleRoles: ["Sommelier"] },
+      { role: "Chef", eligibleRoles: ["Kitchen Porter"] },
+    ];
+    const options = extractRoleOptions(roster);
+    expect(options).toEqual([
+      "Barista",
+      "Bartender",
+      "Chef",
+      "FOH Supervisor",
+      "Kitchen Porter",
+      "Sommelier",
+    ]);
+  });
+
+  it("includes secondary-only roles when no staff holds them as a primary role", () => {
+    const roster = [
+      { role: "Waiter", eligibleRoles: ["Sommelier", "Mixologist"] },
+      { role: "Bartender", eligibleRoles: [] },
+    ];
+    const options = extractRoleOptions(roster);
+    expect(options).toContain("Sommelier");
+    expect(options).toContain("Mixologist");
+    expect(options).toContain("Waiter");
+    expect(options).toContain("Bartender");
+  });
+
+  it("deduplicates case-insensitively while preserving display casing", () => {
+    const roster = [
+      { role: "Bartender", eligibleRoles: ["bartender", "BARTENDER"] },
+      { role: "Waiter", eligibleRoles: ["waiter"] },
+    ];
+    const options = extractRoleOptions(roster);
+    expect(options).toEqual(["Bartender", "Waiter"]);
+  });
+
+  it("handles staff with no eligibleRoles cleanly", () => {
+    const roster = [
+      { role: "Chef" },
+      { role: "Waiter", eligibleRoles: undefined },
+    ];
+    const options = extractRoleOptions(roster);
+    expect(options).toEqual(["Chef", "Waiter"]);
   });
 });

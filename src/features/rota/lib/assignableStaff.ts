@@ -65,3 +65,26 @@ export function getShiftCopyBlockedReason(
   if (!shift) return COPY_SOURCE_MISSING_REASON;
   return isShiftCopyAssignable(shift, assignableStaff) ? null : COPY_ASSIGNMENT_BLOCKED_REASON;
 }
+
+/**
+ * Extracts and deduplicates all primary and secondary eligible roles from the roster.
+ * Preserves the display casing of the first occurrence and sorts alphabetically.
+ */
+export function extractRoleOptions(
+  roster: readonly { role: string; eligibleRoles?: string[] }[],
+): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const row of roster) {
+    const roles = [row.role, ...(row.eligibleRoles ?? [])];
+    for (const r of roles) {
+      if (!r || !r.trim()) continue;
+      const key = normaliseRoleKey(r);
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        result.push(r.trim());
+      }
+    }
+  }
+  return result.sort((a, b) => a.localeCompare(b));
+}
