@@ -67,6 +67,7 @@ describe("PortalThisWeekCard", () => {
       isWithdrawing: false,
       withdraw: vi.fn(),
       approvedLeave: [],
+      blockingLeave: [],
       requestHistory: [],
     });
 
@@ -123,6 +124,7 @@ describe("PortalThisWeekCard", () => {
       isWithdrawing: false,
       withdraw: vi.fn(),
       approvedLeave: [],
+      blockingLeave: [],
       requestHistory: [
         {
           id: "l1",

@@ -25,7 +25,7 @@ export type PortalLeaveRequestsState = {
   isWithdrawing: boolean;
   withdraw: (leaveRequestId: string) => void;
   approvedLeave: PortalLeaveRequest[];
-  blockingLeave: PortalLeaveRequest[];
+  blockingLeave?: PortalLeaveRequest[];
   requestHistory: PortalLeaveRequest[];
 };
 

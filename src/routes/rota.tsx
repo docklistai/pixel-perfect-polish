@@ -174,7 +174,6 @@ function RotaPage() {
                   staffSearch={rota.staffSearch}
                   hasActiveFilters={rota.hasActiveFilters}
                   plannedShiftCount={rota.plannedShiftCount}
-                  configuredRoles={rota.roleOptions}
                   scheduleTitleId={SCHEDULE_TITLE_ID}
                   scheduleDescId={SCHEDULE_DESC_ID}
                   // A different week, data source or location invalidates every
