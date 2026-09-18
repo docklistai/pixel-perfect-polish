@@ -41,6 +41,7 @@ export function useRotaWeekSearch(
   const navigate = useNavigate();
   const appliedWeekRef = React.useRef<number | null>(null);
   const pendingOutboundRef = React.useRef<number | null>(null);
+  const adoptedInboundRef = React.useRef<number | null>(null);
 
   // Inbound: route URL -> rota state
   React.useEffect(() => {
@@ -60,12 +61,32 @@ export function useRotaWeekSearch(
       return;
     }
     appliedWeekRef.current = targetWeek;
+    // The URL moved on its own — browser Back/Forward, or a deep link landing
+    // before rota state exists. The URL is the authority for that transition,
+    // so record it and let the outbound effect stay quiet until state catches
+    // up. Without this the outbound effect reads the not-yet-updated offset as
+    // a fresh local change and pushes a new entry, so Back never consumes
+    // history and the week oscillates.
+    adoptedInboundRef.current = targetWeek;
     setWeekOffset(targetWeek);
   }, [setWeekOffset, week]);
 
   // Outbound (reverse sync): rota state -> route URL
   React.useEffect(() => {
     if (currentWeekOffset === undefined) return;
+
+    if (adoptedInboundRef.current !== null) {
+      if (currentWeekOffset === adoptedInboundRef.current) {
+        adoptedInboundRef.current = null;
+      }
+      return;
+    }
+
+    // Our own navigation is still in flight. Intermediate URLs it passes
+    // through are not a new local change, so they must not re-push; only a
+    // week the user has since moved to may supersede it.
+    if (pendingOutboundRef.current === currentWeekOffset) return;
+
     const currentSearchWeek = week ?? 0;
     if (currentWeekOffset === currentSearchWeek) return;
 
