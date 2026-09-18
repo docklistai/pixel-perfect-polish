@@ -253,3 +253,24 @@ export function buildAttentionItems(input: DashboardAttentionInput): AttentionIt
 
   return candidates.filter((item): item is AttentionItem => item !== null);
 }
+
+/** Which Home view is asking: the two tabs carry different unresolved work. */
+export type DashboardAttentionView = "today" | "week";
+
+/**
+ * Home keeps exactly one queue per fact. Today already lists unapproved
+ * timesheets in its own card, and pending leave is a week-scoped decision that
+ * belongs to This week, so each view withholds what the other surfaces carry.
+ *
+ * The withholding lives here rather than in the route so the panel can be told
+ * how many signals it is hiding. That count is what keeps its empty state
+ * honest: with signals withheld, an "all clear" would contradict the timesheet
+ * card and the sidebar badges on the very same screen.
+ */
+export function selectVisibleAttentionItems(
+  items: AttentionItem[],
+  view: DashboardAttentionView,
+): AttentionItem[] {
+  const withheld: string[] = view === "week" ? ["/time"] : ["/leave", "/time"];
+  return items.filter((item) => !item.route || !withheld.includes(item.route));
+}

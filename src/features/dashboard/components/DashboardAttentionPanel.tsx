@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, ListChecks } from "lucide-react";
 import { Card, StatusBadge } from "@/components/dl";
 import type { AttentionItem } from "../types";
 import { toneSoft } from "@/components/dl";
@@ -7,11 +7,24 @@ import type { Tone } from "@/components/dl";
 interface Props {
   items: AttentionItem[];
   total: number;
+  /**
+   * Signals this view deliberately withholds, because they are represented on
+   * another Home surface. Home de-duplicates its unresolved work, so an empty
+   * queue does not mean an empty workspace: while this is above zero the panel
+   * must speak only for itself and never claim there is no outstanding work.
+   */
+  hiddenCount?: number;
   onAlertClick: (index: number) => void;
   onViewAll?: () => void;
 }
 
-export function DashboardAttentionPanel({ items, total, onAlertClick, onViewAll }: Props) {
+export function DashboardAttentionPanel({
+  items,
+  total,
+  hiddenCount = 0,
+  onAlertClick,
+  onViewAll,
+}: Props) {
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
@@ -19,15 +32,27 @@ export function DashboardAttentionPanel({ items, total, onAlertClick, onViewAll 
         <StatusBadge tone={total > 0 ? "warning" : "success"}>{total}</StatusBadge>
       </div>
       {items.length === 0 ? (
-        <div className="mt-3 flex flex-col items-center gap-2 rounded-[10px] border border-border px-3 py-6 text-center">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-success-soft text-success">
-            <CheckCircle2 className="h-4 w-4" aria-hidden />
+        hiddenCount > 0 ? (
+          <div className="mt-3 flex flex-col items-center gap-2 rounded-[10px] border border-border px-3 py-6 text-center">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-muted text-muted-foreground">
+              <ListChecks className="h-4 w-4" aria-hidden />
+            </div>
+            <div className="text-sm font-medium">No additional actions here</div>
+            <div className="text-xs text-muted-foreground">
+              Unresolved work is still listed elsewhere on Home.
+            </div>
           </div>
-          <div className="text-sm font-medium">You're all clear</div>
-          <div className="text-xs text-muted-foreground">
-            No open shifts, pending timesheets, or leave decisions right now.
+        ) : (
+          <div className="mt-3 flex flex-col items-center gap-2 rounded-[10px] border border-border px-3 py-6 text-center">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-success-soft text-success">
+              <CheckCircle2 className="h-4 w-4" aria-hidden />
+            </div>
+            <div className="text-sm font-medium">You're all clear</div>
+            <div className="text-xs text-muted-foreground">
+              No open shifts, pending timesheets, or leave decisions right now.
+            </div>
           </div>
-        </div>
+        )
       ) : (
         <div className="mt-3 space-y-2">
           {items.map((a, idx) => {

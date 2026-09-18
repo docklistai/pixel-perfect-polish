@@ -13,11 +13,17 @@ import type { AttentionItem } from "../types";
  * a plain statement rather than something that manufactures urgency.
  */
 
-function renderPanel(items: AttentionItem[], onAlertClick = vi.fn(), onViewAll = vi.fn()) {
+function renderPanel(
+  items: AttentionItem[],
+  onAlertClick = vi.fn(),
+  onViewAll = vi.fn(),
+  hiddenCount = 0,
+) {
   render(
     <DashboardAttentionPanel
       items={items}
       total={items.length}
+      hiddenCount={hiddenCount}
       onAlertClick={onAlertClick}
       onViewAll={onViewAll}
     />,
@@ -50,6 +56,52 @@ describe("DashboardAttentionPanel — empty state", () => {
     renderPanel([]);
     expect(screen.getByText("0")).toBeInTheDocument();
     expect(screen.queryByText(/View all alerts/)).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Home de-duplicates its unresolved work, so an empty queue is not an empty
+ * workspace. While signals are withheld the panel speaks only for itself:
+ * claiming "no pending timesheets" beside a card counting two, and a sidebar
+ * badge counting two, is the contradiction this guards.
+ */
+describe("DashboardAttentionPanel — empty because signals are withheld", () => {
+  it("never claims there are no pending timesheets when one is withheld", () => {
+    renderPanel([], vi.fn(), vi.fn(), 1);
+    expect(screen.queryByText("You're all clear")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("No open shifts, pending timesheets, or leave decisions right now."),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/no pending timesheets/i)).not.toBeInTheDocument();
+  });
+
+  it("never claims there are no leave decisions when leave is withheld", () => {
+    renderPanel([], vi.fn(), vi.fn(), 2);
+    expect(screen.queryByText(/leave decisions right now/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/no leave/i)).not.toBeInTheDocument();
+  });
+
+  it("states only that this list has nothing more, and points onward", () => {
+    renderPanel([], vi.fn(), vi.fn(), 1);
+    expect(screen.getByText("No additional actions here")).toBeInTheDocument();
+    expect(
+      screen.getByText("Unresolved work is still listed elsewhere on Home."),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the genuine all-clear when nothing at all is outstanding", () => {
+    renderPanel([], vi.fn(), vi.fn(), 0);
+    expect(screen.getByText("You're all clear")).toBeInTheDocument();
+    expect(
+      screen.getByText("No open shifts, pending timesheets, or leave decisions right now."),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the queue itself whenever it has items, withheld signals or not", () => {
+    renderPanel(fourSignals, vi.fn(), vi.fn(), 2);
+    expect(screen.queryByText("No additional actions here")).not.toBeInTheDocument();
+    expect(screen.queryByText("You're all clear")).not.toBeInTheDocument();
+    expect(screen.getByText(fourSignals[0]!.t)).toBeInTheDocument();
   });
 });
 

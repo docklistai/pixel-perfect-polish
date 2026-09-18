@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { buildAttentionItems, type DashboardAttentionInput } from "./dashboardAttention";
+import {
+  buildAttentionItems,
+  selectVisibleAttentionItems,
+  type DashboardAttentionInput,
+} from "./dashboardAttention";
 
 /**
  * The attention queue's rules, tested as pure data.
@@ -336,5 +340,62 @@ describe("buildAttentionItems — every item is actionable", () => {
       "/time",
       "/time",
     ]);
+  });
+});
+
+/**
+ * Home shows one queue per fact. These pin the de-duplication itself, so a
+ * later change cannot quietly restore the duplicate leave/timesheet entries the
+ * campaign removed, nor quietly stop withholding them.
+ */
+describe("selectVisibleAttentionItems", () => {
+  const seeded = buildAttentionItems(
+    input({ pendingTimeCount: 2, pendingLeaveCount: 3, openShifts: 1 }),
+  );
+
+  it("withholds timesheets from Today, which lists them in its own card", () => {
+    const today = selectVisibleAttentionItems(seeded, "today");
+    expect(today.filter((item) => item.route === "/time")).toHaveLength(0);
+  });
+
+  it("withholds leave from Today, which is a week-scoped decision", () => {
+    const today = selectVisibleAttentionItems(seeded, "today");
+    expect(today.filter((item) => item.route === "/leave")).toHaveLength(0);
+  });
+
+  it("keeps pending leave exactly once in This week", () => {
+    const week = selectVisibleAttentionItems(seeded, "week");
+    expect(week.filter((item) => item.route === "/leave")).toHaveLength(1);
+  });
+
+  it("withholds timesheets from This week, so they are never listed twice", () => {
+    const week = selectVisibleAttentionItems(seeded, "week");
+    expect(week.filter((item) => item.route === "/time")).toHaveLength(0);
+  });
+
+  it("gives Today and This week materially different queues", () => {
+    const today = selectVisibleAttentionItems(seeded, "today");
+    const week = selectVisibleAttentionItems(seeded, "week");
+    expect(today.map((item) => item.t)).not.toEqual(week.map((item) => item.t));
+    expect(week.length).toBeGreaterThan(today.length);
+  });
+
+  it("reports a withheld count whenever it hides something", () => {
+    const today = selectVisibleAttentionItems(seeded, "today");
+    const week = selectVisibleAttentionItems(seeded, "week");
+    expect(seeded.length - today.length).toBeGreaterThan(0);
+    expect(seeded.length - week.length).toBeGreaterThan(0);
+  });
+
+  it("withholds nothing, in either view, from a workspace with no unresolved work", () => {
+    const none = buildAttentionItems(input());
+    expect(selectVisibleAttentionItems(none, "today")).toEqual(none);
+    expect(selectVisibleAttentionItems(none, "week")).toEqual(none);
+    expect(none.length - selectVisibleAttentionItems(none, "today").length).toBe(0);
+  });
+
+  it("keeps items that carry no route", () => {
+    const routeless = [{ t: "Manual note", s: "No destination" }];
+    expect(selectVisibleAttentionItems(routeless, "today")).toHaveLength(1);
   });
 });

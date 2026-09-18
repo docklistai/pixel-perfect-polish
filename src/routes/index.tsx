@@ -20,6 +20,7 @@ import { DashboardTertiaryRow } from "@/features/dashboard/components/DashboardT
 import { DashboardAlertDrawer } from "@/features/dashboard/components/DashboardAlertDrawer";
 import { DashboardKpiDetailDrawer } from "@/features/dashboard/components/DashboardKpiDetailDrawer";
 import type { KpiItem } from "@/features/dashboard/types";
+import { selectVisibleAttentionItems } from "@/features/dashboard/lib/dashboardAttention";
 import { announcementItems, quickActionItems } from "@/features/dashboard/data/dashboardDemoData";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
 import { useTimePulse } from "@/features/dashboard/hooks/useTimePulse";
@@ -82,14 +83,14 @@ function Home() {
     () => (isLiveDashboard ? quickActionItems.filter((item) => !item.preview) : quickActionItems),
     [isLiveDashboard],
   );
-  const visibleAttentionItems = React.useMemo(() => {
-    if (filter === "week") {
-      return dashboard.attentionItems.filter((item) => item.route !== "/time");
-    }
-    return dashboard.attentionItems.filter(
-      (item) => item.route !== "/leave" && item.route !== "/time",
-    );
-  }, [filter, dashboard.attentionItems]);
+  const visibleAttentionItems = React.useMemo(
+    () => selectVisibleAttentionItems(dashboard.attentionItems, filter),
+    [filter, dashboard.attentionItems],
+  );
+  // What this view withholds because another Home surface already carries it.
+  // The panel needs this to keep its empty state honest: with signals hidden,
+  // "all clear" would contradict the timesheet card and the sidebar badges.
+  const hiddenAttentionCount = dashboard.attentionItems.length - visibleAttentionItems.length;
 
   useDismissOnOutside(moreRef, moreOpen, () => setMoreOpen(false));
 
@@ -216,6 +217,7 @@ function Home() {
             <DashboardAttentionPanel
               items={visibleAttentionItems}
               total={visibleAttentionItems.length}
+              hiddenCount={hiddenAttentionCount}
               onAlertClick={(idx) => {
                 setSelectedAlertIdx(idx);
                 setAlertOpen(true);
