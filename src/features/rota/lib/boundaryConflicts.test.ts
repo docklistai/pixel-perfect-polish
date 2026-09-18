@@ -110,8 +110,8 @@ describe("buildBoundaryConflictSummaries", () => {
     expect(summary!.day).toBe("Mon 8 Jun");
     // Times read through `formatShiftTime`, the same house style the in-week
     // conflict summaries use.
-    expect(summary!.detail).toContain("5am – 1pm");
-    expect(summary!.detail).toContain("Sun 7 Jun 10pm – 6am");
+    expect(summary!.detail).toContain("05:00–13:00");
+    expect(summary!.detail).toContain("Sun 7 Jun 22:00–06:00");
     expect(summary!.cause).toContain("the previous rota week");
   });
 

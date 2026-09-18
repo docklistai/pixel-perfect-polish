@@ -42,20 +42,16 @@ export function shiftHours(start: string, end: string): number {
   return duration / 60;
 }
 
-function formatTime(hhmm: string): string {
+export function formatTime(hhmm: string): string {
   const minutes = parseHHMMToMinutes(hhmm);
   if (minutes === null) return hhmm;
   const hour = Math.floor(minutes / 60);
   const minute = minutes % 60;
-  const period = hour >= 12 ? "pm" : "am";
-  const display = ((hour + 11) % 12) + 1;
-  return minute === 0
-    ? `${display}${period}`
-    : `${display}:${String(minute).padStart(2, "0")}${period}`;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
 export function formatShiftTime(start: string, end: string): string {
-  return `${formatTime(start)} – ${formatTime(end)}`;
+  return `${formatTime(start)}–${formatTime(end)}`;
 }
 
 export function isStartBeforeEnd(start: string, end: string): boolean {

@@ -11,9 +11,8 @@ function getHeatmapDayLabels(rotaStartWeekday: number = 0): string[] {
 const PALETTE = ["#ECFAF9", "#DCF4F3", "#A8E0DE", "#5BC2BF", "#0E9591"];
 
 function hourLabel(hour: number) {
-  if (hour === 0) return "12am";
-  if (hour === 12) return "12pm";
-  return `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? "pm" : "am"}`;
+  const normalizedHour = ((hour % 24) + 24) % 24;
+  return `${String(normalizedHour).padStart(2, "0")}:00`;
 }
 
 export function ReportsCoverageHeatmapCard({

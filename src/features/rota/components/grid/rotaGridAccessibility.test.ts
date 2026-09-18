@@ -39,8 +39,7 @@ describe("rota grid accessibility", () => {
     });
 
     expect(accessibleName).toContain("Asha Khan, Monday 13 July: Chef shift");
-    expect(accessibleName).toContain("9am");
-    expect(accessibleName).toContain("5pm");
+    expect(accessibleName).toContain("09:00–17:00");
     expect(accessibleName).toContain("conflict, edited in draft");
     expect(accessibleName).toContain("Enter or Space");
   });
