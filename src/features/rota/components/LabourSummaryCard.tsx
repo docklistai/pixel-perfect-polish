@@ -25,14 +25,12 @@ export function LabourSummaryCard({
   source,
   scheduledHours,
   contractedHours,
-  coveragePct,
   labour,
   onViewCoverageDetails,
 }: {
   source: "live" | "demo";
   scheduledHours: number;
   contractedHours: number;
-  coveragePct?: number;
   /** Live cost estimate; null while demo data or settings are on screen. */
   labour: LabourCostView | null;
   onViewCoverageDetails: () => void;
@@ -66,8 +64,8 @@ export function LabourSummaryCard({
             className="badge"
             title={
               isLiveEstimate
-                ? "Cost estimate from your labour targets and staff rates. Hours and coverage are live."
-                : "Demo figures. Scheduled hours and coverage reflect the grid."
+                ? "Cost estimate from your labour targets and staff rates. Scheduled hours are live."
+                : "Demo figures. Scheduled hours reflect the grid."
             }
           >
             {isLiveEstimate ? "Estimate" : "Demo figures"}

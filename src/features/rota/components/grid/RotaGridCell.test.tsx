@@ -351,4 +351,11 @@ describe("RotaGridCell — existing behaviour preserved", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(move.commitTo).toHaveBeenCalled();
   });
+
+  it("renders the shift time range in 24-hour format on the shift pill", () => {
+    const { container } = renderCell({
+      cell: makeCell([makeShift({ start: "09:00", end: "17:00" })]),
+    });
+    expect(container.querySelector(".rota-shift-pill")).toHaveTextContent("09:00–17:00");
+  });
 });

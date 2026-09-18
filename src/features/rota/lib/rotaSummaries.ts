@@ -58,16 +58,15 @@ export function buildRoleCoverage(
   return Array.from(roles.entries())
     .map(([role, { assigned, open, tone }]) => {
       const planned = assigned + open;
-      const pct = planned > 0 ? Math.round((assigned / planned) * 100) : 0;
       const value =
         planned === 0
           ? "No shifts planned"
           : open > 0
             ? `${assigned} of ${planned} assigned · ${open} open`
             : `${assigned} of ${planned} assigned`;
-      return { label: role, value, pct, tone };
+      return { label: role, value, tone };
     })
-    .sort((a, b) => b.pct - a.pct || a.label.localeCompare(b.label));
+    .sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /**
@@ -87,12 +86,6 @@ export function totalScheduledHours(shifts: DraftShift[]): number {
     (sum, s) => (s.staffId !== null ? sum + shiftHours(s.start, s.end) : sum),
     0,
   );
-}
-
-export function coveragePercent(staff: StaffMember[], shifts: DraftShift[]): number {
-  const planned = countPlannedShifts(shifts);
-  if (!planned) return 0;
-  return Math.max(0, Math.round((countAssignedShifts(shifts) / planned) * 100));
 }
 
 export type RotaDayStat = {

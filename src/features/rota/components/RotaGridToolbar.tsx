@@ -7,7 +7,6 @@ export function RotaGridToolbar({
   conflictCount,
   openShiftCount,
   workingTimeAlertCount,
-  coveragePct,
   plannedShiftCount,
   assignedShiftCount,
   onFilter,
@@ -24,7 +23,6 @@ export function RotaGridToolbar({
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;
-  coveragePct: number;
   plannedShiftCount?: number;
   assignedShiftCount?: number;
   onFilter: () => void;
@@ -38,7 +36,9 @@ export function RotaGridToolbar({
   canUndo: boolean;
   canRedo: boolean;
 }) {
-  const planned = plannedShiftCount ?? (openShiftCount === 0 && coveragePct === 0 ? 0 : 1);
+  const planned =
+    plannedShiftCount ??
+    (assignedShiftCount !== undefined ? assignedShiftCount + openShiftCount : openShiftCount);
   const assigned = assignedShiftCount ?? Math.max(0, planned - openShiftCount);
 
   const coverageBadge = (() => {

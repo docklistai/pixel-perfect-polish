@@ -22,7 +22,6 @@ export function PublishRotaDialog({
   staffCount,
   assignedShiftCount,
   plannedShiftCount,
-  coveragePct,
   conflictCount,
   openShiftCount,
   workingTimeAlertCount,
@@ -45,7 +44,6 @@ export function PublishRotaDialog({
   staffCount: number;
   assignedShiftCount: number;
   plannedShiftCount: number;
-  coveragePct: number;
   conflictCount: number;
   openShiftCount: number;
   workingTimeAlertCount: number;

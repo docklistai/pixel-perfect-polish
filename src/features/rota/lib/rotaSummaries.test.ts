@@ -3,7 +3,6 @@ import type { DraftShift, RotaDayIndex, StaffMember } from "../types";
 import {
   buildDayStats,
   buildRoleCoverage,
-  coveragePercent,
   staffWeeklyHourTarget,
   workingTimeAlerts,
 } from "./rotaSummaries";
@@ -77,31 +76,6 @@ describe("staffWeeklyHourTarget", () => {
 
   it("is zero for an empty roster", () => {
     expect(staffWeeklyHourTarget([])).toBe(0);
-  });
-});
-
-describe("coveragePercent", () => {
-  it("returns 0 on an empty week with no planned shifts", () => {
-    expect(coveragePercent([staff("a", 2400)], [])).toBe(0);
-  });
-
-  it("calculates percentage of assigned shifts out of planned shifts", () => {
-    const shifts: DraftShift[] = [
-      ...daysScheduled("a", 3), // 3 assigned
-      {
-        id: "open-1",
-        dayIndex: 3,
-        staffId: null,
-        role: "Chef",
-        start: "09:00",
-        end: "17:00",
-        breakMinutes: 30,
-        tone: "warning",
-        status: "open",
-      },
-    ];
-    // 3 assigned out of 4 planned = 75%
-    expect(coveragePercent([staff("a", 2400)], shifts)).toBe(75);
   });
 });
 
@@ -219,7 +193,6 @@ describe("buildRoleCoverage", () => {
     expect(roleCoverage[0]).toEqual({
       label: "Chef",
       value: "1 of 2 assigned · 1 open",
-      pct: 50,
       tone: "info",
     });
   });
@@ -231,7 +204,6 @@ describe("buildRoleCoverage", () => {
     expect(roleCoverage[0]).toEqual({
       label: "Chef",
       value: "No shifts planned",
-      pct: 0,
       tone: "info",
     });
   });
@@ -244,8 +216,90 @@ describe("buildRoleCoverage", () => {
     expect(roleCoverage[0]).toEqual({
       label: "Chef",
       value: "3 of 3 assigned",
-      pct: 100,
       tone: "info",
     });
+  });
+
+  it("sorts roles stably by label without ranking by completion percentage", () => {
+    const team: StaffMember[] = [
+      {
+        id: "1",
+        name: "Staff 1",
+        role: "Sous Chef",
+        hrs: "40h",
+        contractedMinutesPerWeek: 2400,
+        img: 1,
+        tone: "info",
+      },
+      {
+        id: "2",
+        name: "Staff 2",
+        role: "Bartender",
+        hrs: "40h",
+        contractedMinutesPerWeek: 2400,
+        img: 1,
+        tone: "info",
+      },
+      {
+        id: "3",
+        name: "Staff 3",
+        role: "Head Chef",
+        hrs: "40h",
+        contractedMinutesPerWeek: 2400,
+        img: 1,
+        tone: "info",
+      },
+    ];
+    // Bartender: 0% assigned (1 open)
+    // Head Chef: 100% assigned (1 assigned)
+    // Sous Chef: 50% assigned (1 assigned, 1 open)
+    const shifts: DraftShift[] = [
+      {
+        id: "s1",
+        dayIndex: 0,
+        staffId: null,
+        role: "Bartender",
+        start: "09:00",
+        end: "17:00",
+        breakMinutes: 0,
+        tone: "warning",
+        status: "open",
+      },
+      {
+        id: "s2",
+        dayIndex: 0,
+        staffId: "3",
+        role: "Head Chef",
+        start: "09:00",
+        end: "17:00",
+        breakMinutes: 0,
+        tone: "info",
+        status: "scheduled",
+      },
+      {
+        id: "s3",
+        dayIndex: 0,
+        staffId: "1",
+        role: "Sous Chef",
+        start: "09:00",
+        end: "17:00",
+        breakMinutes: 0,
+        tone: "info",
+        status: "scheduled",
+      },
+      {
+        id: "s4",
+        dayIndex: 1,
+        staffId: null,
+        role: "Sous Chef",
+        start: "09:00",
+        end: "17:00",
+        breakMinutes: 0,
+        tone: "warning",
+        status: "open",
+      },
+    ];
+    const roleCoverage = buildRoleCoverage(team, shifts);
+    expect(roleCoverage.map((r) => r.label)).toEqual(["Bartender", "Head Chef", "Sous Chef"]);
   });
 });

@@ -159,7 +159,7 @@ exception when sqlstate '55000' then
 end $$;
 
 -- --------------------------------------------------------------------------
--- 3. Declined / cancelled leave -> request may proceed
+-- 3a. Declined leave -> request may proceed
 -- --------------------------------------------------------------------------
 reset role;
 select set_config('request.jwt.claims', null, true);
@@ -185,7 +185,41 @@ begin
   end if;
 end $$;
 
--- Clean up request 1
+-- Clean up request
+reset role;
+select set_config('request.jwt.claims', null, true);
+delete from public.open_shift_requests where rota_week_id = '75000000-0000-4000-8000-000000000001';
+
+-- --------------------------------------------------------------------------
+-- 3b. Cancelled overlapping leave -> request may proceed
+-- --------------------------------------------------------------------------
+reset role;
+select set_config('request.jwt.claims', null, true);
+update public.leave_requests
+set status = 'cancelled',
+    decided_at = null,
+    decided_by_membership_id = null,
+    decision_reason = null,
+    start_date = '2099-11-05',
+    end_date = '2099-11-05'
+where id = '75000000-0000-4000-8000-000000000021';
+
+select set_config('request.jwt.claims', '{"sub":"ad000000-0000-4000-8000-000000000751","role":"authenticated"}', true);
+set local role authenticated;
+
+do $$
+declare
+  pub_id uuid;
+  res jsonb;
+begin
+  select published_id into pub_id from p75_shifts where source_shift_id = '75000000-0000-4000-8000-000000000011';
+  res := public.rpc_request_open_shift('10000000-0000-4000-8000-000000000001', pub_id);
+  if res->>'status' <> 'pending' then
+    raise exception 'FAIL: expected request to succeed with cancelled leave, got %', res;
+  end if;
+end $$;
+
+-- Clean up request
 reset role;
 select set_config('request.jwt.claims', null, true);
 delete from public.open_shift_requests where rota_week_id = '75000000-0000-4000-8000-000000000001';

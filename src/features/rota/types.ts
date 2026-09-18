@@ -167,7 +167,6 @@ export type ConflictSummary = {
 export type RoleCoverageSummary = {
   label: string;
   value: string;
-  pct: number;
   tone: string;
 };
 

@@ -108,7 +108,6 @@ export function RotaOverlays({
         staffCount={rota.staff.length}
         assignedShiftCount={rota.assignedShiftCount}
         plannedShiftCount={rota.plannedShiftCount}
-        coveragePct={rota.coveragePct}
         conflictCount={rota.conflictCount}
         openShiftCount={rota.openShiftCount}
         workingTimeAlertCount={workingTimeAlertCount}
@@ -176,9 +175,9 @@ export function RotaOverlays({
         staffCount={rota.staff.length}
         openShiftCount={rota.openShiftCount}
         conflictCount={rota.conflictCount}
-        coveragePct={rota.coveragePct}
         roleCoverage={rota.roleCoverage}
         plannedShiftCount={rota.plannedShiftCount}
+        assignedShiftCount={rota.assignedShiftCount}
       />
       <WorkingTimeDetailsDrawer
         open={openOverlays.workingTime}

@@ -23,7 +23,8 @@ export function buildRotaIssues(
     title: `Schedule conflict — ${conflict.staff}, ${conflict.day}`,
     why: conflict.cause,
     fix: conflict.guidance,
-    impact: "Conflict clears and publishing is unblocked. Coverage stays accurate for the day.",
+    impact:
+      "Conflict clears and publishing is unblocked. Shift assignments stay accurate for the day.",
     shiftId: conflict.id,
   }));
   const workingTimeIssues = workingTimeAlerts.map<RotaIssue>((alert) => ({

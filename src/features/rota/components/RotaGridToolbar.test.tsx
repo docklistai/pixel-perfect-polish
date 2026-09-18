@@ -17,7 +17,6 @@ function renderToolbar(overrides: Partial<Parameters<typeof RotaGridToolbar>[0]>
       conflictCount={0}
       openShiftCount={0}
       workingTimeAlertCount={0}
-      coveragePct={100}
       onFilter={vi.fn()}
       onBuildWeek={vi.fn()}
       onAddShift={vi.fn()}
@@ -93,7 +92,7 @@ describe("RotaGridToolbar undo/redo", () => {
 
 describe("RotaGridToolbar assignment facts", () => {
   it("renders 'No shifts planned' on an empty week with no percentage", () => {
-    renderToolbar({ plannedShiftCount: 0, openShiftCount: 0, coveragePct: 0 });
+    renderToolbar({ plannedShiftCount: 0, openShiftCount: 0 });
     expect(screen.getByText("No shifts planned")).toBeInTheDocument();
     expect(screen.queryByText(/% coverage/i)).not.toBeInTheDocument();
   });
@@ -103,7 +102,6 @@ describe("RotaGridToolbar assignment facts", () => {
       plannedShiftCount: 8,
       assignedShiftCount: 6,
       openShiftCount: 2,
-      coveragePct: 75,
     });
     expect(screen.getByText("6 of 8 assigned · 2 open")).toBeInTheDocument();
     expect(screen.queryByText(/% coverage/i)).not.toBeInTheDocument();
@@ -114,7 +112,6 @@ describe("RotaGridToolbar assignment facts", () => {
       plannedShiftCount: 5,
       assignedShiftCount: 5,
       openShiftCount: 0,
-      coveragePct: 100,
     });
     expect(screen.getByText("All shifts assigned")).toBeInTheDocument();
     expect(screen.queryByText(/% coverage/i)).not.toBeInTheDocument();

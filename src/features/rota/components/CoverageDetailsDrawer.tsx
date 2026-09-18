@@ -7,27 +7,30 @@ export function CoverageDetailsDrawer({
   staffCount,
   openShiftCount,
   conflictCount,
-  coveragePct,
   roleCoverage,
   plannedShiftCount,
+  assignedShiftCount,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   staffCount: number;
   openShiftCount: number;
   conflictCount: number;
-  coveragePct: number;
   roleCoverage: RoleCoverageSummary[];
   plannedShiftCount?: number;
+  assignedShiftCount?: number;
 }) {
+  const planned =
+    plannedShiftCount ??
+    (assignedShiftCount !== undefined
+      ? assignedShiftCount + openShiftCount
+      : roleCoverage.every((r) => r.value === "No shifts planned")
+        ? 0
+        : openShiftCount);
+  const assigned = assignedShiftCount ?? Math.max(0, planned - openShiftCount);
   const isZeroPlanned =
-    plannedShiftCount === 0 ||
-    (coveragePct === 0 &&
-      openShiftCount === 0 &&
-      roleCoverage.every((r) => r.value === "No shifts planned"));
-
-  const assignedCount =
-    plannedShiftCount !== undefined ? Math.max(0, plannedShiftCount - openShiftCount) : null;
+    planned === 0 ||
+    (openShiftCount === 0 && roleCoverage.every((r) => r.value === "No shifts planned"));
 
   const statusTone = isZeroPlanned ? "muted" : openShiftCount > 0 ? "warning" : "success";
 
@@ -39,9 +42,9 @@ export function CoverageDetailsDrawer({
 
   const assignmentSummary = isZeroPlanned
     ? "No shifts planned"
-    : assignedCount !== null && plannedShiftCount !== undefined
-      ? `${assignedCount} of ${plannedShiftCount} assigned`
-      : `${coveragePct}%`;
+    : openShiftCount > 0
+      ? `${assigned} of ${planned} assigned · ${openShiftCount} open`
+      : `${assigned} of ${planned} assigned`;
 
   return (
     <DrawerShell
@@ -62,22 +65,14 @@ export function CoverageDetailsDrawer({
       </FormSection>
 
       <FormSection title="Role assignment">
-        <div className="space-y-3">
+        <div className="divide-y divide-border">
           {roleCoverage.map((row) => (
-            <div key={row.label} className="space-y-1">
-              <div className="flex items-center justify-between gap-3 text-xs">
-                <span className="font-medium text-foreground">{row.label}</span>
-                <span className="text-muted-foreground">{row.value}</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-brand" style={{ width: `${row.pct}%` }} />
-              </div>
+            <div key={row.label} className="flex items-center justify-between gap-3 py-2 text-xs">
+              <span className="font-medium text-foreground">{row.label}</span>
+              <span className="text-muted-foreground">{row.value}</span>
             </div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">
-          Role bars show assigned shifts relative to planned shifts for that role.
-        </p>
       </FormSection>
     </DrawerShell>
   );

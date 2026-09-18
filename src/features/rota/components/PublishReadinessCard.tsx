@@ -29,7 +29,6 @@ export function PublishReadinessCard({
   availabilityDataState: "ready" | "loading" | "error";
   assignedShiftCount: number;
   plannedShiftCount: number;
-  coveragePct?: number;
   readOnly: boolean;
   canPublish: boolean;
   onPublish: () => void;

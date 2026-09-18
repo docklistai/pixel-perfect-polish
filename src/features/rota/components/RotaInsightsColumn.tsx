@@ -90,7 +90,6 @@ export function RotaInsightsColumn({
         source={rota.source}
         scheduledHours={rota.scheduledHours}
         contractedHours={rota.targetHours}
-        coveragePct={rota.coveragePct}
         labour={insights.labour}
         onViewCoverageDetails={onViewCoverageDetails}
       />
@@ -136,7 +135,6 @@ export function RotaInsightsColumn({
         availabilityDataState={availabilityDataState}
         assignedShiftCount={rota.assignedShiftCount}
         plannedShiftCount={rota.plannedShiftCount}
-        coveragePct={rota.coveragePct}
         readOnly={readOnly || rota.liveMutationPending || rota.liveMutationFailed}
         canPublish={canPublish}
         onPublish={onPublish}

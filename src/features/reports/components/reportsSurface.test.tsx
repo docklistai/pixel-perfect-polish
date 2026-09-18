@@ -96,4 +96,25 @@ describe("scheduled staffing density", () => {
     const mondayLabels = mondayContainer.querySelectorAll(".font-semibold.text-muted-foreground");
     expect(mondayLabels[0]?.textContent).toBe("Mon");
   });
+
+  it("renders bucket hour labels in 24-hour format and does not use 12am/12pm/3pm", () => {
+    const { container } = render(
+      <ReportsCoverageHeatmapCard
+        cells={[
+          { weekday: 0, bucketStartHour: 0, bucketEndHour: 3, averageHeadcount: 1 },
+          { weekday: 0, bucketStartHour: 3, bucketEndHour: 6, averageHeadcount: 1 },
+          { weekday: 0, bucketStartHour: 12, bucketEndHour: 15, averageHeadcount: 1 },
+          { weekday: 0, bucketStartHour: 15, bucketEndHour: 18, averageHeadcount: 1 },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("00:00")).toBeInTheDocument();
+    expect(screen.getByText("03:00")).toBeInTheDocument();
+    expect(screen.getByText("12:00")).toBeInTheDocument();
+    expect(screen.getByText("15:00")).toBeInTheDocument();
+
+    expect(container.textContent).not.toMatch(/\b(12am|12pm|3pm)\b/i);
+    expect(container.innerHTML).not.toMatch(/\b(12am|12pm|3pm)\b/i);
+  });
 });

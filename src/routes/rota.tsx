@@ -150,7 +150,6 @@ function RotaPage() {
                   conflictCount={rota.conflictCount}
                   openShiftCount={rota.openShiftCount}
                   workingTimeAlertCount={workingTimeAlertCount}
-                  coveragePct={rota.coveragePct}
                   plannedShiftCount={rota.plannedShiftCount}
                   assignedShiftCount={rota.assignedShiftCount}
                   onFilter={() => openOverlay("filters")}
